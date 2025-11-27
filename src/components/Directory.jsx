@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import DepartmentCard from './DepartmentCard';
 import SearchBar from './SearchBar';
@@ -82,21 +82,55 @@ export default function Directory() {
   }, [treeData, searchQuery]);
 
   // Auto-expand nodes when search matches
+  // Use refs to track previous values and avoid unnecessary re-runs
+  const prevSearchRef = useRef('');
+  const prevAutoExpandRef = useRef([]);
+
   useEffect(() => {
-    if (autoExpandPaths.length > 0) {
-      setExpandedNodes(prev => new Set([...prev, ...autoExpandPaths]));
+    const prevSearch = prevSearchRef.current;
+    const currentSearch = searchQuery.trim();
+
+    console.log('🟡 useEffect running. Prev search:', prevSearch, 'Current search:', currentSearch);
+    console.log('🟡 autoExpandPaths:', autoExpandPaths);
+
+    // Only auto-expand when:
+    // 1. We have a non-empty search query
+    // 2. The search query actually changed
+    // 3. We have paths to expand
+    if (currentSearch && currentSearch !== prevSearch) {
+      if (autoExpandPaths.length > 0) {
+        console.log('🟡 Auto-expanding paths:', autoExpandPaths);
+        setExpandedNodes(prev => {
+          const newExpanded = new Set([...prev, ...autoExpandPaths]);
+          console.log('🟡 New expanded state:', [...newExpanded]);
+          return newExpanded;
+        });
+      }
+      prevSearchRef.current = currentSearch;
+      prevAutoExpandRef.current = autoExpandPaths;
+    } else if (!currentSearch && prevSearch) {
+      // Search was cleared
+      console.log('🟡 Search cleared');
+      prevSearchRef.current = currentSearch;
+      prevAutoExpandRef.current = [];
     }
-  }, [searchQuery]); // Only run when search query changes, not on every autoExpandPaths reference change
+  }, [searchQuery]); // Only depend on searchQuery, not autoExpandPaths
 
   // Toggle single node expansion
   const toggleNode = (path) => {
+    console.log('🔵 Toggle called for path:', path);
     setExpandedNodes(prev => {
+      console.log('🔵 Current expandedNodes:', [...prev]);
+      console.log('🔵 Is currently expanded:', prev.has(path));
       const next = new Set(prev);
       if (next.has(path)) {
         next.delete(path);
+        console.log('🔵 Removed from expandedNodes');
       } else {
         next.add(path);
+        console.log('🔵 Added to expandedNodes');
       }
+      console.log('🔵 New expandedNodes:', [...next]);
       return next;
     });
   };

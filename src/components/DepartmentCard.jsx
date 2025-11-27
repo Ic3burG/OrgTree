@@ -28,6 +28,12 @@ export default function DepartmentCard({
   if (counts.departments > 0) countText.push(`${counts.departments} dept${counts.departments > 1 ? 's' : ''}`);
   if (counts.people > 0) countText.push(`${counts.people} ${counts.people > 1 ? 'people' : 'person'}`);
 
+  const handleClick = (e) => {
+    console.log('🟢 DepartmentCard clicked:', department.path, 'depth:', department.depth);
+    e.stopPropagation();
+    onToggle(department.path);
+  };
+
   return (
     <div className="mb-2">
       {/* Department Header */}
@@ -36,7 +42,7 @@ export default function DepartmentCard({
           flex items-center gap-3 transition-all duration-200 shadow-sm hover:shadow-md
           focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
         `}
-        onClick={() => onToggle(department.path)}
+        onClick={handleClick}
         aria-expanded={isExpanded}
         aria-label={`${department.name}, ${countText.join(', ')}. ${isExpanded ? 'Expanded' : 'Collapsed'}`}
       >
