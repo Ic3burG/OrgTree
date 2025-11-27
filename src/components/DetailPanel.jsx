@@ -1,5 +1,5 @@
 import { X, Mail, Phone, MapPin, Building } from 'lucide-react';
-import { getInitials } from '../utils/filterTree';
+import { getInitials } from '../utils/helpers';
 
 /**
  * DetailPanel - Slide-in panel showing full person details

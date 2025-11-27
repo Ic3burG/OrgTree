@@ -1,11 +1,16 @@
-import Directory from './components/Directory';
+import { ReactFlowProvider } from 'reactflow';
+import OrgMap from './components/OrgMap';
 
 /**
  * App - Root component
- * Renders the main Directory component
+ * Renders the organization map with React Flow provider
  */
 function App() {
-  return <Directory />;
+  return (
+    <ReactFlowProvider>
+      <OrgMap />
+    </ReactFlowProvider>
+  );
 }
 
 export default App;

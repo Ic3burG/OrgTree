@@ -4,36 +4,21 @@
  */
 
 export function getDepthColors(depth) {
-  const backgrounds = [
-    'bg-slate-700', // depth 0 - darkest
-    'bg-slate-600', // depth 1
-    'bg-slate-500', // depth 2
-    'bg-slate-400', // depth 3
-    'bg-slate-300', // depth 4+ - lightest
+  const colors = [
+    { bg: 'bg-slate-700', hex: '#334155', text: 'text-white', hover: 'hover:bg-slate-600' },      // depth 0 - darkest
+    { bg: 'bg-slate-600', hex: '#475569', text: 'text-white', hover: 'hover:bg-slate-500' },      // depth 1
+    { bg: 'bg-slate-500', hex: '#64748b', text: 'text-white', hover: 'hover:bg-slate-400' },      // depth 2
+    { bg: 'bg-slate-400', hex: '#94a3b8', text: 'text-slate-900', hover: 'hover:bg-slate-300' },  // depth 3
+    { bg: 'bg-slate-300', hex: '#cbd5e1', text: 'text-slate-900', hover: 'hover:bg-slate-200' },  // depth 4+
   ];
 
-  const textColors = [
-    'text-white',      // depth 0-2: white text on dark bg
-    'text-white',
-    'text-white',
-    'text-slate-900',  // depth 3-4: dark text on light bg
-    'text-slate-900',
-  ];
-
-  const hoverBackgrounds = [
-    'hover:bg-slate-600',
-    'hover:bg-slate-500',
-    'hover:bg-slate-400',
-    'hover:bg-slate-300',
-    'hover:bg-slate-200',
-  ];
-
-  const index = Math.min(depth, backgrounds.length - 1);
+  const index = Math.min(depth, colors.length - 1);
 
   return {
-    bg: backgrounds[index],
-    text: textColors[index],
-    hover: hoverBackgrounds[index],
+    bg: colors[index].bg,
+    hex: colors[index].hex,
+    text: colors[index].text,
+    hover: colors[index].hover,
   };
 }
 

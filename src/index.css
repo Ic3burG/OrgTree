@@ -15,6 +15,26 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden; /* Prevent scrollbars on body since React Flow handles it */
+}
+
+/* React Flow overrides */
+.react-flow {
+  background-color: #f8fafc;
+}
+
+.react-flow__node {
+  cursor: default;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2;
+}
+
+.react-flow__minimap {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 /* Smooth transitions for expand/collapse */
