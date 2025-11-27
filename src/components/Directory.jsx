@@ -50,7 +50,7 @@ export default function Directory() {
   // Filter tree based on search query
   const { displayTree, autoExpandPaths } = useMemo(() => {
     if (!searchQuery || searchQuery.trim() === '') {
-      return { displayTree: treeData, autoExpandPaths: new Set() };
+      return { displayTree: treeData, autoExpandPaths: [] };
     }
 
     const { filteredNodes, expandedPaths } = filterTree(treeData, searchQuery);
@@ -77,16 +77,16 @@ export default function Directory() {
 
     return {
       displayTree: highlightNodes(filteredNodes),
-      autoExpandPaths: expandedPaths
+      autoExpandPaths: Array.from(expandedPaths)
     };
   }, [treeData, searchQuery]);
 
   // Auto-expand nodes when search matches
   useEffect(() => {
-    if (autoExpandPaths.size > 0) {
+    if (autoExpandPaths.length > 0) {
       setExpandedNodes(prev => new Set([...prev, ...autoExpandPaths]));
     }
-  }, [autoExpandPaths]);
+  }, [searchQuery]); // Only run when search query changes, not on every autoExpandPaths reference change
 
   // Toggle single node expansion
   const toggleNode = (path) => {
