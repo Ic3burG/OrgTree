@@ -1,5 +1,3 @@
-import { ClipboardList } from 'lucide-react';
-
 /**
  * DepartmentTooltip - Shows department responsibilities on hover
  * Displays as a floating tooltip with bullet points
@@ -44,13 +42,7 @@ export default function DepartmentTooltip({ description, depthColor, placement =
         }}
       />
 
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 pt-4 pb-2 border-b border-slate-200">
-        <ClipboardList size={18} className="text-slate-600 flex-shrink-0" />
-        <h4 className="font-semibold text-slate-900 text-sm">Responsibilities</h4>
-      </div>
-
-      {/* Body - Bullet list */}
+      {/* Bullet list */}
       <div className="px-4 py-3 max-h-64 overflow-y-auto">
         <ul className="space-y-2">
           {responsibilities.slice(0, 6).map((item, index) => (

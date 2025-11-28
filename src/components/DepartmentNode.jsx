@@ -1,4 +1,5 @@
-import { memo, useState } from 'react';
+import { memo, useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Handle, Position } from 'reactflow';
 import { Folder, FolderOpen, ChevronDown, ChevronUp, Users } from 'lucide-react';
 import { getDepthColors } from '../utils/colors';
@@ -17,6 +18,8 @@ function DepartmentNode({ data, selected }) {
   // Hover state for tooltip
   const [isHovered, setIsHovered] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const nodeRef = useRef(null);
 
   const handleHeaderClick = (e) => {
     e.stopPropagation();
@@ -25,9 +28,21 @@ function DepartmentNode({ data, selected }) {
     }
   };
 
+  // Calculate tooltip position in viewport coordinates
+  const updateTooltipPosition = () => {
+    if (nodeRef.current) {
+      const rect = nodeRef.current.getBoundingClientRect();
+      setTooltipPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.bottom + 12 // 12px gap below node
+      });
+    }
+  };
+
   // Show tooltip after 500ms delay to avoid flashing on quick mouse passes
   const handleMouseEnter = () => {
     const timeout = setTimeout(() => {
+      updateTooltipPosition();
       setIsHovered(true);
     }, 500);
     setHoverTimeout(timeout);
@@ -41,20 +56,39 @@ function DepartmentNode({ data, selected }) {
     setIsHovered(false);
   };
 
+  // Update tooltip position when hovered (in case of canvas pan/zoom)
+  useEffect(() => {
+    if (isHovered && description) {
+      updateTooltipPosition();
+
+      // Update position on scroll or resize
+      const handleUpdate = () => updateTooltipPosition();
+      window.addEventListener('scroll', handleUpdate, true);
+      window.addEventListener('resize', handleUpdate);
+
+      return () => {
+        window.removeEventListener('scroll', handleUpdate, true);
+        window.removeEventListener('resize', handleUpdate);
+      };
+    }
+  }, [isHovered, description]);
+
   return (
-    <div
-      className={`
-        rounded-lg shadow-lg transition-all duration-200 relative
-        ${isHighlighted ? 'ring-4 ring-blue-400 ring-opacity-75' : ''}
-        ${selected ? 'ring-2 ring-blue-500' : ''}
-      `}
-      style={{
-        width: isExpanded ? '280px' : '220px',
-        backgroundColor: 'white'
-      }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <>
+      <div
+        ref={nodeRef}
+        className={`
+          rounded-lg shadow-lg transition-all duration-200 relative
+          ${isHighlighted ? 'ring-4 ring-blue-400 ring-opacity-75' : ''}
+          ${selected ? 'ring-2 ring-blue-500' : ''}
+        `}
+        style={{
+          width: isExpanded ? '280px' : '220px',
+          backgroundColor: 'white'
+        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
       {/* Top handle for incoming connections */}
       <Handle
         type="target"
@@ -115,26 +149,30 @@ function DepartmentNode({ data, selected }) {
         position={Position.Bottom}
         style={{ background: '#94a3b8', width: 10, height: 10 }}
       />
-
-      {/* Tooltip - show when hovered and description exists */}
-      {isHovered && description && (
-        <div
-          className={`
-            absolute left-1/2 -translate-x-1/2 top-full mt-3 z-50
-            transition-all duration-150 ease-out
-            ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}
-          `}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={handleMouseLeave}
-        >
-          <DepartmentTooltip
-            description={description}
-            depthColor={colors}
-            placement="bottom"
-          />
-        </div>
-      )}
     </div>
+
+    {/* Tooltip - rendered via Portal to ensure it appears above all other elements */}
+    {isHovered && description && createPortal(
+      <div
+        className="fixed z-[9999] transition-all duration-150 ease-out"
+        style={{
+          left: `${tooltipPosition.x}px`,
+          top: `${tooltipPosition.y}px`,
+          transform: 'translateX(-50%)',
+          pointerEvents: 'auto'
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={handleMouseLeave}
+      >
+        <DepartmentTooltip
+          description={description}
+          depthColor={colors}
+          placement="bottom"
+        />
+      </div>,
+      document.body
+    )}
+    </>
   );
 }
 
