@@ -7,6 +7,7 @@ import {
   ArrowDown,
   ArrowRight
 } from 'lucide-react';
+import ThemePicker from './ThemePicker';
 
 /**
  * Toolbar - Floating controls for org map interactions
@@ -19,7 +20,9 @@ export default function Toolbar({
   onExpandAll,
   onCollapseAll,
   onToggleLayout,
-  layoutDirection
+  layoutDirection,
+  currentTheme,
+  onThemeChange
 }) {
   const buttonClass = `
     p-2.5 bg-white border border-slate-300 rounded-lg
@@ -114,6 +117,14 @@ export default function Toolbar({
           </>
         )}
       </button>
+
+      {/* Divider */}
+      <div className="h-px bg-slate-300 my-1" />
+
+      {/* Theme Picker */}
+      <div className="bg-white border border-slate-300 rounded-lg p-2 shadow-sm">
+        <ThemePicker currentTheme={currentTheme} onThemeChange={onThemeChange} />
+      </div>
     </div>
   );
 }

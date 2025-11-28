@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, createContext } from 'react';
 import ReactFlow, {
   Background,
   MiniMap,
@@ -16,6 +16,9 @@ import Toolbar from './Toolbar';
 import { parseCSVToFlow } from '../utils/parseCSVToFlow';
 import { calculateLayout } from '../utils/layoutEngine';
 import { getDepthColors } from '../utils/colors';
+
+// Theme context for providing current theme to all nodes
+export const ThemeContext = createContext('slate');
 
 // Register custom node types
 const nodeTypes = {
@@ -46,6 +49,7 @@ export default function OrgMap() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [highlightedNodeId, setHighlightedNodeId] = useState(null);
+  const [currentTheme, setCurrentTheme] = useState('slate');
 
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
 
@@ -90,6 +94,14 @@ export default function OrgMap() {
     }
 
     loadData();
+  }, []);
+
+  // Load saved theme from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('orgTreeTheme');
+    if (savedTheme) {
+      setCurrentTheme(savedTheme);
+    }
   }, []);
 
   // Toggle department expansion
@@ -196,6 +208,12 @@ export default function OrgMap() {
     setTimeout(() => fitView({ padding: 0.2, duration: 800 }), 100);
   }, [layoutDirection, edges, fitView, handleToggleExpand, handleSelectPerson, setNodes]);
 
+  // Handle theme change
+  const handleThemeChange = useCallback((themeName) => {
+    setCurrentTheme(themeName);
+    localStorage.setItem('orgTreeTheme', themeName);
+  }, []);
+
   // Handle search result selection
   const handleSearchSelect = useCallback((result) => {
     if (result.type === 'department') {
@@ -271,26 +289,28 @@ export default function OrgMap() {
 
   return (
     <div className="w-full h-screen relative bg-slate-50">
-      <ReactFlow
-        nodes={nodesWithHighlight}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes}
-        defaultEdgeOptions={defaultEdgeOptions}
-        fitView
-        fitViewOptions={{ padding: 0.2 }}
-        minZoom={0.1}
-        maxZoom={2}
-        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-      >
-        <Background color="#cbd5e1" gap={20} size={1} />
-        <MiniMap
-          nodeColor={(node) => getDepthColors(node.data.depth).hex}
-          maskColor="rgba(0, 0, 0, 0.1)"
-          position="bottom-right"
-        />
-      </ReactFlow>
+      <ThemeContext.Provider value={currentTheme}>
+        <ReactFlow
+          nodes={nodesWithHighlight}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          nodeTypes={nodeTypes}
+          defaultEdgeOptions={defaultEdgeOptions}
+          fitView
+          fitViewOptions={{ padding: 0.2 }}
+          minZoom={0.1}
+          maxZoom={2}
+          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+        >
+          <Background color="#cbd5e1" gap={20} size={1} />
+          <MiniMap
+            nodeColor={(node) => getDepthColors(node.data.depth, currentTheme).hex}
+            maskColor="rgba(0, 0, 0, 0.1)"
+            position="bottom-right"
+          />
+        </ReactFlow>
+      </ThemeContext.Provider>
 
       {/* Overlay Components */}
       <SearchOverlay nodes={nodes} onSelectResult={handleSearchSelect} />
@@ -303,6 +323,8 @@ export default function OrgMap() {
         onCollapseAll={handleCollapseAll}
         onToggleLayout={handleToggleLayout}
         layoutDirection={layoutDirection}
+        currentTheme={currentTheme}
+        onThemeChange={handleThemeChange}
       />
 
       {/* Detail Panel */}

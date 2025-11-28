@@ -1,25 +1,102 @@
 /**
  * Depth-based color system for department cards
- * Darker colors for top-level departments, lighter for nested ones
+ * Supports multiple color themes
  */
 
-export function getDepthColors(depth) {
-  const colors = [
-    { bg: 'bg-slate-700', hex: '#334155', text: 'text-white', hover: 'hover:bg-slate-600' },      // depth 0 - darkest
-    { bg: 'bg-slate-600', hex: '#475569', text: 'text-white', hover: 'hover:bg-slate-500' },      // depth 1
-    { bg: 'bg-slate-500', hex: '#64748b', text: 'text-white', hover: 'hover:bg-slate-400' },      // depth 2
-    { bg: 'bg-slate-400', hex: '#94a3b8', text: 'text-slate-900', hover: 'hover:bg-slate-300' },  // depth 3
-    { bg: 'bg-slate-300', hex: '#cbd5e1', text: 'text-slate-900', hover: 'hover:bg-slate-200' },  // depth 4+
-  ];
+const themes = {
+  slate: {
+    name: 'Slate',
+    colors: [
+      { bg: 'bg-slate-700', hex: '#334155', text: 'text-white', hover: 'hover:bg-slate-600' },
+      { bg: 'bg-slate-600', hex: '#475569', text: 'text-white', hover: 'hover:bg-slate-500' },
+      { bg: 'bg-slate-500', hex: '#64748b', text: 'text-white', hover: 'hover:bg-slate-400' },
+      { bg: 'bg-slate-400', hex: '#94a3b8', text: 'text-slate-900', hover: 'hover:bg-slate-300' },
+      { bg: 'bg-slate-300', hex: '#cbd5e1', text: 'text-slate-900', hover: 'hover:bg-slate-200' },
+    ],
+    swatch: '#475569',
+  },
+  blue: {
+    name: 'Blue',
+    colors: [
+      { bg: 'bg-blue-700', hex: '#1d4ed8', text: 'text-white', hover: 'hover:bg-blue-600' },
+      { bg: 'bg-blue-600', hex: '#2563eb', text: 'text-white', hover: 'hover:bg-blue-500' },
+      { bg: 'bg-blue-500', hex: '#3b82f6', text: 'text-white', hover: 'hover:bg-blue-400' },
+      { bg: 'bg-blue-400', hex: '#60a5fa', text: 'text-blue-900', hover: 'hover:bg-blue-300' },
+      { bg: 'bg-blue-300', hex: '#93c5fd', text: 'text-blue-900', hover: 'hover:bg-blue-200' },
+    ],
+    swatch: '#2563eb',
+  },
+  emerald: {
+    name: 'Emerald',
+    colors: [
+      { bg: 'bg-emerald-700', hex: '#047857', text: 'text-white', hover: 'hover:bg-emerald-600' },
+      { bg: 'bg-emerald-600', hex: '#059669', text: 'text-white', hover: 'hover:bg-emerald-500' },
+      { bg: 'bg-emerald-500', hex: '#10b981', text: 'text-white', hover: 'hover:bg-emerald-400' },
+      { bg: 'bg-emerald-400', hex: '#34d399', text: 'text-emerald-900', hover: 'hover:bg-emerald-300' },
+      { bg: 'bg-emerald-300', hex: '#6ee7b7', text: 'text-emerald-900', hover: 'hover:bg-emerald-200' },
+    ],
+    swatch: '#059669',
+  },
+  violet: {
+    name: 'Violet',
+    colors: [
+      { bg: 'bg-violet-700', hex: '#6d28d9', text: 'text-white', hover: 'hover:bg-violet-600' },
+      { bg: 'bg-violet-600', hex: '#7c3aed', text: 'text-white', hover: 'hover:bg-violet-500' },
+      { bg: 'bg-violet-500', hex: '#8b5cf6', text: 'text-white', hover: 'hover:bg-violet-400' },
+      { bg: 'bg-violet-400', hex: '#a78bfa', text: 'text-violet-900', hover: 'hover:bg-violet-300' },
+      { bg: 'bg-violet-300', hex: '#c4b5fd', text: 'text-violet-900', hover: 'hover:bg-violet-200' },
+    ],
+    swatch: '#7c3aed',
+  },
+  amber: {
+    name: 'Amber',
+    colors: [
+      { bg: 'bg-amber-700', hex: '#b45309', text: 'text-white', hover: 'hover:bg-amber-600' },
+      { bg: 'bg-amber-600', hex: '#d97706', text: 'text-white', hover: 'hover:bg-amber-500' },
+      { bg: 'bg-amber-500', hex: '#f59e0b', text: 'text-white', hover: 'hover:bg-amber-400' },
+      { bg: 'bg-amber-400', hex: '#fbbf24', text: 'text-amber-900', hover: 'hover:bg-amber-300' },
+      { bg: 'bg-amber-300', hex: '#fcd34d', text: 'text-amber-900', hover: 'hover:bg-amber-200' },
+    ],
+    swatch: '#d97706',
+  },
+  rose: {
+    name: 'Rose',
+    colors: [
+      { bg: 'bg-rose-700', hex: '#be123c', text: 'text-white', hover: 'hover:bg-rose-600' },
+      { bg: 'bg-rose-600', hex: '#e11d48', text: 'text-white', hover: 'hover:bg-rose-500' },
+      { bg: 'bg-rose-500', hex: '#f43f5e', text: 'text-white', hover: 'hover:bg-rose-400' },
+      { bg: 'bg-rose-400', hex: '#fb7185', text: 'text-rose-900', hover: 'hover:bg-rose-300' },
+      { bg: 'bg-rose-300', hex: '#fda4af', text: 'text-rose-900', hover: 'hover:bg-rose-200' },
+    ],
+    swatch: '#e11d48',
+  },
+};
 
-  const index = Math.min(depth, colors.length - 1);
+/**
+ * Get depth-based colors for a specific theme
+ */
+export function getDepthColors(depth, themeName = 'slate') {
+  const theme = themes[themeName] || themes.slate;
+  const index = Math.min(depth, theme.colors.length - 1);
+  return theme.colors[index];
+}
 
-  return {
-    bg: colors[index].bg,
-    hex: colors[index].hex,
-    text: colors[index].text,
-    hover: colors[index].hover,
-  };
+/**
+ * Get list of all available themes
+ */
+export function getThemeList() {
+  return Object.entries(themes).map(([key, theme]) => ({
+    id: key,
+    name: theme.name,
+    swatch: theme.swatch,
+  }));
+}
+
+/**
+ * Get swatch color for a theme
+ */
+export function getThemeSwatch(themeName) {
+  return themes[themeName]?.swatch || themes.slate.swatch;
 }
 
 /**

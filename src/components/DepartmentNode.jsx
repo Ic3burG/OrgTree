@@ -1,8 +1,9 @@
-import { memo, useState, useRef, useEffect } from 'react';
+import { memo, useState, useRef, useEffect, useContext } from 'react';
 import { createPortal } from 'react-dom';
 import { Handle, Position } from 'reactflow';
 import { Folder, FolderOpen, ChevronDown, ChevronUp, Users } from 'lucide-react';
 import { getDepthColors } from '../utils/colors';
+import { ThemeContext } from './OrgMap';
 import PersonRowCard from './PersonRowCard';
 import DepartmentTooltip from './DepartmentTooltip';
 
@@ -12,7 +13,8 @@ import DepartmentTooltip from './DepartmentTooltip';
  */
 function DepartmentNode({ data, selected }) {
   const { name, depth, people, description, isExpanded, onToggleExpand, onSelectPerson, isHighlighted } = data;
-  const colors = getDepthColors(depth);
+  const theme = useContext(ThemeContext);
+  const colors = getDepthColors(depth, theme);
   const peopleCount = people?.length || 0;
 
   // Hover state for tooltip
