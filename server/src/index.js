@@ -2,6 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
+import organizationRoutes from './routes/organizations.js';
+import departmentRoutes from './routes/departments.js';
+import peopleRoutes from './routes/people.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -15,6 +18,9 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api', organizationRoutes);
+app.use('/api', departmentRoutes);
+app.use('/api', peopleRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
