@@ -1,0 +1,118 @@
+const API_BASE = 'http://localhost:3001/api';
+
+class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.status = status;
+  }
+}
+
+async function request(endpoint, options = {}) {
+  const token = localStorage.getItem('token');
+
+  const config = {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+  };
+
+  const response = await fetch(`${API_BASE}${endpoint}`, config);
+
+  // Handle 401 - redirect to login
+  if (response.status === 401) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+    throw new ApiError('Session expired', 401);
+  }
+
+  const data = response.status !== 204 ? await response.json() : null;
+
+  if (!response.ok) {
+    throw new ApiError(data?.message || 'Request failed', response.status);
+  }
+
+  return data;
+}
+
+export const api = {
+  // Auth
+  login: (email, password) =>
+    request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+
+  signup: (name, email, password) =>
+    request('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password }),
+    }),
+
+  getMe: () => request('/auth/me'),
+
+  // Organizations
+  getOrganizations: () => request('/organizations'),
+
+  getOrganization: (id) => request(`/organizations/${id}`),
+
+  createOrganization: (name) =>
+    request('/organizations', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    }),
+
+  updateOrganization: (id, name) =>
+    request(`/organizations/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name }),
+    }),
+
+  deleteOrganization: (id) =>
+    request(`/organizations/${id}`, {
+      method: 'DELETE',
+    }),
+
+  // Departments
+  getDepartments: (orgId) => request(`/organizations/${orgId}/departments`),
+
+  createDepartment: (orgId, data) =>
+    request(`/organizations/${orgId}/departments`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateDepartment: (orgId, deptId, data) =>
+    request(`/organizations/${orgId}/departments/${deptId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteDepartment: (orgId, deptId) =>
+    request(`/organizations/${orgId}/departments/${deptId}`, {
+      method: 'DELETE',
+    }),
+
+  // People
+  getPeople: (deptId) => request(`/departments/${deptId}/people`),
+
+  createPerson: (deptId, data) =>
+    request(`/departments/${deptId}/people`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updatePerson: (personId, data) =>
+    request(`/people/${personId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deletePerson: (personId) =>
+    request(`/people/${personId}`, {
+      method: 'DELETE',
+    }),
+};

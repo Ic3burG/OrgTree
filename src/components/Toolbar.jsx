@@ -5,8 +5,10 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowDown,
-  ArrowRight
+  ArrowRight,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import ThemePicker from './ThemePicker';
 
 /**
@@ -24,6 +26,8 @@ export default function Toolbar({
   currentTheme,
   onThemeChange
 }) {
+  const { user, logout } = useAuth();
+
   const buttonClass = `
     p-2.5 bg-white border border-slate-300 rounded-lg
     hover:bg-slate-50 hover:border-slate-400
@@ -125,6 +129,20 @@ export default function Toolbar({
       <div className="bg-white border border-slate-300 rounded-lg p-2 shadow-sm">
         <ThemePicker currentTheme={currentTheme} onThemeChange={onThemeChange} />
       </div>
+
+      {/* Divider */}
+      <div className="h-px bg-slate-300 my-1" />
+
+      {/* Logout Button */}
+      <button
+        onClick={logout}
+        className={buttonClass}
+        aria-label={`Logout (${user?.name})`}
+        title={`Logout (${user?.name})`}
+      >
+        <LogOut size={20} className="text-slate-700" />
+        <Tooltip>Logout {user?.name && `(${user.name})`}</Tooltip>
+      </button>
     </div>
   );
 }
