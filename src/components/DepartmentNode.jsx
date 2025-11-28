@@ -20,8 +20,9 @@ function DepartmentNode({ data, selected }) {
   // Hover state for tooltip
   const [isHovered, setIsHovered] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState(null);
+  const [leaveTimeout, setLeaveTimeout] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const nodeRef = useRef(null);
+  const headerRef = useRef(null);
 
   const handleHeaderClick = (e) => {
     e.stopPropagation();
@@ -32,17 +33,23 @@ function DepartmentNode({ data, selected }) {
 
   // Calculate tooltip position in viewport coordinates
   const updateTooltipPosition = () => {
-    if (nodeRef.current) {
-      const rect = nodeRef.current.getBoundingClientRect();
+    if (headerRef.current) {
+      const rect = headerRef.current.getBoundingClientRect();
       setTooltipPosition({
         x: rect.left + rect.width / 2,
-        y: rect.bottom + 12 // 12px gap below node
+        y: rect.bottom + 12 // 12px gap below header
       });
     }
   };
 
   // Show tooltip after 500ms delay to avoid flashing on quick mouse passes
   const handleMouseEnter = () => {
+    // Clear any pending leave timeout
+    if (leaveTimeout) {
+      clearTimeout(leaveTimeout);
+      setLeaveTimeout(null);
+    }
+
     const timeout = setTimeout(() => {
       updateTooltipPosition();
       setIsHovered(true);
@@ -55,7 +62,12 @@ function DepartmentNode({ data, selected }) {
       clearTimeout(hoverTimeout);
       setHoverTimeout(null);
     }
-    setIsHovered(false);
+
+    // Small delay before hiding tooltip to allow moving mouse to tooltip
+    const timeout = setTimeout(() => {
+      setIsHovered(false);
+    }, 150);
+    setLeaveTimeout(timeout);
   };
 
   // Update tooltip position when hovered (in case of canvas pan/zoom)
@@ -75,10 +87,17 @@ function DepartmentNode({ data, selected }) {
     }
   }, [isHovered, description]);
 
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+      if (leaveTimeout) clearTimeout(leaveTimeout);
+    };
+  }, [hoverTimeout, leaveTimeout]);
+
   return (
     <>
       <div
-        ref={nodeRef}
         className={`
           rounded-lg shadow-lg transition-all duration-200 relative
           ${isHighlighted ? 'ring-4 ring-blue-400 ring-opacity-75' : ''}
@@ -88,8 +107,6 @@ function DepartmentNode({ data, selected }) {
           width: isExpanded ? '280px' : '220px',
           backgroundColor: 'white'
         }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
       >
       {/* Top handle for incoming connections */}
       <Handle
@@ -100,9 +117,12 @@ function DepartmentNode({ data, selected }) {
 
       {/* Department Header */}
       <div
+        ref={headerRef}
         className={`${colors.bg} ${colors.text} rounded-t-lg p-3 cursor-pointer
           hover:opacity-90 transition-opacity`}
         onClick={handleHeaderClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <div className="flex items-center gap-2 mb-2">
           {isExpanded ? (
