@@ -46,6 +46,7 @@ function buildFlowStructure(rows) {
         id: id,
         path: path,
         name: row.Name.trim(),
+        description: row.Description ? row.Description.trim() : '',
         depth: depth,
         people: [],
         parentPath: segments.length > 1 ? '/' + segments.slice(0, -1).join('/') : null
@@ -82,6 +83,7 @@ function buildFlowStructure(rows) {
         name: dept.name,
         path: dept.path,
         depth: dept.depth,
+        description: dept.description, // Department responsibilities for tooltip
         people: dept.people,
         isExpanded: false, // Start collapsed
       }

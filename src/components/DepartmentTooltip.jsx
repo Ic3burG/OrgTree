@@ -1,0 +1,84 @@
+import { ClipboardList } from 'lucide-react';
+
+/**
+ * DepartmentTooltip - Shows department responsibilities on hover
+ * Displays as a floating tooltip with bullet points
+ */
+export default function DepartmentTooltip({ description, depthColor, placement = 'bottom' }) {
+  if (!description) return null;
+
+  // Parse description into bullet points (split by periods)
+  const responsibilities = parseDescription(description);
+
+  if (responsibilities.length === 0) return null;
+
+  const borderColor = depthColor.hex + '4D'; // Add 30% opacity (4D in hex)
+  const arrowPosition = placement === 'top' ? 'bottom' : 'top';
+
+  return (
+    <div
+      className="bg-white rounded-lg shadow-lg border relative"
+      style={{
+        borderColor: borderColor,
+        maxWidth: '320px',
+        minWidth: '280px'
+      }}
+    >
+      {/* Arrow pointer */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2 w-0 h-0"
+        style={{
+          [arrowPosition]: '-8px',
+          borderLeft: '8px solid transparent',
+          borderRight: '8px solid transparent',
+          [placement === 'top' ? 'borderTop' : 'borderBottom']: `8px solid ${borderColor}`,
+        }}
+      />
+      <div
+        className="absolute left-1/2 -translate-x-1/2 w-0 h-0"
+        style={{
+          [arrowPosition]: '-6px',
+          borderLeft: '7px solid transparent',
+          borderRight: '7px solid transparent',
+          [placement === 'top' ? 'borderTop' : 'borderBottom']: '7px solid white',
+        }}
+      />
+
+      {/* Header */}
+      <div className="flex items-center gap-2 px-4 pt-4 pb-2 border-b border-slate-200">
+        <ClipboardList size={18} className="text-slate-600 flex-shrink-0" />
+        <h4 className="font-semibold text-slate-900 text-sm">Responsibilities</h4>
+      </div>
+
+      {/* Body - Bullet list */}
+      <div className="px-4 py-3 max-h-64 overflow-y-auto">
+        <ul className="space-y-2">
+          {responsibilities.slice(0, 6).map((item, index) => (
+            <li key={index} className="flex gap-2 text-sm text-slate-700">
+              <span className="text-slate-400 flex-shrink-0 mt-0.5">•</span>
+              <span className="flex-grow">{item}</span>
+            </li>
+          ))}
+          {responsibilities.length > 6 && (
+            <li className="text-sm text-slate-400 italic">
+              +{responsibilities.length - 6} more...
+            </li>
+          )}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Parse description string into individual responsibility items
+ * Splits by periods and filters out empty strings
+ */
+function parseDescription(description) {
+  if (!description) return [];
+
+  return description
+    .split('.')
+    .map(item => item.trim())
+    .filter(item => item.length > 0);
+}
