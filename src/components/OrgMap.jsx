@@ -234,16 +234,18 @@ export default function OrgMap() {
     }
   }, [nodes, setCenter, handleToggleExpand]);
 
-  // Update highlighted state in nodes
+  // Update highlighted state and callbacks in nodes
   const nodesWithHighlight = useMemo(() => {
     return nodes.map(node => ({
       ...node,
       data: {
         ...node.data,
-        isHighlighted: node.id === highlightedNodeId
+        isHighlighted: node.id === highlightedNodeId,
+        onToggleExpand: () => handleToggleExpand(node.id),
+        onSelectPerson: (person) => handleSelectPerson(person)
       }
     }));
-  }, [nodes, highlightedNodeId]);
+  }, [nodes, highlightedNodeId, handleToggleExpand, handleSelectPerson]);
 
   if (isLoading) {
     return (
