@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Building2, Users, FileText } from 'lucide-react';
+import { Building2, Users, FileText, Download, Upload } from 'lucide-react';
 import api from '../../api/client';
+import { useToast } from '../ui/Toast';
+import { generateCSV, downloadCSV } from '../../utils/csvExport';
+import ImportModal from './ImportModal';
 
 export default function Dashboard() {
   const { orgId } = useParams();
   const [organization, setOrganization] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showImport, setShowImport] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     loadOrganization();
@@ -25,6 +30,17 @@ export default function Dashboard() {
       setLoading(false);
     }
   }
+
+  const handleExport = () => {
+    try {
+      const csv = generateCSV(organization);
+      const filename = `${organization.name.replace(/\s+/g, '-')}-org.csv`;
+      downloadCSV(csv, filename);
+      toast.success('Organization exported successfully');
+    } catch (err) {
+      toast.error('Failed to export organization');
+    }
+  };
 
   if (loading) {
     return (
@@ -64,13 +80,31 @@ export default function Dashboard() {
     <div className="p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {organization.name}
-          </h1>
-          <p className="text-gray-500">
-            Organization overview and statistics
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {organization.name}
+            </h1>
+            <p className="text-gray-500">
+              Organization overview and statistics
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowImport(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <Upload size={20} />
+              Import CSV
+            </button>
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Download size={20} />
+              Export CSV
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -195,6 +229,17 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Import Modal */}
+      <ImportModal
+        isOpen={showImport}
+        onClose={() => setShowImport(false)}
+        orgId={orgId}
+        onSuccess={() => {
+          loadOrganization();
+          toast.success('Data imported successfully');
+        }}
+      />
     </div>
   );
 }

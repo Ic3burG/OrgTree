@@ -76,6 +76,12 @@ const api = {
       method: 'DELETE',
     }),
 
+  importOrganization: (orgId, data) =>
+    request(`/organizations/${orgId}/import`, {
+      method: 'POST',
+      body: JSON.stringify({ data }),
+    }),
+
   // Departments
   getDepartments: (orgId) => request(`/organizations/${orgId}/departments`),
 
