@@ -38,7 +38,7 @@ async function request(endpoint, options = {}) {
   return data;
 }
 
-export const api = {
+const api = {
   // Auth
   login: (email, password) =>
     request('/auth/login', {
@@ -116,3 +116,6 @@ export const api = {
       method: 'DELETE',
     }),
 };
+
+export default api;
+export { api };
