@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
+import OrganizationSelector from './components/OrganizationSelector';
 import OrgMap from './components/OrgMap';
 import AdminLayout from './components/admin/AdminLayout';
 import Dashboard from './components/admin/Dashboard';
@@ -12,7 +13,7 @@ import PersonManager from './components/admin/PersonManager';
 
 /**
  * App - Root component
- * Renders authentication routes, organization map, and admin interface
+ * Renders authentication routes, organization selector, and admin interface
  */
 function App() {
   return (
@@ -28,9 +29,7 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <ReactFlowProvider>
-                  <OrgMap />
-                </ReactFlowProvider>
+                <OrganizationSelector />
               </ProtectedRoute>
             }
           />
