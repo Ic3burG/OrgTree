@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, createContext } from 'react';
+import { useParams } from 'react-router-dom';
 import ReactFlow, {
   Background,
   MiniMap,
@@ -13,9 +14,9 @@ import DepartmentNode from './DepartmentNode';
 import DetailPanel from './DetailPanel';
 import SearchOverlay from './SearchOverlay';
 import Toolbar from './Toolbar';
-import { parseCSVToFlow } from '../utils/parseCSVToFlow';
 import { calculateLayout } from '../utils/layoutEngine';
 import { getDepthColors } from '../utils/colors';
+import api from '../api/client';
 
 // Theme context for providing current theme to all nodes
 export const ThemeContext = createContext('slate');
@@ -39,9 +40,58 @@ const defaultEdgeOptions = {
 };
 
 /**
+ * Transform API data to React Flow format
+ */
+function transformToFlowData(departments) {
+  const nodes = [];
+  const edges = [];
+
+  // Helper to calculate depth
+  const getDepth = (dept, deptMap, depth = 0) => {
+    if (!dept.parent_id) return depth;
+    const parent = deptMap.get(dept.parent_id);
+    return parent ? getDepth(parent, deptMap, depth + 1) : depth;
+  };
+
+  // Create a map for quick lookups
+  const deptMap = new Map(departments.map(d => [d.id, d]));
+
+  departments.forEach((dept) => {
+    const depth = getDepth(dept, deptMap);
+
+    nodes.push({
+      id: dept.id,
+      type: 'department',
+      position: { x: 0, y: 0 }, // Will be set by layout engine
+      data: {
+        name: dept.name,
+        path: dept.id, // Using ID as path
+        depth,
+        description: dept.description || '',
+        people: dept.people || [],
+        isExpanded: false,
+      },
+    });
+
+    // Create edge to parent
+    if (dept.parent_id) {
+      edges.push({
+        id: `e-${dept.parent_id}-${dept.id}`,
+        source: dept.parent_id,
+        target: dept.id,
+        type: 'smoothstep',
+      });
+    }
+  });
+
+  return { nodes, edges };
+}
+
+/**
  * OrgMap - Main organization map component with React Flow canvas
  */
 export default function OrgMap() {
+  const { orgId } = useParams();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedPerson, setSelectedPerson] = useState(null);
@@ -53,17 +103,25 @@ export default function OrgMap() {
 
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
 
-  // Load CSV data on mount
+  // Load organization data from API
   useEffect(() => {
     async function loadData() {
       try {
         setIsLoading(true);
-        const response = await fetch('/src/data/sample-org.csv');
-        if (!response.ok) {
-          throw new Error('Failed to load organization data');
+        setError(null);
+
+        // Fetch organization with all departments and people
+        const org = await api.getOrganization(orgId);
+
+        if (!org.departments || org.departments.length === 0) {
+          setNodes([]);
+          setEdges([]);
+          setIsLoading(false);
+          return;
         }
-        const csvText = await response.text();
-        const { nodes: parsedNodes, edges: parsedEdges } = parseCSVToFlow(csvText);
+
+        // Transform API data to React Flow format
+        const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(org.departments);
 
         // Apply initial layout
         const layoutedNodes = calculateLayout(parsedNodes, parsedEdges, layoutDirection);
@@ -86,15 +144,17 @@ export default function OrgMap() {
           fitView({ padding: 0.2, duration: 800 });
         }, 100);
       } catch (err) {
-        console.error('Error loading data:', err);
-        setError(err.message);
+        console.error('Error loading organization data:', err);
+        setError(err.message || 'Failed to load organization data');
       } finally {
         setIsLoading(false);
       }
     }
 
-    loadData();
-  }, []);
+    if (orgId) {
+      loadData();
+    }
+  }, [orgId]);
 
   // Load saved theme from localStorage on mount
   useEffect(() => {
@@ -282,6 +342,34 @@ export default function OrgMap() {
         <div className="text-center bg-red-50 border border-red-200 rounded-lg p-8 max-w-md">
           <p className="text-red-800 font-semibold mb-2">Error Loading Map</p>
           <p className="text-red-600 text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoading && nodes.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="text-center p-8 max-w-md">
+          <svg
+            className="mx-auto h-16 w-16 text-slate-400 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+            />
+          </svg>
+          <h3 className="text-lg font-medium text-slate-900 mb-2">
+            No departments yet
+          </h3>
+          <p className="text-slate-500">
+            Create departments in the Departments section to see them visualized here.
+          </p>
         </div>
       </div>
     );
