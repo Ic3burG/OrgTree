@@ -15,7 +15,7 @@ export default function PersonForm({
     email: '',
     phone: '',
     office: '',
-    department_id: '',
+    departmentId: '',
   });
   const [errors, setErrors] = useState({});
 
@@ -27,7 +27,7 @@ export default function PersonForm({
         email: person.email || '',
         phone: person.phone || '',
         office: person.office || '',
-        department_id: person.department_id || '',
+        departmentId: person.department_id || '',
       });
     } else {
       setFormData({
@@ -36,7 +36,7 @@ export default function PersonForm({
         email: '',
         phone: '',
         office: '',
-        department_id: departments[0]?.id || '',
+        departmentId: departments[0]?.id || '',
       });
     }
     setErrors({});
@@ -49,8 +49,8 @@ export default function PersonForm({
       newErrors.name = 'Name is required';
     }
 
-    if (!formData.department_id) {
-      newErrors.department_id = 'Department is required';
+    if (!formData.departmentId) {
+      newErrors.departmentId = 'Department is required';
     }
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -147,19 +147,19 @@ export default function PersonForm({
             {/* Department */}
             <div>
               <label
-                htmlFor="department_id"
+                htmlFor="departmentId"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
                 Department *
               </label>
               <select
-                id="department_id"
-                name="department_id"
-                value={formData.department_id}
+                id="departmentId"
+                name="departmentId"
+                value={formData.departmentId}
                 onChange={handleChange}
                 disabled={isSubmitting}
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
-                  errors.department_id ? 'border-red-500' : 'border-gray-300'
+                  errors.departmentId ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
                 <option value="">Select a department</option>
@@ -169,9 +169,9 @@ export default function PersonForm({
                   </option>
                 ))}
               </select>
-              {errors.department_id && (
+              {errors.departmentId && (
                 <p className="text-sm text-red-600 mt-1">
-                  {errors.department_id}
+                  {errors.departmentId}
                 </p>
               )}
             </div>

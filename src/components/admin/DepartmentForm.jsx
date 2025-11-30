@@ -12,7 +12,7 @@ export default function DepartmentForm({
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    parent_id: '',
+    parentId: '',
   });
   const [errors, setErrors] = useState({});
 
@@ -21,13 +21,13 @@ export default function DepartmentForm({
       setFormData({
         name: department.name || '',
         description: department.description || '',
-        parent_id: department.parent_id || '',
+        parentId: department.parent_id || '',
       });
     } else {
       setFormData({
         name: '',
         description: '',
-        parent_id: '',
+        parentId: '',
       });
     }
     setErrors({});
@@ -41,8 +41,8 @@ export default function DepartmentForm({
     }
 
     // Prevent circular references
-    if (department && formData.parent_id === department.id) {
-      newErrors.parent_id = 'A department cannot be its own parent';
+    if (department && formData.parentId === department.id) {
+      newErrors.parentId = 'A department cannot be its own parent';
     }
 
     setErrors(newErrors);
@@ -54,7 +54,7 @@ export default function DepartmentForm({
     if (validate()) {
       onSubmit({
         ...formData,
-        parent_id: formData.parent_id || null,
+        parentId: formData.parentId || null,
       });
     }
   };
@@ -155,19 +155,19 @@ export default function DepartmentForm({
             {/* Parent Department */}
             <div>
               <label
-                htmlFor="parent_id"
+                htmlFor="parentId"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
                 Parent Department
               </label>
               <select
-                id="parent_id"
-                name="parent_id"
-                value={formData.parent_id}
+                id="parentId"
+                name="parentId"
+                value={formData.parentId}
                 onChange={handleChange}
                 disabled={isSubmitting}
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
-                  errors.parent_id ? 'border-red-500' : 'border-gray-300'
+                  errors.parentId ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
                 <option value="">None (Top-level)</option>
@@ -177,8 +177,8 @@ export default function DepartmentForm({
                   </option>
                 ))}
               </select>
-              {errors.parent_id && (
-                <p className="text-sm text-red-600 mt-1">{errors.parent_id}</p>
+              {errors.parentId && (
+                <p className="text-sm text-red-600 mt-1">{errors.parentId}</p>
               )}
               <p className="text-xs text-gray-500 mt-1">
                 Optional: Select a parent to nest this department

@@ -172,9 +172,11 @@ export default function Dashboard() {
                 <FileText size={24} className="text-violet-600" />
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-4">
-              Created {new Date(organization.created_at).toLocaleDateString()}
-            </p>
+            {organization.created_at && (
+              <p className="text-xs text-gray-500 mt-4">
+                Created {new Date(organization.created_at).toLocaleDateString()}
+              </p>
+            )}
           </div>
         </div>
 
@@ -189,10 +191,12 @@ export default function Dashboard() {
             <div className="p-6">
               <div className="space-y-4">
                 {organization.departments
-                  .sort(
-                    (a, b) =>
-                      new Date(b.created_at) - new Date(a.created_at)
-                  )
+                  .sort((a, b) => {
+                    // Handle missing dates safely
+                    const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                    const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                    return dateB - dateA;
+                  })
                   .slice(0, 5)
                   .map((dept) => (
                     <div
@@ -213,9 +217,11 @@ export default function Dashboard() {
                         <p className="text-sm font-medium text-gray-900">
                           {dept.people?.length || 0} people
                         </p>
-                        <p className="text-xs text-gray-500">
-                          {new Date(dept.created_at).toLocaleDateString()}
-                        </p>
+                        {dept.created_at && (
+                          <p className="text-xs text-gray-500">
+                            {new Date(dept.created_at).toLocaleDateString()}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}

@@ -151,9 +151,11 @@ export default function OrganizationSelector() {
                     <p>
                       {org.departments?.length || 0} departments
                     </p>
-                    <p>
-                      Created {new Date(org.created_at).toLocaleDateString()}
-                    </p>
+                    {org.created_at && (
+                      <p>
+                        Created {new Date(org.created_at).toLocaleDateString()}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="border-t border-gray-200 bg-gray-50 px-6 py-3 flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
