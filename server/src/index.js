@@ -6,6 +6,7 @@ import organizationRoutes from './routes/organizations.js';
 import departmentRoutes from './routes/departments.js';
 import peopleRoutes from './routes/people.js';
 import importRoutes from './routes/import.js';
+import publicRoutes from './routes/public.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -30,6 +31,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/public', publicRoutes);
 app.use('/api', organizationRoutes);
 app.use('/api', departmentRoutes);
 app.use('/api', peopleRoutes);

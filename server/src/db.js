@@ -28,6 +28,8 @@ db.exec(`
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     created_by_id TEXT NOT NULL,
+    is_public BOOLEAN DEFAULT 0,
+    share_token TEXT UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by_id) REFERENCES users(id)
@@ -60,6 +62,24 @@ db.exec(`
     FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
   );
 `);
+
+// Migration: Add sharing columns to organizations table if they don't exist
+try {
+  const tableInfo = db.prepare("PRAGMA table_info(organizations)").all();
+  const columnNames = tableInfo.map(col => col.name);
+
+  if (!columnNames.includes('is_public')) {
+    db.exec('ALTER TABLE organizations ADD COLUMN is_public BOOLEAN DEFAULT 0');
+    console.log('Migration: Added is_public column to organizations table');
+  }
+
+  if (!columnNames.includes('share_token')) {
+    db.exec('ALTER TABLE organizations ADD COLUMN share_token TEXT UNIQUE');
+    console.log('Migration: Added share_token column to organizations table');
+  }
+} catch (err) {
+  console.error('Migration error:', err);
+}
 
 console.log('Database initialized at:', dbPath);
 

@@ -82,6 +82,32 @@ const api = {
       body: JSON.stringify({ data }),
     }),
 
+  // Organization sharing
+  getShareSettings: (orgId) => request(`/organizations/${orgId}/share`),
+
+  updateShareSettings: (orgId, isPublic) =>
+    request(`/organizations/${orgId}/share`, {
+      method: 'PUT',
+      body: JSON.stringify({ isPublic }),
+    }),
+
+  regenerateShareToken: (orgId) =>
+    request(`/organizations/${orgId}/share/regenerate`, {
+      method: 'POST',
+    }),
+
+  // Public (no auth)
+  getPublicOrganization: async (shareToken) => {
+    const response = await fetch(`${API_BASE}/public/org/${shareToken}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new ApiError(data?.message || 'Request failed', response.status);
+    }
+
+    return data;
+  },
+
   // Departments
   getDepartments: (orgId) => request(`/organizations/${orgId}/departments`),
 

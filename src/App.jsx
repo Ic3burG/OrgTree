@@ -7,6 +7,7 @@ import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
 import OrganizationSelector from './components/OrganizationSelector';
 import OrgMap from './components/OrgMap';
+import PublicOrgMap from './components/PublicOrgMap';
 import AdminLayout from './components/admin/AdminLayout';
 import Dashboard from './components/admin/Dashboard';
 import DepartmentManager from './components/admin/DepartmentManager';
@@ -25,6 +26,7 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/public/:shareToken" element={<PublicOrgMap />} />
 
           {/* Protected routes */}
           <Route

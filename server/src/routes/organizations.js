@@ -1,5 +1,7 @@
 import express from 'express';
+import { randomBytes } from 'crypto';
 import { authenticateToken } from '../middleware/auth.js';
+import db from '../db.js';
 import {
   getOrganizations,
   getOrganizationById,
@@ -70,6 +72,127 @@ router.delete('/organizations/:id', async (req, res, next) => {
   try {
     await deleteOrganization(req.params.id, req.user.id);
     res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/organizations/:id/share
+// Get sharing settings for an organization
+router.get('/organizations/:id/share', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Verify ownership
+    const org = db.prepare(`
+      SELECT id, name, is_public, share_token, created_by_id
+      FROM organizations
+      WHERE id = ?
+    `).get(id);
+
+    if (!org) {
+      return res.status(404).json({ message: 'Organization not found' });
+    }
+
+    if (org.created_by_id !== req.user.id) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    res.json({
+      isPublic: org.is_public === 1,
+      shareToken: org.share_token,
+      shareUrl: org.share_token
+        ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/public/${org.share_token}`
+        : null
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PUT /api/organizations/:id/share
+// Toggle organization public/private status
+router.put('/organizations/:id/share', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { isPublic } = req.body;
+
+    // Verify ownership
+    const org = db.prepare(`
+      SELECT id, created_by_id, share_token
+      FROM organizations
+      WHERE id = ?
+    `).get(id);
+
+    if (!org) {
+      return res.status(404).json({ message: 'Organization not found' });
+    }
+
+    if (org.created_by_id !== req.user.id) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    // Generate share token if making public and doesn't have one
+    let shareToken = org.share_token;
+    if (isPublic && !shareToken) {
+      shareToken = randomBytes(16).toString('hex');
+    }
+
+    // Update organization
+    db.prepare(`
+      UPDATE organizations
+      SET is_public = ?, share_token = ?, updated_at = datetime('now')
+      WHERE id = ?
+    `).run(isPublic ? 1 : 0, shareToken, id);
+
+    res.json({
+      isPublic,
+      shareToken,
+      shareUrl: shareToken
+        ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/public/${shareToken}`
+        : null
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/organizations/:id/share/regenerate
+// Regenerate share token for an organization
+router.post('/organizations/:id/share/regenerate', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Verify ownership
+    const org = db.prepare(`
+      SELECT id, created_by_id, is_public
+      FROM organizations
+      WHERE id = ?
+    `).get(id);
+
+    if (!org) {
+      return res.status(404).json({ message: 'Organization not found' });
+    }
+
+    if (org.created_by_id !== req.user.id) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    // Generate new share token
+    const shareToken = randomBytes(16).toString('hex');
+
+    // Update organization
+    db.prepare(`
+      UPDATE organizations
+      SET share_token = ?, updated_at = datetime('now')
+      WHERE id = ?
+    `).run(shareToken, id);
+
+    res.json({
+      shareToken,
+      shareUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/public/${shareToken}`,
+      isPublic: org.is_public === 1
+    });
   } catch (err) {
     next(err);
   }

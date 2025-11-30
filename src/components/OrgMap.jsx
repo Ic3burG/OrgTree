@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, createContext } from 'react';
+import { useState, useEffect, useCallback, useMemo, createContext, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactFlow, {
   Background,
@@ -14,8 +14,11 @@ import DepartmentNode from './DepartmentNode';
 import DetailPanel from './DetailPanel';
 import SearchOverlay from './SearchOverlay';
 import Toolbar from './Toolbar';
+import ExportButton from './map/ExportButton';
 import { calculateLayout } from '../utils/layoutEngine';
 import { getDepthColors } from '../utils/colors';
+import { exportToPng, exportToPdf } from '../utils/exportUtils';
+import { useToast } from './ui/Toast';
 import api from '../api/client';
 
 // Theme context for providing current theme to all nodes
@@ -100,8 +103,12 @@ export default function OrgMap() {
   const [error, setError] = useState(null);
   const [highlightedNodeId, setHighlightedNodeId] = useState(null);
   const [currentTheme, setCurrentTheme] = useState('slate');
+  const [exporting, setExporting] = useState(false);
+  const [orgName, setOrgName] = useState('Organization Chart');
 
+  const reactFlowWrapper = useRef(null);
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
+  const toast = useToast();
 
   // Load organization data from API
   useEffect(() => {
@@ -112,6 +119,11 @@ export default function OrgMap() {
 
         // Fetch organization with all departments and people
         const org = await api.getOrganization(orgId);
+
+        // Store organization name for exports
+        if (org.name) {
+          setOrgName(org.name);
+        }
 
         if (!org.departments || org.departments.length === 0) {
           setNodes([]);
@@ -274,6 +286,40 @@ export default function OrgMap() {
     localStorage.setItem('orgTreeTheme', themeName);
   }, []);
 
+  // Handle export to PNG
+  const handleExportPng = useCallback(async () => {
+    if (!reactFlowWrapper.current) return;
+
+    try {
+      setExporting(true);
+      const filename = `${orgName.toLowerCase().replace(/\s+/g, '-')}-org-chart.png`;
+      await exportToPng(reactFlowWrapper.current, filename);
+      toast.success('Chart exported as PNG successfully!');
+    } catch (err) {
+      console.error('PNG export failed:', err);
+      toast.error('Failed to export as PNG. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  }, [orgName, toast]);
+
+  // Handle export to PDF
+  const handleExportPdf = useCallback(async () => {
+    if (!reactFlowWrapper.current) return;
+
+    try {
+      setExporting(true);
+      const filename = `${orgName.toLowerCase().replace(/\s+/g, '-')}-org-chart.pdf`;
+      await exportToPdf(reactFlowWrapper.current, filename, orgName);
+      toast.success('Chart exported as PDF successfully!');
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      toast.error('Failed to export as PDF. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  }, [orgName, toast]);
+
   // Handle search result selection
   const handleSearchSelect = useCallback((result) => {
     if (result.type === 'department') {
@@ -378,26 +424,28 @@ export default function OrgMap() {
   return (
     <div className="w-full h-screen relative bg-slate-50">
       <ThemeContext.Provider value={currentTheme}>
-        <ReactFlow
-          nodes={nodesWithHighlight}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          nodeTypes={nodeTypes}
-          defaultEdgeOptions={defaultEdgeOptions}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
-          minZoom={0.1}
-          maxZoom={2}
-          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-        >
-          <Background color="#cbd5e1" gap={20} size={1} />
-          <MiniMap
-            nodeColor={(node) => getDepthColors(node.data.depth, currentTheme).hex}
-            maskColor="rgba(0, 0, 0, 0.1)"
-            position="bottom-right"
-          />
-        </ReactFlow>
+        <div ref={reactFlowWrapper} className="w-full h-full">
+          <ReactFlow
+            nodes={nodesWithHighlight}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            nodeTypes={nodeTypes}
+            defaultEdgeOptions={defaultEdgeOptions}
+            fitView
+            fitViewOptions={{ padding: 0.2 }}
+            minZoom={0.1}
+            maxZoom={2}
+            defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+          >
+            <Background color="#cbd5e1" gap={20} size={1} />
+            <MiniMap
+              nodeColor={(node) => getDepthColors(node.data.depth, currentTheme).hex}
+              maskColor="rgba(0, 0, 0, 0.1)"
+              position="bottom-right"
+            />
+          </ReactFlow>
+        </div>
       </ThemeContext.Provider>
 
       {/* Overlay Components */}
@@ -414,6 +462,15 @@ export default function OrgMap() {
         currentTheme={currentTheme}
         onThemeChange={handleThemeChange}
       />
+
+      {/* Export Button */}
+      <div className="absolute top-4 right-4 z-10">
+        <ExportButton
+          onExportPng={handleExportPng}
+          onExportPdf={handleExportPdf}
+          loading={exporting}
+        />
+      </div>
 
       {/* Detail Panel */}
       {selectedPerson && (

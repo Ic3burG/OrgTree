@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Building2, Users, FileText, Download, Upload } from 'lucide-react';
+import { Building2, Users, FileText, Download, Upload, Share2 } from 'lucide-react';
 import api from '../../api/client';
 import { useToast } from '../ui/Toast';
 import { generateCSV, downloadCSV } from '../../utils/csvExport';
 import ImportModal from './ImportModal';
+import ShareModal from './ShareModal';
 
 export default function Dashboard() {
   const { orgId } = useParams();
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showImport, setShowImport] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -90,6 +92,13 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex gap-2">
+            <button
+              onClick={() => setShowShare(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <Share2 size={20} />
+              Share
+            </button>
             <button
               onClick={() => setShowImport(true)}
               className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
@@ -240,6 +249,15 @@ export default function Dashboard() {
           toast.success('Data imported successfully');
         }}
       />
+
+      {/* Share Modal */}
+      {showShare && (
+        <ShareModal
+          orgId={orgId}
+          orgName={organization.name}
+          onClose={() => setShowShare(false)}
+        />
+      )}
     </div>
   );
 }
