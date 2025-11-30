@@ -1,4 +1,6 @@
 import express from 'express';
+import bcrypt from 'bcrypt';
+import db from '../db.js';
 import { createUser, loginUser, getUserById } from '../services/auth.service.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -46,6 +48,46 @@ router.get('/me', authenticateToken, async (req, res, next) => {
   try {
     const user = await getUserById(req.user.id);
     res.json(user);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DEV ONLY: Reset password without email verification
+// WARNING: Remove or secure this endpoint before production!
+router.post('/dev-reset-password', async (req, res, next) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    // Validation
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: 'Email and newPassword are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    // Check if user exists
+    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Hash new password
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    db.prepare(`
+      UPDATE users
+      SET password_hash = ?, updated_at = datetime('now')
+      WHERE email = ?
+    `).run(passwordHash, email);
+
+    res.json({
+      message: 'Password reset successful',
+      email
+    });
   } catch (err) {
     next(err);
   }
