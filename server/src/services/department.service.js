@@ -152,7 +152,7 @@ export async function createDepartment(orgId, data, userId) {
   `).run(deptId, orgId, parentId || null, name, description || null, sortOrder, now, now);
 
   // Return the created department with relationships
-  const result = getDepartmentById(orgId, deptId, userId);
+  const result = await getDepartmentById(orgId, deptId, userId);
   console.log('Created department result:', result);
   console.log('Created with parentId:', result.parentId);
   return result;
@@ -219,7 +219,7 @@ export async function updateDepartment(orgId, deptId, data, userId) {
     deptId
   );
 
-  const result = getDepartmentById(orgId, deptId, userId);
+  const result = await getDepartmentById(orgId, deptId, userId);
   console.log('Updated department result:', result);
   console.log('Updated with parentId:', result.parentId);
   return result;
