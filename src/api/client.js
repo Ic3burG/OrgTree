@@ -111,17 +111,28 @@ const api = {
   // Departments
   getDepartments: (orgId) => request(`/organizations/${orgId}/departments`),
 
-  createDepartment: (orgId, data) =>
-    request(`/organizations/${orgId}/departments`, {
+  createDepartment: (orgId, data) => {
+    console.log('=== API createDepartment ===');
+    console.log('orgId:', orgId);
+    console.log('data:', data);
+    console.log('JSON body:', JSON.stringify(data));
+    return request(`/organizations/${orgId}/departments`, {
       method: 'POST',
       body: JSON.stringify(data),
-    }),
+    });
+  },
 
-  updateDepartment: (orgId, deptId, data) =>
-    request(`/organizations/${orgId}/departments/${deptId}`, {
+  updateDepartment: (orgId, deptId, data) => {
+    console.log('=== API updateDepartment ===');
+    console.log('orgId:', orgId);
+    console.log('deptId:', deptId);
+    console.log('data:', data);
+    console.log('JSON body:', JSON.stringify(data));
+    return request(`/organizations/${orgId}/departments/${deptId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
-    }),
+    });
+  },
 
   deleteDepartment: (orgId, deptId) =>
     request(`/organizations/${orgId}/departments/${deptId}`, {

@@ -114,18 +114,24 @@ export async function getDepartmentById(orgId, deptId, userId) {
 }
 
 export async function createDepartment(orgId, data, userId) {
+  console.log('=== createDepartment service ===');
+  console.log('Received data:', data);
   await verifyOrgAccess(orgId, userId);
 
   const { name, description, parentId } = data;
+  console.log('Extracted parentId:', parentId);
+  console.log('parentId type:', typeof parentId);
 
   // If parentId provided, verify it exists in same org
   if (parentId) {
+    console.log('Verifying parent department exists...');
     const parentDept = db.prepare('SELECT * FROM departments WHERE id = ? AND organization_id = ?').get(parentId, orgId);
     if (!parentDept) {
       const error = new Error('Parent department not found');
       error.status = 400;
       throw error;
     }
+    console.log('Parent department found:', parentDept.name);
   }
 
   // Get max sortOrder for positioning
@@ -139,16 +145,22 @@ export async function createDepartment(orgId, data, userId) {
   const deptId = randomUUID();
   const now = new Date().toISOString();
 
+  console.log('Inserting into database with parent_id:', parentId || null);
   db.prepare(`
     INSERT INTO departments (id, organization_id, parent_id, name, description, sort_order, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).run(deptId, orgId, parentId || null, name, description || null, sortOrder, now, now);
 
   // Return the created department with relationships
-  return getDepartmentById(orgId, deptId, userId);
+  const result = getDepartmentById(orgId, deptId, userId);
+  console.log('Created department result:', result);
+  console.log('Created with parentId:', result.parentId);
+  return result;
 }
 
 export async function updateDepartment(orgId, deptId, data, userId) {
+  console.log('=== updateDepartment service ===');
+  console.log('Received data:', data);
   await verifyOrgAccess(orgId, userId);
 
   const dept = db.prepare('SELECT * FROM departments WHERE id = ? AND organization_id = ?').get(deptId, orgId);
@@ -160,6 +172,8 @@ export async function updateDepartment(orgId, deptId, data, userId) {
   }
 
   const { name, description, parentId } = data;
+  console.log('Extracted parentId:', parentId);
+  console.log('parentId type:', typeof parentId);
 
   // Prevent setting parent to self
   if (parentId === deptId) {
@@ -187,6 +201,7 @@ export async function updateDepartment(orgId, deptId, data, userId) {
 
   const now = new Date().toISOString();
   const newParentId = parentId !== undefined ? parentId : dept.parent_id;
+  console.log('Updating with parent_id:', newParentId);
 
   db.prepare(`
     UPDATE departments
@@ -204,7 +219,10 @@ export async function updateDepartment(orgId, deptId, data, userId) {
     deptId
   );
 
-  return getDepartmentById(orgId, deptId, userId);
+  const result = getDepartmentById(orgId, deptId, userId);
+  console.log('Updated department result:', result);
+  console.log('Updated with parentId:', result.parentId);
+  return result;
 }
 
 // Helper to check if potentialChildId is a descendant of parentId

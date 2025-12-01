@@ -59,6 +59,9 @@ export default function DepartmentManager() {
   };
 
   const handleCreate = () => {
+    console.log('=== Opening Add Department Form ===');
+    console.log('departments available:', departments);
+    console.log('departments count:', departments?.length);
     setEditingDepartment(null);
     setIsFormOpen(true);
   };
@@ -69,17 +72,26 @@ export default function DepartmentManager() {
   };
 
   const handleFormSubmit = async (formData) => {
+    console.log('=== handleFormSubmit called ===');
+    console.log('Data received from form:', formData);
+    console.log('parentId value:', formData.parentId);
+    console.log('parentId type:', typeof formData.parentId);
+    console.log('Is editing?:', !!editingDepartment);
+
     try {
       setIsSubmitting(true);
       if (editingDepartment) {
+        console.log('Calling updateDepartment...');
         await api.updateDepartment(orgId, editingDepartment.id, formData);
       } else {
+        console.log('Calling createDepartment...');
         await api.createDepartment(orgId, formData);
       }
       setIsFormOpen(false);
       setEditingDepartment(null);
       await loadDepartments();
     } catch (err) {
+      console.error('Form submit error:', err);
       alert(err.message || 'Failed to save department');
     } finally {
       setIsSubmitting(false);
@@ -262,6 +274,11 @@ export default function DepartmentManager() {
       </div>
 
       {/* Department Form Modal */}
+      {isFormOpen && console.log('=== Rendering DepartmentForm ===', {
+        departments: departments,
+        departmentsCount: departments?.length,
+        editingDepartment: editingDepartment
+      })}
       <DepartmentForm
         isOpen={isFormOpen}
         onClose={() => {

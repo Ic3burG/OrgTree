@@ -9,6 +9,11 @@ export default function DepartmentForm({
   departments = [],
   isSubmitting = false,
 }) {
+  console.log('=== DepartmentForm RENDER ===');
+  console.log('departments prop:', departments);
+  console.log('departments length:', departments?.length);
+  console.log('department (editing):', department);
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -52,10 +57,14 @@ export default function DepartmentForm({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validate()) {
-      onSubmit({
+      const submitData = {
         ...formData,
         parentId: formData.parentId || null,
-      });
+      };
+      console.log('=== FORM SUBMIT DATA ===', submitData);
+      console.log('parentId value:', submitData.parentId);
+      console.log('parentId type:', typeof submitData.parentId);
+      onSubmit(submitData);
     }
   };
 
@@ -164,7 +173,10 @@ export default function DepartmentForm({
                 id="parentId"
                 name="parentId"
                 value={formData.parentId}
-                onChange={handleChange}
+                onChange={(e) => {
+                  console.log('Parent dropdown changed to:', e.target.value);
+                  handleChange(e);
+                }}
                 disabled={isSubmitting}
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
                   errors.parentId ? 'border-red-500' : 'border-gray-300'
@@ -182,6 +194,10 @@ export default function DepartmentForm({
               )}
               <p className="text-xs text-gray-500 mt-1">
                 Optional: Select a parent to nest this department
+              </p>
+              {/* DEBUG: Show department count */}
+              <p className="text-xs text-red-500 mt-1">
+                DEBUG: {departments?.length || 0} departments available for parent selection
               </p>
             </div>
           </div>
