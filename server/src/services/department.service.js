@@ -25,7 +25,7 @@ export async function getDepartments(orgId, userId) {
     ORDER BY sort_order ASC
   `).all(orgId);
 
-  // Get people and children for each department
+  // Get people for each department
   const result = departments.map(dept => {
     const people = db.prepare(`
       SELECT
@@ -36,13 +36,7 @@ export async function getDepartments(orgId, userId) {
       ORDER BY sort_order ASC
     `).all(dept.id);
 
-    const children = db.prepare(`
-      SELECT id, name, parent_id as parentId
-      FROM departments
-      WHERE parent_id = ?
-    `).all(dept.id);
-
-    return { ...dept, people, children };
+    return { ...dept, people };
   });
 
   return result;
@@ -76,41 +70,7 @@ export async function getDepartmentById(orgId, deptId, userId) {
     ORDER BY sort_order ASC
   `).all(deptId);
 
-  // Get children with their people
-  const children = db.prepare(`
-    SELECT
-      id, organization_id as organizationId, parent_id as parentId,
-      name, description, sort_order as sortOrder,
-      created_at as createdAt, updated_at as updatedAt
-    FROM departments
-    WHERE parent_id = ?
-  `).all(deptId);
-
-  const childrenWithPeople = children.map(child => {
-    const childPeople = db.prepare(`
-      SELECT
-        id, department_id as departmentId, name, title, email, phone, office,
-        sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
-      FROM people
-      WHERE department_id = ?
-      ORDER BY sort_order ASC
-    `).all(child.id);
-    return { ...child, people: childPeople };
-  });
-
-  // Get parent if exists
-  let parent = null;
-  if (dept.parentId) {
-    parent = db.prepare(`
-      SELECT
-        id, organization_id as organizationId, parent_id as parentId,
-        name, description, sort_order as sortOrder
-      FROM departments
-      WHERE id = ?
-    `).get(dept.parentId);
-  }
-
-  return { ...dept, people, children: childrenWithPeople, parent };
+  return { ...dept, people };
 }
 
 export async function createDepartment(orgId, data, userId) {
@@ -118,7 +78,10 @@ export async function createDepartment(orgId, data, userId) {
 
   const { name, description, parentId } = data;
 
-  // If parentId provided, verify it exists in same org
+  console.log('=== createDepartment service ===');
+  console.log('Creating with parentId:', parentId);
+
+  // Validate parentId if provided
   if (parentId) {
     const parentDept = db.prepare('SELECT * FROM departments WHERE id = ? AND organization_id = ?').get(parentId, orgId);
     if (!parentDept) {
@@ -144,8 +107,9 @@ export async function createDepartment(orgId, data, userId) {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).run(deptId, orgId, parentId || null, name, description || null, sortOrder, now, now);
 
-  // Return the created department with relationships
-  return await getDepartmentById(orgId, deptId, userId);
+  const result = await getDepartmentById(orgId, deptId, userId);
+  console.log('Created department with parentId:', result.parentId);
+  return result;
 }
 
 export async function updateDepartment(orgId, deptId, data, userId) {
@@ -161,32 +125,43 @@ export async function updateDepartment(orgId, deptId, data, userId) {
 
   const { name, description, parentId } = data;
 
-  // Prevent setting parent to self
+  console.log('=== updateDepartment service ===');
+  console.log('Updating department:', deptId);
+  console.log('New parentId:', parentId);
+  console.log('parentId type:', typeof parentId);
+
+  // Prevent self-reference
   if (parentId === deptId) {
     const error = new Error('Department cannot be its own parent');
     error.status = 400;
     throw error;
   }
 
-  // If parentId provided, verify it exists and isn't a child of this dept
-  if (parentId !== undefined && parentId !== null) {
+  // Validate parentId if provided
+  if (parentId) {
     const parentDept = db.prepare('SELECT * FROM departments WHERE id = ? AND organization_id = ?').get(parentId, orgId);
     if (!parentDept) {
       const error = new Error('Parent department not found');
       error.status = 400;
       throw error;
     }
-
-    // Check for circular reference
-    if (checkIsDescendant(deptId, parentId)) {
-      const error = new Error('Cannot set a child department as parent');
-      error.status = 400;
-      throw error;
-    }
   }
 
+  // Build update data - EXPLICITLY handle parentId
   const now = new Date().toISOString();
-  const newParentId = parentId !== undefined ? parentId : dept.parent_id;
+
+  // CRITICAL: Always update parentId when it's in the request
+  // parentId can be a string (valid ID) or null (top level)
+  let newParentId;
+  if ('parentId' in data) {
+    // parentId is in the data object, use it (could be string or null)
+    newParentId = parentId === '' ? null : (parentId || null);
+    console.log('Updating with new parentId:', newParentId);
+  } else {
+    // parentId not in data, keep existing
+    newParentId = dept.parent_id;
+    console.log('Keeping existing parentId:', newParentId);
+  }
 
   db.prepare(`
     UPDATE departments
@@ -204,23 +179,9 @@ export async function updateDepartment(orgId, deptId, data, userId) {
     deptId
   );
 
-  return await getDepartmentById(orgId, deptId, userId);
-}
-
-// Helper to check if potentialChildId is a descendant of parentId
-function checkIsDescendant(parentId, potentialChildId) {
-  const children = db.prepare('SELECT id FROM departments WHERE parent_id = ?').all(parentId);
-
-  for (const child of children) {
-    if (child.id === potentialChildId) {
-      return true;
-    }
-    if (checkIsDescendant(child.id, potentialChildId)) {
-      return true;
-    }
-  }
-
-  return false;
+  const result = await getDepartmentById(orgId, deptId, userId);
+  console.log('Updated department result - parentId:', result.parentId);
+  return result;
 }
 
 export async function deleteDepartment(orgId, deptId, userId) {
@@ -238,8 +199,4 @@ export async function deleteDepartment(orgId, deptId, userId) {
   db.prepare('DELETE FROM departments WHERE id = ?').run(deptId);
 
   return { success: true };
-}
-
-export async function moveDepartment(orgId, deptId, newParentId, userId) {
-  return updateDepartment(orgId, deptId, { parentId: newParentId }, userId);
 }

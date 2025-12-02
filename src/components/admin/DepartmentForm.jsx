@@ -5,212 +5,148 @@ export default function DepartmentForm({
   isOpen,
   onClose,
   onSubmit,
-  department = null,
-  departments = [],
-  isSubmitting = false,
+  department,
+  departments,
+  loading,
 }) {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [parentId, setParentId] = useState('');
 
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    parentId: '',
-  });
-  const [errors, setErrors] = useState({});
+  const isEditing = !!department;
 
+  // Reset form when opening/closing or when department changes
   useEffect(() => {
-    if (department) {
-      setFormData({
-        name: department.name || '',
-        description: department.description || '',
-        parentId: department.parent_id || '',
-      });
-    } else {
-      setFormData({
-        name: '',
-        description: '',
-        parentId: '',
-      });
+    if (isOpen) {
+      if (department) {
+        // Editing existing department
+        setName(department.name || '');
+        setDescription(department.description || '');
+        setParentId(department.parentId || '');
+      } else {
+        // Creating new department
+        setName('');
+        setDescription('');
+        setParentId('');
+      }
     }
-    setErrors({});
   }, [department, isOpen]);
-
-  const validate = () => {
-    const newErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Department name is required';
-    }
-
-    // Prevent circular references
-    if (department && formData.parentId === department.id) {
-      newErrors.parentId = 'A department cannot be its own parent';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validate()) {
-      const submitData = {
-        ...formData,
-        parentId: formData.parentId || null,
-      };
-      onSubmit(submitData);
-    }
-  };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  // Filter out current department and its descendants from parent options
-  const getAvailableParents = () => {
-    if (!department) return departments;
-
-    const isDescendant = (deptId, potentialParentId) => {
-      const dept = departments.find((d) => d.id === potentialParentId);
-      if (!dept) return false;
-      if (dept.parent_id === deptId) return true;
-      if (dept.parent_id) return isDescendant(deptId, dept.parent_id);
-      return false;
+    // Build the data object explicitly
+    const formData = {
+      name: name.trim(),
+      description: description.trim(),
+      parentId: parentId === '' ? null : parentId,
     };
 
-    return departments.filter(
-      (d) => d.id !== department.id && !isDescendant(department.id, d.id)
-    );
+    console.log('DepartmentForm submitting:', formData);
+    onSubmit(formData);
   };
+
+  // Filter departments for parent dropdown
+  // Exclude current department (can't be parent of itself)
+  const availableParents = Array.isArray(departments)
+    ? departments.filter((d) => {
+        if (!department) return true; // New department, show all
+        return d.id !== department.id; // Exclude self when editing
+      })
+    : [];
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {department ? 'Edit Department' : 'Create Department'}
-          </h2>
-          <button
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
-          >
-            <X size={24} />
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <div className="p-6 space-y-4">
-            {/* Name */}
+      <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-slate-800">
+              {isEditing ? 'Edit Department' : 'Add Department'}
+            </h2>
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+              <X size={24} />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Department Name */}
             <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                 Department Name *
               </label>
               <input
                 type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                disabled={isSubmitting}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="e.g., Engineering"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                placeholder="e.g., Finance Department"
+                required
               />
-              {errors.name && (
-                <p className="text-sm text-red-600 mt-1">{errors.name}</p>
-              )}
+            </div>
+
+            {/* Parent Department Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Parent Department
+              </label>
+              <select
+                value={parentId}
+                onChange={(e) => {
+                  console.log('Parent selected:', e.target.value);
+                  setParentId(e.target.value);
+                }}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white"
+              >
+                <option value="">None (Top Level)</option>
+                {availableParents.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-slate-500 mt-1">
+                {availableParents.length} department(s) available as parent
+              </p>
             </div>
 
             {/* Description */}
             <div>
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                 Description
               </label>
               <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                disabled={isSubmitting}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                placeholder="Brief description of this department"
+                placeholder="Describe this department's responsibilities..."
               />
             </div>
 
-            {/* Parent Department */}
-            <div>
-              <label
-                htmlFor="parentId"
-                className="block text-sm font-medium text-gray-700 mb-1"
+            {/* Buttons */}
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
               >
-                Parent Department
-              </label>
-              <select
-                id="parentId"
-                name="parentId"
-                value={formData.parentId}
-                onChange={handleChange}
-                disabled={isSubmitting}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
-                  errors.parentId ? 'border-red-500' : 'border-gray-300'
-                }`}
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading || !name.trim()}
+                className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
               >
-                <option value="">None (Top-level)</option>
-                {getAvailableParents().map((dept) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-              {errors.parentId && (
-                <p className="text-sm text-red-600 mt-1">{errors.parentId}</p>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                Optional: Select a parent to nest this department
-              </p>
+                {loading ? 'Saving...' : isEditing ? 'Update Department' : 'Add Department'}
+              </button>
             </div>
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-lg disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
-            >
-              {isSubmitting
-                ? 'Saving...'
-                : department
-                ? 'Update Department'
-                : 'Create Department'}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

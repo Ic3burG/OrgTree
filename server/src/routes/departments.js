@@ -6,7 +6,6 @@ import {
   createDepartment,
   updateDepartment,
   deleteDepartment,
-  moveDepartment,
 } from '../services/department.service.js';
 
 const router = express.Router();
@@ -36,7 +35,12 @@ router.get('/organizations/:orgId/departments/:deptId', async (req, res, next) =
 // POST /api/organizations/:orgId/departments
 router.post('/organizations/:orgId/departments', async (req, res, next) => {
   try {
+    console.log('=== POST /departments ===');
+    console.log('Request body:', req.body);
+
     const { name, description, parentId } = req.body;
+
+    console.log('Extracted - name:', name, 'description:', description, 'parentId:', parentId);
 
     if (!name || !name.trim()) {
       return res.status(400).json({ message: 'Department name is required' });
@@ -44,11 +48,18 @@ router.post('/organizations/:orgId/departments', async (req, res, next) => {
 
     const dept = await createDepartment(
       req.params.orgId,
-      { name: name.trim(), description, parentId },
+      {
+        name: name.trim(),
+        description: description || null,
+        parentId: parentId || null
+      },
       req.user.id
     );
+
+    console.log('Created department:', dept);
     res.status(201).json(dept);
   } catch (err) {
+    console.error('Create department error:', err);
     next(err);
   }
 });
@@ -56,7 +67,13 @@ router.post('/organizations/:orgId/departments', async (req, res, next) => {
 // PUT /api/organizations/:orgId/departments/:deptId
 router.put('/organizations/:orgId/departments/:deptId', async (req, res, next) => {
   try {
+    console.log('=== PUT /departments/:deptId ===');
+    console.log('Department ID:', req.params.deptId);
+    console.log('Request body:', req.body);
+
     const { name, description, parentId } = req.body;
+
+    console.log('Extracted - name:', name, 'description:', description, 'parentId:', parentId);
 
     if (name !== undefined && !name.trim()) {
       return res.status(400).json({ message: 'Department name cannot be empty' });
@@ -65,11 +82,18 @@ router.put('/organizations/:orgId/departments/:deptId', async (req, res, next) =
     const dept = await updateDepartment(
       req.params.orgId,
       req.params.deptId,
-      { name: name?.trim(), description, parentId },
+      {
+        name: name?.trim(),
+        description,
+        parentId
+      },
       req.user.id
     );
+
+    console.log('Updated department:', dept);
     res.json(dept);
   } catch (err) {
+    console.error('Update department error:', err);
     next(err);
   }
 });
@@ -79,17 +103,6 @@ router.delete('/organizations/:orgId/departments/:deptId', async (req, res, next
   try {
     await deleteDepartment(req.params.orgId, req.params.deptId, req.user.id);
     res.status(204).send();
-  } catch (err) {
-    next(err);
-  }
-});
-
-// PUT /api/organizations/:orgId/departments/:deptId/move
-router.put('/organizations/:orgId/departments/:deptId/move', async (req, res, next) => {
-  try {
-    const { parentId } = req.body;
-    const dept = await moveDepartment(req.params.orgId, req.params.deptId, parentId, req.user.id);
-    res.json(dept);
   } catch (err) {
     next(err);
   }
