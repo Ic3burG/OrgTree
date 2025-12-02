@@ -117,7 +117,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -134,6 +134,9 @@ export default function Dashboard() {
             </div>
             <p className="text-xs text-gray-500 mt-4">
               {topLevelDepts} top-level departments
+              {organization.created_at && (
+                <> • Created {new Date(organization.created_at).toLocaleDateString()}</>
+              )}
             </p>
           </div>
 
@@ -156,27 +159,6 @@ export default function Dashboard() {
                 ? `Average ${(peopleCount / departmentCount).toFixed(1)} per department`
                 : 'No departments yet'}
             </p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">
-                  Organization ID
-                </p>
-                <p className="text-lg font-mono text-gray-700 truncate">
-                  {organization.id}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-violet-100 rounded-lg flex items-center justify-center">
-                <FileText size={24} className="text-violet-600" />
-              </div>
-            </div>
-            {organization.created_at && (
-              <p className="text-xs text-gray-500 mt-4">
-                Created {new Date(organization.created_at).toLocaleDateString()}
-              </p>
-            )}
           </div>
         </div>
 
