@@ -6,8 +6,10 @@ import {
   ChevronUp,
   ArrowDown,
   ArrowRight,
-  LogOut
+  LogOut,
+  Palette
 } from 'lucide-react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ThemePicker from './ThemePicker';
 
@@ -28,6 +30,7 @@ export default function Toolbar({
   onThemeChange
 }) {
   const { user, logout } = useAuth();
+  const [isThemeOpen, setIsThemeOpen] = useState(false);
 
   // Mobile: compact buttons, bottom positioning
   // Desktop: standard buttons, top positioning
@@ -129,9 +132,36 @@ export default function Toolbar({
       {/* Divider */}
       <div className="h-px bg-slate-300 my-0.5" />
 
-      {/* Theme Picker */}
-      <div className="bg-white border border-slate-300 rounded-lg p-1.5 lg:p-2 shadow-md lg:shadow-sm">
-        <ThemePicker currentTheme={currentTheme} onThemeChange={onThemeChange} />
+      {/* Theme Picker - Collapsible */}
+      <div className="relative">
+        <button
+          onClick={() => setIsThemeOpen(!isThemeOpen)}
+          className={buttonClass}
+          aria-label="Change theme"
+        >
+          <Palette size={20} className="lg:w-5 lg:h-5 text-slate-700" />
+          <Tooltip>Theme</Tooltip>
+        </button>
+
+        {/* Theme Drawer */}
+        {isThemeOpen && (
+          <>
+            {/* Backdrop for mobile */}
+            <div
+              className="fixed inset-0 z-40 lg:hidden"
+              onClick={() => setIsThemeOpen(false)}
+              aria-hidden="true"
+            />
+
+            {/* Theme options */}
+            <div className="absolute right-full mr-2 top-0 z-50 bg-white border border-slate-300 rounded-lg p-3 shadow-xl animate-in slide-in-from-right-2 duration-200">
+              <ThemePicker currentTheme={currentTheme} onThemeChange={(theme) => {
+                onThemeChange(theme);
+                setIsThemeOpen(false);
+              }} />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Divider */}

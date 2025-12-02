@@ -8,7 +8,7 @@ export default function ThemePicker({ currentTheme, onThemeChange }) {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="hidden lg:inline text-xs text-slate-500 mr-1">Theme:</span>
+      <span className="text-xs text-slate-500 mr-1">Theme:</span>
       <div className="flex gap-1.5">
         {themes.map((theme) => (
           <button
