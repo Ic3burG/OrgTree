@@ -464,7 +464,7 @@ export default function OrgMap() {
       />
 
       {/* Export Button */}
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute top-4 left-4 z-10">
         <ExportButton
           onExportPng={handleExportPng}
           onExportPdf={handleExportPdf}
