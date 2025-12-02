@@ -74,7 +74,10 @@ try {
   }
 
   if (!columnNames.includes('share_token')) {
-    db.exec('ALTER TABLE organizations ADD COLUMN share_token TEXT UNIQUE');
+    // SQLite doesn't allow adding UNIQUE columns via ALTER TABLE
+    db.exec('ALTER TABLE organizations ADD COLUMN share_token TEXT');
+    // Create unique index separately
+    db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_organizations_share_token ON organizations(share_token)');
     console.log('Migration: Added share_token column to organizations table');
   }
 } catch (err) {
