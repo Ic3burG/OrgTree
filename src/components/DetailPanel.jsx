@@ -3,7 +3,8 @@ import { getInitials } from '../utils/helpers';
 
 /**
  * DetailPanel - Slide-in panel showing full person details
- * Displays when clicking on a person card
+ * Mobile: Full-screen overlay from right
+ * Desktop: Side panel with max width
  */
 export default function DetailPanel({ person, onClose }) {
   if (!person) return null;
@@ -25,20 +26,20 @@ export default function DetailPanel({ person, onClose }) {
 
       {/* Panel */}
       <div
-        className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50
+        className="fixed right-0 top-0 bottom-0 w-full lg:max-w-md bg-white shadow-2xl z-50
           overflow-y-auto animate-slide-in"
         role="dialog"
         aria-modal="true"
         aria-labelledby="detail-panel-title"
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
-          <h2 id="detail-panel-title" className="text-xl font-bold text-slate-900">
+        <div className="sticky top-0 bg-white border-b border-slate-200 p-4 lg:p-6 flex items-center justify-between">
+          <h2 id="detail-panel-title" className="text-lg lg:text-xl font-bold text-slate-900">
             Contact Details
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-slate-100 transition-colors"
+            className="p-2.5 lg:p-2 rounded-full hover:bg-slate-100 transition-colors touch-manipulation"
             aria-label="Close panel"
           >
             <X size={24} className="text-slate-600" />
@@ -46,15 +47,15 @@ export default function DetailPanel({ person, onClose }) {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-4 lg:p-6 space-y-6">
           {/* Avatar and Name */}
           <div className="flex flex-col items-center text-center">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
-              flex items-center justify-center text-white font-bold text-3xl shadow-lg mb-4">
+            <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
+              flex items-center justify-center text-white font-bold text-2xl lg:text-3xl shadow-lg mb-4">
               {initials}
             </div>
-            <h3 className="text-2xl font-bold text-slate-900">{person.name}</h3>
-            <p className="text-lg text-slate-600 mt-1">{person.title}</p>
+            <h3 className="text-xl lg:text-2xl font-bold text-slate-900">{person.name}</h3>
+            <p className="text-base lg:text-lg text-slate-600 mt-1">{person.title}</p>
           </div>
 
           {/* Contact Information */}
@@ -68,7 +69,7 @@ export default function DetailPanel({ person, onClose }) {
                   <p className="text-xs text-slate-500 uppercase mb-1">Email</p>
                   <a
                     href={`mailto:${person.email}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline break-all"
+                    className="text-blue-600 hover:text-blue-800 hover:underline break-all touch-manipulation"
                   >
                     {person.email}
                   </a>
@@ -83,7 +84,7 @@ export default function DetailPanel({ person, onClose }) {
                   <p className="text-xs text-slate-500 uppercase mb-1">Phone</p>
                   <a
                     href={`tel:${person.phone}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                    className="text-blue-600 hover:text-blue-800 hover:underline touch-manipulation"
                   >
                     {person.phone}
                   </a>

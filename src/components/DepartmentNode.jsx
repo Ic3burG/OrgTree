@@ -10,6 +10,8 @@ import DepartmentTooltip from './DepartmentTooltip';
 /**
  * DepartmentNode - Custom React Flow node for departments
  * Displays department info and can expand to show people
+ * Mobile: Larger touch targets, no tooltips on hover
+ * Desktop: Standard size with hover tooltips
  */
 function DepartmentNode({ data, selected }) {
   const { name, depth, people, description, isExpanded, onToggleExpand, onSelectPerson, isHighlighted } = data;
@@ -17,12 +19,18 @@ function DepartmentNode({ data, selected }) {
   const colors = getDepthColors(depth, theme);
   const peopleCount = people?.length || 0;
 
-  // Hover state for tooltip
+  // Hover state for tooltip (disabled on touch devices)
   const [isHovered, setIsHovered] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState(null);
   const [leaveTimeout, setLeaveTimeout] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const headerRef = useRef(null);
+
+  // Detect touch device
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   const handleHeaderClick = (e) => {
     e.stopPropagation();
@@ -43,7 +51,10 @@ function DepartmentNode({ data, selected }) {
   };
 
   // Show tooltip after 500ms delay to avoid flashing on quick mouse passes
+  // Disabled on touch devices
   const handleMouseEnter = () => {
+    if (isTouchDevice) return;
+
     // Clear any pending leave timeout
     if (leaveTimeout) {
       clearTimeout(leaveTimeout);
@@ -118,31 +129,31 @@ function DepartmentNode({ data, selected }) {
       {/* Department Header */}
       <div
         ref={headerRef}
-        className={`${colors.bg} ${colors.text} rounded-t-lg p-3 cursor-pointer
-          hover:opacity-90 transition-opacity`}
+        className={`${colors.bg} ${colors.text} rounded-t-lg p-4 lg:p-3 cursor-pointer
+          hover:opacity-90 transition-opacity touch-manipulation active:opacity-75`}
         onClick={handleHeaderClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         <div className="flex items-center gap-2 mb-2">
           {isExpanded ? (
-            <FolderOpen size={18} className="flex-shrink-0" />
+            <FolderOpen size={20} className="lg:w-[18px] lg:h-[18px] flex-shrink-0" />
           ) : (
-            <Folder size={18} className="flex-shrink-0" />
+            <Folder size={20} className="lg:w-[18px] lg:h-[18px] flex-shrink-0" />
           )}
-          <span className="font-semibold text-sm leading-tight flex-grow">
+          <span className="font-semibold text-sm lg:text-sm leading-tight flex-grow">
             {name}
           </span>
           {isExpanded ? (
-            <ChevronUp size={16} className="flex-shrink-0" />
+            <ChevronUp size={18} className="lg:w-4 lg:h-4 flex-shrink-0" />
           ) : (
-            <ChevronDown size={16} className="flex-shrink-0" />
+            <ChevronDown size={18} className="lg:w-4 lg:h-4 flex-shrink-0" />
           )}
         </div>
 
         {/* People count */}
-        <div className="flex items-center gap-1.5 text-xs opacity-90">
-          <Users size={14} />
+        <div className="flex items-center gap-1.5 text-xs lg:text-xs opacity-90">
+          <Users size={16} className="lg:w-[14px] lg:h-[14px]" />
           <span>
             {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
           </span>

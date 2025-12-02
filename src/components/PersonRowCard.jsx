@@ -4,6 +4,7 @@ import { getInitials } from '../utils/helpers';
 /**
  * PersonRowCard - Compact person card for display inside department nodes
  * Shown when a department is expanded
+ * Mobile: Larger touch targets and visual feedback
  */
 export default function PersonRowCard({ person, onSelect, isLast }) {
   const initials = getInitials(person.name);
@@ -18,7 +19,8 @@ export default function PersonRowCard({ person, onSelect, isLast }) {
   return (
     <div
       className={`
-        px-3 py-2 cursor-pointer hover:bg-slate-50 transition-colors
+        px-3 py-3 lg:py-2 cursor-pointer hover:bg-slate-50 active:bg-slate-100
+        transition-colors touch-manipulation
         flex items-center gap-2.5
         ${!isLast ? 'border-b border-slate-100' : ''}
       `}
@@ -26,7 +28,7 @@ export default function PersonRowCard({ person, onSelect, isLast }) {
     >
       {/* Initials Avatar */}
       <div className="flex-shrink-0">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
+        <div className="w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
           flex items-center justify-center text-white font-semibold text-xs shadow-sm">
           {initials}
         </div>
@@ -46,7 +48,7 @@ export default function PersonRowCard({ person, onSelect, isLast }) {
 
       {/* Chevron */}
       <div className="flex-shrink-0">
-        <ChevronRight size={16} className="text-slate-400" />
+        <ChevronRight size={18} className="lg:w-4 lg:h-4 text-slate-400" />
       </div>
     </div>
   );
