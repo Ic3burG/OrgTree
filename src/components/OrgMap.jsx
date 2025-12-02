@@ -437,6 +437,13 @@ export default function OrgMap() {
             minZoom={0.1}
             maxZoom={2}
             defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+            // Touch-friendly settings for mobile
+            panOnDrag={true}
+            panOnScroll={false}
+            zoomOnScroll={false}
+            zoomOnPinch={true}
+            zoomOnDoubleClick={true}
+            preventScrolling={false}
           >
             <Background color="#cbd5e1" gap={20} size={1} />
             <MiniMap
