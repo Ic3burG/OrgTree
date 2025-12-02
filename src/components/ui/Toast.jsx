@@ -52,7 +52,7 @@ function ToastItem({ toast, onClose }) {
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg ${backgrounds[toast.type]} animate-slide-in min-w-[300px]`}
+      className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg ${backgrounds[toast.type]} animate-slide-in-right min-w-[300px]`}
     >
       {icons[toast.type]}
       <span className="text-slate-700 flex-1">{toast.message}</span>

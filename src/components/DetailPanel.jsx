@@ -27,7 +27,7 @@ export default function DetailPanel({ person, onClose }) {
       {/* Panel */}
       <div
         className="fixed right-0 top-0 bottom-0 w-full lg:max-w-md bg-white shadow-2xl z-50
-          overflow-y-auto animate-slide-in"
+          overflow-y-auto animate-slide-in-right"
         role="dialog"
         aria-modal="true"
         aria-labelledby="detail-panel-title"
