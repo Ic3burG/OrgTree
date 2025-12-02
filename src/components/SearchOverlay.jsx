@@ -3,7 +3,8 @@ import { Search, X, Users, User } from 'lucide-react';
 
 /**
  * SearchOverlay - Floating search bar with dropdown results
- * Positioned at top-center of canvas
+ * Mobile: Positioned below top nav with larger touch targets
+ * Desktop: Positioned at top-center of canvas
  */
 export default function SearchOverlay({ nodes, onSelectResult }) {
   const [query, setQuery] = useState('');
@@ -54,11 +55,11 @@ export default function SearchOverlay({ nodes, onSelectResult }) {
   };
 
   return (
-    <div ref={searchRef} className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md px-4">
+    <div ref={searchRef} className="absolute top-16 lg:top-4 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md px-4">
       {/* Search Input */}
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search size={20} className="text-slate-400" />
+        <div className="absolute inset-y-0 left-0 pl-3 lg:pl-3 flex items-center pointer-events-none">
+          <Search size={22} className="lg:w-5 lg:h-5 text-slate-400" />
         </div>
 
         <input
@@ -66,9 +67,10 @@ export default function SearchOverlay({ nodes, onSelectResult }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search departments and people..."
-          className="w-full pl-10 pr-10 py-2.5 bg-white/95 backdrop-blur-sm border border-slate-300
+          className="w-full pl-11 lg:pl-10 pr-11 lg:pr-10 py-3 lg:py-2.5 bg-white/95 backdrop-blur-sm border border-slate-300
             rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500
-            focus:border-transparent text-slate-900 placeholder-slate-400"
+            focus:border-transparent text-slate-900 placeholder-slate-400 text-base lg:text-sm
+            touch-manipulation"
           aria-label="Search organization"
         />
 
@@ -76,32 +78,33 @@ export default function SearchOverlay({ nodes, onSelectResult }) {
           <button
             onClick={handleClear}
             className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400
-              hover:text-slate-600 transition-colors"
+              hover:text-slate-600 transition-colors touch-manipulation"
             aria-label="Clear search"
           >
-            <X size={20} />
+            <X size={22} className="lg:w-5 lg:h-5" />
           </button>
         )}
       </div>
 
       {/* Results Dropdown */}
       {isOpen && results.length > 0 && (
-        <div className="mt-2 bg-white rounded-lg shadow-xl border border-slate-200 max-h-96 overflow-y-auto">
+        <div className="mt-2 bg-white rounded-lg shadow-xl border border-slate-200 max-h-[60vh] lg:max-h-96 overflow-y-auto">
           {results.map((result, index) => (
             <button
               key={`${result.type}-${result.id}-${index}`}
               onClick={() => handleSelectResult(result)}
-              className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50
-                transition-colors text-left border-b border-slate-100 last:border-b-0"
+              className="w-full px-4 py-4 lg:py-3 flex items-center gap-3 hover:bg-slate-50
+                active:bg-slate-100 transition-colors text-left border-b border-slate-100 last:border-b-0
+                touch-manipulation"
             >
               {/* Icon */}
               <div className="flex-shrink-0">
                 {result.type === 'department' ? (
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                    <Users size={20} className="text-slate-600" />
+                  <div className="w-11 h-11 lg:w-10 lg:h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                    <Users size={22} className="lg:w-5 lg:h-5 text-slate-600" />
                   </div>
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
+                  <div className="w-11 h-11 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
                     flex items-center justify-center text-white font-semibold text-sm">
                     {getInitials(result.name)}
                   </div>
@@ -110,10 +113,10 @@ export default function SearchOverlay({ nodes, onSelectResult }) {
 
               {/* Info */}
               <div className="flex-grow min-w-0">
-                <div className="font-medium text-slate-900 truncate">
+                <div className="font-medium text-base lg:text-sm text-slate-900 truncate">
                   {result.name}
                 </div>
-                <div className="text-sm text-slate-600 truncate">
+                <div className="text-sm lg:text-sm text-slate-600 truncate">
                   {result.subtitle}
                   {result.type === 'person' && result.departmentName && (
                     <span className="text-slate-400"> · {result.departmentName}</span>

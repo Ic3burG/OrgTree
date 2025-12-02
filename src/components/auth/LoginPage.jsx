@@ -33,10 +33,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-slate-800">Welcome Back</h1>
-            <p className="text-slate-600 mt-2">Sign in to your OrgTree account</p>
+        <div className="bg-white rounded-lg shadow-lg p-6 lg:p-8">
+          <div className="text-center mb-6 lg:mb-8">
+            <h1 className="text-xl lg:text-2xl font-bold text-slate-800">Welcome Back</h1>
+            <p className="text-sm lg:text-base text-slate-600 mt-2">Sign in to your OrgTree account</p>
           </div>
 
           {error && (
@@ -58,7 +58,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
                   placeholder="you@example.com"
                   required
                 />
@@ -76,7 +76,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
                   placeholder="••••••••"
                   required
                 />
@@ -86,7 +86,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-700 text-white py-2 px-4 rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-slate-700 text-white py-3 lg:py-2 px-4 rounded-lg hover:bg-slate-800 active:bg-slate-900 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation text-base lg:text-sm"
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -99,9 +99,9 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-slate-600">
+          <p className="mt-6 text-center text-sm lg:text-base text-slate-600">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-slate-800 font-medium hover:underline">
+            <Link to="/signup" className="text-slate-800 font-medium hover:underline touch-manipulation">
               Sign up
             </Link>
           </p>

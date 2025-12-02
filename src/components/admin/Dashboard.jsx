@@ -79,36 +79,36 @@ export default function Dashboard() {
   ).length || 0;
 
   return (
-    <div className="p-8">
+    <div className="p-4 lg:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="mb-6 lg:mb-8 flex flex-col lg:flex-row items-start gap-4 lg:justify-between">
+          <div className="w-full lg:w-auto">
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
               {organization.name}
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 text-sm lg:text-base">
               Organization overview and statistics
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 w-full lg:w-auto">
             <button
               onClick={() => setShowShare(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 lg:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors touch-manipulation text-sm lg:text-base"
             >
               <Share2 size={20} />
               Share
             </button>
             <button
               onClick={() => setShowImport(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 lg:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 active:bg-gray-300 transition-colors touch-manipulation text-sm lg:text-base"
             >
               <Upload size={20} />
               Import CSV
             </button>
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 lg:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation text-sm lg:text-base"
             >
               <Download size={20} />
               Export CSV
@@ -117,14 +117,14 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
+          <div className="bg-white rounded-lg shadow p-5 lg:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">
+                <p className="text-xs lg:text-sm font-medium text-gray-500 mb-1">
                   Total Departments
                 </p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-2xl lg:text-3xl font-bold text-gray-900">
                   {departmentCount}
                 </p>
               </div>
@@ -140,13 +140,13 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-5 lg:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">
+                <p className="text-xs lg:text-sm font-medium text-gray-500 mb-1">
                   Total People
                 </p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-2xl lg:text-3xl font-bold text-gray-900">
                   {peopleCount}
                 </p>
               </div>
