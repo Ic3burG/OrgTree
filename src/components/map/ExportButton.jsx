@@ -35,7 +35,7 @@ export default function ExportButton({ onExportPng, onExportPdf, loading }) {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-1 bg-white rounded-lg shadow-lg border border-slate-200 py-1 min-w-[160px] z-50">
+        <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-slate-200 py-1 min-w-[160px] z-50">
           <button
             onClick={() => {
               onExportPng();
