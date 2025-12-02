@@ -50,7 +50,7 @@ export default function Toolbar({
   );
 
   return (
-    <div className="absolute bottom-20 right-4 lg:bottom-auto lg:top-4 lg:right-4 z-10 flex flex-col gap-1.5 lg:gap-2">
+    <div className="absolute bottom-20 right-4 lg:bottom-auto lg:top-4 lg:right-4 z-10 flex flex-col items-end gap-1.5 lg:gap-2">
       {/* Zoom In */}
       <button
         onClick={onZoomIn}
