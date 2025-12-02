@@ -47,8 +47,8 @@ function transformToFlowData(departments) {
 
   // Helper to calculate depth
   const getDepth = (dept, deptMap, depth = 0) => {
-    if (!dept.parent_id) return depth;
-    const parent = deptMap.get(dept.parent_id);
+    if (!dept.parentId) return depth;
+    const parent = deptMap.get(dept.parentId);
     return parent ? getDepth(parent, deptMap, depth + 1) : depth;
   };
 
@@ -73,10 +73,10 @@ function transformToFlowData(departments) {
     });
 
     // Create edge to parent
-    if (dept.parent_id) {
+    if (dept.parentId) {
       edges.push({
-        id: `e-${dept.parent_id}-${dept.id}`,
-        source: dept.parent_id,
+        id: `e-${dept.parentId}-${dept.id}`,
+        source: dept.parentId,
         target: dept.id,
         type: 'smoothstep',
       });
