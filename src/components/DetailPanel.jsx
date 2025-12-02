@@ -10,9 +10,9 @@ export default function DetailPanel({ person, onClose }) {
 
   const initials = getInitials(person.name);
 
-  // Get department path for display
-  const pathSegments = person.path.split('/').filter(Boolean);
-  const departmentPath = pathSegments.slice(0, -1).join(' / ');
+  // Get department path for display (if available)
+  const pathSegments = person.path ? person.path.split('/').filter(Boolean) : [];
+  const departmentPath = pathSegments.length > 1 ? pathSegments.slice(0, -1).join(' / ') : null;
 
   return (
     <>
