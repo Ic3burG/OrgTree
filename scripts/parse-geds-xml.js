@@ -15,183 +15,47 @@ const INPUT_DIR = path.join(__dirname, 'xml-files');
 const OUTPUT_FILE = path.join(__dirname, 'output', 'geds-import.csv');
 
 /**
- * Main function to orchestrate the parsing
+ * Slugify function for creating URL-safe paths
  */
-async function main() {
-  try {
-    console.log('Starting GEDS XML parsing...');
-
-    // Read all XML files
-    const files = fs.readdirSync(INPUT_DIR).filter(f => f.endsWith('.xml'));
-    console.log(`Found ${files.length} XML files`);
-
-    if (files.length === 0) {
-      console.error('No XML files found in', INPUT_DIR);
-      process.exit(1);
-    }
-
-    // Parse all files
-    const allPeople = [];
-    const departmentMap = new Map(); // key: path, value: department info
-
-    for (const file of files) {
-      const filePath = path.join(INPUT_DIR, file);
-      console.log(`Processing ${file}...`);
-
-      try {
-        const result = await parseXMLFile(filePath);
-
-        // Add person to list
-        allPeople.push(result.person);
-
-        // Add all departments in hierarchy to map
-        result.hierarchy.forEach(dept => {
-          if (!departmentMap.has(dept.path)) {
-            departmentMap.set(dept.path, dept);
-          }
-        });
-      } catch (err) {
-        console.error(`Error processing ${file}:`, err.message);
-      }
-    }
-
-    console.log(`\nParsed ${allPeople.length} people`);
-    console.log(`Found ${departmentMap.size} unique departments`);
-
-    // Generate CSV
-    const csv = generateCSV(departmentMap, allPeople);
-
-    // Write output
-    fs.writeFileSync(OUTPUT_FILE, csv);
-    console.log(`\nCSV written to ${OUTPUT_FILE}`);
-
-    // Validation
-    console.log('\n--- Validation ---');
-    console.log(`Total entries: ${departmentMap.size + allPeople.length}`);
-    console.log(`Departments: ${departmentMap.size}`);
-    console.log(`People: ${allPeople.length}`);
-
-  } catch (err) {
-    console.error('Fatal error:', err);
-    process.exit(1);
-  }
+function slugify(text) {
+  if (!text) return '';
+  return text
+    .toString()
+    .normalize('NFD')                   // Normalize accented characters
+    .replace(/[\u0300-\u036f]/g, '')    // Remove diacritics
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')       // Remove special chars
+    .replace(/\s+/g, '-')               // Spaces to hyphens
+    .replace(/-+/g, '-')                // Remove multiple hyphens
+    .replace(/^-|-$/g, '');             // Trim hyphens
 }
 
 /**
- * Parse a single XML file and extract person + hierarchy
- */
-async function parseXMLFile(filePath) {
-  const xml = fs.readFileSync(filePath, 'utf8');
-  const result = await parseXML(xml);
-
-  const gedsPerson = result.gedsPerson;
-
-  // Extract person info
-  const firstName = getString(gedsPerson.firstName);
-  const lastName = getString(gedsPerson.lastName);
-  const fullName = cleanName(`${firstName} ${lastName}`.trim());
-  const title = getString(gedsPerson.title);
-  const email = getString(gedsPerson.email);
-  const phone = getString(gedsPerson.workPhone);
-
-  // Build hierarchy from orgStructure
-  const orgStructure = gedsPerson.orgStructure?.[0]?.org || [];
-  const hierarchy = buildHierarchy(orgStructure);
-
-  // Create person path
-  const personSlug = slugify(fullName);
-  const basePath = hierarchy.length > 0 ? hierarchy[hierarchy.length - 1].path : '';
-  const personPath = `${basePath}/${personSlug}`;
-
-  const person = {
-    path: personPath,
-    type: 'person',
-    name: fullName,
-    title: title || '',
-    email: email || '',
-    phone: phone || '',
-    description: ''
-  };
-
-  return { person, hierarchy };
-}
-
-/**
- * Build department hierarchy from orgStructure, skipping "Canada"
- */
-function buildHierarchy(orgStructure) {
-  const hierarchy = [];
-  let currentPath = '';
-
-  for (let i = 0; i < orgStructure.length; i++) {
-    const org = orgStructure[i];
-    const name = getString(org.n);
-
-    // Skip "Canada" (first org in hierarchy)
-    if (i === 0 && name.toLowerCase().includes('canada')) {
-      continue;
-    }
-
-    // Try to find acronym from the name or DN
-    // The DN is base64 encoded, but we don't need to decode it for acronyms
-    // We'll look for patterns like "IRCC-IRCC" in the name or use the name itself
-    let pathSegment = '';
-
-    // Check if the name has format "Full Name (ACRONYM)" or contains recognizable acronym
-    const acronymMatch = name.match(/\(([A-Z]{2,})\)/);
-    if (acronymMatch) {
-      pathSegment = acronymMatch[1];
-    } else {
-      // Create a simple acronym from uppercase letters or use slug
-      const upperLetters = name.match(/[A-Z]/g);
-      if (upperLetters && upperLetters.length >= 2 && upperLetters.length <= 5) {
-        pathSegment = upperLetters.join('');
-      } else {
-        pathSegment = slugify(name);
-      }
-    }
-
-    currentPath += `/${pathSegment}`;
-
-    hierarchy.push({
-      path: currentPath,
-      type: 'department',
-      name: name,
-      title: '',
-      email: '',
-      phone: '',
-      description: ''
-    });
-  }
-
-  return hierarchy;
-}
-
-/**
- * Extract acronym from "ENG-FRA" format
+ * Extract English acronym from "ENG-FRA" format
  */
 function extractAcronym(acronymField) {
-  if (!acronymField) return null;
-  const parts = acronymField.split('-');
-  return parts[0]?.trim() || null;
+  if (!acronymField || !acronymField[0]) return null;
+  const value = acronymField[0].trim();
+  if (!value) return null;
+  // "IRCC-IRCC" → "IRCC"
+  const parts = value.split('-');
+  return parts[0] || null;
 }
 
 /**
- * Create slug from name
+ * Get text value from xml2js array wrapper
  */
-function slugify(name) {
-  return name
-    .toLowerCase()
-    .normalize('NFD') // Decompose accented characters
-    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-    .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
-    .replace(/\s+/g, '-') // Spaces to hyphens
-    .replace(/-+/g, '-') // Collapse multiple hyphens
-    .replace(/^-|-$/g, ''); // Trim hyphens
+function getText(field) {
+  if (!field || !field[0]) return '';
+  const value = field[0];
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'object' && value._) return value._.trim();
+  return '';
 }
 
 /**
- * Clean name from XML (handle backslash escapes)
+ * Clean name (remove backslash escapes)
  */
 function cleanName(name) {
   if (!name) return '';
@@ -200,96 +64,234 @@ function cleanName(name) {
 }
 
 /**
- * Safely get string value from XML parsed array
+ * Parse a single XML file
  */
-function getString(field) {
-  if (!field) return '';
-  if (Array.isArray(field)) {
-    return field[0] || '';
+async function parseXMLFile(filePath) {
+  // Read with UTF-8 encoding
+  const xmlContent = fs.readFileSync(filePath, 'utf-8');
+  const result = await parseXML(xmlContent);
+  const person = result.gedsPerson;
+
+  // Extract person details
+  const firstName = getText(person.firstName);
+  const lastName = getText(person.lastName);
+  const fullName = cleanName(`${firstName} ${lastName}`.trim());
+  const title = getText(person.title);
+  const email = getText(person.email);
+  const phone = getText(person.workPhone);
+
+  // Debug logging
+  console.log(`  Person: ${fullName}`);
+
+  // Extract hierarchy from orgStructure
+  // xml2js structure: orgStructure[0].org is array of org objects
+  const orgStructure = person.orgStructure?.[0]?.org || [];
+
+  // Debug: log raw structure
+  if (orgStructure.length === 0) {
+    console.warn(`  WARNING: No orgStructure found for ${fullName}`);
   }
-  return String(field);
-}
 
-/**
- * Generate CSV content
- */
-function generateCSV(departmentMap, people) {
-  const rows = [];
+  // Skip "Canada" (first element) and build hierarchy
+  const departments = [];
+  for (let i = 0; i < orgStructure.length; i++) {
+    const org = orgStructure[i];
+    const deptName = getText(org.n);
 
-  // CSV Header
-  rows.push('Path,Type,Name,Title,Email,Phone,Description');
-
-  // Sort departments by path depth (shallower first)
-  const departments = Array.from(departmentMap.values())
-    .sort((a, b) => {
-      const depthA = a.path.split('/').length;
-      const depthB = b.path.split('/').length;
-      if (depthA !== depthB) return depthA - depthB;
-      return a.path.localeCompare(b.path);
-    });
-
-  // Add departments
-  departments.forEach(dept => {
-    rows.push(formatCSVRow(dept));
-  });
-
-  // Sort people by path
-  const sortedPeople = people.sort((a, b) => a.path.localeCompare(b.path));
-
-  // Handle duplicate person names
-  const personPaths = new Set();
-  sortedPeople.forEach(person => {
-    let finalPath = person.path;
-    let counter = 2;
-
-    // If path already exists, append number
-    while (personPaths.has(finalPath)) {
-      const basePath = person.path.replace(/-\d+$/, ''); // Remove any existing number
-      finalPath = `${basePath}-${counter}`;
-      counter++;
+    // Skip "Canada" (first org in hierarchy)
+    if (i === 0 && deptName.toLowerCase().includes('canada')) {
+      continue;
     }
 
-    personPaths.add(finalPath);
-    person.path = finalPath;
-
-    rows.push(formatCSVRow(person));
-  });
-
-  return rows.join('\n');
-}
-
-/**
- * Format a single CSV row, escaping fields as needed
- */
-function formatCSVRow(item) {
-  const fields = [
-    item.path,
-    item.type,
-    escapeCSV(item.name),
-    escapeCSV(item.title),
-    escapeCSV(item.email),
-    escapeCSV(item.phone),
-    escapeCSV(item.description)
-  ];
-
-  return fields.join(',');
-}
-
-/**
- * Escape CSV field if it contains comma, quote, or newline
- */
-function escapeCSV(field) {
-  if (!field) return '';
-
-  const stringField = String(field);
-
-  // If field contains comma, quote, or newline, wrap in quotes and escape quotes
-  if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
-    return `"${stringField.replace(/"/g, '""')}"`;
+    if (deptName) {
+      departments.push(deptName);
+    }
   }
 
-  return stringField;
+  // Get acronyms for path segments
+  const deptAcronym = extractAcronym(person.departmentAcronym);
+  const orgAcronym = extractAcronym(person.organizationAcronym);
+
+  // Debug
+  if (departments.length > 0) {
+    console.log(`  Departments: ${departments.join(' > ')}`);
+    if (deptAcronym) console.log(`  Dept Acronym: ${deptAcronym}`);
+    if (orgAcronym) console.log(`  Org Acronym: ${orgAcronym}`);
+  }
+
+  return {
+    person: {
+      name: fullName,
+      slug: slugify(fullName),
+      title,
+      email,
+      phone
+    },
+    departments,
+    deptAcronym,
+    orgAcronym
+  };
 }
 
-// Run main function
-main();
+/**
+ * Build department path with acronyms where possible
+ */
+function buildDepartmentPath(departments, deptAcronym, orgAcronym) {
+  const pathParts = [];
+
+  for (let i = 0; i < departments.length; i++) {
+    const deptName = departments[i];
+    let slug;
+
+    // Use acronym for first level (main department) if available
+    if (i === 0 && deptAcronym) {
+      slug = deptAcronym;
+    }
+    // Use acronym for last level (immediate org) if available
+    else if (i === departments.length - 1 && orgAcronym) {
+      slug = orgAcronym;
+    }
+    else {
+      slug = slugify(deptName);
+    }
+
+    pathParts.push(slug);
+  }
+
+  return pathParts;
+}
+
+/**
+ * Main function
+ */
+async function main() {
+  try {
+    console.log('Starting GEDS XML parsing...\n');
+
+    // Read all XML files
+    const files = fs.readdirSync(INPUT_DIR).filter(f => f.endsWith('.xml'));
+    console.log(`Found ${files.length} XML files\n`);
+
+    if (files.length === 0) {
+      console.error('No XML files found in', INPUT_DIR);
+      process.exit(1);
+    }
+
+    const allDepartments = new Map(); // path -> name
+    const allPeople = [];
+
+    for (const file of files) {
+      const filePath = path.join(INPUT_DIR, file);
+      console.log(`Processing: ${file}`);
+
+      try {
+        const data = await parseXMLFile(filePath);
+
+        if (data.departments.length === 0) {
+          console.warn(`  WARNING: No departments found, skipping person`);
+          continue;
+        }
+
+        // Build path parts using acronyms where available
+        const pathParts = buildDepartmentPath(
+          data.departments,
+          data.deptAcronym,
+          data.orgAcronym
+        );
+
+        // Add each department level to the map
+        let currentPath = '';
+        for (let i = 0; i < pathParts.length; i++) {
+          currentPath += '/' + pathParts[i];
+          if (!allDepartments.has(currentPath)) {
+            allDepartments.set(currentPath, data.departments[i]);
+            console.log(`  Added dept: ${currentPath} -> "${data.departments[i]}"`);
+          }
+        }
+
+        // Add person with full path
+        const personPath = currentPath + '/' + data.person.slug;
+        allPeople.push({
+          path: personPath,
+          ...data.person
+        });
+
+        console.log(`  Person path: ${personPath}\n`);
+
+      } catch (err) {
+        console.error(`  ERROR: ${err.message}\n`);
+      }
+    }
+
+    console.log('='.repeat(60));
+    console.log('Summary:');
+    console.log(`  Departments: ${allDepartments.size}`);
+    console.log(`  People: ${allPeople.length}`);
+    console.log('='.repeat(60) + '\n');
+
+    if (allDepartments.size === 0) {
+      console.error('ERROR: No departments were extracted! Check XML structure.');
+      process.exit(1);
+    }
+
+    // Sort departments by path depth and alphabetically
+    const sortedDepts = Array.from(allDepartments.entries())
+      .sort((a, b) => {
+        const depthA = a[0].split('/').length;
+        const depthB = b[0].split('/').length;
+        if (depthA !== depthB) return depthA - depthB;
+        return a[0].localeCompare(b[0]);
+      });
+
+    // Sort people by path
+    allPeople.sort((a, b) => a.path.localeCompare(b.path));
+
+    // Handle duplicate person paths
+    const usedPaths = new Set();
+    for (const person of allPeople) {
+      let finalPath = person.path;
+      let counter = 2;
+
+      while (usedPaths.has(finalPath)) {
+        const basePath = person.path.replace(/-\d+$/, '');
+        finalPath = `${basePath}-${counter}`;
+        counter++;
+      }
+
+      usedPaths.add(finalPath);
+      person.path = finalPath;
+    }
+
+    // Generate CSV with UTF-8 BOM for Excel compatibility
+    const lines = ['Path,Type,Name,Title,Email,Phone,Description'];
+
+    // Add departments
+    for (const [deptPath, deptName] of sortedDepts) {
+      const escapedName = deptName.replace(/"/g, '""');
+      lines.push(`${deptPath},department,"${escapedName}",,,,`);
+    }
+
+    // Add people
+    for (const person of allPeople) {
+      const name = person.name.replace(/"/g, '""');
+      const title = (person.title || '').replace(/"/g, '""');
+      const email = person.email || '';
+      const phone = person.phone || '';
+      lines.push(`${person.path},person,"${name}","${title}",${email},${phone},`);
+    }
+
+    // Write CSV with UTF-8 BOM for Excel compatibility
+    const BOM = '\ufeff';
+    const csvContent = BOM + lines.join('\n');
+    fs.writeFileSync(OUTPUT_FILE, csvContent, 'utf-8');
+
+    console.log(`✓ CSV written to ${OUTPUT_FILE}`);
+    console.log(`✓ Total entries: ${sortedDepts.length + allPeople.length}`);
+
+  } catch (err) {
+    console.error('Fatal error:', err);
+    process.exit(1);
+  }
+}
+
+main().catch(console.error);
