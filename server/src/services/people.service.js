@@ -24,7 +24,7 @@ export async function getPeopleByDepartment(deptId, userId) {
 
   return db.prepare(`
     SELECT
-      id, department_id as departmentId, name, title, email, phone, office,
+      id, department_id as departmentId, name, title, email, phone,
       sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
     FROM people
     WHERE department_id = ?
@@ -35,7 +35,7 @@ export async function getPeopleByDepartment(deptId, userId) {
 export async function getPersonById(personId, userId) {
   const person = db.prepare(`
     SELECT
-      p.id, p.department_id as departmentId, p.name, p.title, p.email, p.phone, p.office,
+      p.id, p.department_id as departmentId, p.name, p.title, p.email, p.phone,
       p.sort_order as sortOrder, p.created_at as createdAt, p.updated_at as updatedAt,
       d.name as departmentName, d.organization_id as organizationId,
       o.name as organizationName, o.created_by_id as orgCreatedBy
@@ -70,7 +70,7 @@ export async function getPersonById(personId, userId) {
 export async function createPerson(deptId, data, userId) {
   await verifyDeptAccess(deptId, userId);
 
-  const { name, title, email, phone, office } = data;
+  const { name, title, email, phone } = data;
 
   // Get max sortOrder
   const maxSortResult = db.prepare(`
@@ -84,13 +84,13 @@ export async function createPerson(deptId, data, userId) {
   const now = new Date().toISOString();
 
   db.prepare(`
-    INSERT INTO people (id, department_id, name, title, email, phone, office, sort_order, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(personId, deptId, name, title || null, email || null, phone || null, office || null, sortOrder, now, now);
+    INSERT INTO people (id, department_id, name, title, email, phone, sort_order, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(personId, deptId, name, title || null, email || null, phone || null, sortOrder, now, now);
 
   return db.prepare(`
     SELECT
-      id, department_id as departmentId, name, title, email, phone, office,
+      id, department_id as departmentId, name, title, email, phone,
       sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
     FROM people
     WHERE id = ?
@@ -100,7 +100,7 @@ export async function createPerson(deptId, data, userId) {
 export async function updatePerson(personId, data, userId) {
   const person = await getPersonById(personId, userId);
 
-  const { name, title, email, phone, office, departmentId } = data;
+  const { name, title, email, phone, departmentId } = data;
 
   // If moving to new department, verify access to that department
   if (departmentId && departmentId !== person.departmentId) {
@@ -119,7 +119,6 @@ export async function updatePerson(personId, data, userId) {
       title = ?,
       email = ?,
       phone = ?,
-      office = ?,
       department_id = ?,
       updated_at = ?
     WHERE id = ?
@@ -128,7 +127,6 @@ export async function updatePerson(personId, data, userId) {
     title !== undefined ? title : currentPerson.title,
     email !== undefined ? email : currentPerson.email,
     phone !== undefined ? phone : currentPerson.phone,
-    office !== undefined ? office : currentPerson.office,
     departmentId !== undefined ? departmentId : currentPerson.department_id,
     now,
     personId
@@ -136,7 +134,7 @@ export async function updatePerson(personId, data, userId) {
 
   return db.prepare(`
     SELECT
-      id, department_id as departmentId, name, title, email, phone, office,
+      id, department_id as departmentId, name, title, email, phone,
       sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
     FROM people
     WHERE id = ?

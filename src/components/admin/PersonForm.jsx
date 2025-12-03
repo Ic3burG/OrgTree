@@ -14,7 +14,6 @@ export default function PersonForm({
     title: '',
     email: '',
     phone: '',
-    office: '',
     departmentId: '',
   });
   const [errors, setErrors] = useState({});
@@ -26,7 +25,6 @@ export default function PersonForm({
         title: person.title || '',
         email: person.email || '',
         phone: person.phone || '',
-        office: person.office || '',
         departmentId: person.department_id || '',
       });
     } else {
@@ -35,7 +33,6 @@ export default function PersonForm({
         title: '',
         email: '',
         phone: '',
-        office: '',
         departmentId: departments[0]?.id || '',
       });
     }
@@ -114,9 +111,8 @@ export default function PersonForm({
                 value={formData.name}
                 onChange={handleChange}
                 disabled={isSubmitting}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="e.g., John Doe"
               />
               {errors.name && (
@@ -158,9 +154,8 @@ export default function PersonForm({
                 value={formData.departmentId}
                 onChange={handleChange}
                 disabled={isSubmitting}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
-                  errors.departmentId ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${errors.departmentId ? 'border-red-500' : 'border-gray-300'
+                  }`}
               >
                 <option value="">Select a department</option>
                 {departments.map((dept) => (
@@ -191,9 +186,8 @@ export default function PersonForm({
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isSubmitting}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="john.doe@example.com"
               />
               {errors.email && (
@@ -221,51 +215,31 @@ export default function PersonForm({
               />
             </div>
 
-            {/* Office */}
-            <div>
-              <label
-                htmlFor="office"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Office Location
-              </label>
-              <input
-                type="text"
-                id="office"
-                name="office"
-                value={formData.office}
-                onChange={handleChange}
-                disabled={isSubmitting}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                placeholder="e.g., Building A, Room 301"
-              />
-            </div>
           </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-lg disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
-            >
-              {isSubmitting
-                ? 'Saving...'
-                : person
-                ? 'Update Person'
-                : 'Add Person'}
-            </button>
-          </div>
-        </form>
+      {/* Footer */}
+      <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={isSubmitting}
+          className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-lg disabled:opacity-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
+        >
+          {isSubmitting
+            ? 'Saving...'
+            : person
+              ? 'Update Person'
+              : 'Add Person'}
+        </button>
       </div>
-    </div>
+    </form>
+      </div >
+    </div >
   );
 }

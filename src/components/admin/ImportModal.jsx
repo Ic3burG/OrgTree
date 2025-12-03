@@ -123,7 +123,7 @@ export default function ImportModal({ isOpen, onClose, orgId, onSuccess }) {
                   {file ? file.name : 'Click to select a CSV file'}
                 </p>
                 <p className="text-sm text-slate-500 mt-1">
-                  Format: Path, Type, Name, Title, Email, Phone, Office, Description
+                  Format: Path, Type, Name, Title, Email, Phone, Description
                 </p>
               </div>
 

@@ -55,7 +55,6 @@ db.exec(`
     title TEXT,
     email TEXT,
     phone TEXT,
-    office TEXT,
     sort_order INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -82,6 +81,49 @@ try {
   }
 } catch (err) {
   console.error('Migration error:', err);
+}
+
+// Migration: Remove office column from people table if it exists
+try {
+  const peopleTableInfo = db.prepare("PRAGMA table_info(people)").all();
+  const peopleColumnNames = peopleTableInfo.map(col => col.name);
+
+  if (peopleColumnNames.includes('office')) {
+    // SQLite doesn't support DROP COLUMN directly, so we need to recreate the table
+    db.exec(`
+      BEGIN TRANSACTION;
+      
+      -- Create new table without office column
+      CREATE TABLE people_new (
+        id TEXT PRIMARY KEY,
+        department_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        title TEXT,
+        email TEXT,
+        phone TEXT,
+        sort_order INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
+      );
+      
+      -- Copy data from old table to new table
+      INSERT INTO people_new (id, department_id, name, title, email, phone, sort_order, created_at, updated_at)
+      SELECT id, department_id, name, title, email, phone, sort_order, created_at, updated_at
+      FROM people;
+      
+      -- Drop old table
+      DROP TABLE people;
+      
+      -- Rename new table to original name
+      ALTER TABLE people_new RENAME TO people;
+      
+      COMMIT;
+    `);
+    console.log('Migration: Removed office column from people table');
+  }
+} catch (err) {
+  console.error('Migration error (office column removal):', err);
 }
 
 console.log('Database initialized at:', dbPath);

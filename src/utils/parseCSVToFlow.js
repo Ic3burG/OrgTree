@@ -63,7 +63,6 @@ function buildFlowStructure(rows) {
           title: row.Title ? row.Title.trim() : '',
           email: row.Email ? row.Email.trim() : '',
           phone: row.Phone ? row.Phone.trim() : '',
-          office: row.Office ? row.Office.trim() : '',
           path: path
         });
       } else {

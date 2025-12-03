@@ -29,7 +29,7 @@ export async function getDepartments(orgId, userId) {
   const result = departments.map(dept => {
     const people = db.prepare(`
       SELECT
-        id, department_id as departmentId, name, title, email, phone, office,
+        id, department_id as departmentId, name, title, email, phone,
         sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
       FROM people
       WHERE department_id = ?
@@ -63,7 +63,7 @@ export async function getDepartmentById(orgId, deptId, userId) {
   // Get people
   const people = db.prepare(`
     SELECT
-      id, department_id as departmentId, name, title, email, phone, office,
+      id, department_id as departmentId, name, title, email, phone,
       sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
     FROM people
     WHERE department_id = ?

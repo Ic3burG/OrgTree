@@ -3,7 +3,7 @@
  */
 export function generateCSV(org) {
   const rows = [
-    ['Path', 'Type', 'Name', 'Title', 'Email', 'Phone', 'Office', 'Description'],
+    ['Path', 'Type', 'Name', 'Title', 'Email', 'Phone', 'Description'],
   ];
 
   // Helper to build path and add rows
@@ -21,7 +21,6 @@ export function generateCSV(org) {
       '',
       '',
       '',
-      '',
       dept.description || '',
     ]);
 
@@ -36,7 +35,6 @@ export function generateCSV(org) {
         person.title || '',
         person.email || '',
         person.phone || '',
-        person.office || '',
         '',
       ]);
     });

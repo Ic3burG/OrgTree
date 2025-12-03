@@ -44,14 +44,14 @@ router.post('/organizations/:orgId/import', async (req, res, next) => {
     `);
 
     const insertPerson = db.prepare(`
-      INSERT INTO people (id, department_id, name, title, email, phone, office, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      INSERT INTO people (id, department_id, name, title, email, phone, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `);
 
     // Helper to generate ID
     const generateId = () => {
       return Math.random().toString(36).substring(2, 15) +
-             Math.random().toString(36).substring(2, 15);
+        Math.random().toString(36).substring(2, 15);
     };
 
     try {
@@ -96,8 +96,7 @@ router.post('/organizations/:orgId/import', async (req, res, next) => {
               row.name,
               row.title || null,
               row.email || null,
-              row.phone || null,
-              row.office || null
+              row.phone || null
             );
             peopleCreated++;
           }

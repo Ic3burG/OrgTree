@@ -138,7 +138,6 @@ See [Lucide icons](https://lucide.dev) for available options.
 - **Title**: Job title
 - **Email**: Email address
 - **Phone**: Phone number
-- **Office**: Office location
 
 ### Path Rules
 
@@ -151,7 +150,7 @@ See [Lucide icons](https://lucide.dev) for available options.
 ### Example
 
 ```csv
-Path,Type,Name,Title,Email,Phone,Office
+Path,Type,Name,Title,Email,Phone
 /Engineering,department,Engineering Department,,,,
 /Engineering/Software,department,Software Development,,,,
 /Engineering/Software/jane-doe,person,Jane Doe,Senior Engineer,jane@company.org,555-1234,Room 301

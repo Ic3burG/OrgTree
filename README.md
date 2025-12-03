@@ -49,7 +49,7 @@ npm run build
 The application uses CSV files with the following structure:
 
 ```csv
-Path,Type,Name,Title,Email,Phone,Office
+Path,Type,Name,Title,Email,Phone
 /Executive,department,Executive Office,,,,
 /Executive/john-smith,person,John Smith,CEO,john@company.org,555-1001,Room 100
 /Finance,department,Finance Department,,,,
@@ -66,7 +66,6 @@ Path,Type,Name,Title,Email,Phone,Office
 - **Title**: Job title (for people only)
 - **Email**: Email address (for people only)
 - **Phone**: Phone number (for people only)
-- **Office**: Office location (for people only)
 
 ### Path Rules
 

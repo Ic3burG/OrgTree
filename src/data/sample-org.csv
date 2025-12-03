@@ -1,40 +1,40 @@
-Path,Type,Name,Title,Email,Phone,Office,Description
+Path,Type,Name,Title,Email,Phone,Description
 /Executive,department,Executive Office,,,,,Sets company vision and strategy. Oversees all departments and major business decisions. Represents company to board and stakeholders. Manages executive communications.
-/Executive/john-smith,person,John Smith,Chief Executive Officer,john.smith@company.org,555-1001,Room 100,
-/Executive/mary-jones,person,Mary Jones,Executive Assistant,mary.jones@company.org,555-1002,Room 101,
+/Executive/john-smith,person,John Smith,Chief Executive Officer,john.smith@company.org,555-1001,
+/Executive/mary-jones,person,Mary Jones,Executive Assistant,mary.jones@company.org,555-1002,
 /Executive/Strategy,department,Strategic Planning,,,,,Develops long-term business strategy and growth plans. Conducts market research and competitive analysis. Identifies new business opportunities and partnerships. Advises leadership on strategic initiatives.
-/Executive/Strategy/alice-brown,person,Alice Brown,VP of Strategy,alice.brown@company.org,555-1010,Room 105,
+/Executive/Strategy/alice-brown,person,Alice Brown,VP of Strategy,alice.brown@company.org,555-1010,
 /Finance,department,Finance Department,,,,,Manages company budgets and financial planning. Processes payroll and accounts payable/receivable. Prepares quarterly reports and tax filings. Oversees audits and compliance.
-/Finance/susan-lee,person,Susan Lee,Chief Financial Officer,susan.lee@company.org,555-2001,Room 200,
+/Finance/susan-lee,person,Susan Lee,Chief Financial Officer,susan.lee@company.org,555-2001,
 /Finance/Accounting,department,Accounting,,,,,Handles day-to-day bookkeeping and ledger management. Reconciles accounts monthly. Manages vendor payments and customer invoicing. Maintains financial records and documentation.
-/Finance/Accounting/bob-chen,person,Bob Chen,Senior Accountant,bob.chen@company.org,555-2010,Room 205,
-/Finance/Accounting/lisa-wong,person,Lisa Wong,Junior Accountant,lisa.wong@company.org,555-2011,Room 206,
-/Finance/Accounting/david-kim,person,David Kim,Accounts Payable Specialist,david.kim@company.org,555-2012,Room 207,
+/Finance/Accounting/bob-chen,person,Bob Chen,Senior Accountant,bob.chen@company.org,555-2010,
+/Finance/Accounting/lisa-wong,person,Lisa Wong,Junior Accountant,lisa.wong@company.org,555-2011,
+/Finance/Accounting/david-kim,person,David Kim,Accounts Payable Specialist,david.kim@company.org,555-2012,
 /Finance/Treasury,department,Treasury,,,,,Manages cash flow and liquidity planning. Oversees investment strategies and banking relationships. Handles debt management and credit facilities. Monitors currency and interest rate risks.
-/Finance/Treasury/jennifer-lopez,person,Jennifer Lopez,Treasury Manager,jennifer.lopez@company.org,555-2020,Room 210,
+/Finance/Treasury/jennifer-lopez,person,Jennifer Lopez,Treasury Manager,jennifer.lopez@company.org,555-2020,
 /Operations,department,Operations,,,,,Ensures smooth daily business functions. Manages facilities and office resources. Coordinates cross-department projects and initiatives. Handles vendor relationships and contracts.
-/Operations/robert-miller,person,Robert Miller,Chief Operating Officer,robert.miller@company.org,555-3000,Room 300,
+/Operations/robert-miller,person,Robert Miller,Chief Operating Officer,robert.miller@company.org,555-3000,
 /Operations/IT,department,Information Technology,,,,,Maintains company technology infrastructure. Provides technical support to employees. Manages software licenses and security protocols. Oversees system upgrades and data backups.
-/Operations/IT/mike-davis,person,Mike Davis,IT Director,mike.davis@company.org,555-3001,Room 301,
-/Operations/IT/sarah-wilson,person,Sarah Wilson,Systems Administrator,sarah.wilson@company.org,555-3002,Room 302,
+/Operations/IT/mike-davis,person,Mike Davis,IT Director,mike.davis@company.org,555-3001,
+/Operations/IT/sarah-wilson,person,Sarah Wilson,Systems Administrator,sarah.wilson@company.org,555-3002,
 /Operations/IT/Security,department,Security Team,,,,,Monitors network security and threat detection. Manages access controls and user permissions. Conducts security audits and employee training. Responds to security incidents and breaches.
-/Operations/IT/Security/anna-kim,person,Anna Kim,Security Analyst,anna.kim@company.org,555-3010,Room 310,
-/Operations/IT/Security/carlos-garcia,person,Carlos Garcia,Senior Security Engineer,carlos.garcia@company.org,555-3011,Room 311,
+/Operations/IT/Security/anna-kim,person,Anna Kim,Security Analyst,anna.kim@company.org,555-3010,
+/Operations/IT/Security/carlos-garcia,person,Carlos Garcia,Senior Security Engineer,carlos.garcia@company.org,555-3011,
 /Operations/IT/Development,department,Software Development,,,,,Builds and maintains internal software applications. Develops features for customer-facing products. Conducts code reviews and quality assurance. Manages development workflows and deployment pipelines.
-/Operations/IT/Development/james-taylor,person,James Taylor,Lead Developer,james.taylor@company.org,555-3020,Room 320,
-/Operations/IT/Development/emma-anderson,person,Emma Anderson,Frontend Developer,emma.anderson@company.org,555-3021,Room 321,
+/Operations/IT/Development/james-taylor,person,James Taylor,Lead Developer,james.taylor@company.org,555-3020,
+/Operations/IT/Development/emma-anderson,person,Emma Anderson,Frontend Developer,emma.anderson@company.org,555-3021,
 /Operations/Facilities,department,Facilities,,,,,Manages office space and building maintenance. Coordinates with vendors for repairs and services. Oversees office supplies and equipment inventory. Handles space planning and employee moves.
-/Operations/Facilities/tom-garcia,person,Tom Garcia,Facilities Manager,tom.garcia@company.org,555-4001,Room 400,
-/Operations/Facilities/patricia-martinez,person,Patricia Martinez,Maintenance Coordinator,patricia.martinez@company.org,555-4002,Room 401,
+/Operations/Facilities/tom-garcia,person,Tom Garcia,Facilities Manager,tom.garcia@company.org,555-4001,
+/Operations/Facilities/patricia-martinez,person,Patricia Martinez,Maintenance Coordinator,patricia.martinez@company.org,555-4002,
 /Marketing,department,Marketing & Communications,,,,,Develops brand strategy and messaging. Manages advertising campaigns across channels. Creates marketing materials and content. Analyzes market trends and competitive landscape.
-/Marketing/rachel-green,person,Rachel Green,Chief Marketing Officer,rachel.green@company.org,555-5001,Room 500,
+/Marketing/rachel-green,person,Rachel Green,Chief Marketing Officer,rachel.green@company.org,555-5001,
 /Marketing/Digital,department,Digital Marketing,,,,,Manages social media presence and engagement. Runs digital advertising campaigns and SEO. Optimizes website performance and user experience. Tracks digital analytics and conversion metrics.
-/Marketing/Digital/kevin-white,person,Kevin White,Digital Marketing Manager,kevin.white@company.org,555-5010,Room 505,
-/Marketing/Digital/sophia-harris,person,Sophia Harris,Social Media Specialist,sophia.harris@company.org,555-5011,Room 506,
+/Marketing/Digital/kevin-white,person,Kevin White,Digital Marketing Manager,kevin.white@company.org,555-5010,
+/Marketing/Digital/sophia-harris,person,Sophia Harris,Social Media Specialist,sophia.harris@company.org,555-5011,
 /Marketing/Communications,department,Corporate Communications,,,,,Manages internal and external communications. Writes press releases and company announcements. Coordinates media relations and interviews. Maintains brand voice and messaging consistency.
-/Marketing/Communications/daniel-clark,person,Daniel Clark,Communications Director,daniel.clark@company.org,555-5020,Room 510,
+/Marketing/Communications/daniel-clark,person,Daniel Clark,Communications Director,daniel.clark@company.org,555-5020,
 /HR,department,Human Resources,,,,,Manages recruitment and onboarding processes. Administers employee benefits programs. Handles employee relations and conflict resolution. Ensures compliance with labor laws and regulations.
-/HR/linda-jackson,person,Linda Jackson,Chief Human Resources Officer,linda.jackson@company.org,555-6001,Room 600,
+/HR/linda-jackson,person,Linda Jackson,Chief Human Resources Officer,linda.jackson@company.org,555-6001,
 /HR/Recruiting,department,Talent Acquisition,,,,,Sources and screens job candidates. Coordinates interviews and candidate assessments. Manages job postings and employer branding. Tracks recruiting metrics and pipeline analytics.
-/HR/Recruiting/michael-thomas,person,Michael Thomas,Recruiting Manager,michael.thomas@company.org,555-6010,Room 605,
-/HR/Recruiting/nicole-moore,person,Nicole Moore,Technical Recruiter,nicole.moore@company.org,555-6011,Room 606,
+/HR/Recruiting/michael-thomas,person,Michael Thomas,Recruiting Manager,michael.thomas@company.org,555-6010,
+/HR/Recruiting/nicole-moore,person,Nicole Moore,Technical Recruiter,nicole.moore@company.org,555-6011,

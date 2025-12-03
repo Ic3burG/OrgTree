@@ -92,15 +92,6 @@ export default function DetailPanel({ person, onClose }) {
               </div>
             )}
 
-            {person.office && (
-              <div className="flex items-start gap-3">
-                <MapPin size={20} className="text-slate-500 mt-0.5 flex-shrink-0" />
-                <div className="flex-grow">
-                  <p className="text-xs text-slate-500 uppercase mb-1">Office</p>
-                  <p className="text-slate-900">{person.office}</p>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Department Path */}

@@ -26,7 +26,7 @@ router.get('/departments/:deptId/people', async (req, res, next) => {
 // POST /api/departments/:deptId/people
 router.post('/departments/:deptId/people', async (req, res, next) => {
   try {
-    const { name, title, email, phone, office } = req.body;
+    const { name, title, email, phone } = req.body;
 
     if (!name || !name.trim()) {
       return res.status(400).json({ message: 'Person name is required' });
@@ -34,7 +34,7 @@ router.post('/departments/:deptId/people', async (req, res, next) => {
 
     const person = await createPerson(
       req.params.deptId,
-      { name: name.trim(), title, email, phone, office },
+      { name: name.trim(), title, email, phone },
       req.user.id
     );
     res.status(201).json(person);
@@ -56,7 +56,7 @@ router.get('/people/:personId', async (req, res, next) => {
 // PUT /api/people/:personId
 router.put('/people/:personId', async (req, res, next) => {
   try {
-    const { name, title, email, phone, office, departmentId } = req.body;
+    const { name, title, email, phone, departmentId } = req.body;
 
     if (name !== undefined && !name.trim()) {
       return res.status(400).json({ message: 'Person name cannot be empty' });
@@ -64,7 +64,7 @@ router.put('/people/:personId', async (req, res, next) => {
 
     const person = await updatePerson(
       req.params.personId,
-      { name: name?.trim(), title, email, phone, office, departmentId },
+      { name: name?.trim(), title, email, phone, departmentId },
       req.user.id
     );
     res.json(person);

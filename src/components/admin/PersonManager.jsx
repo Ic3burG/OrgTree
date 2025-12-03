@@ -229,12 +229,6 @@ export default function PersonManager() {
                             <span>{person.phone}</span>
                           </div>
                         )}
-                        {person.office && (
-                          <div className="flex items-center gap-2">
-                            <MapPin size={16} />
-                            <span>{person.office}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
 
