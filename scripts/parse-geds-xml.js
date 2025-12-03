@@ -87,24 +87,50 @@ async function parseXMLFile(filePath) {
   // xml2js structure: orgStructure[0].org is array of org objects
   const orgStructure = person.orgStructure?.[0]?.org || [];
 
-  // Debug: log raw structure
+  // Debug: log raw structure if empty
   if (orgStructure.length === 0) {
     console.warn(`  WARNING: No orgStructure found for ${fullName}`);
+    console.warn(`  Raw orgStructure:`, JSON.stringify(person.orgStructure, null, 2));
   }
 
   // Skip "Canada" (first element) and build hierarchy
   const departments = [];
   for (let i = 0; i < orgStructure.length; i++) {
     const org = orgStructure[i];
+
+    // Debug: show what we're trying to extract
+    if (orgStructure.length > 0 && i === 0) {
+      console.log(`  Debug - First org object:`, JSON.stringify(org, null, 2));
+    }
+
     const deptName = getText(org.n);
 
     // Skip "Canada" (first org in hierarchy)
     if (i === 0 && deptName.toLowerCase().includes('canada')) {
+      console.log(`  Skipping "Canada" (root org)`);
       continue;
     }
 
     if (deptName) {
       departments.push(deptName);
+    } else {
+      console.warn(`  WARNING: Empty department name at index ${i}`);
+    }
+  }
+
+  // Fallback: If no departments found from orgStructure, try to build from department/organization fields
+  if (departments.length === 0) {
+    console.warn(`  No departments from orgStructure, using fallback...`);
+    const deptName = getText(person.department);
+    const orgName = getText(person.organization);
+
+    if (deptName) {
+      departments.push(deptName);
+      console.log(`  Added department from <department> field: ${deptName}`);
+    }
+    if (orgName && orgName !== deptName) {
+      departments.push(orgName);
+      console.log(`  Added organization from <organization> field: ${orgName}`);
     }
   }
 
@@ -179,6 +205,7 @@ async function main() {
 
     const allDepartments = new Map(); // path -> name
     const allPeople = [];
+    const problemFiles = []; // Track files with issues
 
     for (const file of files) {
       const filePath = path.join(INPUT_DIR, file);
@@ -189,6 +216,7 @@ async function main() {
 
         if (data.departments.length === 0) {
           console.warn(`  WARNING: No departments found, skipping person`);
+          problemFiles.push(file);
           continue;
         }
 
@@ -227,10 +255,20 @@ async function main() {
     console.log('Summary:');
     console.log(`  Departments: ${allDepartments.size}`);
     console.log(`  People: ${allPeople.length}`);
+    if (problemFiles.length > 0) {
+      console.log(`  Files with issues: ${problemFiles.length}`);
+      console.log(`  Problem files: ${problemFiles.join(', ')}`);
+    }
     console.log('='.repeat(60) + '\n');
 
     if (allDepartments.size === 0) {
       console.error('ERROR: No departments were extracted! Check XML structure.');
+      console.error('\nTroubleshooting steps:');
+      console.error('1. Verify XML files are in the correct format');
+      console.error('2. Check that <orgStructure> elements exist in your XML');
+      console.error('3. Alternatively, ensure <department> and <organization> fields are present');
+      console.error('4. Run with a single file first to debug: place only 1 XML file in xml-files/');
+      console.error('\nIf the issue persists, please share a sample XML file for debugging.');
       process.exit(1);
     }
 
