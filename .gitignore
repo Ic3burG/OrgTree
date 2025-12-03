@@ -40,3 +40,9 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Scripts - ignore user data but keep samples
+scripts/output/*.csv
+scripts/xml-files/*.xml
+!scripts/xml-files/sample.xml
+!scripts/xml-files/sample2.xml
