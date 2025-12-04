@@ -96,15 +96,27 @@ async function parseXMLFile(filePath) {
 
     console.log(`  Found ${orgs.length} org elements in orgStructure`);
 
+    // Debug: Show structure of first few org elements
+    console.log(`  DEBUG - First org element structure:`, JSON.stringify(orgs[0], null, 2));
+    if (orgs.length > 1) {
+      console.log(`  DEBUG - Second org element structure:`, JSON.stringify(orgs[1], null, 2));
+    }
+
     // Skip first element (Canada)
     for (let i = 1; i < orgs.length; i++) {
       const org = orgs[i];
+
+      // Debug: Show what we're checking
+      console.log(`  DEBUG - Org ${i}: checking org.n =`, org.n);
+
       if (org.n && Array.isArray(org.n) && org.n[0]) {
         let name = org.n[0];
         // Decode HTML entities
         name = name.replace(/&amp;/g, '&');
         departments.push(name);
         console.log(`    Dept ${i}: ${name}`);
+      } else {
+        console.log(`    WARNING - Org ${i}: Could not extract name. Keys available:`, Object.keys(org));
       }
     }
   } else {
