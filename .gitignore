@@ -46,3 +46,4 @@ scripts/output/*.csv
 scripts/xml-files/*.xml
 !scripts/xml-files/sample.xml
 !scripts/xml-files/sample2.xml
+scripts/output/
