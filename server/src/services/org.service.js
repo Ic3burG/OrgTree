@@ -3,13 +3,24 @@ import { randomUUID } from 'crypto';
 
 export async function getOrganizations(userId) {
   const orgs = db.prepare(`
-    SELECT id, name, created_by_id as createdById, created_at as createdAt, updated_at as updatedAt
-    FROM organizations
-    WHERE created_by_id = ?
-    ORDER BY created_at DESC
+    SELECT
+      o.id,
+      o.name,
+      o.created_by_id as createdById,
+      o.created_at as createdAt,
+      o.updated_at as updatedAt,
+      (SELECT COUNT(*) FROM departments WHERE organization_id = o.id) as departmentCount
+    FROM organizations o
+    WHERE o.created_by_id = ?
+    ORDER BY o.created_at DESC
   `).all(userId);
 
-  return orgs;
+  // Add departments array to match frontend expectation (org.departments.length)
+  // Using a proxy array with just length property is more efficient than creating actual array elements
+  return orgs.map(org => ({
+    ...org,
+    departments: { length: org.departmentCount || 0 }
+  }));
 }
 
 export async function getOrganizationById(id, userId) {
