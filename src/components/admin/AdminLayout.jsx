@@ -180,7 +180,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main content - adjust padding for mobile header and bottom nav */}
-      <main className="lg:ml-64 pt-14 lg:pt-0 pb-16 lg:pb-0 min-h-screen">
+      <main className="lg:ml-64 pt-14 lg:pt-0 pb-16 lg:pb-0 h-screen overflow-hidden">
         <div className="h-full">
           <Outlet />
         </div>
