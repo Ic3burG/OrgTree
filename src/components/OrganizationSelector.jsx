@@ -11,6 +11,10 @@ export default function OrganizationSelector() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newOrgName, setNewOrgName] = useState('');
   const [creating, setCreating] = useState(false);
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [renamingOrg, setRenamingOrg] = useState(null);
+  const [renameOrgName, setRenameOrgName] = useState('');
+  const [renaming, setRenaming] = useState(false);
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -47,6 +51,30 @@ export default function OrganizationSelector() {
       alert(err.message || 'Failed to create organization');
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleRenameOrg = (org) => {
+    setRenamingOrg(org);
+    setRenameOrgName(org.name);
+    setShowRenameModal(true);
+  };
+
+  const handleRenameSubmit = async (e) => {
+    e.preventDefault();
+    if (!renameOrgName.trim() || !renamingOrg) return;
+
+    try {
+      setRenaming(true);
+      await api.updateOrganization(renamingOrg.id, renameOrgName.trim());
+      setShowRenameModal(false);
+      setRenamingOrg(null);
+      setRenameOrgName('');
+      await loadOrganizations();
+    } catch (err) {
+      alert(err.message || 'Failed to rename organization');
+    } finally {
+      setRenaming(false);
     }
   };
 
@@ -162,6 +190,16 @@ export default function OrganizationSelector() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      handleRenameOrg(org);
+                    }}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="Rename organization"
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleDeleteOrg(org.id, org.name);
                     }}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -239,6 +277,60 @@ export default function OrganizationSelector() {
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
                 >
                   {creating ? 'Creating...' : 'Create Organization'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Rename Organization Modal */}
+      {showRenameModal && renamingOrg && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Rename Organization
+              </h2>
+            </div>
+            <form onSubmit={handleRenameSubmit}>
+              <div className="p-6">
+                <label
+                  htmlFor="renameOrgName"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Organization Name
+                </label>
+                <input
+                  id="renameOrgName"
+                  type="text"
+                  value={renameOrgName}
+                  onChange={(e) => setRenameOrgName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Acme Corporation"
+                  autoFocus
+                  required
+                />
+              </div>
+              <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRenameModal(false);
+                    setRenamingOrg(null);
+                    setRenameOrgName('');
+                  }}
+                  disabled={renaming}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-lg disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={renaming || !renameOrgName.trim()}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
+                >
+                  {renaming ? 'Renaming...' : 'Rename Organization'}
                 </button>
               </div>
             </form>
