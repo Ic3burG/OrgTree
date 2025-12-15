@@ -108,30 +108,20 @@ async function parseXMLFile(filePath) {
 }
 
 // Build department path using acronyms where available
-function buildPath(departments, deptAcronym, orgAcronym) {
+// Uses a pre-built map of department names to acronyms for consistency
+function buildPath(departments, acronymMap) {
   const pathParts = [];
-  
+
   for (let i = 0; i < departments.length; i++) {
     const deptName = departments[i];
-    let slug;
-    
-    // Use acronym for first level (main department) if available
-    if (i === 0 && deptAcronym) {
-      slug = deptAcronym;
-    }
-    // Use acronym for last level (immediate org) if available  
-    else if (i === departments.length - 1 && orgAcronym) {
-      slug = orgAcronym;
-    }
-    else {
-      slug = slugify(deptName);
-    }
-    
+    // Use acronym from map if available, otherwise slugify the name
+    const slug = acronymMap.get(deptName) || slugify(deptName);
+
     if (slug) {
       pathParts.push(slug);
     }
   }
-  
+
   return pathParts;
 }
 
@@ -147,7 +137,7 @@ function escapeCSV(field) {
 
 async function main() {
   console.log('Starting GEDS XML parsing...\n');
-  
+
   // Create output directory if it doesn't exist
   const outputDir = path.dirname(OUTPUT_FILE);
   if (!fs.existsSync(outputDir)) {
@@ -158,53 +148,84 @@ async function main() {
   const files = fs.readdirSync(INPUT_DIR).filter(f => f.toLowerCase().endsWith('.xml'));
   console.log(`Found ${files.length} XML files\n`);
 
+  // FIRST PASS: Collect all department name -> acronym mappings
+  // This ensures consistent slugs across all files
+  console.log('Pass 1: Collecting department acronyms...');
+  const acronymMap = new Map(); // department name -> acronym
+  const parsedData = []; // Store parsed data for second pass
+
+  for (const file of files) {
+    const filePath = path.join(INPUT_DIR, file);
+    try {
+      const data = await parseXMLFile(filePath);
+      parsedData.push({ file, data });
+
+      // Map first department (main dept) to its acronym
+      if (data.departments.length > 0 && data.deptAcronym) {
+        const firstDeptName = data.departments[0];
+        if (!acronymMap.has(firstDeptName)) {
+          acronymMap.set(firstDeptName, data.deptAcronym);
+        }
+      }
+
+      // Map last department (immediate org) to its acronym
+      if (data.departments.length > 0 && data.orgAcronym) {
+        const lastDeptName = data.departments[data.departments.length - 1];
+        if (!acronymMap.has(lastDeptName)) {
+          acronymMap.set(lastDeptName, data.orgAcronym);
+        }
+      }
+    } catch (err) {
+      console.error(`  ERROR parsing ${file}:`, err.message);
+    }
+  }
+
+  console.log(`  Found ${acronymMap.size} department acronyms:`);
+  for (const [name, acronym] of acronymMap) {
+    console.log(`    "${name}" -> ${acronym}`);
+  }
+  console.log('');
+
+  // SECOND PASS: Process all files using collected acronyms
+  console.log('Pass 2: Processing files with consistent paths...\n');
   const allDepartments = new Map(); // path -> name
   const allPeople = [];
   let skippedCount = 0;
 
-  for (const file of files) {
-    const filePath = path.join(INPUT_DIR, file);
+  for (const { file, data } of parsedData) {
     console.log(`Processing: ${file}`);
-    
-    try {
-      const data = await parseXMLFile(filePath);
-      
-      console.log(`  Person: ${data.person.name}`);
-      console.log(`  Departments found: ${data.departments.length}`);
-      
-      if (data.departments.length === 0) {
-        console.log(`  WARNING: No departments found, skipping person`);
-        skippedCount++;
-        continue;
-      }
+    console.log(`  Person: ${data.person.name}`);
+    console.log(`  Departments found: ${data.departments.length}`);
 
-      // Log the departments found
-      data.departments.forEach((d, i) => console.log(`    ${i + 1}. ${d}`));
-
-      // Build path parts using acronyms
-      const pathParts = buildPath(data.departments, data.deptAcronym, data.orgAcronym);
-      console.log(`  Path: /${pathParts.join('/')}`);
-      
-      // Add each department level to the map
-      let currentPath = '';
-      for (let i = 0; i < pathParts.length; i++) {
-        currentPath += '/' + pathParts[i];
-        if (!allDepartments.has(currentPath)) {
-          allDepartments.set(currentPath, data.departments[i]);
-        }
-      }
-      
-      // Add person with full path
-      const personPath = currentPath + '/' + data.person.slug;
-      allPeople.push({
-        path: personPath,
-        ...data.person
-      });
-      
-    } catch (err) {
-      console.error(`  ERROR processing ${file}:`, err.message);
+    if (data.departments.length === 0) {
+      console.log(`  WARNING: No departments found, skipping person`);
+      skippedCount++;
+      continue;
     }
-    
+
+    // Log the departments found
+    data.departments.forEach((d, i) => console.log(`    ${i + 1}. ${d}`));
+
+    // Build path parts using the consistent acronym map
+    const pathParts = buildPath(data.departments, acronymMap);
+    console.log(`  Path: /${pathParts.join('/')}`);
+
+    // Add each department level to the map
+    let currentPath = '';
+    for (let i = 0; i < pathParts.length; i++) {
+      currentPath += '/' + pathParts[i];
+      if (!allDepartments.has(currentPath)) {
+        allDepartments.set(currentPath, data.departments[i]);
+      }
+    }
+
+    // Add person with full path
+    const personPath = currentPath + '/' + data.person.slug;
+    allPeople.push({
+      path: personPath,
+      ...data.person
+    });
+
     console.log('');
   }
 
