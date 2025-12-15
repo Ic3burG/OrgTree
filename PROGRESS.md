@@ -40,6 +40,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 1. **✅ Department Count Display** - Fixed "Your Organizations" page showing 0 departments
 2. **✅ Public Link Edge Rendering** - Fixed missing connection lines in public shared views
 3. **✅ Mobile Scrolling Critical Fix** - Completely rebuilt People list with proper flexbox layout
+4. **✅ Public Share Link Database Error** - Fixed "no such column: p.office" error in public API
 
 ## 🐛 Known Issues (Fixed)
 
@@ -47,6 +48,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ~~People list not scrollable on any screen size~~ ✅ **FIXED** - Rebuilt with proper height constraints
 - ~~Department connections missing in public view~~ ✅ **FIXED** - Field name mapping corrected
 - ~~Organization page showing 0 departments~~ ✅ **FIXED** - Added department count logic
+- ~~Public share links failing with database error~~ ✅ **FIXED** - Removed non-existent column reference
 
 ## 🎯 Current Status
 
@@ -156,8 +158,8 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 8+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Mobile scrolling fix (December 2025)
-- **Total Commits**: 15+ commits on current branch
+- **Last Major Update**: Public share link database fix (December 2025)
+- **Total Commits**: 17+ commits on current branch
 - **Active Development**: Ongoing improvements and bug fixes
 
 ---
