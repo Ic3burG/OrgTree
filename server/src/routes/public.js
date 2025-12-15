@@ -32,7 +32,7 @@ router.get('/org/:shareToken', async (req, res, next) => {
 
     // Get all people for each department
     const people = db.prepare(`
-      SELECT p.id, p.department_id, p.name, p.title, p.email, p.phone, p.office, p.sort_order
+      SELECT p.id, p.department_id as departmentId, p.name, p.title, p.email, p.phone, p.sort_order as sortOrder
       FROM people p
       INNER JOIN departments d ON p.department_id = d.id
       WHERE d.organization_id = ?
