@@ -364,12 +364,13 @@ export default function OrgMap() {
       ...node,
       data: {
         ...node.data,
+        theme: currentTheme,
         isHighlighted: node.id === highlightedNodeId,
         onToggleExpand: () => handleToggleExpand(node.id),
         onSelectPerson: (person) => handleSelectPerson(person)
       }
     }));
-  }, [nodes, highlightedNodeId, handleToggleExpand, handleSelectPerson]);
+  }, [nodes, currentTheme, highlightedNodeId, handleToggleExpand, handleSelectPerson]);
 
   if (isLoading) {
     return (

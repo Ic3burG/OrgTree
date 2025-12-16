@@ -14,8 +14,10 @@ import DepartmentTooltip from './DepartmentTooltip';
  * Desktop: Standard size with hover tooltips
  */
 function DepartmentNode({ data, selected }) {
-  const { name, depth, people, description, isExpanded, onToggleExpand, onSelectPerson, isHighlighted } = data;
-  const theme = useContext(ThemeContext);
+  const { name, depth, people, description, isExpanded, onToggleExpand, onSelectPerson, isHighlighted, theme: dataTheme } = data;
+  const contextTheme = useContext(ThemeContext);
+  // Use theme from data if provided (for memoized nodes), otherwise fall back to context
+  const theme = dataTheme || contextTheme;
   const colors = getDepthColors(depth, theme);
   const peopleCount = people?.length || 0;
 
