@@ -269,17 +269,18 @@ function PublicOrgMapContent() {
     setCurrentTheme(themeName);
   }, []);
 
-  // Update nodes with callbacks
+  // Update nodes with callbacks and theme
   const nodesWithCallbacks = useMemo(() => {
     return nodes.map(node => ({
       ...node,
       data: {
         ...node.data,
+        theme: currentTheme, // Include theme to trigger re-render when it changes
         onToggleExpand: () => handleToggleExpand(node.id),
         onSelectPerson: (person) => handleSelectPerson(person)
       }
     }));
-  }, [nodes, handleToggleExpand, handleSelectPerson]);
+  }, [nodes, currentTheme, handleToggleExpand, handleSelectPerson]);
 
   if (isLoading) {
     return (
