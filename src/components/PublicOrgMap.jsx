@@ -13,6 +13,7 @@ import 'reactflow/dist/style.css';
 
 import DepartmentNode from './DepartmentNode';
 import DetailPanel from './DetailPanel';
+import Toolbar from './Toolbar';
 import { calculateLayout } from '../utils/layoutEngine';
 import { getDepthColors } from '../utils/colors';
 import api from '../api/client';
@@ -94,13 +95,13 @@ function PublicOrgMapContent() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedPerson, setSelectedPerson] = useState(null);
-  const [layoutDirection] = useState('TB');
+  const [layoutDirection, setLayoutDirection] = useState('TB');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [orgName, setOrgName] = useState('Organization Chart');
-  const [currentTheme] = useState('slate');
+  const [currentTheme, setCurrentTheme] = useState('slate');
 
-  const { fitView } = useReactFlow();
+  const { fitView, zoomIn, zoomOut } = useReactFlow();
 
   // Load organization data from public API
   useEffect(() => {
@@ -200,6 +201,74 @@ function PublicOrgMapContent() {
     setSelectedPerson(null);
   }, []);
 
+  // Expand all departments
+  const handleExpandAll = useCallback(() => {
+    setNodes((nds) => {
+      const updatedNodes = nds.map((node) => ({
+        ...node,
+        data: { ...node.data, isExpanded: true }
+      }));
+
+      const layoutedNodes = calculateLayout(updatedNodes, edges, layoutDirection);
+
+      return layoutedNodes.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          onToggleExpand: () => handleToggleExpand(node.id),
+          onSelectPerson: (person) => handleSelectPerson(person)
+        }
+      }));
+    });
+  }, [edges, layoutDirection, handleToggleExpand, handleSelectPerson, setNodes]);
+
+  // Collapse all departments
+  const handleCollapseAll = useCallback(() => {
+    setNodes((nds) => {
+      const updatedNodes = nds.map((node) => ({
+        ...node,
+        data: { ...node.data, isExpanded: false }
+      }));
+
+      const layoutedNodes = calculateLayout(updatedNodes, edges, layoutDirection);
+
+      return layoutedNodes.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          onToggleExpand: () => handleToggleExpand(node.id),
+          onSelectPerson: (person) => handleSelectPerson(person)
+        }
+      }));
+    });
+  }, [edges, layoutDirection, handleToggleExpand, handleSelectPerson, setNodes]);
+
+  // Toggle layout direction
+  const handleToggleLayout = useCallback(() => {
+    const newDirection = layoutDirection === 'TB' ? 'LR' : 'TB';
+    setLayoutDirection(newDirection);
+
+    setNodes((nds) => {
+      const layoutedNodes = calculateLayout(nds, edges, newDirection);
+
+      return layoutedNodes.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          onToggleExpand: () => handleToggleExpand(node.id),
+          onSelectPerson: (person) => handleSelectPerson(person)
+        }
+      }));
+    });
+
+    setTimeout(() => fitView({ padding: 0.2, duration: 800 }), 100);
+  }, [layoutDirection, edges, fitView, handleToggleExpand, handleSelectPerson, setNodes]);
+
+  // Handle theme change
+  const handleThemeChange = useCallback((themeName) => {
+    setCurrentTheme(themeName);
+  }, []);
+
   // Update nodes with callbacks
   const nodesWithCallbacks = useMemo(() => {
     return nodes.map(node => ({
@@ -289,6 +358,19 @@ function PublicOrgMapContent() {
           </div>
         </div>
       </div>
+
+      {/* Navigation Toolbar */}
+      <Toolbar
+        onZoomIn={() => zoomIn({ duration: 300 })}
+        onZoomOut={() => zoomOut({ duration: 300 })}
+        onFitView={() => fitView({ padding: 0.2, duration: 800 })}
+        onExpandAll={handleExpandAll}
+        onCollapseAll={handleCollapseAll}
+        onToggleLayout={handleToggleLayout}
+        layoutDirection={layoutDirection}
+        currentTheme={currentTheme}
+        onThemeChange={handleThemeChange}
+      />
 
       {/* Detail Panel */}
       {selectedPerson && (
