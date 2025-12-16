@@ -32,7 +32,7 @@ router.get('/org/:shareToken', async (req, res, next) => {
 
     // Get all people for each department
     const people = db.prepare(`
-      SELECT p.id, p.department_id as departmentId, p.name, p.title, p.email, p.phone, p.sort_order as sortOrder
+      SELECT p.id, p.department_id, p.name, p.title, p.email, p.phone, p.sort_order
       FROM people p
       INNER JOIN departments d ON p.department_id = d.id
       WHERE d.organization_id = ?
@@ -45,17 +45,34 @@ router.get('/org/:shareToken', async (req, res, next) => {
       if (!peopleByDept[person.department_id]) {
         peopleByDept[person.department_id] = [];
       }
-      peopleByDept[person.department_id].push(person);
+      // Convert to camelCase for frontend
+      peopleByDept[person.department_id].push({
+        id: person.id,
+        departmentId: person.department_id,
+        name: person.name,
+        title: person.title,
+        email: person.email,
+        phone: person.phone,
+        sortOrder: person.sort_order
+      });
     });
 
-    // Add people to departments
+    // Add people to departments and convert to camelCase
     const departmentsWithPeople = departments.map(dept => ({
-      ...dept,
+      id: dept.id,
+      organizationId: dept.organization_id,
+      parentId: dept.parent_id,
+      name: dept.name,
+      description: dept.description,
+      sortOrder: dept.sort_order,
       people: peopleByDept[dept.id] || []
     }));
 
+    // Return with camelCase field names
     res.json({
-      ...org,
+      id: org.id,
+      name: org.name,
+      createdAt: org.created_at,
       departments: departmentsWithPeople
     });
   } catch (err) {
