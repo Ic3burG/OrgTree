@@ -29,9 +29,10 @@ export function calculateLayout(nodes, edges, direction = 'TB') {
     const width = node.data.isExpanded ? 280 : 220;
 
     // Node height: base height + space for each person when expanded
+    // Cap at 384px (max-h-96) to match the scrollable container in DepartmentNode
     const baseHeight = 70;
     const peopleCount = node.data.people?.length || 0;
-    const peopleHeight = node.data.isExpanded ? peopleCount * 48 : 0;
+    const peopleHeight = node.data.isExpanded ? Math.min(peopleCount * 48, 384) : 0;
     const height = baseHeight + peopleHeight;
 
     g.setNode(node.id, { width, height });
@@ -67,7 +68,8 @@ export function calculateLayout(nodes, edges, direction = 'TB') {
 export function getNodeDimensions(isExpanded, peopleCount) {
   const width = isExpanded ? 280 : 220;
   const baseHeight = 70;
-  const peopleHeight = isExpanded ? peopleCount * 48 : 0;
+  // Cap at 384px (max-h-96) to match the scrollable container
+  const peopleHeight = isExpanded ? Math.min(peopleCount * 48, 384) : 0;
   const height = baseHeight + peopleHeight;
 
   return { width, height };
