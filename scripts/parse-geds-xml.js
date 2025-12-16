@@ -52,7 +52,8 @@ function getText(field) {
 
 // Parse a single XML file
 async function parseXMLFile(filePath) {
-  const xmlContent = fs.readFileSync(filePath, 'utf-8');
+  // Read as latin1 (ISO-8859-1) since GEDS XML files use this encoding for French characters
+  const xmlContent = fs.readFileSync(filePath, 'latin1');
   const result = await parseXML(xmlContent);
   const person = result.gedsPerson;
 
