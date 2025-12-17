@@ -41,6 +41,13 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 2. **✅ Public Link Edge Rendering** - Fixed missing connection lines in public shared views
 3. **✅ Mobile Scrolling Critical Fix** - Completely rebuilt People list with proper flexbox layout
 4. **✅ Public Share Link Database Error** - Fixed "no such column: p.office" error in public API
+5. **✅ XML Parser Duplicate Departments** - Implemented two-pass acronym mapping for consistent department slugs
+6. **✅ Organization Rename Feature** - Added UI for renaming organizations from selector page
+7. **✅ Org Map Layout with Large Departments** - Capped node height to prevent excessive vertical spacing
+8. **✅ French Character Encoding** - Fixed accented character handling in GEDS XML imports (Latin-1)
+9. **✅ Public View Navigation Controls** - Restored full Toolbar functionality to public share links
+10. **✅ Public View Department Connections** - Fixed API field naming (camelCase) for proper edge rendering
+11. **✅ Public View Theme Switching** - Fixed React.memo optimization preventing theme color updates
 
 ## 🐛 Known Issues (Fixed)
 
@@ -49,21 +56,31 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ~~Department connections missing in public view~~ ✅ **FIXED** - Field name mapping corrected
 - ~~Organization page showing 0 departments~~ ✅ **FIXED** - Added department count logic
 - ~~Public share links failing with database error~~ ✅ **FIXED** - Removed non-existent column reference
+- ~~XML parser creating duplicate departments~~ ✅ **FIXED** - Two-pass approach with consistent acronym mapping
+- ~~Cannot rename organizations~~ ✅ **FIXED** - Added rename UI with modal dialog
+- ~~Org chart vertical gaps with many people~~ ✅ **FIXED** - Capped node height to match scrollable container
+- ~~French names showing garbled characters~~ ✅ **FIXED** - Changed XML encoding from UTF-8 to Latin-1
+- ~~Public view missing navigation controls~~ ✅ **FIXED** - Restored Toolbar component
+- ~~Public view missing connection lines~~ ✅ **FIXED** - API now returns camelCase field names
+- ~~Public view theme switching not working~~ ✅ **FIXED** - Pass theme through props for memoized components
 
 ## 🎯 Current Status
 
 ### What's Working Well
 - ✅ User authentication and session management
-- ✅ Organization creation and management
+- ✅ Organization creation, management, and **renaming**
 - ✅ Department hierarchy creation and editing
 - ✅ People management with full CRUD operations
 - ✅ Interactive org chart with zoom, pan, expand/collapse
-- ✅ Public sharing with read-only access
+- ✅ Public sharing with read-only access and **full navigation controls**
 - ✅ CSV data import/export functionality
+- ✅ **GEDS XML import with French character support**
 - ✅ Search and filtering across all data
 - ✅ Mobile responsiveness and touch controls
-- ✅ Theme switching and visual customization
+- ✅ Theme switching and visual customization (works in public and private views)
 - ✅ All scrolling functionality working properly
+- ✅ Proper layout spacing for departments with many people
+- ✅ Consistent department hierarchy from XML imports (no duplicates)
 
 ### Areas for Potential Enhancement
 
@@ -158,14 +175,22 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 8+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Public share link database fix (December 2025)
-- **Total Commits**: 17+ commits on current branch
+- **Last Major Update**: Complete public view overhaul - navigation, edges, and theme fixes (December 17, 2025)
+- **Total Commits**: 62 commits on current branch
+- **Recent Session Highlights**:
+  - Fixed XML parser duplicate departments with two-pass acronym mapping
+  - Added organization rename feature with modal UI
+  - Fixed org map layout for large departments (384px cap)
+  - Added French character support for GEDS XML imports
+  - Restored full Toolbar to public share views
+  - Fixed public view connection lines (camelCase API fields)
+  - Fixed theme switching in public view (React.memo optimization)
 - **Active Development**: Ongoing improvements and bug fixes
 
 ---
 
 **Project Status**: 🟢 **Active Development** - Core functionality complete, enhancing features and stability
 
-**Maintainers**: Claude Code + Development Team  
-**Repository**: https://github.com/Ic3burG/OrgTree  
-**Last Updated**: December 15, 2025
+**Maintainers**: Claude Code + Development Team
+**Repository**: https://github.com/Ic3burG/OrgTree
+**Last Updated**: December 17, 2025
