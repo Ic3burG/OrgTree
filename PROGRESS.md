@@ -1,7 +1,7 @@
 # OrgTree Progress Report
 
 > **⚠️ IMPORTANT NOTE FOR ALL FUTURE CONVERSATIONS**:
-> This file MUST be updated every time changes are made to the codebase. Add session details, features implemented, bugs fixed, and security improvements to the "Recent Activity" section. Update the "Last Updated" date. This ensures project history is maintained and future sessions have full context.
+> This file MUST be updated every time changes are made to the codebase. Add session details, features implemented, bugs fixed, and security improvements to the "Recent Activity" section. Update the "Last Updated" date. **CRITICAL: Always commit changes AND push to GitHub** - local commits are not enough! This ensures project history is maintained and future sessions have full context.
 
 ## Project Overview
 OrgTree is a comprehensive organizational directory and visualization tool that allows users to create, manage, and visualize hierarchical organizational structures with departments and people.
@@ -179,11 +179,12 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 - **Last Major Update**: Production readiness and security hardening (December 21, 2025)
-- **Total Commits**: 66 commits on current branch (3 new commits today)
+- **Total Commits**: 67 commits on current branch (4 new commits today)
 - **Recent Session Highlights**:
 
   **December 21, 2025 - Production Readiness & Deployment Fixes**:
   - ✅ **CRITICAL FIX**: Database path now uses DATABASE_URL environment variable (was hardcoded)
+  - ✅ **CRITICAL FIX**: Frontend path corrected for production deployment (../../dist → ../dist)
   - ✅ **FIX**: Corrected curl command in DEPLOYMENT.md (removed newlines causing JSON parse errors)
   - ✅ **SECURITY**: Fixed HIGH severity JWT vulnerability (npm audit fix)
   - ✅ **SECURITY**: Removed insecure dev password reset endpoint
