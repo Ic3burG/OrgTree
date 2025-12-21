@@ -2,7 +2,7 @@ services:
   - type: web
     name: orgtree-app
     runtime: node
-    buildCommand: npm install
+    buildCommand: cd .. && npm install && npm run build && cp -r dist server/ && cd server && npm install
     startCommand: npm start
     rootDir: server
     envVars:

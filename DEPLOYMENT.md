@@ -39,30 +39,17 @@ Save this 128-character string - you'll need it for environment variables.
 
 ### Step 1: Prepare Your Application
 
-#### 1.1 Build the Frontend
+#### 1.1 Verify Critical Files
 
-From the project root directory:
-
-```bash
-# Option A: Use the build script (recommended)
-./scripts/build-for-production.sh
-
-# Option B: Manual build
-npm install
-npm run build
-cp -r dist server/
-```
-
-This creates the production build and copies it to the server directory.
-
-#### 1.2 Verify Critical Files
-
-Ensure these files exist:
+Ensure these files exist in your repository:
 - `server/.env.example` - Environment variable template
-- `server/dist/index.html` - Built frontend
-- `render.yaml` - Render configuration
+- `render.yaml` - Render configuration (includes automated build command)
+- `package.json` - Frontend build configuration
+- `server/package.json` - Backend dependencies
 
-#### 1.3 Commit and Push
+**Note**: You do NOT need to build the frontend locally. Render will automatically build it during deployment using the build command in `render.yaml`.
+
+#### 1.2 Commit and Push
 
 ```bash
 git add .
@@ -91,8 +78,10 @@ Fill in the following settings:
 - **Branch**: `main` (or your primary branch)
 - **Root Directory**: `server`
 - **Runtime**: `Node`
-- **Build Command**: `npm install`
+- **Build Command**: `cd .. && npm install && npm run build && cp -r dist server/ && cd server && npm install`
 - **Start Command**: `npm start`
+
+**Note**: The build command builds the frontend and copies it to the server directory automatically during deployment.
 
 **Instance Type**:
 - **For Production**: `Starter` ($7/month, always on)
