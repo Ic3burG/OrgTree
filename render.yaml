@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: orgtree-app
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    rootDir: server
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: DATABASE_URL
+        value: file:/opt/render/project/src/data/production.db
+      # Note: JWT_SECRET and FRONTEND_URL must be set manually in Render dashboard for security
+    disk:
+      name: orgtree-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
