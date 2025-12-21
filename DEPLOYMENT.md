@@ -177,17 +177,24 @@ Expected response:
 
 Create an admin user via API:
 
+**From your local machine:**
 ```bash
 curl -X POST https://orgtree-app.onrender.com/api/auth/signup \
   -H "Content-Type: application/json" \
-  -d '{
-    "name": "Admin User",
-    "email": "admin@yourcompany.com",
-    "password": "secure_password_123"
-  }'
+  -d '{"name":"Admin User","email":"admin@yourcompany.com","password":"secure_password_123"}'
 ```
 
-**Important**: Change `admin@yourcompany.com` and use a strong password.
+**From Render Shell:**
+```bash
+curl -X POST http://localhost:3001/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Admin User","email":"admin@yourcompany.com","password":"secure_password_123"}'
+```
+
+**Important**:
+- Change `admin@yourcompany.com` to your actual email
+- Use a strong password (minimum 6 characters)
+- The JSON must be on a single line to avoid parsing errors
 
 ---
 
