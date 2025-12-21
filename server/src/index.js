@@ -64,7 +64,7 @@ const __dirname = path.dirname(__filename);
 
 // Serve static frontend files in production
 if (process.env.NODE_ENV === 'production') {
-  const frontendPath = path.join(__dirname, '../../dist');
+  const frontendPath = path.join(__dirname, '../dist');
   app.use(express.static(frontendPath));
 }
 
@@ -101,7 +101,7 @@ app.use('/api', importRoutes);
 // Serve index.html for all non-API routes (SPA support) in production
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
-    const frontendPath = path.join(__dirname, '../../dist');
+    const frontendPath = path.join(__dirname, '../dist');
     res.sendFile(path.join(frontendPath, 'index.html'));
   });
 }
