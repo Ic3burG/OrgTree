@@ -6,7 +6,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Initialize database
-const dbPath = join(__dirname, '..', 'database.db');
+// Use DATABASE_URL environment variable or fallback to development database
+let dbPath;
+if (process.env.DATABASE_URL) {
+  // Remove 'file:' prefix if present
+  dbPath = process.env.DATABASE_URL.replace(/^file:/, '');
+} else {
+  // Development fallback
+  dbPath = join(__dirname, '..', 'database.db');
+}
+
 const db = new Database(dbPath);
 
 // Enable foreign keys

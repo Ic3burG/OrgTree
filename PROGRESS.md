@@ -182,7 +182,8 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Total Commits**: 62+ commits on current branch
 - **Recent Session Highlights**:
 
-  **December 21, 2025 - Production Readiness**:
+  **December 21, 2025 - Production Readiness & Deployment Fix**:
+  - ✅ **CRITICAL FIX**: Database path now uses DATABASE_URL environment variable (was hardcoded)
   - ✅ **SECURITY**: Fixed HIGH severity JWT vulnerability (npm audit fix)
   - ✅ **SECURITY**: Removed insecure dev password reset endpoint
   - ✅ **SECURITY**: Added rate limiting to authentication (5 attempts/15min)
