@@ -19,6 +19,7 @@ const passwordResetLimiter = rateLimit({
   message: { message: 'Too many password reset attempts, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
+  trustProxy: true, // Trust X-Forwarded-For header from Render proxy
 });
 
 // All user management routes require authentication and superuser role

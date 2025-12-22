@@ -207,7 +207,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Created `users.js` routes with 6 superuser-only endpoints (list, get, update, change role, reset password, delete)
     - Updated default role from 'admin' to 'user' for new signups
     - Added rate limiting for password reset endpoint
-    - **PRODUCTION FIX**: Added `app.set('trust proxy', 1)` to fix rate limiting behind Render's proxy
+    - **PRODUCTION FIX**: Added `app.set('trust proxy', 1)` and `trustProxy: true` to rate limiters to fix rate limiting behind Render's proxy
   - **Frontend Changes**:
     - Added role helpers to AuthContext (`isSuperuser`, `isAdmin`, `canManageUsers`)
     - Updated ProtectedRoute with `requiredRole` prop and role hierarchy checking
