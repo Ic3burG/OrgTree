@@ -165,7 +165,7 @@ function DepartmentNode({ data, selected }) {
       {/* Expanded People List */}
       {isExpanded && peopleCount > 0 && (
         <div className="bg-white rounded-b-lg border-t border-slate-200">
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto touch-pan-y">
             {people.map((person, index) => (
               <PersonRowCard
                 key={person.id}
