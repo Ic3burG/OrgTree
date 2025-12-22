@@ -3,6 +3,21 @@
 > **⚠️ IMPORTANT NOTE FOR ALL FUTURE CONVERSATIONS**:
 > This file MUST be updated every time changes are made to the codebase. Add session details, features implemented, bugs fixed, and security improvements to the "Recent Activity" section. Update the "Last Updated" date. **CRITICAL: Always commit changes AND push to GitHub** - local commits are not enough! This ensures project history is maintained and future sessions have full context.
 
+## 🎯 Key Preferences
+
+**CRITICAL**: These preferences must be followed in every conversation to maintain consistency and avoid repetition.
+
+### Update Workflow
+- **PROGRESS.md updates are MANDATORY**: Update this file after EACH command/task completion (not just at end of session)
+- **Commit AND push ALL changes**: Never leave commits local-only; always push to GitHub
+- **Update "Last Updated" date**: Change to current date when making any updates
+- **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
+
+### Development Preferences
+- [Add your preferences here as needed]
+
+---
+
 ## Project Overview
 OrgTree is a comprehensive organizational directory and visualization tool that allows users to create, manage, and visualize hierarchical organizational structures with departments and people.
 
@@ -180,9 +195,16 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 8+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Mobile scrolling fix for iPhone Safari (December 22, 2025)
-- **Total Commits**: 70 commits on current branch (1 new commit today)
+- **Last Major Update**: Added Key Preferences section (December 22, 2025)
+- **Total Commits**: 71 commits on current branch
 - **Recent Session Highlights**:
+
+  **December 22, 2025 - Key Preferences Documentation**:
+  - ✅ **DOCUMENTATION**: Added "Key Preferences" section to PROGRESS.md
+  - ✅ **WORKFLOW IMPROVEMENT**: Documented mandatory PROGRESS.md update after each command
+  - ✅ **CONSISTENCY**: Centralized project preferences to avoid repetition across sessions
+  - 📝 **PURPOSE**: Future conversations will have clear guidelines for workflow and preferences
+  - 🎯 **IMPACT**: Reduces cognitive load and ensures consistent development practices
 
   **December 22, 2025 - Mobile Scrolling Fix**:
   - ✅ **CRITICAL UX FIX**: Fixed mobile scrolling in department node people lists
