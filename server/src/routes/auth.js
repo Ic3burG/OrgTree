@@ -14,7 +14,6 @@ const authLimiter = rateLimit({
   message: { message: 'Too many login attempts, please try again later' },
   standardHeaders: true, // Return rate limit info in RateLimit-* headers
   legacyHeaders: false, // Disable X-RateLimit-* headers
-  trustProxy: true, // Trust X-Forwarded-For header from Render proxy
 });
 
 // POST /api/auth/signup

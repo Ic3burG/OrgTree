@@ -199,6 +199,18 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Total Commits**: 72 commits on current branch
 - **Recent Session Highlights**:
 
+  **December 22, 2025 - Rate Limiter Configuration Fix**:
+  - ✅ **CRITICAL PRODUCTION FIX**: Removed unsupported `trustProxy` option from rate limiters
+  - ✅ **ROOT CAUSE**: express-rate-limit version doesn't support `trustProxy` configuration option
+  - ✅ **ERROR**: ValidationError: Unexpected configuration option: trustProxy (ERR_ERL_UNKNOWN_OPTION)
+  - ✅ **SOLUTION**: Removed `trustProxy: true` from both authLimiter and passwordResetLimiter
+  - ✅ **EXPLANATION**: `app.set('trust proxy', 1)` in main server file handles proxy trust globally
+  - ✅ **FILES MODIFIED**:
+    - server/src/routes/auth.js (removed line 17)
+    - server/src/routes/users.js (removed line 23)
+  - ✅ **IMPACT**: Fixes server startup crash in production on Render
+  - 📝 **NOTE**: This was incorrectly added in commit 00da4a9 based on misunderstanding of rate limiter library
+
   **December 22, 2025 - Create User + Force Password Change Feature**:
   - **MAJOR FEATURE**: Superusers can create new users with auto-generated temporary passwords
   - **MAJOR FEATURE**: Users must change password on first login after creation or password reset
