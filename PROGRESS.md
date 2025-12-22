@@ -179,13 +179,13 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 - **Last Major Update**: Production readiness and security hardening (December 21, 2025)
-- **Total Commits**: 68 commits on current branch (5 new commits today)
+- **Total Commits**: 69 commits on current branch (6 new commits today)
 - **Recent Session Highlights**:
 
   **December 21, 2025 - Production Readiness & Deployment Fixes**:
   - ✅ **CRITICAL FIX**: Database path now uses DATABASE_URL environment variable (was hardcoded)
   - ✅ **CRITICAL FIX**: Frontend path corrected for production deployment (../../dist → ../dist)
-  - ✅ **CRITICAL FIX**: Render build command now builds frontend automatically during deployment
+  - ✅ **CRITICAL FIX**: Render build command now installs dev dependencies for Vite build
   - ✅ **FIX**: Corrected curl command in DEPLOYMENT.md (removed newlines causing JSON parse errors)
   - ✅ **SECURITY**: Fixed HIGH severity JWT vulnerability (npm audit fix)
   - ✅ **SECURITY**: Removed insecure dev password reset endpoint

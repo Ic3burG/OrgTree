@@ -78,10 +78,10 @@ Fill in the following settings:
 - **Branch**: `main` (or your primary branch)
 - **Root Directory**: `server`
 - **Runtime**: `Node`
-- **Build Command**: `cd .. && npm install && npm run build && cp -r dist server/ && cd server && npm install`
+- **Build Command**: `cd .. && npm install --include=dev && npm run build && cp -r dist server/ && cd server && npm install --production`
 - **Start Command**: `npm start`
 
-**Note**: The build command builds the frontend and copies it to the server directory automatically during deployment.
+**Note**: The build command installs all dependencies (including dev dependencies needed for Vite), builds the frontend, copies it to the server directory, then installs only production dependencies for the backend.
 
 **Instance Type**:
 - **For Production**: `Starter` ($7/month, always on)
