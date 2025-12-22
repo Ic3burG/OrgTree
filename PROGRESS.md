@@ -199,7 +199,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Total Commits**: 72 commits on current branch
 - **Recent Session Highlights**:
 
-  **December 22, 2025 - User Hierarchy / Super User Feature**:
+  **December 22, 2025 - User Hierarchy / Super User Feature + Production Fix**:
   - **MAJOR FEATURE**: Implemented complete 3-tier role hierarchy (superuser > admin > user)
   - **Backend Changes**:
     - Added role-checking middleware (`requireRole`, `requireSuperuser`, `requireAdminOrAbove`)
@@ -207,6 +207,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Created `users.js` routes with 6 superuser-only endpoints (list, get, update, change role, reset password, delete)
     - Updated default role from 'admin' to 'user' for new signups
     - Added rate limiting for password reset endpoint
+    - **PRODUCTION FIX**: Added `app.set('trust proxy', 1)` to fix rate limiting behind Render's proxy
   - **Frontend Changes**:
     - Added role helpers to AuthContext (`isSuperuser`, `isAdmin`, `canManageUsers`)
     - Updated ProtectedRoute with `requiredRole` prop and role hierarchy checking
@@ -221,9 +222,13 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Cryptographically secure temporary password generation
     - All role checks enforced server-side
     - Rate limiting on password reset
-  - **Files Modified**: 8 files
+  - **Files Modified**: 9 files (added trust proxy fix)
   - **Files Created**: 5 new files
-  - **Next Step**: Run SQL to promote first superuser
+  - **Database Path in Production**: `/opt/render/project/src/data/production.db`
+  - **SQL Command to Promote Superuser**:
+    ```bash
+    sqlite3 /opt/render/project/src/data/production.db "UPDATE users SET role = 'superuser' WHERE email = 'YOUR_EMAIL';"
+    ```
 
   **December 22, 2025 - Key Preferences Documentation**:
   - ✅ **DOCUMENTATION**: Added "Key Preferences" section to PROGRESS.md

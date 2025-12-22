@@ -31,6 +31,9 @@ if (process.env.NODE_ENV === 'production' &&
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy - required for rate limiting to work correctly behind Render's proxy
+app.set('trust proxy', 1);
+
 // CORS configuration - dynamic based on environment
 const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [process.env.FRONTEND_URL].filter(Boolean) // Production: use env var
