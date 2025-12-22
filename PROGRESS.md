@@ -51,6 +51,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 9. **✅ Public View Navigation Controls** - Restored full Toolbar functionality to public share links
 10. **✅ Public View Department Connections** - Fixed API field naming (camelCase) for proper edge rendering
 11. **✅ Public View Theme Switching** - Fixed React.memo optimization preventing theme color updates
+12. **✅ Mobile Org Map Scrolling** - Fixed people list scrolling on iPhone Safari using CSS touch-action property
 
 ## 🐛 Known Issues (Fixed)
 
@@ -66,6 +67,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ~~Public view missing navigation controls~~ ✅ **FIXED** - Restored Toolbar component
 - ~~Public view missing connection lines~~ ✅ **FIXED** - API now returns camelCase field names
 - ~~Public view theme switching not working~~ ✅ **FIXED** - Pass theme through props for memoized components
+- ~~Mobile org map people list not scrollable on iPhone Safari~~ ✅ **FIXED** - Added CSS touch-action: pan-y to prevent React Flow from intercepting vertical scroll
 
 ## 🎯 Current Status
 
@@ -178,9 +180,22 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 8+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Production readiness and security hardening (December 21, 2025)
-- **Total Commits**: 69 commits on current branch (6 new commits today)
+- **Last Major Update**: Mobile scrolling fix for iPhone Safari (December 22, 2025)
+- **Total Commits**: 70 commits on current branch (1 new commit today)
 - **Recent Session Highlights**:
+
+  **December 22, 2025 - Mobile Scrolling Fix**:
+  - ✅ **CRITICAL UX FIX**: Fixed mobile scrolling in department node people lists
+  - ✅ **ROOT CAUSE IDENTIFIED**: React Flow's panOnDrag was intercepting touch events on iPhone Safari
+  - ✅ **SOLUTION IMPLEMENTED**: Added CSS touch-action: pan-y property to scrollable containers
+  - ✅ **FILES MODIFIED**:
+    - Added `.touch-pan-y` utility class to src/index.css
+    - Applied class to people list container in src/components/DepartmentNode.jsx
+  - ✅ **TESTING APPROACH**: Deployed directly to production (low-risk CSS-only change)
+  - ✅ **IMPACT**: Users can now scroll people lists on mobile without triggering canvas pan
+  - ✅ **PRESERVED FUNCTIONALITY**: Canvas panning, pinch-to-zoom, and all touch gestures still work
+  - 📝 **PLANNING**: Used comprehensive plan mode exploration before implementation
+  - 🚀 **DEPLOYMENT**: Changes committed and pushed to GitHub for auto-deployment on Render
 
   **December 21, 2025 - Production Deployment SUCCESS**:
   - 🎉 **DEPLOYED**: OrgTree is now LIVE in production on Render!
@@ -226,7 +241,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 21, 2025
+**Last Updated**: December 22, 2025
 
 ---
 
