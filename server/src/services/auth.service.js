@@ -21,7 +21,7 @@ export async function createUser(name, email, password) {
 
   db.prepare(`
     INSERT INTO users (id, name, email, password_hash, role, created_at, updated_at)
-    VALUES (?, ?, ?, ?, 'admin', ?, ?)
+    VALUES (?, ?, ?, ?, 'user', ?, ?)
   `).run(userId, name, email, passwordHash, now, now);
 
   const user = db.prepare(`

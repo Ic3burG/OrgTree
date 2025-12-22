@@ -147,6 +147,33 @@ const api = {
     request(`/people/${personId}`, {
       method: 'DELETE',
     }),
+
+  // User Management (superuser only)
+  getUsers: () => request('/users'),
+
+  getUser: (userId) => request(`/users/${userId}`),
+
+  updateUser: (userId, data) =>
+    request(`/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  updateUserRole: (userId, role) =>
+    request(`/users/${userId}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role }),
+    }),
+
+  resetUserPassword: (userId) =>
+    request(`/users/${userId}/reset-password`, {
+      method: 'POST',
+    }),
+
+  deleteUser: (userId) =>
+    request(`/users/${userId}`, {
+      method: 'DELETE',
+    }),
 };
 
 export default api;

@@ -61,6 +61,11 @@ export function AuthProvider({ children }) {
     signup,
     logout,
     isAuthenticated: !!user,
+    // Role helpers
+    isSuperuser: user?.role === 'superuser',
+    isAdmin: user?.role === 'admin' || user?.role === 'superuser',
+    canManageUsers: user?.role === 'superuser',
+    hasRole: (role) => user?.role === role,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

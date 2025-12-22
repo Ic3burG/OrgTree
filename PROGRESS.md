@@ -190,14 +190,40 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Codebase Statistics
 - **Total Components**: ~15 React components
-- **API Endpoints**: ~12 REST endpoints
+- **API Endpoints**: ~18 REST endpoints (added 6 user management endpoints)
 - **Database Tables**: 4 main tables (users, organizations, departments, people)
 - **Features**: 8+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Added Key Preferences section (December 22, 2025)
-- **Total Commits**: 71 commits on current branch
+- **Last Major Update**: User Hierarchy / Super User Feature (December 22, 2025)
+- **Total Commits**: 72 commits on current branch
 - **Recent Session Highlights**:
+
+  **December 22, 2025 - User Hierarchy / Super User Feature**:
+  - **MAJOR FEATURE**: Implemented complete 3-tier role hierarchy (superuser > admin > user)
+  - **Backend Changes**:
+    - Added role-checking middleware (`requireRole`, `requireSuperuser`, `requireAdminOrAbove`)
+    - Created `users.service.js` with full CRUD operations for user management
+    - Created `users.js` routes with 6 superuser-only endpoints (list, get, update, change role, reset password, delete)
+    - Updated default role from 'admin' to 'user' for new signups
+    - Added rate limiting for password reset endpoint
+  - **Frontend Changes**:
+    - Added role helpers to AuthContext (`isSuperuser`, `isAdmin`, `canManageUsers`)
+    - Updated ProtectedRoute with `requiredRole` prop and role hierarchy checking
+    - Created `/admin` route with SuperuserLayout for system administration
+    - Created UserManagement page with search, filter, and CRUD operations
+    - Created UserForm modal for editing user details and roles
+    - Created ResetPasswordModal with temporary password generation and copy functionality
+    - Added "System Admin" link in AdminLayout for superusers
+  - **Security Features**:
+    - Cannot change own role (prevents lock-out)
+    - Cannot delete own account
+    - Cryptographically secure temporary password generation
+    - All role checks enforced server-side
+    - Rate limiting on password reset
+  - **Files Modified**: 8 files
+  - **Files Created**: 5 new files
+  - **Next Step**: Run SQL to promote first superuser
 
   **December 22, 2025 - Key Preferences Documentation**:
   - ✅ **DOCUMENTATION**: Added "Key Preferences" section to PROGRESS.md

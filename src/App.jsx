@@ -13,6 +13,8 @@ import AdminLayout from './components/admin/AdminLayout';
 import Dashboard from './components/admin/Dashboard';
 import DepartmentManager from './components/admin/DepartmentManager';
 import PersonManager from './components/admin/PersonManager';
+import SuperuserLayout from './components/superuser/SuperuserLayout';
+import UserManagement from './components/superuser/UserManagement';
 
 /**
  * App - Root component
@@ -39,6 +41,19 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Superuser routes - System Administration */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole="superuser">
+                <SuperuserLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/admin/users" replace />} />
+            <Route path="users" element={<UserManagement />} />
+          </Route>
 
           {/* Admin routes */}
           <Route

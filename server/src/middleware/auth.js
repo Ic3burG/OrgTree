@@ -16,3 +16,20 @@ export function authenticateToken(req, res, next) {
     return res.status(401).json({ message: 'Invalid or expired token' });
   }
 }
+
+// Role-based authorization middleware
+export function requireRole(...allowedRoles) {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Insufficient permissions' });
+    }
+    next();
+  };
+}
+
+// Convenience middleware for common role checks
+export const requireSuperuser = requireRole('superuser');
+export const requireAdminOrAbove = requireRole('superuser', 'admin');

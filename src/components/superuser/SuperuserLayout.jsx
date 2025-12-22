@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { Outlet, NavLink, useNavigate, useParams } from 'react-router-dom';
-import { Home, Users, Building2, Map, LogOut, ArrowLeft, Menu, X, Shield } from 'lucide-react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Users, LogOut, ArrowLeft, Menu, X, Shield } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import MobileNav from '../mobile/MobileNav';
 
-export default function AdminLayout() {
-  const { orgId } = useParams();
+export default function SuperuserLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,7 +21,6 @@ export default function AdminLayout() {
     setSidebarOpen(false);
   };
 
-  // Sidebar content component (used in both mobile and desktop)
   const SidebarContent = () => (
     <>
       {/* Header */}
@@ -36,90 +33,37 @@ export default function AdminLayout() {
           className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-2"
         >
           <ArrowLeft size={16} />
-          All Organizations
+          Back to Organizations
         </button>
-        {user?.role === 'superuser' && (
-          <NavLink
-            to="/admin/users"
-            onClick={closeSidebar}
-            className="flex items-center gap-2 text-sm text-purple-600 hover:text-purple-800 mb-2"
-          >
-            <Shield size={16} />
-            System Admin
-          </NavLink>
-        )}
-        <h2 className="text-lg font-semibold text-gray-900">Admin Panel</h2>
+        <div className="flex items-center gap-2">
+          <Shield size={20} className="text-purple-600" />
+          <h2 className="text-lg font-semibold text-gray-900">System Admin</h2>
+        </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-4">
         <NavLink
-          to={`/org/${orgId}`}
-          end
+          to="/admin/users"
           onClick={closeSidebar}
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
               isActive
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-50'
-            }`
-          }
-        >
-          <Home size={20} />
-          <span className="font-medium">Dashboard</span>
-        </NavLink>
-
-        <NavLink
-          to={`/org/${orgId}/departments`}
-          onClick={closeSidebar}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-50'
-            }`
-          }
-        >
-          <Building2 size={20} />
-          <span className="font-medium">Departments</span>
-        </NavLink>
-
-        <NavLink
-          to={`/org/${orgId}/people`}
-          onClick={closeSidebar}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive
-                ? 'bg-blue-50 text-blue-700'
+                ? 'bg-purple-50 text-purple-700'
                 : 'text-gray-700 hover:bg-gray-50'
             }`
           }
         >
           <Users size={20} />
-          <span className="font-medium">People</span>
-        </NavLink>
-
-        <NavLink
-          to={`/org/${orgId}/map`}
-          onClick={closeSidebar}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-50'
-            }`
-          }
-        >
-          <Map size={20} />
-          <span className="font-medium">Organization Map</span>
+          <span className="font-medium">User Management</span>
         </NavLink>
       </nav>
 
       {/* User Section */}
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-            <span className="text-sm font-medium text-blue-700">
+          <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+            <span className="text-sm font-medium text-purple-700">
               {user?.name?.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -127,7 +71,9 @@ export default function AdminLayout() {
             <p className="text-sm font-medium text-gray-900 truncate">
               {user?.name}
             </p>
-            <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-purple-600 font-medium">Superuser</span>
+            </div>
           </div>
         </div>
         <button
@@ -146,7 +92,7 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile header with hamburger */}
+      {/* Mobile header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-40 flex items-center px-4">
         <button
           onClick={() => setSidebarOpen(true)}
@@ -155,20 +101,20 @@ export default function AdminLayout() {
         >
           <Menu size={24} className="text-gray-700" />
         </button>
-        <h1 className="ml-3 text-lg font-semibold text-gray-900">OrgTree</h1>
+        <div className="ml-3 flex items-center gap-2">
+          <Shield size={20} className="text-purple-600" />
+          <h1 className="text-lg font-semibold text-gray-900">System Admin</h1>
+        </div>
       </header>
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 transition-opacity"
             onClick={closeSidebar}
           />
-          {/* Drawer */}
           <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl flex flex-col animate-slide-in-left">
-            {/* Close button */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
               <button
@@ -189,15 +135,12 @@ export default function AdminLayout() {
         <SidebarContent />
       </aside>
 
-      {/* Main content - adjust padding for mobile header and bottom nav */}
-      <main className="lg:ml-64 pt-14 lg:pt-0 pb-16 lg:pb-0 h-screen overflow-hidden">
+      {/* Main content */}
+      <main className="lg:ml-64 pt-14 lg:pt-0 min-h-screen">
         <div className="h-full">
           <Outlet />
         </div>
       </main>
-
-      {/* Mobile bottom navigation */}
-      <MobileNav />
     </div>
   );
 }
