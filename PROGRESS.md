@@ -195,9 +195,25 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 10+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Create User + Force Password Change Feature (December 22, 2025)
+- **Last Major Update**: Superuser UI Improvements (December 22, 2025)
 - **Total Commits**: 72 commits on current branch
 - **Recent Session Highlights**:
+
+  **December 22, 2025 - Superuser UI Improvements**:
+  - ✅ **UX ENHANCEMENT**: Added System Admin link to main OrganizationSelector page
+  - ✅ **ACCESSIBILITY**: Superusers can now access User Management without entering an organization
+  - ✅ **VISUAL CLARITY**: Added role badges showing "Superuser" or "Admin" throughout the app
+  - ✅ **UI CHANGES**:
+    - OrganizationSelector: Added "System Admin" button in header for superusers
+    - OrganizationSelector: Added role badge next to user name (Superuser/Admin)
+    - AdminLayout: Added role badge in sidebar user section
+    - SuperuserLayout: Enhanced role badge styling for consistency
+  - ✅ **FILES MODIFIED**:
+    - src/components/OrganizationSelector.jsx
+    - src/components/admin/AdminLayout.jsx
+    - src/components/superuser/SuperuserLayout.jsx
+  - ✅ **USER FEEDBACK**: Implemented based on user request for better superuser mode visibility
+  - 📝 **IMPACT**: Improves navigation and makes user role immediately visible across all pages
 
   **December 22, 2025 - Rate Limiter Configuration Fix**:
   - ✅ **CRITICAL PRODUCTION FIX**: Removed unsupported `trustProxy` option from rate limiters

@@ -118,15 +118,27 @@ export default function AdminLayout() {
       {/* User Section */}
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
             <span className="text-sm font-medium text-blue-700">
               {user?.name?.charAt(0).toUpperCase()}
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
-              {user?.name}
-            </p>
+            <div className="flex items-center gap-2 mb-0.5">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {user?.name}
+              </p>
+              {user?.role === 'superuser' && (
+                <span className="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full font-medium flex-shrink-0">
+                  Superuser
+                </span>
+              )}
+              {user?.role === 'admin' && (
+                <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full font-medium flex-shrink-0">
+                  Admin
+                </span>
+              )}
+            </div>
             <p className="text-xs text-gray-500 truncate">{user?.email}</p>
           </div>
         </div>

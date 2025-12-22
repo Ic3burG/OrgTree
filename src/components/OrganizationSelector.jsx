@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, LogOut, Trash2, Edit } from 'lucide-react';
+import { Building2, Plus, LogOut, Trash2, Edit, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/client';
 
@@ -115,9 +115,30 @@ export default function OrganizationSelector() {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+              <div className="flex items-center justify-end gap-2 mb-1">
+                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                {user?.role === 'superuser' && (
+                  <span className="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full font-medium">
+                    Superuser
+                  </span>
+                )}
+                {user?.role === 'admin' && (
+                  <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full font-medium">
+                    Admin
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-gray-500">{user?.email}</p>
             </div>
+            {user?.role === 'superuser' && (
+              <button
+                onClick={() => navigate('/admin/users')}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors border border-purple-200"
+              >
+                <Shield size={18} />
+                System Admin
+              </button>
+            )}
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
