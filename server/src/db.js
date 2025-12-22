@@ -135,6 +135,19 @@ try {
   console.error('Migration error (office column removal):', err);
 }
 
+// Migration: Add must_change_password column to users table
+try {
+  const usersTableInfo = db.prepare("PRAGMA table_info(users)").all();
+  const usersColumnNames = usersTableInfo.map(col => col.name);
+
+  if (!usersColumnNames.includes('must_change_password')) {
+    db.exec('ALTER TABLE users ADD COLUMN must_change_password BOOLEAN DEFAULT 0');
+    console.log('Migration: Added must_change_password column to users table');
+  }
+} catch (err) {
+  console.error('Migration error (must_change_password column):', err);
+}
+
 console.log('Database initialized at:', dbPath);
 
 export default db;

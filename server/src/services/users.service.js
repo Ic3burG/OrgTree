@@ -1,6 +1,6 @@
 import db from '../db.js';
 import bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 
 const VALID_ROLES = ['superuser', 'admin', 'user'];
 
@@ -126,7 +126,7 @@ export async function resetUserPassword(userId) {
   const now = new Date().toISOString();
   db.prepare(`
     UPDATE users
-    SET password_hash = ?, updated_at = ?
+    SET password_hash = ?, must_change_password = 1, updated_at = ?
     WHERE id = ?
   `).run(passwordHash, now, userId);
 
@@ -155,4 +155,48 @@ export function deleteUser(userId, requestingUserId) {
   db.prepare('DELETE FROM users WHERE id = ?').run(userId);
 
   return { message: 'User deleted successfully' };
+}
+
+export async function createAdminUser(name, email, role) {
+  // Validate role
+  if (!VALID_ROLES.includes(role)) {
+    const error = new Error(`Invalid role. Must be one of: ${VALID_ROLES.join(', ')}`);
+    error.status = 400;
+    throw error;
+  }
+
+  // Check if email already exists
+  const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  if (existingUser) {
+    const error = new Error('Email already in use');
+    error.status = 400;
+    throw error;
+  }
+
+  // Generate temporary password
+  const tempPassword = randomBytes(9).toString('base64')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, 12);
+
+  // Hash password
+  const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+  // Create user
+  const userId = randomUUID();
+  const now = new Date().toISOString();
+
+  db.prepare(`
+    INSERT INTO users (id, name, email, password_hash, role, must_change_password, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, 1, ?, ?)
+  `).run(userId, name, email, passwordHash, role, now, now);
+
+  const user = db.prepare(`
+    SELECT id, name, email, role, created_at as createdAt
+    FROM users WHERE id = ?
+  `).get(userId);
+
+  return {
+    user,
+    temporaryPassword: tempPassword
+  };
 }

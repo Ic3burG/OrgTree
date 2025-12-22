@@ -6,6 +6,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
+import ChangePasswordPage from './components/auth/ChangePasswordPage';
 import OrganizationSelector from './components/OrganizationSelector';
 import OrgMap from './components/OrgMap';
 import PublicOrgMap from './components/PublicOrgMap';
@@ -31,6 +32,16 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/public/:shareToken" element={<PublicOrgMap />} />
+
+          {/* Change Password (Protected) */}
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute>
+                <ChangePasswordPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected routes */}
           <Route

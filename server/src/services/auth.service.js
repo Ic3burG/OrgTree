@@ -61,6 +61,7 @@ export async function loginUser(email, password) {
       name: user.name,
       email: user.email,
       role: user.role,
+      mustChangePassword: user.must_change_password === 1
     },
     token,
   };

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Search, Edit, Trash2, Key, Users } from 'lucide-react';
+import { Search, Edit, Trash2, Key, Users, UserPlus } from 'lucide-react';
 import api from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
 import UserForm from './UserForm';
 import ResetPasswordModal from './ResetPasswordModal';
+import CreateUserModal from './CreateUserModal';
 import DeleteConfirmModal from '../admin/DeleteConfirmModal';
 
 const ROLE_COLORS = {
@@ -39,6 +40,9 @@ export default function UserManagement() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Create user modal state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -151,17 +155,26 @@ export default function UserManagement() {
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Users size={28} className="text-purple-600" />
-          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-          <span className="px-2 py-1 text-sm bg-purple-100 text-purple-700 rounded-full">
-            {users.length} users
-          </span>
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Users size={28} className="text-purple-600" />
+            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+            <span className="px-2 py-1 text-sm bg-purple-100 text-purple-700 rounded-full">
+              {users.length} users
+            </span>
+          </div>
+          <p className="text-gray-600">
+            Manage user accounts, roles, and permissions
+          </p>
         </div>
-        <p className="text-gray-600">
-          Manage user accounts, roles, and permissions
-        </p>
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+        >
+          <UserPlus size={20} />
+          Create User
+        </button>
       </div>
 
       {/* Filters */}
@@ -329,6 +342,17 @@ export default function UserManagement() {
             setUserToDelete(null);
           }}
           isDeleting={isDeleting}
+        />
+      )}
+
+      {/* Create User Modal */}
+      {isCreateModalOpen && (
+        <CreateUserModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={() => {
+            setIsCreateModalOpen(false);
+            loadUsers();
+          }}
         />
       )}
     </div>

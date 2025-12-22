@@ -64,4 +64,36 @@ router.get('/me', authenticateToken, async (req, res, next) => {
   }
 });
 
+// POST /api/auth/change-password - Change password (requires auth)
+router.post('/change-password', authenticateToken, async (req, res, next) => {
+  try {
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return res.status(400).json({ message: 'New password is required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    // Hash new password
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    const now = new Date().toISOString();
+
+    // Update password and clear must_change_password flag
+    db.prepare(`
+      UPDATE users
+      SET password_hash = ?, must_change_password = 0, updated_at = ?
+      WHERE id = ?
+    `).run(passwordHash, now, req.user.id);
+
+    // Return updated user info
+    const user = await getUserById(req.user.id);
+    res.json({ message: 'Password changed successfully', user });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;

@@ -189,15 +189,51 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 ## 📊 Project Metrics
 
 ### Codebase Statistics
-- **Total Components**: ~15 React components
-- **API Endpoints**: ~18 REST endpoints (added 6 user management endpoints)
+- **Total Components**: ~17 React components (added CreateUserModal, ChangePasswordPage)
+- **API Endpoints**: ~20 REST endpoints (added 6 user management + 2 password management endpoints)
 - **Database Tables**: 4 main tables (users, organizations, departments, people)
-- **Features**: 8+ major feature areas completed
+- **Features**: 10+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: User Hierarchy / Super User Feature (December 22, 2025)
+- **Last Major Update**: Create User + Force Password Change Feature (December 22, 2025)
 - **Total Commits**: 72 commits on current branch
 - **Recent Session Highlights**:
+
+  **December 22, 2025 - Create User + Force Password Change Feature**:
+  - **MAJOR FEATURE**: Superusers can create new users with auto-generated temporary passwords
+  - **MAJOR FEATURE**: Users must change password on first login after creation or password reset
+  - **Backend Changes**:
+    - Added `must_change_password` column migration to users table
+    - Created `createAdminUser` function generating cryptographic 12-char temporary passwords
+    - Updated `resetUserPassword` to set `must_change_password` flag to true
+    - Updated `loginUser` to return `mustChangePassword` field in user object
+    - Added POST `/api/users` endpoint for creating users (superuser only)
+    - Added POST `/api/auth/change-password` endpoint for password changes (authenticated)
+  - **Frontend Changes**:
+    - Created CreateUserModal component with two-step flow (form → success with temp password display)
+    - Created ChangePasswordPage component for forced password changes
+    - Updated UserManagement with "Create User" button and modal integration
+    - Updated ProtectedRoute to redirect to `/change-password` if `mustChangePassword` is true
+    - Added `/change-password` route to App.jsx
+    - Added `createUser` and `changePassword` API methods to client.js
+  - **User Flow**:
+    1. Superuser creates new user via Create User button
+    2. System generates 12-char cryptographic temporary password
+    3. Temporary password shown once with copy-to-clipboard functionality
+    4. New user logs in with temporary password
+    5. User immediately redirected to `/change-password` (cannot access app)
+    6. After changing password, user logged out and must log in again with new password
+    7. `must_change_password` flag cleared, user gains full app access
+  - **Security Features**:
+    - Temporary passwords are cryptographically random (12 alphanumeric characters)
+    - Password change requires authentication (can't bypass)
+    - Users locked out of app until password changed
+    - Password reset also triggers forced password change
+    - Minimum password length: 6 characters
+    - Passwords hashed with bcrypt (10 rounds)
+  - **Files Modified**: 5 backend files, 4 frontend files
+  - **Files Created**: 2 new components (CreateUserModal, ChangePasswordPage)
+  - **Integration**: Works seamlessly with existing User Hierarchy feature
 
   **December 22, 2025 - User Hierarchy / Super User Feature + Production Fix**:
   - **MAJOR FEATURE**: Implemented complete 3-tier role hierarchy (superuser > admin > user)

@@ -174,6 +174,18 @@ const api = {
     request(`/users/${userId}`, {
       method: 'DELETE',
     }),
+
+  createUser: (name, email, role) =>
+    request('/users', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, role }),
+    }),
+
+  changePassword: (newPassword) =>
+    request('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ newPassword }),
+    }),
 };
 
 export default api;

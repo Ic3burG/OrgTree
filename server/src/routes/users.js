@@ -7,7 +7,8 @@ import {
   updateUser,
   updateUserRole,
   resetUserPassword,
-  deleteUser
+  deleteUser,
+  createAdminUser
 } from '../services/users.service.js';
 
 const router = express.Router();
@@ -25,6 +26,22 @@ const passwordResetLimiter = rateLimit({
 // All user management routes require authentication and superuser role
 router.use(authenticateToken);
 router.use(requireSuperuser);
+
+// POST /api/users - Create new user
+router.post('/users', async (req, res, next) => {
+  try {
+    const { name, email, role } = req.body;
+
+    if (!name || !email || !role) {
+      return res.status(400).json({ message: 'Name, email, and role are required' });
+    }
+
+    const result = await createAdminUser(name, email, role);
+    res.status(201).json(result);
+  } catch (err) {
+    next(err);
+  }
+});
 
 // GET /api/users - List all users
 router.get('/users', (req, res, next) => {

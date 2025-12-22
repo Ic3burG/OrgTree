@@ -25,6 +25,11 @@ export default function ProtectedRoute({ children, requiredRole = null }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Check if user must change password (but allow access to change-password page)
+  if (user?.mustChangePassword && location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />;
+  }
+
   // Check role if required
   if (requiredRole) {
     const userLevel = ROLE_HIERARCHY[user?.role] || 0;
