@@ -195,9 +195,20 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 10+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Multi-User Collaboration Feature (December 22, 2025)
-- **Total Commits**: 72+ commits on current branch
+- **Last Major Update**: User Search Bug Fix (December 23, 2025)
+- **Total Commits**: 73+ commits on current branch
 - **Recent Session Highlights**:
+
+  **December 23, 2025 - User Search Bug Fix** 🐛:
+  - ✅ **BUG FIXED**: User search in collaboration feature now works correctly
+  - ✅ **ROOT CAUSE**: Express route conflict - `/api/users/search` was matching `/api/users/:id` in superuser-only users.js router
+  - ✅ **SOLUTION**: Renamed route from `/users/search` to `/members/search`
+  - ✅ **FILES MODIFIED**:
+    - `server/src/routes/members.js`: Changed route path
+    - `src/api/client.js`: Updated API endpoint URL
+    - `src/components/admin/UserSearchSelect.jsx`: Cleaned up debug logs
+  - ✅ **DEBUG CLEANUP**: Removed console.log statements from previous debugging session
+  - 📝 **IMPACT**: Non-superuser admins can now search and add members to organizations
 
   **December 22, 2025 - Debugging User Search Feature** 🔍:
   - ✅ **DEBUGGING SESSION**: Added comprehensive logging to diagnose user search issues
@@ -420,7 +431,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 22, 2025
+**Last Updated**: December 23, 2025
 
 ---
 

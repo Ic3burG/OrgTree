@@ -105,22 +105,19 @@ router.delete('/organizations/:orgId/members/:memberId', async (req, res, next) 
   }
 });
 
-// GET /api/users/search
+// GET /api/members/search
 // Search users for adding as members
 // Returns users excluding current user and already-members
-router.get('/users/search', async (req, res, next) => {
+router.get('/members/search', async (req, res, next) => {
   try {
     const { q, orgId } = req.query;
-    console.log('User search request - query:', q, 'orgId:', orgId, 'userId:', req.user?.id);
 
     if (!q || q.length < 2) {
-      console.log('Query too short, returning empty array');
       return res.json([]);
     }
 
     // Get existing member IDs and owner ID
     let excludeIds = [req.user.id]; // Always exclude self
-    console.log('Excluding user IDs:', excludeIds);
 
     if (orgId) {
       const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId);
@@ -139,9 +136,6 @@ router.get('/users/search', async (req, res, next) => {
     const searchPattern = `%${q}%`;
     const placeholders = excludeIds.map(() => '?').join(',');
 
-    console.log('Search pattern:', searchPattern);
-    console.log('Exclude IDs for query:', excludeIds);
-
     const users = db.prepare(`
       SELECT id, name, email
       FROM users
@@ -151,7 +145,6 @@ router.get('/users/search', async (req, res, next) => {
       LIMIT 10
     `).all(searchPattern, searchPattern, ...excludeIds);
 
-    console.log('Found users:', users.length, users);
     res.json(users);
   } catch (err) {
     next(err);
