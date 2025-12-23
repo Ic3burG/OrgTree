@@ -1,19 +1,14 @@
 import db from '../db.js';
 import { randomUUID } from 'crypto';
+import { requireOrgPermission } from './member.service.js';
 
-// Helper to verify org ownership
-async function verifyOrgAccess(orgId, userId) {
-  const org = db.prepare('SELECT * FROM organizations WHERE id = ? AND created_by_id = ?').get(orgId, userId);
-  if (!org) {
-    const error = new Error('Organization not found');
-    error.status = 404;
-    throw error;
-  }
-  return org;
+// Helper to verify org access with permission level
+async function verifyOrgAccess(orgId, userId, minRole = 'viewer') {
+  return requireOrgPermission(orgId, userId, minRole);
 }
 
 export async function getDepartments(orgId, userId) {
-  await verifyOrgAccess(orgId, userId);
+  await verifyOrgAccess(orgId, userId, 'viewer');
 
   const departments = db.prepare(`
     SELECT
@@ -43,7 +38,7 @@ export async function getDepartments(orgId, userId) {
 }
 
 export async function getDepartmentById(orgId, deptId, userId) {
-  await verifyOrgAccess(orgId, userId);
+  await verifyOrgAccess(orgId, userId, 'viewer');
 
   const dept = db.prepare(`
     SELECT
@@ -74,7 +69,7 @@ export async function getDepartmentById(orgId, deptId, userId) {
 }
 
 export async function createDepartment(orgId, data, userId) {
-  await verifyOrgAccess(orgId, userId);
+  await verifyOrgAccess(orgId, userId, 'editor');
 
   const { name, description, parentId } = data;
 
@@ -113,7 +108,7 @@ export async function createDepartment(orgId, data, userId) {
 }
 
 export async function updateDepartment(orgId, deptId, data, userId) {
-  await verifyOrgAccess(orgId, userId);
+  await verifyOrgAccess(orgId, userId, 'editor');
 
   const dept = db.prepare('SELECT * FROM departments WHERE id = ? AND organization_id = ?').get(deptId, orgId);
 
@@ -185,7 +180,7 @@ export async function updateDepartment(orgId, deptId, data, userId) {
 }
 
 export async function deleteDepartment(orgId, deptId, userId) {
-  await verifyOrgAccess(orgId, userId);
+  await verifyOrgAccess(orgId, userId, 'editor');
 
   const dept = db.prepare('SELECT * FROM departments WHERE id = ? AND organization_id = ?').get(deptId, orgId);
 

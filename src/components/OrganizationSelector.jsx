@@ -192,6 +192,21 @@ export default function OrganizationSelector() {
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                       <Building2 size={24} className="text-blue-600" />
                     </div>
+                    {org.role && (
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          org.role === 'owner'
+                            ? 'bg-purple-100 text-purple-800'
+                            : org.role === 'admin'
+                            ? 'bg-blue-100 text-blue-800'
+                            : org.role === 'editor'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {org.role === 'owner' ? 'Owner' : org.role.charAt(0).toUpperCase() + org.role.slice(1)}
+                      </span>
+                    )}
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
                     {org.name}

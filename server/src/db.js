@@ -148,6 +148,36 @@ try {
   console.error('Migration error (must_change_password column):', err);
 }
 
+// Migration: Add organization_members table
+try {
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+  const tableNames = tables.map(t => t.name);
+
+  if (!tableNames.includes('organization_members')) {
+    db.exec(`
+      CREATE TABLE organization_members (
+        id TEXT PRIMARY KEY,
+        organization_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'viewer',
+        added_by_id TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (added_by_id) REFERENCES users(id),
+        UNIQUE(organization_id, user_id)
+      );
+
+      CREATE INDEX idx_organization_members_org_id ON organization_members(organization_id);
+      CREATE INDEX idx_organization_members_user_id ON organization_members(user_id);
+    `);
+    console.log('Migration: Created organization_members table');
+  }
+} catch (err) {
+  console.error('Migration error (organization_members table):', err);
+}
+
 console.log('Database initialized at:', dbPath);
 
 export default db;

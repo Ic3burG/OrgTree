@@ -96,6 +96,32 @@ const api = {
       method: 'POST',
     }),
 
+  // Organization members
+  getOrgMembers: (orgId) => request(`/organizations/${orgId}/members`),
+
+  addOrgMember: (orgId, userId, role) =>
+    request(`/organizations/${orgId}/members`, {
+      method: 'POST',
+      body: JSON.stringify({ userId, role }),
+    }),
+
+  updateMemberRole: (orgId, memberId, role) =>
+    request(`/organizations/${orgId}/members/${memberId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ role }),
+    }),
+
+  removeMember: (orgId, memberId) =>
+    request(`/organizations/${orgId}/members/${memberId}`, {
+      method: 'DELETE',
+    }),
+
+  searchUsers: (query, orgId) => {
+    const params = new URLSearchParams({ q: query });
+    if (orgId) params.append('orgId', orgId);
+    return request(`/users/search?${params.toString()}`);
+  },
+
   // Public (no auth)
   getPublicOrganization: async (shareToken) => {
     const response = await fetch(`${API_BASE}/public/org/${shareToken}`);

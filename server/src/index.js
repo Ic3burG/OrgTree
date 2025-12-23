@@ -10,6 +10,7 @@ import peopleRoutes from './routes/people.js';
 import importRoutes from './routes/import.js';
 import publicRoutes from './routes/public.js';
 import usersRoutes from './routes/users.js';
+import memberRoutes from './routes/members.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
 import db from './db.js';
@@ -102,6 +103,7 @@ app.use('/api', departmentRoutes);
 app.use('/api', peopleRoutes);
 app.use('/api', importRoutes);
 app.use('/api', usersRoutes);
+app.use('/api', memberRoutes);
 
 // Serve index.html for all non-API routes (SPA support) in production
 if (process.env.NODE_ENV === 'production') {

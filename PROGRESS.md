@@ -25,6 +25,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 
 ### Core Features Implemented
 - **Multi-organization management** - Users can create and manage multiple organizations
+- **Team collaboration** - Multi-user organization management with role-based permissions (Owner, Admin, Editor, Viewer)
 - **Hierarchical department structure** - Tree-based department organization with parent/child relationships
 - **People management** - Full CRUD operations for employees across departments
 - **Interactive org chart visualization** - React Flow-based visual representation with zoom, pan, and navigation
@@ -105,12 +106,11 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 ### Areas for Potential Enhancement
 
 #### Feature Enhancements
-- **Advanced Permissions** - Role-based access control within organizations
-- **Team Collaboration** - Multiple users managing the same organization
 - **Advanced Search** - Full-text search with autocomplete
 - **Bulk Operations** - Multi-select for batch edits/deletions
 - **Audit Trail** - Track changes and modifications
 - **Custom Fields** - Configurable person/department attributes
+- **Email Invitations** - Invite users who don't have OrgTree accounts yet
 
 #### Performance & Scalability
 - **Database Optimization** - Indexing for large datasets
@@ -195,9 +195,50 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 10+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Superuser UI Improvements (December 22, 2025)
-- **Total Commits**: 72 commits on current branch
+- **Last Major Update**: Multi-User Collaboration Feature (December 22, 2025)
+- **Total Commits**: 72+ commits on current branch
 - **Recent Session Highlights**:
+
+  **December 22, 2025 - Multi-User Collaboration Feature** 🎉:
+  - ✅ **MAJOR FEATURE**: Implemented complete multi-user collaboration system for organizations
+  - ✅ **PERMISSION SYSTEM**: Four-tier role hierarchy (Owner > Admin > Editor > Viewer)
+    - **Owner**: Original creator, permanent admin with full control
+    - **Admin**: Can manage members, sharing settings, and all content
+    - **Editor**: Can create, edit, and delete departments and people
+    - **Viewer**: Read-only access to organization
+  - ✅ **BACKEND ARCHITECTURE**:
+    - Database: Added organization_members table with foreign key constraints
+    - Services: Created member.service.js for centralized authorization
+    - Updated all services (org, department, people) to use permission checks
+    - Routes: New member management endpoints + user search API
+  - ✅ **FRONTEND COMPONENTS**:
+    - UserSearchSelect: Debounced user search with dropdown
+    - AddMemberModal: Add members with role selection
+    - ShareModal: Complete redesign with tabbed interface (Public Link | Team Members)
+    - OrganizationSelector: Shows role badges on organization cards
+  - ✅ **SECURITY**:
+    - Service-layer authorization (not just route-level)
+    - Owner cannot be removed or demoted
+    - Member cannot be added twice
+    - Cascade deletes for data integrity
+  - ✅ **FILES CREATED**:
+    - server/src/services/member.service.js (256 lines)
+    - server/src/routes/members.js (159 lines)
+    - src/components/admin/UserSearchSelect.jsx
+    - src/components/admin/AddMemberModal.jsx
+  - ✅ **FILES MODIFIED**:
+    - server/src/db.js (migration)
+    - server/src/services/org.service.js
+    - server/src/services/department.service.js
+    - server/src/services/people.service.js
+    - server/src/routes/organizations.js
+    - server/src/index.js
+    - src/api/client.js
+    - src/components/admin/ShareModal.jsx
+    - src/components/OrganizationSelector.jsx
+  - ✅ **BACKWARD COMPATIBLE**: Existing single-owner organizations work unchanged
+  - 📝 **USER EXPERIENCE**: Members get immediate access (no invitation acceptance flow)
+  - 📝 **IMPACT**: Enables team collaboration on organizational charts with flexible permissions
 
   **December 22, 2025 - Superuser UI Improvements**:
   - ✅ **UX ENHANCEMENT**: Added System Admin link to main OrganizationSelector page

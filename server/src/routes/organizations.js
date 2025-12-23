@@ -9,6 +9,7 @@ import {
   updateOrganization,
   deleteOrganization,
 } from '../services/org.service.js';
+import { requireOrgPermission } from '../services/member.service.js';
 
 const router = express.Router();
 
@@ -78,24 +79,22 @@ router.delete('/organizations/:id', async (req, res, next) => {
 });
 
 // GET /api/organizations/:id/share
-// Get sharing settings for an organization
+// Get sharing settings for an organization (requires admin)
 router.get('/organizations/:id/share', async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Verify ownership
+    // Verify admin permission
+    requireOrgPermission(id, req.user.id, 'admin');
+
     const org = db.prepare(`
-      SELECT id, name, is_public, share_token, created_by_id
+      SELECT id, name, is_public, share_token
       FROM organizations
       WHERE id = ?
     `).get(id);
 
     if (!org) {
       return res.status(404).json({ message: 'Organization not found' });
-    }
-
-    if (org.created_by_id !== req.user.id) {
-      return res.status(403).json({ message: 'Access denied' });
     }
 
     res.json({
@@ -111,25 +110,23 @@ router.get('/organizations/:id/share', async (req, res, next) => {
 });
 
 // PUT /api/organizations/:id/share
-// Toggle organization public/private status
+// Toggle organization public/private status (requires admin)
 router.put('/organizations/:id/share', async (req, res, next) => {
   try {
     const { id } = req.params;
     const { isPublic } = req.body;
 
-    // Verify ownership
+    // Verify admin permission
+    requireOrgPermission(id, req.user.id, 'admin');
+
     const org = db.prepare(`
-      SELECT id, created_by_id, share_token
+      SELECT id, share_token
       FROM organizations
       WHERE id = ?
     `).get(id);
 
     if (!org) {
       return res.status(404).json({ message: 'Organization not found' });
-    }
-
-    if (org.created_by_id !== req.user.id) {
-      return res.status(403).json({ message: 'Access denied' });
     }
 
     // Generate share token if making public and doesn't have one
@@ -158,24 +155,22 @@ router.put('/organizations/:id/share', async (req, res, next) => {
 });
 
 // POST /api/organizations/:id/share/regenerate
-// Regenerate share token for an organization
+// Regenerate share token for an organization (requires admin)
 router.post('/organizations/:id/share/regenerate', async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Verify ownership
+    // Verify admin permission
+    requireOrgPermission(id, req.user.id, 'admin');
+
     const org = db.prepare(`
-      SELECT id, created_by_id, is_public
+      SELECT id, is_public
       FROM organizations
       WHERE id = ?
     `).get(id);
 
     if (!org) {
       return res.status(404).json({ message: 'Organization not found' });
-    }
-
-    if (org.created_by_id !== req.user.id) {
-      return res.status(403).json({ message: 'Access denied' });
     }
 
     // Generate new share token

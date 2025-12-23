@@ -1,34 +1,20 @@
 import db from '../db.js';
 import { randomUUID } from 'crypto';
+import { getUserOrganizations, requireOrgPermission } from './member.service.js';
 
 export async function getOrganizations(userId) {
-  const orgs = db.prepare(`
-    SELECT
-      o.id,
-      o.name,
-      o.created_by_id as createdById,
-      o.created_at as createdAt,
-      o.updated_at as updatedAt,
-      (SELECT COUNT(*) FROM departments WHERE organization_id = o.id) as departmentCount
-    FROM organizations o
-    WHERE o.created_by_id = ?
-    ORDER BY o.created_at DESC
-  `).all(userId);
-
-  // Add departments array to match frontend expectation (org.departments.length)
-  // Using a proxy array with just length property is more efficient than creating actual array elements
-  return orgs.map(org => ({
-    ...org,
-    departments: { length: org.departmentCount || 0 }
-  }));
+  return getUserOrganizations(userId);
 }
 
 export async function getOrganizationById(id, userId) {
+  // Check access (throws if no access)
+  requireOrgPermission(id, userId, 'viewer');
+
   const org = db.prepare(`
     SELECT id, name, created_by_id as createdById, created_at as createdAt, updated_at as updatedAt
     FROM organizations
-    WHERE id = ? AND created_by_id = ?
-  `).get(id, userId);
+    WHERE id = ?
+  `).get(id);
 
   if (!org) {
     const error = new Error('Organization not found');
@@ -81,14 +67,8 @@ export async function createOrganization(name, userId) {
 }
 
 export async function updateOrganization(id, name, userId) {
-  // Verify ownership
-  const org = db.prepare('SELECT * FROM organizations WHERE id = ? AND created_by_id = ?').get(id, userId);
-
-  if (!org) {
-    const error = new Error('Organization not found');
-    error.status = 404;
-    throw error;
-  }
+  // Require admin permission
+  requireOrgPermission(id, userId, 'admin');
 
   const now = new Date().toISOString();
 
@@ -105,12 +85,12 @@ export async function updateOrganization(id, name, userId) {
 }
 
 export async function deleteOrganization(id, userId) {
-  // Verify ownership
-  const org = db.prepare('SELECT * FROM organizations WHERE id = ? AND created_by_id = ?').get(id, userId);
+  // Only owner can delete
+  const access = requireOrgPermission(id, userId, 'owner');
 
-  if (!org) {
-    const error = new Error('Organization not found');
-    error.status = 404;
+  if (!access.isOwner) {
+    const error = new Error('Only the organization owner can delete it');
+    error.status = 403;
     throw error;
   }
 

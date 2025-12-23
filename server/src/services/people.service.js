@@ -1,26 +1,29 @@
 import db from '../db.js';
 import { randomUUID } from 'crypto';
+import { requireOrgPermission } from './member.service.js';
 
-// Helper to verify department access through org ownership
-async function verifyDeptAccess(deptId, userId) {
+// Helper to verify department access through org permissions
+async function verifyDeptAccess(deptId, userId, minRole = 'viewer') {
   const dept = db.prepare(`
-    SELECT d.*, o.created_by_id as orgCreatedBy
+    SELECT d.*, d.organization_id as organizationId
     FROM departments d
-    JOIN organizations o ON d.organization_id = o.id
     WHERE d.id = ?
   `).get(deptId);
 
-  if (!dept || dept.orgCreatedBy !== userId) {
+  if (!dept) {
     const error = new Error('Department not found');
     error.status = 404;
     throw error;
   }
 
+  // Check org permission
+  requireOrgPermission(dept.organizationId, userId, minRole);
+
   return dept;
 }
 
 export async function getPeopleByDepartment(deptId, userId) {
-  await verifyDeptAccess(deptId, userId);
+  await verifyDeptAccess(deptId, userId, 'viewer');
 
   return db.prepare(`
     SELECT
@@ -45,11 +48,14 @@ export async function getPersonById(personId, userId) {
     WHERE p.id = ?
   `).get(personId);
 
-  if (!person || person.orgCreatedBy !== userId) {
+  if (!person) {
     const error = new Error('Person not found');
     error.status = 404;
     throw error;
   }
+
+  // Check org permission
+  requireOrgPermission(person.organizationId, userId, 'viewer');
 
   // Clean up the response to match expected format
   const { departmentName, organizationId, organizationName, orgCreatedBy, ...personData } = person;
@@ -68,7 +74,7 @@ export async function getPersonById(personId, userId) {
 }
 
 export async function createPerson(deptId, data, userId) {
-  await verifyDeptAccess(deptId, userId);
+  await verifyDeptAccess(deptId, userId, 'editor');
 
   const { name, title, email, phone } = data;
 
@@ -104,7 +110,7 @@ export async function updatePerson(personId, data, userId) {
 
   // If moving to new department, verify access to that department
   if (departmentId && departmentId !== person.departmentId) {
-    await verifyDeptAccess(departmentId, userId);
+    await verifyDeptAccess(departmentId, userId, 'editor');
   }
 
   const now = new Date().toISOString();
