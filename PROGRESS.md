@@ -266,6 +266,19 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Sandbox mode: Resend only delivers to verified email addresses unless custom domain is configured
     - Invitation expiry: 7 days (hardcoded)
     - One pending invitation per email per organization (prevents duplicates)
+  - **CRITICAL BUG FIX - Invitation Acceptance**:
+    - ✅ **BUG FIXED**: Invitation acceptance now properly creates members and updates status
+    - ✅ **ROOT CAUSE**: Missing `await` keyword in route handler caused response before DB operations completed
+    - ✅ **SYMPTOMS**: Invitations showed as "pending" after acceptance, users had no access to organization
+    - ✅ **SOLUTION**:
+      - Added `await` to `acceptInvitation` call in route handler
+      - Added validation to verify member insertion succeeds (checks `changes > 0`)
+      - Added validation to verify invitation status update succeeds (checks `changes > 0`)
+      - Throws errors if database operations fail
+    - ✅ **FILES MODIFIED**:
+      - `server/src/routes/invitations.js`: Added await keyword
+      - `server/src/services/invitation.service.js`: Added database operation validation
+    - 📝 **IMPACT**: Invitation acceptance now properly adds users as members and marks invitations as accepted
 
   **December 23, 2025 - User Search Bug Fix** 🐛:
   - ✅ **BUG FIXED**: User search in collaboration feature now works correctly
@@ -499,7 +512,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 23, 2025
+**Last Updated**: December 23, 2025 (Invitation Acceptance Bug Fix)
 
 ---
 
