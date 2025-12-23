@@ -199,7 +199,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Total Commits**: 74+ commits on current branch
 - **Recent Session Highlights**:
 
-  **December 23, 2025 - Email-Based Team Collaboration System** :
+  **December 23, 2025 - Email-Based Team Collaboration System** ✉️:
   - **MAJOR REWRITE**: Replaced broken user search with email-based member addition
   - **DIRECT EMAIL ENTRY**: Admin types email address, user is added if they exist
   - **EMAIL INVITATIONS**: If user doesn't exist, send invitation email via Resend
@@ -240,6 +240,10 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     4. Invitation email sent with 7-day expiry
     5. Recipient accepts via `/invite/:token` page
   - **IMPACT**: Reliable team collaboration without broken search dependency
+  - **FOLLOW-UP**: Added pending invitations display in ShareModal
+    - View all pending invitations with email, role, and sent date
+    - Cancel invitations with trash button
+    - Auto-refreshes when new invitations are sent
 
   **December 23, 2025 - User Search Bug Fix** 🐛:
   - ✅ **BUG FIXED**: User search in collaboration feature now works correctly
