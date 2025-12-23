@@ -195,9 +195,51 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 10+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: User Search Bug Fix (December 23, 2025)
-- **Total Commits**: 73+ commits on current branch
+- **Last Major Update**: Email-Based Team Collaboration System (December 23, 2025)
+- **Total Commits**: 74+ commits on current branch
 - **Recent Session Highlights**:
+
+  **December 23, 2025 - Email-Based Team Collaboration System** :
+  - **MAJOR REWRITE**: Replaced broken user search with email-based member addition
+  - **DIRECT EMAIL ENTRY**: Admin types email address, user is added if they exist
+  - **EMAIL INVITATIONS**: If user doesn't exist, send invitation email via Resend
+  - **BACKEND CHANGES**:
+    - Added `invitations` table with status tracking and expiration
+    - Created `email.service.js` with Resend integration
+    - Created `invitation.service.js` with full invitation lifecycle
+    - Created invitation routes with 5 endpoints
+    - Added `addMemberByEmail()` to member service
+  - **FRONTEND CHANGES**:
+    - Rewrote `AddMemberModal.jsx` with simple email input
+    - Created `AcceptInvitation.jsx` page for accepting invites
+    - Added invitation API methods to client
+    - Updated ShareModal with invitation callbacks
+  - **FILES CREATED**:
+    - `server/src/services/email.service.js`
+    - `server/src/services/invitation.service.js`
+    - `server/src/routes/invitations.js`
+    - `src/components/AcceptInvitation.jsx`
+  - **FILES MODIFIED**:
+    - `server/src/db.js` (migration for invitations table)
+    - `server/src/index.js` (mount invitation routes)
+    - `server/src/services/member.service.js`
+    - `server/src/routes/members.js`
+    - `src/api/client.js`
+    - `src/App.jsx`
+    - `src/components/admin/AddMemberModal.jsx`
+    - `src/components/admin/ShareModal.jsx`
+    - `server/.env.example`
+  - **FILES DELETED**:
+    - `src/components/admin/UserSearchSelect.jsx` (no longer needed)
+  - **DEPENDENCIES**: Added `resend` package for email delivery
+  - **ENVIRONMENT**: Requires `RESEND_API_KEY`, `APP_URL` for email functionality
+  - **USER FLOW**:
+    1. Admin enters email address in Add Member modal
+    2. If user exists -> Added immediately
+    3. If user doesn't exist -> "Send Invitation" button appears
+    4. Invitation email sent with 7-day expiry
+    5. Recipient accepts via `/invite/:token` page
+  - **IMPACT**: Reliable team collaboration without broken search dependency
 
   **December 23, 2025 - User Search Bug Fix** 🐛:
   - ✅ **BUG FIXED**: User search in collaboration feature now works correctly

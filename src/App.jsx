@@ -16,6 +16,7 @@ import DepartmentManager from './components/admin/DepartmentManager';
 import PersonManager from './components/admin/PersonManager';
 import SuperuserLayout from './components/superuser/SuperuserLayout';
 import UserManagement from './components/superuser/UserManagement';
+import AcceptInvitation from './components/AcceptInvitation';
 
 /**
  * App - Root component
@@ -32,6 +33,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/public/:shareToken" element={<PublicOrgMap />} />
+          <Route path="/invite/:token" element={<AcceptInvitation />} />
 
           {/* Change Password (Protected) */}
           <Route

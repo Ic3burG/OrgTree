@@ -178,6 +178,38 @@ try {
   console.error('Migration error (organization_members table):', err);
 }
 
+// Migration: Add invitations table
+try {
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+  const tableNames = tables.map(t => t.name);
+
+  if (!tableNames.includes('invitations')) {
+    db.exec(`
+      CREATE TABLE invitations (
+        id TEXT PRIMARY KEY,
+        organization_id TEXT NOT NULL,
+        email TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'viewer',
+        token TEXT UNIQUE NOT NULL,
+        invited_by_id TEXT NOT NULL,
+        status TEXT DEFAULT 'pending',
+        expires_at DATETIME NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        accepted_at DATETIME,
+        FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+        FOREIGN KEY (invited_by_id) REFERENCES users(id)
+      );
+
+      CREATE INDEX idx_invitations_org_id ON invitations(organization_id);
+      CREATE INDEX idx_invitations_token ON invitations(token);
+      CREATE INDEX idx_invitations_email ON invitations(email);
+    `);
+    console.log('Migration: Created invitations table');
+  }
+} catch (err) {
+  console.error('Migration error (invitations table):', err);
+}
+
 console.log('Database initialized at:', dbPath);
 
 export default db;

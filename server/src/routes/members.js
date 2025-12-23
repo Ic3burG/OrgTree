@@ -3,6 +3,7 @@ import { authenticateToken } from '../middleware/auth.js';
 import {
   getOrgMembers,
   addOrgMember,
+  addMemberByEmail,
   updateMemberRole,
   removeOrgMember,
   checkOrgAccess
@@ -105,47 +106,30 @@ router.delete('/organizations/:orgId/members/:memberId', async (req, res, next) 
   }
 });
 
-// GET /api/members/search
-// Search users for adding as members
-// Returns users excluding current user and already-members
-router.get('/members/search', async (req, res, next) => {
+// POST /api/organizations/:orgId/members/by-email
+// Add a member by email address (requires admin)
+// Returns { success: true, member } or { success: false, error: 'user_not_found' }
+router.post('/organizations/:orgId/members/by-email', async (req, res, next) => {
   try {
-    const { q, orgId } = req.query;
+    const { orgId } = req.params;
+    const { email, role } = req.body;
 
-    if (!q || q.length < 2) {
-      return res.json([]);
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
     }
 
-    // Get existing member IDs and owner ID
-    let excludeIds = [req.user.id]; // Always exclude self
-
-    if (orgId) {
-      const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId);
-      if (org) {
-        excludeIds.push(org.created_by_id); // Exclude owner
-      }
-
-      const members = db.prepare(
-        'SELECT user_id FROM organization_members WHERE organization_id = ?'
-      ).all(orgId);
-
-      excludeIds.push(...members.map(m => m.user_id));
+    if (!role) {
+      return res.status(400).json({ message: 'Role is required' });
     }
 
-    // Search users by name or email
-    const searchPattern = `%${q}%`;
-    const placeholders = excludeIds.map(() => '?').join(',');
+    const result = addMemberByEmail(orgId, email, role, req.user.id);
 
-    const users = db.prepare(`
-      SELECT id, name, email
-      FROM users
-      WHERE (name LIKE ? OR email LIKE ?)
-        AND id NOT IN (${placeholders})
-      ORDER BY name
-      LIMIT 10
-    `).all(searchPattern, searchPattern, ...excludeIds);
-
-    res.json(users);
+    if (result.success) {
+      res.status(201).json(result);
+    } else {
+      // User not found - return 200 with success: false so frontend can offer to send invite
+      res.json(result);
+    }
   } catch (err) {
     next(err);
   }

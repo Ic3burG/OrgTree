@@ -49,9 +49,7 @@ export default function ShareModal({ orgId, orgName, onClose }) {
   async function loadMembers() {
     try {
       setLoadingMembers(true);
-      console.log('Loading members for orgId:', orgId);
       const data = await api.getOrgMembers(orgId);
-      console.log('Loaded members:', data);
       setOwner(data.owner);
       setMembers(data.members || []);
     } catch (err) {
@@ -111,17 +109,15 @@ export default function ShareModal({ orgId, orgName, onClose }) {
     }
   };
 
-  // Add member
-  const handleAddMember = async (userId, role) => {
-    try {
-      await api.addOrgMember(orgId, userId, role);
-      toast.success('Member added successfully');
-      loadMembers();
-    } catch (err) {
-      console.error('Failed to add member:', err);
-      toast.error(err.message || 'Failed to add member');
-      throw err;
-    }
+  // Handle member added (from AddMemberModal)
+  const handleMemberAdded = (member) => {
+    toast.success(`${member.userName} added as ${member.role}`);
+    loadMembers();
+  };
+
+  // Handle invitation sent (from AddMemberModal)
+  const handleInvitationSent = (invitation) => {
+    toast.success(`Invitation sent to ${invitation.email}`);
   };
 
   // Update member role
@@ -341,10 +337,7 @@ export default function ShareModal({ orgId, orgName, onClose }) {
                     {/* Add Member Button */}
                     <div className="flex justify-end">
                       <button
-                        onClick={() => {
-                          console.log('Opening Add Member modal for orgId:', orgId);
-                          setShowAddMember(true);
-                        }}
+                        onClick={() => setShowAddMember(true)}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
                       >
                         <Users size={18} />
@@ -451,7 +444,8 @@ export default function ShareModal({ orgId, orgName, onClose }) {
       <AddMemberModal
         isOpen={showAddMember}
         onClose={() => setShowAddMember(false)}
-        onAdd={handleAddMember}
+        onMemberAdded={handleMemberAdded}
+        onInvitationSent={handleInvitationSent}
         orgId={orgId}
       />
     </>

@@ -116,11 +116,11 @@ const api = {
       method: 'DELETE',
     }),
 
-  searchUsers: (query, orgId) => {
-    const params = new URLSearchParams({ q: query });
-    if (orgId) params.append('orgId', orgId);
-    return request(`/members/search?${params.toString()}`);
-  },
+  addMemberByEmail: (orgId, email, role) =>
+    request(`/organizations/${orgId}/members/by-email`, {
+      method: 'POST',
+      body: JSON.stringify({ email, role }),
+    }),
 
   // Public (no auth)
   getPublicOrganization: async (shareToken) => {
@@ -211,6 +211,34 @@ const api = {
     request('/auth/change-password', {
       method: 'POST',
       body: JSON.stringify({ newPassword }),
+    }),
+
+  // Invitations
+  sendInvitation: (orgId, email, role) =>
+    request(`/organizations/${orgId}/invitations`, {
+      method: 'POST',
+      body: JSON.stringify({ email, role }),
+    }),
+
+  getInvitations: (orgId) => request(`/organizations/${orgId}/invitations`),
+
+  cancelInvitation: (orgId, invitationId) =>
+    request(`/organizations/${orgId}/invitations/${invitationId}`, {
+      method: 'DELETE',
+    }),
+
+  getInvitationByToken: async (token) => {
+    const response = await fetch(`${API_BASE}/invitations/${token}`);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ApiError(data?.message || 'Request failed', response.status);
+    }
+    return data;
+  },
+
+  acceptInvitation: (token) =>
+    request(`/invitations/${token}/accept`, {
+      method: 'POST',
     }),
 };
 

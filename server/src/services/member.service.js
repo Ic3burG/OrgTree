@@ -211,6 +211,75 @@ export function removeOrgMember(orgId, memberId, removedBy) {
 }
 
 /**
+ * Add a member by email address
+ * Returns { success: true, member } if user exists
+ * Returns { success: false, error: 'user_not_found' } if user doesn't exist
+ */
+export function addMemberByEmail(orgId, email, role, addedBy) {
+  // Verify adder has admin permission
+  requireOrgPermission(orgId, addedBy, 'admin');
+
+  // Validate role
+  const validRoles = ['viewer', 'editor', 'admin'];
+  if (!validRoles.includes(role)) {
+    const error = new Error('Invalid role. Must be: viewer, editor, or admin');
+    error.status = 400;
+    throw error;
+  }
+
+  // Find user by email
+  const user = db.prepare('SELECT id, name, email FROM users WHERE email = ?').get(email.toLowerCase().trim());
+
+  if (!user) {
+    return { success: false, error: 'user_not_found', message: 'No user with this email address' };
+  }
+
+  // Check if already a member or owner
+  const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId);
+  if (org.created_by_id === user.id) {
+    const error = new Error('This user is already the owner of this organization');
+    error.status = 400;
+    throw error;
+  }
+
+  const existingMember = db.prepare(
+    'SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?'
+  ).get(orgId, user.id);
+
+  if (existingMember) {
+    const error = new Error('This user is already a member');
+    error.status = 400;
+    throw error;
+  }
+
+  // Add member
+  const memberId = randomUUID();
+  const now = new Date().toISOString();
+
+  db.prepare(`
+    INSERT INTO organization_members (id, organization_id, user_id, role, added_by_id, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(memberId, orgId, user.id, role, addedBy, now, now);
+
+  // Return member with user details
+  const member = db.prepare(`
+    SELECT
+      om.id,
+      om.organization_id as organizationId,
+      om.user_id as userId,
+      om.role,
+      om.created_at as createdAt,
+      u.name as userName,
+      u.email as userEmail
+    FROM organization_members om
+    JOIN users u ON om.user_id = u.id
+    WHERE om.id = ?
+  `).get(memberId);
+
+  return { success: true, member };
+}
+
+/**
  * Get all organizations accessible by a user (owned + member)
  */
 export function getUserOrganizations(userId) {
