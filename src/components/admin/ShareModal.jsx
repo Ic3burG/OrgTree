@@ -18,6 +18,10 @@ export default function ShareModal({ orgId, orgName, onClose }) {
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
 
+  // Invitations state
+  const [invitations, setInvitations] = useState([]);
+  const [loadingInvitations, setLoadingInvitations] = useState(false);
+
   const toast = useToast();
 
   // Load share settings
@@ -43,6 +47,7 @@ export default function ShareModal({ orgId, orgName, onClose }) {
   useEffect(() => {
     if (activeTab === 'members') {
       loadMembers();
+      loadInvitations();
     }
   }, [activeTab, orgId]);
 
@@ -57,6 +62,19 @@ export default function ShareModal({ orgId, orgName, onClose }) {
       toast.error('Failed to load members');
     } finally {
       setLoadingMembers(false);
+    }
+  }
+
+  async function loadInvitations() {
+    try {
+      setLoadingInvitations(true);
+      const data = await api.getInvitations(orgId);
+      setInvitations(data || []);
+    } catch (err) {
+      console.error('Failed to load invitations:', err);
+      // Don't show error toast - invitations are optional
+    } finally {
+      setLoadingInvitations(false);
     }
   }
 
@@ -118,6 +136,23 @@ export default function ShareModal({ orgId, orgName, onClose }) {
   // Handle invitation sent (from AddMemberModal)
   const handleInvitationSent = (invitation) => {
     toast.success(`Invitation sent to ${invitation.email}`);
+    loadInvitations(); // Refresh invitations list
+  };
+
+  // Cancel invitation
+  const handleCancelInvitation = async (invitationId, email) => {
+    if (!confirm(`Cancel invitation for ${email}?`)) {
+      return;
+    }
+
+    try {
+      await api.cancelInvitation(orgId, invitationId);
+      toast.success('Invitation cancelled');
+      loadInvitations();
+    } catch (err) {
+      console.error('Failed to cancel invitation:', err);
+      toast.error('Failed to cancel invitation');
+    }
   };
 
   // Update member role
@@ -408,6 +443,47 @@ export default function ShareModal({ orgId, orgName, onClose }) {
                         <Users size={48} className="mx-auto mb-3 text-gray-300" />
                         <p className="font-medium">No team members yet</p>
                         <p className="text-sm mt-1">Add members to collaborate on this organization</p>
+                      </div>
+                    )}
+
+                    {/* Pending Invitations */}
+                    {invitations.length > 0 && (
+                      <div className="space-y-2">
+                        <h3 className="text-sm font-medium text-gray-700">Pending Invitations</h3>
+                        {invitations.map((invitation) => (
+                          <div key={invitation.id} className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3 flex-1">
+                                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-medium">
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium text-gray-900">{invitation.email}</div>
+                                  <div className="text-sm text-gray-600">
+                                    Invited by {invitation.invitedByName} • {invitation.role}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    Sent {new Date(invitation.createdAt).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-3">
+                                <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
+                                  Pending
+                                </span>
+                                <button
+                                  onClick={() => handleCancelInvitation(invitation.id, invitation.email)}
+                                  className="text-red-600 hover:text-red-800 transition-colors"
+                                  title="Cancel invitation"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
 
