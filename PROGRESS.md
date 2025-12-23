@@ -196,7 +196,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 - **Last Major Update**: Email-Based Team Collaboration System (December 23, 2025)
-- **Total Commits**: 74+ commits on current branch
+- **Total Commits**: 78+ commits on current branch
 - **Recent Session Highlights**:
 
   **December 23, 2025 - Email-Based Team Collaboration System** ✉️:
@@ -240,10 +240,32 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     4. Invitation email sent with 7-day expiry
     5. Recipient accepts via `/invite/:token` page
   - **IMPACT**: Reliable team collaboration without broken search dependency
-  - **FOLLOW-UP**: Added pending invitations display in ShareModal
-    - View all pending invitations with email, role, and sent date
-    - Cancel invitations with trash button
-    - Auto-refreshes when new invitations are sent
+  - **FOLLOW-UP FEATURES**:
+    - **Pending Invitations Display**: Added section in ShareModal showing all pending invitations
+      - View email, role, invited by, and sent date
+      - Cancel invitations with trash button
+      - Auto-refreshes when new invitations are sent
+      - Allows admins to cancel duplicate invitations
+    - **Production Setup & Debugging**:
+      - Fixed invitation link generation (APP_URL configuration)
+      - Configured Resend API integration (RESEND_API_KEY)
+      - Fixed invitation acceptance route (moved to public routes)
+  - **CRITICAL FIXES**:
+    - ✅ Invitation links were showing placeholder URL `your-app.onrender.com`
+      - Solution: Added `APP_URL` environment variable with actual Render URL
+    - ✅ Invitation emails not sending with "email_not_configured" error
+      - Solution: Added `RESEND_API_KEY` to Render environment variables
+    - ✅ "Access token required" error when viewing invitations
+      - Solution: Moved `GET /invitations/:token` to `GET /public/invitation/:token`
+      - Public endpoint doesn't require authentication for invitation viewing
+  - **DEPLOYMENT NOTES**:
+    - Requires `RESEND_API_KEY` from https://resend.com (free tier: 100 emails/day)
+    - Requires `APP_URL` set to actual Render URL (e.g., `https://orgtree-app.onrender.com`)
+    - Emails from `onboarding@resend.dev` may go to spam (custom domain recommended for production)
+  - **KNOWN LIMITATIONS**:
+    - Sandbox mode: Resend only delivers to verified email addresses unless custom domain is configured
+    - Invitation expiry: 7 days (hardcoded)
+    - One pending invitation per email per organization (prevents duplicates)
 
   **December 23, 2025 - User Search Bug Fix** 🐛:
   - ✅ **BUG FIXED**: User search in collaboration feature now works correctly
