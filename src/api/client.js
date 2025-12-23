@@ -228,7 +228,7 @@ const api = {
     }),
 
   getInvitationByToken: async (token) => {
-    const response = await fetch(`${API_BASE}/invitations/${token}`);
+    const response = await fetch(`${API_BASE}/public/invitation/${token}`);
     const data = await response.json();
     if (!response.ok) {
       throw new ApiError(data?.message || 'Request failed', response.status);

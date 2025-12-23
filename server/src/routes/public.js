@@ -1,5 +1,6 @@
 import express from 'express';
 import db from '../db.js';
+import { getInvitationByToken } from '../services/invitation.service.js';
 
 const router = express.Router();
 
@@ -75,6 +76,25 @@ router.get('/org/:shareToken', async (req, res, next) => {
       createdAt: org.created_at,
       departments: departmentsWithPeople
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/public/invitation/:token
+ * Get invitation details by token (no auth required)
+ */
+router.get('/invitation/:token', async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const invitation = getInvitationByToken(token);
+
+    if (!invitation) {
+      return res.status(404).json({ message: 'Invitation not found' });
+    }
+
+    res.json(invitation);
   } catch (err) {
     next(err);
   }
