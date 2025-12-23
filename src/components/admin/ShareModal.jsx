@@ -49,7 +49,9 @@ export default function ShareModal({ orgId, orgName, onClose }) {
   async function loadMembers() {
     try {
       setLoadingMembers(true);
+      console.log('Loading members for orgId:', orgId);
       const data = await api.getOrgMembers(orgId);
+      console.log('Loaded members:', data);
       setOwner(data.owner);
       setMembers(data.members || []);
     } catch (err) {
@@ -339,7 +341,10 @@ export default function ShareModal({ orgId, orgName, onClose }) {
                     {/* Add Member Button */}
                     <div className="flex justify-end">
                       <button
-                        onClick={() => setShowAddMember(true)}
+                        onClick={() => {
+                          console.log('Opening Add Member modal for orgId:', orgId);
+                          setShowAddMember(true);
+                        }}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
                       >
                         <Users size={18} />

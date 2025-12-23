@@ -119,7 +119,9 @@ const api = {
   searchUsers: (query, orgId) => {
     const params = new URLSearchParams({ q: query });
     if (orgId) params.append('orgId', orgId);
-    return request(`/users/search?${params.toString()}`);
+    const url = `/users/search?${params.toString()}`;
+    console.log('API: Searching users with URL:', url);
+    return request(url);
   },
 
   // Public (no auth)

@@ -37,11 +37,13 @@ export default function AddMemberModal({ isOpen, onClose, onAdd, orgId }) {
     setError('');
 
     try {
+      console.log('Adding member:', selectedUser.id, 'with role:', selectedRole);
       await onAdd(selectedUser.id, selectedRole);
       setSelectedUser(null);
       setSelectedRole('viewer');
       onClose();
     } catch (err) {
+      console.error('Failed to add member:', err);
       setError(err.message || 'Failed to add member');
     } finally {
       setIsSubmitting(false);

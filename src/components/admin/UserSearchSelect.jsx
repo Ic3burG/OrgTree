@@ -35,8 +35,10 @@ export default function UserSearchSelect({ orgId, onSelect, selectedUser }) {
 
     debounceTimer.current = setTimeout(async () => {
       setIsLoading(true);
+      console.log('Searching for users with query:', query, 'orgId:', orgId);
       try {
         const results = await api.searchUsers(query, orgId);
+        console.log('Search results:', results);
         setUsers(results);
         setIsOpen(true);
       } catch (error) {
