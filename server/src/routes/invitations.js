@@ -79,7 +79,7 @@ router.get('/invitations/:token', async (req, res, next) => {
 router.post('/invitations/:token/accept', authenticateToken, async (req, res, next) => {
   try {
     const { token } = req.params;
-    const result = acceptInvitation(token, req.user.id);
+    const result = await acceptInvitation(token, req.user.id);
     res.json(result);
   } catch (err) {
     next(err);

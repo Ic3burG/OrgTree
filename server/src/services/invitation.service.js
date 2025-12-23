@@ -249,14 +249,26 @@ export function acceptInvitation(token, userId) {
   const memberId = randomUUID();
   const now = new Date().toISOString();
 
-  db.prepare(`
+  const insertResult = db.prepare(`
     INSERT INTO organization_members (id, organization_id, user_id, role, added_by_id, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `).run(memberId, invitation.organization_id, userId, invitation.role, invitation.invited_by_id, now, now);
 
+  if (insertResult.changes === 0) {
+    const error = new Error('Failed to add member to organization');
+    error.status = 500;
+    throw error;
+  }
+
   // Mark invitation as accepted
-  db.prepare("UPDATE invitations SET status = 'accepted', accepted_at = ? WHERE id = ?")
+  const updateResult = db.prepare("UPDATE invitations SET status = 'accepted', accepted_at = ? WHERE id = ?")
     .run(now, invitation.id);
+
+  if (updateResult.changes === 0) {
+    const error = new Error('Failed to update invitation status');
+    error.status = 500;
+    throw error;
+  }
 
   return {
     success: true,
