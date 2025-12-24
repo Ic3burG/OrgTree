@@ -14,7 +14,11 @@
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
 
 ### Development Preferences
-- [Add your preferences here as needed]
+- **Render CLI**: Installed and configured with API key authentication (not using CLI tokens)
+  - Used for manual deployment triggers and production troubleshooting
+  - Can trigger deploys: `render deploy`
+  - Can view logs: `render logs -s orgtree`
+  - Can access shell: `render shell orgtree`
 
 ---
 
@@ -279,6 +283,25 @@ cd server && npm run dev  # Backend (http://localhost:3001)
       - `server/src/routes/invitations.js`: Added await keyword
       - `server/src/services/invitation.service.js`: Added database operation validation
     - 📝 **IMPACT**: Invitation acceptance now properly adds users as members and marks invitations as accepted
+
+  **December 24, 2025 - Superuser Password Reset CLI Script** 🔧:
+  - ✅ **OPERATIONAL TOOL**: Added CLI script for emergency superuser password recovery
+  - ✅ **USE CASE**: Recover access when superuser password is lost or database issues occur
+  - ✅ **FEATURES**:
+    - List all superusers in database
+    - Reset password for existing superuser
+    - Promote regular user to superuser
+    - Generate secure 12-character temporary password
+    - Sets must_change_password flag for security
+    - Helpful error messages and suggestions
+  - ✅ **USAGE**:
+    - `node scripts/reset-superuser.js --list` - Show all superusers
+    - `node scripts/reset-superuser.js <email>` - Reset superuser password
+    - `node scripts/reset-superuser.js <email> --promote` - Promote to superuser and reset
+  - ✅ **FILES CREATED**:
+    - `server/scripts/reset-superuser.js` (197 lines)
+  - 📝 **IMPACT**: Provides safe recovery mechanism for production superuser access
+  - 🔐 **SECURITY**: Script can only be run with direct database access (Render Shell)
 
   **December 24, 2025 - Organization Sharing Visibility in User Management** 👥:
   - ✅ **FEATURE ADDED**: Superusers can now see organization ownership and membership details for all users
@@ -588,3 +611,16 @@ All critical security vulnerabilities have been addressed:
 - ✅ Comprehensive 500+ line deployment guide
 - ✅ Production .gitignore security
 - ✅ Zero-downtime deployment strategy
+
+### Operational Tools (December 24, 2025)
+- ✅ **Render CLI**: Configured with API key authentication for manual deployment control
+  - Trigger deploys: `render deploy`
+  - View live logs: `render logs -s orgtree`
+  - Access production shell: `render shell orgtree`
+- ✅ **Superuser Password Reset Script**: CLI tool for emergency password recovery
+  - Location: `server/scripts/reset-superuser.js`
+  - List superusers: `node scripts/reset-superuser.js --list`
+  - Reset password: `node scripts/reset-superuser.js <email>`
+  - Promote to superuser: `node scripts/reset-superuser.js <email> --promote`
+  - Generates secure 12-char temporary password
+  - Can be run from Render Shell for production recovery
