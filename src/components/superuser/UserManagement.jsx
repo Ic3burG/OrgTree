@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Search, Edit, Trash2, Key, Users, UserPlus } from 'lucide-react';
+import { Search, Edit, Trash2, Key, Users, UserPlus, Crown, Shield } from 'lucide-react';
 import api from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
 import UserForm from './UserForm';
 import ResetPasswordModal from './ResetPasswordModal';
 import CreateUserModal from './CreateUserModal';
 import DeleteConfirmModal from '../admin/DeleteConfirmModal';
+import UserOrgsModal from './UserOrgsModal';
 
 const ROLE_COLORS = {
   superuser: 'bg-purple-100 text-purple-800',
@@ -43,6 +44,9 @@ export default function UserManagement() {
 
   // Create user modal state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // User orgs modal state
+  const [orgsModalUser, setOrgsModalUser] = useState(null);
 
   useEffect(() => {
     loadUsers();
@@ -266,8 +270,28 @@ export default function UserManagement() {
                       {ROLE_LABELS[user.role] || user.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
-                    {user.organizationCount || 0}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm hidden sm:table-cell">
+                    <button
+                      onClick={() => setOrgsModalUser(user)}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                      title="View organization details"
+                    >
+                      {user.organizationCount > 0 && (
+                        <span className="inline-flex items-center gap-1 text-purple-700">
+                          <Crown size={14} />
+                          <span className="font-medium">{user.organizationCount}</span>
+                        </span>
+                      )}
+                      {user.membershipCount > 0 && (
+                        <span className="inline-flex items-center gap-1 text-blue-700">
+                          <Shield size={14} />
+                          <span className="font-medium">{user.membershipCount}</span>
+                        </span>
+                      )}
+                      {user.organizationCount === 0 && user.membershipCount === 0 && (
+                        <span className="text-gray-400">None</span>
+                      )}
+                    </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
                     {new Date(user.createdAt).toLocaleDateString()}
@@ -353,6 +377,14 @@ export default function UserManagement() {
             setIsCreateModalOpen(false);
             loadUsers();
           }}
+        />
+      )}
+
+      {/* User Organizations Modal */}
+      {orgsModalUser && (
+        <UserOrgsModal
+          user={orgsModalUser}
+          onClose={() => setOrgsModalUser(null)}
         />
       )}
     </div>

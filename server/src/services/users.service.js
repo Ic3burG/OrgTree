@@ -11,13 +11,42 @@ export function getAllUsers() {
       u.name,
       u.email,
       u.role,
-      u.created_at as createdAt,
-      (SELECT COUNT(*) FROM organizations WHERE created_by_id = u.id) as organizationCount
+      u.created_at as createdAt
     FROM users u
     ORDER BY u.created_at DESC
   `).all();
 
-  return users;
+  // Enhance each user with organization details
+  return users.map(user => {
+    // Get owned organizations
+    const ownedOrgs = db.prepare(`
+      SELECT id, name, is_public as isPublic
+      FROM organizations
+      WHERE created_by_id = ?
+      ORDER BY name
+    `).all(user.id);
+
+    // Get memberships
+    const memberships = db.prepare(`
+      SELECT
+        o.id,
+        o.name,
+        o.is_public as isPublic,
+        om.role
+      FROM organization_members om
+      JOIN organizations o ON om.organization_id = o.id
+      WHERE om.user_id = ?
+      ORDER BY o.name
+    `).all(user.id);
+
+    return {
+      ...user,
+      organizationCount: ownedOrgs.length,
+      membershipCount: memberships.length,
+      ownedOrganizations: ownedOrgs,
+      memberships: memberships
+    };
+  });
 }
 
 export function getUserById(userId) {
