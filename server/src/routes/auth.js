@@ -81,11 +81,15 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
     const now = new Date().toISOString();
 
     // Update password and clear must_change_password flag
-    db.prepare(`
+    const result = db.prepare(`
       UPDATE users
       SET password_hash = ?, must_change_password = 0, updated_at = ?
       WHERE id = ?
     `).run(passwordHash, now, req.user.id);
+
+    if (result.changes === 0) {
+      return res.status(500).json({ message: 'Failed to update password' });
+    }
 
     // Return updated user info
     const user = await getUserById(req.user.id);

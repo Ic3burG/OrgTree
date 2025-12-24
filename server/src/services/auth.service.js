@@ -69,7 +69,7 @@ export async function loginUser(email, password) {
 
 export async function getUserById(id) {
   const user = db.prepare(`
-    SELECT id, name, email, role, created_at
+    SELECT id, name, email, role, must_change_password, created_at
     FROM users WHERE id = ?
   `).get(id);
 
@@ -79,7 +79,14 @@ export async function getUserById(id) {
     throw error;
   }
 
-  return user;
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    mustChangePassword: user.must_change_password === 1,
+    createdAt: user.created_at
+  };
 }
 
 function generateToken(user) {
