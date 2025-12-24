@@ -280,6 +280,24 @@ cd server && npm run dev  # Backend (http://localhost:3001)
       - `server/src/services/invitation.service.js`: Added database operation validation
     - 📝 **IMPACT**: Invitation acceptance now properly adds users as members and marks invitations as accepted
 
+  **December 24, 2025 - Infinite Password Change Loop Fix** 🔐:
+  - ✅ **CRITICAL BUG FIXED**: Users no longer stuck in infinite password change redirect loop
+  - ✅ **ROOT CAUSE**: `getUserById` function didn't return `must_change_password` field
+  - ✅ **SYMPTOMS**: After changing temporary password and logging back in, users redirected to change password page infinitely
+  - ✅ **TECHNICAL ISSUE**:
+    - User object missing `mustChangePassword` field after login
+    - ProtectedRoute couldn't determine if password was actually changed
+    - Field was being cleared in DB but not returned in API responses
+  - ✅ **SOLUTION**:
+    - Added `must_change_password` to `getUserById` SELECT query
+    - Converted `getUserById` to return camelCase fields (`mustChangePassword`)
+    - Added validation for password UPDATE query (verifies `changes > 0`)
+    - Returns error if password update fails
+  - ✅ **FILES MODIFIED**:
+    - `server/src/services/auth.service.js`: Updated getUserById to include and format must_change_password
+    - `server/src/routes/auth.js`: Added validation for password update operation
+  - 📝 **IMPACT**: Temporary password flow now works correctly - users can change password and access the app
+
   **December 23, 2025 - User Search Bug Fix** 🐛:
   - ✅ **BUG FIXED**: User search in collaboration feature now works correctly
   - ✅ **ROOT CAUSE**: Express route conflict - `/api/users/search` was matching `/api/users/:id` in superuser-only users.js router
@@ -512,7 +530,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 23, 2025 (Invitation Acceptance Bug Fix)
+**Last Updated**: December 24, 2025 (Password Change Loop Fix)
 
 ---
 
