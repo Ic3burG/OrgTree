@@ -280,6 +280,30 @@ cd server && npm run dev  # Backend (http://localhost:3001)
       - `server/src/services/invitation.service.js`: Added database operation validation
     - 📝 **IMPACT**: Invitation acceptance now properly adds users as members and marks invitations as accepted
 
+  **December 24, 2025 - Organization Sharing Visibility in User Management** 👥:
+  - ✅ **FEATURE ADDED**: Superusers can now see organization ownership and membership details for all users
+  - ✅ **VISUAL ENHANCEMENT**: Organizations column shows intuitive badges with counts
+  - ✅ **DETAILED VIEW**: Click to open modal showing full organization breakdown
+  - ✅ **BACKEND ENHANCEMENTS**:
+    - Enhanced `getAllUsers()` to include owned organizations and memberships
+    - Returns organization names, public/private status, and member roles
+    - Added `membershipCount` to user data
+  - ✅ **FRONTEND FEATURES**:
+    - Created `UserOrgsModal` component with role-based badges
+    - Visual indicators: Purple Crown (owner), Blue Shield (member)
+    - Modal displays:
+      - Organizations owned (with Owner badge)
+      - Organizations user is member of (with Admin/Editor/Viewer role)
+      - Public/Private status for each organization
+    - Color-coded roles: Purple (owner), Blue (admin), Green (editor), Gray (viewer)
+  - ✅ **FILES CREATED**:
+    - `src/components/superuser/UserOrgsModal.jsx`
+  - ✅ **FILES MODIFIED**:
+    - `server/src/services/users.service.js`: Enhanced getAllUsers with membership data
+    - `src/components/superuser/UserManagement.jsx`: Added badges and modal
+  - 📝 **IMPACT**: Superusers have complete visibility into organization sharing and team collaboration across all users
+  - 🎯 **USER EXPERIENCE**: Click organization badges to see detailed breakdown of owned vs member access
+
   **December 24, 2025 - Infinite Password Change Loop Fix** 🔐:
   - ✅ **CRITICAL BUG FIXED**: Users no longer stuck in infinite password change redirect loop
   - ✅ **ROOT CAUSE**: `getUserById` function didn't return `must_change_password` field
@@ -530,7 +554,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 24, 2025 (Password Change Loop Fix)
+**Last Updated**: December 24, 2025 (Organization Sharing Visibility Feature)
 
 ---
 
