@@ -25,7 +25,7 @@ export default function PersonForm({
         title: person.title || '',
         email: person.email || '',
         phone: person.phone || '',
-        departmentId: person.department_id || '',
+        departmentId: person.departmentId || '',
       });
     } else {
       setFormData({

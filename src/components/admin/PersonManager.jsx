@@ -79,7 +79,7 @@ export default function PersonManager() {
       if (editingPerson) {
         await api.updatePerson(editingPerson.id, formData);
       } else {
-        await api.createPerson(formData.department_id, formData);
+        await api.createPerson(formData.departmentId, formData);
       }
       setIsFormOpen(false);
       setEditingPerson(null);
@@ -118,7 +118,7 @@ export default function PersonManager() {
       person.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesDepartment =
-      !filterDepartment || person.department_id === filterDepartment;
+      !filterDepartment || person.departmentId === filterDepartment;
 
     return matchesSearch && matchesDepartment;
   });
