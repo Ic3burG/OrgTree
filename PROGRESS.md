@@ -200,18 +200,20 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 10+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Person Creation Bug Fix (December 25, 2025)
+- **Last Major Update**: Snake_case Field Name Fixes (December 25, 2025)
 - **Total Commits**: 80+ commits on current branch
 - **Recent Session Highlights**:
 
-  **December 25, 2025 - Person Creation Bug Fix** 🐛:
+  **December 25, 2025 - Snake_case Field Name Fixes** 🐛:
   - ✅ **BUG FIXED**: "Department Not Found" error when adding people to organizations
-  - ✅ **ROOT CAUSE**: Field name mismatch - frontend used `department_id` (snake_case) but API returns `departmentId` (camelCase)
+  - ✅ **ROOT CAUSE**: Field name mismatch - frontend used snake_case but API returns camelCase
   - ✅ **FILES MODIFIED**:
-    - `src/components/admin/PersonManager.jsx`: Fixed `formData.department_id` → `formData.departmentId` for createPerson call
-    - `src/components/admin/PersonManager.jsx`: Fixed filter comparison `person.department_id` → `person.departmentId`
-    - `src/components/admin/PersonForm.jsx`: Fixed edit mode `person.department_id` → `person.departmentId`
-  - 📝 **IMPACT**: Users can now add people to any department without errors
+    - `src/components/admin/PersonManager.jsx`: Fixed `department_id` → `departmentId` (createPerson + filter)
+    - `src/components/admin/PersonForm.jsx`: Fixed `department_id` → `departmentId` (edit mode)
+    - `src/utils/csvExport.js`: Fixed `parent_id` → `parentId` (CSV export)
+    - `src/components/OrganizationSelector.jsx`: Fixed `created_at` → `createdAt` (org cards)
+    - `src/components/admin/Dashboard.jsx`: Fixed `parent_id` → `parentId`, `created_at` → `createdAt`
+  - 📝 **IMPACT**: All frontend field references now match API camelCase conventions
 
   **December 24, 2025 - Real-Time Collaboration Updates** :zap::
   - :white_check_mark: **MAJOR FEATURE**: Implemented WebSocket-based real-time updates using Socket.IO
@@ -644,7 +646,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 25, 2025 (Person Creation Bug Fix)
+**Last Updated**: December 25, 2025 (Snake_case Field Name Fixes)
 
 ---
 

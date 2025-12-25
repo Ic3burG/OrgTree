@@ -40,12 +40,12 @@ export function generateCSV(org) {
     });
 
     // Process children
-    const children = depts.filter((d) => d.parent_id === dept.id);
+    const children = depts.filter((d) => d.parentId === dept.id);
     children.forEach((child) => buildPath(child, depts, currentPath));
   };
 
   // Start with top-level departments
-  const topLevel = (org.departments || []).filter((d) => !d.parent_id);
+  const topLevel = (org.departments || []).filter((d) => !d.parentId);
   topLevel.forEach((dept) => buildPath(dept, org.departments));
 
   // Convert to CSV string

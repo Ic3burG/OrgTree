@@ -75,7 +75,7 @@ export default function Dashboard() {
   ) || 0;
 
   const topLevelDepts = organization.departments?.filter(
-    (d) => !d.parent_id
+    (d) => !d.parentId
   ).length || 0;
 
   return (
@@ -134,8 +134,8 @@ export default function Dashboard() {
             </div>
             <p className="text-xs text-gray-500 mt-4">
               {topLevelDepts} top-level departments
-              {organization.created_at && (
-                <> • Created {new Date(organization.created_at).toLocaleDateString()}</>
+              {organization.createdAt && (
+                <> • Created {new Date(organization.createdAt).toLocaleDateString()}</>
               )}
             </p>
           </div>
@@ -175,8 +175,8 @@ export default function Dashboard() {
                 {organization.departments
                   .sort((a, b) => {
                     // Handle missing dates safely
-                    const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-                    const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
                     return dateB - dateA;
                   })
                   .slice(0, 5)
@@ -199,9 +199,9 @@ export default function Dashboard() {
                         <p className="text-sm font-medium text-gray-900">
                           {dept.people?.length || 0} people
                         </p>
-                        {dept.created_at && (
+                        {dept.createdAt && (
                           <p className="text-xs text-gray-500">
-                            {new Date(dept.created_at).toLocaleDateString()}
+                            {new Date(dept.createdAt).toLocaleDateString()}
                           </p>
                         )}
                       </div>

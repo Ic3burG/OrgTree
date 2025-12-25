@@ -215,9 +215,9 @@ export default function OrganizationSelector() {
                     <p>
                       {org.departments?.length || 0} departments
                     </p>
-                    {org.created_at && (
+                    {org.createdAt && (
                       <p>
-                        Created {new Date(org.created_at).toLocaleDateString()}
+                        Created {new Date(org.createdAt).toLocaleDateString()}
                       </p>
                     )}
                   </div>
