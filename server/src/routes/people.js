@@ -8,6 +8,12 @@ import {
   deletePerson,
   movePerson,
 } from '../services/people.service.js';
+import {
+  emitPersonCreated,
+  emitPersonUpdated,
+  emitPersonDeleted
+} from '../services/socket-events.service.js';
+import db from '../db.js';
 
 const router = express.Router();
 
@@ -37,6 +43,13 @@ router.post('/departments/:deptId/people', async (req, res, next) => {
       { name: name.trim(), title, email, phone },
       req.user.id
     );
+
+    // Get orgId from department for real-time event
+    const dept = db.prepare('SELECT organization_id FROM departments WHERE id = ?').get(req.params.deptId);
+    if (dept) {
+      emitPersonCreated(dept.organization_id, person, req.user);
+    }
+
     res.status(201).json(person);
   } catch (err) {
     next(err);
@@ -67,6 +80,13 @@ router.put('/people/:personId', async (req, res, next) => {
       { name: name?.trim(), title, email, phone, departmentId },
       req.user.id
     );
+
+    // Get orgId from person's department for real-time event
+    const dept = db.prepare('SELECT organization_id FROM departments WHERE id = ?').get(person.departmentId);
+    if (dept) {
+      emitPersonUpdated(dept.organization_id, person, req.user);
+    }
+
     res.json(person);
   } catch (err) {
     next(err);
@@ -76,7 +96,21 @@ router.put('/people/:personId', async (req, res, next) => {
 // DELETE /api/people/:personId
 router.delete('/people/:personId', async (req, res, next) => {
   try {
+    // Get person's department before deleting for real-time event
+    const person = db.prepare(`
+      SELECT p.id, d.organization_id
+      FROM people p
+      JOIN departments d ON p.department_id = d.id
+      WHERE p.id = ?
+    `).get(req.params.personId);
+
     await deletePerson(req.params.personId, req.user.id);
+
+    // Emit real-time event
+    if (person) {
+      emitPersonDeleted(person.organization_id, req.params.personId, req.user);
+    }
+
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -93,6 +127,13 @@ router.put('/people/:personId/move', async (req, res, next) => {
     }
 
     const person = await movePerson(req.params.personId, departmentId, req.user.id);
+
+    // Get orgId from new department for real-time event
+    const dept = db.prepare('SELECT organization_id FROM departments WHERE id = ?').get(departmentId);
+    if (dept) {
+      emitPersonUpdated(dept.organization_id, person, req.user);
+    }
+
     res.json(person);
   } catch (err) {
     next(err);

@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../../api/client';
 import DepartmentForm from './DepartmentForm';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 import {
   Plus,
   ChevronRight,
@@ -30,24 +31,33 @@ export default function DepartmentManager() {
   const [deletingDept, setDeletingDept] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
 
-  useEffect(() => {
-    loadDepartments();
-  }, [orgId]);
-
-  const loadDepartments = async () => {
+  const loadDepartments = useCallback(async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const data = await api.getDepartments(orgId);
       console.log('Loaded departments:', data);
       setDepartments(data);
-      // Auto-expand all
-      setExpanded(new Set(data.map((d) => d.id)));
+      // Auto-expand all on initial load
+      if (showLoading) {
+        setExpanded(new Set(data.map((d) => d.id)));
+      }
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
-  };
+  }, [orgId]);
+
+  useEffect(() => {
+    loadDepartments();
+  }, [loadDepartments]);
+
+  // Real-time updates
+  const { isRecentlyChanged } = useRealtimeUpdates(orgId, {
+    onDepartmentChange: () => loadDepartments(false),
+    onPersonChange: () => loadDepartments(false),
+    showNotifications: true
+  });
 
   const handleCreateDept = async (formData) => {
     console.log('handleCreateDept called with:', formData);
@@ -144,11 +154,14 @@ export default function DepartmentManager() {
     const hasChildren = dept.children && dept.children.length > 0;
     const isExpanded = expanded.has(dept.id);
     const peopleCount = dept.people?.length || 0;
+    const recentlyChanged = isRecentlyChanged(dept.id);
 
     return (
       <div key={dept.id}>
         <div
-          className="flex items-center gap-2 p-3 hover:bg-slate-50 rounded-lg group"
+          className={`flex items-center gap-2 p-3 hover:bg-slate-50 rounded-lg group transition-all duration-300 ${
+            recentlyChanged ? 'bg-blue-50 ring-2 ring-blue-200' : ''
+          }`}
           style={{ paddingLeft: `${dept.depth * 24 + 12}px` }}
         >
           <button

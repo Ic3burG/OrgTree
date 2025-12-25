@@ -19,6 +19,7 @@ import { calculateLayout } from '../utils/layoutEngine';
 import { getDepthColors } from '../utils/colors';
 import { exportToPng, exportToPdf } from '../utils/exportUtils';
 import { useToast } from './ui/Toast';
+import { useRealtimeUpdates } from '../hooks/useRealtimeUpdates';
 import api from '../api/client';
 
 // Theme context for providing current theme to all nodes
@@ -111,62 +112,72 @@ export default function OrgMap() {
   const toast = useToast();
 
   // Load organization data from API
-  useEffect(() => {
-    async function loadData() {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const loadData = useCallback(async (showLoading = true) => {
+    try {
+      if (showLoading) setIsLoading(true);
+      setError(null);
 
-        // Fetch organization with all departments and people
-        const org = await api.getOrganization(orgId);
+      // Fetch organization with all departments and people
+      const org = await api.getOrganization(orgId);
 
-        // Store organization name for exports
-        if (org.name) {
-          setOrgName(org.name);
+      // Store organization name for exports
+      if (org.name) {
+        setOrgName(org.name);
+      }
+
+      if (!org.departments || org.departments.length === 0) {
+        setNodes([]);
+        setEdges([]);
+        if (showLoading) setIsLoading(false);
+        return;
+      }
+
+      // Transform API data to React Flow format
+      const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(org.departments);
+
+      // Apply initial layout
+      const layoutedNodes = calculateLayout(parsedNodes, parsedEdges, layoutDirection);
+
+      // Add callbacks to node data
+      const nodesWithCallbacks = layoutedNodes.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          onToggleExpand: () => handleToggleExpand(node.id),
+          onSelectPerson: (person) => handleSelectPerson(person)
         }
+      }));
 
-        if (!org.departments || org.departments.length === 0) {
-          setNodes([]);
-          setEdges([]);
-          setIsLoading(false);
-          return;
-        }
+      setNodes(nodesWithCallbacks);
+      setEdges(parsedEdges);
 
-        // Transform API data to React Flow format
-        const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(org.departments);
-
-        // Apply initial layout
-        const layoutedNodes = calculateLayout(parsedNodes, parsedEdges, layoutDirection);
-
-        // Add callbacks to node data
-        const nodesWithCallbacks = layoutedNodes.map(node => ({
-          ...node,
-          data: {
-            ...node.data,
-            onToggleExpand: () => handleToggleExpand(node.id),
-            onSelectPerson: (person) => handleSelectPerson(person)
-          }
-        }));
-
-        setNodes(nodesWithCallbacks);
-        setEdges(parsedEdges);
-
-        // Fit view after initial load
+      // Fit view after initial load (only on first load)
+      if (showLoading) {
         setTimeout(() => {
           fitView({ padding: 0.2, duration: 800 });
         }, 100);
-      } catch (err) {
-        console.error('Error loading organization data:', err);
-        setError(err.message || 'Failed to load organization data');
-      } finally {
-        setIsLoading(false);
       }
+    } catch (err) {
+      console.error('Error loading organization data:', err);
+      setError(err.message || 'Failed to load organization data');
+    } finally {
+      if (showLoading) setIsLoading(false);
     }
+  }, [orgId, layoutDirection, fitView, setNodes, setEdges]);
 
+  // Initial load
+  useEffect(() => {
     if (orgId) {
       loadData();
     }
   }, [orgId]);
+
+  // Real-time updates
+  useRealtimeUpdates(orgId, {
+    onDepartmentChange: () => loadData(false),
+    onPersonChange: () => loadData(false),
+    showNotifications: true
+  });
 
   // Load saved theme from localStorage on mount
   useEffect(() => {

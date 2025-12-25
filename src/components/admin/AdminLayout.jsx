@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate, useParams } from 'react-router-dom';
 import { Home, Users, Building2, Map, LogOut, ArrowLeft, Menu, X, Shield } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
+import ConnectionStatus from '../ui/ConnectionStatus';
 
 export default function AdminLayout() {
   const { orgId } = useParams();
@@ -48,7 +49,12 @@ export default function AdminLayout() {
             System Admin
           </NavLink>
         )}
-        <h2 className="text-lg font-semibold text-gray-900">Admin Panel</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">Admin Panel</h2>
+          <div className="hidden lg:block">
+            <ConnectionStatus />
+          </div>
+        </div>
       </div>
 
       {/* Navigation */}
@@ -159,15 +165,18 @@ export default function AdminLayout() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile header with hamburger */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-40 flex items-center px-4">
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="p-2 -ml-2 hover:bg-gray-100 rounded-lg transition-colors"
-          aria-label="Open menu"
-        >
-          <Menu size={24} className="text-gray-700" />
-        </button>
-        <h1 className="ml-3 text-lg font-semibold text-gray-900">OrgTree</h1>
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-40 flex items-center justify-between px-4">
+        <div className="flex items-center">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 -ml-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu size={24} className="text-gray-700" />
+          </button>
+          <h1 className="ml-3 text-lg font-semibold text-gray-900">OrgTree</h1>
+        </div>
+        <ConnectionStatus />
       </header>
 
       {/* Mobile sidebar overlay */}

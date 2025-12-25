@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Link2, RefreshCw, Copy, Check, Globe, Lock, Users, Trash2 } from 'lucide-react';
 import api from '../../api/client';
 import { useToast } from '../ui/Toast';
 import AddMemberModal from './AddMemberModal';
+import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 
 export default function ShareModal({ orgId, orgName, onClose }) {
   const [activeTab, setActiveTab] = useState('public');
@@ -43,40 +44,49 @@ export default function ShareModal({ orgId, orgName, onClose }) {
     loadSettings();
   }, [orgId, toast]);
 
-  // Load members when Team Members tab is active
-  useEffect(() => {
-    if (activeTab === 'members') {
-      loadMembers();
-      loadInvitations();
-    }
-  }, [activeTab, orgId]);
-
-  async function loadMembers() {
+  const loadMembers = useCallback(async (showLoading = true) => {
     try {
-      setLoadingMembers(true);
+      if (showLoading) setLoadingMembers(true);
       const data = await api.getOrgMembers(orgId);
       setOwner(data.owner);
       setMembers(data.members || []);
     } catch (err) {
       console.error('Failed to load members:', err);
-      toast.error('Failed to load members');
+      if (showLoading) toast.error('Failed to load members');
     } finally {
-      setLoadingMembers(false);
+      if (showLoading) setLoadingMembers(false);
     }
-  }
+  }, [orgId, toast]);
 
-  async function loadInvitations() {
+  const loadInvitations = useCallback(async (showLoading = true) => {
     try {
-      setLoadingInvitations(true);
+      if (showLoading) setLoadingInvitations(true);
       const data = await api.getInvitations(orgId);
       setInvitations(data || []);
     } catch (err) {
       console.error('Failed to load invitations:', err);
       // Don't show error toast - invitations are optional
     } finally {
-      setLoadingInvitations(false);
+      if (showLoading) setLoadingInvitations(false);
     }
-  }
+  }, [orgId]);
+
+  // Load members when Team Members tab is active
+  useEffect(() => {
+    if (activeTab === 'members') {
+      loadMembers();
+      loadInvitations();
+    }
+  }, [activeTab, loadMembers, loadInvitations]);
+
+  // Real-time updates for members
+  useRealtimeUpdates(orgId, {
+    onMemberChange: () => {
+      loadMembers(false);
+      loadInvitations(false);
+    },
+    showNotifications: true
+  });
 
   // Toggle public/private
   const handleTogglePublic = async () => {

@@ -10,6 +10,7 @@ import {
   deleteOrganization,
 } from '../services/org.service.js';
 import { requireOrgPermission } from '../services/member.service.js';
+import { emitOrgUpdated, emitOrgSettings } from '../services/socket-events.service.js';
 
 const router = express.Router();
 
@@ -62,6 +63,10 @@ router.put('/organizations/:id', async (req, res, next) => {
     }
 
     const org = await updateOrganization(req.params.id, name.trim(), req.user.id);
+
+    // Emit real-time event
+    emitOrgUpdated(req.params.id, org, req.user);
+
     res.json(org);
   } catch (err) {
     next(err);
@@ -142,13 +147,18 @@ router.put('/organizations/:id/share', async (req, res, next) => {
       WHERE id = ?
     `).run(isPublic ? 1 : 0, shareToken, id);
 
-    res.json({
+    const settings = {
       isPublic,
       shareToken,
       shareUrl: shareToken
         ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/public/${shareToken}`
         : null
-    });
+    };
+
+    // Emit real-time event
+    emitOrgSettings(id, settings, req.user);
+
+    res.json(settings);
   } catch (err) {
     next(err);
   }
@@ -183,11 +193,16 @@ router.post('/organizations/:id/share/regenerate', async (req, res, next) => {
       WHERE id = ?
     `).run(shareToken, id);
 
-    res.json({
+    const settings = {
       shareToken,
       shareUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/public/${shareToken}`,
       isPublic: org.is_public === 1
-    });
+    };
+
+    // Emit real-time event
+    emitOrgSettings(id, settings, req.user);
+
+    res.json(settings);
   } catch (err) {
     next(err);
   }

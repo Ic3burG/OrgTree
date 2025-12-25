@@ -7,6 +7,11 @@ import {
   updateDepartment,
   deleteDepartment,
 } from '../services/department.service.js';
+import {
+  emitDepartmentCreated,
+  emitDepartmentUpdated,
+  emitDepartmentDeleted
+} from '../services/socket-events.service.js';
 
 const router = express.Router();
 
@@ -56,6 +61,9 @@ router.post('/organizations/:orgId/departments', async (req, res, next) => {
       req.user.id
     );
 
+    // Emit real-time event
+    emitDepartmentCreated(req.params.orgId, dept, req.user);
+
     console.log('Created department:', dept);
     res.status(201).json(dept);
   } catch (err) {
@@ -90,6 +98,9 @@ router.put('/organizations/:orgId/departments/:deptId', async (req, res, next) =
       req.user.id
     );
 
+    // Emit real-time event
+    emitDepartmentUpdated(req.params.orgId, dept, req.user);
+
     console.log('Updated department:', dept);
     res.json(dept);
   } catch (err) {
@@ -102,6 +113,10 @@ router.put('/organizations/:orgId/departments/:deptId', async (req, res, next) =
 router.delete('/organizations/:orgId/departments/:deptId', async (req, res, next) => {
   try {
     await deleteDepartment(req.params.orgId, req.params.deptId, req.user.id);
+
+    // Emit real-time event
+    emitDepartmentDeleted(req.params.orgId, req.params.deptId, req.user);
+
     res.status(204).send();
   } catch (err) {
     next(err);

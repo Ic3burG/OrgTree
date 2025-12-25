@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Edit, Trash2, Search, Mail, Phone, MapPin } from 'lucide-react';
 import api from '../../api/client';
 import PersonForm from './PersonForm';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 
 export default function PersonManager() {
   const { orgId } = useParams();
@@ -24,13 +25,9 @@ export default function PersonManager() {
   const [personToDelete, setPersonToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, [orgId]);
-
-  async function loadData() {
+  const loadData = useCallback(async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       setError(null);
 
       // Load organization with all departments and people
@@ -51,9 +48,20 @@ export default function PersonManager() {
     } catch (err) {
       setError(err.message || 'Failed to load data');
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
-  }
+  }, [orgId]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Real-time updates
+  const { isRecentlyChanged } = useRealtimeUpdates(orgId, {
+    onDepartmentChange: () => loadData(false),
+    onPersonChange: () => loadData(false),
+    showNotifications: true
+  });
 
   const handleCreate = () => {
     setEditingPerson(null);
@@ -214,7 +222,9 @@ export default function PersonManager() {
                   {filteredPeople.map((person) => (
                     <div
                       key={person.id}
-                      className="p-6 hover:bg-gray-50 transition-colors group"
+                      className={`p-6 hover:bg-gray-50 transition-all duration-300 group ${
+                        isRecentlyChanged(person.id) ? 'bg-blue-50 ring-2 ring-blue-200' : ''
+                      }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">

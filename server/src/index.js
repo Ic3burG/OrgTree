@@ -1,4 +1,5 @@
 import express from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -15,6 +16,7 @@ import invitationRoutes from './routes/invitations.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
 import db from './db.js';
+import { initializeSocket } from './socket.js';
 
 dotenv.config();
 
@@ -31,6 +33,7 @@ if (process.env.NODE_ENV === 'production' &&
 }
 
 const app = express();
+const server = createServer(app);
 const PORT = process.env.PORT || 3001;
 
 // Trust proxy - required for rate limiting to work correctly behind Render's proxy
@@ -63,6 +66,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Initialize Socket.IO with the HTTP server
+initializeSocket(server, allowedOrigins);
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -118,7 +124,7 @@ if (process.env.NODE_ENV === 'production') {
 // Error handler (must be last)
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`, {
     port: PORT,
     environment: process.env.NODE_ENV || 'development'

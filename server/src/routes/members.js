@@ -8,6 +8,11 @@ import {
   removeOrgMember,
   checkOrgAccess
 } from '../services/member.service.js';
+import {
+  emitMemberAdded,
+  emitMemberUpdated,
+  emitMemberRemoved
+} from '../services/socket-events.service.js';
 import db from '../db.js';
 
 const router = express.Router();
@@ -69,6 +74,10 @@ router.post('/organizations/:orgId/members', async (req, res, next) => {
     }
 
     const member = addOrgMember(orgId, userId, role, req.user.id);
+
+    // Emit real-time event
+    emitMemberAdded(orgId, member, req.user);
+
     res.status(201).json(member);
   } catch (err) {
     next(err);
@@ -87,6 +96,10 @@ router.put('/organizations/:orgId/members/:memberId', async (req, res, next) => 
     }
 
     const member = updateMemberRole(orgId, memberId, role, req.user.id);
+
+    // Emit real-time event
+    emitMemberUpdated(orgId, member, req.user);
+
     res.json(member);
   } catch (err) {
     next(err);
@@ -100,6 +113,10 @@ router.delete('/organizations/:orgId/members/:memberId', async (req, res, next) 
     const { orgId, memberId } = req.params;
 
     await removeOrgMember(orgId, memberId, req.user.id);
+
+    // Emit real-time event
+    emitMemberRemoved(orgId, memberId, req.user);
+
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -125,6 +142,8 @@ router.post('/organizations/:orgId/members/by-email', async (req, res, next) => 
     const result = addMemberByEmail(orgId, email, role, req.user.id);
 
     if (result.success) {
+      // Emit real-time event
+      emitMemberAdded(orgId, result.member, req.user);
       res.status(201).json(result);
     } else {
       // User not found - return 200 with success: false so frontend can offer to send invite

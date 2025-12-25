@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
 import { AuthProvider } from './contexts/AuthContext';
+import { SocketProvider } from './contexts/SocketContext';
 import { ToastProvider } from './components/ui/Toast';
 import ErrorBoundary from './components/ErrorBoundary';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -26,6 +27,7 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
+        <SocketProvider>
         <ToastProvider>
         <BrowserRouter>
         <Routes>
@@ -95,6 +97,7 @@ function App() {
         </Routes>
       </BrowserRouter>
         </ToastProvider>
+        </SocketProvider>
       </AuthProvider>
     </ErrorBoundary>
   );

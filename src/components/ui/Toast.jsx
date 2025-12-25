@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
 
 const ToastContext = createContext(null);
@@ -18,6 +18,19 @@ export function ToastProvider({ children }) {
   const removeToast = useCallback((id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
+
+  // Listen for realtime notification events from Socket.IO hook
+  useEffect(() => {
+    const handleRealtimeNotification = (event) => {
+      const { message, type } = event.detail;
+      addToast(message, type || 'info');
+    };
+
+    window.addEventListener('realtime-notification', handleRealtimeNotification);
+    return () => {
+      window.removeEventListener('realtime-notification', handleRealtimeNotification);
+    };
+  }, [addToast]);
 
   const toast = {
     success: (message) => addToast(message, 'success'),
