@@ -79,10 +79,12 @@ export default function Dashboard() {
   ).length || 0;
 
   return (
-    <div className="p-4 lg:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 lg:mb-8 flex flex-col lg:flex-row items-start gap-4 lg:justify-between">
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Header - fixed */}
+      <div className="flex-shrink-0 p-4 lg:p-8 pb-0">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="mb-6 lg:mb-8 flex flex-col lg:flex-row items-start gap-4 lg:justify-between">
           <div className="w-full lg:w-auto">
             <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
               {organization.name}
@@ -115,9 +117,14 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
+        </div>
+      </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto px-4 lg:px-8 pb-4 lg:pb-8 min-h-0">
+        <div className="max-w-6xl mx-auto">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
           <div className="bg-white rounded-lg shadow p-5 lg:p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -225,6 +232,7 @@ export default function Dashboard() {
             </p>
           </div>
         )}
+        </div>
       </div>
 
       {/* Import Modal */}

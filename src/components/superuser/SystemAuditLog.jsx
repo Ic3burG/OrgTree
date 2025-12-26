@@ -104,9 +104,12 @@ export default function SystemAuditLog() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Header - fixed */}
+      <div className="flex-shrink-0 px-4 py-8 pb-0">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <FileText className="text-purple-600" size={32} />
           <h1 className="text-3xl font-bold text-gray-900">System Audit Logs</h1>
@@ -195,10 +198,14 @@ export default function SystemAuditLog() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
-      {/* Audit Logs Table */}
-      {logs.length === 0 ? (
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto px-4 pb-8 min-h-0">
+        <div className="max-w-7xl mx-auto">
+          {/* Audit Logs Table */}
+          {logs.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
           <FileText className="mx-auto text-gray-400 mb-4" size={48} />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -325,6 +332,8 @@ export default function SystemAuditLog() {
           )}
         </>
       )}
+        </div>
+      </div>
     </div>
   );
 }
