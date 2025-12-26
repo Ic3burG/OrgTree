@@ -201,9 +201,29 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 10+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Audit Trail Feature (December 26, 2025)
+- **Last Major Update**: Scrolling Layout Fixes (December 26, 2025)
 - **Total Commits**: 80+ commits on current branch
 - **Recent Session Highlights**:
+
+  **December 26, 2025 - Scrolling Layout Fixes** 🎨:
+  - ✅ **BUG FIXED**: Vertical scrolling not working on Dashboard, Departments, and Audit pages at certain browser sizes
+  - ✅ **ROOT CAUSE**: Missing flexbox layout structure with proper height constraints
+  - ✅ **SOLUTION**: Implemented consistent h-full flex layout pattern across all affected pages
+  - ✅ **LAYOUT PATTERN**:
+    - Outer container: `h-full flex flex-col overflow-hidden`
+    - Header section: `flex-shrink-0` (fixed, doesn't shrink)
+    - Content section: `flex-1 overflow-y-auto min-h-0` (scrollable)
+  - ✅ **FILES MODIFIED** (4 files):
+    - `src/components/admin/Dashboard.jsx` - Added proper flexbox layout
+    - `src/components/admin/DepartmentManager.jsx` - Added proper flexbox layout
+    - `src/components/admin/AuditLog.jsx` - Added proper flexbox layout
+    - `src/components/superuser/SystemAuditLog.jsx` - Added proper flexbox layout
+  - ✅ **JSX SYNTAX FIXES**:
+    - Fixed extra closing `</div>` tags in AuditLog.jsx and SystemAuditLog.jsx
+    - Corrected div nesting structure that was causing build failures
+  - 📝 **IMPACT**: Consistent scrolling behavior across all admin pages, matching PersonManager pattern
+  - 🎯 **USER EXPERIENCE**: Smooth vertical scrolling on all browser sizes, no content cutoff
+  - 🚀 **DEPLOYMENT**: Successfully deployed to production (dep-d57c55dactks73c2r7hg)
 
   **December 26, 2025 - Audit Trail Feature** 📋:
   - ✅ **MAJOR FEATURE**: Comprehensive audit logging system for tracking all changes
@@ -696,7 +716,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 26, 2025 (Audit Trail Feature)
+**Last Updated**: December 26, 2025 (Scrolling Layout Fixes)
 
 ---
 
