@@ -198,6 +198,7 @@ export default function SystemAuditLog() {
             </div>
           </div>
         )}
+      </div>
         </div>
       </div>
 
