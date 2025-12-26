@@ -251,6 +251,7 @@ export default function Dashboard() {
         <ShareModal
           orgId={orgId}
           orgName={organization.name}
+          userRole={organization.userRole}
           onClose={() => setShowShare(false)}
         />
       )}

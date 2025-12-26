@@ -5,13 +5,16 @@ import { useToast } from '../ui/Toast';
 import AddMemberModal from './AddMemberModal';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 
-export default function ShareModal({ orgId, orgName, onClose }) {
+export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   const [activeTab, setActiveTab] = useState('public');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
+
+  // Check if user has admin permissions (admin or owner)
+  const isAdmin = userRole === 'admin' || userRole === 'owner';
 
   // Members state
   const [members, setMembers] = useState([]);
@@ -294,10 +297,11 @@ export default function ShareModal({ orgId, orgName, onClose }) {
                       </div>
                       <button
                         onClick={handleTogglePublic}
-                        disabled={saving}
+                        disabled={saving || !isAdmin}
+                        title={!isAdmin ? 'Only admins can change sharing settings' : ''}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                           isPublic ? 'bg-blue-600' : 'bg-slate-300'
-                        } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        } ${saving || !isAdmin ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -339,14 +343,16 @@ export default function ShareModal({ orgId, orgName, onClose }) {
                         </div>
 
                         {/* Regenerate Token */}
-                        <button
-                          onClick={handleRegenerateToken}
-                          disabled={saving}
-                          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors disabled:opacity-50"
-                        >
-                          <RefreshCw size={16} />
-                          Regenerate link
-                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={handleRegenerateToken}
+                            disabled={saving}
+                            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors disabled:opacity-50"
+                          >
+                            <RefreshCw size={16} />
+                            Regenerate link
+                          </button>
+                        )}
                       </div>
                     )}
 
@@ -379,16 +385,18 @@ export default function ShareModal({ orgId, orgName, onClose }) {
                   </div>
                 ) : (
                   <>
-                    {/* Add Member Button */}
-                    <div className="flex justify-end">
-                      <button
-                        onClick={() => setShowAddMember(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-                      >
-                        <Users size={18} />
-                        Add Member
-                      </button>
-                    </div>
+                    {/* Add Member Button - only for admins */}
+                    {isAdmin && (
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => setShowAddMember(true)}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                        >
+                          <Users size={18} />
+                          Add Member
+                        </button>
+                      </div>
+                    )}
 
                     {/* Owner */}
                     {owner && (
@@ -427,22 +435,30 @@ export default function ShareModal({ orgId, orgName, onClose }) {
                                 </div>
                               </div>
                               <div className="flex items-center space-x-3">
-                                <select
-                                  value={member.role}
-                                  onChange={(e) => handleUpdateRole(member.id, e.target.value)}
-                                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                >
-                                  <option value="viewer">Viewer</option>
-                                  <option value="editor">Editor</option>
-                                  <option value="admin">Admin</option>
-                                </select>
-                                <button
-                                  onClick={() => handleRemoveMember(member.id, member.userName)}
-                                  className="text-red-600 hover:text-red-800 transition-colors"
-                                  title="Remove member"
-                                >
-                                  <Trash2 size={18} />
-                                </button>
+                                {isAdmin ? (
+                                  <>
+                                    <select
+                                      value={member.role}
+                                      onChange={(e) => handleUpdateRole(member.id, e.target.value)}
+                                      className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                      <option value="viewer">Viewer</option>
+                                      <option value="editor">Editor</option>
+                                      <option value="admin">Admin</option>
+                                    </select>
+                                    <button
+                                      onClick={() => handleRemoveMember(member.id, member.userName)}
+                                      className="text-red-600 hover:text-red-800 transition-colors"
+                                      title="Remove member"
+                                    >
+                                      <Trash2 size={18} />
+                                    </button>
+                                  </>
+                                ) : (
+                                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleBadgeColor(member.role)}`}>
+                                    {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -483,13 +499,15 @@ export default function ShareModal({ orgId, orgName, onClose }) {
                                 <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
                                   Pending
                                 </span>
-                                <button
-                                  onClick={() => handleCancelInvitation(invitation.id, invitation.email)}
-                                  className="text-red-600 hover:text-red-800 transition-colors"
-                                  title="Cancel invitation"
-                                >
-                                  <Trash2 size={18} />
-                                </button>
+                                {isAdmin && (
+                                  <button
+                                    onClick={() => handleCancelInvitation(invitation.id, invitation.email)}
+                                    className="text-red-600 hover:text-red-800 transition-colors"
+                                    title="Cancel invitation"
+                                  >
+                                    <Trash2 size={18} />
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </div>

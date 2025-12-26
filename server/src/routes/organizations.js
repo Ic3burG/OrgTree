@@ -84,13 +84,13 @@ router.delete('/organizations/:id', async (req, res, next) => {
 });
 
 // GET /api/organizations/:id/share
-// Get sharing settings for an organization (requires admin)
+// Get sharing settings for an organization (any member can view)
 router.get('/organizations/:id/share', async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Verify admin permission
-    requireOrgPermission(id, req.user.id, 'admin');
+    // Any member can view share settings (viewer or higher)
+    requireOrgPermission(id, req.user.id, 'viewer');
 
     const org = db.prepare(`
       SELECT id, name, is_public, share_token

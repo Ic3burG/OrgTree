@@ -7,8 +7,8 @@ export async function getOrganizations(userId) {
 }
 
 export async function getOrganizationById(id, userId) {
-  // Check access (throws if no access)
-  requireOrgPermission(id, userId, 'viewer');
+  // Check access (throws if no access) and get user's role
+  const access = requireOrgPermission(id, userId, 'viewer');
 
   const org = db.prepare(`
     SELECT id, name, created_by_id as createdById, created_at as createdAt, updated_at as updatedAt
@@ -48,6 +48,7 @@ export async function getOrganizationById(id, userId) {
   });
 
   org.departments = departmentsWithPeople;
+  org.userRole = access.role;  // Include user's role in response
   return org;
 }
 

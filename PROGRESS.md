@@ -201,9 +201,31 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 10+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Scrolling Layout Fixes (December 26, 2025)
+- **Last Major Update**: Share Settings Permission Fix (December 26, 2025)
 - **Total Commits**: 80+ commits on current branch
 - **Recent Session Highlights**:
+
+  **December 26, 2025 - Share Settings Permission Fix** 🔐:
+  - ✅ **BUG FIXED**: Non-admin users (Editor/Viewer) receiving "Failed to load share settings" error when clicking "Share Organization"
+  - ✅ **ROOT CAUSE**: GET `/organizations/:id/share` endpoint required 'admin' permission, blocking non-admin members entirely
+  - ✅ **SOLUTION**:
+    - Changed GET endpoint to require 'viewer' permission (read access for all members)
+    - Keep PUT/POST endpoints requiring 'admin' permission (write access restricted)
+    - Added `userRole` field to organization API response
+    - Updated ShareModal to conditionally disable admin-only controls
+  - ✅ **FILES MODIFIED** (4 files):
+    - `server/src/routes/organizations.js` - Changed GET /share to require 'viewer' permission
+    - `server/src/services/org.service.js` - Added userRole to getOrganizationById response
+    - `src/components/admin/Dashboard.jsx` - Pass userRole prop to ShareModal
+    - `src/components/admin/ShareModal.jsx` - Disable toggle/regenerate for non-admins, show read-only role badges
+  - ✅ **UX IMPROVEMENTS**:
+    - Non-admins can VIEW share settings and copy public link
+    - Toggle switch disabled with tooltip for non-admins
+    - "Regenerate link" button hidden for non-admins
+    - "Add Member" button hidden for non-admins
+    - Role editing and remove buttons hidden for non-admins
+    - Member roles shown as read-only badges for non-admins
+  - 📝 **IMPACT**: All organization members can now view sharing status and copy public links
 
   **December 26, 2025 - Scrolling Layout Fixes** 🎨:
   - ✅ **BUG FIXED**: Vertical scrolling not working on Dashboard, Departments, and Audit pages at certain browser sizes
@@ -716,7 +738,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 26, 2025 (Scrolling Layout Fixes)
+**Last Updated**: December 26, 2025 (Share Settings Permission Fix)
 
 ---
 
