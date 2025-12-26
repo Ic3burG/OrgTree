@@ -37,6 +37,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - **Data import/export** - CSV import/export functionality for bulk operations
 - **Search and filtering** - Advanced search across departments and people
 - **Responsive design** - Mobile-friendly interface with touch controls
+- **Audit trail** - Comprehensive activity logging with 1-year retention, filtering, and pagination
 
 ### Technical Stack
 - **Frontend**: React 18, Vite, Tailwind CSS, React Flow, React Router
@@ -113,7 +114,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 #### Feature Enhancements
 - **Advanced Search** - Full-text search with autocomplete
 - **Bulk Operations** - Multi-select for batch edits/deletions
-- **Audit Trail** - Track changes and modifications
+- ~~**Audit Trail** - Track changes and modifications~~ ✅ **IMPLEMENTED** (December 26, 2025)
 - **Custom Fields** - Configurable person/department attributes
 - **Email Invitations** - Invite users who don't have OrgTree accounts yet
 
@@ -200,9 +201,58 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 10+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Snake_case Field Name Fixes (December 25, 2025)
+- **Last Major Update**: Audit Trail Feature (December 26, 2025)
 - **Total Commits**: 80+ commits on current branch
 - **Recent Session Highlights**:
+
+  **December 26, 2025 - Audit Trail Feature** 📋:
+  - ✅ **MAJOR FEATURE**: Comprehensive audit logging system for tracking all changes
+  - ✅ **BACKEND IMPLEMENTATION**:
+    - Created `server/src/services/audit.service.js` - Audit log persistence and retrieval
+    - Created `server/src/routes/audit.js` - REST API endpoints for audit logs
+    - Modified `server/src/services/socket-events.service.js` - Integrated audit capture into existing real-time events
+    - Modified `server/src/db.js` - Added audit_logs table migration with indexes
+    - Modified `server/src/index.js` - Registered audit routes
+  - ✅ **DATABASE SCHEMA**:
+    - Table: `audit_logs` with fields: id, organization_id, actor_id, actor_name, action_type, entity_type, entity_id, entity_data, created_at
+    - Indexes: (organization_id, created_at DESC), (created_at DESC), (entity_type, entity_id)
+    - Foreign keys: organization_id → CASCADE DELETE, actor_id → SET NULL
+  - ✅ **FRONTEND IMPLEMENTATION**:
+    - Created `src/components/admin/AuditLog.jsx` - Organization-level audit log viewer
+    - Created `src/components/superuser/SystemAuditLog.jsx` - System-wide audit log viewer
+    - Created `src/utils/audit.js` - Formatting utilities for audit display
+    - Modified `src/api/client.js` - Added getAuditLogs() and getAdminAuditLogs()
+    - Modified `src/components/admin/AdminLayout.jsx` - Added "Audit Log" navigation link
+    - Modified `src/components/superuser/SuperuserLayout.jsx` - Added "System Audit Logs" navigation link
+    - Modified `src/App.jsx` - Added audit routes for both org and superuser views
+  - ✅ **FEATURES**:
+    - Tracks all CRUD operations: departments, people, members, organization settings
+    - Captures: actor (who), action (what), entity (which), timestamp (when), data snapshot
+    - Filtering by: action type, entity type, date range, organization
+    - Cursor-based pagination for efficient loading
+    - 1-year retention with automatic cleanup (lazy deletion on query)
+    - Responsive UI: table view (desktop), card view (mobile)
+    - Access control: Admins can view org logs, Superusers can view all logs
+  - ✅ **INTEGRATION**:
+    - Leverages existing Socket.IO event system for audit capture
+    - Single point of capture ensures no missed events
+    - Non-blocking: audit failures don't affect normal operations
+  - ✅ **FILES CREATED** (6 new files):
+    - `server/src/services/audit.service.js` (269 lines)
+    - `server/src/routes/audit.js` (89 lines)
+    - `src/components/admin/AuditLog.jsx` (347 lines)
+    - `src/components/superuser/SystemAuditLog.jsx` (360 lines)
+    - `src/utils/audit.js` (113 lines)
+  - ✅ **FILES MODIFIED** (6 files):
+    - `server/src/db.js` - audit_logs table migration
+    - `server/src/services/socket-events.service.js` - audit log integration
+    - `server/src/index.js` - route registration
+    - `src/api/client.js` - API methods
+    - `src/components/admin/AdminLayout.jsx` - navigation
+    - `src/components/superuser/SuperuserLayout.jsx` - navigation
+    - `src/App.jsx` - routes
+  - 📝 **IMPACT**: Complete audit trail for compliance, debugging, and accountability
+  - 🎯 **USER EXPERIENCE**: Transparent activity history accessible to organization admins and system administrators
 
   **December 25, 2025 - Snake_case Field Name Fixes** 🐛:
   - ✅ **BUG FIXED**: "Department Not Found" error when adding people to organizations
@@ -646,7 +696,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 25, 2025 (Snake_case Field Name Fixes)
+**Last Updated**: December 26, 2025 (Audit Trail Feature)
 
 ---
 

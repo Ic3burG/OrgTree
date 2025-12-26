@@ -15,8 +15,10 @@ import AdminLayout from './components/admin/AdminLayout';
 import Dashboard from './components/admin/Dashboard';
 import DepartmentManager from './components/admin/DepartmentManager';
 import PersonManager from './components/admin/PersonManager';
+import AuditLog from './components/admin/AuditLog';
 import SuperuserLayout from './components/superuser/SuperuserLayout';
 import UserManagement from './components/superuser/UserManagement';
+import SystemAuditLog from './components/superuser/SystemAuditLog';
 import AcceptInvitation from './components/AcceptInvitation';
 
 /**
@@ -68,6 +70,7 @@ function App() {
           >
             <Route index element={<Navigate to="/admin/users" replace />} />
             <Route path="users" element={<UserManagement />} />
+            <Route path="audit" element={<SystemAuditLog />} />
           </Route>
 
           {/* Admin routes */}
@@ -90,6 +93,7 @@ function App() {
                 </ReactFlowProvider>
               }
             />
+            <Route path="audit" element={<AuditLog />} />
           </Route>
 
           {/* Catch all - redirect to home */}

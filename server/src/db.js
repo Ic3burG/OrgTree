@@ -210,6 +210,37 @@ try {
   console.error('Migration error (invitations table):', err);
 }
 
+// Migration: Add audit_logs table
+try {
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+  const tableNames = tables.map(t => t.name);
+
+  if (!tableNames.includes('audit_logs')) {
+    db.exec(`
+      CREATE TABLE audit_logs (
+        id TEXT PRIMARY KEY,
+        organization_id TEXT NOT NULL,
+        actor_id TEXT,
+        actor_name TEXT NOT NULL,
+        action_type TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
+        entity_id TEXT,
+        entity_data TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+        FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL
+      );
+
+      CREATE INDEX idx_audit_logs_org_created ON audit_logs(organization_id, created_at DESC);
+      CREATE INDEX idx_audit_logs_created ON audit_logs(created_at DESC);
+      CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
+    `);
+    console.log('Migration: Created audit_logs table');
+  }
+} catch (err) {
+  console.error('Migration error (audit_logs table):', err);
+}
+
 console.log('Database initialized at:', dbPath);
 
 export default db;

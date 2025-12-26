@@ -240,6 +240,19 @@ const api = {
     request(`/invitations/${token}/accept`, {
       method: 'POST',
     }),
+
+  // Audit logs
+  getAuditLogs: (orgId, params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const url = `/organizations/${orgId}/audit-logs${query ? `?${query}` : ''}`;
+    return request(url);
+  },
+
+  getAdminAuditLogs: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const url = `/admin/audit-logs${query ? `?${query}` : ''}`;
+    return request(url);
+  },
 };
 
 export default api;

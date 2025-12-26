@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useParams } from 'react-router-dom';
-import { Home, Users, Building2, Map, LogOut, ArrowLeft, Menu, X, Shield } from 'lucide-react';
+import { Home, Users, Building2, Map, FileText, LogOut, ArrowLeft, Menu, X, Shield } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
 import ConnectionStatus from '../ui/ConnectionStatus';
@@ -118,6 +118,21 @@ export default function AdminLayout() {
         >
           <Map size={20} />
           <span className="font-medium">Organization Map</span>
+        </NavLink>
+
+        <NavLink
+          to={`/org/${orgId}/audit`}
+          onClick={closeSidebar}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
+              isActive
+                ? 'bg-blue-50 text-blue-700'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`
+          }
+        >
+          <FileText size={20} />
+          <span className="font-medium">Audit Log</span>
         </NavLink>
       </nav>
 
