@@ -238,7 +238,7 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
             </button>
           </div>
 
-          {/* Tabs */}
+          {/* Tabs - only show Team Members tab for admins */}
           <div className="border-b border-slate-200">
             <div className="flex px-6">
               <button
@@ -252,17 +252,19 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                 <Globe size={18} />
                 Public Link
               </button>
-              <button
-                onClick={() => setActiveTab('members')}
-                className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
-                  activeTab === 'members'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Users size={18} />
-                Team Members
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => setActiveTab('members')}
+                  className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
+                    activeTab === 'members'
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Users size={18} />
+                  Team Members
+                </button>
+              )}
             </div>
           </div>
 
