@@ -35,15 +35,17 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - **Interactive org chart visualization** - React Flow-based visual representation with zoom, pan, and navigation
 - **Public sharing** - Organizations can be shared via public read-only links
 - **Data import/export** - CSV import/export functionality for bulk operations
-- **Search and filtering** - Advanced search across departments and people
+- **Advanced Search** - Server-side FTS5 full-text search with autocomplete, fuzzy matching, type filtering, and highlighted results
 - **Responsive design** - Mobile-friendly interface with touch controls
 - **Audit trail** - Comprehensive activity logging with 1-year retention, filtering, and pagination
 
 ### Technical Stack
 - **Frontend**: React 18, Vite, Tailwind CSS, React Flow, React Router
 - **Backend**: Node.js, Express, SQLite with better-sqlite3
+- **Search**: SQLite FTS5 with Porter stemming, BM25 ranking
+- **Real-time**: Socket.IO for live collaboration
 - **Authentication**: JWT-based user authentication
-- **Deployment**: Ready for production deployment
+- **Deployment**: Render.com (production live)
 
 ### Architecture Components
 
@@ -101,7 +103,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ✅ Public sharing with read-only access and **full navigation controls**
 - ✅ CSV data import/export functionality
 - ✅ **GEDS XML import with French character support**
-- ✅ Search and filtering across all data
+- ✅ **Advanced Search with FTS5** - Full-text search with autocomplete, fuzzy matching, type filtering
 - ✅ Mobile responsiveness and touch controls
 - ✅ Theme switching and visual customization (works in public and private views)
 - ✅ All scrolling functionality working properly
@@ -196,8 +198,8 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Codebase Statistics
 - **Total Components**: ~17 React components (added CreateUserModal, ChangePasswordPage)
-- **API Endpoints**: ~20 REST endpoints (added 6 user management + 2 password management endpoints)
-- **Database Tables**: 4 main tables (users, organizations, departments, people)
+- **API Endpoints**: ~22 REST endpoints (added search + autocomplete endpoints)
+- **Database Tables**: 4 main tables + 2 FTS5 virtual tables (departments_fts, people_fts)
 - **Features**: 10+ major feature areas completed
 
 ### Recent Activity
@@ -207,6 +209,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
   **December 28, 2025 - Advanced Search with SQLite FTS5** 🔍:
   - ✅ **MAJOR FEATURE**: Server-side full-text search with autocomplete, fuzzy matching, and type filtering
+  - 🚀 **DEPLOYED & TESTED**: Successfully deployed to Render, FTS5 migrations ran correctly
   - ✅ **BACKEND IMPLEMENTATION**:
     - Created FTS5 virtual tables for departments and people with Porter stemming
     - Added database triggers to keep FTS tables synchronized on INSERT/UPDATE/DELETE
