@@ -1,33 +1,39 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, X, Users, User } from 'lucide-react';
+import { Search, X, Users, User, Loader2, Filter } from 'lucide-react';
+import { useSearch } from '../hooks/useSearch';
 
 /**
  * SearchOverlay - Floating search bar with dropdown results
  * Mobile: Positioned below top nav with larger touch targets
  * Desktop: Positioned at top-center of canvas
+ *
+ * Uses server-side FTS5 search with autocomplete, fuzzy matching, and type filtering
  */
-export default function SearchOverlay({ nodes, onSelectResult }) {
-  const [query, setQuery] = useState('');
+export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [results, setResults] = useState([]);
+  const [showTypeFilter, setShowTypeFilter] = useState(false);
   const searchRef = useRef(null);
 
-  // Debounced search
+  const {
+    query,
+    setQuery,
+    type,
+    setType,
+    results,
+    suggestions,
+    loading,
+    total,
+    clearSearch
+  } = useSearch(orgId, { debounceMs: 300, minQueryLength: 1 });
+
+  // Open dropdown when we have results
   useEffect(() => {
-    if (!query.trim()) {
-      setResults([]);
+    if (query.trim() && (results.length > 0 || loading)) {
+      setIsOpen(true);
+    } else if (!query.trim()) {
       setIsOpen(false);
-      return;
     }
-
-    const timer = setTimeout(() => {
-      const matches = searchNodesAndPeople(nodes, query);
-      setResults(matches);
-      setIsOpen(matches.length > 0);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [query, nodes]);
+  }, [query, results, loading]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -42,16 +48,47 @@ export default function SearchOverlay({ nodes, onSelectResult }) {
   }, []);
 
   const handleClear = () => {
-    setQuery('');
-    setResults([]);
+    clearSearch();
     setIsOpen(false);
+    setShowTypeFilter(false);
   };
 
   const handleSelectResult = (result) => {
     setIsOpen(false);
     if (onSelectResult) {
-      onSelectResult(result);
+      // Transform API result to format expected by OrgMap
+      const transformedResult = {
+        type: result.type,
+        id: result.id,
+        name: result.name,
+        subtitle: result.type === 'department'
+          ? `${result.peopleCount || 0} people`
+          : result.title,
+        // For departments, nodeId is the department id itself
+        // For people, nodeId is the departmentId
+        nodeId: result.type === 'department' ? result.id : result.departmentId,
+        departmentName: result.departmentName,
+        // Pass person data for detail panel
+        person: result.type === 'person' ? {
+          id: result.id,
+          name: result.name,
+          title: result.title,
+          email: result.email,
+          phone: result.phone
+        } : null
+      };
+      onSelectResult(transformedResult);
     }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setQuery(suggestion.text);
+  };
+
+  const typeLabels = {
+    all: 'All',
+    departments: 'Departments',
+    people: 'People'
   };
 
   return (
@@ -59,7 +96,11 @@ export default function SearchOverlay({ nodes, onSelectResult }) {
       {/* Search Input */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 lg:pl-3 flex items-center pointer-events-none">
-          <Search size={22} className="lg:w-5 lg:h-5 text-slate-400" />
+          {loading ? (
+            <Loader2 size={22} className="lg:w-5 lg:h-5 text-blue-500 animate-spin" />
+          ) : (
+            <Search size={22} className="lg:w-5 lg:h-5 text-slate-400" />
+          )}
         </div>
 
         <input
@@ -67,12 +108,23 @@ export default function SearchOverlay({ nodes, onSelectResult }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search departments and people..."
-          className="w-full pl-11 lg:pl-10 pr-11 lg:pr-10 py-3 lg:py-2.5 bg-white/95 backdrop-blur-sm border border-slate-300
+          className="w-full pl-11 lg:pl-10 pr-20 lg:pr-20 py-3 lg:py-2.5 bg-white/95 backdrop-blur-sm border border-slate-300
             rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500
             focus:border-transparent text-slate-900 placeholder-slate-400 text-base lg:text-sm
             touch-manipulation"
           aria-label="Search organization"
         />
+
+        {/* Type Filter Button */}
+        <button
+          onClick={() => setShowTypeFilter(!showTypeFilter)}
+          className={`absolute inset-y-0 right-10 flex items-center px-2 text-slate-400
+            hover:text-slate-600 transition-colors touch-manipulation
+            ${type !== 'all' ? 'text-blue-500' : ''}`}
+          aria-label="Filter search type"
+        >
+          <Filter size={18} className="lg:w-4 lg:h-4" />
+        </button>
 
         {query && (
           <button
@@ -86,9 +138,60 @@ export default function SearchOverlay({ nodes, onSelectResult }) {
         )}
       </div>
 
+      {/* Type Filter Dropdown */}
+      {showTypeFilter && (
+        <div className="mt-1 bg-white rounded-lg shadow-lg border border-slate-200 p-2">
+          <div className="text-xs text-slate-500 px-2 pb-1">Search in:</div>
+          <div className="flex gap-1">
+            {(['all', 'departments', 'people']).map((t) => (
+              <button
+                key={t}
+                onClick={() => {
+                  setType(t);
+                  setShowTypeFilter(false);
+                }}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors
+                  ${type === t
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+              >
+                {typeLabels[t]}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Suggestions (shown while typing, before results) */}
+      {isOpen && suggestions.length > 0 && results.length === 0 && !loading && (
+        <div className="mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2">
+          <div className="text-xs text-slate-500 px-4 pb-1">Suggestions:</div>
+          {suggestions.map((suggestion, index) => (
+            <button
+              key={`suggestion-${index}`}
+              onClick={() => handleSuggestionClick(suggestion)}
+              className="w-full px-4 py-2 text-left hover:bg-slate-50 text-sm text-slate-700 flex items-center gap-2"
+            >
+              <Search size={14} className="text-slate-400" />
+              {suggestion.text}
+              <span className="text-xs text-slate-400">({suggestion.type})</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Results Dropdown */}
       {isOpen && results.length > 0 && (
         <div className="mt-2 bg-white rounded-lg shadow-xl border border-slate-200 max-h-[60vh] lg:max-h-96 overflow-y-auto">
+          {/* Results count header */}
+          {total > 0 && (
+            <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 text-xs text-slate-500">
+              {total} result{total !== 1 ? 's' : ''} found
+              {type !== 'all' && ` in ${typeLabels[type].toLowerCase()}`}
+            </div>
+          )}
+
           {results.map((result, index) => (
             <button
               key={`${result.type}-${result.id}-${index}`}
@@ -113,11 +216,21 @@ export default function SearchOverlay({ nodes, onSelectResult }) {
 
               {/* Info */}
               <div className="flex-grow min-w-0">
-                <div className="font-medium text-base lg:text-sm text-slate-900 truncate">
-                  {result.name}
-                </div>
+                {/* Use highlight if available, otherwise plain name */}
+                {result.highlight ? (
+                  <div
+                    className="font-medium text-base lg:text-sm text-slate-900 truncate [&>mark]:bg-yellow-200 [&>mark]:rounded"
+                    dangerouslySetInnerHTML={{ __html: result.highlight }}
+                  />
+                ) : (
+                  <div className="font-medium text-base lg:text-sm text-slate-900 truncate">
+                    {result.name}
+                  </div>
+                )}
                 <div className="text-sm lg:text-sm text-slate-600 truncate">
-                  {result.subtitle}
+                  {result.type === 'department'
+                    ? `${result.peopleCount || 0} people`
+                    : result.title}
                   {result.type === 'person' && result.departmentName && (
                     <span className="text-slate-400"> · {result.departmentName}</span>
                   )}
@@ -140,52 +253,34 @@ export default function SearchOverlay({ nodes, onSelectResult }) {
           ))}
         </div>
       )}
+
+      {/* Loading state with no results yet */}
+      {isOpen && loading && results.length === 0 && (
+        <div className="mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-8 text-center">
+          <Loader2 size={24} className="text-blue-500 animate-spin mx-auto mb-2" />
+          <p className="text-sm text-slate-500">Searching...</p>
+        </div>
+      )}
+
+      {/* No results state */}
+      {isOpen && !loading && query.trim() && results.length === 0 && suggestions.length === 0 && (
+        <div className="mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-8 text-center">
+          <p className="text-sm text-slate-500">No results found for "{query}"</p>
+          {type !== 'all' && (
+            <button
+              onClick={() => setType('all')}
+              className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+            >
+              Search in all categories
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-// Helper functions
-function searchNodesAndPeople(nodes, query) {
-  if (!query || query.trim() === '') return [];
-
-  const lowerQuery = query.toLowerCase();
-  const matches = [];
-
-  nodes.forEach(node => {
-    // Check department name
-    if (node.data.name.toLowerCase().includes(lowerQuery)) {
-      matches.push({
-        type: 'department',
-        id: node.id,
-        name: node.data.name,
-        subtitle: `${node.data.people.length} people`,
-        nodeId: node.id
-      });
-    }
-
-    // Check people in this department
-    node.data.people?.forEach(person => {
-      const nameMatch = person.name.toLowerCase().includes(lowerQuery);
-      const titleMatch = person.title && person.title.toLowerCase().includes(lowerQuery);
-      const emailMatch = person.email && person.email.toLowerCase().includes(lowerQuery);
-
-      if (nameMatch || titleMatch || emailMatch) {
-        matches.push({
-          type: 'person',
-          id: person.id,
-          name: person.name,
-          subtitle: person.title,
-          person: person,
-          nodeId: node.id,
-          departmentName: node.data.name
-        });
-      }
-    });
-  });
-
-  return matches;
-}
-
+// Helper function
 function getInitials(name) {
   if (!name) return '?';
   const parts = name.trim().split(/\s+/);

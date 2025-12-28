@@ -241,6 +241,100 @@ try {
   console.error('Migration error (audit_logs table):', err);
 }
 
+// Migration: Add FTS5 full-text search tables for advanced search
+try {
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+  const tableNames = tables.map(t => t.name);
+
+  if (!tableNames.includes('departments_fts')) {
+    // Create FTS5 virtual table for departments
+    db.exec(`
+      CREATE VIRTUAL TABLE departments_fts USING fts5(
+        name,
+        description,
+        content='departments',
+        content_rowid='rowid',
+        tokenize='porter unicode61 remove_diacritics 2'
+      );
+
+      -- Triggers to keep FTS in sync with departments table
+      CREATE TRIGGER departments_fts_insert AFTER INSERT ON departments BEGIN
+        INSERT INTO departments_fts(rowid, name, description)
+        VALUES (NEW.rowid, NEW.name, NEW.description);
+      END;
+
+      CREATE TRIGGER departments_fts_delete AFTER DELETE ON departments BEGIN
+        INSERT INTO departments_fts(departments_fts, rowid, name, description)
+        VALUES ('delete', OLD.rowid, OLD.name, OLD.description);
+      END;
+
+      CREATE TRIGGER departments_fts_update AFTER UPDATE ON departments BEGIN
+        INSERT INTO departments_fts(departments_fts, rowid, name, description)
+        VALUES ('delete', OLD.rowid, OLD.name, OLD.description);
+        INSERT INTO departments_fts(rowid, name, description)
+        VALUES (NEW.rowid, NEW.name, NEW.description);
+      END;
+    `);
+
+    // Populate FTS table with existing data
+    db.exec(`
+      INSERT INTO departments_fts(rowid, name, description)
+      SELECT rowid, name, description FROM departments;
+    `);
+
+    console.log('Migration: Created departments_fts table with triggers');
+  }
+
+  if (!tableNames.includes('people_fts')) {
+    // Create FTS5 virtual table for people
+    db.exec(`
+      CREATE VIRTUAL TABLE people_fts USING fts5(
+        name,
+        title,
+        email,
+        phone,
+        content='people',
+        content_rowid='rowid',
+        tokenize='porter unicode61 remove_diacritics 2'
+      );
+
+      -- Triggers to keep FTS in sync with people table
+      CREATE TRIGGER people_fts_insert AFTER INSERT ON people BEGIN
+        INSERT INTO people_fts(rowid, name, title, email, phone)
+        VALUES (NEW.rowid, NEW.name, NEW.title, NEW.email, NEW.phone);
+      END;
+
+      CREATE TRIGGER people_fts_delete AFTER DELETE ON people BEGIN
+        INSERT INTO people_fts(people_fts, rowid, name, title, email, phone)
+        VALUES ('delete', OLD.rowid, OLD.name, OLD.title, OLD.email, OLD.phone);
+      END;
+
+      CREATE TRIGGER people_fts_update AFTER UPDATE ON people BEGIN
+        INSERT INTO people_fts(people_fts, rowid, name, title, email, phone)
+        VALUES ('delete', OLD.rowid, OLD.name, OLD.title, OLD.email, OLD.phone);
+        INSERT INTO people_fts(rowid, name, title, email, phone)
+        VALUES (NEW.rowid, NEW.name, NEW.title, NEW.email, NEW.phone);
+      END;
+    `);
+
+    // Populate FTS table with existing data
+    db.exec(`
+      INSERT INTO people_fts(rowid, name, title, email, phone)
+      SELECT rowid, name, title, email, phone FROM people;
+    `);
+
+    console.log('Migration: Created people_fts table with triggers');
+  }
+
+  // Add search optimization indexes if they don't exist
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_departments_org_id ON departments(organization_id);
+    CREATE INDEX IF NOT EXISTS idx_people_dept_id ON people(department_id);
+  `);
+} catch (err) {
+  console.error('Migration error (FTS5 tables):', err);
+}
+
 console.log('Database initialized at:', dbPath);
 
 export default db;

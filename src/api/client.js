@@ -253,6 +253,17 @@ const api = {
     const url = `/admin/audit-logs${query ? `?${query}` : ''}`;
     return request(url);
   },
+
+  // Search
+  search: (orgId, params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/organizations/${orgId}/search?${query}`);
+  },
+
+  searchAutocomplete: (orgId, q, limit = 5) => {
+    const params = new URLSearchParams({ q, limit: limit.toString() });
+    return request(`/organizations/${orgId}/search/autocomplete?${params}`);
+  },
 };
 
 export default api;

@@ -112,7 +112,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 ### Areas for Potential Enhancement
 
 #### Feature Enhancements
-- **Advanced Search** - Full-text search with autocomplete
+- ~~**Advanced Search** - Full-text search with autocomplete~~ ✅ **IMPLEMENTED** (December 28, 2025)
 - **Bulk Operations** - Multi-select for batch edits/deletions
 - ~~**Audit Trail** - Track changes and modifications~~ ✅ **IMPLEMENTED** (December 26, 2025)
 - **Custom Fields** - Configurable person/department attributes
@@ -153,7 +153,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 4. **Performance Testing** - Load testing with larger datasets
 
 ### Short-term Goals (Next month)
-1. **Advanced Search** - Implement full-text search capabilities
+1. ~~**Advanced Search** - Implement full-text search capabilities~~ ✅ **DONE**
 2. **Bulk Operations** - Multi-select functionality for efficiency
 3. **Custom Fields** - Allow configurable person/department attributes
 4. **API Documentation** - Complete REST API documentation
@@ -201,9 +201,66 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 10+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Share Settings Permission Fix (December 26, 2025)
+- **Last Major Update**: Advanced Search with FTS5 (December 28, 2025)
 - **Total Commits**: 80+ commits on current branch
 - **Recent Session Highlights**:
+
+  **December 28, 2025 - Advanced Search with SQLite FTS5** 🔍:
+  - ✅ **MAJOR FEATURE**: Server-side full-text search with autocomplete, fuzzy matching, and type filtering
+  - ✅ **BACKEND IMPLEMENTATION**:
+    - Created FTS5 virtual tables for departments and people with Porter stemming
+    - Added database triggers to keep FTS tables synchronized on INSERT/UPDATE/DELETE
+    - Created `server/src/services/search.service.js` with BM25 ranking and snippet highlights
+    - Created `server/src/routes/search.js` with search and autocomplete endpoints
+  - ✅ **DATABASE CHANGES** (server/src/db.js):
+    - `departments_fts` FTS5 table (name, description)
+    - `people_fts` FTS5 table (name, title, email)
+    - Tokenizer: `porter unicode61 remove_diacritics 2` for fuzzy/typo-tolerant matching
+    - Automatic sync triggers for both tables
+    - Initial population from existing data
+  - ✅ **API ENDPOINTS**:
+    - `GET /api/organizations/:orgId/search` - Full-text search with type filter
+    - `GET /api/organizations/:orgId/search/autocomplete` - Fast prefix suggestions
+  - ✅ **FRONTEND IMPLEMENTATION**:
+    - Created `src/hooks/useSearch.js` - Debounced search hook with abort controller
+    - Updated `src/api/client.js` - Added search and searchAutocomplete methods
+    - Updated `src/components/SearchOverlay.jsx`:
+      - Replaced client-side search with API-based search
+      - Added type filter dropdown (All/Departments/People)
+      - Added loading spinner
+      - Added autocomplete suggestions
+      - Highlighted search matches with `<mark>` tags
+    - Updated `src/components/OrgMap.jsx` - Pass orgId to SearchOverlay
+    - Updated `src/components/admin/PersonManager.jsx`:
+      - Integrated useSearch hook for API-based people search
+      - Now searches name, title, email, AND phone
+      - Shows loading indicator during search
+    - Updated `src/components/admin/DepartmentManager.jsx`:
+      - Integrated useSearch hook for API-based department search
+      - Shows flat results when searching, tree view when not
+      - Search now includes descriptions
+  - ✅ **FEATURES**:
+    - **Fuzzy/typo-tolerant**: Porter stemming ("engineering" matches "engineer")
+    - **Autocomplete**: Fast prefix suggestions as you type
+    - **Type filtering**: Search all, departments only, or people only
+    - **More fields**: Searches name, title, email, phone, description
+    - **Highlighting**: Results show matched terms with `<mark>` tags
+    - **Ranking**: BM25 relevance scoring for best results first
+    - **Permission-aware**: Only searches within accessible organizations
+  - ✅ **FILES CREATED** (3 new files):
+    - `server/src/services/search.service.js` (~260 lines)
+    - `server/src/routes/search.js` (~90 lines)
+    - `src/hooks/useSearch.js` (~165 lines)
+  - ✅ **FILES MODIFIED** (6 files):
+    - `server/src/db.js` - FTS5 migration with tables, triggers, initial population
+    - `server/src/index.js` - Mounted search routes
+    - `src/api/client.js` - Added search API methods
+    - `src/components/SearchOverlay.jsx` - Complete rewrite for API search
+    - `src/components/admin/PersonManager.jsx` - useSearch integration
+    - `src/components/admin/DepartmentManager.jsx` - useSearch integration
+    - `src/components/OrgMap.jsx` - Pass orgId to SearchOverlay
+  - 📝 **IMPACT**: Powerful, fast search across entire organization with instant results
+  - 🎯 **USER EXPERIENCE**: Type to search with autocomplete, filter by type, see highlighted matches
 
   **December 26, 2025 - Share Settings Permission Fix** 🔐:
   - ✅ **BUG FIXED**: Non-admin users (Editor/Viewer) receiving "Failed to load share settings" error when clicking "Share Organization"
@@ -740,7 +797,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 28, 2025 (Share Settings Permission Fix + GPG Signing)
+**Last Updated**: December 28, 2025 (Advanced Search with SQLite FTS5)
 
 ---
 

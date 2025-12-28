@@ -1,19 +1,28 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Edit, Trash2, Search, Mail, Phone, MapPin } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Mail, Phone, MapPin, Loader2 } from 'lucide-react';
 import api from '../../api/client';
 import PersonForm from './PersonForm';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
+import { useSearch } from '../../hooks/useSearch';
 
 export default function PersonManager() {
   const { orgId } = useParams();
   const [people, setPeople] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Use the search hook for API-based search
+  const {
+    query: searchTerm,
+    setQuery: setSearchTerm,
+    results: searchResults,
+    loading: searchLoading,
+    total: searchTotal
+  } = useSearch(orgId, { debounceMs: 300, minQueryLength: 2, defaultType: 'people' });
 
   // Form modal state
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -110,18 +119,20 @@ export default function PersonManager() {
     }
   };
 
-  const filteredPeople = people.filter((person) => {
-    const matchesSearch =
-      !searchTerm ||
-      person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      person.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      person.email?.toLowerCase().includes(searchTerm.toLowerCase());
+  // Determine which list to filter: search results (if searching) or all people
+  const filteredPeople = useMemo(() => {
+    // If we have a search term with enough characters, use API search results
+    const baseList = searchTerm.length >= 2 ? searchResults : people;
 
-    const matchesDepartment =
-      !filterDepartment || person.departmentId === filterDepartment;
+    // Apply department filter locally
+    if (!filterDepartment) {
+      return baseList;
+    }
 
-    return matchesSearch && matchesDepartment;
-  });
+    return baseList.filter((person) =>
+      person.departmentId === filterDepartment
+    );
+  }, [searchTerm, searchResults, people, filterDepartment]);
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -154,13 +165,20 @@ export default function PersonManager() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Search */}
               <div className="relative">
-                <Search
-                  size={20}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                />
+                {searchLoading ? (
+                  <Loader2
+                    size={20}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 animate-spin"
+                  />
+                ) : (
+                  <Search
+                    size={20}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  />
+                )}
                 <input
                   type="text"
-                  placeholder="Search by name, title, or email..."
+                  placeholder="Search by name, title, email, or phone..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -288,9 +306,16 @@ export default function PersonManager() {
               </div>
 
               {/* Results count */}
-              {people.length > 0 && (
+              {(people.length > 0 || searchTerm.length >= 2) && (
                 <div className="mt-4 text-sm text-gray-500 text-center">
-                  Showing {filteredPeople.length} of {people.length} people
+                  {searchTerm.length >= 2 ? (
+                    <>
+                      Found {searchTotal} result{searchTotal !== 1 ? 's' : ''}
+                      {filterDepartment && ` (${filteredPeople.length} in selected department)`}
+                    </>
+                  ) : (
+                    <>Showing {filteredPeople.length} of {people.length} people</>
+                  )}
                 </div>
               )}
             </>

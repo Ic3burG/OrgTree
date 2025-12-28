@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../../api/client';
 import DepartmentForm from './DepartmentForm';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
+import { useSearch } from '../../hooks/useSearch';
 import {
   Plus,
   ChevronRight,
@@ -21,8 +22,16 @@ export default function DepartmentManager() {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
   const [expanded, setExpanded] = useState(new Set());
+
+  // Use the search hook for API-based search
+  const {
+    query: searchQuery,
+    setQuery: setSearchQuery,
+    results: searchResults,
+    loading: searchLoading,
+    total: searchTotal
+  } = useSearch(orgId, { debounceMs: 300, minQueryLength: 2, defaultType: 'departments' });
 
   // Modal states
   const [showForm, setShowForm] = useState(false);
@@ -132,15 +141,10 @@ export default function DepartmentManager() {
     setExpanded(newExpanded);
   };
 
-  // Build tree structure from flat list
+  // Build tree structure from flat list (only used when not searching)
   const buildTree = (depts, parentId = null, depth = 0) => {
     return depts
       .filter((d) => d.parentId === parentId)
-      .filter((d) =>
-        searchQuery
-          ? d.name.toLowerCase().includes(searchQuery.toLowerCase())
-          : true
-      )
       .map((dept) => ({
         ...dept,
         depth,
@@ -148,8 +152,12 @@ export default function DepartmentManager() {
       }));
   };
 
-  const tree = buildTree(departments);
+  const tree = useMemo(() => buildTree(departments), [departments]);
 
+  // Determine if we're in search mode
+  const isSearching = searchQuery.length >= 2;
+
+  // Render a single department in tree view
   const renderDepartment = (dept) => {
     const hasChildren = dept.children && dept.children.length > 0;
     const isExpanded = expanded.has(dept.id);
@@ -216,6 +224,63 @@ export default function DepartmentManager() {
     );
   };
 
+  // Render a single search result (flat view)
+  const renderSearchResult = (result) => {
+    // Find the full department data from our loaded departments
+    const fullDept = departments.find(d => d.id === result.id) || result;
+    const peopleCount = result.peopleCount || fullDept.people?.length || 0;
+    const recentlyChanged = isRecentlyChanged(result.id);
+
+    return (
+      <div
+        key={result.id}
+        className={`flex items-center gap-2 p-3 hover:bg-slate-50 rounded-lg group transition-all duration-300 ${
+          recentlyChanged ? 'bg-blue-50 ring-2 ring-blue-200' : ''
+        }`}
+      >
+        <Building2 size={18} className="text-slate-400" />
+
+        <div className="flex-1">
+          {result.highlight ? (
+            <span
+              className="font-medium text-slate-800 [&>mark]:bg-yellow-200 [&>mark]:rounded"
+              dangerouslySetInnerHTML={{ __html: result.highlight }}
+            />
+          ) : (
+            <span className="font-medium text-slate-800">{result.name}</span>
+          )}
+          <span className="ml-2 text-sm text-slate-500">
+            <Users size={14} className="inline mr-1" />
+            {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
+          </span>
+          {result.description && (
+            <p className="text-sm text-slate-500 mt-1 truncate">{result.description}</p>
+          )}
+        </div>
+
+        <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1">
+          <button
+            onClick={() => openEditForm(fullDept)}
+            className="p-2 hover:bg-slate-200 rounded-lg transition-colors"
+            title="Edit"
+          >
+            <Pencil size={16} className="text-slate-500" />
+          </button>
+          <button
+            onClick={() => {
+              setDeletingDept(fullDept);
+              setShowDelete(true);
+            }}
+            className="p-2 hover:bg-red-100 rounded-lg transition-colors"
+            title="Delete"
+          >
+            <Trash2 size={16} className="text-red-500" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -245,28 +310,59 @@ export default function DepartmentManager() {
 
         <div className="mb-4">
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            {searchLoading ? (
+              <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 animate-spin" size={20} />
+            ) : (
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            )}
             <input
               type="text"
-              placeholder="Search departments..."
+              placeholder="Search departments by name or description..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg"
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+          {isSearching && searchTotal > 0 && (
+            <p className="mt-2 text-sm text-slate-500">
+              Found {searchTotal} department{searchTotal !== 1 ? 's' : ''}
+            </p>
+          )}
         </div>
       </div>
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-8 pb-8 min-h-0">
         <div className="bg-white rounded-lg shadow">
-        {tree.length === 0 ? (
-          <div className="p-8 text-center text-slate-500">
-            No departments yet. Click "Add Department" to create one.
-          </div>
-        ) : (
-          <div className="p-2">{tree.map(renderDepartment)}</div>
-        )}
+          {isSearching ? (
+            // Search results view (flat list)
+            searchResults.length === 0 ? (
+              <div className="p-8 text-center text-slate-500">
+                {searchLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin" size={20} />
+                    <span>Searching...</span>
+                  </div>
+                ) : (
+                  <>
+                    <p>No departments found for "{searchQuery}"</p>
+                    <p className="text-sm mt-2">Try a different search term</p>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="p-2">{searchResults.map(renderSearchResult)}</div>
+            )
+          ) : (
+            // Tree view (when not searching)
+            tree.length === 0 ? (
+              <div className="p-8 text-center text-slate-500">
+                No departments yet. Click "Add Department" to create one.
+              </div>
+            ) : (
+              <div className="p-2">{tree.map(renderDepartment)}</div>
+            )
+          )}
         </div>
       </div>
 

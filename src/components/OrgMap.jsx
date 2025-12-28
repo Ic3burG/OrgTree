@@ -468,7 +468,7 @@ export default function OrgMap() {
       </ThemeContext.Provider>
 
       {/* Overlay Components */}
-      <SearchOverlay nodes={nodes} onSelectResult={handleSearchSelect} />
+      <SearchOverlay orgId={orgId} nodes={nodes} onSelectResult={handleSearchSelect} />
 
       <Toolbar
         onZoomIn={() => zoomIn({ duration: 300 })}
