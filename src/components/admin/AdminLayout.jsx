@@ -1,15 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useParams } from 'react-router-dom';
 import { Home, Users, Building2, Map, FileText, LogOut, ArrowLeft, Menu, X, Shield } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
 import ConnectionStatus from '../ui/ConnectionStatus';
+import api from '../../api/client';
 
 export default function AdminLayout() {
   const { orgId } = useParams();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [orgRole, setOrgRole] = useState(null);
+
+  // Fetch organization to get user's role
+  useEffect(() => {
+    async function fetchOrgRole() {
+      try {
+        const org = await api.getOrganization(orgId);
+        setOrgRole(org.userRole);
+      } catch (err) {
+        console.error('Failed to fetch org role:', err);
+      }
+    }
+    if (orgId) {
+      fetchOrgRole();
+    }
+  }, [orgId]);
+
+  // Check if user has admin access (admin or owner in this org)
+  const isOrgAdmin = orgRole === 'admin' || orgRole === 'owner';
 
   const handleLogout = () => {
     logout();
@@ -120,20 +140,22 @@ export default function AdminLayout() {
           <span className="font-medium">Organization Map</span>
         </NavLink>
 
-        <NavLink
-          to={`/org/${orgId}/audit`}
-          onClick={closeSidebar}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-50'
-            }`
-          }
-        >
-          <FileText size={20} />
-          <span className="font-medium">Audit Log</span>
-        </NavLink>
+        {isOrgAdmin && (
+          <NavLink
+            to={`/org/${orgId}/audit`}
+            onClick={closeSidebar}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
+                isActive
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`
+            }
+          >
+            <FileText size={20} />
+            <span className="font-medium">Audit Log</span>
+          </NavLink>
+        )}
       </nav>
 
       {/* User Section */}
