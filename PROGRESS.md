@@ -226,6 +226,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - "Add Member" button hidden for non-admins
     - Role editing and remove buttons hidden for non-admins
     - Member roles shown as read-only badges for non-admins
+    - "Audit Log" nav link hidden for non-admins (Viewer/Editor can't access)
   - 📝 **IMPACT**: All organization members can now view sharing status and copy public links
 
   **December 26, 2025 - Scrolling Layout Fixes** 🎨:
