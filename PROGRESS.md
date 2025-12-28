@@ -739,7 +739,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 26, 2025 (Share Settings Permission Fix)
+**Last Updated**: December 28, 2025 (Share Settings Permission Fix)
 
 ---
 
