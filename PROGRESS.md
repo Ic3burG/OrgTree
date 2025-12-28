@@ -222,6 +222,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Non-admins can VIEW share settings and copy public link
     - Toggle switch disabled with tooltip for non-admins
     - "Regenerate link" button hidden for non-admins
+    - "Team Members" tab hidden for non-admins (prevents "Failed to load members" errors)
     - "Add Member" button hidden for non-admins
     - Role editing and remove buttons hidden for non-admins
     - Member roles shown as read-only badges for non-admins
