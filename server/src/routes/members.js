@@ -112,10 +112,20 @@ router.delete('/organizations/:orgId/members/:memberId', async (req, res, next) 
   try {
     const { orgId, memberId } = req.params;
 
+    // Get full member data before removing for audit trail
+    const member = db.prepare(`
+      SELECT om.id, om.user_id as userId, om.role, u.name as userName, u.email
+      FROM organization_members om
+      JOIN users u ON om.user_id = u.id
+      WHERE om.id = ? AND om.organization_id = ?
+    `).get(memberId, orgId);
+
     await removeOrgMember(orgId, memberId, req.user.id);
 
-    // Emit real-time event
-    emitMemberRemoved(orgId, memberId, req.user);
+    // Emit real-time event with full member data
+    if (member) {
+      emitMemberRemoved(orgId, member, req.user);
+    }
 
     res.status(204).send();
   } catch (err) {

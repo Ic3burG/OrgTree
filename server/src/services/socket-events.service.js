@@ -37,8 +37,8 @@ export function emitDepartmentUpdated(orgId, department, actor) {
   emitToOrg(orgId, 'department:updated', payload);
 }
 
-export function emitDepartmentDeleted(orgId, departmentId, actor) {
-  const payload = createPayload(orgId, 'department', 'deleted', { id: departmentId }, actor);
+export function emitDepartmentDeleted(orgId, department, actor) {
+  const payload = createPayload(orgId, 'department', 'deleted', department, actor);
   emitToOrg(orgId, 'department:deleted', payload);
 }
 
@@ -53,8 +53,8 @@ export function emitPersonUpdated(orgId, person, actor) {
   emitToOrg(orgId, 'person:updated', payload);
 }
 
-export function emitPersonDeleted(orgId, personId, actor) {
-  const payload = createPayload(orgId, 'person', 'deleted', { id: personId }, actor);
+export function emitPersonDeleted(orgId, person, actor) {
+  const payload = createPayload(orgId, 'person', 'deleted', person, actor);
   emitToOrg(orgId, 'person:deleted', payload);
 }
 
@@ -69,8 +69,8 @@ export function emitMemberUpdated(orgId, member, actor) {
   emitToOrg(orgId, 'member:updated', payload);
 }
 
-export function emitMemberRemoved(orgId, memberId, actor) {
-  const payload = createPayload(orgId, 'member', 'removed', { id: memberId }, actor);
+export function emitMemberRemoved(orgId, member, actor) {
+  const payload = createPayload(orgId, 'member', 'removed', member, actor);
   emitToOrg(orgId, 'member:removed', payload);
 }
 

@@ -112,10 +112,19 @@ router.put('/organizations/:orgId/departments/:deptId', async (req, res, next) =
 // DELETE /api/organizations/:orgId/departments/:deptId
 router.delete('/organizations/:orgId/departments/:deptId', async (req, res, next) => {
   try {
+    // Get full department data before deleting for audit trail
+    const department = db.prepare(`
+      SELECT id, name, description, parent_id as parentId, organization_id
+      FROM departments
+      WHERE id = ? AND organization_id = ?
+    `).get(req.params.deptId, req.params.orgId);
+
     await deleteDepartment(req.params.orgId, req.params.deptId, req.user.id);
 
-    // Emit real-time event
-    emitDepartmentDeleted(req.params.orgId, req.params.deptId, req.user);
+    // Emit real-time event with full department data
+    if (department) {
+      emitDepartmentDeleted(req.params.orgId, department, req.user);
+    }
 
     res.status(204).send();
   } catch (err) {

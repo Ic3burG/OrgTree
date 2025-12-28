@@ -96,9 +96,9 @@ router.put('/people/:personId', async (req, res, next) => {
 // DELETE /api/people/:personId
 router.delete('/people/:personId', async (req, res, next) => {
   try {
-    // Get person's department before deleting for real-time event
+    // Get full person data before deleting for audit trail
     const person = db.prepare(`
-      SELECT p.id, d.organization_id
+      SELECT p.id, p.name, p.title, p.email, p.phone, p.department_id as departmentId, d.organization_id, d.name as departmentName
       FROM people p
       JOIN departments d ON p.department_id = d.id
       WHERE p.id = ?
@@ -106,9 +106,9 @@ router.delete('/people/:personId', async (req, res, next) => {
 
     await deletePerson(req.params.personId, req.user.id);
 
-    // Emit real-time event
+    // Emit real-time event with full person data
     if (person) {
-      emitPersonDeleted(person.organization_id, req.params.personId, req.user);
+      emitPersonDeleted(person.organization_id, person, req.user);
     }
 
     res.status(204).send();

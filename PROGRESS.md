@@ -203,9 +203,28 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 10+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Advanced Search with FTS5 (December 28, 2025)
+- **Last Major Update**: Audit Log Improvements (December 28, 2025)
 - **Total Commits**: 80+ commits on current branch
 - **Recent Session Highlights**:
+
+  **December 28, 2025 - Audit Log Improvements** 📋:
+  - ✅ **BUG FIXED**: Audit log showing "Unknown" for deleted entities and "System" for actor
+  - ✅ **ROOT CAUSES**:
+    - JWT token didn't include user's name (only id, email, role)
+    - Delete operations only passed entity ID, not full entity data with name/details
+  - ✅ **SOLUTIONS IMPLEMENTED**:
+    - Added `name` field to JWT token payload (auth.service.js)
+    - Updated all delete routes to fetch full entity data before deletion
+    - Modified socket event emitters to accept full entity objects instead of just IDs
+  - ✅ **FILES MODIFIED** (5 files):
+    - `server/src/services/auth.service.js` - Added name to JWT token
+    - `server/src/routes/people.js` - Fetch full person data before delete
+    - `server/src/routes/departments.js` - Fetch full department data before delete
+    - `server/src/routes/members.js` - Fetch full member data before removal
+    - `server/src/services/socket-events.service.js` - Accept full entity objects
+  - 📝 **IMPACT**: Audit log now shows who performed actions and what exactly was deleted
+  - 🎯 **USER EXPERIENCE**: Clear audit trail with actor names and deleted entity details
+  - 🔐 **NOTE**: Users must log in again for JWT token to include their name
 
   **December 28, 2025 - Advanced Search with SQLite FTS5** 🔍:
   - ✅ **MAJOR FEATURE**: Server-side full-text search with autocomplete, fuzzy matching, and type filtering
