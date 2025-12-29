@@ -1,11 +1,16 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Edit, Trash2, Search, Mail, Phone, MapPin, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Mail, Phone, Loader2, CheckSquare, Square, X } from 'lucide-react';
 import api from '../../api/client';
 import PersonForm from './PersonForm';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import BulkActionBar from './BulkActionBar';
+import BulkDeleteModal from './BulkDeleteModal';
+import BulkMoveModal from './BulkMoveModal';
+import BulkEditModal from './BulkEditModal';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 import { useSearch } from '../../hooks/useSearch';
+import { useBulkSelection } from '../../hooks/useBulkSelection';
 
 export default function PersonManager() {
   const { orgId } = useParams();
@@ -33,6 +38,13 @@ export default function PersonManager() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [personToDelete, setPersonToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Bulk operations state
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [bulkMoveModalOpen, setBulkMoveModalOpen] = useState(false);
+  const [bulkEditModalOpen, setBulkEditModalOpen] = useState(false);
+  const [bulkOperationLoading, setBulkOperationLoading] = useState(false);
+  const [bulkOperationResult, setBulkOperationResult] = useState(null);
 
   const loadData = useCallback(async (showLoading = true) => {
     try {
@@ -134,6 +146,77 @@ export default function PersonManager() {
     );
   }, [searchTerm, searchResults, people, filterDepartment]);
 
+  // Bulk selection hook
+  const {
+    selectionMode,
+    toggleSelectionMode,
+    exitSelectionMode,
+    selectedArray,
+    selectedCount,
+    hasSelection,
+    toggleSelect,
+    isSelected,
+    toggleSelectAll,
+    allSelected,
+  } = useBulkSelection(filteredPeople);
+
+  // Bulk operation handlers
+  const handleBulkDelete = async () => {
+    try {
+      setBulkOperationLoading(true);
+      setBulkOperationResult(null);
+      const result = await api.bulkDeletePeople(orgId, selectedArray);
+      setBulkOperationResult(result);
+      if (result.deletedCount > 0) {
+        await loadData(false);
+      }
+    } catch (err) {
+      setBulkOperationResult({ deletedCount: 0, failedCount: selectedCount, error: err.message });
+    } finally {
+      setBulkOperationLoading(false);
+    }
+  };
+
+  const handleBulkMove = async (targetDepartmentId) => {
+    try {
+      setBulkOperationLoading(true);
+      setBulkOperationResult(null);
+      const result = await api.bulkMovePeople(orgId, selectedArray, targetDepartmentId);
+      setBulkOperationResult(result);
+      if (result.movedCount > 0) {
+        await loadData(false);
+      }
+    } catch (err) {
+      setBulkOperationResult({ movedCount: 0, failedCount: selectedCount, error: err.message });
+    } finally {
+      setBulkOperationLoading(false);
+    }
+  };
+
+  const handleBulkEdit = async (updates) => {
+    try {
+      setBulkOperationLoading(true);
+      setBulkOperationResult(null);
+      const result = await api.bulkEditPeople(orgId, selectedArray, updates);
+      setBulkOperationResult(result);
+      if (result.updatedCount > 0) {
+        await loadData(false);
+      }
+    } catch (err) {
+      setBulkOperationResult({ updatedCount: 0, failedCount: selectedCount, error: err.message });
+    } finally {
+      setBulkOperationLoading(false);
+    }
+  };
+
+  const closeBulkModal = (modalSetter) => {
+    modalSetter(false);
+    setBulkOperationResult(null);
+    if (bulkOperationResult?.deletedCount > 0 || bulkOperationResult?.movedCount > 0 || bulkOperationResult?.updatedCount > 0) {
+      exitSelectionMode();
+    }
+  };
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header - fixed */}
@@ -146,13 +229,28 @@ export default function PersonManager() {
                 Manage people across all departments
               </p>
             </div>
-            <button
-              onClick={handleCreate}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              <Plus size={20} />
-              Add Person
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleSelectionMode}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                  selectionMode
+                    ? 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {selectionMode ? <X size={20} /> : <CheckSquare size={20} />}
+                {selectionMode ? 'Cancel' : 'Select'}
+              </button>
+              {!selectionMode && (
+                <button
+                  onClick={handleCreate}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  <Plus size={20} />
+                  Add Person
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Error display */}
@@ -236,15 +334,52 @@ export default function PersonManager() {
           ) : (
             <>
               <div className="bg-white rounded-lg shadow">
+                {/* Select All header in selection mode */}
+                {selectionMode && filteredPeople.length > 0 && (
+                  <div className="px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-3">
+                    <button
+                      onClick={toggleSelectAll}
+                      className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+                    >
+                      {allSelected ? (
+                        <CheckSquare size={18} className="text-blue-600" />
+                      ) : (
+                        <Square size={18} />
+                      )}
+                      {allSelected ? 'Deselect all' : 'Select all'}
+                    </button>
+                    {hasSelection && (
+                      <span className="text-sm text-gray-500">
+                        ({selectedCount} selected)
+                      </span>
+                    )}
+                  </div>
+                )}
                 <div className="divide-y divide-gray-200">
                   {filteredPeople.map((person) => (
                     <div
                       key={person.id}
-                      className={`p-6 hover:bg-gray-50 transition-all duration-300 group ${
+                      onClick={selectionMode ? () => toggleSelect(person.id) : undefined}
+                      className={`p-6 transition-all duration-300 group ${
+                        selectionMode ? 'cursor-pointer' : ''
+                      } ${
                         isRecentlyChanged(person.id) ? 'bg-blue-50 ring-2 ring-blue-200' : ''
+                      } ${
+                        selectionMode && isSelected(person.id) ? 'bg-blue-50' : 'hover:bg-gray-50'
                       }`}
                     >
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        {/* Checkbox in selection mode */}
+                        {selectionMode && (
+                          <div className="pt-1">
+                            {isSelected(person.id) ? (
+                              <CheckSquare size={20} className="text-blue-600" />
+                            ) : (
+                              <Square size={20} className="text-gray-400" />
+                            )}
+                          </div>
+                        )}
+
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="text-lg font-semibold text-gray-900">
@@ -268,6 +403,7 @@ export default function PersonManager() {
                                 <a
                                   href={`mailto:${person.email}`}
                                   className="hover:text-blue-600"
+                                  onClick={(e) => selectionMode && e.preventDefault()}
                                 >
                                   {person.email}
                                 </a>
@@ -282,23 +418,25 @@ export default function PersonManager() {
                           </div>
                         </div>
 
-                        {/* Actions */}
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => handleEdit(person)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                            title="Edit person"
-                          >
-                            <Edit size={18} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(person)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                            title="Delete person"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
+                        {/* Actions - hide in selection mode */}
+                        {!selectionMode && (
+                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleEdit(person)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                              title="Edit person"
+                            >
+                              <Edit size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(person)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                              title="Delete person"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -347,6 +485,52 @@ export default function PersonManager() {
         title="Delete Person"
         message={`Are you sure you want to delete "${personToDelete?.name}"? This action cannot be undone.`}
         isDeleting={isDeleting}
+      />
+
+      {/* Bulk Action Bar */}
+      {selectionMode && hasSelection && (
+        <BulkActionBar
+          selectedCount={selectedCount}
+          entityType="people"
+          onDelete={() => setBulkDeleteModalOpen(true)}
+          onMove={() => setBulkMoveModalOpen(true)}
+          onEdit={() => setBulkEditModalOpen(true)}
+          onCancel={exitSelectionMode}
+        />
+      )}
+
+      {/* Bulk Delete Modal */}
+      <BulkDeleteModal
+        isOpen={bulkDeleteModalOpen}
+        onClose={() => closeBulkModal(setBulkDeleteModalOpen)}
+        onConfirm={handleBulkDelete}
+        count={selectedCount}
+        entityType="people"
+        isDeleting={bulkOperationLoading}
+        result={bulkOperationResult}
+      />
+
+      {/* Bulk Move Modal */}
+      <BulkMoveModal
+        isOpen={bulkMoveModalOpen}
+        onClose={() => closeBulkModal(setBulkMoveModalOpen)}
+        onConfirm={handleBulkMove}
+        count={selectedCount}
+        departments={departments}
+        isMoving={bulkOperationLoading}
+        result={bulkOperationResult}
+      />
+
+      {/* Bulk Edit Modal */}
+      <BulkEditModal
+        isOpen={bulkEditModalOpen}
+        onClose={() => closeBulkModal(setBulkEditModalOpen)}
+        onConfirm={handleBulkEdit}
+        count={selectedCount}
+        entityType="people"
+        departments={departments}
+        isUpdating={bulkOperationLoading}
+        result={bulkOperationResult}
       />
     </div>
   );

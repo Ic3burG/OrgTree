@@ -12,6 +12,7 @@ import {
   emitDepartmentUpdated,
   emitDepartmentDeleted
 } from '../services/socket-events.service.js';
+import db from '../db.js';
 
 const router = express.Router();
 

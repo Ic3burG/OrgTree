@@ -110,12 +110,13 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ✅ Proper layout spacing for departments with many people
 - ✅ Consistent department hierarchy from XML imports (no duplicates)
 - ✅ **Real-time collaboration** - Changes sync instantly between users via WebSocket
+- ✅ **Bulk Operations** - Multi-select with batch delete, move, and edit
 
 ### Areas for Potential Enhancement
 
 #### Feature Enhancements
 - ~~**Advanced Search** - Full-text search with autocomplete~~ ✅ **IMPLEMENTED** (December 28, 2025)
-- **Bulk Operations** - Multi-select for batch edits/deletions
+- ~~**Bulk Operations** - Multi-select for batch edits/deletions~~ ✅ **IMPLEMENTED** (December 29, 2025)
 - ~~**Audit Trail** - Track changes and modifications~~ ✅ **IMPLEMENTED** (December 26, 2025)
 - **Custom Fields** - Configurable person/department attributes
 - **Email Invitations** - Invite users who don't have OrgTree accounts yet
@@ -156,7 +157,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 
 ### Short-term Goals (Next month)
 1. ~~**Advanced Search** - Implement full-text search capabilities~~ ✅ **DONE**
-2. **Bulk Operations** - Multi-select functionality for efficiency
+2. ~~**Bulk Operations** - Multi-select functionality for efficiency~~ ✅ **DONE**
 3. **Custom Fields** - Allow configurable person/department attributes
 4. **API Documentation** - Complete REST API documentation
 
@@ -197,15 +198,88 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 ## 📊 Project Metrics
 
 ### Codebase Statistics
-- **Total Components**: ~17 React components (added CreateUserModal, ChangePasswordPage)
-- **API Endpoints**: ~22 REST endpoints (added search + autocomplete endpoints)
+- **Total Components**: ~21 React components (added Bulk modals and action bar)
+- **API Endpoints**: ~27 REST endpoints (added 5 bulk operation endpoints)
 - **Database Tables**: 4 main tables + 2 FTS5 virtual tables (departments_fts, people_fts)
-- **Features**: 10+ major feature areas completed
+- **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Audit Log Improvements (December 28, 2025)
-- **Total Commits**: 116 commits on main branch
+- **Last Major Update**: Bulk Operations Feature (December 29, 2025)
+- **Total Commits**: 117 commits on main branch
 - **Recent Session Highlights**:
+
+  **December 29, 2025 - Bulk Operations Feature** 📦:
+  - ✅ **MAJOR FEATURE**: Multi-select and bulk operations for People and Departments
+  - ✅ **OPERATIONS SUPPORTED**:
+    - **Delete**: Bulk delete multiple items with individual audit logs
+    - **Move**: Move multiple people to a different department
+    - **Edit**: Bulk edit titles (people) or parent departments (departments)
+  - ✅ **BACKEND IMPLEMENTATION**:
+    - Created `server/src/services/bulk.service.js` (~530 lines):
+      - `bulkDeletePeople()` - Delete multiple people with audit trail
+      - `bulkMovePeople()` - Move people to target department
+      - `bulkEditPeople()` - Edit title/department for multiple people
+      - `bulkDeleteDepartments()` - Delete departments with cascade warnings
+      - `bulkEditDepartments()` - Re-parent multiple departments
+    - Created `server/src/routes/bulk.js` (~110 lines):
+      - POST `/organizations/:orgId/people/bulk-delete`
+      - POST `/organizations/:orgId/people/bulk-move`
+      - PUT `/organizations/:orgId/people/bulk-edit`
+      - POST `/organizations/:orgId/departments/bulk-delete`
+      - PUT `/organizations/:orgId/departments/bulk-edit`
+  - ✅ **FRONTEND IMPLEMENTATION**:
+    - Created `src/hooks/useBulkSelection.js` (~100 lines):
+      - Selection mode toggle
+      - Select/deselect individual items
+      - Select all / deselect all
+      - Selection state management
+    - Created `src/components/admin/BulkActionBar.jsx`:
+      - Floating action bar at bottom of screen
+      - Shows selected count
+      - Action buttons: Move, Edit, Delete
+    - Created `src/components/admin/BulkDeleteModal.jsx`:
+      - Confirmation with warnings for departments (cascade delete)
+      - Shows results (success/failure counts)
+    - Created `src/components/admin/BulkMoveModal.jsx`:
+      - Department selector for move target
+      - Shows move results
+    - Created `src/components/admin/BulkEditModal.jsx`:
+      - Dynamic form based on entity type
+      - People: title + department change
+      - Departments: parent department change
+  - ✅ **INTEGRATION**:
+    - Updated PersonManager.jsx with full bulk operations UI
+    - Updated DepartmentManager.jsx with bulk operations UI
+    - Added bulk API methods to client.js
+  - ✅ **FEATURES**:
+    - **Selection Mode Toggle**: Click "Select" button to enter/exit selection mode
+    - **Checkbox UI**: Visual checkboxes on each row when in selection mode
+    - **Select All**: Header button to select/deselect all visible items
+    - **Floating Action Bar**: Appears when items selected with action buttons
+    - **Partial Failure Handling**: Shows which items succeeded/failed
+    - **Individual Audit Logs**: Each item gets its own audit entry
+    - **Real-time Updates**: Changes sync via existing WebSocket system
+    - **Input Validation**: Max 100 items per operation
+    - **Permission Checks**: Requires 'editor' role
+    - **Transaction Safety**: All operations wrapped in db.transaction()
+  - ✅ **FILES CREATED** (7 new files):
+    - `server/src/services/bulk.service.js`
+    - `server/src/routes/bulk.js`
+    - `src/hooks/useBulkSelection.js`
+    - `src/components/admin/BulkActionBar.jsx`
+    - `src/components/admin/BulkDeleteModal.jsx`
+    - `src/components/admin/BulkMoveModal.jsx`
+    - `src/components/admin/BulkEditModal.jsx`
+  - ✅ **FILES MODIFIED** (5 files):
+    - `server/src/index.js` - Mount bulk routes
+    - `server/src/routes/departments.js` - Added missing db import
+    - `src/api/client.js` - Added bulk API methods
+    - `src/components/admin/PersonManager.jsx` - Full bulk operations UI
+    - `src/components/admin/DepartmentManager.jsx` - Bulk operations UI
+  - 📝 **IMPACT**: Dramatically improves efficiency for managing large organizations
+  - 🎯 **USER EXPERIENCE**: Select multiple items, perform batch operations with one click
+
+  ---
 
   **December 28, 2025 - Audit Log Improvements** 📋:
   - ✅ **BUG FIXED**: Audit log showing "Unknown" for deleted entities and "System" for actor
@@ -834,7 +908,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 28, 2025 (Advanced Search + Audit Log Improvements)
+**Last Updated**: December 29, 2025 (Bulk Operations Feature)
 
 ---
 

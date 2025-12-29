@@ -15,6 +15,7 @@ import memberRoutes from './routes/members.js';
 import invitationRoutes from './routes/invitations.js';
 import auditRoutes from './routes/audit.js';
 import searchRoutes from './routes/search.js';
+import bulkRoutes from './routes/bulk.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
 import db from './db.js';
@@ -116,6 +117,7 @@ app.use('/api', memberRoutes);
 app.use('/api', invitationRoutes);
 app.use('/api', auditRoutes);
 app.use('/api', searchRoutes);
+app.use('/api', bulkRoutes);
 
 // Serve index.html for all non-API routes (SPA support) in production
 if (process.env.NODE_ENV === 'production') {

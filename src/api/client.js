@@ -264,6 +264,37 @@ const api = {
     const params = new URLSearchParams({ q, limit: limit.toString() });
     return request(`/organizations/${orgId}/search/autocomplete?${params}`);
   },
+
+  // Bulk Operations
+  bulkDeletePeople: (orgId, personIds) =>
+    request(`/organizations/${orgId}/people/bulk-delete`, {
+      method: 'POST',
+      body: JSON.stringify({ personIds }),
+    }),
+
+  bulkMovePeople: (orgId, personIds, targetDepartmentId) =>
+    request(`/organizations/${orgId}/people/bulk-move`, {
+      method: 'POST',
+      body: JSON.stringify({ personIds, targetDepartmentId }),
+    }),
+
+  bulkEditPeople: (orgId, personIds, updates) =>
+    request(`/organizations/${orgId}/people/bulk-edit`, {
+      method: 'PUT',
+      body: JSON.stringify({ personIds, updates }),
+    }),
+
+  bulkDeleteDepartments: (orgId, departmentIds) =>
+    request(`/organizations/${orgId}/departments/bulk-delete`, {
+      method: 'POST',
+      body: JSON.stringify({ departmentIds }),
+    }),
+
+  bulkEditDepartments: (orgId, departmentIds, updates) =>
+    request(`/organizations/${orgId}/departments/bulk-edit`, {
+      method: 'PUT',
+      body: JSON.stringify({ departmentIds, updates }),
+    }),
 };
 
 export default api;
