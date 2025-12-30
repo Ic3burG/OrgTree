@@ -1,195 +1,196 @@
-# Organization Map
+# OrgTree
 
-An interactive, visual organization map built with React and React Flow. Displays your organization structure as a pannable, zoomable flowchart with expandable department nodes and detailed contact information.
+A modern, full-stack organizational directory and visualization platform. Build, manage, and share interactive org charts with real-time collaboration.
+
+**[Live Demo](https://orgtree.onrender.com)** | **[Documentation](./DOCUMENTATION.md)**
 
 ## Features
 
-- **Interactive Canvas**: Pan, zoom, and navigate through your organization visually
-- **Hierarchical Layout**: Automatically arranged tree structure with parent-child relationships
+### Organization Management
+- **Multi-Organization Support**: Create and manage multiple organizations
+- **Department Hierarchy**: Unlimited nesting with drag-and-drop reorganization
+- **People Management**: Full employee directory with contact details
+- **Bulk Operations**: Select multiple items for move, edit, or delete
+
+### Visualization
+- **Interactive Org Chart**: Pan, zoom, and navigate with React Flow
+- **Flexible Layouts**: Vertical (top-down) or horizontal (left-right) views
 - **Expandable Nodes**: Click departments to show/hide team members
-- **Search & Navigate**: Real-time search with auto-zoom to results
-- **Detail Panels**: Click any person to view full contact information
-- **Flexible Layouts**: Toggle between vertical (top-to-bottom) and horizontal (left-to-right) views
-- **Depth-Based Coloring**: Visual hierarchy with darker colors for top-level departments
-- **Mini-Map**: Bird's-eye view for easy navigation of large organizations
-- **Responsive Controls**: Zoom, fit-to-view, expand/collapse all
+- **Depth-Based Coloring**: Visual hierarchy with automatic color gradients
+- **Mini-Map**: Bird's-eye navigation for large organizations
+
+### Collaboration
+- **Team Roles**: Owner, Admin, Editor, Viewer permissions
+- **Email Invitations**: Invite team members via email
+- **Real-Time Sync**: Changes appear instantly across all connected users
+- **Share Links**: Public or private sharing with optional passwords
+
+### Data Management
+- **Import/Export**: JSON and CSV format support
+- **Full-Text Search**: Instant search across all organizations
+- **Audit Trail**: Track all changes with 1-year retention
+- **Automatic Backups**: Database persistence on Render
 
 ## Tech Stack
 
-- **React 18** (with hooks)
-- **React Flow** for interactive canvas and node visualization
-- **Dagre** for automatic hierarchical layout calculations
+### Frontend
+- **React 18** with hooks
+- **React Flow** for interactive canvas
+- **React Router** for navigation
 - **Tailwind CSS** for styling
 - **Lucide React** for icons
-- **Papa Parse** for CSV parsing
+- **Socket.IO Client** for real-time updates
 - **Vite** for build tooling
 
-## Installation
+### Backend
+- **Node.js** with Express
+- **SQLite** with better-sqlite3
+- **FTS5** for full-text search
+- **Socket.IO** for WebSocket connections
+- **bcrypt** for password hashing
+- **jsonwebtoken** for authentication
+- **Resend** for transactional emails
+- **express-rate-limit** for API protection
+
+## Quick Start
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/orgtree.git
+cd orgtree
+
+# Install dependencies
 npm install
+cd server && npm install && cd ..
+
+# Set up environment variables
+cp server/.env.example server/.env
+# Edit server/.env with your configuration
 ```
 
-## Development
+### Development
 
 ```bash
+# Start backend (from root directory)
+cd server && npm run dev
+
+# Start frontend (new terminal, from root directory)
 npm run dev
 ```
 
-Visit `http://localhost:3000` to view the application.
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:3001
 
-## Build
+### Production Build
 
 ```bash
+# Build frontend
 npm run build
+
+# Start production server
+cd server && npm start
 ```
 
-## Data Format
+## Environment Variables
 
-The application uses CSV files with the following structure:
+Create `server/.env` with:
 
-```csv
-Path,Type,Name,Title,Email,Phone
-/Executive,department,Executive Office,,,,
-/Executive/john-smith,person,John Smith,CEO,john@company.org,555-1001,Room 100
-/Finance,department,Finance Department,,,,
-/Finance/susan-lee,person,Susan Lee,CFO,susan@company.org,555-2001,Room 200
-/Finance/Accounting,department,Accounting,,,,
-/Finance/Accounting/bob-chen,person,Bob Chen,Senior Accountant,bob@company.org,555-2010,Room 205
+```env
+# Required
+JWT_SECRET=your-secure-secret-key
+
+# Optional - Email invitations (Resend)
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+FROM_EMAIL=noreply@yourdomain.com
+
+# Optional - Production
+FRONTEND_URL=https://yourdomain.com
+NODE_ENV=production
 ```
-
-### Column Descriptions
-
-- **Path**: Hierarchical path using `/` separator (e.g., `/Finance/Accounting`)
-- **Type**: Either `department` or `person`
-- **Name**: Display name for the department or person
-- **Title**: Job title (for people only)
-- **Email**: Email address (for people only)
-- **Phone**: Phone number (for people only)
-
-### Path Rules
-
-1. Must start with `/`
-2. Use `/` as separator between levels
-3. No trailing slash
-4. Parent departments must be defined before children
-5. URL-safe characters recommended (lowercase, hyphens for spaces)
 
 ## Project Structure
 
 ```
-/src
-  /components
-    OrgMap.jsx              # Main canvas container with React Flow
-    DepartmentNode.jsx      # Custom node component for departments
-    PersonRowCard.jsx       # Person card inside expanded departments
-    DetailPanel.jsx         # Slide-in panel with full contact info
-    SearchOverlay.jsx       # Floating search with results dropdown
-    Toolbar.jsx             # Zoom and layout controls
-  /utils
-    parseCSVToFlow.js       # CSV parser for React Flow format
-    layoutEngine.js         # Dagre layout calculations
-    colors.js               # Depth-based color system
-    helpers.js              # Shared utility functions
-  /data
-    sample-org.csv          # Sample organization data (33 people)
-  App.jsx                   # Root component with ReactFlowProvider
-  main.jsx                  # Entry point
-  index.css                 # Global styles + React Flow overrides
+/
+├── src/                    # Frontend source
+│   ├── components/
+│   │   ├── admin/          # Admin panels (Person, Department managers)
+│   │   ├── auth/           # Login, Register, Password reset
+│   │   ├── layout/         # Layout components
+│   │   └── org-chart/      # Visualization components
+│   ├── contexts/           # React contexts (Auth, Socket)
+│   ├── hooks/              # Custom hooks
+│   ├── api/                # API client
+│   └── pages/              # Route pages
+├── server/                 # Backend source
+│   └── src/
+│       ├── routes/         # API routes
+│       ├── services/       # Business logic
+│       ├── middleware/     # Auth, rate limiting
+│       └── db.js           # Database setup
+├── DOCUMENTATION.md        # Full user & admin guide
+└── PROGRESS.md             # Development progress
 ```
 
-## Key Interactions
+## API Overview
 
-### Pan & Zoom
-- **Pan**: Click and drag the background
-- **Zoom**: Scroll wheel or use toolbar buttons
-- **Fit View**: Click the maximize icon to fit entire org chart in view
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/auth/*` | Authentication (register, login, logout) |
+| `GET/POST /api/organizations` | Organization CRUD |
+| `GET/POST /api/organizations/:id/departments` | Department management |
+| `GET/POST /api/organizations/:id/people` | People management |
+| `POST /api/organizations/:id/*/bulk-*` | Bulk operations |
+| `GET /api/organizations/:id/audit-logs` | Audit trail |
+| `POST /api/organizations/:id/invitations` | Team invitations |
+| `GET /api/share/:token` | Public share access |
 
-### Expand/Collapse Departments
-- **Single**: Click any department header to toggle
-- **All**: Use toolbar buttons to expand/collapse all at once
+See [DOCUMENTATION.md](./DOCUMENTATION.md) for complete API details.
 
-### View Person Details
-- **Expand Department**: Click department to show team members
-- **Click Person**: Click any person row to open detail panel
-- **Contact Links**: Email and phone are clickable in detail panel
+## Deployment
 
-### Search
-- **Type to Search**: Real-time filtering of departments and people
-- **Select Result**: Click a search result to:
-  - Zoom and center the node on canvas
-  - Expand department (if result is a person)
-  - Highlight with pulsing animation
-  - Open detail panel (for people)
+### Render (Recommended)
 
-### Layout Toggle
-- **Vertical (TB)**: Top-to-bottom hierarchy (default)
-- **Horizontal (LR)**: Left-to-right hierarchy
-- **Click Arrow Icon**: Toggle between layouts
-- **Auto-Reflow**: Positions recalculate automatically
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Configure:
+   - **Build Command**: `npm install && npm run build && cd server && npm install`
+   - **Start Command**: `cd server && npm start`
+   - **Environment Variables**: Set `JWT_SECRET`, `NODE_ENV=production`
+4. Add a Persistent Disk mounted at `/data` for SQLite
 
-## Depth-Based Colors
+### Docker
 
-Departments use progressively lighter colors as you go deeper in the hierarchy:
-
-- **Level 0** (Top): `#334155` (slate-700) - Darkest
-- **Level 1**: `#475569` (slate-600)
-- **Level 2**: `#64748b` (slate-500)
-- **Level 3**: `#94a3b8` (slate-400)
-- **Level 4+**: `#cbd5e1` (slate-300) - Lightest
-
-Text automatically switches between white and dark for optimal contrast.
-
-## Sample Data
-
-The included `sample-org.csv` contains:
-- 5 top-level departments (Executive, Finance, Operations, Marketing, HR)
-- 33 total people across the organization
-- Up to 4 levels of hierarchy
-- Realistic job titles and contact information
-
-## Customization
-
-### Changing Colors
-
-Edit `src/utils/colors.js`:
-
-```javascript
-export function getDepthColors(depth) {
-  const colors = [
-    { bg: 'bg-blue-700', hex: '#1d4ed8', text: 'text-white', hover: 'hover:bg-blue-600' },
-    // ...add your colors
-  ];
-}
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY . .
+RUN npm install && npm run build
+RUN cd server && npm install
+ENV NODE_ENV=production
+EXPOSE 3001
+CMD ["node", "server/src/index.js"]
 ```
 
-### Adjusting Layout
+## Documentation
 
-Modify spacing in `src/utils/layoutEngine.js`:
+For comprehensive documentation including:
+- User guides
+- Admin tutorials
+- Troubleshooting
+- Keyboard shortcuts
 
-```javascript
-g.setGraph({
-  rankdir: direction,
-  nodesep: 80,    // horizontal spacing
-  ranksep: 120,   // vertical spacing
-  // ...
-});
-```
+See **[DOCUMENTATION.md](./DOCUMENTATION.md)**
 
-### Adding Custom Data Fields
+## Development Progress
 
-1. Add column to CSV
-2. Update parser in `src/utils/parseCSVToFlow.js`
-3. Display in `PersonRowCard.jsx` or `DetailPanel.jsx`
-
-## Performance
-
-The application efficiently handles organizations with:
-- **Nodes**: 100+ departments
-- **People**: 500+ employees
-- **Hierarchy Depth**: 6+ levels
-
-React Flow's built-in virtualization ensures smooth performance even with large datasets.
+Track feature implementation and roadmap in **[PROGRESS.md](./PROGRESS.md)**
 
 ## Browser Support
 
@@ -197,16 +198,18 @@ React Flow's built-in virtualization ensures smooth performance even with large 
 - Firefox: Latest 2 versions
 - Safari: Latest 2 versions
 
-Requires ES6+ support (no IE11).
-
-## Accessibility
-
-- Keyboard navigation supported
-- ARIA labels on interactive elements
-- Focus visible states
-- Screen reader friendly
-- Semantic HTML structure
-
 ## License
 
 MIT
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## Support
+
+- [Report Issues](https://github.com/yourusername/orgtree/issues)
+- [Documentation](./DOCUMENTATION.md)
