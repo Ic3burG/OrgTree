@@ -149,6 +149,89 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ~~**Rate Limiting** - Protect against abuse~~ ✅ **DONE** (December 21-22, 2025)
 - ~~**HTTPS Enforcement** - SSL/TLS configuration~~ ✅ **DONE** (via Render)
 
+## 🔧 Technical Debt Roadmap
+
+### Code Quality & Testing
+- [ ] **TypeScript Migration** - Convert codebase from JavaScript to TypeScript for better type safety
+- [ ] **Increase Test Coverage** - Expand from 76 tests to cover edge cases and integration scenarios (target: 80%+ coverage)
+- [ ] **E2E Testing** - Add end-to-end tests with Playwright or Cypress for critical user flows
+- [ ] **ESLint/Prettier Setup** - Enforce code style consistency across the team
+- [ ] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces
+- [ ] **Storybook Integration** - Document UI components with interactive examples
+
+### Performance Optimization
+- [ ] **Database Indexing Audit** - Review and optimize indexes for frequently-queried fields
+- [ ] **Frontend Bundle Optimization** - Code splitting, lazy loading, tree shaking analysis
+- [ ] **Query Profiling** - Profile slow database queries and optimize (especially for large orgs)
+- [ ] **React Performance Audit** - Review unnecessary re-renders, missing memoization
+- [ ] **Image Optimization Pipeline** - Compress and optimize profile pictures/assets
+- [ ] **Service Workers** - Add offline capability and asset caching (PWA)
+
+### Security Hardening
+- [ ] **Address Medium/Low Severity Items** - Complete remaining items from SECURITY_AUDIT.md
+- [ ] **CSRF Protection** - Add CSRF tokens for state-changing operations
+- [ ] **Dependency Scanning Automation** - GitHub Dependabot or Snyk integration
+- [ ] **Penetration Testing** - Professional security assessment
+- [ ] **SQL Injection Testing** - Automated scanning for SQL injection vulnerabilities
+- [ ] **Content Security Policy Tuning** - Refine CSP headers for tighter security
+
+### Infrastructure & DevOps
+- [ ] **Database Backup Strategy** - Automated daily backups with retention policy
+- [ ] **Monitoring & Alerting** - Sentry for error tracking, uptime monitoring
+- [ ] **APM (Application Performance Monitoring)** - New Relic, DataDog, or similar
+- [ ] **CI/CD Pipeline** - GitHub Actions for automated testing and deployment
+- [ ] **Staging Environment** - Separate staging server for pre-production testing
+- [ ] **Database Migration Rollback** - Strategy and scripts for safe rollbacks
+- [ ] **Health Check Enhancement** - Add memory usage, disk space, connection pool metrics
+
+### Scalability & Architecture
+- [ ] **Database Connection Pooling** - Better-sqlite3 optimization for concurrent requests
+- [ ] **PostgreSQL Migration Path** - Research migration from SQLite for better concurrency at scale
+- [ ] **Caching Layer** - Redis for session storage, frequently-accessed data
+- [ ] **Background Jobs** - Bull/BullMQ for async tasks (email sending, large imports)
+- [ ] **File Upload Storage** - S3/Cloudinary for profile pictures and attachments
+- [ ] **Horizontal Scaling Strategy** - Document approach for multi-instance deployment
+
+### Developer Experience
+- [ ] **Git Hooks** - Husky for pre-commit linting, pre-push testing
+- [ ] **Docker Development Environment** - docker-compose for consistent local setup
+- [ ] **Contribution Guidelines** - CONTRIBUTING.md with setup, PR process, code standards
+- [ ] **API Client SDK** - Generate JavaScript/TypeScript SDK from OpenAPI spec
+- [ ] **Development Documentation** - Architecture decision records (ADRs)
+
+### Observability & Analytics
+- [ ] **Application Metrics Dashboard** - Response times, error rates, active users
+- [ ] **User Analytics** - Track feature usage, user journeys (privacy-respecting)
+- [ ] **Log Aggregation** - Centralized logging with search (Loki, CloudWatch, etc.)
+- [ ] **Performance Budget** - Set and monitor bundle size, load time thresholds
+
+### Code Cleanup & Modernization
+- [ ] **Dependency Audit** - Remove unused dependencies, update outdated packages
+- [ ] **Dead Code Elimination** - Remove unused components, functions, routes
+- [ ] **CSS Optimization** - Purge unused Tailwind classes, optimize bundle size
+- [ ] **API Versioning Strategy** - Plan for backward-compatible API changes
+- [ ] **Accessibility Audit** - WCAG 2.1 AA compliance review and fixes
+
+### Priority Recommendations
+
+#### High Priority (Next 1-2 weeks)
+1. **Database Backup Strategy** - Critical for production data safety
+2. **Monitoring & Alerting** - Sentry for error tracking and uptime monitoring
+3. **Git Hooks** - Prevent bugs from being committed
+4. **Address Medium Security Items** - Complete remaining SECURITY_AUDIT.md items
+
+#### Medium Priority (Next month)
+5. **Increase Test Coverage** - Improve test coverage beyond current 76 tests
+6. **Database Indexing Audit** - Optimize query performance
+7. **CI/CD Pipeline** - Automate testing and deployment
+8. **ESLint/Prettier Setup** - Enforce code consistency
+
+#### Low Priority (Next quarter)
+9. **TypeScript Migration** - Long-term type safety improvement
+10. **E2E Testing** - Comprehensive user flow testing
+11. **PostgreSQL Migration Path** - Research for future scalability
+12. **Caching Layer** - Performance optimization for high traffic
+
 ## 📋 Next Steps & Roadmap
 
 ### Immediate Priorities (Next 1-2 weeks)
@@ -207,9 +290,30 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Documentation & Test Coverage (December 30, 2025)
+- **Last Major Update**: Technical Debt Roadmap (December 31, 2025)
 - **Total Commits**: 134+ commits on main branch
 - **Recent Session Highlights**:
+
+  **December 31, 2025 - Technical Debt Roadmap** 🗺️:
+  - ✅ **PLANNING**: Added comprehensive Technical Debt Roadmap to PROGRESS.md
+  - ✅ **CATEGORIES ORGANIZED** (7 major categories):
+    - Code Quality & Testing (6 items)
+    - Performance Optimization (6 items)
+    - Security Hardening (6 items)
+    - Infrastructure & DevOps (7 items)
+    - Scalability & Architecture (6 items)
+    - Developer Experience (5 items)
+    - Observability & Analytics (4 items)
+    - Code Cleanup & Modernization (5 items)
+  - ✅ **TOTAL ITEMS**: 45 technical debt and maintenance items identified
+  - ✅ **PRIORITIZATION**: Organized into High/Medium/Low priority tiers
+  - ✅ **HIGH PRIORITY ITEMS**:
+    1. Database Backup Strategy
+    2. Monitoring & Alerting (Sentry)
+    3. Git Hooks (Husky)
+    4. Address Medium Security Items from SECURITY_AUDIT.md
+  - 📝 **PURPOSE**: Provides clear roadmap for continuous improvement beyond initial feature set
+  - 🎯 **IMPACT**: Enables systematic approach to code quality, performance, and scalability improvements
 
   **December 30, 2025 - Complete Session Summary** 📋:
   - 🎯 **PRIMARY ACHIEVEMENTS**: Security audit, README rewrite, API documentation, test coverage
@@ -1002,7 +1106,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 30, 2025 (Security Audit, README, API Docs, Tests)
+**Last Updated**: December 31, 2025 (Added Technical Debt Roadmap)
 
 ---
 
