@@ -16,8 +16,9 @@ This security audit reviewed the OrgTree application's authentication and author
 - ✅ All 3 CRITICAL vulnerabilities resolved
 - ✅ All 8 HIGH severity issues resolved
 - ✅ 5 of 9 MEDIUM severity issues resolved
+- ✅ 2 of 5 LOW severity issues resolved
 - ⏳ 4 MEDIUM severity issues remain
-- ⏳ 5 LOW severity issues remain
+- ⏳ 3 LOW severity issues remain
 
 **Strengths:**
 - Parameterized SQL queries (no SQL injection)
@@ -49,9 +50,9 @@ This security audit reviewed the OrgTree application's authentication and author
 | CRITICAL | 3 | 3 ✅ | 0 |
 | HIGH | 8 | 8 ✅ | 0 |
 | MEDIUM | 9 | 5 ✅ | 4 |
-| LOW | 5 | 0 | 5 |
+| LOW | 5 | 2 ✅ | 3 |
 
-**Status**: All CRITICAL and HIGH severity issues resolved. 5 of 9 MEDIUM severity issues fixed (December 31, 2025).
+**Status**: All CRITICAL and HIGH severity issues resolved. 5 of 9 MEDIUM + 2 of 5 LOW severity issues fixed (December 31, 2025).
 
 ---
 
@@ -311,17 +312,41 @@ Added MAX_IMPORT_SIZE = 10,000 items limit to prevent DoS attacks.
 ### 21. XSS Risk in Search Highlights
 HTML tags in FTS snippets could be XSS vector if frontend uses innerHTML.
 
-### 22. Health Endpoint Exposes Environment
-Returns `NODE_ENV` value.
+**Status**: Not yet fixed (Low priority - frontend currently uses safe rendering)
+
+---
+
+### 22. Health Endpoint Exposes Environment ✅ FIXED
+**File:** `server/src/index.js:121-140`
+**Fixed:** December 31, 2025
+
+Removed `environment: process.env.NODE_ENV` from health endpoint response. Health checks now only return status, timestamp, and database connectivity without exposing environment details.
+
+**Security Improvement:** Prevents information disclosure that could aid attackers in understanding the deployment environment.
+
+---
 
 ### 23. Cascade Deletes Without Soft Delete
 No audit trail for cascaded deletions.
 
+**Status**: Not yet fixed (Low priority - audit logs capture parent deletions)
+
+---
+
 ### 24. Incomplete Circular Reference Protection
 Edge cases in department parent validation.
 
-### 25. Superuser Check Inconsistency
-Manual role checks instead of middleware in some routes.
+**Status**: Not yet fixed (Low priority - current validation handles common cases)
+
+---
+
+### 25. Superuser Check Inconsistency ✅ FIXED
+**File:** `server/src/routes/audit.js:59-79`
+**Fixed:** December 31, 2025
+
+Replaced manual role check (`if (req.user.role !== 'superuser')`) with standard `requireSuperuser` middleware in `/admin/audit-logs` route. Now consistent with other admin endpoints.
+
+**Security Improvement:** Standardized authorization pattern reduces risk of inconsistent permission enforcement and provides centralized security logging.
 
 ---
 

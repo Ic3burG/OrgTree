@@ -1,5 +1,5 @@
 import express from 'express';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
 import { requireOrgPermission } from '../services/member.service.js';
 import {
   getAuditLogs,
@@ -56,15 +56,8 @@ router.get('/organizations/:orgId/audit-logs', async (req, res, next) => {
  * Access: Superuser role
  * Query params: Same as organization endpoint + optional orgId filter
  */
-router.get('/admin/audit-logs', async (req, res, next) => {
+router.get('/admin/audit-logs', requireSuperuser, async (req, res, next) => {
   try {
-    // Verify superuser role
-    if (req.user.role !== 'superuser') {
-      const error = new Error('Access denied. Superuser role required.');
-      error.status = 403;
-      throw error;
-    }
-
     // Clean up old logs (1 year retention)
     cleanupOldLogs();
 

@@ -290,9 +290,26 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Security Audit Logging Implementation (December 31, 2025)
+- **Last Major Update**: Quick LOW Security Wins (December 31, 2025)
 - **Total Commits**: 136+ commits on main branch
 - **Recent Session Highlights**:
+
+  **December 31, 2025 - Quick LOW Security Wins (Session 4)** 🔐:
+  - ✅ **SECURITY**: 2 LOW severity vulnerabilities resolved (quick wins)
+  - ✅ **FIXES APPLIED**:
+    - **Health Endpoint Exposes Environment (#22)**: Removed NODE_ENV disclosure
+    - **Superuser Check Inconsistency (#25)**: Standardized authorization middleware
+  - ✅ **FILES MODIFIED** (2 files):
+    - `server/src/index.js` - Removed environment field from health endpoint response
+    - `server/src/routes/audit.js` - Replaced manual role check with requireSuperuser middleware
+  - ✅ **SECURITY IMPROVEMENTS**:
+    - Prevents information disclosure about deployment environment
+    - Standardized authorization pattern with centralized logging
+    - Reduced risk of inconsistent permission enforcement
+  - ✅ **AUDIT STATUS**: 18/25 total issues resolved (11 CRITICAL+HIGH + 5 MEDIUM + 2 LOW)
+  - 📝 **DOCUMENTATION**: Updated SECURITY_AUDIT.md with fix details
+  - 🎯 **REMAINING**: 4 MEDIUM + 3 LOW severity items (7 total)
+  - ⚡ **PROGRESS**: 72% of security audit issues now resolved
 
   **December 31, 2025 - Security Audit Logging (Session 3)** 🔐:
   - ✅ **SECURITY**: Comprehensive security event logging implemented
@@ -1171,7 +1188,101 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 31, 2025 (MEDIUM Priority Security Fixes - 15/25 total vulnerabilities resolved)
+**Last Updated**: December 31, 2025 (Quick LOW Security Wins - 18/25 total vulnerabilities resolved, 72% complete)
+
+---
+
+## 📋 Next Session Planning - Remaining Security Items
+
+### Overall Progress
+- **Completed**: 18/25 issues (72%)
+- **Remaining**: 7 issues (4 MEDIUM + 3 LOW)
+
+### MEDIUM Priority Items (4 remaining)
+
+#### Quick to Implement:
+1. **#12 - Email Enumeration via Error Messages**
+   - **Difficulty**: Easy
+   - **Impact**: Low (minimal practical exploit value per audit)
+   - **Files**: `server/src/routes/invitations.js`, `server/src/services/invitation.service.js`
+   - **Fix**: Standardize error messages to avoid revealing user existence
+   - **Estimated Time**: 30 minutes
+
+2. **#18 - Invitation Metadata Disclosure**
+   - **Difficulty**: Easy
+   - **Impact**: Low (token holder is intended recipient per audit)
+   - **Files**: `server/src/routes/public.js`
+   - **Fix**: Reduce information returned by invitation endpoint
+   - **Estimated Time**: 20 minutes
+
+#### Larger Architectural Changes:
+3. **#13 - Missing CSRF Protection**
+   - **Difficulty**: Medium
+   - **Impact**: Medium (CORS provides partial protection)
+   - **Files**: Multiple routes, new middleware
+   - **Fix**: Implement CSRF token generation and validation
+   - **Estimated Time**: 2-3 hours
+   - **Considerations**:
+     - Add CSRF middleware
+     - Update all state-changing endpoints (POST, PUT, DELETE)
+     - Update frontend to include CSRF tokens
+     - Add token rotation logic
+
+4. **#16 - No Refresh Token Implementation**
+   - **Difficulty**: High
+   - **Impact**: High (enables token revocation and better security)
+   - **Files**: New DB migration, auth routes, middleware, frontend
+   - **Fix**: Implement refresh token pattern
+   - **Estimated Time**: 4-6 hours
+   - **Considerations**:
+     - Create refresh_tokens database table
+     - Implement token rotation and revocation
+     - Add refresh endpoint
+     - Update frontend auth flow
+     - Implement token expiry and cleanup
+     - Add blacklist/revocation mechanism
+
+### LOW Priority Items (3 remaining)
+
+1. **#21 - XSS Risk in Search Highlights**
+   - **Status**: Low priority - frontend currently uses safe rendering
+   - **Files**: `server/src/services/search.service.js`, frontend search components
+   - **Fix**: Sanitize FTS5 snippets before sending to frontend
+
+2. **#23 - Cascade Deletes Without Soft Delete**
+   - **Status**: Low priority - audit logs capture parent deletions
+   - **Files**: Database schema, multiple routes
+   - **Fix**: Implement soft delete pattern with deleted_at timestamps
+
+3. **#24 - Incomplete Circular Reference Protection**
+   - **Status**: Low priority - current validation handles common cases
+   - **Files**: `server/src/services/department.service.js`
+   - **Fix**: Add comprehensive circular reference checking
+
+### Recommended Next Session Approach
+
+#### Option A: Complete All MEDIUM Items (Recommended for Full Security)
+- Start with quick wins (#12, #18) - 1 hour total
+- Implement CSRF Protection (#13) - 2-3 hours
+- Implement Refresh Tokens (#16) - 4-6 hours
+- **Total Time**: Full day session (7-10 hours)
+- **Result**: 22/25 issues resolved (88% complete)
+
+#### Option B: Quick MEDIUM Wins Only
+- Fix Email Enumeration (#12) - 30 min
+- Fix Invitation Metadata (#18) - 20 min
+- **Total Time**: 1 hour
+- **Result**: 20/25 issues resolved (80% complete)
+- **Leave for later**: CSRF and Refresh Tokens (larger architectural changes)
+
+#### Option C: Focus on High-Impact Item
+- Implement Refresh Tokens (#16) only
+- **Total Time**: 4-6 hours
+- **Result**: Most important security improvement
+- **Leave for later**: Smaller items that can be done anytime
+
+### Recommendation
+Start with **Option B** (quick MEDIUM wins) to reach 80% completion, then tackle **Refresh Tokens (#16)** in a dedicated session when ready for the larger architectural change. CSRF protection (#13) can be added after refresh tokens are working.
 
 ---
 
