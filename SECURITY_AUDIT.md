@@ -36,7 +36,7 @@ This security audit reviewed the OrgTree application's authentication and author
 |----------|-------|-------|-----------|--------|
 | CRITICAL | 3 | 3 ✅ | 0 | All Fixed (Dec 30, 2025) |
 | HIGH | 8 | 7 ✅ | 1 | Nearly Complete |
-| MEDIUM | 9 | 2 ✅ | 7 | In Progress |
+| MEDIUM | 9 | 5 ✅ | 4 | Good Progress |
 | LOW | 5 | 0 | 5 | Backlog |
 
 ---
@@ -202,23 +202,45 @@ Different error messages reveal user existence in invitation flow.
 ### 13. Missing CSRF Protection
 No CSRF tokens (mitigated by CORS but still a gap).
 
-### 14. Debug Logging in Production
-`server/src/routes/departments.js` contains console.log statements.
+### 14. Debug Logging in Production ✅ **FIXED** (Dec 30, 2025)
+~~`server/src/routes/departments.js` contains console.log statements.~~
 
-### 15. Weak Temporary Password Generation
-`randomBytes(9)` with base64 filtering reduces entropy.
+**Fix Applied:** Removed 15 debug console.log statements from production code.
+
+### 15. Weak Temporary Password Generation ✅ **FIXED** (Dec 31, 2025)
+~~`randomBytes(9)` with base64 filtering reduces entropy.~~
+
+**Fix Applied:**
+- Created `generateSecurePassword()` function with proper entropy
+- Uses randomBytes without filtering that reduces randomness
+- Generates 16-character passwords (was 12) with full alphanumeric charset
+- Applied to both `resetUserPassword()` and `createAdminUser()`
 
 ### 16. No Refresh Token Implementation
 7-day JWT with no revocation capability.
 
-### 17. Missing Password Change Verification
-No old password required when changing password.
+### 17. Missing Password Change Verification ✅ **FIXED** (Dec 31, 2025)
+~~No old password required when changing password.~~
 
-### 18. Invitation Metadata Disclosure
-Public endpoint returns organization name, inviter name, role.
+**Fix Applied:**
+- Password change now requires old password verification via bcrypt.compare()
+- Skips verification only when `must_change_password=true` (temporary password flow)
+- Returns 401 error if current password is incorrect
+- Prevents unauthorized password changes if session is compromised
 
-### 19. CSV Import Without Size Limits
-No validation of import array size.
+### 18. Invitation Metadata Disclosure ✅ **FIXED** (Dec 31, 2025)
+~~Public endpoint returns organization name, inviter name, role.~~
+
+**Fix Applied:**
+- Removed inviter name and email from public `getInvitationByToken()` endpoint
+- Public endpoint now returns only: organizationName, role, status, expiresAt
+- Updated frontend AcceptInvitation component to handle missing fields
+- Reduces information leakage from publicly-accessible invitation tokens
+
+### 19. CSV Import Without Size Limits ✅ **FIXED** (Dec 30, 2025)
+~~No validation of import array size.~~
+
+**Fix Applied:** Added 10,000 item limit for CSV imports.
 
 ### 20. Insufficient Audit Logging
 Many security events not logged (failed logins, permission denials).
@@ -262,12 +284,12 @@ Manual role checks instead of middleware in some routes.
 11. [x] Remove debug console.log statements ✅ **FIXED** (Dec 30, 2025)
 
 ### MEDIUM-TERM (Next Month)
-12. [ ] Implement refresh tokens
-13. [ ] Add CSRF protection
-14. [ ] Improve audit logging coverage
-15. [ ] Add password change verification
-16. [ ] Limit invitation metadata exposure
-17. [ ] Add CSV import size limits
+12. [ ] Implement refresh tokens (#16)
+13. [ ] Add CSRF protection (#13)
+14. [ ] Improve audit logging coverage (#20)
+15. [x] Add password change verification ✅ **FIXED** (Dec 31, 2025) (#17)
+16. [x] Limit invitation metadata exposure ✅ **FIXED** (Dec 31, 2025) (#18)
+17. [x] Add CSV import size limits ✅ **FIXED** (Dec 30, 2025) (#19)
 
 ---
 

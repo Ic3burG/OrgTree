@@ -290,9 +290,27 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: High-Priority Security Fixes (December 31, 2025)
-- **Total Commits**: 136+ commits on branch
+- **Last Major Update**: Medium-Priority Security Fixes (December 31, 2025)
+- **Total Commits**: 138+ commits on branch
 - **Recent Session Highlights**:
+
+  **December 31, 2025 - Medium-Priority Security Fixes** 🔐:
+  - ✅ **SECURITY FIXES**: Addressed 3 medium-severity vulnerabilities (quick wins)
+  - ✅ **ISSUES RESOLVED**:
+    - **Weak Temporary Password Generation (#15)**: Created secure password generator with proper entropy, 16-char passwords
+    - **Missing Password Change Verification (#17)**: Now requires old password verification for normal password changes
+    - **Invitation Metadata Disclosure (#18)**: Removed inviter name and email from public invitation endpoint
+  - ✅ **FILES MODIFIED** (4 files):
+    - `server/src/services/users.service.js` - generateSecurePassword() function
+    - `server/src/routes/auth.js` - Old password verification with bcrypt.compare()
+    - `server/src/services/invitation.service.js` - Reduced public endpoint data
+    - `src/components/AcceptInvitation.jsx` - Handle missing invitation fields
+  - ✅ **SECURITY POSTURE UPDATE**:
+    - CRITICAL: 3/3 fixed (100%) ✅
+    - HIGH: 7/8 fixed (87.5%)
+    - MEDIUM: 5/9 fixed (55.6%) ⬆️ was 22.2%
+    - LOW: 0/5 fixed (0%)
+  - 📝 **IMPACT**: Better password security, protected password changes, reduced information leakage
 
   **December 31, 2025 - High-Priority Security Fixes** 🔐:
   - ✅ **SECURITY FIXES**: Addressed 3 remaining high-severity vulnerabilities from security audit
@@ -1125,7 +1143,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 31, 2025 (Security Fixes + Technical Debt Roadmap)
+**Last Updated**: December 31, 2025 (High & Medium Security Fixes + Technical Debt Roadmap)
 
 ---
 
