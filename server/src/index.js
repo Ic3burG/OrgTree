@@ -3,7 +3,10 @@ import { createServer } from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yaml';
 import authRoutes from './routes/auth.js';
 import organizationRoutes from './routes/organizations.js';
 import departmentRoutes from './routes/departments.js';
@@ -82,6 +85,22 @@ if (process.env.NODE_ENV === 'production') {
   const frontendPath = path.join(__dirname, '../dist');
   app.use(express.static(frontendPath));
 }
+
+// Load and serve OpenAPI documentation
+const openApiPath = path.join(__dirname, 'openapi.yaml');
+const openApiSpec = YAML.parse(fs.readFileSync(openApiPath, 'utf8'));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'OrgTree API Documentation'
+}));
+
+// Serve raw OpenAPI spec
+app.get('/api/openapi.yaml', (req, res) => {
+  res.type('text/yaml').send(fs.readFileSync(openApiPath, 'utf8'));
+});
+app.get('/api/openapi.json', (req, res) => {
+  res.json(openApiSpec);
+});
 
 // Health check with database connectivity test (must be before other routes)
 app.get('/api/health', async (req, res) => {

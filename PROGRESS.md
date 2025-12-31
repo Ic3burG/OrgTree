@@ -161,7 +161,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 1. ~~**Advanced Search** - Implement full-text search capabilities~~ ✅ **DONE** (December 28, 2025)
 2. ~~**Bulk Operations** - Multi-select functionality for efficiency~~ ✅ **DONE** (December 29, 2025)
 3. **Custom Fields** - Allow configurable person/department attributes
-4. **API Documentation** - Complete REST API documentation
+4. ~~**API Documentation** - Complete REST API documentation~~ ✅ **DONE** (December 30, 2025)
 
 ### Medium-term Vision (Next quarter)
 1. ~~**Team Collaboration** - Multi-user organization management~~ ✅ **DONE** (December 22-23, 2025)
@@ -206,9 +206,24 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Bulk Operations Feature (December 29, 2025)
-- **Total Commits**: 117 commits on main branch
+- **Last Major Update**: API Documentation with OpenAPI/Swagger (December 30, 2025)
+- **Total Commits**: 120+ commits on main branch
 - **Recent Session Highlights**:
+
+  **December 30, 2025 - API Documentation (OpenAPI 3.0)** 📚:
+  - ✅ **MAJOR FEATURE**: Complete REST API documentation with OpenAPI 3.0 specification
+  - ✅ **OPENAPI SPEC** (`server/src/openapi.yaml`):
+    - Comprehensive documentation of 50+ API endpoints
+    - Organized into 13 tags: Health, Authentication, Organizations, Departments, People, Members, Invitations, Search, Bulk Operations, Audit, Import/Export, Sharing, Users
+    - Full request/response schemas with examples
+    - Security definitions (JWT Bearer authentication)
+    - Error response documentation
+  - ✅ **SWAGGER UI** (Interactive Documentation):
+    - Available at `/api/docs` endpoint
+    - Try-it-out functionality for testing endpoints
+    - Raw spec available at `/api/openapi.yaml` and `/api/openapi.json`
+  - ✅ **README.md UPDATED**: Complete rewrite to reflect full-stack application
+  - ✅ **DOCUMENTATION.md**: Comprehensive user guide and admin manual (38KB)
 
   **December 29, 2025 - Bulk Operations Feature** 📦:
   - ✅ **MAJOR FEATURE**: Multi-select and bulk operations for People and Departments
@@ -914,7 +929,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 29, 2025 (Bulk Operations Feature)
+**Last Updated**: December 30, 2025 (API Documentation with OpenAPI/Swagger)
 
 ---
 
