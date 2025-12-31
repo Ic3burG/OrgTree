@@ -290,9 +290,28 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: HIGH Priority Security Fixes (December 31, 2025)
-- **Total Commits**: 135+ commits on main branch
+- **Last Major Update**: MEDIUM Priority Security Fixes (December 31, 2025)
+- **Total Commits**: 136+ commits on main branch
 - **Recent Session Highlights**:
+
+  **December 31, 2025 - MEDIUM Priority Security Fixes (Session 2)** 🔐:
+  - ✅ **SECURITY**: 2 MEDIUM severity vulnerabilities resolved (quick wins)
+  - ✅ **FIXES APPLIED**:
+    - **Weak Temporary Password Generation (#15)**: Created secure password generator with full entropy
+    - **Missing Password Change Verification (#17)**: Require old password before changes
+  - ✅ **IMPROVEMENTS**:
+    - Increased temp password length: 12 → 16 characters
+    - Increased entropy: ~60 bits → ~96 bits
+    - Added password reuse prevention
+    - Updated frontend validation to 12+ character requirement
+  - ✅ **FILES MODIFIED** (4 files):
+    - `server/src/services/users.service.js` - Added generateSecurePassword() helper, increased password length
+    - `server/src/routes/auth.js` - Added old password verification logic
+    - `src/api/client.js` - Updated changePassword to accept oldPassword parameter
+    - `src/components/auth/ChangePasswordPage.jsx` - Updated validation to 12 characters
+  - ✅ **AUDIT STATUS**: 15/25 total issues resolved (11 CRITICAL+HIGH + 4 MEDIUM)
+  - 📝 **DOCUMENTATION**: Updated SECURITY_AUDIT.md with detailed fix descriptions
+  - 🎯 **REMAINING**: 5 MEDIUM + 5 LOW severity items
 
   **December 31, 2025 - HIGH Priority Security Hardening** 🔐:
   - ✅ **SECURITY**: All 8 remaining HIGH severity vulnerabilities resolved
@@ -1125,7 +1144,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 31, 2025 (HIGH Priority Security Fixes - All CRITICAL+HIGH vulnerabilities resolved)
+**Last Updated**: December 31, 2025 (MEDIUM Priority Security Fixes - 15/25 total vulnerabilities resolved)
 
 ---
 

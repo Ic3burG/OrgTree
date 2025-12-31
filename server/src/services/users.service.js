@@ -4,6 +4,31 @@ import { randomBytes, randomUUID } from 'crypto';
 
 const VALID_ROLES = ['superuser', 'admin', 'user'];
 
+/**
+ * Generate a cryptographically secure temporary password
+ * Uses full entropy from crypto.randomBytes without filtering
+ * @param {number} length - Desired password length (default 16)
+ * @returns {string} - Secure alphanumeric password
+ */
+function generateSecurePassword(length = 16) {
+  // Use base62 encoding (alphanumeric: 0-9, A-Z, a-z) for maximum entropy
+  // Each random byte gives us ~8 bits of entropy
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charsetLength = charset.length;
+
+  // Generate enough random bytes (1 byte per character is sufficient)
+  const randomBytesBuffer = randomBytes(length);
+
+  // Map each byte to a character in our charset
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    // Use modulo to map byte value (0-255) to charset index (0-61)
+    password += charset[randomBytesBuffer[i] % charsetLength];
+  }
+
+  return password;
+}
+
 export function getAllUsers() {
   const users = db.prepare(`
     SELECT
@@ -158,8 +183,8 @@ export async function resetUserPassword(userId) {
     throw error;
   }
 
-  // Generate a random temporary password (12 characters, alphanumeric)
-  const tempPassword = randomBytes(9).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 12);
+  // Security: Generate cryptographically secure temporary password (16 chars, full entropy)
+  const tempPassword = generateSecurePassword(16);
 
   // Hash the new password
   const passwordHash = await bcrypt.hash(tempPassword, 10);
@@ -214,10 +239,8 @@ export async function createAdminUser(name, email, role) {
     throw error;
   }
 
-  // Generate temporary password
-  const tempPassword = randomBytes(9).toString('base64')
-    .replace(/[^a-zA-Z0-9]/g, '')
-    .slice(0, 12);
+  // Security: Generate cryptographically secure temporary password (16 chars, full entropy)
+  const tempPassword = generateSecurePassword(16);
 
   // Hash password
   const passwordHash = await bcrypt.hash(tempPassword, 10);

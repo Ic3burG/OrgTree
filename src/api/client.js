@@ -207,10 +207,10 @@ const api = {
       body: JSON.stringify({ name, email, role }),
     }),
 
-  changePassword: (newPassword) =>
+  changePassword: (newPassword, oldPassword = null) =>
     request('/auth/change-password', {
       method: 'POST',
-      body: JSON.stringify({ newPassword }),
+      body: JSON.stringify({ newPassword, oldPassword }),
     }),
 
   // Invitations

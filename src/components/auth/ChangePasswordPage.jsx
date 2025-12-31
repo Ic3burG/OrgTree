@@ -19,8 +19,8 @@ export default function ChangePasswordPage() {
 
     if (!formData.newPassword) {
       newErrors.newPassword = 'New password is required';
-    } else if (formData.newPassword.length < 6) {
-      newErrors.newPassword = 'Password must be at least 6 characters';
+    } else if (formData.newPassword.length < 12) {
+      newErrors.newPassword = 'Password must be at least 12 characters';
     }
 
     if (!formData.confirmPassword) {

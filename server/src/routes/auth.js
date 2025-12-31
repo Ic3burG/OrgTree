@@ -67,7 +67,27 @@ router.get('/me', authenticateToken, async (req, res, next) => {
 // POST /api/auth/change-password - Change password (requires auth)
 router.post('/change-password', authenticateToken, async (req, res, next) => {
   try {
-    const { newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
+
+    // Get current user from database
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Security: Require old password verification UNLESS user must change password
+    // (temporary password flow allows change without knowing old password)
+    if (!user.must_change_password) {
+      if (!oldPassword) {
+        return res.status(400).json({ message: 'Current password is required' });
+      }
+
+      // Verify old password
+      const isValidOldPassword = await bcrypt.compare(oldPassword, user.password_hash);
+      if (!isValidOldPassword) {
+        return res.status(401).json({ message: 'Current password is incorrect' });
+      }
+    }
 
     if (!newPassword) {
       return res.status(400).json({ message: 'New password is required' });
@@ -76,6 +96,11 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
     // Security: Enforce stronger password requirements
     if (newPassword.length < 12) {
       return res.status(400).json({ message: 'Password must be at least 12 characters' });
+    }
+
+    // Security: Prevent reusing the same password
+    if (oldPassword && oldPassword === newPassword) {
+      return res.status(400).json({ message: 'New password must be different from current password' });
     }
 
     // Hash new password
@@ -94,8 +119,8 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
     }
 
     // Return updated user info
-    const user = await getUserById(req.user.id);
-    res.json({ message: 'Password changed successfully', user });
+    const updatedUser = await getUserById(req.user.id);
+    res.json({ message: 'Password changed successfully', user: updatedUser });
   } catch (err) {
     next(err);
   }

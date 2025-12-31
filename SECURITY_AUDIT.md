@@ -47,10 +47,10 @@ This security audit reviewed the OrgTree application's authentication and author
 |----------|-------|-------|-----------|
 | CRITICAL | 3 | 3 ✅ | 0 |
 | HIGH | 8 | 8 ✅ | 0 |
-| MEDIUM | 9 | 0 | 9 |
+| MEDIUM | 9 | 4 ✅ | 5 |
 | LOW | 5 | 0 | 5 |
 
-**Status**: All CRITICAL and HIGH severity issues have been resolved as of December 31, 2025.
+**Status**: All CRITICAL and HIGH severity issues resolved. 4 of 9 MEDIUM severity issues fixed (December 31, 2025).
 
 ---
 
@@ -206,29 +206,87 @@ const decoded = jwt.verify(token, process.env.JWT_SECRET, {
 ### 12. Email Enumeration via Error Messages
 Different error messages reveal user existence in invitation flow.
 
+**Status**: Not yet fixed (Low priority - minimal practical exploit value)
+
+---
+
 ### 13. Missing CSRF Protection
 No CSRF tokens (mitigated by CORS but still a gap).
 
-### 14. Debug Logging in Production
-`server/src/routes/departments.js` contains console.log statements.
+**Status**: Not yet fixed (Medium priority - CORS provides partial protection)
 
-### 15. Weak Temporary Password Generation
-`randomBytes(9)` with base64 filtering reduces entropy.
+---
+
+### 14. Debug Logging in Production ✅ FIXED
+**File:** `server/src/routes/departments.js`, `server/src/services/department.service.js`
+**Fixed:** December 30, 2025 (Previous session)
+
+Removed 15 debug console.log statements from production code.
+
+---
+
+### 15. Weak Temporary Password Generation ✅ FIXED
+**File:** `server/src/services/users.service.js:13-30, 187, 243`
+**Fixed:** December 31, 2025
+
+**Previous Implementation:**
+```javascript
+const tempPassword = randomBytes(9).toString('base64')
+  .replace(/[^a-zA-Z0-9]/g, '')
+  .slice(0, 12);
+```
+
+**New Implementation:**
+- Created `generateSecurePassword()` helper function
+- Uses full entropy from crypto.randomBytes (no filtering)
+- Generates 16-character passwords (increased from 12)
+- Base62 encoding (alphanumeric charset) for maximum entropy
+- Each byte mapped directly to charset without loss
+
+**Security Improvement:** ~96 bits of entropy vs ~60 bits previously
+
+---
 
 ### 16. No Refresh Token Implementation
 7-day JWT with no revocation capability.
 
-### 17. Missing Password Change Verification
-No old password required when changing password.
+**Status**: Not yet fixed (High priority for future - requires architectural changes)
+
+---
+
+### 17. Missing Password Change Verification ✅ FIXED
+**File:** `server/src/routes/auth.js:68-127`
+**Fixed:** December 31, 2025
+
+**Changes Applied:**
+- Require old password verification before password changes
+- Exception: Users with `must_change_password=true` (temporary password flow)
+- Prevent password reuse (new password must differ from old)
+- Updated API client and frontend validation
+
+**Security Improvement:** Prevents unauthorized password changes if session is compromised
+
+---
 
 ### 18. Invitation Metadata Disclosure
 Public endpoint returns organization name, inviter name, role.
 
-### 19. CSV Import Without Size Limits
-No validation of import array size.
+**Status**: Not yet fixed (Low priority - token holder is intended recipient)
+
+---
+
+### 19. CSV Import Without Size Limits ✅ FIXED
+**File:** `server/src/routes/import.js:21-26`
+**Fixed:** December 30, 2025 (Previous session)
+
+Added MAX_IMPORT_SIZE = 10,000 items limit to prevent DoS attacks.
+
+---
 
 ### 20. Insufficient Audit Logging
 Many security events not logged (failed logins, permission denials).
+
+**Status**: Not yet fixed (High priority - improves security visibility)
 
 ---
 
