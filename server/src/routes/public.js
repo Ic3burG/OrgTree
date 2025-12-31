@@ -2,6 +2,7 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import db from '../db.js';
 import { getInvitationByToken } from '../services/invitation.service.js';
+import { createAuditLog } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -12,6 +13,26 @@ const publicLimiter = rateLimit({
   message: { message: 'Too many requests, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res) => {
+    // Security: Log rate limit violation
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    createAuditLog(
+      null, // System-wide security event
+      null, // Public endpoints don't have user info
+      'rate_limit_exceeded',
+      'security',
+      'rate_limiting',
+      {
+        endpoint: req.path,
+        method: req.method,
+        ipAddress,
+        limit: 100,
+        windowMs: 15 * 60 * 1000,
+        timestamp: new Date().toISOString()
+      }
+    );
+    res.status(429).json({ message: 'Too many requests, please try again later' });
+  }
 });
 
 router.use(publicLimiter);

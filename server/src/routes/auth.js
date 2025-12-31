@@ -4,6 +4,7 @@ import rateLimit from 'express-rate-limit';
 import db from '../db.js';
 import { createUser, loginUser, getUserById } from '../services/auth.service.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { createAuditLog } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -14,6 +15,26 @@ const authLimiter = rateLimit({
   message: { message: 'Too many login attempts, please try again later' },
   standardHeaders: true, // Return rate limit info in RateLimit-* headers
   legacyHeaders: false, // Disable X-RateLimit-* headers
+  handler: (req, res) => {
+    // Security: Log rate limit violation
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    createAuditLog(
+      null, // System-wide security event
+      null, // No user information
+      'rate_limit_exceeded',
+      'security',
+      'rate_limiting',
+      {
+        endpoint: req.path,
+        method: req.method,
+        ipAddress,
+        limit: 5,
+        windowMs: 15 * 60 * 1000,
+        timestamp: new Date().toISOString()
+      }
+    );
+    res.status(429).json({ message: 'Too many login attempts, please try again later' });
+  }
 });
 
 // POST /api/auth/signup
@@ -47,7 +68,9 @@ router.post('/login', authLimiter, async (req, res, next) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    const result = await loginUser(email, password);
+    // Get IP address for audit logging
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const result = await loginUser(email, password, ipAddress);
     res.json(result);
   } catch (err) {
     next(err);
@@ -69,6 +92,26 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
   try {
     const { oldPassword, newPassword } = req.body;
 
+    // Get current user from database
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Security: Require old password verification UNLESS user must change password
+    // (temporary password flow allows change without knowing old password)
+    if (!user.must_change_password) {
+      if (!oldPassword) {
+        return res.status(400).json({ message: 'Current password is required' });
+      }
+
+      // Verify old password
+      const isValidOldPassword = await bcrypt.compare(oldPassword, user.password_hash);
+      if (!isValidOldPassword) {
+        return res.status(401).json({ message: 'Current password is incorrect' });
+      }
+    }
+
     if (!newPassword) {
       return res.status(400).json({ message: 'New password is required' });
     }
@@ -78,29 +121,9 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
       return res.status(400).json({ message: 'Password must be at least 12 characters' });
     }
 
-    // Get current user from database
-    const currentUser = db.prepare(`
-      SELECT password_hash, must_change_password
-      FROM users
-      WHERE id = ?
-    `).get(req.user.id);
-
-    if (!currentUser) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Security: Verify old password unless forced password change is required
-    // If must_change_password is true, skip old password verification (temporary password flow)
-    if (!currentUser.must_change_password) {
-      if (!oldPassword) {
-        return res.status(400).json({ message: 'Current password is required' });
-      }
-
-      // Verify old password
-      const isOldPasswordValid = await bcrypt.compare(oldPassword, currentUser.password_hash);
-      if (!isOldPasswordValid) {
-        return res.status(401).json({ message: 'Current password is incorrect' });
-      }
+    // Security: Prevent reusing the same password
+    if (oldPassword && oldPassword === newPassword) {
+      return res.status(400).json({ message: 'New password must be different from current password' });
     }
 
     // Hash new password
@@ -119,8 +142,8 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
     }
 
     // Return updated user info
-    const user = await getUserById(req.user.id);
-    res.json({ message: 'Password changed successfully', user });
+    const updatedUser = await getUserById(req.user.id);
+    res.json({ message: 'Password changed successfully', user: updatedUser });
   } catch (err) {
     next(err);
   }

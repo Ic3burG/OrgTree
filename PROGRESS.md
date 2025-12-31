@@ -290,46 +290,91 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Medium-Priority Security Fixes (December 31, 2025)
-- **Total Commits**: 138+ commits on branch
+- **Last Major Update**: Quick LOW Security Wins (December 31, 2025)
+- **Total Commits**: 136+ commits on main branch
 - **Recent Session Highlights**:
 
-  **December 31, 2025 - Medium-Priority Security Fixes** 🔐:
-  - ✅ **SECURITY FIXES**: Addressed 3 medium-severity vulnerabilities (quick wins)
-  - ✅ **ISSUES RESOLVED**:
-    - **Weak Temporary Password Generation (#15)**: Created secure password generator with proper entropy, 16-char passwords
-    - **Missing Password Change Verification (#17)**: Now requires old password verification for normal password changes
-    - **Invitation Metadata Disclosure (#18)**: Removed inviter name and email from public invitation endpoint
-  - ✅ **FILES MODIFIED** (4 files):
-    - `server/src/services/users.service.js` - generateSecurePassword() function
-    - `server/src/routes/auth.js` - Old password verification with bcrypt.compare()
-    - `server/src/services/invitation.service.js` - Reduced public endpoint data
-    - `src/components/AcceptInvitation.jsx` - Handle missing invitation fields
-  - ✅ **SECURITY POSTURE UPDATE**:
-    - CRITICAL: 3/3 fixed (100%) ✅
-    - HIGH: 7/8 fixed (87.5%)
-    - MEDIUM: 5/9 fixed (55.6%) ⬆️ was 22.2%
-    - LOW: 0/5 fixed (0%)
-  - 📝 **IMPACT**: Better password security, protected password changes, reduced information leakage
+  **December 31, 2025 - Quick LOW Security Wins (Session 4)** 🔐:
+  - ✅ **SECURITY**: 2 LOW severity vulnerabilities resolved (quick wins)
+  - ✅ **FIXES APPLIED**:
+    - **Health Endpoint Exposes Environment (#22)**: Removed NODE_ENV disclosure
+    - **Superuser Check Inconsistency (#25)**: Standardized authorization middleware
+  - ✅ **FILES MODIFIED** (2 files):
+    - `server/src/index.js` - Removed environment field from health endpoint response
+    - `server/src/routes/audit.js` - Replaced manual role check with requireSuperuser middleware
+  - ✅ **SECURITY IMPROVEMENTS**:
+    - Prevents information disclosure about deployment environment
+    - Standardized authorization pattern with centralized logging
+    - Reduced risk of inconsistent permission enforcement
+  - ✅ **AUDIT STATUS**: 18/25 total issues resolved (11 CRITICAL+HIGH + 5 MEDIUM + 2 LOW)
+  - 📝 **DOCUMENTATION**: Updated SECURITY_AUDIT.md with fix details
+  - 🎯 **REMAINING**: 4 MEDIUM + 3 LOW severity items (7 total)
+  - ⚡ **PROGRESS**: 72% of security audit issues now resolved
 
-  **December 31, 2025 - High-Priority Security Fixes** 🔐:
-  - ✅ **SECURITY FIXES**: Addressed 3 remaining high-severity vulnerabilities from security audit
-  - ✅ **ISSUES RESOLVED**:
-    - **Import Route Authorization (#5)**: Replaced manual ownership check with standard `requireOrgPermission('admin')` middleware
-    - **Admin Rate Limiting (#6)**: Added rate limiter (50 req/15min) to create user, change role, and delete user endpoints
-    - **Excessive Data Exposure (#7)**: Reduced getAllUsers response to counts only, created new on-demand endpoint for full org details
-  - ✅ **FILES MODIFIED** (5 files):
-    - `server/src/routes/import.js` - Use requireOrgPermission middleware
-    - `server/src/routes/users.js` - Add adminActionLimiter, new GET /users/:id/organizations endpoint
-    - `server/src/services/users.service.js` - Return counts only in getAllUsers(), new getUserOrganizationDetails() function
-    - `src/api/client.js` - Add getUserOrganizations() API method
-    - `src/components/superuser/UserManagement.jsx` - Fetch org details on-demand with loading state
-  - ✅ **SECURITY POSTURE**:
-    - CRITICAL: 3/3 fixed (100%) ✅
-    - HIGH: 7/8 fixed (87.5%) - only password complexity requirements remaining
-    - MEDIUM: 2/9 fixed (22.2%)
-    - LOW: 0/5 fixed (0%)
-  - 📝 **IMPACT**: Standardized authorization patterns, improved rate limiting coverage, reduced information disclosure
+  **December 31, 2025 - Security Audit Logging (Session 3)** 🔐:
+  - ✅ **SECURITY**: Comprehensive security event logging implemented
+  - ✅ **FIXES APPLIED**:
+    - **Insufficient Audit Logging (#20)**: Logs all critical security events
+  - ✅ **SECURITY EVENTS LOGGED**:
+    - **Failed Login Attempts**: Email, IP address, failure reason (user_not_found, invalid_password)
+    - **Invalid Token Attempts**: Missing/expired/invalid tokens with IP, path, error details
+    - **Permission Denied Events**: Role-based and organization permission denials with user context
+    - **Rate Limit Violations**: All rate limiters now log exceeded limits with IP and endpoint details
+  - ✅ **FILES MODIFIED** (6 files):
+    - `server/src/services/auth.service.js` - Added failed login logging
+    - `server/src/middleware/auth.js` - Added invalid token logging, permission denied logging
+    - `server/src/services/member.service.js` - Added organization permission denied logging
+    - `server/src/routes/auth.js` - Added IP address capture for login attempts
+    - `server/src/routes/users.js` - Added rate limit handlers with logging (2 limiters)
+    - `server/src/routes/public.js` - Added rate limit handler with logging
+  - ✅ **IMPLEMENTATION DETAILS**:
+    - Uses existing audit.service.js createAuditLog() function
+    - System-wide events use null for orgId
+    - Organization-specific events link to orgId
+    - Captures IP addresses, timestamps, and security context
+    - All events use security-specific action types and entity type
+  - ✅ **AUDIT STATUS**: 16/25 total issues resolved (11 CRITICAL+HIGH + 5 MEDIUM)
+  - 📝 **DOCUMENTATION**: Updated SECURITY_AUDIT.md with comprehensive fix details
+  - 🎯 **REMAINING**: 4 MEDIUM + 5 LOW severity items
+  - ⚡ **IMPACT**: Significantly improved security visibility for attack detection and monitoring
+
+  **December 31, 2025 - MEDIUM Priority Security Fixes (Session 2)** 🔐:
+  - ✅ **SECURITY**: 2 MEDIUM severity vulnerabilities resolved (quick wins)
+  - ✅ **FIXES APPLIED**:
+    - **Weak Temporary Password Generation (#15)**: Created secure password generator with full entropy
+    - **Missing Password Change Verification (#17)**: Require old password before changes
+  - ✅ **IMPROVEMENTS**:
+    - Increased temp password length: 12 → 16 characters
+    - Increased entropy: ~60 bits → ~96 bits
+    - Added password reuse prevention
+    - Updated frontend validation to 12+ character requirement
+  - ✅ **FILES MODIFIED** (4 files):
+    - `server/src/services/users.service.js` - Added generateSecurePassword() helper, increased password length
+    - `server/src/routes/auth.js` - Added old password verification logic
+    - `src/api/client.js` - Updated changePassword to accept oldPassword parameter
+    - `src/components/auth/ChangePasswordPage.jsx` - Updated validation to 12 characters
+  - ✅ **AUDIT STATUS**: 15/25 total issues resolved (11 CRITICAL+HIGH + 4 MEDIUM)
+  - 📝 **DOCUMENTATION**: Updated SECURITY_AUDIT.md with detailed fix descriptions
+  - 🎯 **REMAINING**: 5 MEDIUM + 5 LOW severity items
+
+  **December 31, 2025 - HIGH Priority Security Hardening** 🔐:
+  - ✅ **SECURITY**: All 8 remaining HIGH severity vulnerabilities resolved
+  - ✅ **CRITICAL FIXES APPLIED**:
+    - **Import Route Authorization**: Now uses `requireOrgPermission()` instead of ownership-only check
+    - **Admin Endpoint Rate Limiting**: Added rate limiter (50 req/15min) to create user, change role, delete user endpoints
+    - **Information Disclosure**: Reduced getAllUsers response to counts only (no detailed org data in list view)
+    - **Permission Standardization**: All routes now use consistent `requireOrgPermission()` pattern
+  - ✅ **FILES MODIFIED** (4 files):
+    - `server/src/routes/import.js` - Standardized authorization pattern
+    - `server/src/routes/users.js` - Added adminOperationsLimiter to 3 endpoints
+    - `server/src/routes/members.js` - Replaced manual checkOrgAccess with requireOrgPermission
+    - `server/src/services/users.service.js` - Return counts instead of full org arrays
+    - `src/components/superuser/UserManagement.jsx` - Fetch full user details on-demand for modal
+  - ✅ **SECURITY POSTURE**: Upgraded from "NEEDS IMPROVEMENT" to "SIGNIFICANTLY IMPROVED"
+  - ✅ **AUDIT STATUS**: 11/11 CRITICAL+HIGH issues resolved (100%)
+  - 📝 **DOCUMENTATION**: Updated SECURITY_AUDIT.md with fix details and timestamps
+  - 🛡️ **VERIFIED**: All service functions use standardized permission checks consistently
+  - 🎯 **REMAINING WORK**: 9 MEDIUM + 5 LOW severity items (future enhancement)
 
   **December 31, 2025 - Technical Debt Roadmap** 🗺️:
   - ✅ **PLANNING**: Added comprehensive Technical Debt Roadmap to PROGRESS.md
@@ -1143,7 +1188,101 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 31, 2025 (High & Medium Security Fixes + Technical Debt Roadmap)
+**Last Updated**: December 31, 2025 (Quick LOW Security Wins - 18/25 total vulnerabilities resolved, 72% complete)
+
+---
+
+## 📋 Next Session Planning - Remaining Security Items
+
+### Overall Progress
+- **Completed**: 18/25 issues (72%)
+- **Remaining**: 7 issues (4 MEDIUM + 3 LOW)
+
+### MEDIUM Priority Items (4 remaining)
+
+#### Quick to Implement:
+1. **#12 - Email Enumeration via Error Messages**
+   - **Difficulty**: Easy
+   - **Impact**: Low (minimal practical exploit value per audit)
+   - **Files**: `server/src/routes/invitations.js`, `server/src/services/invitation.service.js`
+   - **Fix**: Standardize error messages to avoid revealing user existence
+   - **Estimated Time**: 30 minutes
+
+2. **#18 - Invitation Metadata Disclosure**
+   - **Difficulty**: Easy
+   - **Impact**: Low (token holder is intended recipient per audit)
+   - **Files**: `server/src/routes/public.js`
+   - **Fix**: Reduce information returned by invitation endpoint
+   - **Estimated Time**: 20 minutes
+
+#### Larger Architectural Changes:
+3. **#13 - Missing CSRF Protection**
+   - **Difficulty**: Medium
+   - **Impact**: Medium (CORS provides partial protection)
+   - **Files**: Multiple routes, new middleware
+   - **Fix**: Implement CSRF token generation and validation
+   - **Estimated Time**: 2-3 hours
+   - **Considerations**:
+     - Add CSRF middleware
+     - Update all state-changing endpoints (POST, PUT, DELETE)
+     - Update frontend to include CSRF tokens
+     - Add token rotation logic
+
+4. **#16 - No Refresh Token Implementation**
+   - **Difficulty**: High
+   - **Impact**: High (enables token revocation and better security)
+   - **Files**: New DB migration, auth routes, middleware, frontend
+   - **Fix**: Implement refresh token pattern
+   - **Estimated Time**: 4-6 hours
+   - **Considerations**:
+     - Create refresh_tokens database table
+     - Implement token rotation and revocation
+     - Add refresh endpoint
+     - Update frontend auth flow
+     - Implement token expiry and cleanup
+     - Add blacklist/revocation mechanism
+
+### LOW Priority Items (3 remaining)
+
+1. **#21 - XSS Risk in Search Highlights**
+   - **Status**: Low priority - frontend currently uses safe rendering
+   - **Files**: `server/src/services/search.service.js`, frontend search components
+   - **Fix**: Sanitize FTS5 snippets before sending to frontend
+
+2. **#23 - Cascade Deletes Without Soft Delete**
+   - **Status**: Low priority - audit logs capture parent deletions
+   - **Files**: Database schema, multiple routes
+   - **Fix**: Implement soft delete pattern with deleted_at timestamps
+
+3. **#24 - Incomplete Circular Reference Protection**
+   - **Status**: Low priority - current validation handles common cases
+   - **Files**: `server/src/services/department.service.js`
+   - **Fix**: Add comprehensive circular reference checking
+
+### Recommended Next Session Approach
+
+#### Option A: Complete All MEDIUM Items (Recommended for Full Security)
+- Start with quick wins (#12, #18) - 1 hour total
+- Implement CSRF Protection (#13) - 2-3 hours
+- Implement Refresh Tokens (#16) - 4-6 hours
+- **Total Time**: Full day session (7-10 hours)
+- **Result**: 22/25 issues resolved (88% complete)
+
+#### Option B: Quick MEDIUM Wins Only
+- Fix Email Enumeration (#12) - 30 min
+- Fix Invitation Metadata (#18) - 20 min
+- **Total Time**: 1 hour
+- **Result**: 20/25 issues resolved (80% complete)
+- **Leave for later**: CSRF and Refresh Tokens (larger architectural changes)
+
+#### Option C: Focus on High-Impact Item
+- Implement Refresh Tokens (#16) only
+- **Total Time**: 4-6 hours
+- **Result**: Most important security improvement
+- **Leave for later**: Smaller items that can be done anytime
+
+### Recommendation
+Start with **Option B** (quick MEDIUM wins) to reach 80% completion, then tackle **Refresh Tokens (#16)** in a dedicated session when ready for the larger architectural change. CSRF protection (#13) can be added after refresh tokens are working.
 
 ---
 

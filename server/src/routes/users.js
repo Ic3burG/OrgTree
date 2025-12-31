@@ -4,13 +4,13 @@ import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
 import {
   getAllUsers,
   getUserById,
-  getUserOrganizationDetails,
   updateUser,
   updateUserRole,
   resetUserPassword,
   deleteUser,
   createAdminUser
 } from '../services/users.service.js';
+import { createAuditLog } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -21,15 +21,55 @@ const passwordResetLimiter = rateLimit({
   message: { message: 'Too many password reset attempts, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res) => {
+    // Security: Log rate limit violation
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    createAuditLog(
+      null, // System-wide security event
+      req.user ? { id: req.user.id, name: req.user.name, email: req.user.email } : null,
+      'rate_limit_exceeded',
+      'security',
+      'rate_limiting',
+      {
+        endpoint: req.path,
+        method: req.method,
+        ipAddress,
+        limit: 10,
+        windowMs: 15 * 60 * 1000,
+        timestamp: new Date().toISOString()
+      }
+    );
+    res.status(429).json({ message: 'Too many password reset attempts, please try again later' });
+  }
 });
 
-// Rate limiter for sensitive admin operations - prevents abuse
-const adminActionLimiter = rateLimit({
+// Rate limiter for sensitive admin operations - prevents abuse of privileged endpoints
+const adminOperationsLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Limit each IP to 50 admin actions per windowMs
-  message: { message: 'Too many admin requests, please try again later' },
+  max: 50, // Limit each IP to 50 admin operations per windowMs
+  message: { message: 'Too many admin operations, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res) => {
+    // Security: Log rate limit violation
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    createAuditLog(
+      null, // System-wide security event
+      req.user ? { id: req.user.id, name: req.user.name, email: req.user.email } : null,
+      'rate_limit_exceeded',
+      'security',
+      'rate_limiting',
+      {
+        endpoint: req.path,
+        method: req.method,
+        ipAddress,
+        limit: 50,
+        windowMs: 15 * 60 * 1000,
+        timestamp: new Date().toISOString()
+      }
+    );
+    res.status(429).json({ message: 'Too many admin operations, please try again later' });
+  }
 });
 
 // All user management routes require authentication and superuser role
@@ -37,7 +77,7 @@ router.use(authenticateToken);
 router.use(requireSuperuser);
 
 // POST /api/users - Create new user
-router.post('/users', adminActionLimiter, async (req, res, next) => {
+router.post('/users', adminOperationsLimiter, async (req, res, next) => {
   try {
     const { name, email, role } = req.body;
 
@@ -72,16 +112,6 @@ router.get('/users/:id', (req, res, next) => {
   }
 });
 
-// GET /api/users/:id/organizations - Get user's organization details
-router.get('/users/:id/organizations', (req, res, next) => {
-  try {
-    const details = getUserOrganizationDetails(req.params.id);
-    res.json(details);
-  } catch (err) {
-    next(err);
-  }
-});
-
 // PUT /api/users/:id - Update user details
 router.put('/users/:id', (req, res, next) => {
   try {
@@ -99,7 +129,7 @@ router.put('/users/:id', (req, res, next) => {
 });
 
 // PUT /api/users/:id/role - Change user role
-router.put('/users/:id/role', adminActionLimiter, (req, res, next) => {
+router.put('/users/:id/role', adminOperationsLimiter, (req, res, next) => {
   try {
     const { role } = req.body;
 
@@ -125,7 +155,7 @@ router.post('/users/:id/reset-password', passwordResetLimiter, async (req, res, 
 });
 
 // DELETE /api/users/:id - Delete user
-router.delete('/users/:id', adminActionLimiter, (req, res, next) => {
+router.delete('/users/:id', adminOperationsLimiter, (req, res, next) => {
   try {
     deleteUser(req.params.id, req.user.id);
     res.status(204).send();

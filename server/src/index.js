@@ -123,11 +123,11 @@ app.get('/api/health', async (req, res) => {
     // Test database connectivity
     const dbCheck = db.prepare('SELECT 1 as ok').get();
 
+    // Security: Don't expose environment details
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
-      database: dbCheck.ok === 1 ? 'connected' : 'error',
-      environment: process.env.NODE_ENV || 'development'
+      database: dbCheck.ok === 1 ? 'connected' : 'error'
     });
   } catch (error) {
     res.status(503).json({

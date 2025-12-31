@@ -47,11 +47,24 @@ export default function UserManagement() {
 
   // User orgs modal state
   const [orgsModalUser, setOrgsModalUser] = useState(null);
-  const [loadingOrgsFor, setLoadingOrgsFor] = useState(null);
+  const [loadingOrgs, setLoadingOrgs] = useState(false);
 
   useEffect(() => {
     loadUsers();
   }, []);
+
+  // Fetch full user details including organizations when opening modal
+  const handleViewOrgs = async (user) => {
+    try {
+      setLoadingOrgs(true);
+      const fullUserData = await api.getUser(user.id);
+      setOrgsModalUser(fullUserData);
+    } catch (err) {
+      alert(err.message || 'Failed to load organization details');
+    } finally {
+      setLoadingOrgs(false);
+    }
+  };
 
   async function loadUsers() {
     try {
@@ -119,18 +132,6 @@ export default function UserManagement() {
       alert(err.message || 'Failed to delete user');
     } finally {
       setIsDeleting(false);
-    }
-  };
-
-  const handleViewOrganizations = async (user) => {
-    try {
-      setLoadingOrgsFor(user.id);
-      const orgDetails = await api.getUserOrganizations(user.id);
-      setOrgsModalUser(orgDetails);
-    } catch (err) {
-      alert(err.message || 'Failed to load organization details');
-    } finally {
-      setLoadingOrgsFor(null);
     }
   };
 
@@ -285,31 +286,25 @@ export default function UserManagement() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm hidden sm:table-cell">
                     <button
-                      onClick={() => handleViewOrganizations(user)}
-                      disabled={loadingOrgsFor === user.id}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => handleViewOrgs(user)}
+                      disabled={loadingOrgs}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors text-left disabled:opacity-50"
                       title="View organization details"
                     >
-                      {loadingOrgsFor === user.id ? (
-                        <span className="text-gray-400">Loading...</span>
-                      ) : (
-                        <>
-                          {user.organizationCount > 0 && (
-                            <span className="inline-flex items-center gap-1 text-purple-700">
-                              <Crown size={14} />
-                              <span className="font-medium">{user.organizationCount}</span>
-                            </span>
-                          )}
-                          {user.membershipCount > 0 && (
-                            <span className="inline-flex items-center gap-1 text-blue-700">
-                              <Shield size={14} />
-                              <span className="font-medium">{user.membershipCount}</span>
-                            </span>
-                          )}
-                          {user.organizationCount === 0 && user.membershipCount === 0 && (
-                            <span className="text-gray-400">None</span>
-                          )}
-                        </>
+                      {user.organizationCount > 0 && (
+                        <span className="inline-flex items-center gap-1 text-purple-700">
+                          <Crown size={14} />
+                          <span className="font-medium">{user.organizationCount}</span>
+                        </span>
+                      )}
+                      {user.membershipCount > 0 && (
+                        <span className="inline-flex items-center gap-1 text-blue-700">
+                          <Shield size={14} />
+                          <span className="font-medium">{user.membershipCount}</span>
+                        </span>
+                      )}
+                      {user.organizationCount === 0 && user.membershipCount === 0 && (
+                        <span className="text-gray-400">None</span>
                       )}
                     </button>
                   </td>

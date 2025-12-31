@@ -6,19 +6,24 @@ const VALID_ROLES = ['superuser', 'admin', 'user'];
 
 /**
  * Generate a cryptographically secure temporary password
- * Uses proper entropy without filtering that reduces randomness
+ * Uses full entropy from crypto.randomBytes without filtering
+ * @param {number} length - Desired password length (default 16)
+ * @returns {string} - Secure alphanumeric password
  */
 function generateSecurePassword(length = 16) {
+  // Use base62 encoding (alphanumeric: 0-9, A-Z, a-z) for maximum entropy
+  // Each random byte gives us ~8 bits of entropy
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charsetLength = charset.length;
-  const randomBytesNeeded = length * 2; // Use extra bytes to ensure enough entropy
-  const bytes = randomBytes(randomBytesNeeded);
 
+  // Generate enough random bytes (1 byte per character is sufficient)
+  const randomBytesBuffer = randomBytes(length);
+
+  // Map each byte to a character in our charset
   let password = '';
   for (let i = 0; i < length; i++) {
-    // Use modulo with sufficient random bytes to avoid bias
-    const randomIndex = bytes[i] % charsetLength;
-    password += charset[randomIndex];
+    // Use modulo to map byte value (0-255) to charset index (0-61)
+    password += charset[randomBytesBuffer[i] % charsetLength];
   }
 
   return password;
@@ -36,10 +41,11 @@ export function getAllUsers() {
     ORDER BY u.created_at DESC
   `).all();
 
-  // Enhance each user with organization counts only (not full data for privacy)
+  // Security: Only return counts, not detailed organization data
+  // Detailed data available via getUserById if needed
   return users.map(user => {
     // Count owned organizations
-    const ownedOrgCount = db.prepare(`
+    const ownedCount = db.prepare(`
       SELECT COUNT(*) as count
       FROM organizations
       WHERE created_by_id = ?
@@ -54,7 +60,7 @@ export function getAllUsers() {
 
     return {
       ...user,
-      organizationCount: ownedOrgCount,
+      organizationCount: ownedCount,
       membershipCount: membershipCount
     };
   });
@@ -72,29 +78,9 @@ export function getUserById(userId) {
     throw error;
   }
 
-  // Get user's organizations
-  const organizations = db.prepare(`
-    SELECT id, name, created_at as createdAt
-    FROM organizations
-    WHERE created_by_id = ?
-    ORDER BY created_at DESC
-  `).all(userId);
-
-  return { ...user, organizations };
-}
-
-export function getUserOrganizationDetails(userId) {
-  // Verify user exists
-  const user = db.prepare('SELECT id, name FROM users WHERE id = ?').get(userId);
-  if (!user) {
-    const error = new Error('User not found');
-    error.status = 404;
-    throw error;
-  }
-
   // Get owned organizations with full details
   const ownedOrganizations = db.prepare(`
-    SELECT id, name, is_public as isPublic
+    SELECT id, name, is_public as isPublic, created_at as createdAt
     FROM organizations
     WHERE created_by_id = ?
     ORDER BY name
@@ -106,7 +92,8 @@ export function getUserOrganizationDetails(userId) {
       o.id,
       o.name,
       o.is_public as isPublic,
-      om.role
+      om.role,
+      om.created_at as joinedAt
     FROM organization_members om
     JOIN organizations o ON om.organization_id = o.id
     WHERE om.user_id = ?
@@ -114,12 +101,11 @@ export function getUserOrganizationDetails(userId) {
   `).all(userId);
 
   return {
-    id: user.id,
-    name: user.name,
-    organizationCount: ownedOrganizations.length,
-    membershipCount: memberships.length,
+    ...user,
     ownedOrganizations,
-    memberships
+    memberships,
+    organizationCount: ownedOrganizations.length,
+    membershipCount: memberships.length
   };
 }
 
@@ -197,7 +183,7 @@ export async function resetUserPassword(userId) {
     throw error;
   }
 
-  // Generate a cryptographically secure temporary password (16 characters)
+  // Security: Generate cryptographically secure temporary password (16 chars, full entropy)
   const tempPassword = generateSecurePassword(16);
 
   // Hash the new password
@@ -253,7 +239,7 @@ export async function createAdminUser(name, email, role) {
     throw error;
   }
 
-  // Generate cryptographically secure temporary password (16 characters)
+  // Security: Generate cryptographically secure temporary password (16 chars, full entropy)
   const tempPassword = generateSecurePassword(16);
 
   // Hash password

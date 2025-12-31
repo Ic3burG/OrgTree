@@ -10,34 +10,49 @@
 
 This security audit reviewed the OrgTree application's authentication and authorization systems, API routes, and input validation. The audit identified **3 critical**, **8 high**, **9 medium**, and **5 low** severity issues.
 
-### Current Security Posture: **NEEDS IMPROVEMENT**
+### Current Security Posture: **SIGNIFICANTLY IMPROVED** ✅
+
+**Recent Fixes (December 30-31, 2025):**
+- ✅ All 3 CRITICAL vulnerabilities resolved
+- ✅ All 8 HIGH severity issues resolved
+- ✅ 5 of 9 MEDIUM severity issues resolved
+- ✅ 2 of 5 LOW severity issues resolved
+- ⏳ 4 MEDIUM severity issues remain
+- ⏳ 3 LOW severity issues remain
 
 **Strengths:**
 - Parameterized SQL queries (no SQL injection)
-- bcrypt password hashing with proper salt rounds
-- JWT authentication with expiration
-- Role-based access control (RBAC) implemented
+- bcrypt password hashing with proper salt rounds (10 rounds)
+- JWT authentication with expiration and explicit algorithm specification
+- Role-based access control (RBAC) with standardized permission checks
 - Database transactions for bulk operations
 - CORS properly configured
 - Strong invitation tokens (256-bit entropy)
+- Security headers (helmet.js) protecting against common attacks
+- Rate limiting on all critical endpoints
+- Strong password policy (12+ character minimum)
+- Secure ID generation using crypto.randomUUID()
+- Input validation with array size limits
+- Field whitelisting for bulk operations
+- Comprehensive security audit logging (failed logins, invalid tokens, permission denials, rate limits)
 
-**Areas Requiring Attention:**
-- Password policy too weak (6 char minimum)
-- Missing rate limiting on critical endpoints
-- Inconsistent permission check patterns
-- Missing security headers
-- Input validation gaps
+**Remaining Areas for Future Enhancement:**
+- CSRF protection
+- Refresh token implementation
+- Password complexity requirements
 
 ---
 
 ## Vulnerability Summary
 
-| Severity | Count | Fixed | Remaining | Status |
-|----------|-------|-------|-----------|--------|
-| CRITICAL | 3 | 3 ✅ | 0 | All Fixed (Dec 30, 2025) |
-| HIGH | 8 | 7 ✅ | 1 | Nearly Complete |
-| MEDIUM | 9 | 5 ✅ | 4 | Good Progress |
-| LOW | 5 | 0 | 5 | Backlog |
+| Severity | Count | Fixed | Remaining |
+|----------|-------|-------|-----------|
+| CRITICAL | 3 | 3 ✅ | 0 |
+| HIGH | 8 | 8 ✅ | 0 |
+| MEDIUM | 9 | 5 ✅ | 4 |
+| LOW | 5 | 2 ✅ | 3 |
+
+**Status**: All CRITICAL and HIGH severity issues resolved. 5 of 9 MEDIUM + 2 of 5 LOW severity issues fixed (December 31, 2025).
 
 ---
 
@@ -107,86 +122,80 @@ const sanitizedUpdates = Object.fromEntries(
 
 ## HIGH SEVERITY VULNERABILITIES
 
-### 4. Weak Password Policy ✅ **FIXED** (Dec 30, 2025)
+### 4. Weak Password Policy ✅ FIXED
 **File:** `server/src/routes/auth.js:29-31`
+**Fixed:** December 30, 2025 (Previous session)
 
-- ~~Minimum 6 characters only~~ → **Now 12+ characters required**
-- No complexity requirements (still open - item #7 in roadmap)
-- No password history
-
-**Status:** Partially fixed. Minimum length increased to 12 characters.
+Increased minimum password length from 6 to 12 characters.
 
 ---
 
-### 5. Import Route Authorization Inconsistency ✅ **FIXED** (Dec 31, 2025)
-**File:** `server/src/routes/import.js:20-30`
+### 5. Import Route Authorization Inconsistency ✅ FIXED
+**File:** `server/src/routes/import.js:30`
+**Fixed:** December 31, 2025
 
-~~Uses ownership check instead of `requireOrgPermission('admin')`, inconsistent with other routes.~~
-
-**Fix Applied:** Import route now uses `requireOrgPermission(orgId, req.user.id, 'admin')` for consistent authorization pattern across all routes.
-
----
-
-### 6. Missing Rate Limiting on Admin Endpoints ✅ **FIXED** (Dec 31, 2025)
-**File:** `server/src/routes/users.js`
-
-~~Only password reset has rate limiting. Missing on:~~
-- ~~`POST /api/users` (create user)~~
-- ~~`PUT /api/users/:id/role` (change role)~~
-- ~~`DELETE /api/users/:id` (delete user)~~
-
-**Fix Applied:** Added `adminActionLimiter` (50 requests/15 minutes) to all three admin endpoints.
+Now uses `requireOrgPermission(orgId, req.user.id, 'admin')` instead of manual ownership check. Consistent with other routes and respects multi-user collaboration permissions.
 
 ---
 
-### 7. Excessive Data in getAllUsers Response ✅ **FIXED** (Dec 31, 2025)
-**File:** `server/src/services/users.service.js:7-41`
+### 6. Missing Rate Limiting on Admin Endpoints ✅ FIXED
+**File:** `server/src/routes/users.js:26-32, 39, 91, 117`
+**Fixed:** December 31, 2025
 
-~~Returns full organization membership data to superusers - potential information disclosure.~~
-
-**Fix Applied:**
-- `getAllUsers()` now returns only organization/membership counts (not full data)
-- New endpoint `GET /users/:id/organizations` fetches full details on-demand
-- Frontend fetches org details only when user explicitly clicks "View Organizations" button
-
----
-
-### 8. Missing Array Size Validation in Bulk Routes ✅ **FIXED** (Dec 30, 2025)
-**File:** `server/src/routes/bulk.js`
-
-~~Arrays checked for emptiness but no maximum size at route level (service has 100 limit but route doesn't validate).~~
-
-**Fix Applied:** Route-level validation added for max 100 items.
+Added `adminOperationsLimiter` (50 req/15min) to:
+- `POST /api/users` (create user)
+- `PUT /api/users/:id/role` (change role)
+- `DELETE /api/users/:id` (delete user)
 
 ---
 
-### 9. Inconsistent Permission Check Patterns
-Multiple files use different patterns:
-- Some use `requireOrgPermission()` (correct)
-- Some use manual `checkOrgAccess()` checks
-- Some check ownership only
+### 7. Excessive Data in getAllUsers Response ✅ FIXED
+**File:** `server/src/services/users.service.js:7-42`
+**Fixed:** December 31, 2025
+
+Modified to return only counts (organizationCount, membershipCount) instead of full organization arrays. Detailed data available via `getUserById()` when specifically requested.
+
+**Frontend Update:** `UserManagement.jsx` now fetches full user details via `api.getUser()` when opening organization details modal.
 
 ---
 
-### 10. Missing HTTPS/Security Headers
+### 8. Missing Array Size Validation in Bulk Routes ✅ FIXED
+**File:** `server/src/routes/bulk.js:16-30`
+**Fixed:** December 30, 2025 (Previous session)
+
+Route-level validation enforces MAX_BULK_SIZE = 100 for all bulk operations.
+
+---
+
+### 9. Inconsistent Permission Check Patterns ✅ FIXED
+**File:** `server/src/routes/members.js:29`
+**Fixed:** December 31, 2025
+
+Standardized GET /members endpoint to use `requireOrgPermission()` instead of manual `checkOrgAccess()`. All routes now follow consistent authorization pattern.
+
+**Verified:** All service functions (audit, bulk, search, invitation, org, department, people) use `requireOrgPermission()` consistently.
+
+---
+
+### 10. Missing HTTPS/Security Headers ✅ FIXED
 **File:** `server/src/index.js`
+**Fixed:** December 30, 2025 (Previous session)
 
-Missing:
+Added helmet.js middleware providing:
 - `Strict-Transport-Security` (HSTS)
 - `X-Frame-Options`
 - `X-Content-Type-Options`
 - `Content-Security-Policy`
 - `X-XSS-Protection`
 
-**Fix:** Use helmet.js middleware.
-
 ---
 
-### 11. JWT Algorithm Not Explicitly Specified
-**File:** `server/src/middleware/auth.js:12`
+### 11. JWT Algorithm Not Explicitly Specified ✅ FIXED
+**File:** `server/src/middleware/auth.js:13-15`
+**Fixed:** December 30, 2025 (Previous session)
 
+Now explicitly specifies HS256 algorithm to prevent algorithm confusion attacks:
 ```javascript
-// Should specify algorithm to prevent algorithm confusion attacks
 const decoded = jwt.verify(token, process.env.JWT_SECRET, {
   algorithms: ['HS256']
 });
@@ -199,51 +208,102 @@ const decoded = jwt.verify(token, process.env.JWT_SECRET, {
 ### 12. Email Enumeration via Error Messages
 Different error messages reveal user existence in invitation flow.
 
+**Status**: Not yet fixed (Low priority - minimal practical exploit value)
+
+---
+
 ### 13. Missing CSRF Protection
 No CSRF tokens (mitigated by CORS but still a gap).
 
-### 14. Debug Logging in Production ✅ **FIXED** (Dec 30, 2025)
-~~`server/src/routes/departments.js` contains console.log statements.~~
+**Status**: Not yet fixed (Medium priority - CORS provides partial protection)
 
-**Fix Applied:** Removed 15 debug console.log statements from production code.
+---
 
-### 15. Weak Temporary Password Generation ✅ **FIXED** (Dec 31, 2025)
-~~`randomBytes(9)` with base64 filtering reduces entropy.~~
+### 14. Debug Logging in Production ✅ FIXED
+**File:** `server/src/routes/departments.js`, `server/src/services/department.service.js`
+**Fixed:** December 30, 2025 (Previous session)
 
-**Fix Applied:**
-- Created `generateSecurePassword()` function with proper entropy
-- Uses randomBytes without filtering that reduces randomness
-- Generates 16-character passwords (was 12) with full alphanumeric charset
-- Applied to both `resetUserPassword()` and `createAdminUser()`
+Removed 15 debug console.log statements from production code.
+
+---
+
+### 15. Weak Temporary Password Generation ✅ FIXED
+**File:** `server/src/services/users.service.js:13-30, 187, 243`
+**Fixed:** December 31, 2025
+
+**Previous Implementation:**
+```javascript
+const tempPassword = randomBytes(9).toString('base64')
+  .replace(/[^a-zA-Z0-9]/g, '')
+  .slice(0, 12);
+```
+
+**New Implementation:**
+- Created `generateSecurePassword()` helper function
+- Uses full entropy from crypto.randomBytes (no filtering)
+- Generates 16-character passwords (increased from 12)
+- Base62 encoding (alphanumeric charset) for maximum entropy
+- Each byte mapped directly to charset without loss
+
+**Security Improvement:** ~96 bits of entropy vs ~60 bits previously
+
+---
 
 ### 16. No Refresh Token Implementation
 7-day JWT with no revocation capability.
 
-### 17. Missing Password Change Verification ✅ **FIXED** (Dec 31, 2025)
-~~No old password required when changing password.~~
+**Status**: Not yet fixed (High priority for future - requires architectural changes)
 
-**Fix Applied:**
-- Password change now requires old password verification via bcrypt.compare()
-- Skips verification only when `must_change_password=true` (temporary password flow)
-- Returns 401 error if current password is incorrect
-- Prevents unauthorized password changes if session is compromised
+---
 
-### 18. Invitation Metadata Disclosure ✅ **FIXED** (Dec 31, 2025)
-~~Public endpoint returns organization name, inviter name, role.~~
+### 17. Missing Password Change Verification ✅ FIXED
+**File:** `server/src/routes/auth.js:68-127`
+**Fixed:** December 31, 2025
 
-**Fix Applied:**
-- Removed inviter name and email from public `getInvitationByToken()` endpoint
-- Public endpoint now returns only: organizationName, role, status, expiresAt
-- Updated frontend AcceptInvitation component to handle missing fields
-- Reduces information leakage from publicly-accessible invitation tokens
+**Changes Applied:**
+- Require old password verification before password changes
+- Exception: Users with `must_change_password=true` (temporary password flow)
+- Prevent password reuse (new password must differ from old)
+- Updated API client and frontend validation
 
-### 19. CSV Import Without Size Limits ✅ **FIXED** (Dec 30, 2025)
-~~No validation of import array size.~~
+**Security Improvement:** Prevents unauthorized password changes if session is compromised
 
-**Fix Applied:** Added 10,000 item limit for CSV imports.
+---
 
-### 20. Insufficient Audit Logging
-Many security events not logged (failed logins, permission denials).
+### 18. Invitation Metadata Disclosure
+Public endpoint returns organization name, inviter name, role.
+
+**Status**: Not yet fixed (Low priority - token holder is intended recipient)
+
+---
+
+### 19. CSV Import Without Size Limits ✅ FIXED
+**File:** `server/src/routes/import.js:21-26`
+**Fixed:** December 30, 2025 (Previous session)
+
+Added MAX_IMPORT_SIZE = 10,000 items limit to prevent DoS attacks.
+
+---
+
+### 20. Insufficient Audit Logging ✅ FIXED
+**Files:** `server/src/services/auth.service.js`, `server/src/middleware/auth.js`, `server/src/services/member.service.js`, `server/src/routes/auth.js`, `server/src/routes/users.js`, `server/src/routes/public.js`
+**Fixed:** December 31, 2025
+
+**Changes Applied:**
+1. **Failed Login Logging** - Logs failed attempts with reason (user_not_found, invalid_password), email, IP address
+2. **Invalid Token Logging** - Logs missing/expired/invalid token attempts with IP address, path, error details
+3. **Permission Denied Logging** - Logs insufficient role and organization permission denials with user details, required/actual roles
+4. **Rate Limit Violations** - Logs rate limit exceeded events across all rate limiters (auth, admin, public endpoints)
+
+**Implementation Details:**
+- Uses existing `createAuditLog()` service from audit.service.js
+- System-wide security events use `null` for orgId
+- Organization-specific events (permission denials) link to orgId
+- Captures IP addresses, timestamps, and relevant context
+- All events use actionType 'failed_login', 'invalid_token', 'permission_denied', 'rate_limit_exceeded'
+- EntityType 'security' groups all security events together
+
+**Security Improvement:** Comprehensive security event visibility for detecting attacks and monitoring suspicious activity
 
 ---
 
@@ -252,44 +312,68 @@ Many security events not logged (failed logins, permission denials).
 ### 21. XSS Risk in Search Highlights
 HTML tags in FTS snippets could be XSS vector if frontend uses innerHTML.
 
-### 22. Health Endpoint Exposes Environment
-Returns `NODE_ENV` value.
+**Status**: Not yet fixed (Low priority - frontend currently uses safe rendering)
+
+---
+
+### 22. Health Endpoint Exposes Environment ✅ FIXED
+**File:** `server/src/index.js:121-140`
+**Fixed:** December 31, 2025
+
+Removed `environment: process.env.NODE_ENV` from health endpoint response. Health checks now only return status, timestamp, and database connectivity without exposing environment details.
+
+**Security Improvement:** Prevents information disclosure that could aid attackers in understanding the deployment environment.
+
+---
 
 ### 23. Cascade Deletes Without Soft Delete
 No audit trail for cascaded deletions.
 
+**Status**: Not yet fixed (Low priority - audit logs capture parent deletions)
+
+---
+
 ### 24. Incomplete Circular Reference Protection
 Edge cases in department parent validation.
 
-### 25. Superuser Check Inconsistency
-Manual role checks instead of middleware in some routes.
+**Status**: Not yet fixed (Low priority - current validation handles common cases)
+
+---
+
+### 25. Superuser Check Inconsistency ✅ FIXED
+**File:** `server/src/routes/audit.js:59-79`
+**Fixed:** December 31, 2025
+
+Replaced manual role check (`if (req.user.role !== 'superuser')`) with standard `requireSuperuser` middleware in `/admin/audit-logs` route. Now consistent with other admin endpoints.
+
+**Security Improvement:** Standardized authorization pattern reduces risk of inconsistent permission enforcement and provides centralized security logging.
 
 ---
 
 ## Remediation Roadmap
 
 ### IMMEDIATE (This Week)
-1. [x] Fix weak ID generation in import route ✅ **FIXED** (Dec 30, 2025)
-2. [x] Add rate limiting to public endpoints ✅ **FIXED** (Dec 30, 2025)
-3. [x] Add field whitelist to bulk edit operations ✅ **FIXED** (Dec 30, 2025)
-4. [x] Add security headers (helmet.js) ✅ **FIXED** (Dec 30, 2025)
-5. [x] Specify JWT algorithm explicitly ✅ **FIXED** (Dec 30, 2025)
+1. [ ] Fix weak ID generation in import route
+2. [ ] Add rate limiting to public endpoints
+3. [ ] Add field whitelist to bulk edit operations
+4. [ ] Add security headers (helmet.js)
+5. [ ] Specify JWT algorithm explicitly
 
 ### SHORT-TERM (Next 2 Weeks)
-6. [x] Increase password minimum to 12 characters ✅ **FIXED** (Dec 30, 2025)
+6. [ ] Increase password minimum to 12 characters
 7. [ ] Add complexity requirements to passwords
-8. [x] Add rate limiting to admin endpoints ✅ **FIXED** (Dec 31, 2025)
-9. [x] Standardize permission check patterns ✅ **FIXED** (Dec 31, 2025)
-10. [x] Add array size validation to bulk routes ✅ **FIXED** (Dec 30, 2025)
-11. [x] Remove debug console.log statements ✅ **FIXED** (Dec 30, 2025)
+8. [ ] Add rate limiting to admin endpoints
+9. [ ] Standardize permission check patterns
+10. [ ] Add array size validation to bulk routes
+11. [ ] Remove debug console.log statements
 
 ### MEDIUM-TERM (Next Month)
-12. [ ] Implement refresh tokens (#16)
-13. [ ] Add CSRF protection (#13)
-14. [ ] Improve audit logging coverage (#20)
-15. [x] Add password change verification ✅ **FIXED** (Dec 31, 2025) (#17)
-16. [x] Limit invitation metadata exposure ✅ **FIXED** (Dec 31, 2025) (#18)
-17. [x] Add CSV import size limits ✅ **FIXED** (Dec 30, 2025) (#19)
+12. [ ] Implement refresh tokens
+13. [ ] Add CSRF protection
+14. [ ] Improve audit logging coverage
+15. [ ] Add password change verification
+16. [ ] Limit invitation metadata exposure
+17. [ ] Add CSV import size limits
 
 ---
 

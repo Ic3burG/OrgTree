@@ -26,7 +26,7 @@ router.post('/organizations/:orgId/import', async (req, res, next) => {
       });
     }
 
-    // Verify user has admin permission (consistent with other routes)
+    // Security: Verify user has admin permission (owner or admin member)
     requireOrgPermission(orgId, req.user.id, 'admin');
 
     // Process import within a transaction
