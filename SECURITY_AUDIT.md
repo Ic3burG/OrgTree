@@ -15,15 +15,16 @@ This security audit reviewed the OrgTree application's authentication and author
 **Recent Fixes (December 30-31, 2025):**
 - ✅ All 3 CRITICAL vulnerabilities resolved
 - ✅ All 8 HIGH severity issues resolved
-- ✅ 5 of 9 MEDIUM severity issues resolved
+- ✅ 6 of 9 MEDIUM severity issues resolved
 - ✅ 2 of 5 LOW severity issues resolved
-- ⏳ 4 MEDIUM severity issues remain
+- ⏳ 3 MEDIUM severity issues remain
 - ⏳ 3 LOW severity issues remain
 
 **Strengths:**
 - Parameterized SQL queries (no SQL injection)
 - bcrypt password hashing with proper salt rounds (10 rounds)
 - JWT authentication with expiration and explicit algorithm specification
+- **CSRF protection** with Double Submit Cookie pattern and HMAC-signed tokens
 - Role-based access control (RBAC) with standardized permission checks
 - Database transactions for bulk operations
 - CORS properly configured
@@ -34,10 +35,9 @@ This security audit reviewed the OrgTree application's authentication and author
 - Secure ID generation using crypto.randomUUID()
 - Input validation with array size limits
 - Field whitelisting for bulk operations
-- Comprehensive security audit logging (failed logins, invalid tokens, permission denials, rate limits)
+- Comprehensive security audit logging (failed logins, invalid tokens, permission denials, rate limits, CSRF violations)
 
 **Remaining Areas for Future Enhancement:**
-- CSRF protection
 - Refresh token implementation
 - Password complexity requirements
 
@@ -49,10 +49,10 @@ This security audit reviewed the OrgTree application's authentication and author
 |----------|-------|-------|-----------|
 | CRITICAL | 3 | 3 ✅ | 0 |
 | HIGH | 8 | 8 ✅ | 0 |
-| MEDIUM | 9 | 5 ✅ | 4 |
+| MEDIUM | 9 | 6 ✅ | 3 |
 | LOW | 5 | 2 ✅ | 3 |
 
-**Status**: All CRITICAL and HIGH severity issues resolved. 5 of 9 MEDIUM + 2 of 5 LOW severity issues fixed (December 31, 2025).
+**Status**: All CRITICAL and HIGH severity issues resolved. 6 of 9 MEDIUM + 2 of 5 LOW severity issues fixed (December 31, 2025).
 
 ---
 
@@ -212,10 +212,42 @@ Different error messages reveal user existence in invitation flow.
 
 ---
 
-### 13. Missing CSRF Protection
-No CSRF tokens (mitigated by CORS but still a gap).
+### 13. Missing CSRF Protection ✅ FIXED
+**File:** Multiple files (server/src/middleware/csrf.js, server/src/services/csrf.service.js, src/api/client.js)
+**Fixed:** December 31, 2025
 
-**Status**: Not yet fixed (Medium priority - CORS provides partial protection)
+**Implementation Details:**
+- **Pattern**: Double Submit Cookie with HMAC-signed tokens
+- **Token Generation**: Cryptographically secure (128-bit random + SHA256 HMAC signature)
+- **Validation**: Middleware validates token from both X-CSRF-Token header and csrf-token cookie
+- **Auto-retry**: Frontend automatically refreshes token and retries on CSRF errors
+- **Scope**: Applied to all state-changing operations (POST, PUT, DELETE)
+- **Exceptions**: Public routes (auth, public) and safe methods (GET, HEAD, OPTIONS) exempt
+
+**Files Created:**
+- `server/src/services/csrf.service.js` - Token generation, signing, and validation
+- `server/src/middleware/csrf.js` - CSRF validation middleware with audit logging
+- `server/src/routes/csrf.js` - CSRF token endpoint
+
+**Files Modified:**
+- `server/src/index.js` - Added cookie-parser, mounted CSRF routes, applied middleware
+- `server/package.json` - Added cookie-parser dependency
+- `src/api/client.js` - CSRF token fetching, storage, header injection, auto-retry
+- `src/App.jsx` - CSRF initialization on app mount
+
+**Security Features:**
+- Timing-safe token comparison (prevents timing attacks)
+- HMAC signature prevents token tampering
+- Token rotation on each request
+- Cookie flags: httpOnly=false (JS readable), Secure, SameSite=Strict
+- 24-hour token expiration
+- Comprehensive audit logging for CSRF violations
+
+**Testing:**
+- ✅ CSRF token endpoint generates valid tokens
+- ✅ POST requests without CSRF rejected (403)
+- ✅ GET requests work without CSRF (safe methods)
+- ✅ Auth routes work without CSRF (public endpoints)
 
 ---
 

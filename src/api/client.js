@@ -1,20 +1,85 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
+// CSRF token storage
+let csrfToken = null;
+let csrfTokenPromise = null; // Prevent concurrent fetches
+
 class ApiError extends Error {
-  constructor(message, status) {
+  constructor(message, status, code) {
     super(message);
     this.status = status;
+    this.code = code;
   }
 }
 
-async function request(endpoint, options = {}) {
+/**
+ * Fetch CSRF token from the server
+ * @returns {Promise<string>} The CSRF token
+ */
+async function fetchCsrfToken() {
+  // If already fetching, return the existing promise
+  if (csrfTokenPromise) {
+    return csrfTokenPromise;
+  }
+
+  csrfTokenPromise = fetch(`${API_BASE}/csrf-token`, {
+    credentials: 'include' // Required for cookies
+  })
+    .then(response => response.json())
+    .then(data => {
+      csrfToken = data.csrfToken;
+      csrfTokenPromise = null; // Clear promise for future fetches
+      return csrfToken;
+    })
+    .catch(err => {
+      csrfTokenPromise = null; // Clear promise so retry is possible
+      console.error('Failed to fetch CSRF token:', err);
+      throw err;
+    });
+
+  return csrfTokenPromise;
+}
+
+/**
+ * Initialize CSRF protection (fetch initial token)
+ * Call this when the app starts
+ */
+export async function initCsrf() {
+  try {
+    await fetchCsrfToken();
+  } catch (err) {
+    console.error('Failed to initialize CSRF token:', err);
+    // Don't throw - app can still work, just won't be able to make state-changing requests
+  }
+}
+
+/**
+ * Get the current CSRF token, fetching if necessary
+ */
+async function getCsrfToken() {
+  if (!csrfToken) {
+    await fetchCsrfToken();
+  }
+  return csrfToken;
+}
+
+async function request(endpoint, options = {}, retryOnCsrf = true) {
   const token = localStorage.getItem('token');
+
+  // Get CSRF token for state-changing requests
+  let csrf = null;
+  const isStatefulRequest = ['POST', 'PUT', 'DELETE'].includes(options.method);
+  if (isStatefulRequest) {
+    csrf = await getCsrfToken();
+  }
 
   const config = {
     ...options,
+    credentials: 'include', // Required for CSRF cookies
     headers: {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
+      ...(csrf && { 'X-CSRF-Token': csrf }),
       ...options.headers,
     },
   };
@@ -31,8 +96,16 @@ async function request(endpoint, options = {}) {
 
   const data = response.status !== 204 ? await response.json() : null;
 
+  // Handle CSRF errors - refresh token and retry once
+  if (response.status === 403 && data?.code?.startsWith('CSRF_') && retryOnCsrf) {
+    console.warn('CSRF token validation failed, refreshing token and retrying...');
+    csrfToken = null; // Clear invalid token
+    await fetchCsrfToken(); // Get new token
+    return request(endpoint, options, false); // Retry once without recursion
+  }
+
   if (!response.ok) {
-    throw new ApiError(data?.message || 'Request failed', response.status);
+    throw new ApiError(data?.message || 'Request failed', response.status, data?.code);
   }
 
   return data;
