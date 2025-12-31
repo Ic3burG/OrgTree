@@ -67,7 +67,7 @@ router.get('/me', authenticateToken, async (req, res, next) => {
 // POST /api/auth/change-password - Change password (requires auth)
 router.post('/change-password', authenticateToken, async (req, res, next) => {
   try {
-    const { newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
 
     if (!newPassword) {
       return res.status(400).json({ message: 'New password is required' });
@@ -76,6 +76,31 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
     // Security: Enforce stronger password requirements
     if (newPassword.length < 12) {
       return res.status(400).json({ message: 'Password must be at least 12 characters' });
+    }
+
+    // Get current user from database
+    const currentUser = db.prepare(`
+      SELECT password_hash, must_change_password
+      FROM users
+      WHERE id = ?
+    `).get(req.user.id);
+
+    if (!currentUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Security: Verify old password unless forced password change is required
+    // If must_change_password is true, skip old password verification (temporary password flow)
+    if (!currentUser.must_change_password) {
+      if (!oldPassword) {
+        return res.status(400).json({ message: 'Current password is required' });
+      }
+
+      // Verify old password
+      const isOldPasswordValid = await bcrypt.compare(oldPassword, currentUser.password_hash);
+      if (!isOldPasswordValid) {
+        return res.status(401).json({ message: 'Current password is incorrect' });
+      }
     }
 
     // Hash new password

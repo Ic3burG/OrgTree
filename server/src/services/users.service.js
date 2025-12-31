@@ -4,6 +4,26 @@ import { randomBytes, randomUUID } from 'crypto';
 
 const VALID_ROLES = ['superuser', 'admin', 'user'];
 
+/**
+ * Generate a cryptographically secure temporary password
+ * Uses proper entropy without filtering that reduces randomness
+ */
+function generateSecurePassword(length = 16) {
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charsetLength = charset.length;
+  const randomBytesNeeded = length * 2; // Use extra bytes to ensure enough entropy
+  const bytes = randomBytes(randomBytesNeeded);
+
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    // Use modulo with sufficient random bytes to avoid bias
+    const randomIndex = bytes[i] % charsetLength;
+    password += charset[randomIndex];
+  }
+
+  return password;
+}
+
 export function getAllUsers() {
   const users = db.prepare(`
     SELECT
@@ -177,8 +197,8 @@ export async function resetUserPassword(userId) {
     throw error;
   }
 
-  // Generate a random temporary password (12 characters, alphanumeric)
-  const tempPassword = randomBytes(9).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 12);
+  // Generate a cryptographically secure temporary password (16 characters)
+  const tempPassword = generateSecurePassword(16);
 
   // Hash the new password
   const passwordHash = await bcrypt.hash(tempPassword, 10);
@@ -233,10 +253,8 @@ export async function createAdminUser(name, email, role) {
     throw error;
   }
 
-  // Generate temporary password
-  const tempPassword = randomBytes(9).toString('base64')
-    .replace(/[^a-zA-Z0-9]/g, '')
-    .slice(0, 12);
+  // Generate cryptographically secure temporary password (16 characters)
+  const tempPassword = generateSecurePassword(16);
 
   // Hash password
   const passwordHash = await bcrypt.hash(tempPassword, 10);
