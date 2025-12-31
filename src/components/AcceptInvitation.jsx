@@ -103,7 +103,7 @@ export default function AcceptInvitation() {
           </div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Invitation Expired</h1>
           <p className="text-gray-600 mb-6">
-            This invitation has expired. Please ask {invitation.invitedByName} to send you a new one.
+            This invitation has expired. Please request a new invitation to join this organization.
           </p>
           <Link
             to="/"
@@ -173,7 +173,7 @@ export default function AcceptInvitation() {
 
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
           <p className="text-gray-600 text-center">
-            <strong>{invitation.invitedByName}</strong> has invited you to join
+            You've been invited to join
           </p>
           <p className="text-xl font-semibold text-gray-900 text-center mt-2">
             {invitation.organizationName}
@@ -214,12 +214,6 @@ export default function AcceptInvitation() {
             <p className="text-gray-600 text-center text-sm">
               Logged in as <strong>{user?.email}</strong>
             </p>
-            {user?.email?.toLowerCase() !== invitation.email?.toLowerCase() && (
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
-                Note: This invitation was sent to <strong>{invitation.email}</strong>.
-                You may need to log in with that email to accept.
-              </div>
-            )}
             <button
               onClick={handleAccept}
               disabled={accepting}
