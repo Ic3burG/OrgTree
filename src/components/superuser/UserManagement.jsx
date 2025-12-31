@@ -47,10 +47,24 @@ export default function UserManagement() {
 
   // User orgs modal state
   const [orgsModalUser, setOrgsModalUser] = useState(null);
+  const [loadingOrgs, setLoadingOrgs] = useState(false);
 
   useEffect(() => {
     loadUsers();
   }, []);
+
+  // Fetch full user details including organizations when opening modal
+  const handleViewOrgs = async (user) => {
+    try {
+      setLoadingOrgs(true);
+      const fullUserData = await api.getUser(user.id);
+      setOrgsModalUser(fullUserData);
+    } catch (err) {
+      alert(err.message || 'Failed to load organization details');
+    } finally {
+      setLoadingOrgs(false);
+    }
+  };
 
   async function loadUsers() {
     try {
@@ -272,8 +286,9 @@ export default function UserManagement() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm hidden sm:table-cell">
                     <button
-                      onClick={() => setOrgsModalUser(user)}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                      onClick={() => handleViewOrgs(user)}
+                      disabled={loadingOrgs}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors text-left disabled:opacity-50"
                       title="View organization details"
                     >
                       {user.organizationCount > 0 && (

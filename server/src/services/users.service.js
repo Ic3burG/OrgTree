@@ -16,35 +16,27 @@ export function getAllUsers() {
     ORDER BY u.created_at DESC
   `).all();
 
-  // Enhance each user with organization details
+  // Security: Only return counts, not detailed organization data
+  // Detailed data available via getUserById if needed
   return users.map(user => {
-    // Get owned organizations
-    const ownedOrgs = db.prepare(`
-      SELECT id, name, is_public as isPublic
+    // Count owned organizations
+    const ownedCount = db.prepare(`
+      SELECT COUNT(*) as count
       FROM organizations
       WHERE created_by_id = ?
-      ORDER BY name
-    `).all(user.id);
+    `).get(user.id).count;
 
-    // Get memberships
-    const memberships = db.prepare(`
-      SELECT
-        o.id,
-        o.name,
-        o.is_public as isPublic,
-        om.role
-      FROM organization_members om
-      JOIN organizations o ON om.organization_id = o.id
-      WHERE om.user_id = ?
-      ORDER BY o.name
-    `).all(user.id);
+    // Count memberships
+    const membershipCount = db.prepare(`
+      SELECT COUNT(*) as count
+      FROM organization_members
+      WHERE user_id = ?
+    `).get(user.id).count;
 
     return {
       ...user,
-      organizationCount: ownedOrgs.length,
-      membershipCount: memberships.length,
-      ownedOrganizations: ownedOrgs,
-      memberships: memberships
+      organizationCount: ownedCount,
+      membershipCount: membershipCount
     };
   });
 }
@@ -61,15 +53,35 @@ export function getUserById(userId) {
     throw error;
   }
 
-  // Get user's organizations
-  const organizations = db.prepare(`
-    SELECT id, name, created_at as createdAt
+  // Get owned organizations with full details
+  const ownedOrganizations = db.prepare(`
+    SELECT id, name, is_public as isPublic, created_at as createdAt
     FROM organizations
     WHERE created_by_id = ?
-    ORDER BY created_at DESC
+    ORDER BY name
   `).all(userId);
 
-  return { ...user, organizations };
+  // Get memberships with full details
+  const memberships = db.prepare(`
+    SELECT
+      o.id,
+      o.name,
+      o.is_public as isPublic,
+      om.role,
+      om.created_at as joinedAt
+    FROM organization_members om
+    JOIN organizations o ON om.organization_id = o.id
+    WHERE om.user_id = ?
+    ORDER BY o.name
+  `).all(userId);
+
+  return {
+    ...user,
+    ownedOrganizations,
+    memberships,
+    organizationCount: ownedOrganizations.length,
+    membershipCount: memberships.length
+  };
 }
 
 export function updateUser(userId, { name, email }) {

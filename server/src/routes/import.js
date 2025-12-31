@@ -1,6 +1,7 @@
 import express from 'express';
 import { randomUUID } from 'crypto';
 import { authenticateToken } from '../middleware/auth.js';
+import { requireOrgPermission } from '../services/member.service.js';
 import db from '../db.js';
 
 const router = express.Router();
@@ -25,14 +26,8 @@ router.post('/organizations/:orgId/import', async (req, res, next) => {
       });
     }
 
-    // Verify org ownership
-    const org = db
-      .prepare('SELECT * FROM organizations WHERE id = ? AND created_by_id = ?')
-      .get(orgId, req.user.id);
-
-    if (!org) {
-      return res.status(404).json({ message: 'Organization not found' });
-    }
+    // Security: Verify user has admin permission (owner or admin member)
+    requireOrgPermission(orgId, req.user.id, 'admin');
 
     // Process import within a transaction
     const pathToDeptId = new Map();

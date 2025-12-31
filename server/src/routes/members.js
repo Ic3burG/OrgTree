@@ -6,7 +6,7 @@ import {
   addMemberByEmail,
   updateMemberRole,
   removeOrgMember,
-  checkOrgAccess
+  requireOrgPermission
 } from '../services/member.service.js';
 import {
   emitMemberAdded,
@@ -25,11 +25,8 @@ router.get('/organizations/:orgId/members', async (req, res, next) => {
   try {
     const { orgId } = req.params;
 
-    // Verify user has admin access to view members
-    const access = checkOrgAccess(orgId, req.user.id);
-    if (!access.hasAccess || (access.role !== 'admin' && access.role !== 'owner')) {
-      return res.status(403).json({ message: 'Admin access required' });
-    }
+    // Security: Verify user has admin permission using standard pattern
+    requireOrgPermission(orgId, req.user.id, 'admin');
 
     const members = getOrgMembers(orgId);
 

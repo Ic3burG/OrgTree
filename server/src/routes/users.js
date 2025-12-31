@@ -22,12 +22,21 @@ const passwordResetLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Rate limiter for sensitive admin operations - prevents abuse of privileged endpoints
+const adminOperationsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // Limit each IP to 50 admin operations per windowMs
+  message: { message: 'Too many admin operations, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // All user management routes require authentication and superuser role
 router.use(authenticateToken);
 router.use(requireSuperuser);
 
 // POST /api/users - Create new user
-router.post('/users', async (req, res, next) => {
+router.post('/users', adminOperationsLimiter, async (req, res, next) => {
   try {
     const { name, email, role } = req.body;
 
@@ -79,7 +88,7 @@ router.put('/users/:id', (req, res, next) => {
 });
 
 // PUT /api/users/:id/role - Change user role
-router.put('/users/:id/role', (req, res, next) => {
+router.put('/users/:id/role', adminOperationsLimiter, (req, res, next) => {
   try {
     const { role } = req.body;
 
@@ -105,7 +114,7 @@ router.post('/users/:id/reset-password', passwordResetLimiter, async (req, res, 
 });
 
 // DELETE /api/users/:id - Delete user
-router.delete('/users/:id', (req, res, next) => {
+router.delete('/users/:id', adminOperationsLimiter, (req, res, next) => {
   try {
     deleteUser(req.params.id, req.user.id);
     res.status(204).send();
