@@ -32,12 +32,12 @@ This security audit reviewed the OrgTree application's authentication and author
 
 ## Vulnerability Summary
 
-| Severity | Count | Status |
-|----------|-------|--------|
-| CRITICAL | 3 | Action Required |
-| HIGH | 8 | Action Required |
-| MEDIUM | 9 | Should Fix |
-| LOW | 5 | Best Practice |
+| Severity | Count | Fixed | Remaining | Status |
+|----------|-------|-------|-----------|--------|
+| CRITICAL | 3 | 3 ✅ | 0 | All Fixed (Dec 30, 2025) |
+| HIGH | 8 | 7 ✅ | 1 | Nearly Complete |
+| MEDIUM | 9 | 2 ✅ | 7 | In Progress |
+| LOW | 5 | 0 | 5 | Backlog |
 
 ---
 
@@ -107,45 +107,56 @@ const sanitizedUpdates = Object.fromEntries(
 
 ## HIGH SEVERITY VULNERABILITIES
 
-### 4. Weak Password Policy
+### 4. Weak Password Policy ✅ **FIXED** (Dec 30, 2025)
 **File:** `server/src/routes/auth.js:29-31`
 
-- Minimum 6 characters only
-- No complexity requirements
+- ~~Minimum 6 characters only~~ → **Now 12+ characters required**
+- No complexity requirements (still open - item #7 in roadmap)
 - No password history
 
-**Fix:** Enforce 12+ characters with complexity.
+**Status:** Partially fixed. Minimum length increased to 12 characters.
 
 ---
 
-### 5. Import Route Authorization Inconsistency
-**File:** `server/src/routes/import.js:20-26`
+### 5. Import Route Authorization Inconsistency ✅ **FIXED** (Dec 31, 2025)
+**File:** `server/src/routes/import.js:20-30`
 
-Uses ownership check instead of `requireOrgPermission('admin')`, inconsistent with other routes.
+~~Uses ownership check instead of `requireOrgPermission('admin')`, inconsistent with other routes.~~
+
+**Fix Applied:** Import route now uses `requireOrgPermission(orgId, req.user.id, 'admin')` for consistent authorization pattern across all routes.
 
 ---
 
-### 6. Missing Rate Limiting on Admin Endpoints
+### 6. Missing Rate Limiting on Admin Endpoints ✅ **FIXED** (Dec 31, 2025)
 **File:** `server/src/routes/users.js`
 
-Only password reset has rate limiting. Missing on:
-- `POST /api/users` (create user)
-- `PUT /api/users/:id/role` (change role)
-- `DELETE /api/users/:id` (delete user)
+~~Only password reset has rate limiting. Missing on:~~
+- ~~`POST /api/users` (create user)~~
+- ~~`PUT /api/users/:id/role` (change role)~~
+- ~~`DELETE /api/users/:id` (delete user)~~
+
+**Fix Applied:** Added `adminActionLimiter` (50 requests/15 minutes) to all three admin endpoints.
 
 ---
 
-### 7. Excessive Data in getAllUsers Response
-**File:** `server/src/services/users.service.js:42-49`
+### 7. Excessive Data in getAllUsers Response ✅ **FIXED** (Dec 31, 2025)
+**File:** `server/src/services/users.service.js:7-41`
 
-Returns full organization membership data to superusers - potential information disclosure.
+~~Returns full organization membership data to superusers - potential information disclosure.~~
+
+**Fix Applied:**
+- `getAllUsers()` now returns only organization/membership counts (not full data)
+- New endpoint `GET /users/:id/organizations` fetches full details on-demand
+- Frontend fetches org details only when user explicitly clicks "View Organizations" button
 
 ---
 
-### 8. Missing Array Size Validation in Bulk Routes
+### 8. Missing Array Size Validation in Bulk Routes ✅ **FIXED** (Dec 30, 2025)
 **File:** `server/src/routes/bulk.js`
 
-Arrays checked for emptiness but no maximum size at route level (service has 100 limit but route doesn't validate).
+~~Arrays checked for emptiness but no maximum size at route level (service has 100 limit but route doesn't validate).~~
+
+**Fix Applied:** Route-level validation added for max 100 items.
 
 ---
 
@@ -236,19 +247,19 @@ Manual role checks instead of middleware in some routes.
 ## Remediation Roadmap
 
 ### IMMEDIATE (This Week)
-1. [ ] Fix weak ID generation in import route
-2. [ ] Add rate limiting to public endpoints
-3. [ ] Add field whitelist to bulk edit operations
-4. [ ] Add security headers (helmet.js)
-5. [ ] Specify JWT algorithm explicitly
+1. [x] Fix weak ID generation in import route ✅ **FIXED** (Dec 30, 2025)
+2. [x] Add rate limiting to public endpoints ✅ **FIXED** (Dec 30, 2025)
+3. [x] Add field whitelist to bulk edit operations ✅ **FIXED** (Dec 30, 2025)
+4. [x] Add security headers (helmet.js) ✅ **FIXED** (Dec 30, 2025)
+5. [x] Specify JWT algorithm explicitly ✅ **FIXED** (Dec 30, 2025)
 
 ### SHORT-TERM (Next 2 Weeks)
-6. [ ] Increase password minimum to 12 characters
+6. [x] Increase password minimum to 12 characters ✅ **FIXED** (Dec 30, 2025)
 7. [ ] Add complexity requirements to passwords
-8. [ ] Add rate limiting to admin endpoints
-9. [ ] Standardize permission check patterns
-10. [ ] Add array size validation to bulk routes
-11. [ ] Remove debug console.log statements
+8. [x] Add rate limiting to admin endpoints ✅ **FIXED** (Dec 31, 2025)
+9. [x] Standardize permission check patterns ✅ **FIXED** (Dec 31, 2025)
+10. [x] Add array size validation to bulk routes ✅ **FIXED** (Dec 30, 2025)
+11. [x] Remove debug console.log statements ✅ **FIXED** (Dec 30, 2025)
 
 ### MEDIUM-TERM (Next Month)
 12. [ ] Implement refresh tokens
