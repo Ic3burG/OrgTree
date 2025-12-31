@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
 import { AuthProvider } from './contexts/AuthContext';
@@ -20,12 +21,18 @@ import SuperuserLayout from './components/superuser/SuperuserLayout';
 import UserManagement from './components/superuser/UserManagement';
 import SystemAuditLog from './components/superuser/SystemAuditLog';
 import AcceptInvitation from './components/AcceptInvitation';
+import { initCsrf } from './api/client';
 
 /**
  * App - Root component
  * Renders authentication routes, organization selector, and admin interface
  */
 function App() {
+  // Initialize CSRF protection on app mount
+  useEffect(() => {
+    initCsrf();
+  }, []);
+
   return (
     <ErrorBoundary>
       <AuthProvider>

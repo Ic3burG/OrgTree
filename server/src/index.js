@@ -2,6 +2,7 @@ import express from 'express';
 import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
@@ -20,6 +21,8 @@ import invitationRoutes from './routes/invitations.js';
 import auditRoutes from './routes/audit.js';
 import searchRoutes from './routes/search.js';
 import bulkRoutes from './routes/bulk.js';
+import csrfRoutes from './routes/csrf.js';
+import { validateCsrf } from './middleware/csrf.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
 import db from './db.js';
@@ -69,7 +72,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
 }));
 
 // Security headers - protects against XSS, clickjacking, MIME sniffing, etc.
@@ -87,6 +90,7 @@ app.use(helmet({
 }));
 
 app.use(express.json());
+app.use(cookieParser()); // Required for CSRF cookie validation
 
 // Initialize Socket.IO with the HTTP server
 initializeSocket(server, allowedOrigins);
@@ -140,8 +144,16 @@ app.get('/api/health', async (req, res) => {
 });
 
 // API Routes
+// CSRF token endpoint (must be before CSRF validation middleware)
+app.use('/api', csrfRoutes);
+
+// Public routes (no authentication or CSRF required)
 app.use('/api/auth', authRoutes);
 app.use('/api/public', publicRoutes);
+
+// Protected routes (require CSRF validation for state-changing operations)
+app.use('/api', validateCsrf); // Apply CSRF middleware to all routes below
+
 app.use('/api', organizationRoutes);
 app.use('/api', departmentRoutes);
 app.use('/api', peopleRoutes);

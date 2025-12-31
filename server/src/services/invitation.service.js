@@ -34,7 +34,8 @@ export async function createInvitation(orgId, email, role, invitedById) {
     // Check if they're already a member
     const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId);
     if (org.created_by_id === existingUser.id) {
-      const error = new Error('This user is already the owner of this organization');
+      // Security: Use generic message to prevent email enumeration
+      const error = new Error('Cannot send invitation to this email address');
       error.status = 400;
       throw error;
     }
@@ -44,7 +45,8 @@ export async function createInvitation(orgId, email, role, invitedById) {
     ).get(orgId, existingUser.id);
 
     if (existingMember) {
-      const error = new Error('This user is already a member of this organization');
+      // Security: Use generic message to prevent email enumeration
+      const error = new Error('Cannot send invitation to this email address');
       error.status = 400;
       throw error;
     }
@@ -166,13 +168,23 @@ export function getInvitationByToken(token) {
 
   // Check if expired
   if (new Date(invitation.expiresAt) < new Date()) {
-    return { ...invitation, status: 'expired' };
+    return {
+      organizationName: invitation.organizationName,
+      role: invitation.role,
+      status: 'expired',
+      expiresAt: invitation.expiresAt
+    };
   }
 
-  // Security: Don't expose inviter name or email to reduce information disclosure
-  // Return only what's necessary to accept the invitation
-
-  return invitation;
+  // Security: Minimize metadata disclosure
+  // Don't expose: inviter name/email, internal IDs
+  // Only return what's necessary for the recipient to make an informed decision
+  return {
+    organizationName: invitation.organizationName,
+    role: invitation.role,
+    status: invitation.status,
+    expiresAt: invitation.expiresAt
+  };
 }
 
 /**
@@ -213,14 +225,16 @@ export function acceptInvitation(token, userId) {
   // Get the user's email
   const user = db.prepare('SELECT email FROM users WHERE id = ?').get(userId);
   if (!user) {
-    const error = new Error('User not found');
-    error.status = 404;
+    // Security: Generic message to prevent information disclosure
+    const error = new Error('Unable to accept invitation');
+    error.status = 403;
     throw error;
   }
 
   // Verify the email matches (case-insensitive)
   if (user.email.toLowerCase() !== invitation.email.toLowerCase()) {
-    const error = new Error('This invitation was sent to a different email address');
+    // Security: Generic message to prevent email enumeration
+    const error = new Error('Unable to accept invitation');
     error.status = 403;
     throw error;
   }
@@ -240,7 +254,8 @@ export function acceptInvitation(token, userId) {
   // Check if user is owner
   const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(invitation.organization_id);
   if (org.created_by_id === userId) {
-    const error = new Error('You are already the owner of this organization');
+    // Security: Generic message to prevent information disclosure
+    const error = new Error('Unable to accept invitation');
     error.status = 400;
     throw error;
   }
