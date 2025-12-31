@@ -41,12 +41,7 @@ router.get('/organizations/:orgId/departments/:deptId', async (req, res, next) =
 // POST /api/organizations/:orgId/departments
 router.post('/organizations/:orgId/departments', async (req, res, next) => {
   try {
-    console.log('=== POST /departments ===');
-    console.log('Request body:', req.body);
-
     const { name, description, parentId } = req.body;
-
-    console.log('Extracted - name:', name, 'description:', description, 'parentId:', parentId);
 
     if (!name || !name.trim()) {
       return res.status(400).json({ message: 'Department name is required' });
@@ -65,10 +60,8 @@ router.post('/organizations/:orgId/departments', async (req, res, next) => {
     // Emit real-time event
     emitDepartmentCreated(req.params.orgId, dept, req.user);
 
-    console.log('Created department:', dept);
     res.status(201).json(dept);
   } catch (err) {
-    console.error('Create department error:', err);
     next(err);
   }
 });
@@ -76,13 +69,7 @@ router.post('/organizations/:orgId/departments', async (req, res, next) => {
 // PUT /api/organizations/:orgId/departments/:deptId
 router.put('/organizations/:orgId/departments/:deptId', async (req, res, next) => {
   try {
-    console.log('=== PUT /departments/:deptId ===');
-    console.log('Department ID:', req.params.deptId);
-    console.log('Request body:', req.body);
-
     const { name, description, parentId } = req.body;
-
-    console.log('Extracted - name:', name, 'description:', description, 'parentId:', parentId);
 
     if (name !== undefined && !name.trim()) {
       return res.status(400).json({ message: 'Department name cannot be empty' });
@@ -102,10 +89,8 @@ router.put('/organizations/:orgId/departments/:deptId', async (req, res, next) =
     // Emit real-time event
     emitDepartmentUpdated(req.params.orgId, dept, req.user);
 
-    console.log('Updated department:', dept);
     res.json(dept);
   } catch (err) {
-    console.error('Update department error:', err);
     next(err);
   }
 });

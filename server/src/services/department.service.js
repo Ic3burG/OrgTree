@@ -73,9 +73,6 @@ export async function createDepartment(orgId, data, userId) {
 
   const { name, description, parentId } = data;
 
-  console.log('=== createDepartment service ===');
-  console.log('Creating with parentId:', parentId);
-
   // Validate parentId if provided
   if (parentId) {
     const parentDept = db.prepare('SELECT * FROM departments WHERE id = ? AND organization_id = ?').get(parentId, orgId);
@@ -102,9 +99,7 @@ export async function createDepartment(orgId, data, userId) {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).run(deptId, orgId, parentId || null, name, description || null, sortOrder, now, now);
 
-  const result = await getDepartmentById(orgId, deptId, userId);
-  console.log('Created department with parentId:', result.parentId);
-  return result;
+  return await getDepartmentById(orgId, deptId, userId);
 }
 
 export async function updateDepartment(orgId, deptId, data, userId) {
@@ -119,11 +114,6 @@ export async function updateDepartment(orgId, deptId, data, userId) {
   }
 
   const { name, description, parentId } = data;
-
-  console.log('=== updateDepartment service ===');
-  console.log('Updating department:', deptId);
-  console.log('New parentId:', parentId);
-  console.log('parentId type:', typeof parentId);
 
   // Prevent self-reference
   if (parentId === deptId) {
@@ -151,11 +141,9 @@ export async function updateDepartment(orgId, deptId, data, userId) {
   if ('parentId' in data) {
     // parentId is in the data object, use it (could be string or null)
     newParentId = parentId === '' ? null : (parentId || null);
-    console.log('Updating with new parentId:', newParentId);
   } else {
     // parentId not in data, keep existing
     newParentId = dept.parent_id;
-    console.log('Keeping existing parentId:', newParentId);
   }
 
   db.prepare(`
@@ -174,9 +162,7 @@ export async function updateDepartment(orgId, deptId, data, userId) {
     deptId
   );
 
-  const result = await getDepartmentById(orgId, deptId, userId);
-  console.log('Updated department result - parentId:', result.parentId);
-  return result;
+  return await getDepartmentById(orgId, deptId, userId);
 }
 
 export async function deleteDepartment(orgId, deptId, userId) {
