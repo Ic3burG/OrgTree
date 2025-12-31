@@ -1,8 +1,20 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import db from '../db.js';
 import { getInvitationByToken } from '../services/invitation.service.js';
 
 const router = express.Router();
+
+// Rate limiter for public endpoints - prevents brute force and enumeration
+const publicLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per 15 minutes per IP
+  message: { message: 'Too many requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+router.use(publicLimiter);
 
 /**
  * GET /api/public/org/:shareToken

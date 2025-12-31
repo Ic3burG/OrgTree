@@ -12,6 +12,23 @@ const router = express.Router();
 
 router.use(authenticateToken);
 
+// Security: Maximum items per bulk operation
+const MAX_BULK_SIZE = 100;
+
+// Helper to validate array input
+function validateBulkArray(arr, fieldName) {
+  if (!arr || !Array.isArray(arr)) {
+    return { valid: false, message: `${fieldName} array is required` };
+  }
+  if (arr.length === 0) {
+    return { valid: false, message: `${fieldName} array cannot be empty` };
+  }
+  if (arr.length > MAX_BULK_SIZE) {
+    return { valid: false, message: `${fieldName} exceeds maximum limit of ${MAX_BULK_SIZE} items` };
+  }
+  return { valid: true };
+}
+
 // ==================== PEOPLE BULK OPERATIONS ====================
 
 // POST /api/organizations/:orgId/people/bulk-delete
@@ -21,8 +38,9 @@ router.post('/organizations/:orgId/people/bulk-delete', async (req, res, next) =
     const { orgId } = req.params;
     const { personIds } = req.body;
 
-    if (!personIds) {
-      return res.status(400).json({ message: 'personIds array is required' });
+    const validation = validateBulkArray(personIds, 'personIds');
+    if (!validation.valid) {
+      return res.status(400).json({ message: validation.message });
     }
 
     const result = bulkDeletePeople(orgId, personIds, req.user);
@@ -39,8 +57,9 @@ router.post('/organizations/:orgId/people/bulk-move', async (req, res, next) => 
     const { orgId } = req.params;
     const { personIds, targetDepartmentId } = req.body;
 
-    if (!personIds) {
-      return res.status(400).json({ message: 'personIds array is required' });
+    const validation = validateBulkArray(personIds, 'personIds');
+    if (!validation.valid) {
+      return res.status(400).json({ message: validation.message });
     }
 
     if (!targetDepartmentId) {
@@ -61,15 +80,28 @@ router.put('/organizations/:orgId/people/bulk-edit', async (req, res, next) => {
     const { orgId } = req.params;
     const { personIds, updates } = req.body;
 
-    if (!personIds) {
-      return res.status(400).json({ message: 'personIds array is required' });
+    const validation = validateBulkArray(personIds, 'personIds');
+    if (!validation.valid) {
+      return res.status(400).json({ message: validation.message });
     }
 
-    if (!updates) {
+    if (!updates || typeof updates !== 'object') {
       return res.status(400).json({ message: 'updates object is required' });
     }
 
-    const result = bulkEditPeople(orgId, personIds, updates, req.user);
+    // Security: Whitelist allowed fields to prevent mass assignment
+    const allowedPersonFields = ['title', 'departmentId', 'email', 'phone'];
+    const sanitizedUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([key]) => allowedPersonFields.includes(key))
+    );
+
+    if (Object.keys(sanitizedUpdates).length === 0) {
+      return res.status(400).json({
+        message: `No valid update fields provided. Allowed: ${allowedPersonFields.join(', ')}`
+      });
+    }
+
+    const result = bulkEditPeople(orgId, personIds, sanitizedUpdates, req.user);
     res.json(result);
   } catch (err) {
     next(err);
@@ -85,8 +117,9 @@ router.post('/organizations/:orgId/departments/bulk-delete', async (req, res, ne
     const { orgId } = req.params;
     const { departmentIds } = req.body;
 
-    if (!departmentIds) {
-      return res.status(400).json({ message: 'departmentIds array is required' });
+    const validation = validateBulkArray(departmentIds, 'departmentIds');
+    if (!validation.valid) {
+      return res.status(400).json({ message: validation.message });
     }
 
     const result = bulkDeleteDepartments(orgId, departmentIds, req.user);
@@ -103,15 +136,28 @@ router.put('/organizations/:orgId/departments/bulk-edit', async (req, res, next)
     const { orgId } = req.params;
     const { departmentIds, updates } = req.body;
 
-    if (!departmentIds) {
-      return res.status(400).json({ message: 'departmentIds array is required' });
+    const validation = validateBulkArray(departmentIds, 'departmentIds');
+    if (!validation.valid) {
+      return res.status(400).json({ message: validation.message });
     }
 
-    if (!updates) {
+    if (!updates || typeof updates !== 'object') {
       return res.status(400).json({ message: 'updates object is required' });
     }
 
-    const result = bulkEditDepartments(orgId, departmentIds, updates, req.user);
+    // Security: Whitelist allowed fields to prevent mass assignment
+    const allowedDeptFields = ['parentId', 'name', 'description'];
+    const sanitizedUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([key]) => allowedDeptFields.includes(key))
+    );
+
+    if (Object.keys(sanitizedUpdates).length === 0) {
+      return res.status(400).json({
+        message: `No valid update fields provided. Allowed: ${allowedDeptFields.join(', ')}`
+      });
+    }
+
+    const result = bulkEditDepartments(orgId, departmentIds, sanitizedUpdates, req.user);
     res.json(result);
   } catch (err) {
     next(err);

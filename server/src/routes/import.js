@@ -1,4 +1,5 @@
 import express from 'express';
+import { randomUUID } from 'crypto';
 import { authenticateToken } from '../middleware/auth.js';
 import db from '../db.js';
 
@@ -14,6 +15,14 @@ router.post('/organizations/:orgId/import', async (req, res, next) => {
 
     if (!data || !Array.isArray(data)) {
       return res.status(400).json({ message: 'Invalid data format' });
+    }
+
+    // Security: Limit import size to prevent DoS
+    const MAX_IMPORT_SIZE = 10000;
+    if (data.length > MAX_IMPORT_SIZE) {
+      return res.status(400).json({
+        message: `Import size exceeds maximum limit of ${MAX_IMPORT_SIZE} items`
+      });
     }
 
     // Verify org ownership
@@ -48,11 +57,8 @@ router.post('/organizations/:orgId/import', async (req, res, next) => {
       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `);
 
-    // Helper to generate ID
-    const generateId = () => {
-      return Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15);
-    };
+    // Helper to generate cryptographically secure ID
+    const generateId = () => randomUUID();
 
     try {
       // Start transaction

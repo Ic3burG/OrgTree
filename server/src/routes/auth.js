@@ -26,8 +26,9 @@ router.post('/signup', authLimiter, async (req, res, next) => {
       return res.status(400).json({ message: 'Name, email, and password are required' });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    // Security: Enforce stronger password requirements
+    if (password.length < 12) {
+      return res.status(400).json({ message: 'Password must be at least 12 characters' });
     }
 
     const result = await createUser(name, email, password);
@@ -72,8 +73,9 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
       return res.status(400).json({ message: 'New password is required' });
     }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    // Security: Enforce stronger password requirements
+    if (newPassword.length < 12) {
+      return res.status(400).json({ message: 'Password must be at least 12 characters' });
     }
 
     // Hash new password
