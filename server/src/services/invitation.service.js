@@ -151,15 +151,12 @@ export function getInvitationByToken(token) {
     SELECT
       i.id,
       i.organization_id as organizationId,
-      i.email,
       i.role,
       i.status,
       i.expires_at as expiresAt,
-      o.name as organizationName,
-      u.name as invitedByName
+      o.name as organizationName
     FROM invitations i
     JOIN organizations o ON i.organization_id = o.id
-    JOIN users u ON i.invited_by_id = u.id
     WHERE i.token = ?
   `).get(token);
 
@@ -171,6 +168,9 @@ export function getInvitationByToken(token) {
   if (new Date(invitation.expiresAt) < new Date()) {
     return { ...invitation, status: 'expired' };
   }
+
+  // Security: Don't expose inviter name or email to reduce information disclosure
+  // Return only what's necessary to accept the invitation
 
   return invitation;
 }

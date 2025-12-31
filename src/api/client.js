@@ -179,6 +179,8 @@ const api = {
 
   getUser: (userId) => request(`/users/${userId}`),
 
+  getUserOrganizations: (userId) => request(`/users/${userId}/organizations`),
+
   updateUser: (userId, data) =>
     request(`/users/${userId}`, {
       method: 'PUT',

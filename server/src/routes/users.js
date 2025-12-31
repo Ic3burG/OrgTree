@@ -4,6 +4,7 @@ import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
 import {
   getAllUsers,
   getUserById,
+  getUserOrganizationDetails,
   updateUser,
   updateUserRole,
   resetUserPassword,
@@ -22,12 +23,21 @@ const passwordResetLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Rate limiter for sensitive admin operations - prevents abuse
+const adminActionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // Limit each IP to 50 admin actions per windowMs
+  message: { message: 'Too many admin requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // All user management routes require authentication and superuser role
 router.use(authenticateToken);
 router.use(requireSuperuser);
 
 // POST /api/users - Create new user
-router.post('/users', async (req, res, next) => {
+router.post('/users', adminActionLimiter, async (req, res, next) => {
   try {
     const { name, email, role } = req.body;
 
@@ -62,6 +72,16 @@ router.get('/users/:id', (req, res, next) => {
   }
 });
 
+// GET /api/users/:id/organizations - Get user's organization details
+router.get('/users/:id/organizations', (req, res, next) => {
+  try {
+    const details = getUserOrganizationDetails(req.params.id);
+    res.json(details);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // PUT /api/users/:id - Update user details
 router.put('/users/:id', (req, res, next) => {
   try {
@@ -79,7 +99,7 @@ router.put('/users/:id', (req, res, next) => {
 });
 
 // PUT /api/users/:id/role - Change user role
-router.put('/users/:id/role', (req, res, next) => {
+router.put('/users/:id/role', adminActionLimiter, (req, res, next) => {
   try {
     const { role } = req.body;
 
@@ -105,7 +125,7 @@ router.post('/users/:id/reset-password', passwordResetLimiter, async (req, res, 
 });
 
 // DELETE /api/users/:id - Delete user
-router.delete('/users/:id', (req, res, next) => {
+router.delete('/users/:id', adminActionLimiter, (req, res, next) => {
   try {
     deleteUser(req.params.id, req.user.id);
     res.status(204).send();
