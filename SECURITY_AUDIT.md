@@ -15,9 +15,9 @@ This security audit reviewed the OrgTree application's authentication and author
 **Recent Fixes (December 30-31, 2025):**
 - ✅ All 3 CRITICAL vulnerabilities resolved
 - ✅ All 8 HIGH severity issues resolved
-- ✅ 6 of 9 MEDIUM severity issues resolved
+- ✅ 8 of 9 MEDIUM severity issues resolved
 - ✅ 2 of 5 LOW severity issues resolved
-- ⏳ 3 MEDIUM severity issues remain
+- ⏳ 1 MEDIUM severity issue remains
 - ⏳ 3 LOW severity issues remain
 
 **Strengths:**
@@ -49,10 +49,10 @@ This security audit reviewed the OrgTree application's authentication and author
 |----------|-------|-------|-----------|
 | CRITICAL | 3 | 3 ✅ | 0 |
 | HIGH | 8 | 8 ✅ | 0 |
-| MEDIUM | 9 | 6 ✅ | 3 |
+| MEDIUM | 9 | 8 ✅ | 1 |
 | LOW | 5 | 2 ✅ | 3 |
 
-**Status**: All CRITICAL and HIGH severity issues resolved. 6 of 9 MEDIUM + 2 of 5 LOW severity issues fixed (December 31, 2025).
+**Status**: All CRITICAL and HIGH severity issues resolved. 8 of 9 MEDIUM + 2 of 5 LOW severity issues fixed (December 31, 2025).
 
 ---
 
@@ -205,10 +205,26 @@ const decoded = jwt.verify(token, process.env.JWT_SECRET, {
 
 ## MEDIUM SEVERITY VULNERABILITIES
 
-### 12. Email Enumeration via Error Messages
-Different error messages reveal user existence in invitation flow.
+### 12. Email Enumeration via Error Messages ✅ FIXED
+**File:** `server/src/services/invitation.service.js`
+**Fixed:** December 31, 2025
 
-**Status**: Not yet fixed (Low priority - minimal practical exploit value)
+**Original Issue:**
+Different error messages in the invitation flow revealed whether a user existed and their relationship to the organization:
+- "This user is already the owner of this organization"
+- "This user is already a member of this organization"
+- "This invitation was sent to a different email address"
+- "You are already the owner of this organization"
+
+**Fix Applied:**
+Standardized all error messages to generic responses that don't reveal user existence:
+- "Cannot send invitation to this email address" (for existing members/owners)
+- "Unable to accept invitation" (for acceptance errors)
+
+**Files Modified:**
+- `server/src/services/invitation.service.js` (lines 37-40, 48-51, 218-221, 226-229, 247-250)
+
+**Security Improvement:** Prevents email enumeration attacks where attackers could probe for registered users or organization relationships.
 
 ---
 
@@ -302,10 +318,26 @@ const tempPassword = randomBytes(9).toString('base64')
 
 ---
 
-### 18. Invitation Metadata Disclosure
-Public endpoint returns organization name, inviter name, role.
+### 18. Invitation Metadata Disclosure ✅ FIXED
+**File:** `server/src/services/invitation.service.js`
+**Fixed:** December 31, 2025
 
-**Status**: Not yet fixed (Low priority - token holder is intended recipient)
+**Original Issue:**
+Public invitation endpoint returned excessive metadata including:
+- Internal database IDs (invitation.id, organizationId)
+- Organization name
+- Role
+- Status and expiration
+
+**Fix Applied:**
+Reduced exposed metadata to minimum required for informed decision-making:
+- **Kept**: organizationName, role, status, expiresAt (necessary for recipient)
+- **Removed**: invitation id, organizationId (internal implementation details)
+
+**Files Modified:**
+- `server/src/services/invitation.service.js` (lines 169-187)
+
+**Security Improvement:** Minimizes information disclosure while maintaining necessary functionality for invitation acceptance.
 
 ---
 
