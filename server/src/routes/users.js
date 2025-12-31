@@ -10,6 +10,7 @@ import {
   deleteUser,
   createAdminUser
 } from '../services/users.service.js';
+import { createAuditLog } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -20,6 +21,26 @@ const passwordResetLimiter = rateLimit({
   message: { message: 'Too many password reset attempts, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res) => {
+    // Security: Log rate limit violation
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    createAuditLog(
+      null, // System-wide security event
+      req.user ? { id: req.user.id, name: req.user.name, email: req.user.email } : null,
+      'rate_limit_exceeded',
+      'security',
+      'rate_limiting',
+      {
+        endpoint: req.path,
+        method: req.method,
+        ipAddress,
+        limit: 10,
+        windowMs: 15 * 60 * 1000,
+        timestamp: new Date().toISOString()
+      }
+    );
+    res.status(429).json({ message: 'Too many password reset attempts, please try again later' });
+  }
 });
 
 // Rate limiter for sensitive admin operations - prevents abuse of privileged endpoints
@@ -29,6 +50,26 @@ const adminOperationsLimiter = rateLimit({
   message: { message: 'Too many admin operations, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res) => {
+    // Security: Log rate limit violation
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    createAuditLog(
+      null, // System-wide security event
+      req.user ? { id: req.user.id, name: req.user.name, email: req.user.email } : null,
+      'rate_limit_exceeded',
+      'security',
+      'rate_limiting',
+      {
+        endpoint: req.path,
+        method: req.method,
+        ipAddress,
+        limit: 50,
+        windowMs: 15 * 60 * 1000,
+        timestamp: new Date().toISOString()
+      }
+    );
+    res.status(429).json({ message: 'Too many admin operations, please try again later' });
+  }
 });
 
 // All user management routes require authentication and superuser role

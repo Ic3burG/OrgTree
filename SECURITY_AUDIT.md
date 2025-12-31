@@ -15,7 +15,8 @@ This security audit reviewed the OrgTree application's authentication and author
 **Recent Fixes (December 30-31, 2025):**
 - ✅ All 3 CRITICAL vulnerabilities resolved
 - ✅ All 8 HIGH severity issues resolved
-- ⏳ 9 MEDIUM severity issues remain
+- ✅ 5 of 9 MEDIUM severity issues resolved
+- ⏳ 4 MEDIUM severity issues remain
 - ⏳ 5 LOW severity issues remain
 
 **Strengths:**
@@ -32,11 +33,11 @@ This security audit reviewed the OrgTree application's authentication and author
 - Secure ID generation using crypto.randomUUID()
 - Input validation with array size limits
 - Field whitelisting for bulk operations
+- Comprehensive security audit logging (failed logins, invalid tokens, permission denials, rate limits)
 
 **Remaining Areas for Future Enhancement:**
 - CSRF protection
 - Refresh token implementation
-- Enhanced audit logging for security events
 - Password complexity requirements
 
 ---
@@ -47,10 +48,10 @@ This security audit reviewed the OrgTree application's authentication and author
 |----------|-------|-------|-----------|
 | CRITICAL | 3 | 3 ✅ | 0 |
 | HIGH | 8 | 8 ✅ | 0 |
-| MEDIUM | 9 | 4 ✅ | 5 |
+| MEDIUM | 9 | 5 ✅ | 4 |
 | LOW | 5 | 0 | 5 |
 
-**Status**: All CRITICAL and HIGH severity issues resolved. 4 of 9 MEDIUM severity issues fixed (December 31, 2025).
+**Status**: All CRITICAL and HIGH severity issues resolved. 5 of 9 MEDIUM severity issues fixed (December 31, 2025).
 
 ---
 
@@ -283,10 +284,25 @@ Added MAX_IMPORT_SIZE = 10,000 items limit to prevent DoS attacks.
 
 ---
 
-### 20. Insufficient Audit Logging
-Many security events not logged (failed logins, permission denials).
+### 20. Insufficient Audit Logging ✅ FIXED
+**Files:** `server/src/services/auth.service.js`, `server/src/middleware/auth.js`, `server/src/services/member.service.js`, `server/src/routes/auth.js`, `server/src/routes/users.js`, `server/src/routes/public.js`
+**Fixed:** December 31, 2025
 
-**Status**: Not yet fixed (High priority - improves security visibility)
+**Changes Applied:**
+1. **Failed Login Logging** - Logs failed attempts with reason (user_not_found, invalid_password), email, IP address
+2. **Invalid Token Logging** - Logs missing/expired/invalid token attempts with IP address, path, error details
+3. **Permission Denied Logging** - Logs insufficient role and organization permission denials with user details, required/actual roles
+4. **Rate Limit Violations** - Logs rate limit exceeded events across all rate limiters (auth, admin, public endpoints)
+
+**Implementation Details:**
+- Uses existing `createAuditLog()` service from audit.service.js
+- System-wide security events use `null` for orgId
+- Organization-specific events (permission denials) link to orgId
+- Captures IP addresses, timestamps, and relevant context
+- All events use actionType 'failed_login', 'invalid_token', 'permission_denied', 'rate_limit_exceeded'
+- EntityType 'security' groups all security events together
+
+**Security Improvement:** Comprehensive security event visibility for detecting attacks and monitoring suspicious activity
 
 ---
 

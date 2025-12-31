@@ -4,6 +4,7 @@ import rateLimit from 'express-rate-limit';
 import db from '../db.js';
 import { createUser, loginUser, getUserById } from '../services/auth.service.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { createAuditLog } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -14,6 +15,26 @@ const authLimiter = rateLimit({
   message: { message: 'Too many login attempts, please try again later' },
   standardHeaders: true, // Return rate limit info in RateLimit-* headers
   legacyHeaders: false, // Disable X-RateLimit-* headers
+  handler: (req, res) => {
+    // Security: Log rate limit violation
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    createAuditLog(
+      null, // System-wide security event
+      null, // No user information
+      'rate_limit_exceeded',
+      'security',
+      'rate_limiting',
+      {
+        endpoint: req.path,
+        method: req.method,
+        ipAddress,
+        limit: 5,
+        windowMs: 15 * 60 * 1000,
+        timestamp: new Date().toISOString()
+      }
+    );
+    res.status(429).json({ message: 'Too many login attempts, please try again later' });
+  }
 });
 
 // POST /api/auth/signup
@@ -47,7 +68,9 @@ router.post('/login', authLimiter, async (req, res, next) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    const result = await loginUser(email, password);
+    // Get IP address for audit logging
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const result = await loginUser(email, password, ipAddress);
     res.json(result);
   } catch (err) {
     next(err);

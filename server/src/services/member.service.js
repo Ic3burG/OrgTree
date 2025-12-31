@@ -1,5 +1,6 @@
 import db from '../db.js';
 import { randomUUID } from 'crypto';
+import { createAuditLog } from './audit.service.js';
 
 /**
  * Check if user has access to organization and return their effective role
@@ -50,6 +51,22 @@ export function requireOrgPermission(orgId, userId, minRole = 'viewer') {
   const requiredLevel = roleHierarchy[minRole];
 
   if (userLevel < requiredLevel) {
+    // Security: Log permission denied - insufficient organization role
+    // Get user details for logging
+    const user = db.prepare('SELECT id, name, email FROM users WHERE id = ?').get(userId);
+    createAuditLog(
+      orgId, // Organization-specific security event
+      user ? { id: user.id, name: user.name, email: user.email } : { id: userId, name: 'Unknown', email: '' },
+      'permission_denied',
+      'security',
+      'organization_access',
+      {
+        organizationId: orgId,
+        requiredRole: minRole,
+        userRole: access.role,
+        timestamp: new Date().toISOString()
+      }
+    );
     const error = new Error('Insufficient permissions');
     error.status = 403;
     throw error;

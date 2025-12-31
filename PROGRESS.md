@@ -290,9 +290,36 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: MEDIUM Priority Security Fixes (December 31, 2025)
+- **Last Major Update**: Security Audit Logging Implementation (December 31, 2025)
 - **Total Commits**: 136+ commits on main branch
 - **Recent Session Highlights**:
+
+  **December 31, 2025 - Security Audit Logging (Session 3)** 🔐:
+  - ✅ **SECURITY**: Comprehensive security event logging implemented
+  - ✅ **FIXES APPLIED**:
+    - **Insufficient Audit Logging (#20)**: Logs all critical security events
+  - ✅ **SECURITY EVENTS LOGGED**:
+    - **Failed Login Attempts**: Email, IP address, failure reason (user_not_found, invalid_password)
+    - **Invalid Token Attempts**: Missing/expired/invalid tokens with IP, path, error details
+    - **Permission Denied Events**: Role-based and organization permission denials with user context
+    - **Rate Limit Violations**: All rate limiters now log exceeded limits with IP and endpoint details
+  - ✅ **FILES MODIFIED** (6 files):
+    - `server/src/services/auth.service.js` - Added failed login logging
+    - `server/src/middleware/auth.js` - Added invalid token logging, permission denied logging
+    - `server/src/services/member.service.js` - Added organization permission denied logging
+    - `server/src/routes/auth.js` - Added IP address capture for login attempts
+    - `server/src/routes/users.js` - Added rate limit handlers with logging (2 limiters)
+    - `server/src/routes/public.js` - Added rate limit handler with logging
+  - ✅ **IMPLEMENTATION DETAILS**:
+    - Uses existing audit.service.js createAuditLog() function
+    - System-wide events use null for orgId
+    - Organization-specific events link to orgId
+    - Captures IP addresses, timestamps, and security context
+    - All events use security-specific action types and entity type
+  - ✅ **AUDIT STATUS**: 16/25 total issues resolved (11 CRITICAL+HIGH + 5 MEDIUM)
+  - 📝 **DOCUMENTATION**: Updated SECURITY_AUDIT.md with comprehensive fix details
+  - 🎯 **REMAINING**: 4 MEDIUM + 5 LOW severity items
+  - ⚡ **IMPACT**: Significantly improved security visibility for attack detection and monitoring
 
   **December 31, 2025 - MEDIUM Priority Security Fixes (Session 2)** 🔐:
   - ✅ **SECURITY**: 2 MEDIUM severity vulnerabilities resolved (quick wins)

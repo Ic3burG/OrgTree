@@ -2,6 +2,7 @@ import db from '../db.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
+import { createAuditLog } from './audit.service.js';
 
 export async function createUser(name, email, password) {
   // Check if user exists
@@ -35,10 +36,24 @@ export async function createUser(name, email, password) {
   return { user, token };
 }
 
-export async function loginUser(email, password) {
+export async function loginUser(email, password, ipAddress = null) {
   // Find user
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
   if (!user) {
+    // Security: Log failed login attempt - user not found
+    createAuditLog(
+      null, // System-wide security event
+      null, // No authenticated user yet
+      'failed_login',
+      'security',
+      'login',
+      {
+        email,
+        reason: 'user_not_found',
+        ipAddress,
+        timestamp: new Date().toISOString()
+      }
+    );
     const error = new Error('Invalid email or password');
     error.status = 401;
     throw error;
@@ -47,6 +62,20 @@ export async function loginUser(email, password) {
   // Verify password
   const validPassword = await bcrypt.compare(password, user.password_hash);
   if (!validPassword) {
+    // Security: Log failed login attempt - invalid password
+    createAuditLog(
+      null, // System-wide security event
+      { id: user.id, name: user.name, email: user.email }, // Attempted user
+      'failed_login',
+      'security',
+      'login',
+      {
+        email,
+        reason: 'invalid_password',
+        ipAddress,
+        timestamp: new Date().toISOString()
+      }
+    );
     const error = new Error('Invalid email or password');
     error.status = 401;
     throw error;
