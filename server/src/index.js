@@ -3,7 +3,6 @@ import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -29,7 +28,11 @@ import db from './db.js';
 import { initializeSocket } from './socket.js';
 import { cleanupExpiredTokens } from './services/auth.service.js';
 
-dotenv.config();
+// Only load dotenv in development - Render sets env vars directly in production
+if (process.env.NODE_ENV !== 'production') {
+  const dotenv = await import('dotenv');
+  dotenv.config();
+}
 
 // Validate critical environment variables
 if (!process.env.JWT_SECRET) {
