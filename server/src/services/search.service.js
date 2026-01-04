@@ -1,5 +1,6 @@
 import db from '../db.js';
 import { requireOrgPermission } from './member.service.js';
+import { escapeHtml } from '../utils/escape.js';
 
 /**
  * Escape special FTS5 characters in query to prevent syntax errors
@@ -71,7 +72,7 @@ function searchDepartments(orgId, ftsQuery, limit, offset) {
       name: row.name,
       description: row.description,
       parentId: row.parentId,
-      highlight: row.nameHighlight || row.descHighlight,
+      highlight: escapeHtml(row.nameHighlight || row.descHighlight),
       peopleCount: row.peopleCount
     }))
   };
@@ -129,7 +130,7 @@ function searchPeople(orgId, ftsQuery, limit, offset) {
       phone: row.phone,
       departmentId: row.departmentId,
       departmentName: row.departmentName,
-      highlight: row.nameHighlight || row.titleHighlight || row.emailHighlight
+      highlight: escapeHtml(row.nameHighlight || row.titleHighlight || row.emailHighlight)
     }))
   };
 }
