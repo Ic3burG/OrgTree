@@ -1,0 +1,17 @@
+#!/bin/sh
+
+echo "Running pre-commit checks..."
+
+# Ensure we use the correct architecture for node
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+# Run frontend tests
+echo "Running frontend tests..."
+npm test
+
+if [ $? -ne 0 ]; then
+  echo "Frontend tests failed. Commit aborted."
+  exit 1
+fi
+
+echo "Pre-commit checks passed!"

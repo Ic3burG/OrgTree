@@ -1,0 +1,26 @@
+#!/bin/sh
+
+echo "Running pre-push checks..."
+
+# Ensure we use the correct architecture for node
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+# Run full test suite (frontend + backend)
+echo "Running full test suite..."
+npm run test:all
+
+if [ $? -ne 0 ]; then
+  echo "Tests failed. Push aborted."
+  exit 1
+fi
+
+# Build check
+echo "Verifying build..."
+npm run build
+
+if [ $? -ne 0 ]; then
+  echo "Build failed. Push aborted."
+  exit 1
+fi
+
+echo "Pre-push checks passed!"
