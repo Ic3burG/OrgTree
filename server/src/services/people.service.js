@@ -7,7 +7,7 @@ async function verifyDeptAccess(deptId, userId, minRole = 'viewer') {
   const dept = db.prepare(`
     SELECT d.*, d.organization_id as organizationId
     FROM departments d
-    WHERE d.id = ?
+    WHERE d.id = ? AND d.deleted_at IS NULL
   `).get(deptId);
 
   if (!dept) {
@@ -30,7 +30,7 @@ export async function getPeopleByDepartment(deptId, userId) {
       id, department_id as departmentId, name, title, email, phone,
       sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
     FROM people
-    WHERE department_id = ?
+    WHERE department_id = ? AND deleted_at IS NULL
     ORDER BY sort_order ASC
   `).all(deptId);
 }
@@ -45,7 +45,7 @@ export async function getPersonById(personId, userId) {
     FROM people p
     JOIN departments d ON p.department_id = d.id
     JOIN organizations o ON d.organization_id = o.id
-    WHERE p.id = ?
+    WHERE p.id = ? AND p.deleted_at IS NULL
   `).get(personId);
 
   if (!person) {
@@ -116,7 +116,12 @@ export async function updatePerson(personId, data, userId) {
   const now = new Date().toISOString();
 
   // Get current person data
-  const currentPerson = db.prepare('SELECT * FROM people WHERE id = ?').get(personId);
+  const currentPerson = db.prepare('SELECT * FROM people WHERE id = ? AND deleted_at IS NULL').get(personId);
+  if (!currentPerson) {
+    const error = new Error('Person not found');
+    error.status = 404;
+    throw error;
+  }
 
   db.prepare(`
     UPDATE people
@@ -148,9 +153,14 @@ export async function updatePerson(personId, data, userId) {
 }
 
 export async function deletePerson(personId, userId) {
-  await getPersonById(personId, userId); // Verifies access
+  await getPersonById(personId, userId); // Verifies access and that person exists
 
-  db.prepare('DELETE FROM people WHERE id = ?').run(personId);
+  const now = new Date().toISOString();
+  db.prepare(`
+    UPDATE people
+    SET deleted_at = ?, updated_at = ?
+    WHERE id = ?
+  `).run(now, now, personId);
 
   return { success: true };
 }

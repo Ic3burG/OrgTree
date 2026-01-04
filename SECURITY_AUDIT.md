@@ -410,10 +410,14 @@ Added MAX_IMPORT_SIZE = 10,000 items limit to prevent DoS attacks.
 
 ## LOW SEVERITY VULNERABILITIES
 
-### 21. XSS Risk in Search Highlights
+### 21. XSS Risk in Search Highlights ✅ FIXED
 HTML tags in FTS snippets could be XSS vector if frontend uses innerHTML.
 
-**Status**: Not yet fixed (Low priority - frontend currently uses safe rendering)
+**Status**: Fixed (January 4, 2026)
+**Fix Applied**:
+- Created `server/src/utils/escape.js` with `escapeHtml()` utility to sanitize strings
+- Updated `server/src/services/search.service.js` to import and apply `escapeHtml()` to all `highlight` fields returned from `searchDepartments()` and `searchPeople()`
+- The frontend is already using safe rendering methods, but this fix hardens the backend by ensuring that any potentially unsafe characters in the FTS snippets are properly escaped before being sent to the client. This provides an additional layer of defense-in-depth against XSS.
 
 ---
 
@@ -427,17 +431,28 @@ Removed `environment: process.env.NODE_ENV` from health endpoint response. Healt
 
 ---
 
-### 23. Cascade Deletes Without Soft Delete
+### 23. Cascade Deletes Without Soft Delete ✅ FIXED
 No audit trail for cascaded deletions.
 
-**Status**: Not yet fixed (Low priority - audit logs capture parent deletions)
+**Status**: Fixed (January 4, 2026)
+**Fix Applied**:
+- Added a `deleted_at` column to both the `departments` and `people` tables in `server/src/db.js`.
+- Modified all database queries in `server/src/services/people.service.js`, `server/src/services/department.service.js`, and `server/src/services/bulk.service.js` to respect the `deleted_at` flag, ensuring soft-deleted items are excluded from results.
+- Replaced all `DELETE` statements with `UPDATE` statements that set the `deleted_at` timestamp.
+- The `deleteDepartment` and `bulkDeleteDepartments` functions now recursively soft-delete all child departments and their associated people, ensuring a complete and auditable record of deletions.
+- This approach preserves the data for audit purposes while effectively removing it from the application's active use.
 
 ---
 
-### 24. Incomplete Circular Reference Protection
+### 24. Incomplete Circular Reference Protection ✅ FIXED
 Edge cases in department parent validation.
 
-**Status**: Not yet fixed (Low priority - current validation handles common cases)
+**Status**: Fixed (January 4, 2026)
+**Fix Applied**:
+- Implemented a new `checkIsDescendant` helper function in `server/src/services/department.service.js`.
+- This function is now called during the `updateDepartment` operation to perform a comprehensive check before changing a department's parent.
+- It traverses up the ancestry of the potential new parent department to ensure the department being moved is not one of its ancestors.
+- This prevents a department from being moved under one of its own children, which would create a detached loop in the hierarchy and make a branch of the org chart inaccessible.
 
 ---
 

@@ -18,6 +18,31 @@ vi.mock('../db.js', () => {
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS refresh_tokens (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      token_hash TEXT NOT NULL UNIQUE,
+      device_info TEXT,
+      ip_address TEXT,
+      expires_at DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      last_used_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      revoked_at DATETIME,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id TEXT PRIMARY KEY,
+      organization_id TEXT,
+      actor_id TEXT,
+      actor_name TEXT,
+      action_type TEXT,
+      entity_type TEXT,
+      entity_id TEXT,
+      entity_data TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
   `);
 
   return { default: db };
@@ -31,13 +56,15 @@ describe('Auth Service', () => {
   beforeEach(() => {
     // Clear users table before each test
     db.prepare('DELETE FROM users').run();
+    db.prepare('DELETE FROM refresh_tokens').run();
   });
 
   describe('createUser', () => {
     it('should create a new user successfully', async () => {
       const result = await createUser('John Doe', 'john@example.com', 'password123');
 
-      expect(result).toHaveProperty('token');
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('refreshToken');
       expect(result).toHaveProperty('user');
       expect(result.user.name).toBe('John Doe');
       expect(result.user.email).toBe('john@example.com');
@@ -81,7 +108,8 @@ describe('Auth Service', () => {
     it('should login with correct credentials', async () => {
       const result = await loginUser('john@example.com', 'password123');
 
-      expect(result).toHaveProperty('token');
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('refreshToken');
       expect(result).toHaveProperty('user');
       expect(result.user.email).toBe('john@example.com');
     });

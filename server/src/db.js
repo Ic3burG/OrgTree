@@ -51,6 +51,7 @@ db.exec(`
     name TEXT NOT NULL,
     description TEXT,
     sort_order INTEGER DEFAULT 0,
+    deleted_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
@@ -65,6 +66,7 @@ db.exec(`
     email TEXT,
     phone TEXT,
     sort_order INTEGER DEFAULT 0,
+    deleted_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
@@ -368,6 +370,25 @@ try {
   }
 } catch (err) {
   console.error('Migration error (refresh_tokens table):', err);
+}
+
+// Migration: Add deleted_at column for soft deletes
+try {
+  const departmentsTableInfo = db.prepare("PRAGMA table_info(departments)").all();
+  const departmentsColumnNames = departmentsTableInfo.map(col => col.name);
+  if (!departmentsColumnNames.includes('deleted_at')) {
+    db.exec('ALTER TABLE departments ADD COLUMN deleted_at DATETIME');
+    console.log('Migration: Added deleted_at column to departments table');
+  }
+
+  const peopleTableInfo = db.prepare("PRAGMA table_info(people)").all();
+  const peopleColumnNames = peopleTableInfo.map(col => col.name);
+  if (!peopleColumnNames.includes('deleted_at')) {
+    db.exec('ALTER TABLE people ADD COLUMN deleted_at DATETIME');
+    console.log('Migration: Added deleted_at column to people table');
+  }
+} catch (err) {
+  console.error('Migration error (soft delete columns):', err);
 }
 
 console.log('Database initialized at:', dbPath);
