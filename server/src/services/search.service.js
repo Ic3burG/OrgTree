@@ -160,7 +160,7 @@ export function search(orgId, userId, options = {}) {
     };
   }
 
-  let results = [];
+  const results = [];
   let totalDepts = 0;
   let totalPeople = 0;
 

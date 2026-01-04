@@ -10,7 +10,11 @@
     "test:coverage": "vitest run --coverage",
     "backup": "node scripts/backup.js",
     "backup:list": "node scripts/backup.js --list",
-    "backup:stats": "node scripts/backup.js --stats"
+    "backup:stats": "node scripts/backup.js --stats",
+    "lint": "eslint src/ scripts/",
+    "lint:fix": "eslint src/ scripts/ --fix",
+    "format": "prettier --write \"src/**/*.js\" \"scripts/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\" \"scripts/**/*.js\""
   },
   "dependencies": {
     "@sentry/node": "^10.32.1",
@@ -28,8 +32,12 @@
     "yaml": "^2.8.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@vitest/coverage-v8": "^4.0.16",
     "dotenv": "^17.2.3",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.7.4",
     "supertest": "^7.1.4",
     "vitest": "^4.0.16"
   }

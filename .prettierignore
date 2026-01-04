@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+server/node_modules/
+
+# Build outputs
+dist/
+coverage/
+server/coverage/
+
+# Database files
+*.db
+backups/
+
+# Lock files
+package-lock.json
+
+# Generated files
+*.min.js
+*.min.css

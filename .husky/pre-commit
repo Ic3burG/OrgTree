@@ -7,6 +7,15 @@ if [ "$(arch)" = "i386" ]; then
   exec arch -arm64 "$0" "$@"
 fi
 
+# Run lint-staged (linting + formatting on staged files)
+echo "Linting staged files..."
+npx lint-staged
+
+if [ $? -ne 0 ]; then
+  echo "Linting failed. Please fix errors and try again."
+  exit 1
+fi
+
 # Run frontend tests
 echo "Running frontend tests..."
 npm test

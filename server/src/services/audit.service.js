@@ -58,8 +58,8 @@ export function getAuditLogs(orgId, options = {}) {
   const { cursor, actionType, entityType, startDate, endDate } = options;
 
   // Build WHERE clause
-  let whereConditions = ['organization_id = ?'];
-  let params = [orgId];
+  const whereConditions = ['organization_id = ?'];
+  const params = [orgId];
 
   if (actionType) {
     whereConditions.push('action_type = ?');
@@ -152,8 +152,8 @@ export function getAllAuditLogs(options = {}) {
   const { cursor, actionType, entityType, startDate, endDate, orgId } = options;
 
   // Build WHERE clause
-  let whereConditions = [];
-  let params = [];
+  const whereConditions = [];
+  const params = [];
 
   if (orgId) {
     whereConditions.push('organization_id = ?');

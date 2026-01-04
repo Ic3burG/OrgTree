@@ -53,7 +53,7 @@ async function main() {
         await cleanup();
         break;
 
-      case '--restore':
+      case '--restore': {
         const backupFile = args[1];
         if (!backupFile) {
           console.error('Error: Please specify a backup file to restore');
@@ -62,6 +62,7 @@ async function main() {
         }
         await restore(backupFile);
         break;
+      }
 
       case '--help':
       case '-h':
