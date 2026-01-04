@@ -9,6 +9,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
 import ChangePasswordPage from './components/auth/ChangePasswordPage';
+import SessionsPage from './components/auth/SessionsPage';
 import OrganizationSelector from './components/OrganizationSelector';
 import OrgMap from './components/OrgMap';
 import PublicOrgMap from './components/PublicOrgMap';
@@ -52,6 +53,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <ChangePasswordPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Sessions Management (Protected) */}
+          <Route
+            path="/settings/sessions"
+            element={
+              <ProtectedRoute>
+                <SessionsPage />
               </ProtectedRoute>
             }
           />

@@ -1,12 +1,35 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
+import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import db from '../db.js';
-import { createUser, loginUser, getUserById } from '../services/auth.service.js';
+import {
+  createUser,
+  loginUser,
+  getUserById,
+  rotateRefreshToken,
+  revokeRefreshToken,
+  revokeAllUserTokens,
+  getUserSessions,
+  revokeSession,
+  revokeOtherSessions
+} from '../services/auth.service.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { createAuditLog } from '../services/audit.service.js';
 
 const router = express.Router();
+
+// Cookie parser for refresh tokens
+router.use(cookieParser());
+
+// Cookie options for refresh token
+const REFRESH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  path: '/api/auth' // Only sent to auth endpoints
+};
 
 // Rate limiter for authentication endpoints - prevents brute force attacks
 const authLimiter = rateLimit({
@@ -52,8 +75,20 @@ router.post('/signup', authLimiter, async (req, res, next) => {
       return res.status(400).json({ message: 'Password must be at least 12 characters' });
     }
 
-    const result = await createUser(name, email, password);
-    res.status(201).json(result);
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+
+    const result = await createUser(name, email, password, ipAddress, userAgent);
+
+    // Set refresh token in httpOnly cookie
+    res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
+
+    // Return access token and user (not refresh token in body)
+    res.status(201).json({
+      user: result.user,
+      accessToken: result.accessToken,
+      expiresIn: result.expiresIn
+    });
   } catch (err) {
     next(err);
   }
@@ -68,10 +103,20 @@ router.post('/login', authLimiter, async (req, res, next) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    // Get IP address for audit logging
     const ipAddress = req.ip || req.connection.remoteAddress;
-    const result = await loginUser(email, password, ipAddress);
-    res.json(result);
+    const userAgent = req.headers['user-agent'];
+
+    const result = await loginUser(email, password, ipAddress, userAgent);
+
+    // Set refresh token in httpOnly cookie
+    res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
+
+    // Return access token and user (not refresh token in body)
+    res.json({
+      user: result.user,
+      accessToken: result.accessToken,
+      expiresIn: result.expiresIn
+    });
   } catch (err) {
     next(err);
   }
@@ -141,9 +186,165 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
       return res.status(500).json({ message: 'Failed to update password' });
     }
 
+    // Security: Revoke all refresh tokens (force re-login on all devices)
+    const revokedCount = revokeAllUserTokens(req.user.id);
+
+    // Clear the refresh token cookie
+    res.clearCookie('refreshToken', { path: '/api/auth' });
+
     // Return updated user info
     const updatedUser = await getUserById(req.user.id);
-    res.json({ message: 'Password changed successfully', user: updatedUser });
+    res.json({
+      message: 'Password changed successfully. Please log in again.',
+      user: updatedUser,
+      sessionsRevoked: revokedCount
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ============================================
+// REFRESH TOKEN ENDPOINTS
+// ============================================
+
+// Rate limiter for refresh endpoint - more permissive than login
+const refreshLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10, // 10 requests per minute
+  message: { message: 'Too many refresh attempts, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// POST /api/auth/refresh - Get new access token using refresh token
+router.post('/refresh', refreshLimiter, async (req, res, next) => {
+  try {
+    // Get refresh token from httpOnly cookie
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        message: 'Refresh token required',
+        code: 'REFRESH_TOKEN_MISSING'
+      });
+    }
+
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+
+    const result = rotateRefreshToken(refreshToken, { ipAddress, userAgent });
+
+    if (!result) {
+      // Clear invalid cookie
+      res.clearCookie('refreshToken', { path: '/api/auth' });
+
+      // Log potential token reuse attack
+      createAuditLog(
+        null,
+        null,
+        'refresh_token_invalid',
+        'security',
+        'authentication',
+        {
+          reason: 'invalid_or_expired_refresh_token',
+          ipAddress,
+          timestamp: new Date().toISOString()
+        }
+      );
+
+      return res.status(401).json({
+        message: 'Invalid or expired refresh token',
+        code: 'REFRESH_TOKEN_INVALID'
+      });
+    }
+
+    // Set new refresh token cookie
+    res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
+
+    res.json({
+      user: result.user,
+      accessToken: result.accessToken,
+      expiresIn: 900 // 15 minutes in seconds
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/logout - Revoke refresh token and clear cookie
+router.post('/logout', async (req, res, next) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken) {
+      // Revoke the refresh token
+      revokeRefreshToken(refreshToken);
+    }
+
+    // Clear the cookie
+    res.clearCookie('refreshToken', { path: '/api/auth' });
+
+    res.json({ message: 'Logged out successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ============================================
+// SESSION MANAGEMENT ENDPOINTS
+// ============================================
+
+// GET /api/auth/sessions - List all active sessions for current user
+router.get('/sessions', authenticateToken, async (req, res, next) => {
+  try {
+    const sessions = getUserSessions(req.user.id);
+
+    // Mark current session
+    const currentToken = req.cookies.refreshToken;
+    const sessionsWithCurrent = sessions.map(session => ({
+      ...session,
+      isCurrent: false // We can't easily determine this without storing the hash
+    }));
+
+    res.json({ sessions: sessionsWithCurrent });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /api/auth/sessions/:sessionId - Revoke a specific session
+router.delete('/sessions/:sessionId', authenticateToken, async (req, res, next) => {
+  try {
+    const { sessionId } = req.params;
+
+    const revoked = revokeSession(sessionId, req.user.id);
+
+    if (!revoked) {
+      return res.status(404).json({ message: 'Session not found' });
+    }
+
+    res.json({ message: 'Session revoked successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/sessions/revoke-others - Revoke all sessions except current
+router.post('/sessions/revoke-others', authenticateToken, async (req, res, next) => {
+  try {
+    const currentToken = req.cookies.refreshToken;
+
+    if (!currentToken) {
+      return res.status(400).json({ message: 'No current session found' });
+    }
+
+    const revokedCount = revokeOtherSessions(req.user.id, currentToken);
+
+    res.json({
+      message: `Revoked ${revokedCount} other session(s)`,
+      revokedCount
+    });
   } catch (err) {
     next(err);
   }

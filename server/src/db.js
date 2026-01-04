@@ -335,6 +335,41 @@ try {
   console.error('Migration error (FTS5 tables):', err);
 }
 
+// Migration: Add refresh_tokens table for secure token management
+try {
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+  const tableNames = tables.map(t => t.name);
+
+  if (!tableNames.includes('refresh_tokens')) {
+    db.exec(`
+      CREATE TABLE refresh_tokens (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        token_hash TEXT NOT NULL UNIQUE,
+        device_info TEXT,
+        ip_address TEXT,
+        expires_at DATETIME NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        last_used_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        revoked_at DATETIME,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+
+      -- Index for fast lookup by user_id (for "revoke all" operations)
+      CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
+
+      -- Index for token lookup (primary operation)
+      CREATE INDEX idx_refresh_tokens_hash ON refresh_tokens(token_hash);
+
+      -- Index for cleanup of expired tokens
+      CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
+    `);
+    console.log('Migration: Created refresh_tokens table');
+  }
+} catch (err) {
+  console.error('Migration error (refresh_tokens table):', err);
+}
+
 console.log('Database initialized at:', dbPath);
 
 export default db;

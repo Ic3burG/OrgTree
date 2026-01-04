@@ -27,6 +27,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
 import db from './db.js';
 import { initializeSocket } from './socket.js';
+import { cleanupExpiredTokens } from './services/auth.service.js';
 
 dotenv.config();
 
@@ -181,4 +182,15 @@ server.listen(PORT, () => {
     port: PORT,
     environment: process.env.NODE_ENV || 'development'
   });
+
+  // Schedule token cleanup job - runs every hour
+  const TOKEN_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
+  setInterval(() => {
+    cleanupExpiredTokens();
+  }, TOKEN_CLEANUP_INTERVAL);
+
+  // Run initial cleanup on startup
+  cleanupExpiredTokens();
+
+  logger.info('Token cleanup job scheduled', { intervalMs: TOKEN_CLEANUP_INTERVAL });
 });

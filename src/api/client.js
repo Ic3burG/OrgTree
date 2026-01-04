@@ -4,6 +4,11 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 let csrfToken = null;
 let csrfTokenPromise = null; // Prevent concurrent fetches
 
+// Refresh token state
+let isRefreshing = false;
+let refreshSubscribers = [];
+let refreshTimer = null;
+
 class ApiError extends Error {
   constructor(message, status, code) {
     super(message);
@@ -63,6 +68,113 @@ async function getCsrfToken() {
   return csrfToken;
 }
 
+// ============================================
+// REFRESH TOKEN FUNCTIONS
+// ============================================
+
+/**
+ * Subscribe to token refresh completion
+ * @param {function} callback - Called with new access token
+ */
+function subscribeToRefresh(callback) {
+  refreshSubscribers.push(callback);
+}
+
+/**
+ * Notify all subscribers of new token
+ * @param {string} accessToken - New access token
+ */
+function onRefreshComplete(accessToken) {
+  refreshSubscribers.forEach(callback => callback(accessToken));
+  refreshSubscribers = [];
+}
+
+/**
+ * Notify subscribers of refresh failure
+ */
+function onRefreshFailed() {
+  refreshSubscribers.forEach(callback => callback(null));
+  refreshSubscribers = [];
+}
+
+/**
+ * Handle authentication failure - clear state and redirect
+ */
+function handleAuthFailure() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  if (refreshTimer) {
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+  window.location.href = '/login';
+}
+
+/**
+ * Attempt to refresh the access token
+ * @returns {Promise<string|null>} New access token or null
+ */
+async function refreshAccessToken() {
+  try {
+    const response = await fetch(`${API_BASE}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include', // Send httpOnly cookie
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+
+    // Store new access token
+    localStorage.setItem('token', data.accessToken);
+    localStorage.setItem('user', JSON.stringify(data.user));
+
+    // Schedule next refresh before expiry
+    scheduleTokenRefresh(data.expiresIn);
+
+    return data.accessToken;
+  } catch (err) {
+    console.error('Token refresh failed:', err);
+    return null;
+  }
+}
+
+/**
+ * Schedule automatic token refresh before expiry
+ * @param {number} expiresIn - Token lifetime in seconds
+ */
+export function scheduleTokenRefresh(expiresIn) {
+  if (refreshTimer) {
+    clearTimeout(refreshTimer);
+  }
+
+  // Refresh at 80% of token lifetime (12 minutes for 15-min token)
+  const refreshTime = (expiresIn * 0.8) * 1000;
+
+  refreshTimer = setTimeout(async () => {
+    const token = await refreshAccessToken();
+    if (!token) {
+      // Refresh failed, redirect to login
+      handleAuthFailure();
+    }
+  }, refreshTime);
+}
+
+/**
+ * Cancel scheduled token refresh (call on logout)
+ */
+export function cancelTokenRefresh() {
+  if (refreshTimer) {
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+}
+
 async function request(endpoint, options = {}, retryOnCsrf = true) {
   const token = localStorage.getItem('token');
 
@@ -86,12 +198,70 @@ async function request(endpoint, options = {}, retryOnCsrf = true) {
 
   const response = await fetch(`${API_BASE}${endpoint}`, config);
 
-  // Handle 401 - redirect to login
+  // Handle 401 - attempt refresh before redirecting
   if (response.status === 401) {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
-    throw new ApiError('Session expired', 401);
+    // Don't try to refresh for auth endpoints (login, signup, refresh itself)
+    if (endpoint.startsWith('/auth/')) {
+      handleAuthFailure();
+      throw new ApiError('Session expired', 401);
+    }
+
+    // If already refreshing, wait for it
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        subscribeToRefresh(async (newToken) => {
+          if (newToken) {
+            // Retry with new token
+            config.headers.Authorization = `Bearer ${newToken}`;
+            try {
+              const retryResponse = await fetch(`${API_BASE}${endpoint}`, config);
+              const retryData = retryResponse.status !== 204 ? await retryResponse.json() : null;
+              if (!retryResponse.ok) {
+                reject(new ApiError(retryData?.message || 'Request failed', retryResponse.status, retryData?.code));
+              } else {
+                resolve(retryData);
+              }
+            } catch (err) {
+              reject(err);
+            }
+          } else {
+            reject(new ApiError('Session expired', 401));
+          }
+        });
+      });
+    }
+
+    isRefreshing = true;
+
+    try {
+      const newToken = await refreshAccessToken();
+      isRefreshing = false;
+
+      if (newToken) {
+        onRefreshComplete(newToken);
+        // Retry original request with new token
+        config.headers.Authorization = `Bearer ${newToken}`;
+        const retryResponse = await fetch(`${API_BASE}${endpoint}`, config);
+        const retryData = retryResponse.status !== 204 ? await retryResponse.json() : null;
+
+        if (!retryResponse.ok) {
+          throw new ApiError(retryData?.message || 'Request failed', retryResponse.status, retryData?.code);
+        }
+        return retryData;
+      } else {
+        onRefreshFailed();
+        handleAuthFailure();
+        throw new ApiError('Session expired', 401);
+      }
+    } catch (err) {
+      isRefreshing = false;
+      onRefreshFailed();
+      if (err instanceof ApiError) {
+        throw err;
+      }
+      handleAuthFailure();
+      throw new ApiError('Session expired', 401);
+    }
   }
 
   const data = response.status !== 204 ? await response.json() : null;
@@ -113,19 +283,49 @@ async function request(endpoint, options = {}, retryOnCsrf = true) {
 
 const api = {
   // Auth
-  login: (email, password) =>
-    request('/auth/login', {
+  login: async (email, password) => {
+    const response = await request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
-    }),
+    });
+    // Schedule refresh based on token expiry
+    if (response.expiresIn) {
+      scheduleTokenRefresh(response.expiresIn);
+    }
+    return response;
+  },
 
-  signup: (name, email, password) =>
-    request('/auth/signup', {
+  signup: async (name, email, password) => {
+    const response = await request('/auth/signup', {
       method: 'POST',
       body: JSON.stringify({ name, email, password }),
+    });
+    // Schedule refresh based on token expiry
+    if (response.expiresIn) {
+      scheduleTokenRefresh(response.expiresIn);
+    }
+    return response;
+  },
+
+  logout: () =>
+    request('/auth/logout', {
+      method: 'POST',
     }),
 
   getMe: () => request('/auth/me'),
+
+  // Session management
+  getSessions: () => request('/auth/sessions'),
+
+  revokeSession: (sessionId) =>
+    request(`/auth/sessions/${sessionId}`, {
+      method: 'DELETE',
+    }),
+
+  revokeOtherSessions: () =>
+    request('/auth/sessions/revoke-others', {
+      method: 'POST',
+    }),
 
   // Organizations
   getOrganizations: () => request('/organizations'),

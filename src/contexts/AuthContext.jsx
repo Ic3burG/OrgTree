@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { api } from '../api/client';
+import { api, cancelTokenRefresh, scheduleTokenRefresh } from '../api/client';
 
 const AuthContext = createContext(null);
 
@@ -14,17 +14,22 @@ export function AuthProvider({ children }) {
 
     if (token && savedUser) {
       setUser(JSON.parse(savedUser));
-      // Verify token is still valid
+      // Verify token is still valid and schedule refresh
       api.getMe()
         .then((userData) => {
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
+          // Schedule a refresh - assume token is still fairly fresh on page load
+          // The server will reject if expired and trigger a refresh
+          scheduleTokenRefresh(900); // 15 minutes default
         })
         .catch(() => {
-          // Token invalid, clear storage
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          setUser(null);
+          // Token invalid - the API client will handle refresh or redirect
+          // Only clear if we get here without redirect (refresh also failed)
+          const currentToken = localStorage.getItem('token');
+          if (!currentToken) {
+            setUser(null);
+          }
         })
         .finally(() => setLoading(false));
     } else {
@@ -33,22 +38,34 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const { user, token } = await api.login(email, password);
-    localStorage.setItem('token', token);
+    const { user, accessToken } = await api.login(email, password);
+    localStorage.setItem('token', accessToken);
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
     return user;
   };
 
   const signup = async (name, email, password) => {
-    const { user, token } = await api.signup(name, email, password);
-    localStorage.setItem('token', token);
+    const { user, accessToken } = await api.signup(name, email, password);
+    localStorage.setItem('token', accessToken);
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
     return user;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Call server to revoke refresh token
+      await api.logout();
+    } catch (err) {
+      // Continue with local logout even if server call fails
+      console.error('Server logout failed:', err);
+    }
+
+    // Cancel any scheduled refresh
+    cancelTokenRefresh();
+
+    // Clear local storage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
