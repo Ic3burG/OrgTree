@@ -291,9 +291,28 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Refresh Token Implementation (January 3, 2026)
-- **Total Commits**: 137+ commits on main branch
+- **Last Major Update**: Production Startup Fix (January 4, 2026)
+- **Total Commits**: 140+ commits on main branch
 - **Recent Session Highlights**:
+
+  **January 4, 2026 - Production Startup Fix (Session 8)** 🔧:
+  - ✅ **CRITICAL FIX**: Resolved intermittent server startup failures on Render
+  - ✅ **ROOT CAUSE**: `dotenv` package imported unconditionally at top-level
+  - ✅ **SYMPTOMS**: Server crashed 2x before eventually starting ("Cannot find package 'dotenv'")
+  - ✅ **SOLUTION**: Made dotenv conditional - only loaded in development mode
+  - ✅ **FILES MODIFIED** (1 file):
+    - `server/src/index.js` - Changed static import to dynamic import with production check
+  - ✅ **CODE CHANGE**:
+    ```javascript
+    // Only load dotenv in development - Render sets env vars directly in production
+    if (process.env.NODE_ENV !== 'production') {
+      const dotenv = await import('dotenv');
+      dotenv.config();
+    }
+    ```
+  - ✅ **RESULT**: Server now starts cleanly on first attempt
+  - 🚀 **DEPLOYED**: Successfully deployed to Render (https://orgtree-app.onrender.com)
+  - 📝 **NOTE**: Also noticed soft delete migrations ran (deleted_at columns for departments/people)
 
   **January 3, 2026 - Refresh Token Implementation (Session 7)** 🔐:
   - ✅ **MAJOR SECURITY FEATURE**: Complete refresh token system implementation
@@ -1303,7 +1322,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: December 31, 2025 (Quick MEDIUM Security Wins - 21/25 total vulnerabilities resolved, 84% complete)
+**Last Updated**: January 4, 2026 (Production Startup Fix - dotenv conditional loading)
 
 ---
 
