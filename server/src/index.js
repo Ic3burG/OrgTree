@@ -27,12 +27,17 @@ import logger from './utils/logger.js';
 import db from './db.js';
 import { initializeSocket } from './socket.js';
 import { cleanupExpiredTokens } from './services/auth.service.js';
+import { initSentry, setupGlobalErrorHandlers } from './sentry.js';
 
 // Only load dotenv in development - Render sets env vars directly in production
 if (process.env.NODE_ENV !== 'production') {
   const dotenv = await import('dotenv');
   dotenv.config();
 }
+
+// Initialize Sentry early (after dotenv loads)
+const { requestHandler: sentryRequestHandler, errorHandler: sentryErrorHandler } = initSentry();
+setupGlobalErrorHandlers();
 
 // Validate critical environment variables
 if (!process.env.JWT_SECRET) {
@@ -52,6 +57,11 @@ const PORT = process.env.PORT || 3001;
 
 // Trust proxy - required for rate limiting to work correctly behind Render's proxy
 app.set('trust proxy', 1);
+
+// Sentry request handler must be first middleware
+if (sentryRequestHandler) {
+  app.use(sentryRequestHandler);
+}
 
 // CORS configuration - dynamic based on environment
 const allowedOrigins = process.env.NODE_ENV === 'production'
@@ -177,7 +187,12 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Error handler (must be last)
+// Sentry error handler must be before custom error handler
+if (sentryErrorHandler) {
+  app.use(sentryErrorHandler);
+}
+
+// Custom error handler (must be last)
 app.use(errorHandler);
 
 server.listen(PORT, () => {

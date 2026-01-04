@@ -1,9 +1,10 @@
 import React from 'react';
+import { Sentry } from '../sentry';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, eventId: null };
   }
 
   static getDerivedStateFromError(error) {
@@ -13,9 +14,14 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     console.error('Error Boundary caught:', error, errorInfo);
 
-    // TODO: Send to error tracking service (Sentry, etc.) in production
+    // Send to Sentry in production
     if (import.meta.env.PROD) {
-      // Example: Sentry.captureException(error);
+      const eventId = Sentry.captureException(error, {
+        extra: {
+          componentStack: errorInfo.componentStack,
+        },
+      });
+      this.setState({ eventId });
     }
   }
 
@@ -37,6 +43,11 @@ class ErrorBoundary extends React.Component {
             >
               Refresh Page
             </button>
+            {this.state.eventId && (
+              <p className="mt-4 text-xs text-slate-400">
+                Error ID: {this.state.eventId}
+              </p>
+            )}
             {!import.meta.env.PROD && this.state.error && (
               <details className="mt-6 text-left">
                 <summary className="cursor-pointer text-sm text-slate-500">
