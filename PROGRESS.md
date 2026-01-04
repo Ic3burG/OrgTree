@@ -245,6 +245,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 2. ~~**Bulk Operations** - Multi-select functionality for efficiency~~ ✅ **DONE** (December 29, 2025)
 3. **Custom Fields** - Allow configurable person/department attributes
 4. ~~**API Documentation** - Complete REST API documentation~~ ✅ **DONE** (December 30, 2025)
+5. **Dark Mode** - Add dark theme support with user preference persistence
 
 ### Medium-term Vision (Next quarter)
 1. ~~**Team Collaboration** - Multi-user organization management~~ ✅ **DONE** (December 22-23, 2025)
