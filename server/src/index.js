@@ -21,6 +21,7 @@ import auditRoutes from './routes/audit.js';
 import searchRoutes from './routes/search.js';
 import bulkRoutes from './routes/bulk.js';
 import csrfRoutes from './routes/csrf.js';
+import backupRoutes from './routes/backup.js';
 import { validateCsrf } from './middleware/csrf.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
@@ -178,6 +179,7 @@ app.use('/api', invitationRoutes);
 app.use('/api', auditRoutes);
 app.use('/api', searchRoutes);
 app.use('/api', bulkRoutes);
+app.use('/api', backupRoutes);
 
 // Serve index.html for all non-API routes (SPA support) in production
 if (process.env.NODE_ENV === 'production') {
