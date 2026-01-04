@@ -62,6 +62,18 @@ vi.mock('../db.js', () => {
       updated_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id TEXT PRIMARY KEY,
+      organization_id TEXT,
+      actor_id TEXT,
+      actor_name TEXT,
+      action_type TEXT,
+      entity_type TEXT,
+      entity_id TEXT,
+      entity_data TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
   `);
 
   return { default: db };
@@ -127,6 +139,7 @@ describe('Organization Service', () => {
       await createOrganization('Org 2', testUser.id);
 
       const orgs = await getOrganizations(testUser.id);
+      orgs.sort((a, b) => a.name.localeCompare(b.name));
 
       expect(orgs).toHaveLength(2);
       expect(orgs[0].name).toBe('Org 1');

@@ -41,6 +41,18 @@ vi.mock('../db.js', () => {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
       UNIQUE(organization_id, user_id)
     );
+
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id TEXT PRIMARY KEY,
+      organization_id TEXT,
+      actor_id TEXT,
+      actor_name TEXT,
+      action_type TEXT,
+      entity_type TEXT,
+      entity_id TEXT,
+      entity_data TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
   `);
 
   return { default: db };
