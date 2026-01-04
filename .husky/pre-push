@@ -2,8 +2,10 @@
 
 echo "Running pre-push checks..."
 
-# Ensure we use the correct architecture for node
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+# Force ARM64 architecture (fixes x86 git spawning x86 node)
+if [ "$(arch)" = "i386" ]; then
+  exec arch -arm64 "$0" "$@"
+fi
 
 # Run full test suite (frontend + backend)
 echo "Running full test suite..."
