@@ -1,8 +1,11 @@
 # OrgTree
 
+[![CI](https://github.com/Ic3burG/OrgTree/actions/workflows/ci.yml/badge.svg)](https://github.com/Ic3burG/OrgTree/actions/workflows/ci.yml)
+[![CD](https://github.com/Ic3burG/OrgTree/actions/workflows/cd.yml/badge.svg)](https://github.com/Ic3burG/OrgTree/actions/workflows/cd.yml)
+
 A modern, full-stack organizational directory and visualization platform. Build, manage, and share interactive org charts with real-time collaboration.
 
-**[Live Demo](https://orgtree.onrender.com)** | **[Documentation](./DOCUMENTATION.md)**
+**[Live Demo](https://orgtree.onrender.com)** | **[Documentation](./DOCUMENTATION.md)** | **[CI/CD Setup](./.github/CICD_SETUP.md)**
 
 ## Features
 
