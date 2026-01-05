@@ -10,7 +10,7 @@ import {
 import {
   emitDepartmentCreated,
   emitDepartmentUpdated,
-  emitDepartmentDeleted
+  emitDepartmentDeleted,
 } from '../services/socket-events.service.js';
 import db from '../db.js';
 
@@ -52,7 +52,7 @@ router.post('/organizations/:orgId/departments', async (req, res, next) => {
       {
         name: name.trim(),
         description: description || null,
-        parentId: parentId || null
+        parentId: parentId || null,
       },
       req.user.id
     );
@@ -81,7 +81,7 @@ router.put('/organizations/:orgId/departments/:deptId', async (req, res, next) =
       {
         name: name?.trim(),
         description,
-        parentId
+        parentId,
       },
       req.user.id
     );
@@ -99,11 +99,15 @@ router.put('/organizations/:orgId/departments/:deptId', async (req, res, next) =
 router.delete('/organizations/:orgId/departments/:deptId', async (req, res, next) => {
   try {
     // Get full department data before deleting for audit trail
-    const department = db.prepare(`
+    const department = db
+      .prepare(
+        `
       SELECT id, name, description, parent_id as parentId, organization_id
       FROM departments
       WHERE id = ? AND organization_id = ?
-    `).get(req.params.deptId, req.params.orgId);
+    `
+      )
+      .get(req.params.deptId, req.params.orgId);
 
     await deleteDepartment(req.params.orgId, req.params.deptId, req.user.id);
 

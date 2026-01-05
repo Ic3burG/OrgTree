@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
-export default function UserForm({
-  user,
-  currentUserId,
-  onClose,
-  onSubmit,
-  isSubmitting = false,
-}) {
+export default function UserForm({ user, currentUserId, onClose, onSubmit, isSubmitting = false }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -49,18 +43,18 @@ export default function UserForm({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
     if (validate()) {
       onSubmit(formData);
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -69,13 +63,8 @@ export default function UserForm({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Edit User
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <h2 className="text-lg font-semibold text-gray-900">Edit User</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X size={20} className="text-gray-500" />
           </button>
         </div>
@@ -84,10 +73,7 @@ export default function UserForm({
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           {/* Name */}
           <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
               Name *
             </label>
             <input
@@ -101,17 +87,12 @@ export default function UserForm({
               }`}
               placeholder="Enter name"
             />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-            )}
+            {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
           </div>
 
           {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email *
             </label>
             <input
@@ -125,17 +106,12 @@ export default function UserForm({
               }`}
               placeholder="Enter email"
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-            )}
+            {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
           </div>
 
           {/* Role */}
           <div>
-            <label
-              htmlFor="role"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
               Role *
             </label>
             <select
@@ -153,13 +129,9 @@ export default function UserForm({
               <option value="superuser">Superuser</option>
             </select>
             {isEditingSelf && (
-              <p className="mt-1 text-sm text-gray-500">
-                You cannot change your own role
-              </p>
+              <p className="mt-1 text-sm text-gray-500">You cannot change your own role</p>
             )}
-            {errors.role && (
-              <p className="mt-1 text-sm text-red-500">{errors.role}</p>
-            )}
+            {errors.role && <p className="mt-1 text-sm text-red-500">{errors.role}</p>}
           </div>
 
           {/* Actions */}

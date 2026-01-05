@@ -30,7 +30,8 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, '..', '.env') });
 
 // Import backup service after env is loaded
-const { createBackup, listBackups, cleanupOldBackups, restoreFromBackup, getBackupStats } = await import('../src/services/backup.service.js');
+const { createBackup, listBackups, cleanupOldBackups, restoreFromBackup, getBackupStats } =
+  await import('../src/services/backup.service.js');
 
 const args = process.argv.slice(2);
 const command = args[0];

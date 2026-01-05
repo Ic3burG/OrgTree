@@ -10,16 +10,14 @@ export async function exportToPng(element, filename = 'org-chart.png') {
       backgroundColor: '#f8fafc',
       quality: 1,
       pixelRatio: 2, // Higher resolution for better quality
-      filter: (node) => {
+      filter: node => {
         // Exclude UI controls from export
         const exclusionClasses = [
           'react-flow__controls',
           'react-flow__minimap',
-          'react-flow__attribution'
+          'react-flow__attribution',
         ];
-        return !exclusionClasses.some(className =>
-          node.classList?.contains(className)
-        );
+        return !exclusionClasses.some(className => node.classList?.contains(className));
       },
     });
 
@@ -39,22 +37,24 @@ export async function exportToPng(element, filename = 'org-chart.png') {
 /**
  * Export organization chart as PDF document
  */
-export async function exportToPdf(element, filename = 'org-chart.pdf', orgName = 'Organization Chart') {
+export async function exportToPdf(
+  element,
+  filename = 'org-chart.pdf',
+  orgName = 'Organization Chart'
+) {
   try {
     // Capture as image first
     const dataUrl = await toPng(element, {
       backgroundColor: '#f8fafc',
       quality: 1,
       pixelRatio: 2,
-      filter: (node) => {
+      filter: node => {
         const exclusionClasses = [
           'react-flow__controls',
           'react-flow__minimap',
-          'react-flow__attribution'
+          'react-flow__attribution',
         ];
-        return !exclusionClasses.some(className =>
-          node.classList?.contains(className)
-        );
+        return !exclusionClasses.some(className => node.classList?.contains(className));
       },
     });
 
@@ -94,7 +94,7 @@ export async function exportToPdf(element, filename = 'org-chart.pdf', orgName =
 
     // Calculate image placement
     const margin = 40;
-    const availableWidth = pageWidth - (margin * 2);
+    const availableWidth = pageWidth - margin * 2;
     const availableHeight = pageHeight - 80 - margin; // Account for header
 
     let finalWidth = availableWidth;

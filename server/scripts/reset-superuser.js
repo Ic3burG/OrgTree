@@ -73,22 +73,30 @@ try {
 
 // List superusers
 if (shouldList) {
-  const superusers = db.prepare(`
+  const superusers = db
+    .prepare(
+      `
     SELECT id, name, email, role, created_at, must_change_password
     FROM users
     WHERE role = 'superuser'
     ORDER BY created_at
-  `).all();
+  `
+    )
+    .all();
 
   if (superusers.length === 0) {
     console.log('⚠️  No superusers found in database!\n');
 
     // Show all users instead
-    const allUsers = db.prepare(`
+    const allUsers = db
+      .prepare(
+        `
       SELECT id, name, email, role, created_at
       FROM users
       ORDER BY created_at
-    `).all();
+    `
+      )
+      .all();
 
     if (allUsers.length === 0) {
       console.log('   Database has no users at all.\n');
@@ -171,11 +179,15 @@ const passwordHash = await bcrypt.hash(tempPassword, 10);
 
 // Update user
 const now = new Date().toISOString();
-const result = db.prepare(`
+const result = db
+  .prepare(
+    `
   UPDATE users
   SET password_hash = ?, must_change_password = 1, updated_at = ?
   WHERE id = ?
-`).run(passwordHash, now, user.id);
+`
+  )
+  .run(passwordHash, now, user.id);
 
 if (result.changes === 0) {
   console.error('❌ Failed to update password');

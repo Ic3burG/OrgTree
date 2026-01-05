@@ -68,7 +68,7 @@ export function setupGlobalErrorHandlers() {
     Sentry.captureException(reason);
   });
 
-  process.on('uncaughtException', (error) => {
+  process.on('uncaughtException', error => {
     console.error('Uncaught Exception:', error);
     Sentry.captureException(error);
     // Give Sentry time to send the error before crashing

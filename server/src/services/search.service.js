@@ -73,8 +73,8 @@ function searchDepartments(orgId, ftsQuery, limit, offset) {
       description: row.description,
       parentId: row.parentId,
       highlight: escapeHtml(row.nameHighlight || row.descHighlight),
-      peopleCount: row.peopleCount
-    }))
+      peopleCount: row.peopleCount,
+    })),
   };
 }
 
@@ -130,8 +130,8 @@ function searchPeople(orgId, ftsQuery, limit, offset) {
       phone: row.phone,
       departmentId: row.departmentId,
       departmentName: row.departmentName,
-      highlight: escapeHtml(row.nameHighlight || row.titleHighlight || row.emailHighlight)
-    }))
+      highlight: escapeHtml(row.nameHighlight || row.titleHighlight || row.emailHighlight),
+    })),
   };
 }
 
@@ -142,12 +142,7 @@ export function search(orgId, userId, options = {}) {
   // Verify user has access to this organization
   requireOrgPermission(orgId, userId, 'viewer');
 
-  const {
-    query,
-    type = 'all',
-    limit = 20,
-    offset = 0
-  } = options;
+  const { query, type = 'all', limit = 20, offset = 0 } = options;
 
   // Build FTS query with prefix matching
   const ftsQuery = buildFtsQuery(query, true);
@@ -156,7 +151,7 @@ export function search(orgId, userId, options = {}) {
       query,
       total: 0,
       results: [],
-      pagination: { limit, offset, hasMore: false }
+      pagination: { limit, offset, hasMore: false },
     };
   }
 
@@ -197,8 +192,8 @@ export function search(orgId, userId, options = {}) {
     pagination: {
       limit,
       offset,
-      hasMore: total > offset + limit
-    }
+      hasMore: total > offset + limit,
+    },
   };
 }
 
@@ -228,10 +223,12 @@ export function getAutocompleteSuggestions(orgId, userId, query, limit = 5) {
     `);
 
     const deptRows = deptStmt.all(ftsQuery, orgId, Math.ceil(limit / 2));
-    suggestions.push(...deptRows.map(r => ({
-      text: r.name,
-      type: 'department'
-    })));
+    suggestions.push(
+      ...deptRows.map(r => ({
+        text: r.name,
+        type: 'department',
+      }))
+    );
   } catch (err) {
     console.error('Department autocomplete error:', err);
   }
@@ -250,10 +247,12 @@ export function getAutocompleteSuggestions(orgId, userId, query, limit = 5) {
 
     const remainingLimit = Math.max(1, limit - suggestions.length);
     const peopleRows = peopleStmt.all(ftsQuery, orgId, remainingLimit);
-    suggestions.push(...peopleRows.map(r => ({
-      text: r.name,
-      type: 'person'
-    })));
+    suggestions.push(
+      ...peopleRows.map(r => ({
+        text: r.name,
+        type: 'person',
+      }))
+    );
   } catch (err) {
     console.error('People autocomplete error:', err);
   }

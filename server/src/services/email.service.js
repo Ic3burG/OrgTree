@@ -26,11 +26,12 @@ export async function sendInvitationEmail({ to, inviterName, orgName, role, toke
   }
 
   const inviteUrl = `${APP_URL}/invite/${token}`;
-  const roleDescription = {
-    viewer: 'view',
-    editor: 'view and edit',
-    admin: 'manage'
-  }[role] || 'access';
+  const roleDescription =
+    {
+      viewer: 'view',
+      editor: 'view and edit',
+      admin: 'manage',
+    }[role] || 'access';
 
   try {
     const { data, error } = await resend.emails.send({
@@ -89,7 +90,7 @@ ${inviteUrl}
 This invitation expires in 7 days.
 
 If you didn't expect this email, you can safely ignore it.
-      `.trim()
+      `.trim(),
     });
 
     if (error) {

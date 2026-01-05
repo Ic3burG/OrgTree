@@ -18,7 +18,7 @@ export function authenticateToken(req, res, next) {
         reason: 'missing_token',
         ipAddress,
         path: req.path,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
     return res.status(401).json({ message: 'Access token required' });
@@ -27,7 +27,7 @@ export function authenticateToken(req, res, next) {
   try {
     // Security: Explicitly specify algorithm to prevent algorithm confusion attacks
     const decoded = jwt.verify(token, process.env.JWT_SECRET, {
-      algorithms: ['HS256']
+      algorithms: ['HS256'],
     });
     req.user = decoded;
     next();
@@ -44,7 +44,7 @@ export function authenticateToken(req, res, next) {
         ipAddress,
         path: req.path,
         error: err.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
     return res.status(401).json({ message: 'Invalid or expired token' });
@@ -72,7 +72,7 @@ export function requireRole(...allowedRoles) {
           path: req.path,
           method: req.method,
           ipAddress,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }
       );
       return res.status(403).json({ message: 'Insufficient permissions' });

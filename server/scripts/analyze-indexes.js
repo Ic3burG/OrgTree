@@ -15,11 +15,15 @@ console.log('='.repeat(80));
 console.log();
 
 // Get all tables
-const tables = db.prepare(`
+const tables = db
+  .prepare(
+    `
   SELECT name FROM sqlite_master
   WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '%_fts'
   ORDER BY name
-`).all();
+`
+  )
+  .all();
 
 console.log('📊 TABLES:');
 tables.forEach(t => console.log(`  - ${t.name}`));
@@ -30,7 +34,9 @@ console.log('🔍 EXISTING INDEXES:');
 console.log();
 
 for (const table of tables) {
-  const indexes = db.prepare(`
+  const indexes = db
+    .prepare(
+      `
     SELECT
       m.name as index_name,
       m.sql
@@ -39,7 +45,9 @@ for (const table of tables) {
       AND m.tbl_name = ?
       AND m.name NOT LIKE 'sqlite_%'
     ORDER BY m.name
-  `).all(table.name);
+  `
+    )
+    .all(table.name);
 
   if (indexes.length > 0) {
     console.log(`📋 ${table.name}:`);
@@ -64,33 +72,35 @@ const testQueries = [
   {
     name: 'Get departments by organization',
     query: 'SELECT * FROM departments WHERE organization_id = ? AND deleted_at IS NULL',
-    params: ['test-org-id']
+    params: ['test-org-id'],
   },
   {
     name: 'Get departments with parent hierarchy',
     query: 'SELECT * FROM departments WHERE parent_id = ? AND deleted_at IS NULL',
-    params: ['test-dept-id']
+    params: ['test-dept-id'],
   },
   {
     name: 'Get people by department',
     query: 'SELECT * FROM people WHERE department_id = ? AND deleted_at IS NULL',
-    params: ['test-dept-id']
+    params: ['test-dept-id'],
   },
   {
     name: 'Get audit logs with filters',
-    query: 'SELECT * FROM audit_logs WHERE organization_id = ? AND action_type = ? ORDER BY created_at DESC LIMIT 50',
-    params: ['test-org-id', 'created']
+    query:
+      'SELECT * FROM audit_logs WHERE organization_id = ? AND action_type = ? ORDER BY created_at DESC LIMIT 50',
+    params: ['test-org-id', 'created'],
   },
   {
     name: 'Get active invitations',
-    query: "SELECT * FROM invitations WHERE organization_id = ? AND status = ? AND expires_at > datetime('now')",
-    params: ['test-org-id', 'pending']
+    query:
+      "SELECT * FROM invitations WHERE organization_id = ? AND status = ? AND expires_at > datetime('now')",
+    params: ['test-org-id', 'pending'],
   },
   {
     name: 'Get organization members',
     query: 'SELECT * FROM organization_members WHERE organization_id = ? AND user_id = ?',
-    params: ['test-org-id', 'test-user-id']
-  }
+    params: ['test-org-id', 'test-user-id'],
+  },
 ];
 
 testQueries.forEach(({ name, query, params }) => {
@@ -120,33 +130,33 @@ const recommendations = [
   {
     table: 'departments',
     column: 'deleted_at',
-    reason: 'Frequently filtered for soft delete checks'
+    reason: 'Frequently filtered for soft delete checks',
   },
   {
     table: 'departments',
     column: 'parent_id',
-    reason: 'Used for hierarchical queries'
+    reason: 'Used for hierarchical queries',
   },
   {
     table: 'people',
     column: 'deleted_at',
-    reason: 'Frequently filtered for soft delete checks'
+    reason: 'Frequently filtered for soft delete checks',
   },
   {
     table: 'audit_logs',
     column: 'action_type',
-    reason: 'Used for filtering logs by action type'
+    reason: 'Used for filtering logs by action type',
   },
   {
     table: 'invitations',
     columns: ['status', 'expires_at'],
-    reason: 'Used together for finding active invitations'
+    reason: 'Used together for finding active invitations',
   },
   {
     table: 'organizations',
     column: 'created_by_id',
-    reason: 'Used for filtering organizations by creator'
-  }
+    reason: 'Used for filtering organizations by creator',
+  },
 ];
 
 console.log('Potential indexes to add:');
@@ -154,9 +164,13 @@ console.log();
 
 recommendations.forEach((rec, idx) => {
   if (rec.columns) {
-    console.log(`${idx + 1}. CREATE INDEX idx_${rec.table}_${rec.columns.join('_')} ON ${rec.table}(${rec.columns.join(', ')});`);
+    console.log(
+      `${idx + 1}. CREATE INDEX idx_${rec.table}_${rec.columns.join('_')} ON ${rec.table}(${rec.columns.join(', ')});`
+    );
   } else {
-    console.log(`${idx + 1}. CREATE INDEX idx_${rec.table}_${rec.column} ON ${rec.table}(${rec.column});`);
+    console.log(
+      `${idx + 1}. CREATE INDEX idx_${rec.table}_${rec.column} ON ${rec.table}(${rec.column});`
+    );
   }
   console.log(`   Reason: ${rec.reason}`);
   console.log();

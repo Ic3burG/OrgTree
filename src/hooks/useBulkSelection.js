@@ -32,7 +32,7 @@ export function useBulkSelection(items = []) {
   }, []);
 
   // Toggle single item selection
-  const toggleSelect = useCallback((id) => {
+  const toggleSelect = useCallback(id => {
     setSelectedIds(prev => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -59,9 +59,12 @@ export function useBulkSelection(items = []) {
   const clearSelection = deselectAll;
 
   // Check if an item is selected
-  const isSelected = useCallback((id) => {
-    return selectedIds.has(id);
-  }, [selectedIds]);
+  const isSelected = useCallback(
+    id => {
+      return selectedIds.has(id);
+    },
+    [selectedIds]
+  );
 
   // Get array of selected IDs
   const selectedArray = useMemo(() => {

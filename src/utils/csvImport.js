@@ -2,12 +2,12 @@
  * Parse CSV text into array of objects
  */
 export function parseCSV(csvText) {
-  const lines = csvText.split('\n').filter((line) => line.trim());
+  const lines = csvText.split('\n').filter(line => line.trim());
   if (lines.length === 0) return [];
 
-  const headers = parseCSVLine(lines[0]).map((h) => h.toLowerCase().trim());
+  const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
 
-  const rows = lines.slice(1).map((line) => {
+  const rows = lines.slice(1).map(line => {
     const values = parseCSVLine(line);
     const row = {};
     headers.forEach((header, i) => {

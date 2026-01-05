@@ -1,6 +1,17 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Edit, Trash2, Search, Mail, Phone, Loader2, CheckSquare, Square, X } from 'lucide-react';
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Search,
+  Mail,
+  Phone,
+  Loader2,
+  CheckSquare,
+  Square,
+  X,
+} from 'lucide-react';
 import api from '../../api/client';
 import PersonForm from './PersonForm';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -26,7 +37,7 @@ export default function PersonManager() {
     setQuery: setSearchTerm,
     results: searchResults,
     loading: searchLoading,
-    total: searchTotal
+    total: searchTotal,
   } = useSearch(orgId, { debounceMs: 300, minQueryLength: 2, defaultType: 'people' });
 
   // Form modal state
@@ -46,32 +57,35 @@ export default function PersonManager() {
   const [bulkOperationLoading, setBulkOperationLoading] = useState(false);
   const [bulkOperationResult, setBulkOperationResult] = useState(null);
 
-  const loadData = useCallback(async (showLoading = true) => {
-    try {
-      if (showLoading) setLoading(true);
-      setError(null);
+  const loadData = useCallback(
+    async (showLoading = true) => {
+      try {
+        if (showLoading) setLoading(true);
+        setError(null);
 
-      // Load organization with all departments and people
-      const orgData = await api.getOrganization(orgId);
-      setDepartments(orgData.departments || []);
+        // Load organization with all departments and people
+        const orgData = await api.getOrganization(orgId);
+        setDepartments(orgData.departments || []);
 
-      // Flatten people from all departments
-      const allPeople = [];
-      (orgData.departments || []).forEach((dept) => {
-        (dept.people || []).forEach((person) => {
-          allPeople.push({
-            ...person,
-            departmentName: dept.name,
+        // Flatten people from all departments
+        const allPeople = [];
+        (orgData.departments || []).forEach(dept => {
+          (dept.people || []).forEach(person => {
+            allPeople.push({
+              ...person,
+              departmentName: dept.name,
+            });
           });
         });
-      });
-      setPeople(allPeople);
-    } catch (err) {
-      setError(err.message || 'Failed to load data');
-    } finally {
-      if (showLoading) setLoading(false);
-    }
-  }, [orgId]);
+        setPeople(allPeople);
+      } catch (err) {
+        setError(err.message || 'Failed to load data');
+      } finally {
+        if (showLoading) setLoading(false);
+      }
+    },
+    [orgId]
+  );
 
   useEffect(() => {
     loadData();
@@ -81,7 +95,7 @@ export default function PersonManager() {
   const { isRecentlyChanged } = useRealtimeUpdates(orgId, {
     onDepartmentChange: () => loadData(false),
     onPersonChange: () => loadData(false),
-    showNotifications: true
+    showNotifications: true,
   });
 
   const handleCreate = () => {
@@ -89,12 +103,12 @@ export default function PersonManager() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = (person) => {
+  const handleEdit = person => {
     setEditingPerson(person);
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = async (formData) => {
+  const handleFormSubmit = async formData => {
     try {
       setIsSubmitting(true);
       if (editingPerson) {
@@ -112,7 +126,7 @@ export default function PersonManager() {
     }
   };
 
-  const handleDeleteClick = (person) => {
+  const handleDeleteClick = person => {
     setPersonToDelete(person);
     setDeleteModalOpen(true);
   };
@@ -141,9 +155,7 @@ export default function PersonManager() {
       return baseList;
     }
 
-    return baseList.filter((person) =>
-      person.departmentId === filterDepartment
-    );
+    return baseList.filter(person => person.departmentId === filterDepartment);
   }, [searchTerm, searchResults, people, filterDepartment]);
 
   // Bulk selection hook
@@ -177,7 +189,7 @@ export default function PersonManager() {
     }
   };
 
-  const handleBulkMove = async (targetDepartmentId) => {
+  const handleBulkMove = async targetDepartmentId => {
     try {
       setBulkOperationLoading(true);
       setBulkOperationResult(null);
@@ -193,7 +205,7 @@ export default function PersonManager() {
     }
   };
 
-  const handleBulkEdit = async (updates) => {
+  const handleBulkEdit = async updates => {
     try {
       setBulkOperationLoading(true);
       setBulkOperationResult(null);
@@ -209,10 +221,14 @@ export default function PersonManager() {
     }
   };
 
-  const closeBulkModal = (modalSetter) => {
+  const closeBulkModal = modalSetter => {
     modalSetter(false);
     setBulkOperationResult(null);
-    if (bulkOperationResult?.deletedCount > 0 || bulkOperationResult?.movedCount > 0 || bulkOperationResult?.updatedCount > 0) {
+    if (
+      bulkOperationResult?.deletedCount > 0 ||
+      bulkOperationResult?.movedCount > 0 ||
+      bulkOperationResult?.updatedCount > 0
+    ) {
       exitSelectionMode();
     }
   };
@@ -225,9 +241,7 @@ export default function PersonManager() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-1">People</h1>
-              <p className="text-gray-500">
-                Manage people across all departments
-              </p>
+              <p className="text-gray-500">Manage people across all departments</p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -254,9 +268,7 @@ export default function PersonManager() {
           </div>
 
           {/* Error display */}
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">{error}</div>
-          )}
+          {error && <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">{error}</div>}
 
           {/* Filters - fixed */}
           <div className="mb-4 bg-white rounded-lg shadow p-4">
@@ -278,7 +290,7 @@ export default function PersonManager() {
                   type="text"
                   placeholder="Search by name, title, email, or phone..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -286,11 +298,11 @@ export default function PersonManager() {
               {/* Department Filter */}
               <select
                 value={filterDepartment}
-                onChange={(e) => setFilterDepartment(e.target.value)}
+                onChange={e => setFilterDepartment(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Departments</option>
-                {departments.map((dept) => (
+                {departments.map(dept => (
                   <option key={dept.id} value={dept.id}>
                     {dept.name}
                   </option>
@@ -312,9 +324,7 @@ export default function PersonManager() {
             <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
               <Search size={48} className="mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {searchTerm || filterDepartment
-                  ? 'No people found'
-                  : 'No people yet'}
+                {searchTerm || filterDepartment ? 'No people found' : 'No people yet'}
               </h3>
               <p className="text-gray-500 mb-4">
                 {searchTerm || filterDepartment
@@ -349,22 +359,18 @@ export default function PersonManager() {
                       {allSelected ? 'Deselect all' : 'Select all'}
                     </button>
                     {hasSelection && (
-                      <span className="text-sm text-gray-500">
-                        ({selectedCount} selected)
-                      </span>
+                      <span className="text-sm text-gray-500">({selectedCount} selected)</span>
                     )}
                   </div>
                 )}
                 <div className="divide-y divide-gray-200">
-                  {filteredPeople.map((person) => (
+                  {filteredPeople.map(person => (
                     <div
                       key={person.id}
                       onClick={selectionMode ? () => toggleSelect(person.id) : undefined}
                       className={`p-6 transition-all duration-300 group ${
                         selectionMode ? 'cursor-pointer' : ''
-                      } ${
-                        isRecentlyChanged(person.id) ? 'bg-blue-50 ring-2 ring-blue-200' : ''
-                      } ${
+                      } ${isRecentlyChanged(person.id) ? 'bg-blue-50 ring-2 ring-blue-200' : ''} ${
                         selectionMode && isSelected(person.id) ? 'bg-blue-50' : 'hover:bg-gray-50'
                       }`}
                     >
@@ -382,18 +388,14 @@ export default function PersonManager() {
 
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              {person.name}
-                            </h3>
+                            <h3 className="text-lg font-semibold text-gray-900">{person.name}</h3>
                             <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded">
                               {person.departmentName}
                             </span>
                           </div>
 
                           {person.title && (
-                            <p className="text-sm text-gray-600 mb-3">
-                              {person.title}
-                            </p>
+                            <p className="text-sm text-gray-600 mb-3">{person.title}</p>
                           )}
 
                           <div className="flex flex-wrap gap-4 text-sm text-gray-500">
@@ -403,7 +405,7 @@ export default function PersonManager() {
                                 <a
                                   href={`mailto:${person.email}`}
                                   className="hover:text-blue-600"
-                                  onClick={(e) => selectionMode && e.preventDefault()}
+                                  onClick={e => selectionMode && e.preventDefault()}
                                 >
                                   {person.email}
                                 </a>
@@ -452,7 +454,9 @@ export default function PersonManager() {
                       {filterDepartment && ` (${filteredPeople.length} in selected department)`}
                     </>
                   ) : (
-                    <>Showing {filteredPeople.length} of {people.length} people</>
+                    <>
+                      Showing {filteredPeople.length} of {people.length} people
+                    </>
                   )}
                 </div>
               )}

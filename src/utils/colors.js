@@ -32,8 +32,18 @@ const themes = {
       { bg: 'bg-emerald-700', hex: '#047857', text: 'text-white', hover: 'hover:bg-emerald-600' },
       { bg: 'bg-emerald-600', hex: '#059669', text: 'text-white', hover: 'hover:bg-emerald-500' },
       { bg: 'bg-emerald-500', hex: '#10b981', text: 'text-white', hover: 'hover:bg-emerald-400' },
-      { bg: 'bg-emerald-400', hex: '#34d399', text: 'text-emerald-900', hover: 'hover:bg-emerald-300' },
-      { bg: 'bg-emerald-300', hex: '#6ee7b7', text: 'text-emerald-900', hover: 'hover:bg-emerald-200' },
+      {
+        bg: 'bg-emerald-400',
+        hex: '#34d399',
+        text: 'text-emerald-900',
+        hover: 'hover:bg-emerald-300',
+      },
+      {
+        bg: 'bg-emerald-300',
+        hex: '#6ee7b7',
+        text: 'text-emerald-900',
+        hover: 'hover:bg-emerald-200',
+      },
     ],
     swatch: '#059669',
   },
@@ -43,8 +53,18 @@ const themes = {
       { bg: 'bg-violet-700', hex: '#6d28d9', text: 'text-white', hover: 'hover:bg-violet-600' },
       { bg: 'bg-violet-600', hex: '#7c3aed', text: 'text-white', hover: 'hover:bg-violet-500' },
       { bg: 'bg-violet-500', hex: '#8b5cf6', text: 'text-white', hover: 'hover:bg-violet-400' },
-      { bg: 'bg-violet-400', hex: '#a78bfa', text: 'text-violet-900', hover: 'hover:bg-violet-300' },
-      { bg: 'bg-violet-300', hex: '#c4b5fd', text: 'text-violet-900', hover: 'hover:bg-violet-200' },
+      {
+        bg: 'bg-violet-400',
+        hex: '#a78bfa',
+        text: 'text-violet-900',
+        hover: 'hover:bg-violet-300',
+      },
+      {
+        bg: 'bg-violet-300',
+        hex: '#c4b5fd',
+        text: 'text-violet-900',
+        hover: 'hover:bg-violet-200',
+      },
     ],
     swatch: '#7c3aed',
   },
@@ -104,13 +124,7 @@ export function getThemeSwatch(themeName) {
  * Person cards should be slightly lighter than their parent department
  */
 export function getPersonCardColor(parentDepth) {
-  const backgrounds = [
-    'bg-slate-100',
-    'bg-slate-50',
-    'bg-white',
-    'bg-white',
-    'bg-white',
-  ];
+  const backgrounds = ['bg-slate-100', 'bg-slate-50', 'bg-white', 'bg-white', 'bg-white'];
 
   const index = Math.min(parentDepth, backgrounds.length - 1);
   return backgrounds[index];

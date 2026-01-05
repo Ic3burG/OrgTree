@@ -47,32 +47,38 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
     loadSettings();
   }, [orgId, toast]);
 
-  const loadMembers = useCallback(async (showLoading = true) => {
-    try {
-      if (showLoading) setLoadingMembers(true);
-      const data = await api.getOrgMembers(orgId);
-      setOwner(data.owner);
-      setMembers(data.members || []);
-    } catch (err) {
-      console.error('Failed to load members:', err);
-      if (showLoading) toast.error('Failed to load members');
-    } finally {
-      if (showLoading) setLoadingMembers(false);
-    }
-  }, [orgId, toast]);
+  const loadMembers = useCallback(
+    async (showLoading = true) => {
+      try {
+        if (showLoading) setLoadingMembers(true);
+        const data = await api.getOrgMembers(orgId);
+        setOwner(data.owner);
+        setMembers(data.members || []);
+      } catch (err) {
+        console.error('Failed to load members:', err);
+        if (showLoading) toast.error('Failed to load members');
+      } finally {
+        if (showLoading) setLoadingMembers(false);
+      }
+    },
+    [orgId, toast]
+  );
 
-  const loadInvitations = useCallback(async (showLoading = true) => {
-    try {
-      if (showLoading) setLoadingInvitations(true);
-      const data = await api.getInvitations(orgId);
-      setInvitations(data || []);
-    } catch (err) {
-      console.error('Failed to load invitations:', err);
-      // Don't show error toast - invitations are optional
-    } finally {
-      if (showLoading) setLoadingInvitations(false);
-    }
-  }, [orgId]);
+  const loadInvitations = useCallback(
+    async (showLoading = true) => {
+      try {
+        if (showLoading) setLoadingInvitations(true);
+        const data = await api.getInvitations(orgId);
+        setInvitations(data || []);
+      } catch (err) {
+        console.error('Failed to load invitations:', err);
+        // Don't show error toast - invitations are optional
+      } finally {
+        if (showLoading) setLoadingInvitations(false);
+      }
+    },
+    [orgId]
+  );
 
   // Load members when Team Members tab is active
   useEffect(() => {
@@ -88,7 +94,7 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
       loadMembers(false);
       loadInvitations(false);
     },
-    showNotifications: true
+    showNotifications: true,
   });
 
   // Toggle public/private
@@ -141,13 +147,13 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   };
 
   // Handle member added (from AddMemberModal)
-  const handleMemberAdded = (member) => {
+  const handleMemberAdded = member => {
     toast.success(`${member.userName} added as ${member.role}`);
     loadMembers();
   };
 
   // Handle invitation sent (from AddMemberModal)
-  const handleInvitationSent = (invitation) => {
+  const handleInvitationSent = invitation => {
     toast.success(`Invitation sent to ${invitation.email}`);
     loadInvitations(); // Refresh invitations list
   };
@@ -197,7 +203,7 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   };
 
   // Get initials for avatar
-  const getInitials = (name) => {
+  const getInitials = name => {
     return name
       .split(' ')
       .map(n => n[0])
@@ -207,12 +213,12 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   };
 
   // Role badge colors
-  const getRoleBadgeColor = (role) => {
+  const getRoleBadgeColor = role => {
     const colors = {
       owner: 'bg-purple-100 text-purple-800',
       admin: 'bg-blue-100 text-blue-800',
       editor: 'bg-green-100 text-green-800',
-      viewer: 'bg-gray-100 text-gray-800'
+      viewer: 'bg-gray-100 text-gray-800',
     };
     return colors[role] || colors.viewer;
   };
@@ -363,13 +369,13 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                       <p className="text-sm text-blue-800">
                         {isPublic ? (
                           <>
-                            <strong>Public sharing is enabled.</strong> Anyone with the link can view
-                            this organization chart in read-only mode.
+                            <strong>Public sharing is enabled.</strong> Anyone with the link can
+                            view this organization chart in read-only mode.
                           </>
                         ) : (
                           <>
-                            <strong>Private mode.</strong> Enable public sharing to generate a shareable
-                            link that anyone can use to view this organization chart.
+                            <strong>Private mode.</strong> Enable public sharing to generate a
+                            shareable link that anyone can use to view this organization chart.
                           </>
                         )}
                       </p>
@@ -413,7 +419,9 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                               <div className="text-sm text-gray-500">{owner.userEmail}</div>
                             </div>
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleBadgeColor('owner')}`}>
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleBadgeColor('owner')}`}
+                          >
                             Owner
                           </span>
                         </div>
@@ -424,8 +432,11 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                     {members.length > 0 ? (
                       <div className="space-y-2">
                         <h3 className="text-sm font-medium text-gray-700">Members</h3>
-                        {members.map((member) => (
-                          <div key={member.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                        {members.map(member => (
+                          <div
+                            key={member.id}
+                            className="bg-white border border-gray-200 rounded-lg p-4"
+                          >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3 flex-1">
                                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
@@ -433,7 +444,9 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="font-medium text-gray-900">{member.userName}</div>
-                                  <div className="text-sm text-gray-500 truncate">{member.userEmail}</div>
+                                  <div className="text-sm text-gray-500 truncate">
+                                    {member.userEmail}
+                                  </div>
                                 </div>
                               </div>
                               <div className="flex items-center space-x-3">
@@ -441,7 +454,7 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                                   <>
                                     <select
                                       value={member.role}
-                                      onChange={(e) => handleUpdateRole(member.id, e.target.value)}
+                                      onChange={e => handleUpdateRole(member.id, e.target.value)}
                                       className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     >
                                       <option value="viewer">Viewer</option>
@@ -457,7 +470,9 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                                     </button>
                                   </>
                                 ) : (
-                                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleBadgeColor(member.role)}`}>
+                                  <span
+                                    className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleBadgeColor(member.role)}`}
+                                  >
                                     {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
                                   </span>
                                 )}
@@ -470,7 +485,9 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                       <div className="text-center py-8 text-gray-500">
                         <Users size={48} className="mx-auto mb-3 text-gray-300" />
                         <p className="font-medium">No team members yet</p>
-                        <p className="text-sm mt-1">Add members to collaborate on this organization</p>
+                        <p className="text-sm mt-1">
+                          Add members to collaborate on this organization
+                        </p>
                       </div>
                     )}
 
@@ -478,17 +495,32 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                     {invitations.length > 0 && (
                       <div className="space-y-2">
                         <h3 className="text-sm font-medium text-gray-700">Pending Invitations</h3>
-                        {invitations.map((invitation) => (
-                          <div key={invitation.id} className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                        {invitations.map(invitation => (
+                          <div
+                            key={invitation.id}
+                            className="bg-amber-50 border border-amber-200 rounded-lg p-4"
+                          >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3 flex-1">
                                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-medium">
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                  <svg
+                                    className="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                    />
                                   </svg>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="font-medium text-gray-900">{invitation.email}</div>
+                                  <div className="font-medium text-gray-900">
+                                    {invitation.email}
+                                  </div>
                                   <div className="text-sm text-gray-600">
                                     Invited by {invitation.invitedByName} • {invitation.role}
                                   </div>
@@ -503,7 +535,9 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                                 </span>
                                 {isAdmin && (
                                   <button
-                                    onClick={() => handleCancelInvitation(invitation.id, invitation.email)}
+                                    onClick={() =>
+                                      handleCancelInvitation(invitation.id, invitation.email)
+                                    }
                                     className="text-red-600 hover:text-red-800 transition-colors"
                                     title="Cancel invitation"
                                   >
@@ -523,9 +557,16 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                         <strong>Permission Levels:</strong>
                       </p>
                       <ul className="text-sm text-blue-800 mt-2 space-y-1 list-disc list-inside">
-                        <li><strong>Viewer:</strong> Can view the organization</li>
-                        <li><strong>Editor:</strong> Can create, edit, and delete departments and people</li>
-                        <li><strong>Admin:</strong> Can manage members and settings</li>
+                        <li>
+                          <strong>Viewer:</strong> Can view the organization
+                        </li>
+                        <li>
+                          <strong>Editor:</strong> Can create, edit, and delete departments and
+                          people
+                        </li>
+                        <li>
+                          <strong>Admin:</strong> Can manage members and settings
+                        </li>
                       </ul>
                     </div>
                   </>

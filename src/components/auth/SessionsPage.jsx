@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Monitor, Smartphone, Trash2, Shield, ArrowLeft, RefreshCw, AlertCircle } from 'lucide-react';
+import {
+  Monitor,
+  Smartphone,
+  Trash2,
+  Shield,
+  ArrowLeft,
+  RefreshCw,
+  AlertCircle,
+} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
 
@@ -30,7 +38,7 @@ export default function SessionsPage() {
     fetchSessions();
   }, []);
 
-  const handleRevokeSession = async (sessionId) => {
+  const handleRevokeSession = async sessionId => {
     try {
       setRevoking(sessionId);
       await api.revokeSession(sessionId);
@@ -59,13 +67,13 @@ export default function SessionsPage() {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     if (!dateString) return 'Unknown';
     const date = new Date(dateString);
     return date.toLocaleString();
   };
 
-  const getDeviceIcon = (deviceInfo) => {
+  const getDeviceIcon = deviceInfo => {
     if (!deviceInfo) return <Monitor size={20} />;
     const lower = deviceInfo.toLowerCase();
     if (lower.includes('mobile') || lower.includes('android') || lower.includes('iphone')) {
@@ -74,7 +82,7 @@ export default function SessionsPage() {
     return <Monitor size={20} />;
   };
 
-  const getDeviceName = (deviceInfo) => {
+  const getDeviceName = deviceInfo => {
     if (!deviceInfo) return 'Unknown Device';
     // Parse user agent to get a readable name
     if (deviceInfo.includes('Chrome')) return 'Chrome Browser';
@@ -102,9 +110,7 @@ export default function SessionsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Active Sessions</h1>
-              <p className="text-gray-600">
-                Manage your active sessions across devices
-              </p>
+              <p className="text-gray-600">Manage your active sessions across devices</p>
             </div>
           </div>
         </div>
@@ -153,7 +159,7 @@ export default function SessionsPage() {
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {sessions.map((session) => (
+              {sessions.map(session => (
                 <div
                   key={session.id}
                   className="p-4 flex items-center justify-between hover:bg-gray-50"

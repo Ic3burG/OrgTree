@@ -8,7 +8,7 @@ import {
   updateUserRole,
   resetUserPassword,
   deleteUser,
-  createAdminUser
+  createAdminUser,
 } from '../services/users.service.js';
 import { createAuditLog } from '../services/audit.service.js';
 
@@ -36,11 +36,11 @@ const passwordResetLimiter = rateLimit({
         ipAddress,
         limit: 10,
         windowMs: 15 * 60 * 1000,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
     res.status(429).json({ message: 'Too many password reset attempts, please try again later' });
-  }
+  },
 });
 
 // Rate limiter for sensitive admin operations - prevents abuse of privileged endpoints
@@ -65,11 +65,11 @@ const adminOperationsLimiter = rateLimit({
         ipAddress,
         limit: 50,
         windowMs: 15 * 60 * 1000,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
     res.status(429).json({ message: 'Too many admin operations, please try again later' });
-  }
+  },
 });
 
 // All user management routes require authentication and superuser role

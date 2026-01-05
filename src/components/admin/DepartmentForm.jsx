@@ -32,7 +32,7 @@ export default function DepartmentForm({
     }
   }, [department, isOpen]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
 
     // Build the data object explicitly
@@ -49,7 +49,7 @@ export default function DepartmentForm({
   // Filter departments for parent dropdown
   // Exclude current department (can't be parent of itself)
   const availableParents = Array.isArray(departments)
-    ? departments.filter((d) => {
+    ? departments.filter(d => {
         if (!department) return true; // New department, show all
         return d.id !== department.id; // Exclude self when editing
       })
@@ -81,7 +81,7 @@ export default function DepartmentForm({
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={e => setName(e.target.value)}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                 placeholder="e.g., Finance Department"
                 required
@@ -95,14 +95,14 @@ export default function DepartmentForm({
               </label>
               <select
                 value={parentId}
-                onChange={(e) => {
+                onChange={e => {
                   console.log('Parent selected:', e.target.value);
                   setParentId(e.target.value);
                 }}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white"
               >
                 <option value="">None (Top Level)</option>
-                {availableParents.map((d) => (
+                {availableParents.map(d => (
                   <option key={d.id} value={d.id}>
                     {d.name}
                   </option>
@@ -115,12 +115,10 @@ export default function DepartmentForm({
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Description
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
               <textarea
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={e => setDescription(e.target.value)}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                 rows={3}
                 placeholder="Describe this department's responsibilities..."

@@ -20,9 +20,14 @@ export default function BulkActionBar({
 }) {
   if (selectedCount === 0) return null;
 
-  const itemLabel = selectedCount === 1
-    ? (entityType === 'people' ? 'person' : 'department')
-    : (entityType === 'people' ? 'people' : 'departments');
+  const itemLabel =
+    selectedCount === 1
+      ? entityType === 'people'
+        ? 'person'
+        : 'department'
+      : entityType === 'people'
+        ? 'people'
+        : 'departments';
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-800 text-white rounded-lg shadow-xl px-4 py-3 flex items-center gap-4 z-50">

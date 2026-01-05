@@ -75,7 +75,7 @@ db.exec(`
 
 // Migration: Add sharing columns to organizations table if they don't exist
 try {
-  const tableInfo = db.prepare("PRAGMA table_info(organizations)").all();
+  const tableInfo = db.prepare('PRAGMA table_info(organizations)').all();
   const columnNames = tableInfo.map(col => col.name);
 
   if (!columnNames.includes('is_public')) {
@@ -87,7 +87,9 @@ try {
     // SQLite doesn't allow adding UNIQUE columns via ALTER TABLE
     db.exec('ALTER TABLE organizations ADD COLUMN share_token TEXT');
     // Create unique index separately
-    db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_organizations_share_token ON organizations(share_token)');
+    db.exec(
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_organizations_share_token ON organizations(share_token)'
+    );
     console.log('Migration: Added share_token column to organizations table');
   }
 } catch (err) {
@@ -96,7 +98,7 @@ try {
 
 // Migration: Remove office column from people table if it exists
 try {
-  const peopleTableInfo = db.prepare("PRAGMA table_info(people)").all();
+  const peopleTableInfo = db.prepare('PRAGMA table_info(people)').all();
   const peopleColumnNames = peopleTableInfo.map(col => col.name);
 
   if (peopleColumnNames.includes('office')) {
@@ -139,7 +141,7 @@ try {
 
 // Migration: Add must_change_password column to users table
 try {
-  const usersTableInfo = db.prepare("PRAGMA table_info(users)").all();
+  const usersTableInfo = db.prepare('PRAGMA table_info(users)').all();
   const usersColumnNames = usersTableInfo.map(col => col.name);
 
   if (!usersColumnNames.includes('must_change_password')) {
@@ -374,14 +376,14 @@ try {
 
 // Migration: Add deleted_at column for soft deletes
 try {
-  const departmentsTableInfo = db.prepare("PRAGMA table_info(departments)").all();
+  const departmentsTableInfo = db.prepare('PRAGMA table_info(departments)').all();
   const departmentsColumnNames = departmentsTableInfo.map(col => col.name);
   if (!departmentsColumnNames.includes('deleted_at')) {
     db.exec('ALTER TABLE departments ADD COLUMN deleted_at DATETIME');
     console.log('Migration: Added deleted_at column to departments table');
   }
 
-  const peopleTableInfo = db.prepare("PRAGMA table_info(people)").all();
+  const peopleTableInfo = db.prepare('PRAGMA table_info(people)').all();
   const peopleColumnNames = peopleTableInfo.map(col => col.name);
   if (!peopleColumnNames.includes('deleted_at')) {
     db.exec('ALTER TABLE people ADD COLUMN deleted_at DATETIME');
@@ -394,40 +396,45 @@ try {
 // Migration: Add performance optimization indexes
 try {
   // Check which indexes already exist
-  const existingIndexes = db.prepare(`
+  const existingIndexes = db
+    .prepare(
+      `
     SELECT name FROM sqlite_master WHERE type='index'
-  `).all().map(idx => idx.name);
+  `
+    )
+    .all()
+    .map(idx => idx.name);
 
   const indexesToCreate = [
     // CRITICAL: departments.parent_id - used for hierarchical queries (currently causes table scans)
     {
       name: 'idx_departments_parent_id',
-      sql: 'CREATE INDEX idx_departments_parent_id ON departments(parent_id) WHERE deleted_at IS NULL'
+      sql: 'CREATE INDEX idx_departments_parent_id ON departments(parent_id) WHERE deleted_at IS NULL',
     },
     // HIGH PRIORITY: Soft delete filters used in almost every query
     {
       name: 'idx_departments_deleted_at',
-      sql: 'CREATE INDEX idx_departments_deleted_at ON departments(deleted_at)'
+      sql: 'CREATE INDEX idx_departments_deleted_at ON departments(deleted_at)',
     },
     {
       name: 'idx_people_deleted_at',
-      sql: 'CREATE INDEX idx_people_deleted_at ON people(deleted_at)'
+      sql: 'CREATE INDEX idx_people_deleted_at ON people(deleted_at)',
     },
     // MEDIUM PRIORITY: Audit log filtering by action type
     {
       name: 'idx_audit_logs_action_type',
-      sql: 'CREATE INDEX idx_audit_logs_action_type ON audit_logs(action_type, created_at DESC)'
+      sql: 'CREATE INDEX idx_audit_logs_action_type ON audit_logs(action_type, created_at DESC)',
     },
     // MEDIUM PRIORITY: Finding active invitations
     {
       name: 'idx_invitations_status_expires',
-      sql: 'CREATE INDEX idx_invitations_status_expires ON invitations(status, expires_at) WHERE organization_id IS NOT NULL'
+      sql: 'CREATE INDEX idx_invitations_status_expires ON invitations(status, expires_at) WHERE organization_id IS NOT NULL',
     },
     // LOW PRIORITY: Organization owner lookups (not as frequent)
     {
       name: 'idx_organizations_created_by',
-      sql: 'CREATE INDEX idx_organizations_created_by ON organizations(created_by_id)'
-    }
+      sql: 'CREATE INDEX idx_organizations_created_by ON organizations(created_by_id)',
+    },
   ];
 
   let indexesCreated = 0;

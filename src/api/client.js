@@ -28,7 +28,7 @@ async function fetchCsrfToken() {
   }
 
   csrfTokenPromise = fetch(`${API_BASE}/csrf-token`, {
-    credentials: 'include' // Required for cookies
+    credentials: 'include', // Required for cookies
   })
     .then(response => response.json())
     .then(data => {
@@ -120,8 +120,8 @@ async function refreshAccessToken() {
       method: 'POST',
       credentials: 'include', // Send httpOnly cookie
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!response.ok) {
@@ -154,7 +154,7 @@ export function scheduleTokenRefresh(expiresIn) {
   }
 
   // Refresh at 80% of token lifetime (12 minutes for 15-min token)
-  const refreshTime = (expiresIn * 0.8) * 1000;
+  const refreshTime = expiresIn * 0.8 * 1000;
 
   refreshTimer = setTimeout(async () => {
     const token = await refreshAccessToken();
@@ -209,7 +209,7 @@ async function request(endpoint, options = {}, retryOnCsrf = true) {
     // If already refreshing, wait for it
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
-        subscribeToRefresh(async (newToken) => {
+        subscribeToRefresh(async newToken => {
           if (newToken) {
             // Retry with new token
             config.headers.Authorization = `Bearer ${newToken}`;
@@ -217,7 +217,13 @@ async function request(endpoint, options = {}, retryOnCsrf = true) {
               const retryResponse = await fetch(`${API_BASE}${endpoint}`, config);
               const retryData = retryResponse.status !== 204 ? await retryResponse.json() : null;
               if (!retryResponse.ok) {
-                reject(new ApiError(retryData?.message || 'Request failed', retryResponse.status, retryData?.code));
+                reject(
+                  new ApiError(
+                    retryData?.message || 'Request failed',
+                    retryResponse.status,
+                    retryData?.code
+                  )
+                );
               } else {
                 resolve(retryData);
               }
@@ -245,7 +251,11 @@ async function request(endpoint, options = {}, retryOnCsrf = true) {
         const retryData = retryResponse.status !== 204 ? await retryResponse.json() : null;
 
         if (!retryResponse.ok) {
-          throw new ApiError(retryData?.message || 'Request failed', retryResponse.status, retryData?.code);
+          throw new ApiError(
+            retryData?.message || 'Request failed',
+            retryResponse.status,
+            retryData?.code
+          );
         }
         return retryData;
       } else {
@@ -317,7 +327,7 @@ const api = {
   // Session management
   getSessions: () => request('/auth/sessions'),
 
-  revokeSession: (sessionId) =>
+  revokeSession: sessionId =>
     request(`/auth/sessions/${sessionId}`, {
       method: 'DELETE',
     }),
@@ -330,9 +340,9 @@ const api = {
   // Organizations
   getOrganizations: () => request('/organizations'),
 
-  getOrganization: (id) => request(`/organizations/${id}`),
+  getOrganization: id => request(`/organizations/${id}`),
 
-  createOrganization: (name) =>
+  createOrganization: name =>
     request('/organizations', {
       method: 'POST',
       body: JSON.stringify({ name }),
@@ -344,7 +354,7 @@ const api = {
       body: JSON.stringify({ name }),
     }),
 
-  deleteOrganization: (id) =>
+  deleteOrganization: id =>
     request(`/organizations/${id}`, {
       method: 'DELETE',
     }),
@@ -356,7 +366,7 @@ const api = {
     }),
 
   // Organization sharing
-  getShareSettings: (orgId) => request(`/organizations/${orgId}/share`),
+  getShareSettings: orgId => request(`/organizations/${orgId}/share`),
 
   updateShareSettings: (orgId, isPublic) =>
     request(`/organizations/${orgId}/share`, {
@@ -364,13 +374,13 @@ const api = {
       body: JSON.stringify({ isPublic }),
     }),
 
-  regenerateShareToken: (orgId) =>
+  regenerateShareToken: orgId =>
     request(`/organizations/${orgId}/share/regenerate`, {
       method: 'POST',
     }),
 
   // Organization members
-  getOrgMembers: (orgId) => request(`/organizations/${orgId}/members`),
+  getOrgMembers: orgId => request(`/organizations/${orgId}/members`),
 
   addOrgMember: (orgId, userId, role) =>
     request(`/organizations/${orgId}/members`, {
@@ -396,7 +406,7 @@ const api = {
     }),
 
   // Public (no auth)
-  getPublicOrganization: async (shareToken) => {
+  getPublicOrganization: async shareToken => {
     const response = await fetch(`${API_BASE}/public/org/${shareToken}`);
     const data = await response.json();
 
@@ -408,7 +418,7 @@ const api = {
   },
 
   // Departments
-  getDepartments: (orgId) => request(`/organizations/${orgId}/departments`),
+  getDepartments: orgId => request(`/organizations/${orgId}/departments`),
 
   createDepartment: (orgId, data) =>
     request(`/organizations/${orgId}/departments`, {
@@ -428,7 +438,7 @@ const api = {
     }),
 
   // People
-  getPeople: (deptId) => request(`/departments/${deptId}/people`),
+  getPeople: deptId => request(`/departments/${deptId}/people`),
 
   createPerson: (deptId, data) =>
     request(`/departments/${deptId}/people`, {
@@ -442,7 +452,7 @@ const api = {
       body: JSON.stringify(data),
     }),
 
-  deletePerson: (personId) =>
+  deletePerson: personId =>
     request(`/people/${personId}`, {
       method: 'DELETE',
     }),
@@ -450,9 +460,9 @@ const api = {
   // User Management (superuser only)
   getUsers: () => request('/users'),
 
-  getUser: (userId) => request(`/users/${userId}`),
+  getUser: userId => request(`/users/${userId}`),
 
-  getUserOrganizations: (userId) => request(`/users/${userId}/organizations`),
+  getUserOrganizations: userId => request(`/users/${userId}/organizations`),
 
   updateUser: (userId, data) =>
     request(`/users/${userId}`, {
@@ -466,12 +476,12 @@ const api = {
       body: JSON.stringify({ role }),
     }),
 
-  resetUserPassword: (userId) =>
+  resetUserPassword: userId =>
     request(`/users/${userId}/reset-password`, {
       method: 'POST',
     }),
 
-  deleteUser: (userId) =>
+  deleteUser: userId =>
     request(`/users/${userId}`, {
       method: 'DELETE',
     }),
@@ -495,14 +505,14 @@ const api = {
       body: JSON.stringify({ email, role }),
     }),
 
-  getInvitations: (orgId) => request(`/organizations/${orgId}/invitations`),
+  getInvitations: orgId => request(`/organizations/${orgId}/invitations`),
 
   cancelInvitation: (orgId, invitationId) =>
     request(`/organizations/${orgId}/invitations/${invitationId}`, {
       method: 'DELETE',
     }),
 
-  getInvitationByToken: async (token) => {
+  getInvitationByToken: async token => {
     const response = await fetch(`${API_BASE}/public/invitation/${token}`);
     const data = await response.json();
     if (!response.ok) {
@@ -511,7 +521,7 @@ const api = {
     return data;
   },
 
-  acceptInvitation: (token) =>
+  acceptInvitation: token =>
     request(`/invitations/${token}/accept`, {
       method: 'POST',
     }),

@@ -6,7 +6,7 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   MarkerType,
-  useReactFlow
+  useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -27,7 +27,7 @@ export const ThemeContext = createContext('slate');
 
 // Register custom node types
 const nodeTypes = {
-  department: DepartmentNode
+  department: DepartmentNode,
 };
 
 // Default edge styling
@@ -39,8 +39,8 @@ const defaultEdgeOptions = {
     type: MarkerType.ArrowClosed,
     color: '#94a3b8',
     width: 20,
-    height: 20
-  }
+    height: 20,
+  },
 };
 
 /**
@@ -60,7 +60,7 @@ function transformToFlowData(departments) {
   // Create a map for quick lookups
   const deptMap = new Map(departments.map(d => [d.id, d]));
 
-  departments.forEach((dept) => {
+  departments.forEach(dept => {
     const depth = getDepth(dept, deptMap);
 
     nodes.push({
@@ -112,58 +112,61 @@ export default function OrgMap() {
   const toast = useToast();
 
   // Load organization data from API
-  const loadData = useCallback(async (showLoading = true) => {
-    try {
-      if (showLoading) setIsLoading(true);
-      setError(null);
+  const loadData = useCallback(
+    async (showLoading = true) => {
+      try {
+        if (showLoading) setIsLoading(true);
+        setError(null);
 
-      // Fetch organization with all departments and people
-      const org = await api.getOrganization(orgId);
+        // Fetch organization with all departments and people
+        const org = await api.getOrganization(orgId);
 
-      // Store organization name for exports
-      if (org.name) {
-        setOrgName(org.name);
-      }
-
-      if (!org.departments || org.departments.length === 0) {
-        setNodes([]);
-        setEdges([]);
-        if (showLoading) setIsLoading(false);
-        return;
-      }
-
-      // Transform API data to React Flow format
-      const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(org.departments);
-
-      // Apply initial layout
-      const layoutedNodes = calculateLayout(parsedNodes, parsedEdges, layoutDirection);
-
-      // Add callbacks to node data
-      const nodesWithCallbacks = layoutedNodes.map(node => ({
-        ...node,
-        data: {
-          ...node.data,
-          onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: (person) => handleSelectPerson(person)
+        // Store organization name for exports
+        if (org.name) {
+          setOrgName(org.name);
         }
-      }));
 
-      setNodes(nodesWithCallbacks);
-      setEdges(parsedEdges);
+        if (!org.departments || org.departments.length === 0) {
+          setNodes([]);
+          setEdges([]);
+          if (showLoading) setIsLoading(false);
+          return;
+        }
 
-      // Fit view after initial load (only on first load)
-      if (showLoading) {
-        setTimeout(() => {
-          fitView({ padding: 0.2, duration: 800 });
-        }, 100);
+        // Transform API data to React Flow format
+        const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(org.departments);
+
+        // Apply initial layout
+        const layoutedNodes = calculateLayout(parsedNodes, parsedEdges, layoutDirection);
+
+        // Add callbacks to node data
+        const nodesWithCallbacks = layoutedNodes.map(node => ({
+          ...node,
+          data: {
+            ...node.data,
+            onToggleExpand: () => handleToggleExpand(node.id),
+            onSelectPerson: person => handleSelectPerson(person),
+          },
+        }));
+
+        setNodes(nodesWithCallbacks);
+        setEdges(parsedEdges);
+
+        // Fit view after initial load (only on first load)
+        if (showLoading) {
+          setTimeout(() => {
+            fitView({ padding: 0.2, duration: 800 });
+          }, 100);
+        }
+      } catch (err) {
+        console.error('Error loading organization data:', err);
+        setError(err.message || 'Failed to load organization data');
+      } finally {
+        if (showLoading) setIsLoading(false);
       }
-    } catch (err) {
-      console.error('Error loading organization data:', err);
-      setError(err.message || 'Failed to load organization data');
-    } finally {
-      if (showLoading) setIsLoading(false);
-    }
-  }, [orgId, layoutDirection, fitView, setNodes, setEdges]);
+    },
+    [orgId, layoutDirection, fitView, setNodes, setEdges]
+  );
 
   // Initial load
   useEffect(() => {
@@ -176,7 +179,7 @@ export default function OrgMap() {
   useRealtimeUpdates(orgId, {
     onDepartmentChange: () => loadData(false),
     onPersonChange: () => loadData(false),
-    showNotifications: true
+    showNotifications: true,
   });
 
   // Load saved theme from localStorage on mount
@@ -188,38 +191,41 @@ export default function OrgMap() {
   }, []);
 
   // Toggle department expansion
-  const handleToggleExpand = useCallback((nodeId) => {
-    setNodes((nds) => {
-      const updatedNodes = nds.map((node) => {
-        if (node.id === nodeId) {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              isExpanded: !node.data.isExpanded
-            }
-          };
-        }
-        return node;
+  const handleToggleExpand = useCallback(
+    nodeId => {
+      setNodes(nds => {
+        const updatedNodes = nds.map(node => {
+          if (node.id === nodeId) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                isExpanded: !node.data.isExpanded,
+              },
+            };
+          }
+          return node;
+        });
+
+        // Recalculate layout with new dimensions
+        const layoutedNodes = calculateLayout(updatedNodes, edges, layoutDirection);
+
+        // Preserve callbacks
+        return layoutedNodes.map(node => ({
+          ...node,
+          data: {
+            ...node.data,
+            onToggleExpand: () => handleToggleExpand(node.id),
+            onSelectPerson: person => handleSelectPerson(person),
+          },
+        }));
       });
-
-      // Recalculate layout with new dimensions
-      const layoutedNodes = calculateLayout(updatedNodes, edges, layoutDirection);
-
-      // Preserve callbacks
-      return layoutedNodes.map(node => ({
-        ...node,
-        data: {
-          ...node.data,
-          onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: (person) => handleSelectPerson(person)
-        }
-      }));
-    });
-  }, [edges, layoutDirection, setNodes]);
+    },
+    [edges, layoutDirection, setNodes]
+  );
 
   // Select person for detail panel
-  const handleSelectPerson = useCallback((person) => {
+  const handleSelectPerson = useCallback(person => {
     setSelectedPerson(person);
   }, []);
 
@@ -230,10 +236,10 @@ export default function OrgMap() {
 
   // Expand all departments
   const handleExpandAll = useCallback(() => {
-    setNodes((nds) => {
-      const updatedNodes = nds.map((node) => ({
+    setNodes(nds => {
+      const updatedNodes = nds.map(node => ({
         ...node,
-        data: { ...node.data, isExpanded: true }
+        data: { ...node.data, isExpanded: true },
       }));
 
       const layoutedNodes = calculateLayout(updatedNodes, edges, layoutDirection);
@@ -243,18 +249,18 @@ export default function OrgMap() {
         data: {
           ...node.data,
           onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: (person) => handleSelectPerson(person)
-        }
+          onSelectPerson: person => handleSelectPerson(person),
+        },
       }));
     });
   }, [edges, layoutDirection, handleToggleExpand, handleSelectPerson, setNodes]);
 
   // Collapse all departments
   const handleCollapseAll = useCallback(() => {
-    setNodes((nds) => {
-      const updatedNodes = nds.map((node) => ({
+    setNodes(nds => {
+      const updatedNodes = nds.map(node => ({
         ...node,
-        data: { ...node.data, isExpanded: false }
+        data: { ...node.data, isExpanded: false },
       }));
 
       const layoutedNodes = calculateLayout(updatedNodes, edges, layoutDirection);
@@ -264,8 +270,8 @@ export default function OrgMap() {
         data: {
           ...node.data,
           onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: (person) => handleSelectPerson(person)
-        }
+          onSelectPerson: person => handleSelectPerson(person),
+        },
       }));
     });
   }, [edges, layoutDirection, handleToggleExpand, handleSelectPerson, setNodes]);
@@ -275,7 +281,7 @@ export default function OrgMap() {
     const newDirection = layoutDirection === 'TB' ? 'LR' : 'TB';
     setLayoutDirection(newDirection);
 
-    setNodes((nds) => {
+    setNodes(nds => {
       const layoutedNodes = calculateLayout(nds, edges, newDirection);
 
       return layoutedNodes.map(node => ({
@@ -283,8 +289,8 @@ export default function OrgMap() {
         data: {
           ...node.data,
           onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: (person) => handleSelectPerson(person)
-        }
+          onSelectPerson: person => handleSelectPerson(person),
+        },
       }));
     });
 
@@ -292,7 +298,7 @@ export default function OrgMap() {
   }, [layoutDirection, edges, fitView, handleToggleExpand, handleSelectPerson, setNodes]);
 
   // Handle theme change
-  const handleThemeChange = useCallback((themeName) => {
+  const handleThemeChange = useCallback(themeName => {
     setCurrentTheme(themeName);
     localStorage.setItem('orgTreeTheme', themeName);
   }, []);
@@ -332,42 +338,45 @@ export default function OrgMap() {
   }, [orgName, toast]);
 
   // Handle search result selection
-  const handleSearchSelect = useCallback((result) => {
-    if (result.type === 'department') {
-      // Zoom to department node
-      const node = nodes.find(n => n.id === result.nodeId);
-      if (node) {
-        setCenter(node.position.x + 110, node.position.y + 35, { zoom: 1.5, duration: 800 });
-        setHighlightedNodeId(node.id);
-        setTimeout(() => setHighlightedNodeId(null), 3000);
-      }
-    } else if (result.type === 'person') {
-      // Expand department if not expanded, then zoom to it
-      const nodeId = result.nodeId;
-      const node = nodes.find(n => n.id === nodeId);
-
-      if (node && !node.data.isExpanded) {
-        handleToggleExpand(nodeId);
-      }
-
-      setTimeout(() => {
-        const updatedNode = nodes.find(n => n.id === nodeId);
-        if (updatedNode) {
-          setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
-            zoom: 1.5,
-            duration: 800
-          });
-          setHighlightedNodeId(nodeId);
+  const handleSearchSelect = useCallback(
+    result => {
+      if (result.type === 'department') {
+        // Zoom to department node
+        const node = nodes.find(n => n.id === result.nodeId);
+        if (node) {
+          setCenter(node.position.x + 110, node.position.y + 35, { zoom: 1.5, duration: 800 });
+          setHighlightedNodeId(node.id);
           setTimeout(() => setHighlightedNodeId(null), 3000);
         }
+      } else if (result.type === 'person') {
+        // Expand department if not expanded, then zoom to it
+        const nodeId = result.nodeId;
+        const node = nodes.find(n => n.id === nodeId);
 
-        // Open detail panel
-        if (result.person) {
-          setSelectedPerson(result.person);
+        if (node && !node.data.isExpanded) {
+          handleToggleExpand(nodeId);
         }
-      }, 300);
-    }
-  }, [nodes, setCenter, handleToggleExpand]);
+
+        setTimeout(() => {
+          const updatedNode = nodes.find(n => n.id === nodeId);
+          if (updatedNode) {
+            setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
+              zoom: 1.5,
+              duration: 800,
+            });
+            setHighlightedNodeId(nodeId);
+            setTimeout(() => setHighlightedNodeId(null), 3000);
+          }
+
+          // Open detail panel
+          if (result.person) {
+            setSelectedPerson(result.person);
+          }
+        }, 300);
+      }
+    },
+    [nodes, setCenter, handleToggleExpand]
+  );
 
   // Update highlighted state and callbacks in nodes
   const nodesWithHighlight = useMemo(() => {
@@ -378,8 +387,8 @@ export default function OrgMap() {
         theme: currentTheme,
         isHighlighted: node.id === highlightedNodeId,
         onToggleExpand: () => handleToggleExpand(node.id),
-        onSelectPerson: (person) => handleSelectPerson(person)
-      }
+        onSelectPerson: person => handleSelectPerson(person),
+      },
     }));
   }, [nodes, currentTheme, highlightedNodeId, handleToggleExpand, handleSelectPerson]);
 
@@ -422,9 +431,7 @@ export default function OrgMap() {
               d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
             />
           </svg>
-          <h3 className="text-lg font-medium text-slate-900 mb-2">
-            No departments yet
-          </h3>
+          <h3 className="text-lg font-medium text-slate-900 mb-2">No departments yet</h3>
           <p className="text-slate-500">
             Create departments in the Departments section to see them visualized here.
           </p>
@@ -459,7 +466,7 @@ export default function OrgMap() {
           >
             <Background color="#cbd5e1" gap={20} size={1} />
             <MiniMap
-              nodeColor={(node) => getDepthColors(node.data.depth, currentTheme).hex}
+              nodeColor={node => getDepthColors(node.data.depth, currentTheme).hex}
               maskColor="rgba(0, 0, 0, 0.1)"
               position="bottom-right"
             />
@@ -492,9 +499,7 @@ export default function OrgMap() {
       </div>
 
       {/* Detail Panel */}
-      {selectedPerson && (
-        <DetailPanel person={selectedPerson} onClose={handleCloseDetail} />
-      )}
+      {selectedPerson && <DetailPanel person={selectedPerson} onClose={handleCloseDetail} />}
     </div>
   );
 }

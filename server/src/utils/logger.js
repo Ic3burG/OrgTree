@@ -11,11 +11,12 @@ function formatLog(level, message, meta = {}) {
     timestamp: new Date().toISOString(),
     level,
     message,
-    ...meta
+    ...meta,
   };
 
-  return isProduction ? JSON.stringify(log) :
-    `[${log.timestamp}] ${level.toUpperCase()}: ${message}${Object.keys(meta).length ? ' ' + JSON.stringify(meta) : ''}`;
+  return isProduction
+    ? JSON.stringify(log)
+    : `[${log.timestamp}] ${level.toUpperCase()}: ${message}${Object.keys(meta).length ? ' ' + JSON.stringify(meta) : ''}`;
 }
 
 export const logger = {
@@ -26,7 +27,7 @@ export const logger = {
     if (!isProduction) {
       console.debug(formatLog('debug', message, meta));
     }
-  }
+  },
 };
 
 export default logger;

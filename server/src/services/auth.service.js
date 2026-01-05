@@ -24,15 +24,21 @@ export async function createUser(name, email, password, ipAddress = null, userAg
   const userId = randomUUID();
   const now = new Date().toISOString();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO users (id, name, email, password_hash, role, created_at, updated_at)
     VALUES (?, ?, ?, ?, 'user', ?, ?)
-  `).run(userId, name, email, passwordHash, now, now);
+  `
+  ).run(userId, name, email, passwordHash, now, now);
 
-  const user = db.prepare(`
+  const user = db
+    .prepare(
+      `
     SELECT id, name, email, role, created_at
     FROM users WHERE id = ?
-  `).get(userId);
+  `
+    )
+    .get(userId);
 
   // Generate access token
   const accessToken = generateToken(user);
@@ -64,7 +70,7 @@ export async function loginUser(email, password, ipAddress = null, userAgent = n
         email,
         reason: 'user_not_found',
         ipAddress,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
     const error = new Error('Invalid email or password');
@@ -86,7 +92,7 @@ export async function loginUser(email, password, ipAddress = null, userAgent = n
         email,
         reason: 'invalid_password',
         ipAddress,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
     const error = new Error('Invalid email or password');
@@ -107,7 +113,7 @@ export async function loginUser(email, password, ipAddress = null, userAgent = n
       name: user.name,
       email: user.email,
       role: user.role,
-      mustChangePassword: user.must_change_password === 1
+      mustChangePassword: user.must_change_password === 1,
     },
     accessToken,
     refreshToken,
@@ -116,10 +122,14 @@ export async function loginUser(email, password, ipAddress = null, userAgent = n
 }
 
 export async function getUserById(id) {
-  const user = db.prepare(`
+  const user = db
+    .prepare(
+      `
     SELECT id, name, email, role, must_change_password, created_at
     FROM users WHERE id = ?
-  `).get(id);
+  `
+    )
+    .get(id);
 
   if (!user) {
     const error = new Error('User not found');
@@ -133,7 +143,7 @@ export async function getUserById(id) {
     email: user.email,
     role: user.role,
     mustChangePassword: user.must_change_password === 1,
-    createdAt: user.created_at
+    createdAt: user.created_at,
   };
 }
 
@@ -188,10 +198,12 @@ export function storeRefreshToken(userId, token, metadata = {}) {
   const tokenHash = hashRefreshToken(token);
   const expiresAt = getRefreshTokenExpiry();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO refresh_tokens (id, user_id, token_hash, device_info, ip_address, expires_at)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).run(id, userId, tokenHash, metadata.userAgent || null, metadata.ipAddress || null, expiresAt);
+  `
+  ).run(id, userId, tokenHash, metadata.userAgent || null, metadata.ipAddress || null, expiresAt);
 
   return { id, expiresAt };
 }
@@ -204,23 +216,29 @@ export function storeRefreshToken(userId, token, metadata = {}) {
 export function validateRefreshToken(token) {
   const tokenHash = hashRefreshToken(token);
 
-  const tokenRecord = db.prepare(`
+  const tokenRecord = db
+    .prepare(
+      `
     SELECT rt.*, u.id as userId, u.name, u.email, u.role, u.must_change_password
     FROM refresh_tokens rt
     JOIN users u ON rt.user_id = u.id
     WHERE rt.token_hash = ?
       AND rt.expires_at > datetime('now')
       AND rt.revoked_at IS NULL
-  `).get(tokenHash);
+  `
+    )
+    .get(tokenHash);
 
   if (!tokenRecord) {
     return null;
   }
 
   // Update last_used_at
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE refresh_tokens SET last_used_at = datetime('now') WHERE token_hash = ?
-  `).run(tokenHash);
+  `
+  ).run(tokenHash);
 
   return {
     tokenId: tokenRecord.id,
@@ -228,7 +246,7 @@ export function validateRefreshToken(token) {
     name: tokenRecord.name,
     email: tokenRecord.email,
     role: tokenRecord.role,
-    mustChangePassword: tokenRecord.must_change_password === 1
+    mustChangePassword: tokenRecord.must_change_password === 1,
   };
 }
 
@@ -240,11 +258,15 @@ export function validateRefreshToken(token) {
 export function revokeRefreshToken(token) {
   const tokenHash = hashRefreshToken(token);
 
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     UPDATE refresh_tokens
     SET revoked_at = datetime('now')
     WHERE token_hash = ? AND revoked_at IS NULL
-  `).run(tokenHash);
+  `
+    )
+    .run(tokenHash);
 
   return result.changes > 0;
 }
@@ -255,11 +277,15 @@ export function revokeRefreshToken(token) {
  * @returns {number} Number of tokens revoked
  */
 export function revokeAllUserTokens(userId) {
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     UPDATE refresh_tokens
     SET revoked_at = datetime('now')
     WHERE user_id = ? AND revoked_at IS NULL
-  `).run(userId);
+  `
+    )
+    .run(userId);
 
   return result.changes;
 }
@@ -296,8 +322,8 @@ export function rotateRefreshToken(oldToken, metadata = {}) {
       name: userData.name,
       email: userData.email,
       role: userData.role,
-      mustChangePassword: userData.mustChangePassword
-    }
+      mustChangePassword: userData.mustChangePassword,
+    },
   };
 }
 
@@ -307,7 +333,9 @@ export function rotateRefreshToken(oldToken, metadata = {}) {
  * @returns {array} List of active sessions
  */
 export function getUserSessions(userId) {
-  const sessions = db.prepare(`
+  const sessions = db
+    .prepare(
+      `
     SELECT
       id,
       device_info as deviceInfo,
@@ -317,7 +345,9 @@ export function getUserSessions(userId) {
     FROM refresh_tokens
     WHERE user_id = ? AND revoked_at IS NULL AND expires_at > datetime('now')
     ORDER BY last_used_at DESC
-  `).all(userId);
+  `
+    )
+    .all(userId);
 
   return sessions;
 }
@@ -329,11 +359,15 @@ export function getUserSessions(userId) {
  * @returns {boolean} True if revoked, false if not found
  */
 export function revokeSession(sessionId, userId) {
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     UPDATE refresh_tokens
     SET revoked_at = datetime('now')
     WHERE id = ? AND user_id = ? AND revoked_at IS NULL
-  `).run(sessionId, userId);
+  `
+    )
+    .run(sessionId, userId);
 
   return result.changes > 0;
 }
@@ -347,11 +381,15 @@ export function revokeSession(sessionId, userId) {
 export function revokeOtherSessions(userId, currentToken) {
   const currentHash = hashRefreshToken(currentToken);
 
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     UPDATE refresh_tokens
     SET revoked_at = datetime('now')
     WHERE user_id = ? AND token_hash != ? AND revoked_at IS NULL
-  `).run(userId, currentHash);
+  `
+    )
+    .run(userId, currentHash);
 
   return result.changes;
 }
@@ -364,11 +402,15 @@ export function cleanupExpiredTokens() {
   // Delete tokens that are:
   // 1. Expired (past expires_at)
   // 2. Revoked more than 7 days ago (keep revoked tokens briefly for security analysis)
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     DELETE FROM refresh_tokens
     WHERE expires_at < datetime('now')
        OR (revoked_at IS NOT NULL AND revoked_at < datetime('now', '-7 days'))
-  `).run();
+  `
+    )
+    .run();
 
   if (result.changes > 0) {
     console.log(`Cleaned up ${result.changes} expired/revoked refresh tokens`);

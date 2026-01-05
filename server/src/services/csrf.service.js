@@ -38,9 +38,7 @@ export function signCsrfToken(token) {
     throw new Error('CSRF_SECRET or JWT_SECRET must be configured');
   }
 
-  const signature = createHmac('sha256', secret)
-    .update(token)
-    .digest('base64url');
+  const signature = createHmac('sha256', secret).update(token).digest('base64url');
 
   return `${token}.${signature}`;
 }
@@ -67,9 +65,7 @@ export function verifyCsrfToken(signedToken) {
     return false;
   }
 
-  const expectedSignature = createHmac('sha256', secret)
-    .update(token)
-    .digest('base64url');
+  const expectedSignature = createHmac('sha256', secret).update(token).digest('base64url');
 
   // Timing-safe comparison to prevent timing attacks
   try {

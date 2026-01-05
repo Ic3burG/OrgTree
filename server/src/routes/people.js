@@ -11,7 +11,7 @@ import {
 import {
   emitPersonCreated,
   emitPersonUpdated,
-  emitPersonDeleted
+  emitPersonDeleted,
 } from '../services/socket-events.service.js';
 import db from '../db.js';
 
@@ -45,7 +45,9 @@ router.post('/departments/:deptId/people', async (req, res, next) => {
     );
 
     // Get orgId from department for real-time event
-    const dept = db.prepare('SELECT organization_id FROM departments WHERE id = ?').get(req.params.deptId);
+    const dept = db
+      .prepare('SELECT organization_id FROM departments WHERE id = ?')
+      .get(req.params.deptId);
     if (dept) {
       emitPersonCreated(dept.organization_id, person, req.user);
     }
@@ -82,7 +84,9 @@ router.put('/people/:personId', async (req, res, next) => {
     );
 
     // Get orgId from person's department for real-time event
-    const dept = db.prepare('SELECT organization_id FROM departments WHERE id = ?').get(person.departmentId);
+    const dept = db
+      .prepare('SELECT organization_id FROM departments WHERE id = ?')
+      .get(person.departmentId);
     if (dept) {
       emitPersonUpdated(dept.organization_id, person, req.user);
     }
@@ -97,12 +101,16 @@ router.put('/people/:personId', async (req, res, next) => {
 router.delete('/people/:personId', async (req, res, next) => {
   try {
     // Get full person data before deleting for audit trail
-    const person = db.prepare(`
+    const person = db
+      .prepare(
+        `
       SELECT p.id, p.name, p.title, p.email, p.phone, p.department_id as departmentId, d.organization_id, d.name as departmentName
       FROM people p
       JOIN departments d ON p.department_id = d.id
       WHERE p.id = ?
-    `).get(req.params.personId);
+    `
+      )
+      .get(req.params.personId);
 
     await deletePerson(req.params.personId, req.user.id);
 
@@ -129,7 +137,9 @@ router.put('/people/:personId/move', async (req, res, next) => {
     const person = await movePerson(req.params.personId, departmentId, req.user.id);
 
     // Get orgId from new department for real-time event
-    const dept = db.prepare('SELECT organization_id FROM departments WHERE id = ?').get(departmentId);
+    const dept = db
+      .prepare('SELECT organization_id FROM departments WHERE id = ?')
+      .get(departmentId);
     if (dept) {
       emitPersonUpdated(dept.organization_id, person, req.user);
     }

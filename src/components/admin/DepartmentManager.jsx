@@ -37,7 +37,7 @@ export default function DepartmentManager() {
     setQuery: setSearchQuery,
     results: searchResults,
     loading: searchLoading,
-    total: searchTotal
+    total: searchTotal,
   } = useSearch(orgId, { debounceMs: 300, minQueryLength: 2, defaultType: 'departments' });
 
   // Modal states
@@ -53,22 +53,25 @@ export default function DepartmentManager() {
   const [bulkOperationLoading, setBulkOperationLoading] = useState(false);
   const [bulkOperationResult, setBulkOperationResult] = useState(null);
 
-  const loadDepartments = useCallback(async (showLoading = true) => {
-    try {
-      if (showLoading) setLoading(true);
-      const data = await api.getDepartments(orgId);
-      console.log('Loaded departments:', data);
-      setDepartments(data);
-      // Auto-expand all on initial load
-      if (showLoading) {
-        setExpanded(new Set(data.map((d) => d.id)));
+  const loadDepartments = useCallback(
+    async (showLoading = true) => {
+      try {
+        if (showLoading) setLoading(true);
+        const data = await api.getDepartments(orgId);
+        console.log('Loaded departments:', data);
+        setDepartments(data);
+        // Auto-expand all on initial load
+        if (showLoading) {
+          setExpanded(new Set(data.map(d => d.id)));
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        if (showLoading) setLoading(false);
       }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      if (showLoading) setLoading(false);
-    }
-  }, [orgId]);
+    },
+    [orgId]
+  );
 
   useEffect(() => {
     loadDepartments();
@@ -78,10 +81,10 @@ export default function DepartmentManager() {
   const { isRecentlyChanged } = useRealtimeUpdates(orgId, {
     onDepartmentChange: () => loadDepartments(false),
     onPersonChange: () => loadDepartments(false),
-    showNotifications: true
+    showNotifications: true,
   });
 
-  const handleCreateDept = async (formData) => {
+  const handleCreateDept = async formData => {
     console.log('handleCreateDept called with:', formData);
     setFormLoading(true);
     setError('');
@@ -98,7 +101,7 @@ export default function DepartmentManager() {
     }
   };
 
-  const handleUpdateDept = async (formData) => {
+  const handleUpdateDept = async formData => {
     console.log('handleUpdateDept called with:', formData);
     console.log('Editing department ID:', editingDept.id);
     setFormLoading(true);
@@ -137,14 +140,14 @@ export default function DepartmentManager() {
     setShowForm(true);
   };
 
-  const openEditForm = (dept) => {
+  const openEditForm = dept => {
     console.log('Opening edit form for:', dept);
     console.log('Current parentId:', dept.parentId);
     setEditingDept(dept);
     setShowForm(true);
   };
 
-  const toggleExpand = (id) => {
+  const toggleExpand = id => {
     const newExpanded = new Set(expanded);
     if (newExpanded.has(id)) {
       newExpanded.delete(id);
@@ -157,8 +160,8 @@ export default function DepartmentManager() {
   // Build tree structure from flat list (only used when not searching)
   const buildTree = (depts, parentId = null, depth = 0) => {
     return depts
-      .filter((d) => d.parentId === parentId)
-      .map((dept) => ({
+      .filter(d => d.parentId === parentId)
+      .map(dept => ({
         ...dept,
         depth,
         children: buildTree(depts, dept.id, depth + 1),
@@ -201,7 +204,7 @@ export default function DepartmentManager() {
     }
   };
 
-  const handleBulkEdit = async (updates) => {
+  const handleBulkEdit = async updates => {
     try {
       setBulkOperationLoading(true);
       setBulkOperationResult(null);
@@ -217,7 +220,7 @@ export default function DepartmentManager() {
     }
   };
 
-  const closeBulkModal = (modalSetter) => {
+  const closeBulkModal = modalSetter => {
     modalSetter(false);
     setBulkOperationResult(null);
     if (bulkOperationResult?.deletedCount > 0 || bulkOperationResult?.updatedCount > 0) {
@@ -226,7 +229,7 @@ export default function DepartmentManager() {
   };
 
   // Render a single department in tree view
-  const renderDepartment = (dept) => {
+  const renderDepartment = dept => {
     const hasChildren = dept.children && dept.children.length > 0;
     const isExpanded = expanded.has(dept.id);
     const peopleCount = dept.people?.length || 0;
@@ -239,9 +242,7 @@ export default function DepartmentManager() {
           onClick={selectionMode ? () => toggleSelect(dept.id) : undefined}
           className={`flex items-center gap-2 p-3 rounded-lg group transition-all duration-300 ${
             selectionMode ? 'cursor-pointer' : ''
-          } ${
-            recentlyChanged ? 'bg-blue-50 ring-2 ring-blue-200' : ''
-          } ${
+          } ${recentlyChanged ? 'bg-blue-50 ring-2 ring-blue-200' : ''} ${
             selectionMode && selected ? 'bg-blue-50' : 'hover:bg-slate-50'
           }`}
           style={{ paddingLeft: `${dept.depth * 24 + 12}px` }}
@@ -278,9 +279,7 @@ export default function DepartmentManager() {
               <Users size={14} className="inline mr-1" />
               {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
             </span>
-            {dept.parentId && (
-              <span className="ml-2 text-xs text-green-600">(has parent)</span>
-            )}
+            {dept.parentId && <span className="ml-2 text-xs text-green-600">(has parent)</span>}
           </div>
 
           {/* Actions - hide in selection mode */}
@@ -315,7 +314,7 @@ export default function DepartmentManager() {
   };
 
   // Render a single search result (flat view)
-  const renderSearchResult = (result) => {
+  const renderSearchResult = result => {
     // Find the full department data from our loaded departments
     const fullDept = departments.find(d => d.id === result.id) || result;
     const peopleCount = result.peopleCount || fullDept.people?.length || 0;
@@ -328,9 +327,7 @@ export default function DepartmentManager() {
         onClick={selectionMode ? () => toggleSelect(result.id) : undefined}
         className={`flex items-center gap-2 p-3 rounded-lg group transition-all duration-300 ${
           selectionMode ? 'cursor-pointer' : ''
-        } ${
-          recentlyChanged ? 'bg-blue-50 ring-2 ring-blue-200' : ''
-        } ${
+        } ${recentlyChanged ? 'bg-blue-50 ring-2 ring-blue-200' : ''} ${
           selectionMode && selected ? 'bg-blue-50' : 'hover:bg-slate-50'
         }`}
       >
@@ -429,22 +426,26 @@ export default function DepartmentManager() {
           </div>
         </div>
 
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">{error}</div>
-        )}
+        {error && <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">{error}</div>}
 
         <div className="mb-4">
           <div className="relative max-w-md">
             {searchLoading ? (
-              <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 animate-spin" size={20} />
+              <Loader2
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 animate-spin"
+                size={20}
+              />
             ) : (
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                size={20}
+              />
             )}
             <input
               type="text"
               placeholder="Search departments by name or description..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -474,9 +475,7 @@ export default function DepartmentManager() {
                 {allSelected ? 'Deselect all' : 'Select all'}
               </button>
               {hasSelection && (
-                <span className="text-sm text-slate-500">
-                  ({selectedCount} selected)
-                </span>
+                <span className="text-sm text-slate-500">({selectedCount} selected)</span>
               )}
             </div>
           )}
@@ -500,18 +499,18 @@ export default function DepartmentManager() {
             ) : (
               <div className="p-2">{searchResults.map(renderSearchResult)}</div>
             )
+          ) : // Tree view (when not searching) - flat in selection mode
+          tree.length === 0 ? (
+            <div className="p-8 text-center text-slate-500">
+              No departments yet. Click "Add Department" to create one.
+            </div>
+          ) : selectionMode ? (
+            // Flat list in selection mode
+            <div className="p-2">
+              {departments.map(dept => renderDepartment({ ...dept, depth: 0, children: [] }))}
+            </div>
           ) : (
-            // Tree view (when not searching) - flat in selection mode
-            tree.length === 0 ? (
-              <div className="p-8 text-center text-slate-500">
-                No departments yet. Click "Add Department" to create one.
-              </div>
-            ) : selectionMode ? (
-              // Flat list in selection mode
-              <div className="p-2">{departments.map(dept => renderDepartment({ ...dept, depth: 0, children: [] }))}</div>
-            ) : (
-              <div className="p-2">{tree.map(renderDepartment)}</div>
-            )
+            <div className="p-2">{tree.map(renderDepartment)}</div>
           )}
         </div>
       </div>

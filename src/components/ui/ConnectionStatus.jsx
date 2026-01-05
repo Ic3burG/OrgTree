@@ -22,7 +22,7 @@ export default function ConnectionStatus() {
   const colors = {
     connected: 'bg-green-500',
     error: 'bg-amber-500',
-    disconnected: 'bg-gray-400'
+    disconnected: 'bg-gray-400',
   };
 
   return (

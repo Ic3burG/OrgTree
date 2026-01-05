@@ -25,10 +25,7 @@ function ensureBackupDir() {
  */
 function generateBackupFilename() {
   const now = new Date();
-  const timestamp = now.toISOString()
-    .replace(/T/, '-')
-    .replace(/:/g, '')
-    .replace(/\..+/, '');
+  const timestamp = now.toISOString().replace(/T/, '-').replace(/:/g, '').replace(/\..+/, '');
   return `orgtree-backup-${timestamp}.db`;
 }
 
@@ -58,7 +55,7 @@ export async function createBackup(customPath = null) {
     logger.info('Database backup completed', {
       path: backupPath,
       sizeMB,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     return {
@@ -66,13 +63,13 @@ export async function createBackup(customPath = null) {
       path: backupPath,
       size: stats.size,
       sizeMB: parseFloat(sizeMB),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   } catch (error) {
     logger.error('Database backup failed', { error: error.message });
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -84,7 +81,8 @@ export async function createBackup(customPath = null) {
 export function listBackups() {
   ensureBackupDir();
 
-  const files = fs.readdirSync(BACKUP_DIR)
+  const files = fs
+    .readdirSync(BACKUP_DIR)
     .filter(f => f.startsWith('orgtree-backup-') && f.endsWith('.db'))
     .map(filename => {
       const filePath = path.join(BACKUP_DIR, filename);
@@ -94,7 +92,7 @@ export function listBackups() {
         path: filePath,
         size: stats.size,
         sizeMB: parseFloat((stats.size / (1024 * 1024)).toFixed(2)),
-        created: stats.mtime
+        created: stats.mtime,
       };
     })
     .sort((a, b) => b.created - a.created); // Newest first
@@ -114,7 +112,7 @@ export function cleanupOldBackups(keepCount = MAX_BACKUPS) {
   if (backups.length <= keepCount) {
     logger.info('No backups to clean up', {
       total: backups.length,
-      keepCount
+      keepCount,
     });
     return { deleted: 0, kept: backups.length, deletedFiles };
   }
@@ -130,20 +128,20 @@ export function cleanupOldBackups(keepCount = MAX_BACKUPS) {
     } catch (error) {
       logger.error('Failed to delete backup', {
         filename: backup.filename,
-        error: error.message
+        error: error.message,
       });
     }
   }
 
   logger.info('Backup cleanup completed', {
     deleted: deletedFiles.length,
-    kept: keepCount
+    kept: keepCount,
   });
 
   return {
     deleted: deletedFiles.length,
     kept: Math.min(backups.length, keepCount),
-    deletedFiles
+    deletedFiles,
   };
 }
 
@@ -162,7 +160,7 @@ export function restoreFromBackup(backupPath) {
     }
 
     // Verify it's a valid SQLite database
-    const testDb = new (db.constructor)(backupPath, { readonly: true });
+    const testDb = new db.constructor(backupPath, { readonly: true });
     const check = testDb.prepare('SELECT 1 as ok').get();
     testDb.close();
 
@@ -175,7 +173,7 @@ export function restoreFromBackup(backupPath) {
 
     logger.warn('Starting database restore', {
       from: backupPath,
-      to: currentDbPath
+      to: currentDbPath,
     });
 
     // Close current database connection
@@ -186,18 +184,18 @@ export function restoreFromBackup(backupPath) {
 
     logger.info('Database restore completed', {
       from: backupPath,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     return {
       success: true,
-      message: 'Database restored. Server restart required.'
+      message: 'Database restored. Server restart required.',
     };
   } catch (error) {
     logger.error('Database restore failed', { error: error.message });
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -215,7 +213,7 @@ export function getBackupStats() {
       totalSizeMB: 0,
       oldestBackup: null,
       newestBackup: null,
-      backupDir: BACKUP_DIR
+      backupDir: BACKUP_DIR,
     };
   }
 
@@ -226,7 +224,7 @@ export function getBackupStats() {
     totalSizeMB: parseFloat((totalSize / (1024 * 1024)).toFixed(2)),
     oldestBackup: backups[backups.length - 1].created,
     newestBackup: backups[0].created,
-    backupDir: BACKUP_DIR
+    backupDir: BACKUP_DIR,
   };
 }
 
@@ -235,5 +233,5 @@ export default {
   listBackups,
   cleanupOldBackups,
   restoreFromBackup,
-  getBackupStats
+  getBackupStats,
 };

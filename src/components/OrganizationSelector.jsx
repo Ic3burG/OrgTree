@@ -36,7 +36,7 @@ export default function OrganizationSelector() {
     }
   }
 
-  const handleCreateOrg = async (e) => {
+  const handleCreateOrg = async e => {
     e.preventDefault();
     if (!newOrgName.trim()) return;
 
@@ -54,13 +54,13 @@ export default function OrganizationSelector() {
     }
   };
 
-  const handleRenameOrg = (org) => {
+  const handleRenameOrg = org => {
     setRenamingOrg(org);
     setRenameOrgName(org.name);
     setShowRenameModal(true);
   };
 
-  const handleRenameSubmit = async (e) => {
+  const handleRenameSubmit = async e => {
     e.preventDefault();
     if (!renameOrgName.trim() || !renamingOrg) return;
 
@@ -79,7 +79,11 @@ export default function OrganizationSelector() {
   };
 
   const handleDeleteOrg = async (orgId, orgName) => {
-    if (!confirm(`Are you sure you want to delete "${orgName}"? This will delete all departments and people in this organization. This action cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${orgName}"? This will delete all departments and people in this organization. This action cannot be undone.`
+      )
+    ) {
       return;
     }
 
@@ -154,12 +158,8 @@ export default function OrganizationSelector() {
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Your Organizations
-            </h2>
-            <p className="text-gray-600">
-              Select an organization to manage or create a new one
-            </p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Organizations</h2>
+            <p className="text-gray-600">Select an organization to manage or create a new one</p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
@@ -179,15 +179,12 @@ export default function OrganizationSelector() {
         {/* Organization Grid */}
         {organizations.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {organizations.map((org) => (
+            {organizations.map(org => (
               <div
                 key={org.id}
                 className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow border border-gray-200 overflow-hidden group"
               >
-                <div
-                  onClick={() => navigate(`/org/${org.id}`)}
-                  className="p-6 cursor-pointer"
-                >
+                <div onClick={() => navigate(`/org/${org.id}`)} className="p-6 cursor-pointer">
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                       <Building2 size={24} className="text-blue-600" />
@@ -198,33 +195,27 @@ export default function OrganizationSelector() {
                           org.role === 'owner'
                             ? 'bg-purple-100 text-purple-800'
                             : org.role === 'admin'
-                            ? 'bg-blue-100 text-blue-800'
-                            : org.role === 'editor'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
+                              ? 'bg-blue-100 text-blue-800'
+                              : org.role === 'editor'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'
                         }`}
                       >
-                        {org.role === 'owner' ? 'Owner' : org.role.charAt(0).toUpperCase() + org.role.slice(1)}
+                        {org.role === 'owner'
+                          ? 'Owner'
+                          : org.role.charAt(0).toUpperCase() + org.role.slice(1)}
                       </span>
                     )}
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {org.name}
-                  </h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{org.name}</h3>
                   <div className="text-sm text-gray-500">
-                    <p>
-                      {org.departments?.length || 0} departments
-                    </p>
-                    {org.createdAt && (
-                      <p>
-                        Created {new Date(org.createdAt).toLocaleDateString()}
-                      </p>
-                    )}
+                    <p>{org.departments?.length || 0} departments</p>
+                    {org.createdAt && <p>Created {new Date(org.createdAt).toLocaleDateString()}</p>}
                   </div>
                 </div>
                 <div className="border-t border-gray-200 bg-gray-50 px-6 py-3 flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       handleRenameOrg(org);
                     }}
@@ -234,7 +225,7 @@ export default function OrganizationSelector() {
                     <Edit size={16} />
                   </button>
                   <button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       handleDeleteOrg(org.id, org.name);
                     }}
@@ -250,9 +241,7 @@ export default function OrganizationSelector() {
         ) : (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <Building2 size={64} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No organizations yet
-            </h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No organizations yet</h3>
             <p className="text-gray-600 mb-6">
               Create your first organization to get started with OrgTree
             </p>
@@ -272,23 +261,18 @@ export default function OrganizationSelector() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Create New Organization
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900">Create New Organization</h2>
             </div>
             <form onSubmit={handleCreateOrg}>
               <div className="p-6">
-                <label
-                  htmlFor="orgName"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="orgName" className="block text-sm font-medium text-gray-700 mb-2">
                   Organization Name
                 </label>
                 <input
                   id="orgName"
                   type="text"
                   value={newOrgName}
-                  onChange={(e) => setNewOrgName(e.target.value)}
+                  onChange={e => setNewOrgName(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="e.g., Acme Corporation"
                   autoFocus
@@ -325,9 +309,7 @@ export default function OrganizationSelector() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Rename Organization
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900">Rename Organization</h2>
             </div>
             <form onSubmit={handleRenameSubmit}>
               <div className="p-6">
@@ -341,7 +323,7 @@ export default function OrganizationSelector() {
                   id="renameOrgName"
                   type="text"
                   value={renameOrgName}
-                  onChange={(e) => setRenameOrgName(e.target.value)}
+                  onChange={e => setRenameOrgName(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="e.g., Acme Corporation"
                   autoFocus

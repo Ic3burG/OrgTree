@@ -14,17 +14,8 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
   const [showTypeFilter, setShowTypeFilter] = useState(false);
   const searchRef = useRef(null);
 
-  const {
-    query,
-    setQuery,
-    type,
-    setType,
-    results,
-    suggestions,
-    loading,
-    total,
-    clearSearch
-  } = useSearch(orgId, { debounceMs: 300, minQueryLength: 1 });
+  const { query, setQuery, type, setType, results, suggestions, loading, total, clearSearch } =
+    useSearch(orgId, { debounceMs: 300, minQueryLength: 1 });
 
   // Open dropdown when we have results
   useEffect(() => {
@@ -37,7 +28,7 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = event => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setIsOpen(false);
       }
@@ -53,7 +44,7 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
     setShowTypeFilter(false);
   };
 
-  const handleSelectResult = (result) => {
+  const handleSelectResult = result => {
     setIsOpen(false);
     if (onSelectResult) {
       // Transform API result to format expected by OrgMap
@@ -61,38 +52,42 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
         type: result.type,
         id: result.id,
         name: result.name,
-        subtitle: result.type === 'department'
-          ? `${result.peopleCount || 0} people`
-          : result.title,
+        subtitle: result.type === 'department' ? `${result.peopleCount || 0} people` : result.title,
         // For departments, nodeId is the department id itself
         // For people, nodeId is the departmentId
         nodeId: result.type === 'department' ? result.id : result.departmentId,
         departmentName: result.departmentName,
         // Pass person data for detail panel
-        person: result.type === 'person' ? {
-          id: result.id,
-          name: result.name,
-          title: result.title,
-          email: result.email,
-          phone: result.phone
-        } : null
+        person:
+          result.type === 'person'
+            ? {
+                id: result.id,
+                name: result.name,
+                title: result.title,
+                email: result.email,
+                phone: result.phone,
+              }
+            : null,
       };
       onSelectResult(transformedResult);
     }
   };
 
-  const handleSuggestionClick = (suggestion) => {
+  const handleSuggestionClick = suggestion => {
     setQuery(suggestion.text);
   };
 
   const typeLabels = {
     all: 'All',
     departments: 'Departments',
-    people: 'People'
+    people: 'People',
   };
 
   return (
-    <div ref={searchRef} className="absolute top-16 lg:top-4 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md px-4">
+    <div
+      ref={searchRef}
+      className="absolute top-16 lg:top-4 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md px-4"
+    >
       {/* Search Input */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 lg:pl-3 flex items-center pointer-events-none">
@@ -106,7 +101,7 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={e => setQuery(e.target.value)}
           placeholder="Search departments and people..."
           className="w-full pl-11 lg:pl-10 pr-20 lg:pr-20 py-3 lg:py-2.5 bg-white/95 backdrop-blur-sm border border-slate-300
             rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500
@@ -143,7 +138,7 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
         <div className="mt-1 bg-white rounded-lg shadow-lg border border-slate-200 p-2">
           <div className="text-xs text-slate-500 px-2 pb-1">Search in:</div>
           <div className="flex gap-1">
-            {(['all', 'departments', 'people']).map((t) => (
+            {['all', 'departments', 'people'].map(t => (
               <button
                 key={t}
                 onClick={() => {
@@ -151,9 +146,10 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
                   setShowTypeFilter(false);
                 }}
                 className={`px-3 py-1.5 rounded text-sm font-medium transition-colors
-                  ${type === t
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ${
+                    type === t
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
               >
                 {typeLabels[t]}
@@ -207,8 +203,10 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
                     <Users size={22} className="lg:w-5 lg:h-5 text-slate-600" />
                   </div>
                 ) : (
-                  <div className="w-11 h-11 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
-                    flex items-center justify-center text-white font-semibold text-sm">
+                  <div
+                    className="w-11 h-11 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
+                    flex items-center justify-center text-white font-semibold text-sm"
+                  >
                     {getInitials(result.name)}
                   </div>
                 )}
@@ -239,13 +237,16 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
 
               {/* Type Badge */}
               <div className="flex-shrink-0">
-                <span className={`
+                <span
+                  className={`
                   px-2 py-1 rounded text-xs font-medium
-                  ${result.type === 'department'
-                    ? 'bg-slate-100 text-slate-700'
-                    : 'bg-blue-100 text-blue-700'
+                  ${
+                    result.type === 'department'
+                      ? 'bg-slate-100 text-slate-700'
+                      : 'bg-blue-100 text-blue-700'
                   }
-                `}>
+                `}
+                >
                   {result.type === 'department' ? 'Dept' : 'Person'}
                 </span>
               </div>

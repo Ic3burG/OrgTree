@@ -75,7 +75,9 @@ describe('Auth Service', () => {
     it('should hash the password', async () => {
       await createUser('John Doe', 'john@example.com', 'password123');
 
-      const user = db.prepare('SELECT password_hash FROM users WHERE email = ?').get('john@example.com');
+      const user = db
+        .prepare('SELECT password_hash FROM users WHERE email = ?')
+        .get('john@example.com');
       expect(user.password_hash).not.toBe('password123');
       expect(await bcrypt.compare('password123', user.password_hash)).toBe(true);
     });
@@ -83,8 +85,9 @@ describe('Auth Service', () => {
     it('should throw error for duplicate email', async () => {
       await createUser('John Doe', 'john@example.com', 'password123');
 
-      await expect(createUser('Jane Doe', 'john@example.com', 'password456'))
-        .rejects.toThrow('Email already registered');
+      await expect(createUser('Jane Doe', 'john@example.com', 'password456')).rejects.toThrow(
+        'Email already registered'
+      );
     });
 
     it('should set correct role for first user', async () => {
@@ -115,13 +118,15 @@ describe('Auth Service', () => {
     });
 
     it('should throw error for non-existent user', async () => {
-      await expect(loginUser('unknown@example.com', 'password123'))
-        .rejects.toThrow('Invalid email or password');
+      await expect(loginUser('unknown@example.com', 'password123')).rejects.toThrow(
+        'Invalid email or password'
+      );
     });
 
     it('should throw error for wrong password', async () => {
-      await expect(loginUser('john@example.com', 'wrongpassword'))
-        .rejects.toThrow('Invalid email or password');
+      await expect(loginUser('john@example.com', 'wrongpassword')).rejects.toThrow(
+        'Invalid email or password'
+      );
     });
   });
 
@@ -137,8 +142,7 @@ describe('Auth Service', () => {
     });
 
     it('should throw error for non-existent user', async () => {
-      await expect(getUserById('non-existent-id'))
-        .rejects.toThrow('User not found');
+      await expect(getUserById('non-existent-id')).rejects.toThrow('User not found');
     });
 
     it('should not return password hash', async () => {

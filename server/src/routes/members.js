@@ -6,12 +6,12 @@ import {
   addMemberByEmail,
   updateMemberRole,
   removeOrgMember,
-  requireOrgPermission
+  requireOrgPermission,
 } from '../services/member.service.js';
 import {
   emitMemberAdded,
   emitMemberUpdated,
-  emitMemberRemoved
+  emitMemberRemoved,
 } from '../services/socket-events.service.js';
 import db from '../db.js';
 
@@ -31,21 +31,25 @@ router.get('/organizations/:orgId/members', async (req, res, next) => {
     const members = getOrgMembers(orgId);
 
     // Also include owner info
-    const org = db.prepare(`
+    const org = db
+      .prepare(
+        `
       SELECT o.created_by_id, u.name, u.email
       FROM organizations o
       JOIN users u ON o.created_by_id = u.id
       WHERE o.id = ?
-    `).get(orgId);
+    `
+      )
+      .get(orgId);
 
     res.json({
       owner: {
         userId: org.created_by_id,
         userName: org.name,
         userEmail: org.email,
-        role: 'owner'
+        role: 'owner',
       },
-      members
+      members,
     });
   } catch (err) {
     next(err);
@@ -66,7 +70,7 @@ router.post('/organizations/:orgId/members', async (req, res, next) => {
     const validRoles = ['viewer', 'editor', 'admin'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({
-        message: 'Invalid role. Must be: viewer, editor, or admin'
+        message: 'Invalid role. Must be: viewer, editor, or admin',
       });
     }
 
@@ -110,12 +114,16 @@ router.delete('/organizations/:orgId/members/:memberId', async (req, res, next) 
     const { orgId, memberId } = req.params;
 
     // Get full member data before removing for audit trail
-    const member = db.prepare(`
+    const member = db
+      .prepare(
+        `
       SELECT om.id, om.user_id as userId, om.role, u.name as userName, u.email
       FROM organization_members om
       JOIN users u ON om.user_id = u.id
       WHERE om.id = ? AND om.organization_id = ?
-    `).get(memberId, orgId);
+    `
+      )
+      .get(memberId, orgId);
 
     await removeOrgMember(orgId, memberId, req.user.id);
 

@@ -48,9 +48,7 @@ export default function SuperuserLayout() {
           onClick={closeSidebar}
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive
-                ? 'bg-purple-50 text-purple-700'
-                : 'text-gray-700 hover:bg-gray-50'
+              isActive ? 'bg-purple-50 text-purple-700' : 'text-gray-700 hover:bg-gray-50'
             }`
           }
         >
@@ -63,9 +61,7 @@ export default function SuperuserLayout() {
           onClick={closeSidebar}
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive
-                ? 'bg-purple-50 text-purple-700'
-                : 'text-gray-700 hover:bg-gray-50'
+              isActive ? 'bg-purple-50 text-purple-700' : 'text-gray-700 hover:bg-gray-50'
             }`
           }
         >
@@ -84,9 +80,7 @@ export default function SuperuserLayout() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {user?.name}
-              </p>
+              <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
               <span className="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full font-medium flex-shrink-0">
                 Superuser
               </span>
@@ -128,10 +122,7 @@ export default function SuperuserLayout() {
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
-          <div
-            className="absolute inset-0 bg-black/50 transition-opacity"
-            onClick={closeSidebar}
-          />
+          <div className="absolute inset-0 bg-black/50 transition-opacity" onClick={closeSidebar} />
           <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl flex flex-col animate-slide-in-left">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Menu</h2>

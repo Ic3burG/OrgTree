@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   const from = location.state?.from?.pathname || '/';
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -36,7 +36,9 @@ export default function LoginPage() {
         <div className="bg-white rounded-lg shadow-lg p-6 lg:p-8">
           <div className="text-center mb-6 lg:mb-8">
             <h1 className="text-xl lg:text-2xl font-bold text-slate-800">Welcome Back</h1>
-            <p className="text-sm lg:text-base text-slate-600 mt-2">Sign in to your OrgTree account</p>
+            <p className="text-sm lg:text-base text-slate-600 mt-2">
+              Sign in to your OrgTree account
+            </p>
           </div>
 
           {error && (
@@ -52,12 +54,15 @@ export default function LoginPage() {
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <Mail
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  size={20}
+                />
                 <input
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
                   placeholder="you@example.com"
                   required
@@ -70,12 +75,15 @@ export default function LoginPage() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <Lock
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  size={20}
+                />
                 <input
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
                   placeholder="••••••••"
                   required
@@ -101,7 +109,10 @@ export default function LoginPage() {
 
           <p className="mt-6 text-center text-sm lg:text-base text-slate-600">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-slate-800 font-medium hover:underline touch-manipulation">
+            <Link
+              to="/signup"
+              className="text-slate-800 font-medium hover:underline touch-manipulation"
+            >
               Sign up
             </Link>
           </p>

@@ -22,11 +22,11 @@ export function useRealtimeUpdates(orgId, options = {}) {
     onPersonChange,
     onMemberChange,
     onOrgChange,
-    showNotifications = true
+    showNotifications = true,
   } = options;
 
   // Track recently changed items for highlighting
-  const markAsChanged = useCallback((id) => {
+  const markAsChanged = useCallback(id => {
     setRecentlyChanged(prev => new Set([...prev, id]));
     // Clear after 3 seconds
     setTimeout(() => {
@@ -39,12 +39,15 @@ export function useRealtimeUpdates(orgId, options = {}) {
   }, []);
 
   // Check if we should ignore this event (it's from ourselves)
-  const shouldIgnore = useCallback((payload) => {
-    return payload?.meta?.actorId === user?.id;
-  }, [user?.id]);
+  const shouldIgnore = useCallback(
+    payload => {
+      return payload?.meta?.actorId === user?.id;
+    },
+    [user?.id]
+  );
 
   // Create notification message
-  const getNotificationMessage = useCallback((payload) => {
+  const getNotificationMessage = useCallback(payload => {
     const actor = payload?.meta?.actorName || 'Someone';
     const type = payload?.type;
     const action = payload?.action;
@@ -55,7 +58,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
       updated: 'updated',
       deleted: 'removed',
       added: 'added',
-      removed: 'removed'
+      removed: 'removed',
     };
 
     const verb = actionVerbs[action] || action;
@@ -94,111 +97,145 @@ export function useRealtimeUpdates(orgId, options = {}) {
     if (!orgId || !onDepartmentChange) return;
 
     const handlers = [
-      subscribe('department:created', (payload) => {
+      subscribe('department:created', payload => {
         if (shouldIgnore(payload)) return;
         markAsChanged(payload.data?.id);
         onDepartmentChange(payload);
         if (showNotifications) {
-          window.dispatchEvent(new CustomEvent('realtime-notification', {
-            detail: { message: getNotificationMessage(payload), type: 'info' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent('realtime-notification', {
+              detail: { message: getNotificationMessage(payload), type: 'info' },
+            })
+          );
         }
       }),
-      subscribe('department:updated', (payload) => {
+      subscribe('department:updated', payload => {
         if (shouldIgnore(payload)) return;
         markAsChanged(payload.data?.id);
         onDepartmentChange(payload);
         if (showNotifications) {
-          window.dispatchEvent(new CustomEvent('realtime-notification', {
-            detail: { message: getNotificationMessage(payload), type: 'info' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent('realtime-notification', {
+              detail: { message: getNotificationMessage(payload), type: 'info' },
+            })
+          );
         }
       }),
-      subscribe('department:deleted', (payload) => {
+      subscribe('department:deleted', payload => {
         if (shouldIgnore(payload)) return;
         onDepartmentChange(payload);
         if (showNotifications) {
-          window.dispatchEvent(new CustomEvent('realtime-notification', {
-            detail: { message: getNotificationMessage(payload), type: 'info' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent('realtime-notification', {
+              detail: { message: getNotificationMessage(payload), type: 'info' },
+            })
+          );
         }
-      })
+      }),
     ];
 
     return () => handlers.forEach(unsubscribe => unsubscribe());
-  }, [orgId, subscribe, onDepartmentChange, shouldIgnore, showNotifications, markAsChanged, getNotificationMessage]);
+  }, [
+    orgId,
+    subscribe,
+    onDepartmentChange,
+    shouldIgnore,
+    showNotifications,
+    markAsChanged,
+    getNotificationMessage,
+  ]);
 
   // Subscribe to person events
   useEffect(() => {
     if (!orgId || !onPersonChange) return;
 
     const handlers = [
-      subscribe('person:created', (payload) => {
+      subscribe('person:created', payload => {
         if (shouldIgnore(payload)) return;
         markAsChanged(payload.data?.id);
         onPersonChange(payload);
         if (showNotifications) {
-          window.dispatchEvent(new CustomEvent('realtime-notification', {
-            detail: { message: getNotificationMessage(payload), type: 'info' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent('realtime-notification', {
+              detail: { message: getNotificationMessage(payload), type: 'info' },
+            })
+          );
         }
       }),
-      subscribe('person:updated', (payload) => {
+      subscribe('person:updated', payload => {
         if (shouldIgnore(payload)) return;
         markAsChanged(payload.data?.id);
         onPersonChange(payload);
         if (showNotifications) {
-          window.dispatchEvent(new CustomEvent('realtime-notification', {
-            detail: { message: getNotificationMessage(payload), type: 'info' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent('realtime-notification', {
+              detail: { message: getNotificationMessage(payload), type: 'info' },
+            })
+          );
         }
       }),
-      subscribe('person:deleted', (payload) => {
+      subscribe('person:deleted', payload => {
         if (shouldIgnore(payload)) return;
         onPersonChange(payload);
         if (showNotifications) {
-          window.dispatchEvent(new CustomEvent('realtime-notification', {
-            detail: { message: getNotificationMessage(payload), type: 'info' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent('realtime-notification', {
+              detail: { message: getNotificationMessage(payload), type: 'info' },
+            })
+          );
         }
-      })
+      }),
     ];
 
     return () => handlers.forEach(unsubscribe => unsubscribe());
-  }, [orgId, subscribe, onPersonChange, shouldIgnore, showNotifications, markAsChanged, getNotificationMessage]);
+  }, [
+    orgId,
+    subscribe,
+    onPersonChange,
+    shouldIgnore,
+    showNotifications,
+    markAsChanged,
+    getNotificationMessage,
+  ]);
 
   // Subscribe to member events
   useEffect(() => {
     if (!orgId || !onMemberChange) return;
 
     const handlers = [
-      subscribe('member:added', (payload) => {
+      subscribe('member:added', payload => {
         if (shouldIgnore(payload)) return;
         onMemberChange(payload);
         if (showNotifications) {
-          window.dispatchEvent(new CustomEvent('realtime-notification', {
-            detail: { message: getNotificationMessage(payload), type: 'info' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent('realtime-notification', {
+              detail: { message: getNotificationMessage(payload), type: 'info' },
+            })
+          );
         }
       }),
-      subscribe('member:updated', (payload) => {
+      subscribe('member:updated', payload => {
         if (shouldIgnore(payload)) return;
         onMemberChange(payload);
         if (showNotifications) {
-          window.dispatchEvent(new CustomEvent('realtime-notification', {
-            detail: { message: getNotificationMessage(payload), type: 'info' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent('realtime-notification', {
+              detail: { message: getNotificationMessage(payload), type: 'info' },
+            })
+          );
         }
       }),
-      subscribe('member:removed', (payload) => {
+      subscribe('member:removed', payload => {
         if (shouldIgnore(payload)) return;
         onMemberChange(payload);
         if (showNotifications) {
-          window.dispatchEvent(new CustomEvent('realtime-notification', {
-            detail: { message: getNotificationMessage(payload), type: 'info' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent('realtime-notification', {
+              detail: { message: getNotificationMessage(payload), type: 'info' },
+            })
+          );
         }
-      })
+      }),
     ];
 
     return () => handlers.forEach(unsubscribe => unsubscribe());
@@ -209,24 +246,28 @@ export function useRealtimeUpdates(orgId, options = {}) {
     if (!orgId || !onOrgChange) return;
 
     const handlers = [
-      subscribe('org:updated', (payload) => {
+      subscribe('org:updated', payload => {
         if (shouldIgnore(payload)) return;
         onOrgChange(payload);
         if (showNotifications) {
-          window.dispatchEvent(new CustomEvent('realtime-notification', {
-            detail: { message: getNotificationMessage(payload), type: 'info' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent('realtime-notification', {
+              detail: { message: getNotificationMessage(payload), type: 'info' },
+            })
+          );
         }
       }),
-      subscribe('org:settings', (payload) => {
+      subscribe('org:settings', payload => {
         if (shouldIgnore(payload)) return;
         onOrgChange(payload);
         if (showNotifications) {
-          window.dispatchEvent(new CustomEvent('realtime-notification', {
-            detail: { message: getNotificationMessage(payload), type: 'info' }
-          }));
+          window.dispatchEvent(
+            new CustomEvent('realtime-notification', {
+              detail: { message: getNotificationMessage(payload), type: 'info' },
+            })
+          );
         }
-      })
+      }),
     ];
 
     return () => handlers.forEach(unsubscribe => unsubscribe());
@@ -234,7 +275,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
 
   return {
     recentlyChanged,
-    isRecentlyChanged: (id) => recentlyChanged.has(id)
+    isRecentlyChanged: id => recentlyChanged.has(id),
   };
 }
 

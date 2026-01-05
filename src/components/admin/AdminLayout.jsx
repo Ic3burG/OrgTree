@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useParams } from 'react-router-dom';
-import { Home, Users, Building2, Map, FileText, LogOut, ArrowLeft, Menu, X, Shield } from 'lucide-react';
+import {
+  Home,
+  Users,
+  Building2,
+  Map,
+  FileText,
+  LogOut,
+  ArrowLeft,
+  Menu,
+  X,
+  Shield,
+} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
 import ConnectionStatus from '../ui/ConnectionStatus';
@@ -85,9 +96,7 @@ export default function AdminLayout() {
           onClick={closeSidebar}
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-50'
+              isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
             }`
           }
         >
@@ -100,9 +109,7 @@ export default function AdminLayout() {
           onClick={closeSidebar}
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-50'
+              isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
             }`
           }
         >
@@ -115,9 +122,7 @@ export default function AdminLayout() {
           onClick={closeSidebar}
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-50'
+              isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
             }`
           }
         >
@@ -130,9 +135,7 @@ export default function AdminLayout() {
           onClick={closeSidebar}
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-50'
+              isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
             }`
           }
         >
@@ -146,9 +149,7 @@ export default function AdminLayout() {
             onClick={closeSidebar}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-                isActive
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-50'
+                isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
               }`
             }
           >
@@ -168,9 +169,7 @@ export default function AdminLayout() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {user?.name}
-              </p>
+              <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
               {user?.role === 'superuser' && (
                 <span className="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full font-medium flex-shrink-0">
                   Superuser
@@ -220,10 +219,7 @@ export default function AdminLayout() {
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50 transition-opacity"
-            onClick={closeSidebar}
-          />
+          <div className="absolute inset-0 bg-black/50 transition-opacity" onClick={closeSidebar} />
           {/* Drawer */}
           <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl flex flex-col animate-slide-in-left">
             {/* Close button */}

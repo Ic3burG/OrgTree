@@ -30,7 +30,9 @@ function generateSecurePassword(length = 16) {
 }
 
 export function getAllUsers() {
-  const users = db.prepare(`
+  const users = db
+    .prepare(
+      `
     SELECT
       u.id,
       u.name,
@@ -39,38 +41,52 @@ export function getAllUsers() {
       u.created_at as createdAt
     FROM users u
     ORDER BY u.created_at DESC
-  `).all();
+  `
+    )
+    .all();
 
   // Security: Only return counts, not detailed organization data
   // Detailed data available via getUserById if needed
   return users.map(user => {
     // Count owned organizations
-    const ownedCount = db.prepare(`
+    const ownedCount = db
+      .prepare(
+        `
       SELECT COUNT(*) as count
       FROM organizations
       WHERE created_by_id = ?
-    `).get(user.id).count;
+    `
+      )
+      .get(user.id).count;
 
     // Count memberships
-    const membershipCount = db.prepare(`
+    const membershipCount = db
+      .prepare(
+        `
       SELECT COUNT(*) as count
       FROM organization_members
       WHERE user_id = ?
-    `).get(user.id).count;
+    `
+      )
+      .get(user.id).count;
 
     return {
       ...user,
       organizationCount: ownedCount,
-      membershipCount: membershipCount
+      membershipCount: membershipCount,
     };
   });
 }
 
 export function getUserById(userId) {
-  const user = db.prepare(`
+  const user = db
+    .prepare(
+      `
     SELECT id, name, email, role, created_at as createdAt
     FROM users WHERE id = ?
-  `).get(userId);
+  `
+    )
+    .get(userId);
 
   if (!user) {
     const error = new Error('User not found');
@@ -79,15 +95,21 @@ export function getUserById(userId) {
   }
 
   // Get owned organizations with full details
-  const ownedOrganizations = db.prepare(`
+  const ownedOrganizations = db
+    .prepare(
+      `
     SELECT id, name, is_public as isPublic, created_at as createdAt
     FROM organizations
     WHERE created_by_id = ?
     ORDER BY name
-  `).all(userId);
+  `
+    )
+    .all(userId);
 
   // Get memberships with full details
-  const memberships = db.prepare(`
+  const memberships = db
+    .prepare(
+      `
     SELECT
       o.id,
       o.name,
@@ -98,14 +120,16 @@ export function getUserById(userId) {
     JOIN organizations o ON om.organization_id = o.id
     WHERE om.user_id = ?
     ORDER BY o.name
-  `).all(userId);
+  `
+    )
+    .all(userId);
 
   return {
     ...user,
     ownedOrganizations,
     memberships,
     organizationCount: ownedOrganizations.length,
-    membershipCount: memberships.length
+    membershipCount: memberships.length,
   };
 }
 
@@ -119,7 +143,9 @@ export function updateUser(userId, { name, email }) {
 
   // Check if email is already taken by another user
   if (email && email !== user.email) {
-    const existingUser = db.prepare('SELECT id FROM users WHERE email = ? AND id != ?').get(email, userId);
+    const existingUser = db
+      .prepare('SELECT id FROM users WHERE email = ? AND id != ?')
+      .get(email, userId);
     if (existingUser) {
       const error = new Error('Email already in use');
       error.status = 400;
@@ -128,16 +154,22 @@ export function updateUser(userId, { name, email }) {
   }
 
   const now = new Date().toISOString();
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE users
     SET name = ?, email = ?, updated_at = ?
     WHERE id = ?
-  `).run(name || user.name, email || user.email, now, userId);
+  `
+  ).run(name || user.name, email || user.email, now, userId);
 
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT id, name, email, role, created_at as createdAt
     FROM users WHERE id = ?
-  `).get(userId);
+  `
+    )
+    .get(userId);
 }
 
 export function updateUserRole(userId, newRole, requestingUserId) {
@@ -163,16 +195,22 @@ export function updateUserRole(userId, newRole, requestingUserId) {
   }
 
   const now = new Date().toISOString();
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE users
     SET role = ?, updated_at = ?
     WHERE id = ?
-  `).run(newRole, now, userId);
+  `
+  ).run(newRole, now, userId);
 
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT id, name, email, role, created_at as createdAt
     FROM users WHERE id = ?
-  `).get(userId);
+  `
+    )
+    .get(userId);
 }
 
 export async function resetUserPassword(userId) {
@@ -190,15 +228,17 @@ export async function resetUserPassword(userId) {
   const passwordHash = await bcrypt.hash(tempPassword, 10);
 
   const now = new Date().toISOString();
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE users
     SET password_hash = ?, must_change_password = 1, updated_at = ?
     WHERE id = ?
-  `).run(passwordHash, now, userId);
+  `
+  ).run(passwordHash, now, userId);
 
   return {
     message: 'Password reset successfully',
-    temporaryPassword: tempPassword
+    temporaryPassword: tempPassword,
   };
 }
 
@@ -249,18 +289,24 @@ export async function createAdminUser(name, email, role) {
   const userId = randomUUID();
   const now = new Date().toISOString();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO users (id, name, email, password_hash, role, must_change_password, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, 1, ?, ?)
-  `).run(userId, name, email, passwordHash, role, now, now);
+  `
+  ).run(userId, name, email, passwordHash, role, now, now);
 
-  const user = db.prepare(`
+  const user = db
+    .prepare(
+      `
     SELECT id, name, email, role, created_at as createdAt
     FROM users WHERE id = ?
-  `).get(userId);
+  `
+    )
+    .get(userId);
 
   return {
     user,
-    temporaryPassword: tempPassword
+    temporaryPassword: tempPassword,
   };
 }

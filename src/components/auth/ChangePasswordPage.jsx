@@ -33,7 +33,7 @@ export default function ChangePasswordPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     if (!validate()) return;
 
@@ -46,8 +46,8 @@ export default function ChangePasswordPage() {
       logout();
       navigate('/login', {
         state: {
-          message: 'Password changed successfully. Please log in with your new password.'
-        }
+          message: 'Password changed successfully. Please log in with your new password.',
+        },
       });
     } catch (err) {
       setErrors({ submit: err.message || 'Failed to change password' });
@@ -56,11 +56,11 @@ export default function ChangePasswordPage() {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -73,12 +73,8 @@ export default function ChangePasswordPage() {
             <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Lock size={32} className="text-purple-600" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Change Your Password
-            </h1>
-            <p className="text-gray-600">
-              You must change your password before continuing
-            </p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Change Your Password</h1>
+            <p className="text-gray-600">You must change your password before continuing</p>
           </div>
 
           {/* Alert */}
@@ -86,8 +82,8 @@ export default function ChangePasswordPage() {
             <AlertCircle size={24} className="text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm text-amber-800">
-                You're using a temporary password. Please create a new, secure
-                password to continue using OrgTree.
+                You're using a temporary password. Please create a new, secure password to continue
+                using OrgTree.
               </p>
             </div>
           </div>
@@ -96,10 +92,7 @@ export default function ChangePasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* New Password */}
             <div>
-              <label
-                htmlFor="newPassword"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
                 New Password *
               </label>
               <input
@@ -144,9 +137,7 @@ export default function ChangePasswordPage() {
 
             {/* Submit Error */}
             {errors.submit && (
-              <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
-                {errors.submit}
-              </div>
+              <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">{errors.submit}</div>
             )}
 
             {/* Submit Button */}

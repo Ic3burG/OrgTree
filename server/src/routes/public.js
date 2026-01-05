@@ -28,11 +28,11 @@ const publicLimiter = rateLimit({
         ipAddress,
         limit: 100,
         windowMs: 15 * 60 * 1000,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
     res.status(429).json({ message: 'Too many requests, please try again later' });
-  }
+  },
 });
 
 router.use(publicLimiter);
@@ -46,32 +46,44 @@ router.get('/org/:shareToken', async (req, res, next) => {
     const { shareToken } = req.params;
 
     // Find organization by share token
-    const org = db.prepare(`
+    const org = db
+      .prepare(
+        `
       SELECT id, name, created_at
       FROM organizations
       WHERE share_token = ? AND is_public = 1
-    `).get(shareToken);
+    `
+      )
+      .get(shareToken);
 
     if (!org) {
       return res.status(404).json({ message: 'Organization not found or not public' });
     }
 
     // Get all departments for this organization
-    const departments = db.prepare(`
+    const departments = db
+      .prepare(
+        `
       SELECT id, organization_id, parent_id, name, description, sort_order
       FROM departments
       WHERE organization_id = ?
       ORDER BY sort_order ASC
-    `).all(org.id);
+    `
+      )
+      .all(org.id);
 
     // Get all people for each department
-    const people = db.prepare(`
+    const people = db
+      .prepare(
+        `
       SELECT p.id, p.department_id, p.name, p.title, p.email, p.phone, p.sort_order
       FROM people p
       INNER JOIN departments d ON p.department_id = d.id
       WHERE d.organization_id = ?
       ORDER BY p.sort_order ASC
-    `).all(org.id);
+    `
+      )
+      .all(org.id);
 
     // Group people by department
     const peopleByDept = {};
@@ -87,7 +99,7 @@ router.get('/org/:shareToken', async (req, res, next) => {
         title: person.title,
         email: person.email,
         phone: person.phone,
-        sortOrder: person.sort_order
+        sortOrder: person.sort_order,
       });
     });
 
@@ -99,7 +111,7 @@ router.get('/org/:shareToken', async (req, res, next) => {
       name: dept.name,
       description: dept.description,
       sortOrder: dept.sort_order,
-      people: peopleByDept[dept.id] || []
+      people: peopleByDept[dept.id] || [],
     }));
 
     // Return with camelCase field names
@@ -107,7 +119,7 @@ router.get('/org/:shareToken', async (req, res, next) => {
       id: org.id,
       name: org.name,
       createdAt: org.created_at,
-      departments: departmentsWithPeople
+      departments: departmentsWithPeople,
     });
   } catch (err) {
     next(err);

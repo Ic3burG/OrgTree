@@ -22,9 +22,14 @@ export default function BulkDeleteModal({
 }) {
   if (!isOpen) return null;
 
-  const itemLabel = count === 1
-    ? (entityType === 'people' ? 'person' : 'department')
-    : (entityType === 'people' ? 'people' : 'departments');
+  const itemLabel =
+    count === 1
+      ? entityType === 'people'
+        ? 'person'
+        : 'department'
+      : entityType === 'people'
+        ? 'people'
+        : 'departments';
 
   const hasResult = result && (result.deletedCount > 0 || result.failedCount > 0);
   const hasWarnings = result?.warnings?.length > 0;
@@ -35,9 +40,11 @@ export default function BulkDeleteModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              hasResult ? 'bg-blue-100' : 'bg-red-100'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                hasResult ? 'bg-blue-100' : 'bg-red-100'
+              }`}
+            >
               <AlertTriangle size={20} className={hasResult ? 'text-blue-600' : 'text-red-600'} />
             </div>
             <h2 className="text-xl font-semibold text-gray-900">
@@ -60,12 +67,14 @@ export default function BulkDeleteModal({
               <div className="space-y-2">
                 {result.deletedCount > 0 && (
                   <p className="text-green-600">
-                    Successfully deleted {result.deletedCount} {result.deletedCount === 1 ? 'item' : 'items'}
+                    Successfully deleted {result.deletedCount}{' '}
+                    {result.deletedCount === 1 ? 'item' : 'items'}
                   </p>
                 )}
                 {result.failedCount > 0 && (
                   <p className="text-red-600">
-                    Failed to delete {result.failedCount} {result.failedCount === 1 ? 'item' : 'items'}
+                    Failed to delete {result.failedCount}{' '}
+                    {result.failedCount === 1 ? 'item' : 'items'}
                   </p>
                 )}
               </div>
@@ -88,7 +97,8 @@ export default function BulkDeleteModal({
               {entityType === 'departments' && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
                   <p className="text-sm text-amber-700">
-                    <strong>Warning:</strong> Deleting departments will also delete all sub-departments and people within them.
+                    <strong>Warning:</strong> Deleting departments will also delete all
+                    sub-departments and people within them.
                   </p>
                 </div>
               )}

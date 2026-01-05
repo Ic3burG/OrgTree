@@ -15,8 +15,9 @@ export function AuthProvider({ children }) {
     if (token && savedUser) {
       setUser(JSON.parse(savedUser));
       // Verify token is still valid and schedule refresh
-      api.getMe()
-        .then((userData) => {
+      api
+        .getMe()
+        .then(userData => {
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
           // Schedule a refresh - assume token is still fairly fresh on page load
@@ -82,7 +83,7 @@ export function AuthProvider({ children }) {
     isSuperuser: user?.role === 'superuser',
     isAdmin: user?.role === 'admin' || user?.role === 'superuser',
     canManageUsers: user?.role === 'superuser',
-    hasRole: (role) => user?.role === role,
+    hasRole: role => user?.role === role,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

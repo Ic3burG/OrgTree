@@ -5,7 +5,7 @@ import {
   bulkMovePeople,
   bulkEditPeople,
   bulkDeleteDepartments,
-  bulkEditDepartments
+  bulkEditDepartments,
 } from '../services/bulk.service.js';
 
 const router = express.Router();
@@ -24,7 +24,10 @@ function validateBulkArray(arr, fieldName) {
     return { valid: false, message: `${fieldName} array cannot be empty` };
   }
   if (arr.length > MAX_BULK_SIZE) {
-    return { valid: false, message: `${fieldName} exceeds maximum limit of ${MAX_BULK_SIZE} items` };
+    return {
+      valid: false,
+      message: `${fieldName} exceeds maximum limit of ${MAX_BULK_SIZE} items`,
+    };
   }
   return { valid: true };
 }
@@ -97,7 +100,7 @@ router.put('/organizations/:orgId/people/bulk-edit', async (req, res, next) => {
 
     if (Object.keys(sanitizedUpdates).length === 0) {
       return res.status(400).json({
-        message: `No valid update fields provided. Allowed: ${allowedPersonFields.join(', ')}`
+        message: `No valid update fields provided. Allowed: ${allowedPersonFields.join(', ')}`,
       });
     }
 
@@ -153,7 +156,7 @@ router.put('/organizations/:orgId/departments/bulk-edit', async (req, res, next)
 
     if (Object.keys(sanitizedUpdates).length === 0) {
       return res.status(400).json({
-        message: `No valid update fields provided. Allowed: ${allowedDeptFields.join(', ')}`
+        message: `No valid update fields provided. Allowed: ${allowedDeptFields.join(', ')}`,
       });
     }
 

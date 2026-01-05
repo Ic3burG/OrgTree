@@ -21,8 +21,8 @@ function createPayload(orgId, type, action, data, actor) {
     meta: {
       actorId: actor?.id || null,
       actorName: actor?.name || 'System',
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   };
 }
 
@@ -96,5 +96,5 @@ export default {
   emitMemberUpdated,
   emitMemberRemoved,
   emitOrgUpdated,
-  emitOrgSettings
+  emitOrgSettings,
 };

@@ -11,7 +11,7 @@ export default function ImportModal({ isOpen, onClose, orgId, onSuccess }) {
   const [result, setResult] = useState(null);
   const fileInputRef = useRef(null);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = e => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
 
@@ -20,7 +20,7 @@ export default function ImportModal({ isOpen, onClose, orgId, onSuccess }) {
     setResult(null);
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = event => {
       try {
         const rows = parseCSV(event.target.result);
         const validationErrors = validateCSVData(rows);
@@ -31,8 +31,8 @@ export default function ImportModal({ isOpen, onClose, orgId, onSuccess }) {
         } else {
           setPreview({
             rows,
-            departments: rows.filter((r) => r.type.toLowerCase() === 'department').length,
-            people: rows.filter((r) => r.type.toLowerCase() === 'person').length,
+            departments: rows.filter(r => r.type.toLowerCase() === 'department').length,
+            people: rows.filter(r => r.type.toLowerCase() === 'person').length,
           });
         }
       } catch (err) {
@@ -93,12 +93,10 @@ export default function ImportModal({ isOpen, onClose, orgId, onSuccess }) {
           {result ? (
             <div className="text-center py-8">
               <CheckCircle className="mx-auto text-green-500 mb-4" size={48} />
-              <h3 className="text-lg font-medium text-slate-800 mb-2">
-                Import Successful!
-              </h3>
+              <h3 className="text-lg font-medium text-slate-800 mb-2">Import Successful!</h3>
               <p className="text-slate-600">
-                Created {result.departmentsCreated} department(s) and{' '}
-                {result.peopleCreated} person(s).
+                Created {result.departmentsCreated} department(s) and {result.peopleCreated}{' '}
+                person(s).
               </p>
             </div>
           ) : (
@@ -139,9 +137,7 @@ export default function ImportModal({ isOpen, onClose, orgId, onSuccess }) {
                       <li key={i}>{error}</li>
                     ))}
                     {errors.length > 10 && (
-                      <li className="font-medium">
-                        ...and {errors.length - 10} more error(s)
-                      </li>
+                      <li className="font-medium">...and {errors.length - 10} more error(s)</li>
                     )}
                   </ul>
                 </div>
@@ -155,8 +151,8 @@ export default function ImportModal({ isOpen, onClose, orgId, onSuccess }) {
                     Preview
                   </div>
                   <p className="text-sm text-blue-600">
-                    Ready to import: {preview.departments} department(s) and{' '}
-                    {preview.people} person(s)
+                    Ready to import: {preview.departments} department(s) and {preview.people}{' '}
+                    person(s)
                   </p>
                 </div>
               )}

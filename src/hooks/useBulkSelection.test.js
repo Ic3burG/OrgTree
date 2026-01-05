@@ -198,10 +198,9 @@ describe('useBulkSelection', () => {
 
   describe('items update', () => {
     it('should update allSelected when items change', () => {
-      const { result, rerender } = renderHook(
-        ({ items }) => useBulkSelection(items),
-        { initialProps: { items: mockItems } }
-      );
+      const { result, rerender } = renderHook(({ items }) => useBulkSelection(items), {
+        initialProps: { items: mockItems },
+      });
 
       // Select all current items
       act(() => {

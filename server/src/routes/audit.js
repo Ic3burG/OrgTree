@@ -1,11 +1,7 @@
 import express from 'express';
 import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
 import { requireOrgPermission } from '../services/member.service.js';
-import {
-  getAuditLogs,
-  getAllAuditLogs,
-  cleanupOldLogs
-} from '../services/audit.service.js';
+import { getAuditLogs, getAllAuditLogs, cleanupOldLogs } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -41,7 +37,7 @@ router.get('/organizations/:orgId/audit-logs', async (req, res, next) => {
       actionType: req.query.actionType,
       entityType: req.query.entityType,
       startDate: req.query.startDate,
-      endDate: req.query.endDate
+      endDate: req.query.endDate,
     });
 
     res.json(result);
@@ -69,7 +65,7 @@ router.get('/admin/audit-logs', requireSuperuser, async (req, res, next) => {
       entityType: req.query.entityType,
       startDate: req.query.startDate,
       endDate: req.query.endDate,
-      orgId: req.query.orgId
+      orgId: req.query.orgId,
     });
 
     res.json(result);

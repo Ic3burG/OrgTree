@@ -12,12 +12,7 @@ import api from '../api/client';
  * @param {number} options.limit - Max results per search (default: 20)
  */
 export function useSearch(orgId, options = {}) {
-  const {
-    debounceMs = 300,
-    minQueryLength = 1,
-    defaultType = 'all',
-    limit = 20
-  } = options;
+  const { debounceMs = 300, minQueryLength = 1, defaultType = 'all', limit = 20 } = options;
 
   const [query, setQuery] = useState('');
   const [type, setType] = useState(defaultType);
@@ -34,62 +29,68 @@ export function useSearch(orgId, options = {}) {
   /**
    * Execute search API call
    */
-  const executeSearch = useCallback(async (searchQuery, searchType, searchOffset = 0) => {
-    if (!orgId || searchQuery.length < minQueryLength) {
-      setResults([]);
-      setTotal(0);
-      setHasMore(false);
-      return;
-    }
-
-    // Cancel previous request
-    if (abortController.current) {
-      abortController.current.abort();
-    }
-    abortController.current = new AbortController();
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await api.search(orgId, {
-        q: searchQuery,
-        type: searchType,
-        limit: limit.toString(),
-        offset: searchOffset.toString()
-      });
-
-      setResults(data.results || []);
-      setTotal(data.total || 0);
-      setHasMore(data.pagination?.hasMore || false);
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        setError(err.message || 'Search failed');
+  const executeSearch = useCallback(
+    async (searchQuery, searchType, searchOffset = 0) => {
+      if (!orgId || searchQuery.length < minQueryLength) {
         setResults([]);
         setTotal(0);
         setHasMore(false);
+        return;
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [orgId, minQueryLength, limit]);
+
+      // Cancel previous request
+      if (abortController.current) {
+        abortController.current.abort();
+      }
+      abortController.current = new AbortController();
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await api.search(orgId, {
+          q: searchQuery,
+          type: searchType,
+          limit: limit.toString(),
+          offset: searchOffset.toString(),
+        });
+
+        setResults(data.results || []);
+        setTotal(data.total || 0);
+        setHasMore(data.pagination?.hasMore || false);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setError(err.message || 'Search failed');
+          setResults([]);
+          setTotal(0);
+          setHasMore(false);
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [orgId, minQueryLength, limit]
+  );
 
   /**
    * Fetch autocomplete suggestions
    */
-  const fetchSuggestions = useCallback(async (q) => {
-    if (!orgId || q.length < 2) {
-      setSuggestions([]);
-      return;
-    }
+  const fetchSuggestions = useCallback(
+    async q => {
+      if (!orgId || q.length < 2) {
+        setSuggestions([]);
+        return;
+      }
 
-    try {
-      const data = await api.searchAutocomplete(orgId, q, 5);
-      setSuggestions(data.suggestions || []);
-    } catch (err) {
-      setSuggestions([]);
-    }
-  }, [orgId]);
+      try {
+        const data = await api.searchAutocomplete(orgId, q, 5);
+        setSuggestions(data.suggestions || []);
+      } catch (err) {
+        setSuggestions([]);
+      }
+    },
+    [orgId]
+  );
 
   /**
    * Debounced search effect - triggers when query or type changes
@@ -159,7 +160,7 @@ export function useSearch(orgId, options = {}) {
     clearSearch,
 
     // Direct search (bypasses debounce)
-    searchNow: (q, t) => executeSearch(q || query, t || type, 0)
+    searchNow: (q, t) => executeSearch(q || query, t || type, 0),
   };
 }
 

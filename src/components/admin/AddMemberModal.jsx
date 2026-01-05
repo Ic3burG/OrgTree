@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import api from '../../api/client';
 
-export default function AddMemberModal({ isOpen, onClose, onMemberAdded, onInvitationSent, orgId }) {
+export default function AddMemberModal({
+  isOpen,
+  onClose,
+  onMemberAdded,
+  onInvitationSent,
+  orgId,
+}) {
   const [email, setEmail] = useState('');
   const [selectedRole, setSelectedRole] = useState('viewer');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -14,21 +20,21 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded, onInvit
     {
       value: 'viewer',
       label: 'Viewer',
-      description: 'Can view the organization and all its content'
+      description: 'Can view the organization and all its content',
     },
     {
       value: 'editor',
       label: 'Editor',
-      description: 'Can create, edit, and delete departments and people'
+      description: 'Can create, edit, and delete departments and people',
     },
     {
       value: 'admin',
       label: 'Admin',
-      description: 'Can manage members and settings in addition to editor permissions'
-    }
+      description: 'Can manage members and settings in addition to editor permissions',
+    },
   ];
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     if (!email.trim()) {
@@ -125,7 +131,12 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded, onInvit
               className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -141,8 +152,18 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded, onInvit
           {inviteSent && (
             <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-start">
-                <svg className="w-5 h-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-5 h-5 text-green-500 mt-0.5 mr-3 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <div>
                   <p className="text-green-800 font-medium">Invitation sent!</p>
@@ -157,8 +178,18 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded, onInvit
           {userNotFound && !inviteSent && (
             <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
               <div className="flex items-start">
-                <svg className="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <svg
+                  className="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
                 </svg>
                 <div>
                   <p className="text-amber-800 font-medium">User not found</p>
@@ -178,8 +209,18 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded, onInvit
                       </>
                     ) : (
                       <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                          />
                         </svg>
                         Send Invitation
                       </>
@@ -192,13 +233,11 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded, onInvit
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
               <input
                 type="email"
                 value={email}
-                onChange={(e) => {
+                onChange={e => {
                   setEmail(e.target.value);
                   setError('');
                   setUserNotFound(false);
@@ -214,11 +253,9 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded, onInvit
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Role
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
               <div className="space-y-2">
-                {roles.map((role) => (
+                {roles.map(role => (
                   <label
                     key={role.value}
                     className={`flex items-start p-3 border-2 rounded-lg cursor-pointer transition-colors ${
@@ -232,7 +269,7 @@ export default function AddMemberModal({ isOpen, onClose, onMemberAdded, onInvit
                       name="role"
                       value={role.value}
                       checked={selectedRole === role.value}
-                      onChange={(e) => setSelectedRole(e.target.value)}
+                      onChange={e => setSelectedRole(e.target.value)}
                       className="mt-1 mr-3"
                       disabled={isSubmitting || isSendingInvite || inviteSent}
                     />

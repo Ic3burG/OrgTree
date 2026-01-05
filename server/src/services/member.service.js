@@ -20,10 +20,14 @@ export function checkOrgAccess(orgId, userId) {
   }
 
   // Check if user is a member
-  const member = db.prepare(`
+  const member = db
+    .prepare(
+      `
     SELECT role FROM organization_members
     WHERE organization_id = ? AND user_id = ?
-  `).get(orgId, userId);
+  `
+    )
+    .get(orgId, userId);
 
   if (!member) {
     return { hasAccess: false, role: null, isOwner: false };
@@ -56,7 +60,9 @@ export function requireOrgPermission(orgId, userId, minRole = 'viewer') {
     const user = db.prepare('SELECT id, name, email FROM users WHERE id = ?').get(userId);
     createAuditLog(
       orgId, // Organization-specific security event
-      user ? { id: user.id, name: user.name, email: user.email } : { id: userId, name: 'Unknown', email: '' },
+      user
+        ? { id: user.id, name: user.name, email: user.email }
+        : { id: userId, name: 'Unknown', email: '' },
       'permission_denied',
       'security',
       'organization_access',
@@ -64,7 +70,7 @@ export function requireOrgPermission(orgId, userId, minRole = 'viewer') {
         organizationId: orgId,
         requiredRole: minRole,
         userRole: access.role,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
     const error = new Error('Insufficient permissions');
@@ -80,7 +86,9 @@ export function requireOrgPermission(orgId, userId, minRole = 'viewer') {
  * Returns members with user details
  */
 export function getOrgMembers(orgId) {
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT
       om.id,
       om.organization_id as organizationId,
@@ -93,7 +101,9 @@ export function getOrgMembers(orgId) {
     JOIN users u ON om.user_id = u.id
     WHERE om.organization_id = ?
     ORDER BY om.created_at DESC
-  `).all(orgId);
+  `
+    )
+    .all(orgId);
 }
 
 /**
@@ -120,9 +130,9 @@ export function addOrgMember(orgId, userId, role, addedBy) {
     throw error;
   }
 
-  const existingMember = db.prepare(
-    'SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?'
-  ).get(orgId, userId);
+  const existingMember = db
+    .prepare('SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?')
+    .get(orgId, userId);
 
   if (existingMember) {
     const error = new Error('User is already a member');
@@ -134,13 +144,17 @@ export function addOrgMember(orgId, userId, role, addedBy) {
   const memberId = randomUUID();
   const now = new Date().toISOString();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO organization_members (id, organization_id, user_id, role, added_by_id, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(memberId, orgId, userId, role, addedBy, now, now);
+  `
+  ).run(memberId, orgId, userId, role, addedBy, now, now);
 
   // Return member with user details
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT
       om.id,
       om.organization_id as organizationId,
@@ -152,7 +166,9 @@ export function addOrgMember(orgId, userId, role, addedBy) {
     FROM organization_members om
     JOIN users u ON om.user_id = u.id
     WHERE om.id = ?
-  `).get(memberId);
+  `
+    )
+    .get(memberId);
 }
 
 /**
@@ -171,9 +187,9 @@ export function updateMemberRole(orgId, memberId, newRole, updatedBy) {
     throw error;
   }
 
-  const member = db.prepare(
-    'SELECT * FROM organization_members WHERE id = ? AND organization_id = ?'
-  ).get(memberId, orgId);
+  const member = db
+    .prepare('SELECT * FROM organization_members WHERE id = ? AND organization_id = ?')
+    .get(memberId, orgId);
 
   if (!member) {
     const error = new Error('Member not found');
@@ -182,14 +198,18 @@ export function updateMemberRole(orgId, memberId, newRole, updatedBy) {
   }
 
   const now = new Date().toISOString();
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE organization_members
     SET role = ?, updated_at = ?
     WHERE id = ?
-  `).run(newRole, now, memberId);
+  `
+  ).run(newRole, now, memberId);
 
   // Return updated member
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT
       om.id,
       om.organization_id as organizationId,
@@ -201,7 +221,9 @@ export function updateMemberRole(orgId, memberId, newRole, updatedBy) {
     FROM organization_members om
     JOIN users u ON om.user_id = u.id
     WHERE om.id = ?
-  `).get(memberId);
+  `
+    )
+    .get(memberId);
 }
 
 /**
@@ -212,9 +234,9 @@ export function removeOrgMember(orgId, memberId, removedBy) {
   // Verify remover has admin permission
   requireOrgPermission(orgId, removedBy, 'admin');
 
-  const member = db.prepare(
-    'SELECT * FROM organization_members WHERE id = ? AND organization_id = ?'
-  ).get(memberId, orgId);
+  const member = db
+    .prepare('SELECT * FROM organization_members WHERE id = ? AND organization_id = ?')
+    .get(memberId, orgId);
 
   if (!member) {
     const error = new Error('Member not found');
@@ -245,7 +267,9 @@ export function addMemberByEmail(orgId, email, role, addedBy) {
   }
 
   // Find user by email
-  const user = db.prepare('SELECT id, name, email FROM users WHERE email = ?').get(email.toLowerCase().trim());
+  const user = db
+    .prepare('SELECT id, name, email FROM users WHERE email = ?')
+    .get(email.toLowerCase().trim());
 
   if (!user) {
     return { success: false, error: 'user_not_found', message: 'No user with this email address' };
@@ -259,9 +283,9 @@ export function addMemberByEmail(orgId, email, role, addedBy) {
     throw error;
   }
 
-  const existingMember = db.prepare(
-    'SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?'
-  ).get(orgId, user.id);
+  const existingMember = db
+    .prepare('SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?')
+    .get(orgId, user.id);
 
   if (existingMember) {
     const error = new Error('This user is already a member');
@@ -273,13 +297,17 @@ export function addMemberByEmail(orgId, email, role, addedBy) {
   const memberId = randomUUID();
   const now = new Date().toISOString();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO organization_members (id, organization_id, user_id, role, added_by_id, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(memberId, orgId, user.id, role, addedBy, now, now);
+  `
+  ).run(memberId, orgId, user.id, role, addedBy, now, now);
 
   // Return member with user details
-  const member = db.prepare(`
+  const member = db
+    .prepare(
+      `
     SELECT
       om.id,
       om.organization_id as organizationId,
@@ -291,7 +319,9 @@ export function addMemberByEmail(orgId, email, role, addedBy) {
     FROM organization_members om
     JOIN users u ON om.user_id = u.id
     WHERE om.id = ?
-  `).get(memberId);
+  `
+    )
+    .get(memberId);
 
   return { success: true, member };
 }
@@ -301,7 +331,9 @@ export function addMemberByEmail(orgId, email, role, addedBy) {
  */
 export function getUserOrganizations(userId) {
   // Get owned organizations
-  const ownedOrgs = db.prepare(`
+  const ownedOrgs = db
+    .prepare(
+      `
     SELECT
       o.id,
       o.name,
@@ -312,10 +344,14 @@ export function getUserOrganizations(userId) {
       (SELECT COUNT(*) FROM departments WHERE organization_id = o.id) as departmentCount
     FROM organizations o
     WHERE o.created_by_id = ?
-  `).all(userId);
+  `
+    )
+    .all(userId);
 
   // Get member organizations
-  const memberOrgs = db.prepare(`
+  const memberOrgs = db
+    .prepare(
+      `
     SELECT
       o.id,
       o.name,
@@ -327,15 +363,17 @@ export function getUserOrganizations(userId) {
     FROM organizations o
     JOIN organization_members om ON o.id = om.organization_id
     WHERE om.user_id = ?
-  `).all(userId);
+  `
+    )
+    .all(userId);
 
   // Combine and sort by created date
-  const allOrgs = [...ownedOrgs, ...memberOrgs].sort((a, b) =>
-    new Date(b.createdAt) - new Date(a.createdAt)
+  const allOrgs = [...ownedOrgs, ...memberOrgs].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
 
   return allOrgs.map(org => ({
     ...org,
-    departments: { length: org.departmentCount || 0 }
+    departments: { length: org.departmentCount || 0 },
   }));
 }

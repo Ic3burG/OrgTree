@@ -50,13 +50,13 @@ export function validateCsrf(req, res, next) {
         path: req.path,
         method: req.method,
         ipAddress,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
 
     return res.status(403).json({
       message: 'CSRF token validation failed',
-      code: 'CSRF_TOKEN_MISSING'
+      code: 'CSRF_TOKEN_MISSING',
     });
   }
 
@@ -77,13 +77,13 @@ export function validateCsrf(req, res, next) {
         path: req.path,
         method: req.method,
         ipAddress,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
 
     return res.status(403).json({
       message: 'CSRF token validation failed',
-      code: 'CSRF_TOKEN_INVALID'
+      code: 'CSRF_TOKEN_INVALID',
     });
   }
 
@@ -101,13 +101,13 @@ export function validateCsrf(req, res, next) {
         path: req.path,
         method: req.method,
         ipAddress,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
 
     return res.status(403).json({
       message: 'CSRF token validation failed',
-      code: 'CSRF_TOKEN_MISMATCH'
+      code: 'CSRF_TOKEN_MISMATCH',
     });
   }
 

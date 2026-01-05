@@ -31,9 +31,7 @@ class ErrorBoundary extends React.Component {
         <div className="min-h-screen flex items-center justify-center bg-slate-50">
           <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 text-center">
             <div className="text-red-500 text-5xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">
-              Something went wrong
-            </h1>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Something went wrong</h1>
             <p className="text-slate-600 mb-6">
               We encountered an unexpected error. Please refresh the page to try again.
             </p>
@@ -44,9 +42,7 @@ class ErrorBoundary extends React.Component {
               Refresh Page
             </button>
             {this.state.eventId && (
-              <p className="mt-4 text-xs text-slate-400">
-                Error ID: {this.state.eventId}
-              </p>
+              <p className="mt-4 text-xs text-slate-400">Error ID: {this.state.eventId}</p>
             )}
             {!import.meta.env.PROD && this.state.error && (
               <details className="mt-6 text-left">

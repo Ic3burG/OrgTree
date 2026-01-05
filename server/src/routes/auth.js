@@ -12,7 +12,7 @@ import {
   revokeAllUserTokens,
   getUserSessions,
   revokeSession,
-  revokeOtherSessions
+  revokeOtherSessions,
 } from '../services/auth.service.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { createAuditLog } from '../services/audit.service.js';
@@ -28,7 +28,7 @@ const REFRESH_COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict',
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  path: '/api/auth' // Only sent to auth endpoints
+  path: '/api/auth', // Only sent to auth endpoints
 };
 
 // Rate limiter for authentication endpoints - prevents brute force attacks
@@ -53,11 +53,11 @@ const authLimiter = rateLimit({
         ipAddress,
         limit: 5,
         windowMs: 15 * 60 * 1000,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
     );
     res.status(429).json({ message: 'Too many login attempts, please try again later' });
-  }
+  },
 });
 
 // POST /api/auth/signup
@@ -87,7 +87,7 @@ router.post('/signup', authLimiter, async (req, res, next) => {
     res.status(201).json({
       user: result.user,
       accessToken: result.accessToken,
-      expiresIn: result.expiresIn
+      expiresIn: result.expiresIn,
     });
   } catch (err) {
     next(err);
@@ -115,7 +115,7 @@ router.post('/login', authLimiter, async (req, res, next) => {
     res.json({
       user: result.user,
       accessToken: result.accessToken,
-      expiresIn: result.expiresIn
+      expiresIn: result.expiresIn,
     });
   } catch (err) {
     next(err);
@@ -168,7 +168,9 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
 
     // Security: Prevent reusing the same password
     if (oldPassword && oldPassword === newPassword) {
-      return res.status(400).json({ message: 'New password must be different from current password' });
+      return res
+        .status(400)
+        .json({ message: 'New password must be different from current password' });
     }
 
     // Hash new password
@@ -176,11 +178,15 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
     const now = new Date().toISOString();
 
     // Update password and clear must_change_password flag
-    const result = db.prepare(`
+    const result = db
+      .prepare(
+        `
       UPDATE users
       SET password_hash = ?, must_change_password = 0, updated_at = ?
       WHERE id = ?
-    `).run(passwordHash, now, req.user.id);
+    `
+      )
+      .run(passwordHash, now, req.user.id);
 
     if (result.changes === 0) {
       return res.status(500).json({ message: 'Failed to update password' });
@@ -197,7 +203,7 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
     res.json({
       message: 'Password changed successfully. Please log in again.',
       user: updatedUser,
-      sessionsRevoked: revokedCount
+      sessionsRevoked: revokedCount,
     });
   } catch (err) {
     next(err);
@@ -214,7 +220,7 @@ const refreshLimiter = rateLimit({
   max: 10, // 10 requests per minute
   message: { message: 'Too many refresh attempts, please try again later' },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
 });
 
 // POST /api/auth/refresh - Get new access token using refresh token
@@ -226,7 +232,7 @@ router.post('/refresh', refreshLimiter, async (req, res, next) => {
     if (!refreshToken) {
       return res.status(401).json({
         message: 'Refresh token required',
-        code: 'REFRESH_TOKEN_MISSING'
+        code: 'REFRESH_TOKEN_MISSING',
       });
     }
 
@@ -240,22 +246,15 @@ router.post('/refresh', refreshLimiter, async (req, res, next) => {
       res.clearCookie('refreshToken', { path: '/api/auth' });
 
       // Log potential token reuse attack
-      createAuditLog(
-        null,
-        null,
-        'refresh_token_invalid',
-        'security',
-        'authentication',
-        {
-          reason: 'invalid_or_expired_refresh_token',
-          ipAddress,
-          timestamp: new Date().toISOString()
-        }
-      );
+      createAuditLog(null, null, 'refresh_token_invalid', 'security', 'authentication', {
+        reason: 'invalid_or_expired_refresh_token',
+        ipAddress,
+        timestamp: new Date().toISOString(),
+      });
 
       return res.status(401).json({
         message: 'Invalid or expired refresh token',
-        code: 'REFRESH_TOKEN_INVALID'
+        code: 'REFRESH_TOKEN_INVALID',
       });
     }
 
@@ -265,7 +264,7 @@ router.post('/refresh', refreshLimiter, async (req, res, next) => {
     res.json({
       user: result.user,
       accessToken: result.accessToken,
-      expiresIn: 900 // 15 minutes in seconds
+      expiresIn: 900, // 15 minutes in seconds
     });
   } catch (err) {
     next(err);
@@ -304,7 +303,7 @@ router.get('/sessions', authenticateToken, async (req, res, next) => {
     const currentToken = req.cookies.refreshToken;
     const sessionsWithCurrent = sessions.map(session => ({
       ...session,
-      isCurrent: false // We can't easily determine this without storing the hash
+      isCurrent: false, // We can't easily determine this without storing the hash
     }));
 
     res.json({ sessions: sessionsWithCurrent });
@@ -343,7 +342,7 @@ router.post('/sessions/revoke-others', authenticateToken, async (req, res, next)
 
     res.json({
       message: `Revoked ${revokedCount} other session(s)`,
-      revokedCount
+      revokedCount,
     });
   } catch (err) {
     next(err);

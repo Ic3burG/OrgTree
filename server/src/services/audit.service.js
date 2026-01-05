@@ -17,21 +17,14 @@ export function createAuditLog(orgId, actor, actionType, entityType, entityId, e
     const actorName = actor?.name || 'System';
     const entityDataJson = entityData ? JSON.stringify(entityData) : null;
 
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO audit_logs (
         id, organization_id, actor_id, actor_name, action_type,
         entity_type, entity_id, entity_data, created_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    `).run(
-      id,
-      orgId,
-      actorId,
-      actorName,
-      actionType,
-      entityType,
-      entityId,
-      entityDataJson
-    );
+    `
+    ).run(id, orgId, actorId, actorName, actionType, entityType, entityId, entityDataJson);
 
     return { id };
   } catch (err) {
@@ -132,13 +125,13 @@ export function getAuditLogs(orgId, options = {}) {
   // Parse entity_data JSON strings
   const parsedLogs = logs.map(log => ({
     ...log,
-    entityData: log.entityData ? JSON.parse(log.entityData) : null
+    entityData: log.entityData ? JSON.parse(log.entityData) : null,
   }));
 
   return {
     logs: parsedLogs,
     hasMore,
-    nextCursor
+    nextCursor,
   };
 }
 
@@ -233,13 +226,13 @@ export function getAllAuditLogs(options = {}) {
   // Parse entity_data JSON strings
   const parsedLogs = logs.map(log => ({
     ...log,
-    entityData: log.entityData ? JSON.parse(log.entityData) : null
+    entityData: log.entityData ? JSON.parse(log.entityData) : null,
   }));
 
   return {
     logs: parsedLogs,
     hasMore,
-    nextCursor
+    nextCursor,
   };
 }
 
@@ -249,10 +242,14 @@ export function getAllAuditLogs(options = {}) {
  */
 export function cleanupOldLogs() {
   try {
-    const result = db.prepare(`
+    const result = db
+      .prepare(
+        `
       DELETE FROM audit_logs
       WHERE created_at < date('now', '-1 year')
-    `).run();
+    `
+      )
+      .run();
 
     if (result.changes > 0) {
       console.log(`Cleaned up ${result.changes} old audit logs`);

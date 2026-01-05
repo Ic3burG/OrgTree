@@ -85,7 +85,7 @@ import {
   getOrganizationById,
   createOrganization,
   updateOrganization,
-  deleteOrganization
+  deleteOrganization,
 } from './org.service.js';
 
 describe('Organization Service', () => {
@@ -105,12 +105,14 @@ describe('Organization Service', () => {
     testUser = {
       id: 'test-user-id',
       name: 'Test User',
-      email: 'test@example.com'
+      email: 'test@example.com',
     };
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO users (id, name, email, password_hash, role)
       VALUES (?, ?, ?, 'hash', 'user')
-    `).run(testUser.id, testUser.name, testUser.email);
+    `
+    ).run(testUser.id, testUser.name, testUser.email);
   });
 
   describe('createOrganization', () => {
@@ -149,18 +151,22 @@ describe('Organization Service', () => {
     it('should return organizations user is member of', async () => {
       // Create org by another user
       const otherUser = { id: 'other-user-id' };
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO users (id, name, email, password_hash, role)
         VALUES (?, 'Other', 'other@example.com', 'hash', 'user')
-      `).run(otherUser.id);
+      `
+      ).run(otherUser.id);
 
       const org = await createOrganization('Other Org', otherUser.id);
 
       // Add test user as member
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('member-id', ?, ?, 'viewer')
-      `).run(org.id, testUser.id);
+      `
+      ).run(org.id, testUser.id);
 
       const orgs = await getOrganizations(testUser.id);
 
@@ -178,10 +184,12 @@ describe('Organization Service', () => {
       const org = await createOrganization('My Org', testUser.id);
 
       // Add departments
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('dept-1', ?, 'Dept 1'), ('dept-2', ?, 'Dept 2')
-      `).run(org.id, org.id);
+      `
+      ).run(org.id, org.id);
 
       const orgs = await getOrganizations(testUser.id);
 
@@ -192,15 +200,19 @@ describe('Organization Service', () => {
       const org = await createOrganization('My Org', testUser.id);
 
       // Add department and people
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('dept-1', ?, 'Dept 1')
-      `).run(org.id);
+      `
+      ).run(org.id);
 
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO people (id, department_id, name)
         VALUES ('person-1', 'dept-1', 'Person 1'), ('person-2', 'dept-1', 'Person 2')
-      `).run();
+      `
+      ).run();
 
       const orgs = await getOrganizations(testUser.id);
 
@@ -222,21 +234,21 @@ describe('Organization Service', () => {
     });
 
     it('should throw error for non-existent organization', async () => {
-      await expect(getOrganizationById('non-existent', testUser.id))
-        .rejects.toThrow();
+      await expect(getOrganizationById('non-existent', testUser.id)).rejects.toThrow();
     });
 
     it('should throw error if user has no access', async () => {
       const otherUser = { id: 'other-user-id' };
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO users (id, name, email, password_hash, role)
         VALUES (?, 'Other', 'other@example.com', 'hash', 'user')
-      `).run(otherUser.id);
+      `
+      ).run(otherUser.id);
 
       const org = await createOrganization('Other Org', otherUser.id);
 
-      await expect(getOrganizationById(org.id, testUser.id))
-        .rejects.toThrow();
+      await expect(getOrganizationById(org.id, testUser.id)).rejects.toThrow();
     });
   });
 
@@ -270,21 +282,24 @@ describe('Organization Service', () => {
 
     it('should throw error if user is not owner', async () => {
       const otherUser = { id: 'other-user-id' };
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO users (id, name, email, password_hash, role)
         VALUES (?, 'Other', 'other@example.com', 'hash', 'user')
-      `).run(otherUser.id);
+      `
+      ).run(otherUser.id);
 
       const org = await createOrganization('Other Org', otherUser.id);
 
       // Add test user as admin (not owner)
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('member-id', ?, ?, 'admin')
-      `).run(org.id, testUser.id);
+      `
+      ).run(org.id, testUser.id);
 
-      await expect(deleteOrganization(org.id, testUser.id))
-        .rejects.toThrow();
+      await expect(deleteOrganization(org.id, testUser.id)).rejects.toThrow();
     });
   });
 });

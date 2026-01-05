@@ -28,10 +28,7 @@ export default function ExportButton({ onExportPng, onExportPdf, loading }) {
       >
         <Download size={18} />
         <span className="text-sm font-medium">Export</span>
-        <ChevronDown
-          size={16}
-          className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
-        />
+        <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (

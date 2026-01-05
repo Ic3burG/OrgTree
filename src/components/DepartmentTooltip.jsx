@@ -19,7 +19,7 @@ export default function DepartmentTooltip({ description, depthColor, placement =
       style={{
         borderColor: borderColor,
         maxWidth: '320px',
-        minWidth: '280px'
+        minWidth: '280px',
       }}
     >
       {/* Arrow pointer */}

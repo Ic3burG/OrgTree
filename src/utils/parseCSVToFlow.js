@@ -9,7 +9,7 @@ export function parseCSVToFlow(csvText) {
   const result = Papa.parse(csvText, {
     header: true,
     skipEmptyLines: true,
-    transformHeader: (header) => header.trim(),
+    transformHeader: header => header.trim(),
   });
 
   if (result.errors.length > 0) {
@@ -49,7 +49,7 @@ function buildFlowStructure(rows) {
         description: row.Description ? row.Description.trim() : '',
         depth: depth,
         people: [],
-        parentPath: segments.length > 1 ? '/' + segments.slice(0, -1).join('/') : null
+        parentPath: segments.length > 1 ? '/' + segments.slice(0, -1).join('/') : null,
       });
     } else if (type === 'person') {
       // Find parent department and add person to it
@@ -63,7 +63,7 @@ function buildFlowStructure(rows) {
           title: row.Title ? row.Title.trim() : '',
           email: row.Email ? row.Email.trim() : '',
           phone: row.Phone ? row.Phone.trim() : '',
-          path: path
+          path: path,
         });
       } else {
         console.warn(`Parent department not found for person at: ${path}`);
@@ -85,7 +85,7 @@ function buildFlowStructure(rows) {
         description: dept.description, // Department responsibilities for tooltip
         people: dept.people,
         isExpanded: false, // Start collapsed
-      }
+      },
     });
 
     // Create edge from parent to this department
@@ -98,7 +98,7 @@ function buildFlowStructure(rows) {
           target: dept.id,
           type: 'smoothstep',
           animated: false,
-          style: { stroke: '#94a3b8', strokeWidth: 2 }
+          style: { stroke: '#94a3b8', strokeWidth: 2 },
         });
       }
     }
@@ -137,7 +137,7 @@ export function searchNodesAndPeople(nodes, query) {
         id: node.id,
         name: node.data.name,
         subtitle: `${node.data.people.length} people`,
-        node: node
+        node: node,
       });
     }
 
@@ -155,7 +155,7 @@ export function searchNodesAndPeople(nodes, query) {
           subtitle: person.title,
           person: person,
           departmentId: node.id,
-          departmentName: node.data.name
+          departmentName: node.data.name,
         });
       }
     });

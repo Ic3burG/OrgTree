@@ -57,14 +57,17 @@ export default function BulkEditModal({
   };
 
   const hasResult = result && (result.updatedCount > 0 || result.failedCount > 0);
-  const itemLabel = count === 1
-    ? (entityType === 'people' ? 'person' : 'department')
-    : (entityType === 'people' ? 'people' : 'departments');
+  const itemLabel =
+    count === 1
+      ? entityType === 'people'
+        ? 'person'
+        : 'department'
+      : entityType === 'people'
+        ? 'people'
+        : 'departments';
 
   // Check if any updates are selected
-  const hasUpdates = entityType === 'people'
-    ? title.trim() || departmentId
-    : parentId;
+  const hasUpdates = entityType === 'people' ? title.trim() || departmentId : parentId;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -72,9 +75,11 @@ export default function BulkEditModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              hasResult ? 'bg-green-100' : 'bg-blue-100'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                hasResult ? 'bg-green-100' : 'bg-blue-100'
+              }`}
+            >
               <Edit3 size={20} className={hasResult ? 'text-green-600' : 'text-blue-600'} />
             </div>
             <h2 className="text-xl font-semibold text-gray-900">
@@ -96,12 +101,14 @@ export default function BulkEditModal({
             <div className="space-y-2">
               {result.updatedCount > 0 && (
                 <p className="text-green-600">
-                  Successfully updated {result.updatedCount} {result.updatedCount === 1 ? 'item' : 'items'}
+                  Successfully updated {result.updatedCount}{' '}
+                  {result.updatedCount === 1 ? 'item' : 'items'}
                 </p>
               )}
               {result.failedCount > 0 && (
                 <p className="text-red-600">
-                  Failed to update {result.failedCount} {result.failedCount === 1 ? 'item' : 'items'}
+                  Failed to update {result.failedCount}{' '}
+                  {result.failedCount === 1 ? 'item' : 'items'}
                 </p>
               )}
             </div>
@@ -121,7 +128,7 @@ export default function BulkEditModal({
                     <input
                       type="text"
                       value={title}
-                      onChange={(e) => setTitle(e.target.value)}
+                      onChange={e => setTitle(e.target.value)}
                       placeholder="Leave empty to keep existing titles"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -134,11 +141,11 @@ export default function BulkEditModal({
                     </label>
                     <select
                       value={departmentId}
-                      onChange={(e) => setDepartmentId(e.target.value)}
+                      onChange={e => setDepartmentId(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Keep existing departments</option>
-                      {departments.map((dept) => (
+                      {departments.map(dept => (
                         <option key={dept.id} value={dept.id}>
                           {dept.name}
                         </option>
@@ -154,12 +161,12 @@ export default function BulkEditModal({
                   </label>
                   <select
                     value={parentId}
-                    onChange={(e) => setParentId(e.target.value)}
+                    onChange={e => setParentId(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Keep existing parent</option>
                     <option value="root">Root level (no parent)</option>
-                    {departments.map((dept) => (
+                    {departments.map(dept => (
                       <option key={dept.id} value={dept.id}>
                         {dept.name}
                       </option>

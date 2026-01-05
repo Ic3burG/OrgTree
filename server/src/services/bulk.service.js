@@ -4,7 +4,7 @@ import {
   emitPersonDeleted,
   emitPersonUpdated,
   emitDepartmentDeleted,
-  emitDepartmentUpdated
+  emitDepartmentUpdated,
 } from './socket-events.service.js';
 
 /**
@@ -39,13 +39,17 @@ export function bulkDeletePeople(orgId, personIds, actor) {
     for (const personId of personIds) {
       try {
         // Get full person data before delete (for audit trail)
-        const person = db.prepare(`
+        const person = db
+          .prepare(
+            `
           SELECT p.id, p.name, p.title, p.email, p.phone, p.department_id as departmentId,
                  d.organization_id, d.name as departmentName
           FROM people p
           JOIN departments d ON p.department_id = d.id
           WHERE p.id = ? AND d.organization_id = ? AND p.deleted_at IS NULL AND d.deleted_at IS NULL
-        `).get(personId, orgId);
+        `
+          )
+          .get(personId, orgId);
 
         if (!person) {
           failed.push({ id: personId, error: 'Person not found in this organization' });
@@ -54,7 +58,9 @@ export function bulkDeletePeople(orgId, personIds, actor) {
 
         // Soft delete the person
         const now = new Date().toISOString();
-        const result = db.prepare('UPDATE people SET deleted_at = ?, updated_at = ? WHERE id = ?').run(now, now, personId);
+        const result = db
+          .prepare('UPDATE people SET deleted_at = ?, updated_at = ? WHERE id = ?')
+          .run(now, now, personId);
 
         if (result.changes > 0) {
           deleted.push(person);
@@ -76,7 +82,7 @@ export function bulkDeletePeople(orgId, personIds, actor) {
     deleted,
     failed,
     deletedCount: deleted.length,
-    failedCount: failed.length
+    failedCount: failed.length,
   };
 }
 
@@ -112,9 +118,13 @@ export function bulkMovePeople(orgId, personIds, targetDepartmentId, actor) {
   }
 
   // Verify target department exists and belongs to this org
-  const targetDept = db.prepare(`
+  const targetDept = db
+    .prepare(
+      `
     SELECT id, name FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
-  `).get(targetDepartmentId, orgId);
+  `
+    )
+    .get(targetDepartmentId, orgId);
 
   if (!targetDept) {
     const error = new Error('Target department not found in this organization');
@@ -130,13 +140,17 @@ export function bulkMovePeople(orgId, personIds, targetDepartmentId, actor) {
     for (const personId of personIds) {
       try {
         // Verify person exists and belongs to this org
-        const person = db.prepare(`
+        const person = db
+          .prepare(
+            `
           SELECT p.id, p.name, p.title, p.email, p.phone, p.department_id as departmentId,
                  d.organization_id, d.name as departmentName
           FROM people p
           JOIN departments d ON p.department_id = d.id
           WHERE p.id = ? AND d.organization_id = ? AND p.deleted_at IS NULL AND d.deleted_at IS NULL
-        `).get(personId, orgId);
+        `
+          )
+          .get(personId, orgId);
 
         if (!person) {
           failed.push({ id: personId, error: 'Person not found in this organization' });
@@ -150,15 +164,19 @@ export function bulkMovePeople(orgId, personIds, targetDepartmentId, actor) {
         }
 
         // Move the person
-        const result = db.prepare(`
+        const result = db
+          .prepare(
+            `
           UPDATE people SET department_id = ?, updated_at = ? WHERE id = ?
-        `).run(targetDepartmentId, now, personId);
+        `
+          )
+          .run(targetDepartmentId, now, personId);
 
         if (result.changes > 0) {
           const updatedPerson = {
             ...person,
             departmentId: targetDepartmentId,
-            departmentName: targetDept.name
+            departmentName: targetDept.name,
           };
           moved.push(updatedPerson);
           // Emit event (also creates audit log)
@@ -179,7 +197,7 @@ export function bulkMovePeople(orgId, personIds, targetDepartmentId, actor) {
     moved,
     failed,
     movedCount: moved.length,
-    failedCount: failed.length
+    failedCount: failed.length,
   };
 }
 
@@ -219,9 +237,13 @@ export function bulkEditPeople(orgId, personIds, updates, actor) {
   // If moving to new department, verify it exists
   let targetDept = null;
   if (departmentId) {
-    targetDept = db.prepare(`
+    targetDept = db
+      .prepare(
+        `
       SELECT id, name FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
-    `).get(departmentId, orgId);
+    `
+      )
+      .get(departmentId, orgId);
 
     if (!targetDept) {
       const error = new Error('Target department not found in this organization');
@@ -238,13 +260,17 @@ export function bulkEditPeople(orgId, personIds, updates, actor) {
     for (const personId of personIds) {
       try {
         // Get current person data
-        const person = db.prepare(`
+        const person = db
+          .prepare(
+            `
           SELECT p.id, p.name, p.title, p.email, p.phone, p.department_id as departmentId,
                  d.organization_id, d.name as departmentName
           FROM people p
           JOIN departments d ON p.department_id = d.id
           WHERE p.id = ? AND d.organization_id = ? AND p.deleted_at IS NULL AND d.deleted_at IS NULL
-        `).get(personId, orgId);
+        `
+          )
+          .get(personId, orgId);
 
         if (!person) {
           failed.push({ id: personId, error: 'Person not found in this organization' });
@@ -269,16 +295,20 @@ export function bulkEditPeople(orgId, personIds, updates, actor) {
         updateValues.push(now);
         updateValues.push(personId);
 
-        const result = db.prepare(`
+        const result = db
+          .prepare(
+            `
           UPDATE people SET ${updateFields.join(', ')} WHERE id = ?
-        `).run(...updateValues);
+        `
+          )
+          .run(...updateValues);
 
         if (result.changes > 0) {
           const updatedPerson = {
             ...person,
             title: title !== undefined ? title : person.title,
             departmentId: departmentId !== undefined ? departmentId : person.departmentId,
-            departmentName: targetDept ? targetDept.name : person.departmentName
+            departmentName: targetDept ? targetDept.name : person.departmentName,
           };
           updated.push(updatedPerson);
           // Emit event (also creates audit log)
@@ -299,7 +329,7 @@ export function bulkEditPeople(orgId, personIds, updates, actor) {
     updated,
     failed,
     updatedCount: updated.length,
-    failedCount: failed.length
+    failedCount: failed.length,
   };
 }
 
@@ -335,11 +365,15 @@ export function bulkDeleteDepartments(orgId, departmentIds, actor) {
     for (const deptId of departmentIds) {
       try {
         // Get full department data before delete (for audit trail)
-        const dept = db.prepare(`
+        const dept = db
+          .prepare(
+            `
           SELECT id, name, description, parent_id as parentId, organization_id
           FROM departments
           WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
-        `).get(deptId, orgId);
+        `
+          )
+          .get(deptId, orgId);
 
         if (!dept) {
           failed.push({ id: deptId, error: 'Department not found in this organization' });
@@ -347,21 +381,33 @@ export function bulkDeleteDepartments(orgId, departmentIds, actor) {
         }
 
         // Check for child departments (will be cascade deleted)
-        const childCount = db.prepare(`
+        const childCount = db
+          .prepare(
+            `
           SELECT COUNT(*) as count FROM departments WHERE parent_id = ? AND deleted_at IS NULL
-        `).get(deptId).count;
+        `
+          )
+          .get(deptId).count;
 
         if (childCount > 0) {
-          warnings.push(`Department '${dept.name}' had ${childCount} sub-department(s) that were also deleted`);
+          warnings.push(
+            `Department '${dept.name}' had ${childCount} sub-department(s) that were also deleted`
+          );
         }
 
         // Check for people (will be cascade deleted)
-        const peopleCount = db.prepare(`
+        const peopleCount = db
+          .prepare(
+            `
           SELECT COUNT(*) as count FROM people WHERE department_id = ? AND deleted_at IS NULL
-        `).get(deptId).count;
+        `
+          )
+          .get(deptId).count;
 
         if (peopleCount > 0) {
-          warnings.push(`Department '${dept.name}' had ${peopleCount} person(s) that were also deleted`);
+          warnings.push(
+            `Department '${dept.name}' had ${peopleCount} person(s) that were also deleted`
+          );
         }
 
         // Soft delete the department and its children/people
@@ -388,7 +434,7 @@ export function bulkDeleteDepartments(orgId, departmentIds, actor) {
     failed,
     warnings,
     deletedCount: deleted.length,
-    failedCount: failed.length
+    failedCount: failed.length,
   };
 }
 
@@ -427,9 +473,13 @@ export function bulkEditDepartments(orgId, departmentIds, updates, actor) {
 
   // If setting a parent, verify it exists and belongs to this org
   if (parentId !== null && parentId !== undefined) {
-    const parentDept = db.prepare(`
+    const parentDept = db
+      .prepare(
+        `
       SELECT id, name FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
-    `).get(parentId, orgId);
+    `
+      )
+      .get(parentId, orgId);
 
     if (!parentDept) {
       const error = new Error('Parent department not found in this organization');
@@ -453,11 +503,15 @@ export function bulkEditDepartments(orgId, departmentIds, updates, actor) {
     for (const deptId of departmentIds) {
       try {
         // Get current department data
-        const dept = db.prepare(`
+        const dept = db
+          .prepare(
+            `
           SELECT id, name, description, parent_id as parentId, organization_id
           FROM departments
           WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
-        `).get(deptId, orgId);
+        `
+          )
+          .get(deptId, orgId);
 
         if (!dept) {
           failed.push({ id: deptId, error: 'Department not found in this organization' });
@@ -475,14 +529,18 @@ export function bulkEditDepartments(orgId, departmentIds, updates, actor) {
         }
 
         // Update the department
-        const result = db.prepare(`
+        const result = db
+          .prepare(
+            `
           UPDATE departments SET parent_id = ?, updated_at = ? WHERE id = ?
-        `).run(parentId === undefined ? dept.parentId : parentId, now, deptId);
+        `
+          )
+          .run(parentId === undefined ? dept.parentId : parentId, now, deptId);
 
         if (result.changes > 0) {
           const updatedDept = {
             ...dept,
-            parentId: parentId === undefined ? dept.parentId : parentId
+            parentId: parentId === undefined ? dept.parentId : parentId,
           };
           updated.push(updatedDept);
           // Emit event (also creates audit log)
@@ -503,7 +561,7 @@ export function bulkEditDepartments(orgId, departmentIds, updates, actor) {
     updated,
     failed,
     updatedCount: updated.length,
-    failedCount: failed.length
+    failedCount: failed.length,
   };
 }
 
@@ -520,7 +578,9 @@ function checkIsDescendant(potentialDescendant, ancestorId) {
 
     if (current === ancestorId) return true;
 
-    const parent = db.prepare('SELECT parent_id FROM departments WHERE id = ? AND deleted_at IS NULL').get(current);
+    const parent = db
+      .prepare('SELECT parent_id FROM departments WHERE id = ? AND deleted_at IS NULL')
+      .get(current);
     current = parent?.parent_id;
   }
 
@@ -540,10 +600,15 @@ function softDeleteDepartment(deptId) {
     let currentDeptIds = [deptId];
 
     while (currentDeptIds.length > 0) {
-      const children = db.prepare(`
+      const children = db
+        .prepare(
+          `
         SELECT id FROM departments
         WHERE parent_id IN (${currentDeptIds.map(() => '?').join(',')}) AND deleted_at IS NULL
-      `).all(currentDeptIds).map(d => d.id);
+      `
+        )
+        .all(currentDeptIds)
+        .map(d => d.id);
 
       if (children.length > 0) {
         allDeptsToDelete.push(...children);
@@ -554,19 +619,27 @@ function softDeleteDepartment(deptId) {
     }
 
     // Soft delete all affected departments
-    const deptResult = db.prepare(`
+    const deptResult = db
+      .prepare(
+        `
       UPDATE departments
       SET deleted_at = ?, updated_at = ?
       WHERE id IN (${allDeptsToDelete.map(() => '?').join(',')})
-    `).run(now, now, ...allDeptsToDelete);
+    `
+      )
+      .run(now, now, ...allDeptsToDelete);
     totalChanges += deptResult.changes;
 
     // Soft delete all people in those departments
-    const peopleResult = db.prepare(`
+    const peopleResult = db
+      .prepare(
+        `
       UPDATE people
       SET deleted_at = ?, updated_at = ?
       WHERE department_id IN (${allDeptsToDelete.map(() => '?').join(',')})
-    `).run(now, now, ...allDeptsToDelete);
+    `
+      )
+      .run(now, now, ...allDeptsToDelete);
     totalChanges += peopleResult.changes;
 
     return { changes: totalChanges };

@@ -22,7 +22,7 @@ router.post('/organizations/:orgId/import', async (req, res, next) => {
     const MAX_IMPORT_SIZE = 10000;
     if (data.length > MAX_IMPORT_SIZE) {
       return res.status(400).json({
-        message: `Import size exceeds maximum limit of ${MAX_IMPORT_SIZE} items`
+        message: `Import size exceeds maximum limit of ${MAX_IMPORT_SIZE} items`,
       });
     }
 
@@ -65,21 +65,12 @@ router.post('/organizations/:orgId/import', async (req, res, next) => {
         if (type === 'department') {
           // Find parent path
           const pathParts = row.path.split('/').filter(Boolean);
-          const parentPath =
-            pathParts.length > 1
-              ? '/' + pathParts.slice(0, -1).join('/')
-              : null;
+          const parentPath = pathParts.length > 1 ? '/' + pathParts.slice(0, -1).join('/') : null;
 
           const deptId = generateId();
           const parentId = parentPath ? pathToDeptId.get(parentPath) || null : null;
 
-          insertDept.run(
-            deptId,
-            orgId,
-            parentId,
-            row.name,
-            row.description || null
-          );
+          insertDept.run(deptId, orgId, parentId, row.name, row.description || null);
 
           pathToDeptId.set(row.path, deptId);
           departmentsCreated++;

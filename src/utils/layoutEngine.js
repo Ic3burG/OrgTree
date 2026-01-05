@@ -12,13 +12,13 @@ export function calculateLayout(nodes, edges, direction = 'TB') {
 
   // Configure graph layout
   g.setGraph({
-    rankdir: direction,  // 'TB' (vertical) or 'LR' (horizontal)
-    nodesep: 80,         // horizontal spacing between nodes at same level
-    ranksep: 120,        // vertical spacing between hierarchy levels
+    rankdir: direction, // 'TB' (vertical) or 'LR' (horizontal)
+    nodesep: 80, // horizontal spacing between nodes at same level
+    ranksep: 120, // vertical spacing between hierarchy levels
     marginx: 40,
     marginy: 40,
-    align: 'UL',         // alignment: UL (up-left), UR, DL, DR
-    ranker: 'tight-tree' // better for tree-like structures
+    align: 'UL', // alignment: UL (up-left), UR, DL, DR
+    ranker: 'tight-tree', // better for tree-like structures
   });
 
   g.setDefaultEdgeLabel(() => ({}));
@@ -55,8 +55,8 @@ export function calculateLayout(nodes, edges, direction = 'TB') {
       ...node,
       position: {
         x: nodeWithPosition.x - nodeWithPosition.width / 2,
-        y: nodeWithPosition.y - nodeWithPosition.height / 2
-      }
+        y: nodeWithPosition.y - nodeWithPosition.height / 2,
+      },
     };
   });
 }

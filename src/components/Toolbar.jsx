@@ -7,7 +7,7 @@ import {
   ArrowDown,
   ArrowRight,
   LogOut,
-  Palette
+  Palette,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
@@ -27,7 +27,7 @@ export default function Toolbar({
   onToggleLayout,
   layoutDirection,
   currentTheme,
-  onThemeChange
+  onThemeChange,
 }) {
   const { user, logout } = useAuth();
   const [isThemeOpen, setIsThemeOpen] = useState(false);
@@ -45,9 +45,11 @@ export default function Toolbar({
   `;
 
   const Tooltip = ({ children }) => (
-    <span className="hidden lg:inline absolute right-full mr-2 px-2 py-1 bg-slate-800 text-white text-xs
+    <span
+      className="hidden lg:inline absolute right-full mr-2 px-2 py-1 bg-slate-800 text-white text-xs
       rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity
-      pointer-events-none z-50">
+      pointer-events-none z-50"
+    >
       {children}
     </span>
   );
@@ -55,31 +57,19 @@ export default function Toolbar({
   return (
     <div className="absolute bottom-20 right-4 lg:bottom-auto lg:top-4 lg:right-4 z-10 flex flex-col items-end gap-1.5 lg:gap-2">
       {/* Zoom In */}
-      <button
-        onClick={onZoomIn}
-        className={buttonClass}
-        aria-label="Zoom in"
-      >
+      <button onClick={onZoomIn} className={buttonClass} aria-label="Zoom in">
         <ZoomIn size={20} className="lg:w-5 lg:h-5 text-slate-700" />
         <Tooltip>Zoom In</Tooltip>
       </button>
 
       {/* Zoom Out */}
-      <button
-        onClick={onZoomOut}
-        className={buttonClass}
-        aria-label="Zoom out"
-      >
+      <button onClick={onZoomOut} className={buttonClass} aria-label="Zoom out">
         <ZoomOut size={20} className="lg:w-5 lg:h-5 text-slate-700" />
         <Tooltip>Zoom Out</Tooltip>
       </button>
 
       {/* Fit View */}
-      <button
-        onClick={onFitView}
-        className={buttonClass}
-        aria-label="Fit view"
-      >
+      <button onClick={onFitView} className={buttonClass} aria-label="Fit view">
         <Maximize2 size={20} className="lg:w-5 lg:h-5 text-slate-700" />
         <Tooltip>Fit to Screen</Tooltip>
       </button>
@@ -88,21 +78,13 @@ export default function Toolbar({
       <div className="h-px bg-slate-300 my-0.5" />
 
       {/* Expand All */}
-      <button
-        onClick={onExpandAll}
-        className={buttonClass}
-        aria-label="Expand all departments"
-      >
+      <button onClick={onExpandAll} className={buttonClass} aria-label="Expand all departments">
         <ChevronDown size={20} className="lg:w-5 lg:h-5 text-slate-700" />
         <Tooltip>Expand All</Tooltip>
       </button>
 
       {/* Collapse All */}
-      <button
-        onClick={onCollapseAll}
-        className={buttonClass}
-        aria-label="Collapse all departments"
-      >
+      <button onClick={onCollapseAll} className={buttonClass} aria-label="Collapse all departments">
         <ChevronUp size={20} className="lg:w-5 lg:h-5 text-slate-700" />
         <Tooltip>Collapse All</Tooltip>
       </button>
@@ -155,10 +137,13 @@ export default function Toolbar({
 
             {/* Theme options */}
             <div className="absolute right-full mr-2 top-0 z-50 bg-white border border-slate-300 rounded-lg p-3 shadow-xl animate-in slide-in-from-right-2 duration-200">
-              <ThemePicker currentTheme={currentTheme} onThemeChange={(theme) => {
-                onThemeChange(theme);
-                setIsThemeOpen(false);
-              }} />
+              <ThemePicker
+                currentTheme={currentTheme}
+                onThemeChange={theme => {
+                  onThemeChange(theme);
+                  setIsThemeOpen(false);
+                }}
+              />
             </div>
           </>
         )}

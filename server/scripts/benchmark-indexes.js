@@ -15,10 +15,12 @@ console.log();
 
 // Get existing data counts
 const stats = {
-  departments: db.prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL').get().count,
+  departments: db
+    .prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL')
+    .get().count,
   people: db.prepare('SELECT COUNT(*) as count FROM people WHERE deleted_at IS NULL').get().count,
   audit_logs: db.prepare('SELECT COUNT(*) as count FROM audit_logs').get().count,
-  invitations: db.prepare('SELECT COUNT(*) as count FROM invitations').get().count
+  invitations: db.prepare('SELECT COUNT(*) as count FROM invitations').get().count,
 };
 
 console.log('📊 Current Database Size:');
@@ -52,7 +54,9 @@ function benchmark(name, query, params, iterations = 100) {
 
 // Get a sample organization and department for testing
 const sampleOrg = db.prepare('SELECT id FROM organizations LIMIT 1').get();
-const sampleDept = db.prepare('SELECT id, parent_id FROM departments WHERE deleted_at IS NULL LIMIT 1').get();
+const sampleDept = db
+  .prepare('SELECT id, parent_id FROM departments WHERE deleted_at IS NULL LIMIT 1')
+  .get();
 
 if (!sampleOrg || !sampleDept) {
   console.log('⚠️  No test data available. Please add some organizations and departments first.');
@@ -146,14 +150,18 @@ console.log();
 
 // Show index sizes
 console.log('📦 Index Storage Impact:');
-const indexStats = db.prepare(`
+const indexStats = db
+  .prepare(
+    `
   SELECT
     name,
     CASE WHEN name LIKE 'idx_%' THEN 'User Index' ELSE 'System' END as type
   FROM sqlite_master
   WHERE type='index' AND tbl_name NOT LIKE '%_fts%' AND name NOT LIKE 'sqlite_%'
   ORDER BY name
-`).all();
+`
+  )
+  .all();
 
 const userIndexes = indexStats.filter(idx => idx.type === 'User Index');
 console.log(`   Total user indexes: ${userIndexes.length}`);

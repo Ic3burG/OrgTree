@@ -9,7 +9,7 @@ import { getInitials } from '../utils/helpers';
 export default function PersonRowCard({ person, onSelect, isLast }) {
   const initials = getInitials(person.name);
 
-  const handleClick = (e) => {
+  const handleClick = e => {
     e.stopPropagation();
     if (onSelect) {
       onSelect(person);
@@ -28,22 +28,18 @@ export default function PersonRowCard({ person, onSelect, isLast }) {
     >
       {/* Initials Avatar */}
       <div className="flex-shrink-0">
-        <div className="w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
-          flex items-center justify-center text-white font-semibold text-xs shadow-sm">
+        <div
+          className="w-9 h-9 lg:w-8 lg:h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
+          flex items-center justify-center text-white font-semibold text-xs shadow-sm"
+        >
           {initials}
         </div>
       </div>
 
       {/* Name and Title */}
       <div className="flex-grow min-w-0">
-        <div className="font-medium text-sm text-slate-900 truncate">
-          {person.name}
-        </div>
-        {person.title && (
-          <div className="text-xs text-slate-600 truncate">
-            {person.title}
-          </div>
-        )}
+        <div className="font-medium text-sm text-slate-900 truncate">{person.name}</div>
+        {person.title && <div className="text-xs text-slate-600 truncate">{person.title}</div>}
       </div>
 
       {/* Chevron */}

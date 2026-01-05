@@ -66,7 +66,7 @@ import {
   addOrgMember,
   addMemberByEmail,
   updateMemberRole,
-  removeOrgMember
+  removeOrgMember,
 } from './member.service.js';
 
 describe('Member Service', () => {
@@ -82,24 +82,30 @@ describe('Member Service', () => {
 
     // Create owner
     owner = { id: 'owner-id', name: 'Owner', email: 'owner@example.com' };
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO users (id, name, email, password_hash, role)
       VALUES (?, ?, ?, 'hash', 'user')
-    `).run(owner.id, owner.name, owner.email);
+    `
+    ).run(owner.id, owner.name, owner.email);
 
     // Create member user
     member = { id: 'member-id', name: 'Member', email: 'member@example.com' };
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO users (id, name, email, password_hash, role)
       VALUES (?, ?, ?, 'hash', 'user')
-    `).run(member.id, member.name, member.email);
+    `
+    ).run(member.id, member.name, member.email);
 
     // Create organization
     org = { id: 'org-id', name: 'Test Org' };
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO organizations (id, name, created_by_id)
       VALUES (?, ?, ?)
-    `).run(org.id, org.name, owner.id);
+    `
+    ).run(org.id, org.name, owner.id);
   });
 
   describe('checkOrgAccess', () => {
@@ -112,10 +118,12 @@ describe('Member Service', () => {
 
     it('should return member access for organization member', () => {
       // Add member
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('mem-1', ?, ?, 'editor')
-      `).run(org.id, member.id);
+      `
+      ).run(org.id, member.id);
 
       const access = checkOrgAccess(org.id, member.id);
 
@@ -125,10 +133,12 @@ describe('Member Service', () => {
 
     it('should return no access for non-member', () => {
       const nonMember = { id: 'non-member-id' };
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO users (id, name, email, password_hash, role)
         VALUES (?, 'Non Member', 'non@example.com', 'hash', 'user')
-      `).run(nonMember.id);
+      `
+      ).run(nonMember.id);
 
       const access = checkOrgAccess(org.id, nonMember.id);
 
@@ -147,29 +157,35 @@ describe('Member Service', () => {
     });
 
     it('should not throw for admin with editor permission', () => {
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('mem-1', ?, ?, 'admin')
-      `).run(org.id, member.id);
+      `
+      ).run(org.id, member.id);
 
       expect(() => requireOrgPermission(org.id, member.id, 'editor')).not.toThrow();
     });
 
     it('should throw for viewer with editor permission', () => {
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('mem-1', ?, ?, 'viewer')
-      `).run(org.id, member.id);
+      `
+      ).run(org.id, member.id);
 
       expect(() => requireOrgPermission(org.id, member.id, 'editor')).toThrow();
     });
 
     it('should throw for non-member', () => {
       const nonMember = { id: 'non-member-id' };
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO users (id, name, email, password_hash, role)
         VALUES (?, 'Non Member', 'non@example.com', 'hash', 'user')
-      `).run(nonMember.id);
+      `
+      ).run(nonMember.id);
 
       expect(() => requireOrgPermission(org.id, nonMember.id, 'viewer')).toThrow();
     });
@@ -178,16 +194,20 @@ describe('Member Service', () => {
   describe('getOrgMembers', () => {
     it('should return all members of organization', () => {
       // Create viewer user first (before adding as member)
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO users (id, name, email, password_hash, role)
         VALUES ('viewer-id', 'Viewer', 'viewer@example.com', 'hash', 'user')
-      `).run();
+      `
+      ).run();
 
       // Add some members
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('mem-1', ?, ?, 'admin'), ('mem-2', ?, ?, 'viewer')
-      `).run(org.id, member.id, org.id, 'viewer-id');
+      `
+      ).run(org.id, member.id, org.id, 'viewer-id');
 
       const members = getOrgMembers(org.id);
 
@@ -195,10 +215,12 @@ describe('Member Service', () => {
     });
 
     it('should include member details', () => {
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('mem-1', ?, ?, 'admin')
-      `).run(org.id, member.id);
+      `
+      ).run(org.id, member.id);
 
       const members = getOrgMembers(org.id);
 
@@ -221,24 +243,28 @@ describe('Member Service', () => {
     it('should throw if user is already a member', () => {
       addOrgMember(org.id, member.id, 'editor', owner.id);
 
-      expect(() => addOrgMember(org.id, member.id, 'admin', owner.id))
-        .toThrow('User is already a member');
+      expect(() => addOrgMember(org.id, member.id, 'admin', owner.id)).toThrow(
+        'User is already a member'
+      );
     });
 
     it('should throw if requester is not admin', () => {
       const viewer = { id: 'viewer-id' };
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO users (id, name, email, password_hash, role)
         VALUES (?, 'Viewer', 'viewer@example.com', 'hash', 'user')
-      `).run(viewer.id);
+      `
+      ).run(viewer.id);
 
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('mem-1', ?, ?, 'viewer')
-      `).run(org.id, viewer.id);
+      `
+      ).run(org.id, viewer.id);
 
-      expect(() => addOrgMember(org.id, member.id, 'editor', viewer.id))
-        .toThrow();
+      expect(() => addOrgMember(org.id, member.id, 'editor', viewer.id)).toThrow();
     });
   });
 
@@ -260,10 +286,12 @@ describe('Member Service', () => {
 
   describe('updateMemberRole', () => {
     beforeEach(() => {
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('mem-1', ?, ?, 'viewer')
-      `).run(org.id, member.id);
+      `
+      ).run(org.id, member.id);
     });
 
     it('should update member role', () => {
@@ -273,17 +301,18 @@ describe('Member Service', () => {
     });
 
     it('should throw for invalid role', () => {
-      expect(() => updateMemberRole(org.id, 'mem-1', 'invalid', owner.id))
-        .toThrow('Invalid role');
+      expect(() => updateMemberRole(org.id, 'mem-1', 'invalid', owner.id)).toThrow('Invalid role');
     });
   });
 
   describe('removeOrgMember', () => {
     beforeEach(() => {
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('mem-1', ?, ?, 'viewer')
-      `).run(org.id, member.id);
+      `
+      ).run(org.id, member.id);
     });
 
     it('should remove member from organization', async () => {
@@ -295,10 +324,12 @@ describe('Member Service', () => {
 
     it('should throw if trying to remove owner', async () => {
       // Owner is creator, not in members table, but let's add as a member
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('owner-mem', ?, ?, 'admin')
-      `).run(org.id, owner.id);
+      `
+      ).run(org.id, owner.id);
 
       // In real service, removing owner should be prevented
       // This test depends on implementation

@@ -16,11 +16,11 @@ export function initializeSocket(httpServer, allowedOrigins) {
     cors: {
       origin: allowedOrigins,
       credentials: true,
-      methods: ['GET', 'POST']
+      methods: ['GET', 'POST'],
     },
     // Ping every 25 seconds, timeout after 60 seconds
     pingInterval: 25000,
-    pingTimeout: 60000
+    pingTimeout: 60000,
   });
 
   // JWT Authentication middleware
@@ -41,15 +41,15 @@ export function initializeSocket(httpServer, allowedOrigins) {
   });
 
   // Connection handler
-  io.on('connection', (socket) => {
+  io.on('connection', socket => {
     logger.info('Socket connected', {
       socketId: socket.id,
       userId: socket.user.id,
-      userName: socket.user.name
+      userName: socket.user.name,
     });
 
     // Join organization room
-    socket.on('join:org', async (orgId) => {
+    socket.on('join:org', async orgId => {
       try {
         // Verify user has access to this organization
         const access = checkOrgAccess(orgId, socket.user.id);
@@ -75,7 +75,7 @@ export function initializeSocket(httpServer, allowedOrigins) {
           socketId: socket.id,
           userId: socket.user.id,
           orgId,
-          role: access.role
+          role: access.role,
         });
 
         socket.emit('joined:org', { orgId, role: access.role });
@@ -86,25 +86,25 @@ export function initializeSocket(httpServer, allowedOrigins) {
     });
 
     // Leave organization room
-    socket.on('leave:org', (orgId) => {
+    socket.on('leave:org', orgId => {
       const roomName = `org:${orgId}`;
       socket.leave(roomName);
 
       logger.info('User left org room', {
         socketId: socket.id,
         userId: socket.user.id,
-        orgId
+        orgId,
       });
 
       socket.emit('left:org', { orgId });
     });
 
     // Handle disconnection
-    socket.on('disconnect', (reason) => {
+    socket.on('disconnect', reason => {
       logger.info('Socket disconnected', {
         socketId: socket.id,
         userId: socket.user.id,
-        reason
+        reason,
       });
     });
   });
@@ -139,7 +139,7 @@ export function emitToOrg(orgId, eventType, payload) {
   logger.info('Emitted event to org', {
     orgId,
     eventType,
-    room: roomName
+    room: roomName,
   });
 }
 

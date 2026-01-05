@@ -48,14 +48,9 @@ export default function ResetPasswordModal({ user, onClose }) {
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
             <Key size={20} className="text-yellow-600" />
-            <h2 className="text-lg font-semibold text-gray-900">
-              Reset Password
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900">Reset Password</h2>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X size={20} className="text-gray-500" />
           </button>
         </div>
@@ -65,23 +60,17 @@ export default function ResetPasswordModal({ user, onClose }) {
           {step === 'confirm' && (
             <>
               <div className="flex items-start gap-3 p-4 bg-yellow-50 rounded-lg mb-4">
-                <AlertTriangle
-                  size={24}
-                  className="text-yellow-600 flex-shrink-0 mt-0.5"
-                />
+                <AlertTriangle size={24} className="text-yellow-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm text-yellow-800">
-                    This will generate a new temporary password for{' '}
-                    <strong>{user?.name}</strong>. They will need to use this
-                    password to log in.
+                    This will generate a new temporary password for <strong>{user?.name}</strong>.
+                    They will need to use this password to log in.
                   </p>
                 </div>
               </div>
 
               {error && (
-                <div className="p-3 bg-red-50 text-red-600 rounded-lg mb-4 text-sm">
-                  {error}
-                </div>
+                <div className="p-3 bg-red-50 text-red-600 rounded-lg mb-4 text-sm">{error}</div>
               )}
 
               <div className="flex gap-3">
@@ -114,8 +103,7 @@ export default function ResetPasswordModal({ user, onClose }) {
                   Password reset successfully for <strong>{user?.name}</strong>
                 </p>
                 <p className="text-sm text-gray-500">
-                  Share this temporary password with the user. It will only be
-                  shown once.
+                  Share this temporary password with the user. It will only be shown once.
                 </p>
               </div>
 
@@ -139,18 +127,13 @@ export default function ResetPasswordModal({ user, onClose }) {
                     {copied ? <Check size={20} /> : <Copy size={20} />}
                   </button>
                 </div>
-                {copied && (
-                  <p className="text-sm text-green-600 mt-1">
-                    Copied to clipboard!
-                  </p>
-                )}
+                {copied && <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>}
               </div>
 
               <div className="p-3 bg-amber-50 rounded-lg mb-4">
                 <p className="text-sm text-amber-800">
-                  <strong>Important:</strong> Make sure to share this password
-                  securely. The user should change their password after logging
-                  in.
+                  <strong>Important:</strong> Make sure to share this password securely. The user
+                  should change their password after logging in.
                 </p>
               </div>
 

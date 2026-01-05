@@ -46,8 +46,10 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 
-if (process.env.NODE_ENV === 'production' &&
-    process.env.JWT_SECRET.includes('change-this-in-production')) {
+if (
+  process.env.NODE_ENV === 'production' &&
+  process.env.JWT_SECRET.includes('change-this-in-production')
+) {
   console.error('FATAL: Default JWT_SECRET detected in production. Set a secure secret.');
   process.exit(1);
 }
@@ -65,44 +67,49 @@ if (sentryRequestHandler) {
 }
 
 // CORS configuration - dynamic based on environment
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.FRONTEND_URL].filter(Boolean) // Production: use env var
-  : [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:3000'
-    ]; // Development: all local ports
+const allowedOrigins =
+  process.env.NODE_ENV === 'production'
+    ? [process.env.FRONTEND_URL].filter(Boolean) // Production: use env var
+    : [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:3000',
+      ]; // Development: all local ports
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) return callback(null, true);
 
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
-}));
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+  })
+);
 
 // Security headers - protects against XSS, clickjacking, MIME sniffing, etc.
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"], // Required for Swagger UI
-      styleSrc: ["'self'", "'unsafe-inline'"],  // Required for Swagger UI
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "wss:", "ws:"],    // WebSocket connections
-    }
-  },
-  crossOriginEmbedderPolicy: false, // Needed for Swagger UI
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"], // Required for Swagger UI
+        styleSrc: ["'self'", "'unsafe-inline'"], // Required for Swagger UI
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'", 'wss:', 'ws:'], // WebSocket connections
+      },
+    },
+    crossOriginEmbedderPolicy: false, // Needed for Swagger UI
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser()); // Required for CSRF cookie validation
@@ -123,10 +130,14 @@ if (process.env.NODE_ENV === 'production') {
 // Load and serve OpenAPI documentation
 const openApiPath = path.join(__dirname, 'openapi.yaml');
 const openApiSpec = YAML.parse(fs.readFileSync(openApiPath, 'utf8'));
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'OrgTree API Documentation'
-}));
+app.use(
+  '/api/docs',
+  swaggerUi.serve,
+  swaggerUi.setup(openApiSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'OrgTree API Documentation',
+  })
+);
 
 // Serve raw OpenAPI spec
 app.get('/api/openapi.yaml', (req, res) => {
@@ -146,14 +157,14 @@ app.get('/api/health', async (req, res) => {
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
-      database: dbCheck.ok === 1 ? 'connected' : 'error'
+      database: dbCheck.ok === 1 ? 'connected' : 'error',
     });
   } catch (error) {
     res.status(503).json({
       status: 'error',
       timestamp: new Date().toISOString(),
       database: 'disconnected',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -200,7 +211,7 @@ app.use(errorHandler);
 server.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`, {
     port: PORT,
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
   });
 
   // Schedule token cleanup job - runs every hour

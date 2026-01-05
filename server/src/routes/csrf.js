@@ -36,19 +36,19 @@ router.get('/csrf-token', (req, res) => {
       secure: process.env.NODE_ENV === 'production', // HTTPS only in production
       sameSite: 'strict', // Strict same-site policy
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      path: '/' // Available site-wide
+      path: '/', // Available site-wide
     });
 
     // Return token in response body
     res.json({
       csrfToken: signedToken,
-      expiresIn: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+      expiresIn: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
     });
   } catch (err) {
     console.error('Error generating CSRF token:', err);
     res.status(500).json({
       message: 'Failed to generate CSRF token',
-      code: 'CSRF_GENERATION_ERROR'
+      code: 'CSRF_GENERATION_ERROR',
     });
   }
 });

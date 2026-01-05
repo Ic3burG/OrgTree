@@ -36,7 +36,7 @@ export default function CreateUserModal({ onClose, onSuccess }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleCreate = async (e) => {
+  const handleCreate = async e => {
     e.preventDefault();
     if (!validate()) return;
 
@@ -53,11 +53,11 @@ export default function CreateUserModal({ onClose, onSuccess }) {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -95,10 +95,7 @@ export default function CreateUserModal({ onClose, onSuccess }) {
               {step === 'form' ? 'Create New User' : 'User Created'}
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X size={20} className="text-gray-500" />
           </button>
         </div>
@@ -109,10 +106,7 @@ export default function CreateUserModal({ onClose, onSuccess }) {
             <form onSubmit={handleCreate} className="space-y-4">
               {/* Name */}
               <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                   Name *
                 </label>
                 <input
@@ -126,17 +120,12 @@ export default function CreateUserModal({ onClose, onSuccess }) {
                   }`}
                   placeholder="Enter name"
                 />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-                )}
+                {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
               </div>
 
               {/* Email */}
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email *
                 </label>
                 <input
@@ -150,17 +139,12 @@ export default function CreateUserModal({ onClose, onSuccess }) {
                   }`}
                   placeholder="Enter email"
                 />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-                )}
+                {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
               </div>
 
               {/* Role */}
               <div>
-                <label
-                  htmlFor="role"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
                   Role *
                 </label>
                 <select
@@ -176,24 +160,20 @@ export default function CreateUserModal({ onClose, onSuccess }) {
                   <option value="admin">Admin</option>
                   <option value="superuser">Superuser</option>
                 </select>
-                {errors.role && (
-                  <p className="mt-1 text-sm text-red-500">{errors.role}</p>
-                )}
+                {errors.role && <p className="mt-1 text-sm text-red-500">{errors.role}</p>}
               </div>
 
               {/* Info */}
               <div className="p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  A temporary password will be generated and shown after creation.
-                  The user will be required to change it on first login.
+                  A temporary password will be generated and shown after creation. The user will be
+                  required to change it on first login.
                 </p>
               </div>
 
               {/* Error */}
               {errors.submit && (
-                <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
-                  {errors.submit}
-                </div>
+                <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">{errors.submit}</div>
               )}
 
               {/* Actions */}
@@ -226,8 +206,7 @@ export default function CreateUserModal({ onClose, onSuccess }) {
                   User <strong>{newUser?.name}</strong> created successfully
                 </p>
                 <p className="text-sm text-gray-500">
-                  Share this temporary password with the user. It will only be
-                  shown once.
+                  Share this temporary password with the user. It will only be shown once.
                 </p>
               </div>
 
@@ -251,18 +230,13 @@ export default function CreateUserModal({ onClose, onSuccess }) {
                     {copied ? <Check size={20} /> : <Copy size={20} />}
                   </button>
                 </div>
-                {copied && (
-                  <p className="text-sm text-green-600 mt-1">
-                    Copied to clipboard!
-                  </p>
-                )}
+                {copied && <p className="text-sm text-green-600 mt-1">Copied to clipboard!</p>}
               </div>
 
               <div className="p-3 bg-amber-50 rounded-lg mb-4">
                 <p className="text-sm text-amber-800">
-                  <strong>Important:</strong> The user will be prompted to change
-                  their password on first login. Make sure to share this password
-                  securely.
+                  <strong>Important:</strong> The user will be prompted to change their password on
+                  first login. Make sure to share this password securely.
                 </p>
               </div>
 

@@ -30,7 +30,9 @@ router.get('/organizations/:orgId/search', async (req, res, next) => {
     // Validate type
     const validTypes = ['all', 'departments', 'people'];
     if (!validTypes.includes(type)) {
-      return res.status(400).json({ message: 'Invalid type. Must be: all, departments, or people' });
+      return res
+        .status(400)
+        .json({ message: 'Invalid type. Must be: all, departments, or people' });
     }
 
     // Parse and validate limit/offset
@@ -41,7 +43,7 @@ router.get('/organizations/:orgId/search', async (req, res, next) => {
       query: q.trim(),
       type,
       limit: parsedLimit,
-      offset: parsedOffset
+      offset: parsedOffset,
     });
 
     res.json(results);

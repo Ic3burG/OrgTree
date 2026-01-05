@@ -8,20 +8,20 @@ export function ToastProvider({ children }) {
 
   const addToast = useCallback((message, type = 'info', duration = 4000) => {
     const id = Date.now() + Math.random();
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts(prev => [...prev, { id, message, type }]);
 
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
+      setToasts(prev => prev.filter(t => t.id !== id));
     }, duration);
   }, []);
 
-  const removeToast = useCallback((id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+  const removeToast = useCallback(id => {
+    setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
   // Listen for realtime notification events from Socket.IO hook
   useEffect(() => {
-    const handleRealtimeNotification = (event) => {
+    const handleRealtimeNotification = event => {
       const { message, type } = event.detail;
       addToast(message, type || 'info');
     };
@@ -33,16 +33,16 @@ export function ToastProvider({ children }) {
   }, [addToast]);
 
   const toast = {
-    success: (message) => addToast(message, 'success'),
-    error: (message) => addToast(message, 'error'),
-    info: (message) => addToast(message, 'info'),
+    success: message => addToast(message, 'success'),
+    error: message => addToast(message, 'error'),
+    info: message => addToast(message, 'info'),
   };
 
   return (
     <ToastContext.Provider value={toast}>
       {children}
       <div className="fixed bottom-4 right-4 z-50 space-y-2">
-        {toasts.map((t) => (
+        {toasts.map(t => (
           <ToastItem key={t.id} toast={t} onClose={() => removeToast(t.id)} />
         ))}
       </div>

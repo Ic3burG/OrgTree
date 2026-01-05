@@ -31,7 +31,9 @@ export default function UserOrgsModal({ user, onClose }) {
     const Icon = config.icon;
 
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${config.color}`}>
+      <span
+        className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${config.color}`}
+      >
         <Icon size={12} />
         {config.label}
       </span>
@@ -69,17 +71,12 @@ export default function UserOrgsModal({ user, onClose }) {
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              Organization Access
-            </h2>
+            <h2 className="text-xl font-bold text-gray-900">Organization Access</h2>
             <p className="text-sm text-gray-600 mt-1">
               {user.name} • {totalOrgs} organization{totalOrgs !== 1 ? 's' : ''}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -91,15 +88,11 @@ export default function UserOrgsModal({ user, onClose }) {
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3">
                 <Crown size={18} className="text-purple-600" />
-                <h3 className="font-semibold text-gray-900">
-                  Owned Organizations
-                </h3>
-                <span className="text-sm text-gray-500">
-                  ({user.ownedOrganizations.length})
-                </span>
+                <h3 className="font-semibold text-gray-900">Owned Organizations</h3>
+                <span className="text-sm text-gray-500">({user.ownedOrganizations.length})</span>
               </div>
               <div className="space-y-2">
-                {user.ownedOrganizations.map((org) => (
+                {user.ownedOrganizations.map(org => (
                   <OrgItem key={org.id} org={org} role="owner" />
                 ))}
               </div>
@@ -111,20 +104,12 @@ export default function UserOrgsModal({ user, onClose }) {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Shield size={18} className="text-blue-600" />
-                <h3 className="font-semibold text-gray-900">
-                  Member Of
-                </h3>
-                <span className="text-sm text-gray-500">
-                  ({user.memberships.length})
-                </span>
+                <h3 className="font-semibold text-gray-900">Member Of</h3>
+                <span className="text-sm text-gray-500">({user.memberships.length})</span>
               </div>
               <div className="space-y-2">
-                {user.memberships.map((membership) => (
-                  <OrgItem
-                    key={membership.id}
-                    org={membership}
-                    role={membership.role}
-                  />
+                {user.memberships.map(membership => (
+                  <OrgItem key={membership.id} org={membership} role={membership.role} />
                 ))}
               </div>
             </div>
@@ -134,9 +119,7 @@ export default function UserOrgsModal({ user, onClose }) {
           {totalOrgs === 0 && (
             <div className="text-center py-12">
               <Building2 size={48} className="mx-auto text-gray-400 mb-3" />
-              <p className="text-gray-600">
-                This user is not part of any organizations
-              </p>
+              <p className="text-gray-600">This user is not part of any organizations</p>
             </div>
           )}
         </div>

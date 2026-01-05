@@ -20,7 +20,7 @@ export function formatEntityType(entityType) {
     person: 'Person',
     department: 'Department',
     member: 'Member',
-    org: 'Organization'
+    org: 'Organization',
   };
   return typeMap[entityType] || entityType;
 }
@@ -37,7 +37,7 @@ export function getActionColor(actionType) {
     deleted: 'bg-red-100 text-red-800',
     added: 'bg-purple-100 text-purple-800',
     removed: 'bg-orange-100 text-orange-800',
-    settings: 'bg-gray-100 text-gray-800'
+    settings: 'bg-gray-100 text-gray-800',
   };
   return colorMap[actionType] || 'bg-gray-100 text-gray-800';
 }
@@ -112,6 +112,6 @@ export function formatDate(dateString) {
     year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
+    hour12: true,
   });
 }

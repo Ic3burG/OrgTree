@@ -10,7 +10,9 @@ async function verifyOrgAccess(orgId, userId, minRole = 'viewer') {
 export async function getDepartments(orgId, userId) {
   await verifyOrgAccess(orgId, userId, 'viewer');
 
-  const departments = db.prepare(`
+  const departments = db
+    .prepare(
+      `
     SELECT
       id, organization_id as organizationId, parent_id as parentId,
       name, description, sort_order as sortOrder,
@@ -18,18 +20,24 @@ export async function getDepartments(orgId, userId) {
     FROM departments
     WHERE organization_id = ? AND deleted_at IS NULL
     ORDER BY sort_order ASC
-  `).all(orgId);
+  `
+    )
+    .all(orgId);
 
   // Get people for each department
   const result = departments.map(dept => {
-    const people = db.prepare(`
+    const people = db
+      .prepare(
+        `
       SELECT
         id, department_id as departmentId, name, title, email, phone,
         sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
       FROM people
       WHERE department_id = ? AND deleted_at IS NULL
       ORDER BY sort_order ASC
-    `).all(dept.id);
+    `
+      )
+      .all(dept.id);
 
     return { ...dept, people };
   });
@@ -40,14 +48,18 @@ export async function getDepartments(orgId, userId) {
 export async function getDepartmentById(orgId, deptId, userId) {
   await verifyOrgAccess(orgId, userId, 'viewer');
 
-  const dept = db.prepare(`
+  const dept = db
+    .prepare(
+      `
     SELECT
       id, organization_id as organizationId, parent_id as parentId,
       name, description, sort_order as sortOrder,
       created_at as createdAt, updated_at as updatedAt
     FROM departments
     WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
-  `).get(deptId, orgId);
+  `
+    )
+    .get(deptId, orgId);
 
   if (!dept) {
     const error = new Error('Department not found');
@@ -56,14 +68,18 @@ export async function getDepartmentById(orgId, deptId, userId) {
   }
 
   // Get people
-  const people = db.prepare(`
+  const people = db
+    .prepare(
+      `
     SELECT
       id, department_id as departmentId, name, title, email, phone,
       sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
     FROM people
     WHERE department_id = ? AND deleted_at IS NULL
     ORDER BY sort_order ASC
-  `).all(deptId);
+  `
+    )
+    .all(deptId);
 
   return { ...dept, people };
 }
@@ -75,7 +91,11 @@ export async function createDepartment(orgId, data, userId) {
 
   // Validate parentId if provided
   if (parentId) {
-    const parentDept = db.prepare('SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL').get(parentId, orgId);
+    const parentDept = db
+      .prepare(
+        'SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL'
+      )
+      .get(parentId, orgId);
     if (!parentDept) {
       const error = new Error('Parent department not found');
       error.status = 400;
@@ -91,20 +111,26 @@ export async function createDepartment(orgId, data, userId) {
   }
 
   // Get max sortOrder for positioning
-  const maxSortResult = db.prepare(`
+  const maxSortResult = db
+    .prepare(
+      `
     SELECT MAX(sort_order) as maxSort
     FROM departments
     WHERE organization_id = ? AND parent_id ${parentId ? '= ?' : 'IS NULL'} AND deleted_at IS NULL
-  `).get(parentId ? [orgId, parentId] : [orgId]);
+  `
+    )
+    .get(parentId ? [orgId, parentId] : [orgId]);
 
   const sortOrder = (maxSortResult.maxSort || 0) + 1;
   const deptId = randomUUID();
   const now = new Date().toISOString();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO departments (id, organization_id, parent_id, name, description, sort_order, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(deptId, orgId, parentId || null, name, description || null, sortOrder, now, now);
+  `
+  ).run(deptId, orgId, parentId || null, name, description || null, sortOrder, now, now);
 
   return await getDepartmentById(orgId, deptId, userId);
 }
@@ -112,7 +138,11 @@ export async function createDepartment(orgId, data, userId) {
 export async function updateDepartment(orgId, deptId, data, userId) {
   await verifyOrgAccess(orgId, userId, 'editor');
 
-  const dept = db.prepare('SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL').get(deptId, orgId);
+  const dept = db
+    .prepare(
+      'SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL'
+    )
+    .get(deptId, orgId);
 
   if (!dept) {
     const error = new Error('Department not found');
@@ -131,7 +161,11 @@ export async function updateDepartment(orgId, deptId, data, userId) {
 
   // Validate parentId if provided
   if (parentId) {
-    const parentDept = db.prepare('SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL').get(parentId, orgId);
+    const parentDept = db
+      .prepare(
+        'SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL'
+      )
+      .get(parentId, orgId);
     if (!parentDept) {
       const error = new Error('Parent department not found');
       error.status = 400;
@@ -147,13 +181,14 @@ export async function updateDepartment(orgId, deptId, data, userId) {
   let newParentId;
   if ('parentId' in data) {
     // parentId is in the data object, use it (could be string or null)
-    newParentId = parentId === '' ? null : (parentId || null);
+    newParentId = parentId === '' ? null : parentId || null;
   } else {
     // parentId not in data, keep existing
     newParentId = dept.parent_id;
   }
 
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE departments
     SET
       name = ?,
@@ -161,7 +196,8 @@ export async function updateDepartment(orgId, deptId, data, userId) {
       parent_id = ?,
       updated_at = ?
     WHERE id = ?
-  `).run(
+  `
+  ).run(
     name !== undefined ? name : dept.name,
     description !== undefined ? description : dept.description,
     newParentId,
@@ -175,7 +211,11 @@ export async function updateDepartment(orgId, deptId, data, userId) {
 export async function deleteDepartment(orgId, deptId, userId) {
   await verifyOrgAccess(orgId, userId, 'editor');
 
-  const dept = db.prepare('SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL').get(deptId, orgId);
+  const dept = db
+    .prepare(
+      'SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL'
+    )
+    .get(deptId, orgId);
 
   if (!dept) {
     const error = new Error('Department not found');
@@ -192,10 +232,15 @@ export async function deleteDepartment(orgId, deptId, userId) {
     let currentDeptIds = [deptId];
 
     while (currentDeptIds.length > 0) {
-      const children = db.prepare(`
+      const children = db
+        .prepare(
+          `
         SELECT id FROM departments
         WHERE parent_id IN (${currentDeptIds.map(() => '?').join(',')}) AND deleted_at IS NULL
-      `).all(currentDeptIds).map(d => d.id);
+      `
+        )
+        .all(currentDeptIds)
+        .map(d => d.id);
 
       if (children.length > 0) {
         allDeptsToDelete.push(...children);
@@ -206,18 +251,22 @@ export async function deleteDepartment(orgId, deptId, userId) {
     }
 
     // Soft delete all affected departments
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE departments
       SET deleted_at = ?, updated_at = ?
       WHERE id IN (${allDeptsToDelete.map(() => '?').join(',')})
-    `).run(now, now, ...allDeptsToDelete);
+    `
+    ).run(now, now, ...allDeptsToDelete);
 
     // Soft delete all people in those departments
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE people
       SET deleted_at = ?, updated_at = ?
       WHERE department_id IN (${allDeptsToDelete.map(() => '?').join(',')})
-    `).run(now, now, ...allDeptsToDelete);
+    `
+    ).run(now, now, ...allDeptsToDelete);
   });
 
   transaction();
@@ -238,7 +287,9 @@ function checkIsDescendant(potentialParentId, deptId) {
 
     if (currentId === deptId) return true; // Found circular reference
 
-    const parent = db.prepare('SELECT parent_id FROM departments WHERE id = ? AND deleted_at IS NULL').get(currentId);
+    const parent = db
+      .prepare('SELECT parent_id FROM departments WHERE id = ? AND deleted_at IS NULL')
+      .get(currentId);
     currentId = parent ? parent.parent_id : null;
   }
 

@@ -1,6 +1,11 @@
 import express from 'express';
 import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
-import { createBackup, listBackups, cleanupOldBackups, getBackupStats } from '../services/backup.service.js';
+import {
+  createBackup,
+  listBackups,
+  cleanupOldBackups,
+  getBackupStats,
+} from '../services/backup.service.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -17,7 +22,7 @@ router.get('/admin/backups', authenticateToken, requireSuperuser, (req, res) => 
 
     res.json({
       backups,
-      stats
+      stats,
     });
   } catch (error) {
     logger.error('Failed to list backups', { error: error.message });
@@ -34,7 +39,7 @@ router.post('/admin/backups', authenticateToken, requireSuperuser, async (req, r
   try {
     logger.info('Manual backup triggered', {
       userId: req.user.id,
-      userEmail: req.user.email
+      userEmail: req.user.email,
     });
 
     const result = await createBackup();
@@ -48,12 +53,12 @@ router.post('/admin/backups', authenticateToken, requireSuperuser, async (req, r
         backup: {
           path: result.path,
           sizeMB: result.sizeMB,
-          timestamp: result.timestamp
+          timestamp: result.timestamp,
         },
         cleanup: {
           kept: cleanup.kept,
-          deleted: cleanup.deleted
-        }
+          deleted: cleanup.deleted,
+        },
       });
     } else {
       res.status(500).json({ message: result.error });
@@ -79,7 +84,7 @@ router.delete('/admin/backups/cleanup', authenticateToken, requireSuperuser, (re
 
     logger.info('Manual backup cleanup triggered', {
       userId: req.user.id,
-      keepCount
+      keepCount,
     });
 
     const result = cleanupOldBackups(keepCount);
@@ -88,7 +93,7 @@ router.delete('/admin/backups/cleanup', authenticateToken, requireSuperuser, (re
       message: 'Cleanup completed',
       kept: result.kept,
       deleted: result.deleted,
-      deletedFiles: result.deletedFiles
+      deletedFiles: result.deletedFiles,
     });
   } catch (error) {
     logger.error('Failed to cleanup backups', { error: error.message });

@@ -44,9 +44,11 @@ export default function BulkMoveModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              hasResult ? 'bg-green-100' : 'bg-blue-100'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                hasResult ? 'bg-green-100' : 'bg-blue-100'
+              }`}
+            >
               <FolderInput size={20} className={hasResult ? 'text-green-600' : 'text-blue-600'} />
             </div>
             <h2 className="text-xl font-semibold text-gray-900">
@@ -68,12 +70,14 @@ export default function BulkMoveModal({
             <div className="space-y-2">
               {result.movedCount > 0 && (
                 <p className="text-green-600">
-                  Successfully moved {result.movedCount} {result.movedCount === 1 ? 'person' : 'people'}
+                  Successfully moved {result.movedCount}{' '}
+                  {result.movedCount === 1 ? 'person' : 'people'}
                 </p>
               )}
               {result.failedCount > 0 && (
                 <p className="text-red-600">
-                  Failed to move {result.failedCount} {result.failedCount === 1 ? 'person' : 'people'}
+                  Failed to move {result.failedCount}{' '}
+                  {result.failedCount === 1 ? 'person' : 'people'}
                 </p>
               )}
             </div>
@@ -84,11 +88,11 @@ export default function BulkMoveModal({
               </p>
               <select
                 value={selectedDeptId}
-                onChange={(e) => setSelectedDeptId(e.target.value)}
+                onChange={e => setSelectedDeptId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select a department...</option>
-                {departments.map((dept) => (
+                {departments.map(dept => (
                   <option key={dept.id} value={dept.id}>
                     {dept.name}
                   </option>

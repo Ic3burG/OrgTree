@@ -6,7 +6,7 @@ import {
   cancelInvitation,
   getInvitationByToken,
   acceptInvitation,
-  isEmailConfigured
+  isEmailConfigured,
 } from '../services/invitation.service.js';
 
 const router = express.Router();
@@ -47,15 +47,19 @@ router.get('/organizations/:orgId/invitations', authenticateToken, async (req, r
 
 // DELETE /api/organizations/:orgId/invitations/:invitationId
 // Cancel an invitation (requires admin)
-router.delete('/organizations/:orgId/invitations/:invitationId', authenticateToken, async (req, res, next) => {
-  try {
-    const { orgId, invitationId } = req.params;
-    await cancelInvitation(orgId, invitationId, req.user.id);
-    res.status(204).send();
-  } catch (err) {
-    next(err);
+router.delete(
+  '/organizations/:orgId/invitations/:invitationId',
+  authenticateToken,
+  async (req, res, next) => {
+    try {
+      const { orgId, invitationId } = req.params;
+      await cancelInvitation(orgId, invitationId, req.user.id);
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 // GET /api/invitations/:token
 // Get invitation details (public - for viewing before accepting)

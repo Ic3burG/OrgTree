@@ -40,7 +40,7 @@ export function SocketProvider({ children }) {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 10
+      reconnectionAttempts: 10,
     });
 
     newSocket.on('connect', () => {
@@ -52,7 +52,7 @@ export function SocketProvider({ children }) {
       }
     });
 
-    newSocket.on('disconnect', (reason) => {
+    newSocket.on('disconnect', reason => {
       setIsConnected(false);
       if (reason === 'io server disconnect') {
         // Server disconnected us, likely auth issue
@@ -60,12 +60,12 @@ export function SocketProvider({ children }) {
       }
     });
 
-    newSocket.on('connect_error', (error) => {
+    newSocket.on('connect_error', error => {
       setConnectionError(error.message);
       setIsConnected(false);
     });
 
-    newSocket.on('error', (error) => {
+    newSocket.on('error', error => {
       console.error('Socket error:', error);
     });
 
@@ -77,27 +77,36 @@ export function SocketProvider({ children }) {
   }, [isAuthenticated]);
 
   // Join organization room
-  const joinOrg = useCallback((orgId) => {
-    if (!socket || !orgId) return;
-    currentOrgRef.current = orgId;
-    socket.emit('join:org', orgId);
-  }, [socket]);
+  const joinOrg = useCallback(
+    orgId => {
+      if (!socket || !orgId) return;
+      currentOrgRef.current = orgId;
+      socket.emit('join:org', orgId);
+    },
+    [socket]
+  );
 
   // Leave organization room
-  const leaveOrg = useCallback((orgId) => {
-    if (!socket || !orgId) return;
-    if (currentOrgRef.current === orgId) {
-      currentOrgRef.current = null;
-    }
-    socket.emit('leave:org', orgId);
-  }, [socket]);
+  const leaveOrg = useCallback(
+    orgId => {
+      if (!socket || !orgId) return;
+      if (currentOrgRef.current === orgId) {
+        currentOrgRef.current = null;
+      }
+      socket.emit('leave:org', orgId);
+    },
+    [socket]
+  );
 
   // Subscribe to an event
-  const subscribe = useCallback((eventType, callback) => {
-    if (!socket) return () => {};
-    socket.on(eventType, callback);
-    return () => socket.off(eventType, callback);
-  }, [socket]);
+  const subscribe = useCallback(
+    (eventType, callback) => {
+      if (!socket) return () => {};
+      socket.on(eventType, callback);
+      return () => socket.off(eventType, callback);
+    },
+    [socket]
+  );
 
   const value = {
     socket,
@@ -105,14 +114,10 @@ export function SocketProvider({ children }) {
     connectionError,
     joinOrg,
     leaveOrg,
-    subscribe
+    subscribe,
   };
 
-  return (
-    <SocketContext.Provider value={value}>
-      {children}
-    </SocketContext.Provider>
-  );
+  return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
 }
 
 export function useSocket() {

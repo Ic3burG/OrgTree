@@ -40,9 +40,9 @@ export async function createInvitation(orgId, email, role, invitedById) {
       throw error;
     }
 
-    const existingMember = db.prepare(
-      'SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?'
-    ).get(orgId, existingUser.id);
+    const existingMember = db
+      .prepare('SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?')
+      .get(orgId, existingUser.id);
 
     if (existingMember) {
       // Security: Use generic message to prevent email enumeration
@@ -53,10 +53,14 @@ export async function createInvitation(orgId, email, role, invitedById) {
   }
 
   // Check for existing pending invitation
-  const existingInvitation = db.prepare(`
+  const existingInvitation = db
+    .prepare(
+      `
     SELECT id FROM invitations
     WHERE organization_id = ? AND email = ? AND status = 'pending'
-  `).get(orgId, normalizedEmail);
+  `
+    )
+    .get(orgId, normalizedEmail);
 
   if (existingInvitation) {
     const error = new Error('An invitation has already been sent to this email');
@@ -74,10 +78,21 @@ export async function createInvitation(orgId, email, role, invitedById) {
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO invitations (id, organization_id, email, role, token, invited_by_id, status, expires_at, created_at)
     VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?)
-  `).run(invitationId, orgId, normalizedEmail, role, token, invitedById, expiresAt.toISOString(), now.toISOString());
+  `
+  ).run(
+    invitationId,
+    orgId,
+    normalizedEmail,
+    role,
+    token,
+    invitedById,
+    expiresAt.toISOString(),
+    now.toISOString()
+  );
 
   // Send invitation email
   const emailResult = await sendInvitationEmail({
@@ -85,7 +100,7 @@ export async function createInvitation(orgId, email, role, invitedById) {
     inviterName: inviter.name,
     orgName: org.name,
     role,
-    token
+    token,
   });
 
   // Return invitation details
@@ -96,7 +111,7 @@ export async function createInvitation(orgId, email, role, invitedById) {
     status: 'pending',
     expiresAt: expiresAt.toISOString(),
     emailSent: emailResult.success,
-    emailError: emailResult.error
+    emailError: emailResult.error,
   };
 }
 
@@ -107,7 +122,9 @@ export function getOrgInvitations(orgId, userId) {
   // Verify user has admin permission
   requireOrgPermission(orgId, userId, 'admin');
 
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT
       i.id,
       i.email,
@@ -120,7 +137,9 @@ export function getOrgInvitations(orgId, userId) {
     JOIN users u ON i.invited_by_id = u.id
     WHERE i.organization_id = ? AND i.status = 'pending'
     ORDER BY i.created_at DESC
-  `).all(orgId);
+  `
+    )
+    .all(orgId);
 }
 
 /**
@@ -130,9 +149,9 @@ export function cancelInvitation(orgId, invitationId, userId) {
   // Verify user has admin permission
   requireOrgPermission(orgId, userId, 'admin');
 
-  const invitation = db.prepare(
-    'SELECT id FROM invitations WHERE id = ? AND organization_id = ? AND status = ?'
-  ).get(invitationId, orgId, 'pending');
+  const invitation = db
+    .prepare('SELECT id FROM invitations WHERE id = ? AND organization_id = ? AND status = ?')
+    .get(invitationId, orgId, 'pending');
 
   if (!invitation) {
     const error = new Error('Invitation not found');
@@ -149,7 +168,9 @@ export function cancelInvitation(orgId, invitationId, userId) {
  * Get invitation by token (public - for accepting)
  */
 export function getInvitationByToken(token) {
-  const invitation = db.prepare(`
+  const invitation = db
+    .prepare(
+      `
     SELECT
       i.id,
       i.organization_id as organizationId,
@@ -160,7 +181,9 @@ export function getInvitationByToken(token) {
     FROM invitations i
     JOIN organizations o ON i.organization_id = o.id
     WHERE i.token = ?
-  `).get(token);
+  `
+    )
+    .get(token);
 
   if (!invitation) {
     return null;
@@ -172,7 +195,7 @@ export function getInvitationByToken(token) {
       organizationName: invitation.organizationName,
       role: invitation.role,
       status: 'expired',
-      expiresAt: invitation.expiresAt
+      expiresAt: invitation.expiresAt,
     };
   }
 
@@ -183,7 +206,7 @@ export function getInvitationByToken(token) {
     organizationName: invitation.organizationName,
     role: invitation.role,
     status: invitation.status,
-    expiresAt: invitation.expiresAt
+    expiresAt: invitation.expiresAt,
   };
 }
 
@@ -191,7 +214,9 @@ export function getInvitationByToken(token) {
  * Accept an invitation
  */
 export function acceptInvitation(token, userId) {
-  const invitation = db.prepare(`
+  const invitation = db
+    .prepare(
+      `
     SELECT
       i.id,
       i.organization_id,
@@ -202,7 +227,9 @@ export function acceptInvitation(token, userId) {
       i.invited_by_id
     FROM invitations i
     WHERE i.token = ?
-  `).get(token);
+  `
+    )
+    .get(token);
 
   if (!invitation) {
     const error = new Error('Invitation not found');
@@ -240,19 +267,23 @@ export function acceptInvitation(token, userId) {
   }
 
   // Check if already a member
-  const existingMember = db.prepare(
-    'SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?'
-  ).get(invitation.organization_id, userId);
+  const existingMember = db
+    .prepare('SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?')
+    .get(invitation.organization_id, userId);
 
   if (existingMember) {
     // Already a member, just mark invitation as accepted
-    db.prepare("UPDATE invitations SET status = 'accepted', accepted_at = ? WHERE id = ?")
-      .run(new Date().toISOString(), invitation.id);
+    db.prepare("UPDATE invitations SET status = 'accepted', accepted_at = ? WHERE id = ?").run(
+      new Date().toISOString(),
+      invitation.id
+    );
     return { success: true, alreadyMember: true };
   }
 
   // Check if user is owner
-  const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(invitation.organization_id);
+  const org = db
+    .prepare('SELECT created_by_id FROM organizations WHERE id = ?')
+    .get(invitation.organization_id);
   if (org.created_by_id === userId) {
     // Security: Generic message to prevent information disclosure
     const error = new Error('Unable to accept invitation');
@@ -264,10 +295,22 @@ export function acceptInvitation(token, userId) {
   const memberId = randomUUID();
   const now = new Date().toISOString();
 
-  const insertResult = db.prepare(`
+  const insertResult = db
+    .prepare(
+      `
     INSERT INTO organization_members (id, organization_id, user_id, role, added_by_id, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(memberId, invitation.organization_id, userId, invitation.role, invitation.invited_by_id, now, now);
+  `
+    )
+    .run(
+      memberId,
+      invitation.organization_id,
+      userId,
+      invitation.role,
+      invitation.invited_by_id,
+      now,
+      now
+    );
 
   if (insertResult.changes === 0) {
     const error = new Error('Failed to add member to organization');
@@ -276,7 +319,8 @@ export function acceptInvitation(token, userId) {
   }
 
   // Mark invitation as accepted
-  const updateResult = db.prepare("UPDATE invitations SET status = 'accepted', accepted_at = ? WHERE id = ?")
+  const updateResult = db
+    .prepare("UPDATE invitations SET status = 'accepted', accepted_at = ? WHERE id = ?")
     .run(now, invitation.id);
 
   if (updateResult.changes === 0) {
@@ -288,7 +332,7 @@ export function acceptInvitation(token, userId) {
   return {
     success: true,
     organizationId: invitation.organization_id,
-    role: invitation.role
+    role: invitation.role,
   };
 }
 

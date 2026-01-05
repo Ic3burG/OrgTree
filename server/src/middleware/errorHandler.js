@@ -7,7 +7,7 @@ export function errorHandler(err, req, res, next) {
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     path: req.path,
     method: req.method,
-    userId: req.user?.id
+    userId: req.user?.id,
   });
 
   if (err.name === 'ValidationError') {
@@ -20,6 +20,6 @@ export function errorHandler(err, req, res, next) {
 
   const statusCode = err.status || 500;
   res.status(statusCode).json({
-    message: err.message || 'Internal server error'
+    message: err.message || 'Internal server error',
   });
 }

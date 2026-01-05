@@ -92,11 +92,15 @@ router.get('/organizations/:id/share', async (req, res, next) => {
     // Any member can view share settings (viewer or higher)
     requireOrgPermission(id, req.user.id, 'viewer');
 
-    const org = db.prepare(`
+    const org = db
+      .prepare(
+        `
       SELECT id, name, is_public, share_token
       FROM organizations
       WHERE id = ?
-    `).get(id);
+    `
+      )
+      .get(id);
 
     if (!org) {
       return res.status(404).json({ message: 'Organization not found' });
@@ -107,7 +111,7 @@ router.get('/organizations/:id/share', async (req, res, next) => {
       shareToken: org.share_token,
       shareUrl: org.share_token
         ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/public/${org.share_token}`
-        : null
+        : null,
     });
   } catch (err) {
     next(err);
@@ -124,11 +128,15 @@ router.put('/organizations/:id/share', async (req, res, next) => {
     // Verify admin permission
     requireOrgPermission(id, req.user.id, 'admin');
 
-    const org = db.prepare(`
+    const org = db
+      .prepare(
+        `
       SELECT id, share_token
       FROM organizations
       WHERE id = ?
-    `).get(id);
+    `
+      )
+      .get(id);
 
     if (!org) {
       return res.status(404).json({ message: 'Organization not found' });
@@ -141,18 +149,20 @@ router.put('/organizations/:id/share', async (req, res, next) => {
     }
 
     // Update organization
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE organizations
       SET is_public = ?, share_token = ?, updated_at = datetime('now')
       WHERE id = ?
-    `).run(isPublic ? 1 : 0, shareToken, id);
+    `
+    ).run(isPublic ? 1 : 0, shareToken, id);
 
     const settings = {
       isPublic,
       shareToken,
       shareUrl: shareToken
         ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/public/${shareToken}`
-        : null
+        : null,
     };
 
     // Emit real-time event
@@ -173,11 +183,15 @@ router.post('/organizations/:id/share/regenerate', async (req, res, next) => {
     // Verify admin permission
     requireOrgPermission(id, req.user.id, 'admin');
 
-    const org = db.prepare(`
+    const org = db
+      .prepare(
+        `
       SELECT id, is_public
       FROM organizations
       WHERE id = ?
-    `).get(id);
+    `
+      )
+      .get(id);
 
     if (!org) {
       return res.status(404).json({ message: 'Organization not found' });
@@ -187,16 +201,18 @@ router.post('/organizations/:id/share/regenerate', async (req, res, next) => {
     const shareToken = randomBytes(16).toString('hex');
 
     // Update organization
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE organizations
       SET share_token = ?, updated_at = datetime('now')
       WHERE id = ?
-    `).run(shareToken, id);
+    `
+    ).run(shareToken, id);
 
     const settings = {
       shareToken,
       shareUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/public/${shareToken}`,
-      isPublic: org.is_public === 1
+      isPublic: org.is_public === 1,
     };
 
     // Emit real-time event
