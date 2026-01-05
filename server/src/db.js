@@ -391,6 +391,61 @@ try {
   console.error('Migration error (soft delete columns):', err);
 }
 
+// Migration: Add performance optimization indexes
+try {
+  // Check which indexes already exist
+  const existingIndexes = db.prepare(`
+    SELECT name FROM sqlite_master WHERE type='index'
+  `).all().map(idx => idx.name);
+
+  const indexesToCreate = [
+    // CRITICAL: departments.parent_id - used for hierarchical queries (currently causes table scans)
+    {
+      name: 'idx_departments_parent_id',
+      sql: 'CREATE INDEX idx_departments_parent_id ON departments(parent_id) WHERE deleted_at IS NULL'
+    },
+    // HIGH PRIORITY: Soft delete filters used in almost every query
+    {
+      name: 'idx_departments_deleted_at',
+      sql: 'CREATE INDEX idx_departments_deleted_at ON departments(deleted_at)'
+    },
+    {
+      name: 'idx_people_deleted_at',
+      sql: 'CREATE INDEX idx_people_deleted_at ON people(deleted_at)'
+    },
+    // MEDIUM PRIORITY: Audit log filtering by action type
+    {
+      name: 'idx_audit_logs_action_type',
+      sql: 'CREATE INDEX idx_audit_logs_action_type ON audit_logs(action_type, created_at DESC)'
+    },
+    // MEDIUM PRIORITY: Finding active invitations
+    {
+      name: 'idx_invitations_status_expires',
+      sql: 'CREATE INDEX idx_invitations_status_expires ON invitations(status, expires_at) WHERE organization_id IS NOT NULL'
+    },
+    // LOW PRIORITY: Organization owner lookups (not as frequent)
+    {
+      name: 'idx_organizations_created_by',
+      sql: 'CREATE INDEX idx_organizations_created_by ON organizations(created_by_id)'
+    }
+  ];
+
+  let indexesCreated = 0;
+  for (const index of indexesToCreate) {
+    if (!existingIndexes.includes(index.name)) {
+      db.exec(index.sql);
+      indexesCreated++;
+      console.log(`Migration: Created index ${index.name}`);
+    }
+  }
+
+  if (indexesCreated > 0) {
+    console.log(`Migration: Created ${indexesCreated} performance optimization index(es)`);
+  }
+} catch (err) {
+  console.error('Migration error (performance indexes):', err);
+}
+
 console.log('Database initialized at:', dbPath);
 
 export default db;
