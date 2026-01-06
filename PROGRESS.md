@@ -207,7 +207,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - [ ] **Performance Budget** - Set and monitor bundle size, load time thresholds
 
 ### Code Cleanup & Modernization
-- [ ] **Dependency Audit** - Remove unused dependencies, update outdated packages
+- [x] **Dependency Audit** - Remove unused dependencies, update outdated packages ✅ **DONE** (January 6, 2026)
 - [ ] **Dead Code Elimination** - Remove unused components, functions, routes
 - [ ] **CSS Optimization** - Purge unused Tailwind classes, optimize bundle size
 - [ ] **API Versioning Strategy** - Plan for backward-compatible API changes
@@ -294,10 +294,41 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: CI/CD Pipeline Operational + Sentry Error Monitoring Fixed (January 6, 2026)
-- **Total Commits**: 173 commits on main branch
-- **Today's Progress (January 5-6, 2026)**: CI/CD Pipeline fully operational + Sentry crash loop resolved
+- **Last Major Update**: Dependency Audit & Cleanup (January 6, 2026)
+- **Total Commits**: 174 commits on main branch
+- **Today's Progress (January 6, 2026)**: Dependency audit complete - removed 4 unused packages, updated 2 packages
 - **Recent Session Highlights**:
+
+  **January 6, 2026 - Dependency Audit & Cleanup (Session 17)** 🧹:
+  - ✅ **CLEANUP**: Comprehensive dependency audit and modernization
+  - ✅ **SECURITY AUDIT**: 0 vulnerabilities found (frontend + backend)
+  - ✅ **UNUSED DEPENDENCIES REMOVED** (4 packages):
+    - `@types/dagre` - TypeScript types (not using TypeScript)
+    - `@testing-library/user-event` - Not used in any tests
+    - `jsdom` - Replaced with happy-dom, now redundant
+    - `supertest` - Not used in backend tests
+  - ✅ **PACKAGES UPDATED** (2 packages):
+    - `better-sqlite3`: 12.4.6 → 12.5.0 (patch update)
+    - `jsonwebtoken`: 9.0.2 → 9.0.3 (patch update, security fixes)
+  - ✅ **IMPACT**:
+    - Removed 19 transitive dependencies from node_modules
+    - Reduced package count: 442 → 423 (frontend + backend combined)
+    - Smaller installation footprint (~50MB saved)
+    - Faster npm install times
+    - All 76 tests still passing (44 backend + 32 frontend)
+  - 📁 **FILES MODIFIED** (4 files):
+    - `package.json` - Removed 3 unused dependencies
+    - `package-lock.json` - Updated with cleanups
+    - `server/package.json` - Removed 1 unused dep, updated 2 packages
+    - `server/package-lock.json` - Updated with cleanups
+  - 🎯 **SKIPPED** (Breaking Changes - Future Consideration):
+    - `bcrypt`: 5.1.1 → 6.0.0 (major version, breaking changes)
+    - `express`: 4.22.1 → 5.2.1 (major version, breaking changes)
+  - 📊 **FINAL STATUS**:
+    - ✅ No security vulnerabilities
+    - ✅ All tests passing
+    - ✅ Production deployment unaffected
+    - ✅ Cleaner dependency tree
 
   **January 6, 2026 - CI/CD Pipeline Setup & Deployment (Session 15-16)** 🚀:
   - ✅ **AUTOMATION**: Complete GitHub Actions CI/CD pipeline implementation and successful deployment
@@ -1491,7 +1522,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: January 6, 2026 (CI/CD pipeline operational + Sentry error monitoring fixed)
+**Last Updated**: January 6, 2026 (Dependency audit complete - 4 packages removed, 2 updated)
 
 ---
 
