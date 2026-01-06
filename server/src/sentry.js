@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node';
 
-export function initSentry(app) {
+export function initSentry() {
   const dsn = process.env.SENTRY_DSN;
 
   // Only initialize if DSN is configured
@@ -8,7 +8,7 @@ export function initSentry(app) {
     if (process.env.NODE_ENV !== 'production') {
       console.log('Sentry: No DSN configured, skipping initialization');
     }
-    return { requestHandler: null, errorHandler: null };
+    return;
   }
 
   Sentry.init({
@@ -47,18 +47,6 @@ export function initSentry(app) {
   });
 
   console.log('Sentry initialized for environment:', process.env.NODE_ENV || 'development');
-
-  return {
-    // Request handler creates a trace for each request
-    requestHandler: Sentry.Handlers.requestHandler(),
-    // Error handler captures errors
-    errorHandler: Sentry.Handlers.errorHandler({
-      shouldHandleError(error) {
-        // Capture 4xx and 5xx errors
-        return error.status >= 400 || !error.status;
-      },
-    }),
-  };
 }
 
 // Capture unhandled rejections
