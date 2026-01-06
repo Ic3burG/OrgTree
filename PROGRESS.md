@@ -294,9 +294,9 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: CI/CD Pipeline Fully Operational (January 6, 2026)
-- **Total Commits**: 171 commits on main branch
-- **Today's Progress (January 5-6, 2026)**: CI/CD Pipeline deployed with all issues resolved (frontend tests + health check retry)
+- **Last Major Update**: CI/CD Pipeline Operational + Sentry Error Monitoring Fixed (January 6, 2026)
+- **Total Commits**: 173 commits on main branch
+- **Today's Progress (January 5-6, 2026)**: CI/CD Pipeline fully operational + Sentry crash loop resolved
 - **Recent Session Highlights**:
 
   **January 6, 2026 - CI/CD Pipeline Setup & Deployment (Session 15-16)** 🚀:
@@ -328,9 +328,20 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - **Result**: CD workflow now passes consistently (21s when warm, handles cold starts)
     - **Files Modified**: `.github/workflows/cd.yml` (replaced single wait with retry loop)
     - **Retry Strategy**: 10 attempts × 20s intervals = up to 200s total wait time
+  - ✅ **SENTRY ERROR MONITORING FIX** (Session 16):
+    - **Problem**: Server crash loop in production with "Cannot read properties of undefined (reading 'requestHandler')"
+    - **Root Cause**: Using deprecated Sentry v7/v8 API (Sentry.Handlers) with Sentry v10+
+    - **Solution**: Updated to Sentry v10+ API using `Sentry.setupExpressErrorHandler(app)`
+    - **Result**: Server starts successfully, Sentry capturing errors in production
+    - **Files Modified**:
+      - `server/src/sentry.js` - Removed handlers return, simplified to Sentry.init() only
+      - `server/src/index.js` - Use Sentry.setupExpressErrorHandler() for v10+ API
+    - **Production Status**: ✅ Sentry initialized successfully, no crashes
+    - **Environment Variables**: SENTRY_DSN (backend) + VITE_SENTRY_DSN (frontend) configured on Render
   - ✅ **ISSUES FIXED**:
     - ES Module error causing tests to hang (switched to happy-dom environment)
     - CD health check failures with HTTP 502 (added retry logic for Render deployments)
+    - Sentry server crash loop (updated to v10+ API, removed deprecated handlers)
     - Formatting issues (applied Prettier to all 100+ files)
     - Coverage test failures (made optional with `continue-on-error`)
   - ✅ **DEPLOYMENT TESTS**:
@@ -351,9 +362,12 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `.github/workflows/cd.yml` - Continuous Deployment workflow
     - `.github/CICD_SETUP.md` - Complete setup documentation
     - `CLAUDE.md` - Comprehensive onboarding guide for Claude Code
-  - 📁 **FILES MODIFIED** (3 files):
+  - 📁 **FILES MODIFIED** (6 files):
     - `README.md` - Added CI/CD status badges and documentation link
-    - `vitest.config.js` - Added ES module dependency configuration
+    - `vitest.config.js` - Switched to happy-dom test environment
+    - `.github/workflows/cd.yml` - Added health check retry logic
+    - `server/src/sentry.js` - Updated to Sentry v10+ API
+    - `server/src/index.js` - Updated Sentry middleware setup
     - 100+ files formatted with Prettier
   - 🎯 **WORKFLOW STATUS**:
     - CI: Runs on all pushes and pull requests ✓ WORKING
@@ -371,6 +385,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - ✅ CI Workflow: 100% passing (3m37s average)
     - ✅ CD Workflow: 100% passing (21s warm, handles 3min cold starts)
     - ✅ All deployment health checks passing with retry logic
+    - ✅ Sentry Error Monitoring: Active in production (frontend + backend)
     - ✅ Live production site: https://orgtree-app.onrender.com
 
   **January 5, 2026 - Database Indexing Audit (Session 14)** ⚡:
@@ -1476,7 +1491,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: January 6, 2026 (CI/CD pipeline fully operational - all issues resolved)
+**Last Updated**: January 6, 2026 (CI/CD pipeline operational + Sentry error monitoring fixed)
 
 ---
 
