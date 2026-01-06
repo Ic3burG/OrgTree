@@ -5,16 +5,9 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
-    environment: 'jsdom',
+    environment: 'happy-dom',
     setupFiles: ['./src/test/setup.js'],
     include: ['src/**/*.test.{js,jsx}'],
-    // Handle ES module dependencies
-    deps: {
-      inline: [
-        '@exodus/bytes',
-        'html-encoding-sniffer'
-      ]
-    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
