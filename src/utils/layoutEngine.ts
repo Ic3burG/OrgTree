@@ -1,13 +1,43 @@
 import dagre from 'dagre';
 
+interface NodeData {
+  isExpanded?: boolean;
+  people?: unknown[];
+  [key: string]: unknown;
+}
+
+interface FlowNode {
+  id: string;
+  data: NodeData;
+  position?: { x: number; y: number };
+  [key: string]: unknown;
+}
+
+interface FlowEdge {
+  source: string;
+  target: string;
+  [key: string]: unknown;
+}
+
+type Direction = 'TB' | 'LR';
+
+interface NodeDimensions {
+  width: number;
+  height: number;
+}
+
 /**
  * Calculate hierarchical layout positions for org chart nodes using Dagre
- * @param {Array} nodes - React Flow node objects
- * @param {Array} edges - React Flow edge objects
- * @param {string} direction - 'TB' (top-to-bottom) or 'LR' (left-to-right)
- * @returns {Array} Nodes with calculated positions
+ * @param nodes - React Flow node objects
+ * @param edges - React Flow edge objects
+ * @param direction - 'TB' (top-to-bottom) or 'LR' (left-to-right)
+ * @returns Nodes with calculated positions
  */
-export function calculateLayout(nodes, edges, direction = 'TB') {
+export function calculateLayout(
+  nodes: FlowNode[],
+  edges: FlowEdge[],
+  direction: Direction = 'TB'
+): FlowNode[] {
   const g = new dagre.graphlib.Graph();
 
   // Configure graph layout
@@ -24,7 +54,7 @@ export function calculateLayout(nodes, edges, direction = 'TB') {
   g.setDefaultEdgeLabel(() => ({}));
 
   // Add nodes with their dimensions
-  nodes.forEach(node => {
+  nodes.forEach((node: FlowNode) => {
     // Node width: expanded nodes are wider
     const width = node.data.isExpanded ? 280 : 220;
 
@@ -39,7 +69,7 @@ export function calculateLayout(nodes, edges, direction = 'TB') {
   });
 
   // Add edges (connections between departments)
-  edges.forEach(edge => {
+  edges.forEach((edge: FlowEdge) => {
     g.setEdge(edge.source, edge.target);
   });
 
@@ -48,7 +78,7 @@ export function calculateLayout(nodes, edges, direction = 'TB') {
 
   // Apply calculated positions to nodes
   // Dagre positions are center-based, React Flow uses top-left corner
-  return nodes.map(node => {
+  return nodes.map((node: FlowNode) => {
     const nodeWithPosition = g.node(node.id);
 
     return {
@@ -65,7 +95,7 @@ export function calculateLayout(nodes, edges, direction = 'TB') {
  * Get dimensions for a department node
  * Used for consistent sizing across the app
  */
-export function getNodeDimensions(isExpanded, peopleCount) {
+export function getNodeDimensions(isExpanded: boolean, peopleCount: number): NodeDimensions {
   const width = isExpanded ? 280 : 220;
   const baseHeight = 70;
   // Cap at 384px (max-h-96) to match the scrollable container

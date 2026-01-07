@@ -1,21 +1,32 @@
-import { useState } from 'react';
+import React, { useState, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
 
-export default function ChangePasswordPage() {
+interface FormData {
+  newPassword: string;
+  confirmPassword: string;
+}
+
+interface FormErrors {
+  newPassword?: string;
+  confirmPassword?: string;
+  submit?: string;
+}
+
+export default function ChangePasswordPage(): React.JSX.Element {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     newPassword: '',
     confirmPassword: '',
   });
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const validate = () => {
-    const newErrors = {};
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
 
     if (!formData.newPassword) {
       newErrors.newPassword = 'New password is required';
@@ -33,7 +44,7 @@ export default function ChangePasswordPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (!validate()) return;
 
@@ -50,16 +61,20 @@ export default function ChangePasswordPage() {
         },
       });
     } catch (err) {
-      setErrors({ submit: err.message || 'Failed to change password' });
+      if (err instanceof Error) {
+        setErrors({ submit: err.message || 'Failed to change password' });
+      } else {
+        setErrors({ submit: 'Failed to change password' });
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleChange = e => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
+    if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };

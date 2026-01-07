@@ -1,16 +1,23 @@
 import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
+interface ExportResult {
+  success: boolean;
+}
+
 /**
  * Export organization chart as PNG image
  */
-export async function exportToPng(element, filename = 'org-chart.png') {
+export async function exportToPng(
+  element: HTMLElement,
+  filename: string = 'org-chart.png'
+): Promise<ExportResult> {
   try {
     const dataUrl = await toPng(element, {
       backgroundColor: '#f8fafc',
       quality: 1,
       pixelRatio: 2, // Higher resolution for better quality
-      filter: node => {
+      filter: (node: HTMLElement): boolean => {
         // Exclude UI controls from export
         const exclusionClasses = [
           'react-flow__controls',
@@ -38,17 +45,17 @@ export async function exportToPng(element, filename = 'org-chart.png') {
  * Export organization chart as PDF document
  */
 export async function exportToPdf(
-  element,
-  filename = 'org-chart.pdf',
-  orgName = 'Organization Chart'
-) {
+  element: HTMLElement,
+  filename: string = 'org-chart.pdf',
+  orgName: string = 'Organization Chart'
+): Promise<ExportResult> {
   try {
     // Capture as image first
     const dataUrl = await toPng(element, {
       backgroundColor: '#f8fafc',
       quality: 1,
       pixelRatio: 2,
-      filter: node => {
+      filter: (node: HTMLElement): boolean => {
         const exclusionClasses = [
           'react-flow__controls',
           'react-flow__minimap',
@@ -60,9 +67,9 @@ export async function exportToPdf(
 
     // Get image dimensions
     const img = new Image();
-    await new Promise((resolve, reject) => {
-      img.onload = resolve;
-      img.onerror = reject;
+    await new Promise<void>((resolve, reject) => {
+      img.onload = (): void => resolve();
+      img.onerror = (): void => reject(new Error('Failed to load image'));
       img.src = dataUrl;
     });
 

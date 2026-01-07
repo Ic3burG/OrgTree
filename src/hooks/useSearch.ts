@@ -1,36 +1,67 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import api from '../api/client';
+import { SearchResult } from '../types';
+
+type SearchType = 'all' | 'departments' | 'people';
+
+interface SearchOptions {
+  debounceMs?: number;
+  minQueryLength?: number;
+  defaultType?: SearchType;
+  limit?: number;
+}
+
+interface SearchSuggestion {
+  text: string;
+  type: 'department' | 'person';
+}
+
+interface UseSearchReturn {
+  query: string;
+  type: SearchType;
+  results: SearchResult[];
+  suggestions: SearchSuggestion[];
+  loading: boolean;
+  error: string | null;
+  total: number;
+  hasMore: boolean;
+  setQuery: (query: string) => void;
+  setType: (type: SearchType) => void;
+  updateQuery: (query: string, type?: SearchType) => void;
+  clearSearch: () => void;
+  searchNow: (q?: string, t?: SearchType) => void;
+}
 
 /**
  * Custom hook for managing search state with debouncing and API integration
  *
- * @param {string} orgId - Organization ID to search within
- * @param {Object} options - Configuration options
- * @param {number} options.debounceMs - Debounce delay in ms (default: 300)
- * @param {number} options.minQueryLength - Minimum query length to trigger search (default: 1)
- * @param {string} options.defaultType - Default search type: 'all' | 'departments' | 'people' (default: 'all')
- * @param {number} options.limit - Max results per search (default: 20)
+ * @param orgId - Organization ID to search within
+ * @param options - Configuration options
  */
-export function useSearch(orgId, options = {}) {
+export function useSearch(orgId: string | undefined, options: SearchOptions = {}): UseSearchReturn {
   const { debounceMs = 300, minQueryLength = 1, defaultType = 'all', limit = 20 } = options;
 
-  const [query, setQuery] = useState('');
-  const [type, setType] = useState(defaultType);
-  const [results, setResults] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [total, setTotal] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
+  const [query, setQuery] = useState<string>('');
+  const [type, setType] = useState<SearchType>(defaultType);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(false);
 
-  const debounceTimer = useRef(null);
-  const abortController = useRef(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortController = useRef<AbortController | null>(null);
 
   /**
    * Execute search API call
    */
   const executeSearch = useCallback(
-    async (searchQuery, searchType, searchOffset = 0) => {
+    async (
+      searchQuery: string,
+      searchType: SearchType,
+      searchOffset: number = 0
+    ): Promise<void> => {
       if (!orgId || searchQuery.length < minQueryLength) {
         setResults([]);
         setTotal(0);
@@ -59,8 +90,8 @@ export function useSearch(orgId, options = {}) {
         setTotal(data.total || 0);
         setHasMore(data.pagination?.hasMore || false);
       } catch (err) {
-        if (err.name !== 'AbortError') {
-          setError(err.message || 'Search failed');
+        if ((err as Error).name !== 'AbortError') {
+          setError((err as Error).message || 'Search failed');
           setResults([]);
           setTotal(0);
           setHasMore(false);
@@ -76,7 +107,7 @@ export function useSearch(orgId, options = {}) {
    * Fetch autocomplete suggestions
    */
   const fetchSuggestions = useCallback(
-    async q => {
+    async (q: string): Promise<void> => {
       if (!orgId || q.length < 2) {
         setSuggestions([]);
         return;
@@ -123,7 +154,7 @@ export function useSearch(orgId, options = {}) {
   /**
    * Clear all search state
    */
-  const clearSearch = useCallback(() => {
+  const clearSearch = useCallback((): void => {
     setQuery('');
     setResults([]);
     setSuggestions([]);
@@ -135,7 +166,7 @@ export function useSearch(orgId, options = {}) {
   /**
    * Update query and optionally the type
    */
-  const updateQuery = useCallback((newQuery, newType) => {
+  const updateQuery = useCallback((newQuery: string, newType?: SearchType): void => {
     setQuery(newQuery);
     if (newType !== undefined) {
       setType(newType);
@@ -160,7 +191,9 @@ export function useSearch(orgId, options = {}) {
     clearSearch,
 
     // Direct search (bypasses debounce)
-    searchNow: (q, t) => executeSearch(q || query, t || type, 0),
+    searchNow: (q?: string, t?: SearchType): void => {
+      executeSearch(q || query, t || type, 0);
+    },
   };
 }
 

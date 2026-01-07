@@ -1,22 +1,22 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { FileText, Clock, User, Filter, X, ChevronDown } from 'lucide-react';
 import api from '../../api/client';
+import type { AuditLog as AuditLogType } from '../../types/index.js';
 import {
-  formatActionType,
   formatEntityType,
   getActionColor,
   formatEntityDetails,
   formatDate,
 } from '../../utils/audit';
 
-export default function AuditLog() {
-  const { orgId } = useParams();
-  const [logs, setLogs] = useState([]);
+export default function AuditLog(): React.JSX.Element {
+  const { orgId } = useParams<{ orgId: string }>();
+  const [logs, setLogs] = useState<AuditLogType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
   // Filters
@@ -25,7 +25,9 @@ export default function AuditLog() {
   const [showFilters, setShowFilters] = useState(false);
 
   // Fetch audit logs
-  const fetchLogs = async (cursor = null, reset = false) => {
+  const fetchLogs = async (cursor: string | null = null, reset = false): Promise<void> => {
+    if (!orgId) return;
+
     try {
       if (reset) {
         setLoading(true);
@@ -34,8 +36,8 @@ export default function AuditLog() {
         setLoadingMore(true);
       }
 
-      const params = {
-        limit: 50,
+      const params: Record<string, string> = {
+        limit: '50',
         ...(cursor && { cursor }),
         ...(actionType && { actionType }),
         ...(entityType && { entityType }),
@@ -44,16 +46,20 @@ export default function AuditLog() {
       const result = await api.getAuditLogs(orgId, params);
 
       if (reset || !cursor) {
-        setLogs(result.logs);
+        setLogs(result.logs || []);
       } else {
-        setLogs(prev => [...prev, ...result.logs]);
+        setLogs(prev => [...prev, ...(result.logs || [])]);
       }
 
       setHasMore(result.hasMore);
       setNextCursor(result.nextCursor);
       setError(null);
     } catch (err) {
-      setError(err.message || 'Failed to load audit logs');
+      if (err instanceof Error) {
+        setError(err.message || 'Failed to load audit logs');
+      } else {
+        setError('Failed to load audit logs');
+      }
       console.error('Failed to fetch audit logs:', err);
     } finally {
       setLoading(false);
@@ -64,17 +70,18 @@ export default function AuditLog() {
   // Initial load
   useEffect(() => {
     fetchLogs(null, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orgId, actionType, entityType]);
 
   // Handle load more
-  const handleLoadMore = () => {
+  const handleLoadMore = (): void => {
     if (nextCursor && !loadingMore) {
       fetchLogs(nextCursor);
     }
   };
 
   // Clear filters
-  const clearFilters = () => {
+  const clearFilters = (): void => {
     setActionType('');
     setEntityType('');
   };

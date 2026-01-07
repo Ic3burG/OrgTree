@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import React, { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+export default function LoginPage(): React.JSX.Element {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   const from = location.state?.from?.pathname || '/';
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -24,7 +24,11 @@ export default function LoginPage() {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || 'Failed to login');
+      if (err instanceof Error) {
+        setError(err.message || 'Failed to login');
+      } else {
+        setError('Failed to login');
+      }
     } finally {
       setLoading(false);
     }
@@ -62,7 +66,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
                   placeholder="you@example.com"
                   required
@@ -83,7 +87,7 @@ export default function LoginPage() {
                   id="password"
                   type="password"
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
                   placeholder="••••••••"
                   required

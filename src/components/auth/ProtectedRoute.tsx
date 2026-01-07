@@ -1,14 +1,24 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Navigate, useLocation, type ReactNode } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import type { User } from '../../types/index.js';
 
 // Role hierarchy: superuser > admin > user
-const ROLE_HIERARCHY = {
+const ROLE_HIERARCHY: Record<User['role'], number> = {
   superuser: 3,
   admin: 2,
   user: 1,
 };
 
-export default function ProtectedRoute({ children, requiredRole = null }) {
+interface ProtectedRouteProps {
+  children: ReactNode;
+  requiredRole?: User['role'] | null;
+}
+
+export default function ProtectedRoute({
+  children,
+  requiredRole = null,
+}: ProtectedRouteProps): React.JSX.Element {
   const { isAuthenticated, loading, user } = useAuth();
   const location = useLocation();
 
@@ -32,7 +42,7 @@ export default function ProtectedRoute({ children, requiredRole = null }) {
 
   // Check role if required
   if (requiredRole) {
-    const userLevel = ROLE_HIERARCHY[user?.role] || 0;
+    const userLevel = ROLE_HIERARCHY[user?.role as User['role']] || 0;
     const requiredLevel = ROLE_HIERARCHY[requiredRole] || 999;
 
     if (userLevel < requiredLevel) {
@@ -41,5 +51,5 @@ export default function ProtectedRoute({ children, requiredRole = null }) {
     }
   }
 
-  return children;
+  return <>{children}</>;
 }

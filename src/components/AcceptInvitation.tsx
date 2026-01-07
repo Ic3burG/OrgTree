@@ -1,57 +1,76 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/client';
+import type { Invitation } from '../types/index.js';
 
-export default function AcceptInvitation() {
-  const { token } = useParams();
+export default function AcceptInvitation(): React.JSX.Element {
+  const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
-  const [invitation, setInvitation] = useState(null);
+  const [invitation, setInvitation] = useState<Invitation | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     loadInvitation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  async function loadInvitation() {
+  async function loadInvitation(): Promise<void> {
+    if (!token) {
+      setError('Invalid invitation link');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const data = await api.getInvitationByToken(token);
       setInvitation(data);
     } catch (err) {
-      setError(err.message || 'Failed to load invitation');
+      if (err instanceof Error) {
+        setError(err.message || 'Failed to load invitation');
+      } else {
+        setError('Failed to load invitation');
+      }
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleAccept() {
+  async function handleAccept(): Promise<void> {
+    if (!token) {
+      setError('Invalid invitation link');
+      return;
+    }
+
     try {
       setAccepting(true);
       setError('');
       const result = await api.acceptInvitation(token);
 
-      if (result.success) {
-        setSuccess(true);
-        // Redirect to the organization after a short delay
-        setTimeout(() => {
-          navigate(`/org/${result.organizationId}`);
-        }, 2000);
-      }
+      setSuccess(true);
+      // Redirect to the organization after a short delay
+      setTimeout(() => {
+        navigate(`/org/${result.organization.id}`);
+      }, 2000);
     } catch (err) {
-      setError(err.message || 'Failed to accept invitation');
+      if (err instanceof Error) {
+        setError(err.message || 'Failed to accept invitation');
+      } else {
+        setError('Failed to accept invitation');
+      }
     } finally {
       setAccepting(false);
     }
   }
 
-  const getRoleDescription = role => {
-    const descriptions = {
+  const getRoleDescription = (role: string): string => {
+    const descriptions: Record<string, string> = {
       viewer: 'view this organization',
       editor: 'view and edit departments and people',
       admin: 'manage members and settings',

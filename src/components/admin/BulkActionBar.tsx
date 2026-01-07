@@ -1,14 +1,17 @@
+import React from 'react';
 import { X, Trash2, FolderInput, Edit3 } from 'lucide-react';
+
+interface BulkActionBarProps {
+  selectedCount: number;
+  entityType?: 'people' | 'departments';
+  onDelete?: () => void;
+  onMove?: () => void;
+  onEdit?: () => void;
+  onCancel: () => void;
+}
 
 /**
  * Floating action bar for bulk operations
- * @param {Object} props
- * @param {number} props.selectedCount - Number of selected items
- * @param {string} props.entityType - 'people' or 'departments'
- * @param {Function} props.onDelete - Delete callback
- * @param {Function} props.onMove - Move callback (people only)
- * @param {Function} props.onEdit - Edit callback
- * @param {Function} props.onCancel - Cancel/exit selection mode callback
  */
 export default function BulkActionBar({
   selectedCount,
@@ -17,7 +20,7 @@ export default function BulkActionBar({
   onMove,
   onEdit,
   onCancel,
-}) {
+}: BulkActionBarProps): React.JSX.Element | null {
   if (selectedCount === 0) return null;
 
   const itemLabel =

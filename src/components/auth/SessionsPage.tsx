@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Monitor,
@@ -11,24 +11,37 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
+import type { Session } from '../../types/index.js';
 
-export default function SessionsPage() {
+interface SessionsResponse {
+  sessions: Session[];
+}
+
+interface RevokeOthersResponse {
+  revokedCount: number;
+}
+
+export default function SessionsPage(): React.JSX.Element {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [sessions, setSessions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [revoking, setRevoking] = useState(null);
-  const [revokingAll, setRevokingAll] = useState(false);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [revoking, setRevoking] = useState<string | null>(null);
+  const [revokingAll, setRevokingAll] = useState<boolean>(false);
 
-  const fetchSessions = async () => {
+  const fetchSessions = async (): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
-      const data = await api.getSessions();
+      const data = (await api.getSessions()) as SessionsResponse;
       setSessions(data.sessions || []);
     } catch (err) {
-      setError(err.message || 'Failed to load sessions');
+      if (err instanceof Error) {
+        setError(err.message || 'Failed to load sessions');
+      } else {
+        setError('Failed to load sessions');
+      }
     } finally {
       setLoading(false);
     }
@@ -38,22 +51,26 @@ export default function SessionsPage() {
     fetchSessions();
   }, []);
 
-  const handleRevokeSession = async sessionId => {
+  const handleRevokeSession = async (sessionId: string): Promise<void> => {
     try {
       setRevoking(sessionId);
       await api.revokeSession(sessionId);
       setSessions(prev => prev.filter(s => s.id !== sessionId));
     } catch (err) {
-      setError(err.message || 'Failed to revoke session');
+      if (err instanceof Error) {
+        setError(err.message || 'Failed to revoke session');
+      } else {
+        setError('Failed to revoke session');
+      }
     } finally {
       setRevoking(null);
     }
   };
 
-  const handleRevokeOthers = async () => {
+  const handleRevokeOthers = async (): Promise<void> => {
     try {
       setRevokingAll(true);
-      const result = await api.revokeOtherSessions();
+      const result = (await api.revokeOtherSessions()) as RevokeOthersResponse;
       // Refresh the list
       await fetchSessions();
       // Show success message briefly
@@ -61,19 +78,23 @@ export default function SessionsPage() {
         setError(null);
       }
     } catch (err) {
-      setError(err.message || 'Failed to revoke other sessions');
+      if (err instanceof Error) {
+        setError(err.message || 'Failed to revoke other sessions');
+      } else {
+        setError('Failed to revoke other sessions');
+      }
     } finally {
       setRevokingAll(false);
     }
   };
 
-  const formatDate = dateString => {
+  const formatDate = (dateString: string | null | undefined): string => {
     if (!dateString) return 'Unknown';
     const date = new Date(dateString);
     return date.toLocaleString();
   };
 
-  const getDeviceIcon = deviceInfo => {
+  const getDeviceIcon = (deviceInfo: string | null | undefined): React.JSX.Element => {
     if (!deviceInfo) return <Monitor size={20} />;
     const lower = deviceInfo.toLowerCase();
     if (lower.includes('mobile') || lower.includes('android') || lower.includes('iphone')) {
@@ -82,7 +103,7 @@ export default function SessionsPage() {
     return <Monitor size={20} />;
   };
 
-  const getDeviceName = deviceInfo => {
+  const getDeviceName = (deviceInfo: string | null | undefined): string => {
     if (!deviceInfo) return 'Unknown Device';
     // Parse user agent to get a readable name
     if (deviceInfo.includes('Chrome')) return 'Chrome Browser';
@@ -166,30 +187,30 @@ export default function SessionsPage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600">
-                      {getDeviceIcon(session.deviceInfo)}
+                      {getDeviceIcon(session.device_info)}
                     </div>
                     <div>
                       <div className="font-medium text-gray-900">
-                        {getDeviceName(session.deviceInfo)}
-                        {session.isCurrent && (
+                        {getDeviceName(session.device_info)}
+                        {session.is_current && (
                           <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                             Current
                           </span>
                         )}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {session.ipAddress || 'Unknown IP'}
+                        {session.ip_address || 'Unknown IP'}
                       </div>
                       <div className="text-xs text-gray-400">
-                        Last active: {formatDate(session.lastUsedAt)}
+                        Last active: {formatDate(session.last_used_at)}
                       </div>
                     </div>
                   </div>
                   <button
                     onClick={() => handleRevokeSession(session.id)}
-                    disabled={revoking === session.id || session.isCurrent}
+                    disabled={revoking === session.id || session.is_current}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={session.isCurrent ? "Can't revoke current session" : 'Revoke session'}
+                    title={session.is_current ? "Can't revoke current session" : 'Revoke session'}
                   >
                     {revoking === session.id ? (
                       <RefreshCw size={18} className="animate-spin" />

@@ -144,6 +144,15 @@ export interface SearchResponse {
   total: number;
 }
 
+// Pagination types
+export interface PaginatedResponse<T> {
+  items?: T[];
+  logs?: T[]; // For audit logs
+  total?: number;
+  hasMore: boolean;
+  nextCursor: string | null;
+}
+
 // Bulk operation types
 export interface BulkOperationResult {
   success: number;

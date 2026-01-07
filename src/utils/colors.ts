@@ -3,7 +3,26 @@
  * Supports multiple color themes
  */
 
-const themes = {
+interface ColorConfig {
+  bg: string;
+  hex: string;
+  text: string;
+  hover: string;
+}
+
+interface Theme {
+  name: string;
+  colors: ColorConfig[];
+  swatch: string;
+}
+
+interface ThemeList {
+  id: string;
+  name: string;
+  swatch: string;
+}
+
+const themes: Record<string, Theme> = {
   slate: {
     name: 'Slate',
     colors: [
@@ -95,16 +114,19 @@ const themes = {
 /**
  * Get depth-based colors for a specific theme
  */
-export function getDepthColors(depth, themeName = 'slate') {
-  const theme = themes[themeName] || themes.slate;
+export function getDepthColors(depth: number, themeName: string = 'slate'): ColorConfig {
+  const theme = themes[themeName] || themes['slate'];
+  if (!theme) {
+    throw new Error(`Theme not found: ${themeName}`);
+  }
   const index = Math.min(depth, theme.colors.length - 1);
-  return theme.colors[index];
+  return theme.colors[index] as ColorConfig;
 }
 
 /**
  * Get list of all available themes
  */
-export function getThemeList() {
+export function getThemeList(): ThemeList[] {
   return Object.entries(themes).map(([key, theme]) => ({
     id: key,
     name: theme.name,
@@ -115,17 +137,17 @@ export function getThemeList() {
 /**
  * Get swatch color for a theme
  */
-export function getThemeSwatch(themeName) {
-  return themes[themeName]?.swatch || themes.slate.swatch;
+export function getThemeSwatch(themeName: string): string {
+  return themes[themeName]?.swatch || themes['slate']?.swatch || '#475569';
 }
 
 /**
  * Get lighter background color for person cards
  * Person cards should be slightly lighter than their parent department
  */
-export function getPersonCardColor(parentDepth) {
+export function getPersonCardColor(parentDepth: number): string {
   const backgrounds = ['bg-slate-100', 'bg-slate-50', 'bg-white', 'bg-white', 'bg-white'];
 
   const index = Math.min(parentDepth, backgrounds.length - 1);
-  return backgrounds[index];
+  return backgrounds[index] as string;
 }

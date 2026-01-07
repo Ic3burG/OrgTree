@@ -1,10 +1,10 @@
 /**
  * Format action type for display
- * @param {string} actionType - Action type (created, updated, deleted, etc.)
- * @param {string} entityType - Entity type (department, person, member, org)
- * @returns {string} Formatted action string
+ * @param actionType - Action type (created, updated, deleted, etc.)
+ * @param entityType - Entity type (department, person, member, org)
+ * @returns Formatted action string
  */
-export function formatActionType(actionType, entityType) {
+export function formatActionType(actionType: string, entityType: string): string {
   const action = actionType.charAt(0).toUpperCase() + actionType.slice(1);
   const entity = formatEntityType(entityType);
   return `${action} ${entity}`;
@@ -12,11 +12,11 @@ export function formatActionType(actionType, entityType) {
 
 /**
  * Format entity type for display
- * @param {string} entityType - Entity type (person, department, member, org)
- * @returns {string} Formatted entity type
+ * @param entityType - Entity type (person, department, member, org)
+ * @returns Formatted entity type
  */
-export function formatEntityType(entityType) {
-  const typeMap = {
+export function formatEntityType(entityType: string): string {
+  const typeMap: Record<string, string> = {
     person: 'Person',
     department: 'Department',
     member: 'Member',
@@ -27,11 +27,11 @@ export function formatEntityType(entityType) {
 
 /**
  * Get badge color for action type
- * @param {string} actionType - Action type
- * @returns {string} Tailwind color class
+ * @param actionType - Action type
+ * @returns Tailwind color class
  */
-export function getActionColor(actionType) {
-  const colorMap = {
+export function getActionColor(actionType: string): string {
+  const colorMap: Record<string, string> = {
     created: 'bg-green-100 text-green-800',
     updated: 'bg-blue-100 text-blue-800',
     deleted: 'bg-red-100 text-red-800',
@@ -42,13 +42,22 @@ export function getActionColor(actionType) {
   return colorMap[actionType] || 'bg-gray-100 text-gray-800';
 }
 
+interface EntityData {
+  name?: string;
+  id?: string;
+  userName?: string;
+  role?: string;
+  email?: string;
+  [key: string]: unknown;
+}
+
 /**
  * Format entity details from entity data for display
- * @param {string} entityType - Entity type
- * @param {Object} entityData - Entity data JSON
- * @returns {string} Formatted details string
+ * @param entityType - Entity type
+ * @param entityData - Entity data JSON
+ * @returns Formatted details string
  */
-export function formatEntityDetails(entityType, entityData) {
+export function formatEntityDetails(entityType: string, entityData: EntityData | null): string {
   if (!entityData) return 'N/A';
 
   switch (entityType) {
@@ -74,13 +83,13 @@ export function formatEntityDetails(entityType, entityData) {
 
 /**
  * Format date for display
- * @param {string} dateString - ISO date string
- * @returns {string} Formatted date string
+ * @param dateString - ISO date string
+ * @returns Formatted date string
  */
-export function formatDate(dateString) {
+export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
-  const diffMs = now - date;
+  const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);

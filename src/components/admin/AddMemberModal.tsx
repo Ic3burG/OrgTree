@@ -1,5 +1,14 @@
-import { useState } from 'react';
+import React, { useState, FormEvent, ChangeEvent } from 'react';
 import api from '../../api/client';
+import type { OrgMember, Invitation } from '../../types/index.js';
+
+interface AddMemberModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onMemberAdded?: (member: OrgMember) => void;
+  onInvitationSent?: (invitation: Invitation) => void;
+  orgId: string;
+}
 
 export default function AddMemberModal({
   isOpen,
@@ -7,7 +16,7 @@ export default function AddMemberModal({
   onMemberAdded,
   onInvitationSent,
   orgId,
-}) {
+}: AddMemberModalProps): React.JSX.Element | null {
   const [email, setEmail] = useState('');
   const [selectedRole, setSelectedRole] = useState('viewer');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +43,7 @@ export default function AddMemberModal({
     },
   ];
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
     if (!email.trim()) {
@@ -54,53 +63,57 @@ export default function AddMemberModal({
     setUserNotFound(false);
 
     try {
-      const result = await api.addMemberByEmail(orgId, email.trim(), selectedRole);
+      const roleValue = selectedRole as 'admin' | 'editor' | 'viewer';
+      const member = await api.addMemberByEmail(orgId, email.trim(), roleValue);
 
-      if (result.success) {
-        // Member added successfully
-        if (onMemberAdded) {
-          onMemberAdded(result.member);
-        }
-        handleClose();
-      } else if (result.error === 'user_not_found') {
-        // User doesn't exist - show invite option
-        setUserNotFound(true);
+      // Member added successfully
+      if (onMemberAdded) {
+        onMemberAdded(member);
       }
+      handleClose();
     } catch (err) {
-      setError(err.message || 'Failed to add member');
+      if (err instanceof Error) {
+        // Check if it's a user not found error
+        if (err.message.includes('not found')) {
+          setUserNotFound(true);
+        } else {
+          setError(err.message || 'Failed to add member');
+        }
+      } else {
+        setError('Failed to add member');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleSendInvitation = async () => {
+  const handleSendInvitation = async (): Promise<void> => {
     setIsSendingInvite(true);
     setError('');
 
     try {
-      const result = await api.sendInvitation(orgId, email.trim(), selectedRole);
+      const roleValue = selectedRole as 'admin' | 'editor' | 'viewer';
+      const invitation = await api.sendInvitation(orgId, email.trim(), roleValue);
 
-      if (result.emailSent) {
-        setInviteSent(true);
-        if (onInvitationSent) {
-          onInvitationSent(result);
-        }
-        // Auto close after a delay
-        setTimeout(() => {
-          handleClose();
-        }, 2000);
-      } else if (result.emailError === 'email_not_configured') {
-        setError('Email service is not configured. Please contact the administrator.');
-      } else {
-        // Invitation created but email failed
-        setInviteSent(true);
-        setError('Invitation created but email could not be sent. Share the invite link manually.');
-        if (onInvitationSent) {
-          onInvitationSent(result);
-        }
+      setInviteSent(true);
+      if (onInvitationSent) {
+        onInvitationSent(invitation);
       }
+      // Auto close after a delay
+      setTimeout(() => {
+        handleClose();
+      }, 2000);
     } catch (err) {
-      setError(err.message || 'Failed to send invitation');
+      if (err instanceof Error) {
+        // Check if it's an email configuration error
+        if (err.message.includes('email') || err.message.includes('configured')) {
+          setError('Email service is not configured. Please contact the administrator.');
+        } else {
+          setError(err.message || 'Failed to send invitation');
+        }
+      } else {
+        setError('Failed to send invitation');
+      }
     } finally {
       setIsSendingInvite(false);
     }
@@ -237,7 +250,7 @@ export default function AddMemberModal({
               <input
                 type="email"
                 value={email}
-                onChange={e => {
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   setEmail(e.target.value);
                   setError('');
                   setUserNotFound(false);
@@ -269,7 +282,9 @@ export default function AddMemberModal({
                       name="role"
                       value={role.value}
                       checked={selectedRole === role.value}
-                      onChange={e => setSelectedRole(e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setSelectedRole(e.target.value)
+                      }
                       className="mt-1 mr-3"
                       disabled={isSubmitting || isSendingInvite || inviteSent}
                     />

@@ -1,14 +1,17 @@
+import React from 'react';
 import { useSocket } from '../../contexts/SocketContext';
+
+type ConnectionStatusType = 'connected' | 'error' | 'disconnected';
 
 /**
  * Subtle connection status indicator - just a small colored dot
  * Green = connected, Amber = reconnecting, Gray = disconnected
  */
-export default function ConnectionStatus() {
+export default function ConnectionStatus(): React.JSX.Element {
   const { isConnected, connectionError } = useSocket();
 
   // Determine status
-  let status = 'disconnected';
+  let status: ConnectionStatusType = 'disconnected';
   let tooltip = 'Disconnected';
 
   if (isConnected) {
@@ -19,7 +22,7 @@ export default function ConnectionStatus() {
     tooltip = `Connection error: ${connectionError}`;
   }
 
-  const colors = {
+  const colors: Record<ConnectionStatusType, string> = {
     connected: 'bg-green-500',
     error: 'bg-amber-500',
     disconnected: 'bg-gray-400',

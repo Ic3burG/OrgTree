@@ -32,13 +32,15 @@ declare module 'dagre' {
     edgesep?: number;
     marginx?: number;
     marginy?: number;
+    align?: 'UL' | 'UR' | 'DL' | 'DR';
+    ranker?: 'network-simplex' | 'tight-tree' | 'longest-path';
   }
 
   export interface Node {
     width: number;
     height: number;
-    x?: number;
-    y?: number;
+    x: number;
+    y: number;
   }
 
   export interface Edge {
@@ -52,7 +54,7 @@ declare module 'dagre' {
   export interface Graph {
     setGraph(label: GraphLabel): void;
     setDefaultEdgeLabel(callback: () => Record<string, unknown>): void;
-    setNode(id: string, node: Node): void;
+    setNode(id: string, node: Partial<Node>): void;
     setEdge(source: string, target: string): void;
     nodes(): string[];
     node(id: string): Node;
@@ -72,6 +74,7 @@ declare module 'html-to-image' {
       backgroundColor?: string;
       width?: number;
       height?: number;
+      pixelRatio?: number;
       style?: Partial<CSSStyleDeclaration>;
       filter?: (node: HTMLElement) => boolean;
       cacheBust?: boolean;

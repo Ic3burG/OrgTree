@@ -1,15 +1,24 @@
+import React from 'react';
 import { X, AlertTriangle } from 'lucide-react';
+
+interface BulkDeleteResult {
+  deletedCount: number;
+  failedCount: number;
+  warnings?: string[];
+}
+
+interface BulkDeleteModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  count: number;
+  entityType?: 'people' | 'departments';
+  isDeleting?: boolean;
+  result?: BulkDeleteResult | null;
+}
 
 /**
  * Confirmation modal for bulk delete operations
- * @param {Object} props
- * @param {boolean} props.isOpen - Whether modal is open
- * @param {Function} props.onClose - Close callback
- * @param {Function} props.onConfirm - Confirm delete callback
- * @param {number} props.count - Number of items to delete
- * @param {string} props.entityType - 'people' or 'departments'
- * @param {boolean} props.isDeleting - Loading state
- * @param {Object} props.result - Result from deletion { deletedCount, failedCount, warnings }
  */
 export default function BulkDeleteModal({
   isOpen,
@@ -19,7 +28,7 @@ export default function BulkDeleteModal({
   entityType = 'people',
   isDeleting = false,
   result = null,
-}) {
+}: BulkDeleteModalProps): React.JSX.Element | null {
   if (!isOpen) return null;
 
   const itemLabel =

@@ -1,19 +1,25 @@
+import { Department, Person } from '../types';
+
+interface OrgData {
+  departments: Department[];
+}
+
 /**
  * Generate CSV content from organization data
  */
-export function generateCSV(org) {
-  const rows = [['Path', 'Type', 'Name', 'Title', 'Email', 'Phone', 'Description']];
+export function generateCSV(org: OrgData): string {
+  const rows: string[][] = [['Path', 'Type', 'Name', 'Title', 'Email', 'Phone', 'Description']];
 
   // Helper to build path and add rows
-  const buildPath = (dept, depts, path = '') => {
-    const sanitize = str => str.replace(/[/,]/g, '-');
+  const buildPath = (dept: Department, depts: Department[], path: string = ''): void => {
+    const sanitize = (str: string): string => str.replace(/[/,]/g, '-');
     const currentPath = path ? `${path}/${sanitize(dept.name)}` : `/${sanitize(dept.name)}`;
 
     // Add department row
     rows.push([currentPath, 'department', dept.name, '', '', '', dept.description || '']);
 
     // Add people in this department
-    (dept.people || []).forEach(person => {
+    (dept.people || []).forEach((person: Person) => {
       const personName = sanitize(person.name.toLowerCase().replace(/\s+/g, '-'));
       const personPath = `${currentPath}/${personName}`;
       rows.push([
@@ -28,12 +34,12 @@ export function generateCSV(org) {
     });
 
     // Process children
-    const children = depts.filter(d => d.parentId === dept.id);
+    const children = depts.filter(d => d.parent_id === dept.id);
     children.forEach(child => buildPath(child, depts, currentPath));
   };
 
   // Start with top-level departments
-  const topLevel = (org.departments || []).filter(d => !d.parentId);
+  const topLevel = (org.departments || []).filter(d => !d.parent_id);
   topLevel.forEach(dept => buildPath(dept, org.departments));
 
   // Convert to CSV string
@@ -57,7 +63,7 @@ export function generateCSV(org) {
 /**
  * Download CSV content as a file
  */
-export function downloadCSV(content, filename) {
+export function downloadCSV(content: string, filename: string): void {
   const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);

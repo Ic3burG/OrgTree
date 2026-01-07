@@ -1,15 +1,72 @@
 import Papa from 'papaparse';
 
+interface CSVRow {
+  Path: string;
+  Type: string;
+  Name: string;
+  Title?: string;
+  Email?: string;
+  Phone?: string;
+  Description?: string;
+}
+
+interface Person {
+  id: string;
+  name: string;
+  title: string;
+  email: string;
+  phone: string;
+  path: string;
+}
+
+interface DepartmentData {
+  id: string;
+  path: string;
+  name: string;
+  description: string;
+  depth: number;
+  people: Person[];
+  parentPath: string | null;
+}
+
+interface FlowNode {
+  id: string;
+  type: string;
+  position: { x: number; y: number };
+  data: {
+    name: string;
+    path: string;
+    depth: number;
+    description: string;
+    people: Person[];
+    isExpanded: boolean;
+  };
+}
+
+interface FlowEdge {
+  id: string;
+  source: string;
+  target: string;
+  type: string;
+  animated: boolean;
+  style: { stroke: string; strokeWidth: number };
+}
+
+interface FlowStructure {
+  nodes: FlowNode[];
+  edges: FlowEdge[];
+}
+
 /**
  * Parse CSV data into React Flow nodes and edges format
- * @param {string} csvText - Raw CSV text
- * @returns {Object} { nodes: [], edges: [] }
+ * @param csvText - Raw CSV text
+ * @returns Object with nodes and edges arrays
  */
-export function parseCSVToFlow(csvText) {
-  const result = Papa.parse(csvText, {
+export function parseCSVToFlow(csvText: string): FlowStructure {
+  const result = Papa.parse<CSVRow>(csvText, {
     header: true,
     skipEmptyLines: true,
-    transformHeader: header => header.trim(),
+    transformHeader: (header: string): string => header.trim(),
   });
 
   if (result.errors.length > 0) {
@@ -21,24 +78,24 @@ export function parseCSVToFlow(csvText) {
 
 /**
  * Build React Flow nodes and edges from flat CSV rows
- * @param {Array} rows - Parsed CSV rows
- * @returns {Object} { nodes: [], edges: [] }
+ * @param rows - Parsed CSV rows
+ * @returns Object with nodes and edges arrays
  */
-function buildFlowStructure(rows) {
+function buildFlowStructure(rows: CSVRow[]): FlowStructure {
   // Sort by path to ensure parents come before children
   const sortedRows = rows.sort((a, b) => a.Path.localeCompare(b.Path));
 
-  const departmentMap = new Map(); // Map of path -> department data
-  const nodes = [];
-  const edges = [];
+  const departmentMap = new Map<string, DepartmentData>(); // Map of path -> department data
+  const nodes: FlowNode[] = [];
+  const edges: FlowEdge[] = [];
 
   // First pass: identify all departments and their people
-  sortedRows.forEach(row => {
+  sortedRows.forEach((row: CSVRow) => {
     const path = row.Path.trim();
     const type = row.Type.trim().toLowerCase();
     const segments = path.split('/').filter(Boolean);
     const depth = segments.length - 1;
-    const id = segments[segments.length - 1];
+    const id = segments[segments.length - 1] as string;
 
     if (type === 'department') {
       // Create department entry
@@ -72,7 +129,7 @@ function buildFlowStructure(rows) {
   });
 
   // Second pass: create nodes and edges
-  departmentMap.forEach((dept, path) => {
+  departmentMap.forEach((dept: DepartmentData) => {
     // Create node for this department
     nodes.push({
       id: dept.id,
@@ -109,27 +166,38 @@ function buildFlowStructure(rows) {
 
 /**
  * Find a node by its ID
- * @param {Array} nodes - Array of nodes
- * @param {string} nodeId - Node ID to find
- * @returns {Object|null} Node if found
+ * @param nodes - Array of nodes
+ * @param nodeId - Node ID to find
+ * @returns Node if found, null otherwise
  */
-export function findNodeById(nodes, nodeId) {
+export function findNodeById(nodes: FlowNode[], nodeId: string): FlowNode | null {
   return nodes.find(node => node.id === nodeId) || null;
+}
+
+interface SearchMatch {
+  type: 'department' | 'person';
+  id: string;
+  name: string;
+  subtitle: string;
+  node?: FlowNode;
+  person?: Person;
+  departmentId?: string;
+  departmentName?: string;
 }
 
 /**
  * Search nodes and people by query
- * @param {Array} nodes - Array of nodes
- * @param {string} query - Search query
- * @returns {Array} Array of matches with type and reference
+ * @param nodes - Array of nodes
+ * @param query - Search query
+ * @returns Array of matches with type and reference
  */
-export function searchNodesAndPeople(nodes, query) {
+export function searchNodesAndPeople(nodes: FlowNode[], query: string): SearchMatch[] {
   if (!query || query.trim() === '') return [];
 
   const lowerQuery = query.toLowerCase();
-  const matches = [];
+  const matches: SearchMatch[] = [];
 
-  nodes.forEach(node => {
+  nodes.forEach((node: FlowNode) => {
     // Check department name
     if (node.data.name.toLowerCase().includes(lowerQuery)) {
       matches.push({
@@ -142,7 +210,7 @@ export function searchNodesAndPeople(nodes, query) {
     }
 
     // Check people in this department
-    node.data.people.forEach(person => {
+    node.data.people.forEach((person: Person) => {
       const nameMatch = person.name.toLowerCase().includes(lowerQuery);
       const titleMatch = person.title && person.title.toLowerCase().includes(lowerQuery);
       const emailMatch = person.email && person.email.toLowerCase().includes(lowerQuery);

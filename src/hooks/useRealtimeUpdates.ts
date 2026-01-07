@@ -2,20 +2,45 @@ import { useEffect, useCallback, useState } from 'react';
 import { useSocket } from '../contexts/SocketContext';
 import { useAuth } from '../contexts/AuthContext';
 
+interface RealtimePayload {
+  type?: string;
+  action?: string;
+  data?: {
+    id?: string;
+    name?: string;
+    [key: string]: unknown;
+  };
+  meta?: {
+    actorId?: string;
+    actorName?: string;
+  };
+}
+
+interface RealtimeUpdateOptions {
+  onDepartmentChange?: (payload: RealtimePayload) => void;
+  onPersonChange?: (payload: RealtimePayload) => void;
+  onMemberChange?: (payload: RealtimePayload) => void;
+  onOrgChange?: (payload: RealtimePayload) => void;
+  showNotifications?: boolean;
+}
+
+interface RealtimeUpdateReturn {
+  recentlyChanged: Set<string>;
+  isRecentlyChanged: (id: string) => boolean;
+}
+
 /**
  * Hook for subscribing to real-time updates for an organization
- * @param {string} orgId - Organization ID to listen for updates
- * @param {Object} options - Configuration options
- * @param {Function} options.onDepartmentChange - Called when department changes
- * @param {Function} options.onPersonChange - Called when person changes
- * @param {Function} options.onMemberChange - Called when member changes
- * @param {Function} options.onOrgChange - Called when org changes
- * @param {boolean} options.showNotifications - Whether to show toast notifications
+ * @param orgId - Organization ID to listen for updates
+ * @param options - Configuration options
  */
-export function useRealtimeUpdates(orgId, options = {}) {
+export function useRealtimeUpdates(
+  orgId: string | undefined,
+  options: RealtimeUpdateOptions = {}
+): RealtimeUpdateReturn {
   const { subscribe, joinOrg, leaveOrg } = useSocket();
   const { user } = useAuth();
-  const [recentlyChanged, setRecentlyChanged] = useState(new Set());
+  const [recentlyChanged, setRecentlyChanged] = useState<Set<string>>(new Set());
 
   const {
     onDepartmentChange,
@@ -26,7 +51,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
   } = options;
 
   // Track recently changed items for highlighting
-  const markAsChanged = useCallback(id => {
+  const markAsChanged = useCallback((id: string): void => {
     setRecentlyChanged(prev => new Set([...prev, id]));
     // Clear after 3 seconds
     setTimeout(() => {
@@ -40,20 +65,20 @@ export function useRealtimeUpdates(orgId, options = {}) {
 
   // Check if we should ignore this event (it's from ourselves)
   const shouldIgnore = useCallback(
-    payload => {
+    (payload: RealtimePayload): boolean => {
       return payload?.meta?.actorId === user?.id;
     },
     [user?.id]
   );
 
   // Create notification message
-  const getNotificationMessage = useCallback(payload => {
+  const getNotificationMessage = useCallback((payload: RealtimePayload): string => {
     const actor = payload?.meta?.actorName || 'Someone';
     const type = payload?.type;
     const action = payload?.action;
     const name = payload?.data?.name || '';
 
-    const actionVerbs = {
+    const actionVerbs: Record<string, string> = {
       created: 'added',
       updated: 'updated',
       deleted: 'removed',
@@ -61,7 +86,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
       removed: 'removed',
     };
 
-    const verb = actionVerbs[action] || action;
+    const verb = action ? actionVerbs[action] || action : 'changed';
 
     switch (type) {
       case 'department':
@@ -97,9 +122,9 @@ export function useRealtimeUpdates(orgId, options = {}) {
     if (!orgId || !onDepartmentChange) return;
 
     const handlers = [
-      subscribe('department:created', payload => {
+      subscribe('department:created', (payload: RealtimePayload) => {
         if (shouldIgnore(payload)) return;
-        markAsChanged(payload.data?.id);
+        if (payload.data?.id) markAsChanged(payload.data.id);
         onDepartmentChange(payload);
         if (showNotifications) {
           window.dispatchEvent(
@@ -109,9 +134,9 @@ export function useRealtimeUpdates(orgId, options = {}) {
           );
         }
       }),
-      subscribe('department:updated', payload => {
+      subscribe('department:updated', (payload: RealtimePayload) => {
         if (shouldIgnore(payload)) return;
-        markAsChanged(payload.data?.id);
+        if (payload.data?.id) markAsChanged(payload.data.id);
         onDepartmentChange(payload);
         if (showNotifications) {
           window.dispatchEvent(
@@ -121,7 +146,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
           );
         }
       }),
-      subscribe('department:deleted', payload => {
+      subscribe('department:deleted', (payload: RealtimePayload) => {
         if (shouldIgnore(payload)) return;
         onDepartmentChange(payload);
         if (showNotifications) {
@@ -134,7 +159,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
       }),
     ];
 
-    return () => handlers.forEach(unsubscribe => unsubscribe());
+    return () => handlers.forEach(unsubscribe => unsubscribe?.());
   }, [
     orgId,
     subscribe,
@@ -150,9 +175,9 @@ export function useRealtimeUpdates(orgId, options = {}) {
     if (!orgId || !onPersonChange) return;
 
     const handlers = [
-      subscribe('person:created', payload => {
+      subscribe('person:created', (payload: RealtimePayload) => {
         if (shouldIgnore(payload)) return;
-        markAsChanged(payload.data?.id);
+        if (payload.data?.id) markAsChanged(payload.data.id);
         onPersonChange(payload);
         if (showNotifications) {
           window.dispatchEvent(
@@ -162,9 +187,9 @@ export function useRealtimeUpdates(orgId, options = {}) {
           );
         }
       }),
-      subscribe('person:updated', payload => {
+      subscribe('person:updated', (payload: RealtimePayload) => {
         if (shouldIgnore(payload)) return;
-        markAsChanged(payload.data?.id);
+        if (payload.data?.id) markAsChanged(payload.data.id);
         onPersonChange(payload);
         if (showNotifications) {
           window.dispatchEvent(
@@ -174,7 +199,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
           );
         }
       }),
-      subscribe('person:deleted', payload => {
+      subscribe('person:deleted', (payload: RealtimePayload) => {
         if (shouldIgnore(payload)) return;
         onPersonChange(payload);
         if (showNotifications) {
@@ -187,7 +212,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
       }),
     ];
 
-    return () => handlers.forEach(unsubscribe => unsubscribe());
+    return () => handlers.forEach(unsubscribe => unsubscribe?.());
   }, [
     orgId,
     subscribe,
@@ -203,7 +228,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
     if (!orgId || !onMemberChange) return;
 
     const handlers = [
-      subscribe('member:added', payload => {
+      subscribe('member:added', (payload: RealtimePayload) => {
         if (shouldIgnore(payload)) return;
         onMemberChange(payload);
         if (showNotifications) {
@@ -214,7 +239,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
           );
         }
       }),
-      subscribe('member:updated', payload => {
+      subscribe('member:updated', (payload: RealtimePayload) => {
         if (shouldIgnore(payload)) return;
         onMemberChange(payload);
         if (showNotifications) {
@@ -225,7 +250,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
           );
         }
       }),
-      subscribe('member:removed', payload => {
+      subscribe('member:removed', (payload: RealtimePayload) => {
         if (shouldIgnore(payload)) return;
         onMemberChange(payload);
         if (showNotifications) {
@@ -238,7 +263,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
       }),
     ];
 
-    return () => handlers.forEach(unsubscribe => unsubscribe());
+    return () => handlers.forEach(unsubscribe => unsubscribe?.());
   }, [orgId, subscribe, onMemberChange, shouldIgnore, showNotifications, getNotificationMessage]);
 
   // Subscribe to org events
@@ -246,7 +271,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
     if (!orgId || !onOrgChange) return;
 
     const handlers = [
-      subscribe('org:updated', payload => {
+      subscribe('org:updated', (payload: RealtimePayload) => {
         if (shouldIgnore(payload)) return;
         onOrgChange(payload);
         if (showNotifications) {
@@ -257,7 +282,7 @@ export function useRealtimeUpdates(orgId, options = {}) {
           );
         }
       }),
-      subscribe('org:settings', payload => {
+      subscribe('org:settings', (payload: RealtimePayload) => {
         if (shouldIgnore(payload)) return;
         onOrgChange(payload);
         if (showNotifications) {
@@ -270,12 +295,12 @@ export function useRealtimeUpdates(orgId, options = {}) {
       }),
     ];
 
-    return () => handlers.forEach(unsubscribe => unsubscribe());
+    return () => handlers.forEach(unsubscribe => unsubscribe?.());
   }, [orgId, subscribe, onOrgChange, shouldIgnore, showNotifications, getNotificationMessage]);
 
   return {
     recentlyChanged,
-    isRecentlyChanged: id => recentlyChanged.has(id),
+    isRecentlyChanged: (id: string): boolean => recentlyChanged.has(id),
   };
 }
 

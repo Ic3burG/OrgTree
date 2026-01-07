@@ -1,20 +1,20 @@
-import { useState } from 'react';
+import React, { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserPlus, Mail, Lock, User, AlertCircle } from 'lucide-react';
 
-export default function SignupPage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+export default function SignupPage(): React.JSX.Element {
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   const { signup } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError('');
 
@@ -34,7 +34,11 @@ export default function SignupPage() {
       await signup(name, email, password);
       navigate('/');
     } catch (err) {
-      setError(err.message || 'Failed to create account');
+      if (err instanceof Error) {
+        setError(err.message || 'Failed to create account');
+      } else {
+        setError('Failed to create account');
+      }
     } finally {
       setLoading(false);
     }
@@ -70,7 +74,7 @@ export default function SignupPage() {
                   id="name"
                   type="text"
                   value={name}
-                  onChange={e => setName(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
                   placeholder="John Doe"
                   required
@@ -91,7 +95,7 @@ export default function SignupPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
                   placeholder="you@example.com"
                   required
@@ -112,7 +116,7 @@ export default function SignupPage() {
                   id="password"
                   type="password"
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
                   placeholder="••••••••"
                   required
@@ -136,7 +140,9 @@ export default function SignupPage() {
                   id="confirmPassword"
                   type="password"
                   value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setConfirmPassword(e.target.value)
+                  }
                   className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
                   placeholder="••••••••"
                   required

@@ -1,28 +1,69 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
 
-const ToastContext = createContext(null);
+type ToastType = 'success' | 'error' | 'info';
 
-export function ToastProvider({ children }) {
-  const [toasts, setToasts] = useState([]);
+interface Toast {
+  id: number;
+  message: string;
+  type: ToastType;
+}
 
-  const addToast = useCallback((message, type = 'info', duration = 4000) => {
-    const id = Date.now() + Math.random();
-    setToasts(prev => [...prev, { id, message, type }]);
+interface ToastContextValue {
+  success: (message: string) => void;
+  error: (message: string) => void;
+  info: (message: string) => void;
+}
 
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, duration);
-  }, []);
+interface ToastProviderProps {
+  children: ReactNode;
+}
 
-  const removeToast = useCallback(id => {
+interface ToastItemProps {
+  toast: Toast;
+  onClose: () => void;
+}
+
+interface RealtimeNotificationEvent extends CustomEvent {
+  detail: {
+    message: string;
+    type?: ToastType;
+  };
+}
+
+const ToastContext = createContext<ToastContextValue | null>(null);
+
+export function ToastProvider({ children }: ToastProviderProps): React.JSX.Element {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const addToast = useCallback(
+    (message: string, type: ToastType = 'info', duration = 4000): void => {
+      const id = Date.now() + Math.random();
+      setToasts(prev => [...prev, { id, message, type }]);
+
+      setTimeout(() => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+      }, duration);
+    },
+    []
+  );
+
+  const removeToast = useCallback((id: number): void => {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
   // Listen for realtime notification events from Socket.IO hook
   useEffect(() => {
-    const handleRealtimeNotification = event => {
-      const { message, type } = event.detail;
+    const handleRealtimeNotification = (event: Event): void => {
+      const customEvent = event as RealtimeNotificationEvent;
+      const { message, type } = customEvent.detail;
       addToast(message, type || 'info');
     };
 
@@ -32,10 +73,10 @@ export function ToastProvider({ children }) {
     };
   }, [addToast]);
 
-  const toast = {
-    success: message => addToast(message, 'success'),
-    error: message => addToast(message, 'error'),
-    info: message => addToast(message, 'info'),
+  const toast: ToastContextValue = {
+    success: (message: string) => addToast(message, 'success'),
+    error: (message: string) => addToast(message, 'error'),
+    info: (message: string) => addToast(message, 'info'),
   };
 
   return (
@@ -50,14 +91,14 @@ export function ToastProvider({ children }) {
   );
 }
 
-function ToastItem({ toast, onClose }) {
-  const icons = {
+function ToastItem({ toast, onClose }: ToastItemProps): React.JSX.Element {
+  const icons: Record<ToastType, React.JSX.Element> = {
     success: <CheckCircle className="text-green-500" size={20} />,
     error: <XCircle className="text-red-500" size={20} />,
     info: <AlertCircle className="text-blue-500" size={20} />,
   };
 
-  const backgrounds = {
+  const backgrounds: Record<ToastType, string> = {
     success: 'bg-green-50 border-green-200',
     error: 'bg-red-50 border-red-200',
     info: 'bg-blue-50 border-blue-200',
@@ -76,7 +117,7 @@ function ToastItem({ toast, onClose }) {
   );
 }
 
-export function useToast() {
+export function useToast(): ToastContextValue {
   const context = useContext(ToastContext);
   if (!context) {
     throw new Error('useToast must be used within ToastProvider');

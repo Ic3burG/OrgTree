@@ -1,16 +1,37 @@
+import type {
+  LoginResponse,
+  RefreshTokenResponse,
+  Organization,
+  Department,
+  Person,
+  OrgMember,
+  User,
+  Invitation,
+  ShareSettings,
+  AuditLog,
+  SearchResponse,
+  BulkOperationResult,
+  Session,
+  CSVImportResult,
+  PaginatedResponse,
+} from '../types/index.js';
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // CSRF token storage
-let csrfToken = null;
-let csrfTokenPromise = null; // Prevent concurrent fetches
+let csrfToken: string | null = null;
+let csrfTokenPromise: Promise<string> | null = null; // Prevent concurrent fetches
 
 // Refresh token state
 let isRefreshing = false;
-let refreshSubscribers = [];
-let refreshTimer = null;
+let refreshSubscribers: Array<(token: string | null) => void> = [];
+let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
 class ApiError extends Error {
-  constructor(message, status, code) {
+  status: number;
+  code?: string;
+
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.status = status;
     this.code = code;
@@ -21,7 +42,7 @@ class ApiError extends Error {
  * Fetch CSRF token from the server
  * @returns {Promise<string>} The CSRF token
  */
-async function fetchCsrfToken() {
+async function fetchCsrfToken(): Promise<string> {
   // If already fetching, return the existing promise
   if (csrfTokenPromise) {
     return csrfTokenPromise;
@@ -31,12 +52,12 @@ async function fetchCsrfToken() {
     credentials: 'include', // Required for cookies
   })
     .then(response => response.json())
-    .then(data => {
+    .then((data: { csrfToken: string }) => {
       csrfToken = data.csrfToken;
       csrfTokenPromise = null; // Clear promise for future fetches
       return csrfToken;
     })
-    .catch(err => {
+    .catch((err: unknown) => {
       csrfTokenPromise = null; // Clear promise so retry is possible
       console.error('Failed to fetch CSRF token:', err);
       throw err;
@@ -49,7 +70,7 @@ async function fetchCsrfToken() {
  * Initialize CSRF protection (fetch initial token)
  * Call this when the app starts
  */
-export async function initCsrf() {
+export async function initCsrf(): Promise<void> {
   try {
     await fetchCsrfToken();
   } catch (err) {
@@ -61,7 +82,7 @@ export async function initCsrf() {
 /**
  * Get the current CSRF token, fetching if necessary
  */
-async function getCsrfToken() {
+async function getCsrfToken(): Promise<string | null> {
   if (!csrfToken) {
     await fetchCsrfToken();
   }
@@ -76,7 +97,7 @@ async function getCsrfToken() {
  * Subscribe to token refresh completion
  * @param {function} callback - Called with new access token
  */
-function subscribeToRefresh(callback) {
+function subscribeToRefresh(callback: (token: string | null) => void): void {
   refreshSubscribers.push(callback);
 }
 
@@ -84,7 +105,7 @@ function subscribeToRefresh(callback) {
  * Notify all subscribers of new token
  * @param {string} accessToken - New access token
  */
-function onRefreshComplete(accessToken) {
+function onRefreshComplete(accessToken: string): void {
   refreshSubscribers.forEach(callback => callback(accessToken));
   refreshSubscribers = [];
 }
@@ -92,7 +113,7 @@ function onRefreshComplete(accessToken) {
 /**
  * Notify subscribers of refresh failure
  */
-function onRefreshFailed() {
+function onRefreshFailed(): void {
   refreshSubscribers.forEach(callback => callback(null));
   refreshSubscribers = [];
 }
@@ -100,7 +121,7 @@ function onRefreshFailed() {
 /**
  * Handle authentication failure - clear state and redirect
  */
-function handleAuthFailure() {
+function handleAuthFailure(): void {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
   if (refreshTimer) {
@@ -114,7 +135,7 @@ function handleAuthFailure() {
  * Attempt to refresh the access token
  * @returns {Promise<string|null>} New access token or null
  */
-async function refreshAccessToken() {
+async function refreshAccessToken(): Promise<string | null> {
   try {
     const response = await fetch(`${API_BASE}/auth/refresh`, {
       method: 'POST',
@@ -128,7 +149,7 @@ async function refreshAccessToken() {
       return null;
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as RefreshTokenResponse;
 
     // Store new access token
     localStorage.setItem('token', data.accessToken);
@@ -148,7 +169,7 @@ async function refreshAccessToken() {
  * Schedule automatic token refresh before expiry
  * @param {number} expiresIn - Token lifetime in seconds
  */
-export function scheduleTokenRefresh(expiresIn) {
+export function scheduleTokenRefresh(expiresIn: number): void {
   if (refreshTimer) {
     clearTimeout(refreshTimer);
   }
@@ -168,24 +189,28 @@ export function scheduleTokenRefresh(expiresIn) {
 /**
  * Cancel scheduled token refresh (call on logout)
  */
-export function cancelTokenRefresh() {
+export function cancelTokenRefresh(): void {
   if (refreshTimer) {
     clearTimeout(refreshTimer);
     refreshTimer = null;
   }
 }
 
-async function request(endpoint, options = {}, retryOnCsrf = true) {
+async function request<T = unknown>(
+  endpoint: string,
+  options: RequestInit = {},
+  retryOnCsrf = true
+): Promise<T> {
   const token = localStorage.getItem('token');
 
   // Get CSRF token for state-changing requests
-  let csrf = null;
-  const isStatefulRequest = ['POST', 'PUT', 'DELETE'].includes(options.method);
+  let csrf: string | null = null;
+  const isStatefulRequest = ['POST', 'PUT', 'DELETE'].includes(options.method || 'GET');
   if (isStatefulRequest) {
     csrf = await getCsrfToken();
   }
 
-  const config = {
+  const config: RequestInit = {
     ...options,
     credentials: 'include', // Required for CSRF cookies
     headers: {
@@ -208,24 +233,33 @@ async function request(endpoint, options = {}, retryOnCsrf = true) {
 
     // If already refreshing, wait for it
     if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        subscribeToRefresh(async newToken => {
+      return new Promise<T>((resolve, reject) => {
+        subscribeToRefresh(async (newToken: string | null) => {
           if (newToken) {
             // Retry with new token
-            config.headers.Authorization = `Bearer ${newToken}`;
+            const retryConfig: RequestInit = {
+              ...config,
+              headers: {
+                ...config.headers,
+                Authorization: `Bearer ${newToken}`,
+              },
+            };
             try {
-              const retryResponse = await fetch(`${API_BASE}${endpoint}`, config);
-              const retryData = retryResponse.status !== 204 ? await retryResponse.json() : null;
+              const retryResponse = await fetch(`${API_BASE}${endpoint}`, retryConfig);
+              const retryData = (
+                retryResponse.status !== 204 ? await retryResponse.json() : null
+              ) as T | { message?: string; code?: string };
               if (!retryResponse.ok) {
+                const errorData = retryData as { message?: string; code?: string };
                 reject(
                   new ApiError(
-                    retryData?.message || 'Request failed',
+                    errorData?.message || 'Request failed',
                     retryResponse.status,
-                    retryData?.code
+                    errorData?.code
                   )
                 );
               } else {
-                resolve(retryData);
+                resolve(retryData as T);
               }
             } catch (err) {
               reject(err);
@@ -246,18 +280,27 @@ async function request(endpoint, options = {}, retryOnCsrf = true) {
       if (newToken) {
         onRefreshComplete(newToken);
         // Retry original request with new token
-        config.headers.Authorization = `Bearer ${newToken}`;
-        const retryResponse = await fetch(`${API_BASE}${endpoint}`, config);
-        const retryData = retryResponse.status !== 204 ? await retryResponse.json() : null;
+        const retryConfig: RequestInit = {
+          ...config,
+          headers: {
+            ...config.headers,
+            Authorization: `Bearer ${newToken}`,
+          },
+        };
+        const retryResponse = await fetch(`${API_BASE}${endpoint}`, retryConfig);
+        const retryData = (retryResponse.status !== 204 ? await retryResponse.json() : null) as
+          | T
+          | { message?: string; code?: string };
 
         if (!retryResponse.ok) {
+          const errorData = retryData as { message?: string; code?: string };
           throw new ApiError(
-            retryData?.message || 'Request failed',
+            errorData?.message || 'Request failed',
             retryResponse.status,
-            retryData?.code
+            errorData?.code
           );
         }
-        return retryData;
+        return retryData as T;
       } else {
         onRefreshFailed();
         handleAuthFailure();
@@ -274,27 +317,38 @@ async function request(endpoint, options = {}, retryOnCsrf = true) {
     }
   }
 
-  const data = response.status !== 204 ? await response.json() : null;
+  const data = (response.status !== 204 ? await response.json() : null) as
+    | T
+    | { message?: string; code?: string };
 
   // Handle CSRF errors - refresh token and retry once
-  if (response.status === 403 && data?.code?.startsWith('CSRF_') && retryOnCsrf) {
+  if (
+    response.status === 403 &&
+    typeof data === 'object' &&
+    data !== null &&
+    'code' in data &&
+    typeof data.code === 'string' &&
+    data.code.startsWith('CSRF_') &&
+    retryOnCsrf
+  ) {
     console.warn('CSRF token validation failed, refreshing token and retrying...');
     csrfToken = null; // Clear invalid token
     await fetchCsrfToken(); // Get new token
-    return request(endpoint, options, false); // Retry once without recursion
+    return request<T>(endpoint, options, false); // Retry once without recursion
   }
 
   if (!response.ok) {
-    throw new ApiError(data?.message || 'Request failed', response.status, data?.code);
+    const errorData = data as { message?: string; code?: string };
+    throw new ApiError(errorData?.message || 'Request failed', response.status, errorData?.code);
   }
 
-  return data;
+  return data as T;
 }
 
 const api = {
   // Auth
-  login: async (email, password) => {
-    const response = await request('/auth/login', {
+  login: async (email: string, password: string): Promise<LoginResponse> => {
+    const response = await request<LoginResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
@@ -305,8 +359,8 @@ const api = {
     return response;
   },
 
-  signup: async (name, email, password) => {
-    const response = await request('/auth/signup', {
+  signup: async (name: string, email: string, password: string): Promise<LoginResponse> => {
+    const response = await request<LoginResponse>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify({ name, email, password }),
     });
@@ -317,266 +371,321 @@ const api = {
     return response;
   },
 
-  logout: () =>
-    request('/auth/logout', {
+  logout: (): Promise<void> =>
+    request<void>('/auth/logout', {
       method: 'POST',
     }),
 
-  getMe: () => request('/auth/me'),
+  getMe: (): Promise<User> => request<User>('/auth/me'),
 
   // Session management
-  getSessions: () => request('/auth/sessions'),
+  getSessions: (): Promise<Session[]> => request<Session[]>('/auth/sessions'),
 
-  revokeSession: sessionId =>
-    request(`/auth/sessions/${sessionId}`, {
+  revokeSession: (sessionId: string): Promise<void> =>
+    request<void>(`/auth/sessions/${sessionId}`, {
       method: 'DELETE',
     }),
 
-  revokeOtherSessions: () =>
-    request('/auth/sessions/revoke-others', {
+  revokeOtherSessions: (): Promise<{ revoked: number }> =>
+    request<{ revoked: number }>('/auth/sessions/revoke-others', {
       method: 'POST',
     }),
 
   // Organizations
-  getOrganizations: () => request('/organizations'),
+  getOrganizations: (): Promise<Organization[]> => request<Organization[]>('/organizations'),
 
-  getOrganization: id => request(`/organizations/${id}`),
+  getOrganization: (id: string): Promise<Organization> =>
+    request<Organization>(`/organizations/${id}`),
 
-  createOrganization: name =>
-    request('/organizations', {
+  createOrganization: (name: string): Promise<Organization> =>
+    request<Organization>('/organizations', {
       method: 'POST',
       body: JSON.stringify({ name }),
     }),
 
-  updateOrganization: (id, name) =>
-    request(`/organizations/${id}`, {
+  updateOrganization: (id: string, name: string): Promise<Organization> =>
+    request<Organization>(`/organizations/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ name }),
     }),
 
-  deleteOrganization: id =>
-    request(`/organizations/${id}`, {
+  deleteOrganization: (id: string): Promise<void> =>
+    request<void>(`/organizations/${id}`, {
       method: 'DELETE',
     }),
 
-  importOrganization: (orgId, data) =>
-    request(`/organizations/${orgId}/import`, {
+  importOrganization: (orgId: string, data: unknown): Promise<CSVImportResult> =>
+    request<CSVImportResult>(`/organizations/${orgId}/import`, {
       method: 'POST',
       body: JSON.stringify({ data }),
     }),
 
   // Organization sharing
-  getShareSettings: orgId => request(`/organizations/${orgId}/share`),
+  getShareSettings: (orgId: string): Promise<ShareSettings> =>
+    request<ShareSettings>(`/organizations/${orgId}/share`),
 
-  updateShareSettings: (orgId, isPublic) =>
-    request(`/organizations/${orgId}/share`, {
+  updateShareSettings: (orgId: string, isPublic: boolean): Promise<ShareSettings> =>
+    request<ShareSettings>(`/organizations/${orgId}/share`, {
       method: 'PUT',
       body: JSON.stringify({ isPublic }),
     }),
 
-  regenerateShareToken: orgId =>
-    request(`/organizations/${orgId}/share/regenerate`, {
+  regenerateShareToken: (orgId: string): Promise<ShareSettings> =>
+    request<ShareSettings>(`/organizations/${orgId}/share/regenerate`, {
       method: 'POST',
     }),
 
   // Organization members
-  getOrgMembers: orgId => request(`/organizations/${orgId}/members`),
+  getOrgMembers: (orgId: string): Promise<OrgMember[]> =>
+    request<OrgMember[]>(`/organizations/${orgId}/members`),
 
-  addOrgMember: (orgId, userId, role) =>
-    request(`/organizations/${orgId}/members`, {
+  addOrgMember: (
+    orgId: string,
+    userId: string,
+    role: 'admin' | 'editor' | 'viewer'
+  ): Promise<OrgMember> =>
+    request<OrgMember>(`/organizations/${orgId}/members`, {
       method: 'POST',
       body: JSON.stringify({ userId, role }),
     }),
 
-  updateMemberRole: (orgId, memberId, role) =>
-    request(`/organizations/${orgId}/members/${memberId}`, {
+  updateMemberRole: (
+    orgId: string,
+    memberId: string,
+    role: 'admin' | 'editor' | 'viewer'
+  ): Promise<OrgMember> =>
+    request<OrgMember>(`/organizations/${orgId}/members/${memberId}`, {
       method: 'PUT',
       body: JSON.stringify({ role }),
     }),
 
-  removeMember: (orgId, memberId) =>
-    request(`/organizations/${orgId}/members/${memberId}`, {
+  removeMember: (orgId: string, memberId: string): Promise<void> =>
+    request<void>(`/organizations/${orgId}/members/${memberId}`, {
       method: 'DELETE',
     }),
 
-  addMemberByEmail: (orgId, email, role) =>
-    request(`/organizations/${orgId}/members/by-email`, {
+  addMemberByEmail: (
+    orgId: string,
+    email: string,
+    role: 'admin' | 'editor' | 'viewer'
+  ): Promise<OrgMember> =>
+    request<OrgMember>(`/organizations/${orgId}/members/by-email`, {
       method: 'POST',
       body: JSON.stringify({ email, role }),
     }),
 
   // Public (no auth)
-  getPublicOrganization: async shareToken => {
+  getPublicOrganization: async (shareToken: string): Promise<Organization> => {
     const response = await fetch(`${API_BASE}/public/org/${shareToken}`);
-    const data = await response.json();
+    const data = (await response.json()) as Organization | { message?: string };
 
     if (!response.ok) {
-      throw new ApiError(data?.message || 'Request failed', response.status);
+      const errorData = data as { message?: string };
+      throw new ApiError(errorData?.message || 'Request failed', response.status);
     }
 
-    return data;
+    return data as Organization;
   },
 
   // Departments
-  getDepartments: orgId => request(`/organizations/${orgId}/departments`),
+  getDepartments: (orgId: string): Promise<Department[]> =>
+    request<Department[]>(`/organizations/${orgId}/departments`),
 
-  createDepartment: (orgId, data) =>
-    request(`/organizations/${orgId}/departments`, {
+  createDepartment: (
+    orgId: string,
+    data: Partial<Omit<Department, 'id' | 'created_at' | 'updated_at' | 'organization_id'>>
+  ): Promise<Department> =>
+    request<Department>(`/organizations/${orgId}/departments`, {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  updateDepartment: (orgId, deptId, data) =>
-    request(`/organizations/${orgId}/departments/${deptId}`, {
+  updateDepartment: (
+    orgId: string,
+    deptId: string,
+    data: Partial<Omit<Department, 'id' | 'created_at' | 'updated_at' | 'organization_id'>>
+  ): Promise<Department> =>
+    request<Department>(`/organizations/${orgId}/departments/${deptId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
-  deleteDepartment: (orgId, deptId) =>
-    request(`/organizations/${orgId}/departments/${deptId}`, {
+  deleteDepartment: (orgId: string, deptId: string): Promise<void> =>
+    request<void>(`/organizations/${orgId}/departments/${deptId}`, {
       method: 'DELETE',
     }),
 
   // People
-  getPeople: deptId => request(`/departments/${deptId}/people`),
+  getPeople: (deptId: string): Promise<Person[]> =>
+    request<Person[]>(`/departments/${deptId}/people`),
 
-  createPerson: (deptId, data) =>
-    request(`/departments/${deptId}/people`, {
+  createPerson: (
+    deptId: string,
+    data: Partial<Omit<Person, 'id' | 'created_at' | 'updated_at' | 'department_id'>>
+  ): Promise<Person> =>
+    request<Person>(`/departments/${deptId}/people`, {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  updatePerson: (personId, data) =>
-    request(`/people/${personId}`, {
+  updatePerson: (
+    personId: string,
+    data: Partial<Omit<Person, 'id' | 'created_at' | 'updated_at' | 'department_id'>>
+  ): Promise<Person> =>
+    request<Person>(`/people/${personId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
-  deletePerson: personId =>
-    request(`/people/${personId}`, {
+  deletePerson: (personId: string): Promise<void> =>
+    request<void>(`/people/${personId}`, {
       method: 'DELETE',
     }),
 
   // User Management (superuser only)
-  getUsers: () => request('/users'),
+  getUsers: (): Promise<User[]> => request<User[]>('/users'),
 
-  getUser: userId => request(`/users/${userId}`),
+  getUser: (userId: string): Promise<User> => request<User>(`/users/${userId}`),
 
-  getUserOrganizations: userId => request(`/users/${userId}/organizations`),
+  getUserOrganizations: (userId: string): Promise<Organization[]> =>
+    request<Organization[]>(`/users/${userId}/organizations`),
 
-  updateUser: (userId, data) =>
-    request(`/users/${userId}`, {
+  updateUser: (userId: string, data: Partial<Pick<User, 'name' | 'email'>>): Promise<User> =>
+    request<User>(`/users/${userId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
-  updateUserRole: (userId, role) =>
-    request(`/users/${userId}/role`, {
+  updateUserRole: (userId: string, role: User['role']): Promise<User> =>
+    request<User>(`/users/${userId}/role`, {
       method: 'PUT',
       body: JSON.stringify({ role }),
     }),
 
-  resetUserPassword: userId =>
-    request(`/users/${userId}/reset-password`, {
+  resetUserPassword: (userId: string): Promise<{ temporaryPassword: string }> =>
+    request<{ temporaryPassword: string }>(`/users/${userId}/reset-password`, {
       method: 'POST',
     }),
 
-  deleteUser: userId =>
-    request(`/users/${userId}`, {
+  deleteUser: (userId: string): Promise<void> =>
+    request<void>(`/users/${userId}`, {
       method: 'DELETE',
     }),
 
-  createUser: (name, email, role) =>
-    request('/users', {
+  createUser: (name: string, email: string, role: User['role']): Promise<User> =>
+    request<User>('/users', {
       method: 'POST',
       body: JSON.stringify({ name, email, role }),
     }),
 
-  changePassword: (newPassword, oldPassword = null) =>
-    request('/auth/change-password', {
+  changePassword: (newPassword: string, oldPassword: string | null = null): Promise<void> =>
+    request<void>('/auth/change-password', {
       method: 'POST',
       body: JSON.stringify({ newPassword, oldPassword }),
     }),
 
   // Invitations
-  sendInvitation: (orgId, email, role) =>
-    request(`/organizations/${orgId}/invitations`, {
+  sendInvitation: (
+    orgId: string,
+    email: string,
+    role: 'admin' | 'editor' | 'viewer'
+  ): Promise<Invitation> =>
+    request<Invitation>(`/organizations/${orgId}/invitations`, {
       method: 'POST',
       body: JSON.stringify({ email, role }),
     }),
 
-  getInvitations: orgId => request(`/organizations/${orgId}/invitations`),
+  getInvitations: (orgId: string): Promise<Invitation[]> =>
+    request<Invitation[]>(`/organizations/${orgId}/invitations`),
 
-  cancelInvitation: (orgId, invitationId) =>
-    request(`/organizations/${orgId}/invitations/${invitationId}`, {
+  cancelInvitation: (orgId: string, invitationId: string): Promise<void> =>
+    request<void>(`/organizations/${orgId}/invitations/${invitationId}`, {
       method: 'DELETE',
     }),
 
-  getInvitationByToken: async token => {
+  getInvitationByToken: async (token: string): Promise<Invitation> => {
     const response = await fetch(`${API_BASE}/public/invitation/${token}`);
-    const data = await response.json();
+    const data = (await response.json()) as Invitation | { message?: string };
     if (!response.ok) {
-      throw new ApiError(data?.message || 'Request failed', response.status);
+      const errorData = data as { message?: string };
+      throw new ApiError(errorData?.message || 'Request failed', response.status);
     }
-    return data;
+    return data as Invitation;
   },
 
-  acceptInvitation: token =>
-    request(`/invitations/${token}/accept`, {
+  acceptInvitation: (token: string): Promise<{ organization: Organization }> =>
+    request<{ organization: Organization }>(`/invitations/${token}/accept`, {
       method: 'POST',
     }),
 
   // Audit logs
-  getAuditLogs: (orgId, params = {}) => {
+  getAuditLogs: (
+    orgId: string,
+    params: Record<string, string> = {}
+  ): Promise<PaginatedResponse<AuditLog>> => {
     const query = new URLSearchParams(params).toString();
     const url = `/organizations/${orgId}/audit-logs${query ? `?${query}` : ''}`;
-    return request(url);
+    return request<PaginatedResponse<AuditLog>>(url);
   },
 
-  getAdminAuditLogs: (params = {}) => {
+  getAdminAuditLogs: (
+    params: Record<string, string> = {}
+  ): Promise<PaginatedResponse<AuditLog>> => {
     const query = new URLSearchParams(params).toString();
     const url = `/admin/audit-logs${query ? `?${query}` : ''}`;
-    return request(url);
+    return request<PaginatedResponse<AuditLog>>(url);
   },
 
   // Search
-  search: (orgId, params = {}) => {
+  search: (orgId: string, params: Record<string, string> = {}): Promise<SearchResponse> => {
     const query = new URLSearchParams(params).toString();
-    return request(`/organizations/${orgId}/search?${query}`);
+    return request<SearchResponse>(`/organizations/${orgId}/search?${query}`);
   },
 
-  searchAutocomplete: (orgId, q, limit = 5) => {
+  searchAutocomplete: (orgId: string, q: string, limit = 5): Promise<SearchResponse> => {
     const params = new URLSearchParams({ q, limit: limit.toString() });
-    return request(`/organizations/${orgId}/search/autocomplete?${params}`);
+    return request<SearchResponse>(`/organizations/${orgId}/search/autocomplete?${params}`);
   },
 
   // Bulk Operations
-  bulkDeletePeople: (orgId, personIds) =>
-    request(`/organizations/${orgId}/people/bulk-delete`, {
+  bulkDeletePeople: (orgId: string, personIds: string[]): Promise<BulkOperationResult> =>
+    request<BulkOperationResult>(`/organizations/${orgId}/people/bulk-delete`, {
       method: 'POST',
       body: JSON.stringify({ personIds }),
     }),
 
-  bulkMovePeople: (orgId, personIds, targetDepartmentId) =>
-    request(`/organizations/${orgId}/people/bulk-move`, {
+  bulkMovePeople: (
+    orgId: string,
+    personIds: string[],
+    targetDepartmentId: string
+  ): Promise<BulkOperationResult> =>
+    request<BulkOperationResult>(`/organizations/${orgId}/people/bulk-move`, {
       method: 'POST',
       body: JSON.stringify({ personIds, targetDepartmentId }),
     }),
 
-  bulkEditPeople: (orgId, personIds, updates) =>
-    request(`/organizations/${orgId}/people/bulk-edit`, {
+  bulkEditPeople: (
+    orgId: string,
+    personIds: string[],
+    updates: Partial<Pick<Person, 'title' | 'email' | 'phone'>>
+  ): Promise<BulkOperationResult> =>
+    request<BulkOperationResult>(`/organizations/${orgId}/people/bulk-edit`, {
       method: 'PUT',
       body: JSON.stringify({ personIds, updates }),
     }),
 
-  bulkDeleteDepartments: (orgId, departmentIds) =>
-    request(`/organizations/${orgId}/departments/bulk-delete`, {
+  bulkDeleteDepartments: (orgId: string, departmentIds: string[]): Promise<BulkOperationResult> =>
+    request<BulkOperationResult>(`/organizations/${orgId}/departments/bulk-delete`, {
       method: 'POST',
       body: JSON.stringify({ departmentIds }),
     }),
 
-  bulkEditDepartments: (orgId, departmentIds, updates) =>
-    request(`/organizations/${orgId}/departments/bulk-edit`, {
+  bulkEditDepartments: (
+    orgId: string,
+    departmentIds: string[],
+    updates: Partial<Pick<Department, 'description'>>
+  ): Promise<BulkOperationResult> =>
+    request<BulkOperationResult>(`/organizations/${orgId}/departments/bulk-edit`, {
       method: 'PUT',
       body: JSON.stringify({ departmentIds, updates }),
     }),
