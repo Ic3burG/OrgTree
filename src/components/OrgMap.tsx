@@ -176,14 +176,17 @@ export default function OrgMap(): React.JSX.Element {
 
         // Add callbacks to node data
         const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map(
-          (node: unknown) => ({
-            ...node,
-            data: {
-              ...node.data,
-              onToggleExpand: () => handleToggleExpand(node.id),
-              onSelectPerson: (person: Person) => handleSelectPerson(person),
-            },
-          })
+          (node: unknown) => {
+            const typedNode = node as Node<DepartmentNodeData>;
+            return {
+              ...typedNode,
+              data: {
+                ...typedNode.data,
+                onToggleExpand: () => handleToggleExpand(typedNode.id),
+                onSelectPerson: (person: Person) => handleSelectPerson(person),
+              },
+            };
+          }
         );
 
         setNodes(nodesWithCallbacks);
@@ -255,14 +258,17 @@ export default function OrgMap(): React.JSX.Element {
 
         // Preserve callbacks
         const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map(
-          (node: unknown) => ({
-            ...node,
-            data: {
-              ...node.data,
-              onToggleExpand: () => handleToggleExpand(node.id),
-              onSelectPerson: (person: Person) => handleSelectPerson(person),
-            },
-          })
+          (node: unknown) => {
+            const typedNode = node as Node<DepartmentNodeData>;
+            return {
+              ...typedNode,
+              data: {
+                ...typedNode.data,
+                onToggleExpand: () => handleToggleExpand(typedNode.id),
+                onSelectPerson: (person: Person) => handleSelectPerson(person),
+              },
+            };
+          }
         );
 
         return nodesWithCallbacks;
@@ -295,14 +301,17 @@ export default function OrgMap(): React.JSX.Element {
         layoutDirection
       );
 
-      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => ({
-        ...node,
-        data: {
-          ...node.data,
-          onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: (person: Person) => handleSelectPerson(person),
-        },
-      }));
+      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => {
+        const typedNode = node as Node<DepartmentNodeData>;
+        return {
+          ...typedNode,
+          data: {
+            ...typedNode.data,
+            onToggleExpand: () => handleToggleExpand(typedNode.id),
+            onSelectPerson: (person: Person) => handleSelectPerson(person),
+          },
+        };
+      });
 
       return nodesWithCallbacks;
     });
@@ -322,14 +331,17 @@ export default function OrgMap(): React.JSX.Element {
         layoutDirection
       );
 
-      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => ({
-        ...node,
-        data: {
-          ...node.data,
-          onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: (person: Person) => handleSelectPerson(person),
-        },
-      }));
+      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => {
+        const typedNode = node as Node<DepartmentNodeData>;
+        return {
+          ...typedNode,
+          data: {
+            ...typedNode.data,
+            onToggleExpand: () => handleToggleExpand(typedNode.id),
+            onSelectPerson: (person: Person) => handleSelectPerson(person),
+          },
+        };
+      });
 
       return nodesWithCallbacks;
     });
@@ -343,14 +355,17 @@ export default function OrgMap(): React.JSX.Element {
     setNodes(nds => {
       const layoutedNodes = calculateLayout(nds as unknown as Node[], edges, newDirection);
 
-      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => ({
-        ...node,
-        data: {
-          ...node.data,
-          onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: (person: Person) => handleSelectPerson(person),
-        },
-      }));
+      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => {
+        const typedNode = node as Node<DepartmentNodeData>;
+        return {
+          ...typedNode,
+          data: {
+            ...typedNode.data,
+            onToggleExpand: () => handleToggleExpand(typedNode.id),
+            onSelectPerson: (person: Person) => handleSelectPerson(person),
+          },
+        };
+      });
 
       return nodesWithCallbacks;
     });
