@@ -32,7 +32,7 @@ router.get('/organizations/:orgId/audit-logs', async (req: AuthRequest, res: Res
     cleanupOldLogs();
 
     // Get audit logs with filters
-    const filters: any = {};
+    const filters: Record<string, string> = {};
     if (req.query.limit) filters.limit = String(req.query.limit);
     if (req.query.cursor) filters.cursor = String(req.query.cursor);
     if (req.query.actionType) filters.actionType = String(req.query.actionType);
@@ -60,7 +60,7 @@ router.get('/admin/audit-logs', requireSuperuser, async (req: AuthRequest, res: 
     cleanupOldLogs();
 
     // Get all audit logs with filters
-    const filters: any = {};
+    const filters: Record<string, string> = {};
     if (req.query.limit) filters.limit = String(req.query.limit);
     if (req.query.cursor) filters.cursor = String(req.query.cursor);
     if (req.query.actionType) filters.actionType = String(req.query.actionType);

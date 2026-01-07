@@ -40,7 +40,7 @@ interface OrganizationResult {
   userRole?: 'owner' | 'admin' | 'editor' | 'viewer';
 }
 
-export async function getOrganizations(userId: string): Promise<any> {
+export async function getOrganizations(userId: string): Promise<ReturnType<typeof getUserOrganizations>> {
   return getUserOrganizations(userId);
 }
 

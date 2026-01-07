@@ -38,7 +38,7 @@ export function initializeSocket(httpServer: HTTPServer, allowedOrigins: string[
       const decoded = jwt.verify(token, secret) as unknown as JWTPayload;
       socket.user = decoded;
       next();
-    } catch (err) {
+    } catch {
       return next(new Error('Invalid or expired token'));
     }
   });

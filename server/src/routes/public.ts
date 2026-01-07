@@ -15,7 +15,7 @@ const publicLimiter = rateLimit({
   legacyHeaders: false,
   handler: (req: Request, res: Response) => {
     // Security: Log rate limit violation
-    const ipAddress = req.ip || (req.connection as any).remoteAddress;
+    const ipAddress = req.ip || (req.socket?.remoteAddress ?? '');
     createAuditLog(
       null, // System-wide security event
       null, // Public endpoints don't have user info
@@ -54,7 +54,7 @@ router.get('/org/:shareToken', async (req: Request, res: Response, next: NextFun
       WHERE share_token = ? AND is_public = 1
     `
       )
-      .get(shareToken) as any;
+      .get(shareToken) as { id: string; name: string; created_at: string } | undefined;
 
     if (!org) {
       res.status(404).json({ message: 'Organization not found or not public' });
@@ -71,7 +71,7 @@ router.get('/org/:shareToken', async (req: Request, res: Response, next: NextFun
       ORDER BY sort_order ASC
     `
       )
-      .all(org.id) as any[];
+      .all(org.id) as { id: string; organization_id: string; parent_id: string | null; name: string; description: string | null; sort_order: number }[];
 
     // Get all people for each department
     const people = db
@@ -84,11 +84,21 @@ router.get('/org/:shareToken', async (req: Request, res: Response, next: NextFun
       ORDER BY p.sort_order ASC
     `
       )
-      .all(org.id) as any[];
+      .all(org.id) as { id: string; department_id: string; name: string; title: string | null; email: string | null; phone: string | null; sort_order: number }[];
+
+    interface PersonOutput {
+      id: string;
+      departmentId: string;
+      name: string;
+      title: string | null;
+      email: string | null;
+      phone: string | null;
+      sortOrder: number;
+    }
 
     // Group people by department
-    const peopleByDept: Record<string, any[]> = {};
-    people.forEach((person: any) => {
+    const peopleByDept: Record<string, PersonOutput[]> = {};
+    people.forEach((person) => {
       const deptId = String(person.department_id);
       if (!peopleByDept[deptId]) {
         peopleByDept[deptId] = [];
@@ -106,7 +116,7 @@ router.get('/org/:shareToken', async (req: Request, res: Response, next: NextFun
     });
 
     // Add people to departments and convert to camelCase
-    const departmentsWithPeople = departments.map((dept: any) => ({
+    const departmentsWithPeople = departments.map((dept) => ({
       id: dept.id,
       organizationId: dept.organization_id,
       parentId: dept.parent_id,

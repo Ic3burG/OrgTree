@@ -50,9 +50,10 @@ router.get('/organizations/:orgId/search', async (req: AuthRequest, res: Respons
     });
 
     res.json(results);
-  } catch (err: any) {
-    if (err.status === 403 || err.status === 404) {
-      res.status(err.status).json({ message: err.message });
+  } catch (err: unknown) {
+    const error = err as { status?: number; message?: string };
+    if (error.status === 403 || error.status === 404) {
+      res.status(error.status).json({ message: error.message });
       return;
     }
     next(err);
@@ -84,9 +85,10 @@ router.get('/organizations/:orgId/search/autocomplete', async (req: AuthRequest,
     const results = getAutocompleteSuggestions(orgId!, req.user!.id, (q as string).trim(), parsedLimit);
 
     res.json(results);
-  } catch (err: any) {
-    if (err.status === 403 || err.status === 404) {
-      res.status(err.status).json({ message: err.message });
+  } catch (err: unknown) {
+    const error = err as { status?: number; message?: string };
+    if (error.status === 403 || error.status === 404) {
+      res.status(error.status).json({ message: error.message });
       return;
     }
     next(err);

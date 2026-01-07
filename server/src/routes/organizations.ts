@@ -103,7 +103,7 @@ router.get('/organizations/:id/share', async (req: AuthRequest, res: Response, n
       WHERE id = ?
     `
       )
-      .get(id) as any;
+      .get(id) as { id: string; name: string; is_public: number; share_token: string | null } | undefined;
 
     if (!org) {
       res.status(404).json({ message: 'Organization not found' });
@@ -140,7 +140,7 @@ router.put('/organizations/:id/share', async (req: AuthRequest, res: Response, n
       WHERE id = ?
     `
       )
-      .get(id) as any;
+      .get(id) as { id: string; share_token: string | null } | undefined;
 
     if (!org) {
       res.status(404).json({ message: 'Organization not found' });
@@ -196,7 +196,7 @@ router.post('/organizations/:id/share/regenerate', async (req: AuthRequest, res:
       WHERE id = ?
     `
       )
-      .get(id) as any;
+      .get(id) as { id: string; is_public: number } | undefined;
 
     if (!org) {
       res.status(404).json({ message: 'Organization not found' });

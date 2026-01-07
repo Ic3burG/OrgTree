@@ -18,25 +18,74 @@ interface FailedItem {
   error: string;
 }
 
+interface DeletedPerson {
+  id: string;
+  name: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  departmentId: string;
+  organization_id: string;
+  departmentName: string;
+}
+
+interface DeletedDepartment {
+  id: string;
+  name: string;
+  description?: string;
+  parentId: string | null;
+  organization_id: string;
+}
+
 interface BulkDeleteResult {
   success: boolean;
-  deleted: any[];
+  deleted: DeletedPerson[];
   failed: FailedItem[];
   deletedCount: number;
   failedCount: number;
 }
 
+interface MovedPerson {
+  id: string;
+  name: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  departmentId: string;
+  organization_id: string;
+  departmentName: string;
+}
+
 interface BulkMoveResult {
   success: boolean;
-  moved: any[];
+  moved: MovedPerson[];
   failed: FailedItem[];
   movedCount: number;
   failedCount: number;
 }
 
+interface UpdatedPerson {
+  id: string;
+  name: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  departmentId: string;
+  organization_id: string;
+  departmentName: string;
+}
+
+interface UpdatedDepartment {
+  id: string;
+  name: string;
+  description?: string;
+  parentId: string | null;
+  organization_id: string;
+}
+
 interface BulkEditResult {
   success: boolean;
-  updated: any[];
+  updated: (UpdatedPerson | UpdatedDepartment)[];
   failed: FailedItem[];
   updatedCount: number;
   failedCount: number;
@@ -44,7 +93,7 @@ interface BulkEditResult {
 
 interface BulkDeleteDepartmentsResult {
   success: boolean;
-  deleted: any[];
+  deleted: DeletedDepartment[];
   failed: FailedItem[];
   warnings: string[];
   deletedCount: number;
@@ -84,7 +133,7 @@ export function bulkDeletePeople(orgId: string, personIds: string[], actor: Acto
     throw error;
   }
 
-  const deleted: any[] = [];
+  const deleted: DeletedPerson[] = [];
   const failed: FailedItem[] = [];
 
   // Use transaction for atomicity
@@ -102,7 +151,7 @@ export function bulkDeletePeople(orgId: string, personIds: string[], actor: Acto
           WHERE p.id = ? AND d.organization_id = ? AND p.deleted_at IS NULL AND d.deleted_at IS NULL
         `
           )
-          .get(personId, orgId) as any;
+          .get(personId, orgId) as DeletedPerson | undefined;
 
         if (!person) {
           failed.push({ id: personId, error: 'Person not found in this organization' });
@@ -186,7 +235,7 @@ export function bulkMovePeople(
     throw error;
   }
 
-  const moved: any[] = [];
+  const moved: MovedPerson[] = [];
   const failed: FailedItem[] = [];
   const now = new Date().toISOString();
 
@@ -204,7 +253,7 @@ export function bulkMovePeople(
           WHERE p.id = ? AND d.organization_id = ? AND p.deleted_at IS NULL AND d.deleted_at IS NULL
         `
           )
-          .get(personId, orgId) as any;
+          .get(personId, orgId) as MovedPerson | undefined;
 
         if (!person) {
           failed.push({ id: personId, error: 'Person not found in this organization' });
@@ -308,7 +357,7 @@ export function bulkEditPeople(
     targetDept = dept;
   }
 
-  const updated: any[] = [];
+  const updated: UpdatedPerson[] = [];
   const failed: FailedItem[] = [];
   const now = new Date().toISOString();
 
@@ -326,7 +375,7 @@ export function bulkEditPeople(
           WHERE p.id = ? AND d.organization_id = ? AND p.deleted_at IS NULL AND d.deleted_at IS NULL
         `
           )
-          .get(personId, orgId) as any;
+          .get(personId, orgId) as UpdatedPerson | undefined;
 
         if (!person) {
           failed.push({ id: personId, error: 'Person not found in this organization' });
@@ -335,7 +384,7 @@ export function bulkEditPeople(
 
         // Build update query dynamically
         const updateFields: string[] = [];
-        const updateValues: any[] = [];
+        const updateValues: (string | undefined)[] = [];
 
         if (title !== undefined) {
           updateFields.push('title = ?');
@@ -414,7 +463,7 @@ export function bulkDeleteDepartments(
     throw error;
   }
 
-  const deleted: any[] = [];
+  const deleted: DeletedDepartment[] = [];
   const failed: FailedItem[] = [];
   const warnings: string[] = [];
 
@@ -430,7 +479,7 @@ export function bulkDeleteDepartments(
           WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
         `
           )
-          .get(deptId, orgId) as any;
+          .get(deptId, orgId) as DeletedDepartment | undefined;
 
         if (!dept) {
           failed.push({ id: deptId, error: 'Department not found in this organization' });
@@ -557,7 +606,7 @@ export function bulkEditDepartments(
     }
   }
 
-  const updated: any[] = [];
+  const updated: UpdatedDepartment[] = [];
   const failed: FailedItem[] = [];
   const now = new Date().toISOString();
 
@@ -573,7 +622,7 @@ export function bulkEditDepartments(
           WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
         `
           )
-          .get(deptId, orgId) as any;
+          .get(deptId, orgId) as UpdatedDepartment | undefined;
 
         if (!dept) {
           failed.push({ id: deptId, error: 'Department not found in this organization' });

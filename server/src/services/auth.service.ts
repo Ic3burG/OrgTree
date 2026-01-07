@@ -331,7 +331,7 @@ export function rotateRefreshToken(
 
   // Generate new tokens
   const newRefreshToken = generateRefreshToken();
-  const newAccessToken = generateToken(userData as any);
+  const newAccessToken = generateToken(userData as unknown as DatabaseUser);
 
   // Store new refresh token
   const { expiresAt } = storeRefreshToken(userData.userId, newRefreshToken, metadata);
@@ -340,7 +340,7 @@ export function rotateRefreshToken(
     accessToken: newAccessToken,
     refreshToken: newRefreshToken,
     refreshTokenExpiresAt: expiresAt,
-    user: userData as any,
+    user: userData as unknown as DatabaseUser,
   };
 }
 

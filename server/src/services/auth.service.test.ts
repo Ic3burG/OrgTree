@@ -18,8 +18,8 @@ type AuthResult = {
 };
 
 // Mock the database module before importing the service
-vi.mock('../db.js', () => {
-  const Database = require('better-sqlite3');
+vi.mock('../db.js', async () => {
+  const { default: Database } = await import('better-sqlite3');
   const db: DatabaseType = new Database(':memory:');
 
   // Initialize schema

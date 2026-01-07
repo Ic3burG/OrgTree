@@ -142,7 +142,7 @@ router.post('/change-password', authenticateToken, async (req: AuthRequest, res:
     const { oldPassword, newPassword } = req.body;
 
     // Get current user from database
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user!.id) as any;
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user!.id) as { password_hash: string; must_change_password: number } | undefined;
     if (!user) {
       res.status(404).json({ message: 'User not found' });
       return;

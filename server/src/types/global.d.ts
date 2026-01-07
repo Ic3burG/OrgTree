@@ -38,6 +38,7 @@ declare module 'socket.io' {
 
 declare global {
   namespace Express {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface Request {
       // Custom properties can be added here
       // Note: AuthRequest in index.ts is the preferred pattern

@@ -76,7 +76,7 @@ export function verifyCsrfToken(signedToken: string): boolean {
     }
 
     return timingSafeEqual(receivedBuffer, expectedBuffer);
-  } catch (err: unknown) {
+  } catch {
     return false;
   }
 }
@@ -97,7 +97,7 @@ export function compareCsrfTokens(token1: string, token2: string): boolean {
     const buffer1 = Buffer.from(token1, 'utf8');
     const buffer2 = Buffer.from(token2, 'utf8');
     return timingSafeEqual(buffer1, buffer2);
-  } catch (err) {
+  } catch {
     return false;
   }
 }

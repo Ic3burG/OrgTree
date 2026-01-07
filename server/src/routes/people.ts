@@ -49,7 +49,7 @@ router.post('/departments/:deptId/people', async (req: AuthRequest, res: Respons
     // Get orgId from department for real-time event
     const dept = db
       .prepare('SELECT organization_id FROM departments WHERE id = ?')
-      .get(req.params.deptId!) as any;
+      .get(req.params.deptId!) as { organization_id: string } | undefined;
     if (dept) {
       emitPersonCreated(dept.organization_id, person, req.user!);
     }
@@ -87,11 +87,12 @@ router.put('/people/:personId', async (req: AuthRequest, res: Response, next: Ne
     );
 
     // Get orgId from person's department for real-time event
+    const personWithDept = person as { departmentId: string };
     const dept = db
       .prepare('SELECT organization_id FROM departments WHERE id = ?')
-      .get(String((person as any).departmentId)) as any;
+      .get(String(personWithDept.departmentId)) as { organization_id: string } | undefined;
     if (dept) {
-      emitPersonUpdated(dept.organization_id, person as any, req.user!);
+      emitPersonUpdated(dept.organization_id, person as Record<string, unknown>, req.user!);
     }
 
     res.json(person);
@@ -113,7 +114,7 @@ router.delete('/people/:personId', async (req: AuthRequest, res: Response, next:
       WHERE p.id = ?
     `
       )
-      .get(req.params.personId!) as any;
+      .get(req.params.personId!) as { id: string; name: string; title: string; email: string; phone: string; departmentId: string; organization_id: string; departmentName: string } | undefined;
 
     await deletePerson(req.params.personId!, req.user!.id);
 
@@ -143,7 +144,7 @@ router.put('/people/:personId/move', async (req: AuthRequest, res: Response, nex
     // Get orgId from new department for real-time event
     const dept = db
       .prepare('SELECT organization_id FROM departments WHERE id = ?')
-      .get(departmentId) as any;
+      .get(departmentId) as { organization_id: string } | undefined;
     if (dept) {
       emitPersonUpdated(dept.organization_id, person, req.user!);
     }

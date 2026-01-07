@@ -38,7 +38,7 @@ router.post('/organizations/:orgId/import', async (req: AuthRequest, res: Respon
     let peopleCreated = 0;
 
     // Sort rows so departments come before their children
-    const sortedData = [...data].sort((a: any, b: any) => {
+    const sortedData = [...data].sort((a: { path: string }, b: { path: string }) => {
       const depthA = (a.path.match(/\//g) || []).length;
       const depthB = (b.path.match(/\//g) || []).length;
       return depthA - depthB;

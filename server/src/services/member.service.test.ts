@@ -33,8 +33,8 @@ type AddMemberByEmailResult = {
 };
 
 // Mock the database module
-vi.mock('../db.js', () => {
-  const Database = require('better-sqlite3');
+vi.mock('../db.js', async () => {
+  const { default: Database } = await import('better-sqlite3');
   const db: DatabaseType = new Database(':memory:');
 
   db.exec(`
@@ -373,7 +373,7 @@ describe('Member Service', () => {
     });
 
     it('should throw for invalid role', () => {
-      expect(() => updateMemberRole(org.id, 'mem-1', 'invalid' as any, owner.id)).toThrow(
+      expect(() => updateMemberRole(org.id, 'mem-1', 'invalid' as unknown as 'admin' | 'editor' | 'viewer', owner.id)).toThrow(
         'Invalid role'
       );
     });

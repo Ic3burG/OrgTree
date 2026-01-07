@@ -17,7 +17,7 @@ router.use(authenticateToken);
 const MAX_BULK_SIZE = 100;
 
 // Helper to validate array input
-function validateBulkArray(arr: any, fieldName: string): { valid: boolean; message?: string } {
+function validateBulkArray(arr: unknown, fieldName: string): { valid: boolean; message?: string } {
   if (!arr || !Array.isArray(arr)) {
     return { valid: false, message: `${fieldName} array is required` };
   }

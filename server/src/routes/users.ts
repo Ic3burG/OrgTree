@@ -24,7 +24,7 @@ const passwordResetLimiter = rateLimit({
   legacyHeaders: false,
   handler: (req: Request, res: Response) => {
     // Security: Log rate limit violation
-    const ipAddress = req.ip || (req.connection as any).remoteAddress;
+    const ipAddress = req.ip || (req.socket?.remoteAddress ?? '');
     createAuditLog(
       null, // System-wide security event
       (req as AuthRequest).user ? { id: (req as AuthRequest).user!.id, name: (req as AuthRequest).user!.name, email: (req as AuthRequest).user!.email } : null,
@@ -53,7 +53,7 @@ const adminOperationsLimiter = rateLimit({
   legacyHeaders: false,
   handler: (req: Request, res: Response) => {
     // Security: Log rate limit violation
-    const ipAddress = req.ip || (req.connection as any).remoteAddress;
+    const ipAddress = req.ip || (req.socket?.remoteAddress ?? '');
     createAuditLog(
       null, // System-wide security event
       (req as AuthRequest).user ? { id: (req as AuthRequest).user!.id, name: (req as AuthRequest).user!.name, email: (req as AuthRequest).user!.email } : null,

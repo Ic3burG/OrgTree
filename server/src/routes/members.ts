@@ -41,7 +41,7 @@ router.get('/organizations/:orgId/members', async (req: AuthRequest, res: Respon
       WHERE o.id = ?
     `
       )
-      .get(orgId) as any;
+      .get(orgId) as { created_by_id: string; name: string; email: string } | undefined;
 
     res.json({
       owner: {
@@ -137,7 +137,7 @@ router.delete('/organizations/:orgId/members/:memberId', async (req: AuthRequest
       WHERE om.id = ? AND om.organization_id = ?
     `
       )
-      .get(memberId, orgId) as any;
+      .get(memberId, orgId) as { id: string; userId: string; role: string; userName: string; email: string } | undefined;
 
     await removeOrgMember(orgId, memberId, req.user!.id);
 

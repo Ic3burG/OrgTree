@@ -17,7 +17,7 @@ export function createAuditLog(
   actionType: string,
   entityType: string,
   entityId: string | null,
-  entityData: any
+  entityData: Record<string, unknown> | null
 ): { id: string } | null {
   try {
     const id = randomUUID();
@@ -59,7 +59,7 @@ interface ParsedAuditLog {
   actionType: string;
   entityType: string;
   entityId: string | null;
-  entityData: any;
+  entityData: Record<string, unknown> | null;
   createdAt: string;
 }
 
@@ -78,7 +78,7 @@ export function getAuditLogs(orgId: string, options: GetAuditLogsOptions = {}): 
 
   // Build WHERE clause
   const whereConditions: string[] = ['organization_id = ?'];
-  const params: any[] = [orgId];
+  const params: (string | number)[] = [orgId];
 
   if (actionType) {
     whereConditions.push('action_type = ?');
@@ -188,7 +188,7 @@ export function getAllAuditLogs(options: GetAllAuditLogsOptions = {}): AllAuditL
 
   // Build WHERE clause
   const whereConditions: string[] = [];
-  const params: any[] = [];
+  const params: (string | number)[] = [];
 
   if (orgId) {
     whereConditions.push('organization_id = ?');

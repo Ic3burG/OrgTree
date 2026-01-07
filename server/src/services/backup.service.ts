@@ -164,9 +164,9 @@ export function cleanupOldBackups(
  * Restore database from a backup file
  * WARNING: This will overwrite the current database!
  */
-export function restoreFromBackup(
+export async function restoreFromBackup(
   backupPath: string
-): { success: boolean; message?: string; error?: string } {
+): Promise<{ success: boolean; message?: string; error?: string }> {
   try {
     // Verify backup file exists
     if (!fs.existsSync(backupPath)) {
@@ -174,7 +174,7 @@ export function restoreFromBackup(
     }
 
     // Verify it's a valid SQLite database
-    const Database = require('better-sqlite3');
+    const { default: Database } = await import('better-sqlite3');
     const testDb = new Database(backupPath, { readonly: true });
     const check = testDb.prepare('SELECT 1 as ok').get() as { ok: number } | undefined;
     testDb.close();

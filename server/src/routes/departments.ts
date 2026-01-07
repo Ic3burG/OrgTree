@@ -110,7 +110,7 @@ router.delete('/organizations/:orgId/departments/:deptId', async (req: AuthReque
       WHERE id = ? AND organization_id = ?
     `
       )
-      .get(req.params.deptId!, req.params.orgId!) as any;
+      .get(req.params.deptId!, req.params.orgId!) as { id: string; name: string; description: string | null; parentId: string | null; organization_id: string } | undefined;
 
     await deleteDepartment(req.params.orgId!, req.params.deptId!, req.user!.id);
 

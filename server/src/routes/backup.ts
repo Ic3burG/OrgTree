@@ -25,8 +25,8 @@ router.get('/admin/backups', authenticateToken, requireSuperuser, (_req: AuthReq
       backups,
       stats,
     });
-  } catch (error: any) {
-    logger.error('Failed to list backups', { error: error.message });
+  } catch (error: unknown) {
+    logger.error('Failed to list backups', { error: error instanceof Error ? error.message : 'Unknown error' });
     res.status(500).json({ message: 'Failed to list backups' });
   }
 });
@@ -64,8 +64,8 @@ router.post('/admin/backups', authenticateToken, requireSuperuser, async (req: A
     } else {
       res.status(500).json({ message: result.error });
     }
-  } catch (error: any) {
-    logger.error('Failed to create backup', { error: error.message });
+  } catch (error: unknown) {
+    logger.error('Failed to create backup', { error: error instanceof Error ? error.message : 'Unknown error' });
     res.status(500).json({ message: 'Failed to create backup' });
   }
 });
@@ -97,8 +97,8 @@ router.delete('/admin/backups/cleanup', authenticateToken, requireSuperuser, (re
       deleted: result.deleted,
       deletedFiles: result.deletedFiles,
     });
-  } catch (error: any) {
-    logger.error('Failed to cleanup backups', { error: error.message });
+  } catch (error: unknown) {
+    logger.error('Failed to cleanup backups', { error: error instanceof Error ? error.message : 'Unknown error' });
     res.status(500).json({ message: 'Failed to cleanup backups' });
   }
 });
@@ -112,8 +112,8 @@ router.get('/admin/backups/stats', authenticateToken, requireSuperuser, (_req: A
   try {
     const stats = getBackupStats();
     res.json(stats);
-  } catch (error: any) {
-    logger.error('Failed to get backup stats', { error: error.message });
+  } catch (error: unknown) {
+    logger.error('Failed to get backup stats', { error: error instanceof Error ? error.message : 'Unknown error' });
     res.status(500).json({ message: 'Failed to get backup stats' });
   }
 });
