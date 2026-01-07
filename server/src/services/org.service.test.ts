@@ -147,9 +147,9 @@ describe('Organization Service', () => {
     it('should store organization in database', async () => {
       const org: Organization = await createOrganization('My Org', testUser.id);
 
-      const stored: Organization | undefined = (db as DatabaseType)
-        .prepare('SELECT * FROM organizations WHERE id = ?')
-        .get(org.id) as Organization | undefined;
+      const stored = (db as DatabaseType)
+        .prepare('SELECT id, name, created_by_id as createdById FROM organizations WHERE id = ?')
+        .get(org.id) as { id: string; name: string; createdById: string } | undefined;
       expect(stored).toBeTruthy();
       expect(stored?.name).toBe('My Org');
       expect(stored?.createdById).toBe(testUser.id);
