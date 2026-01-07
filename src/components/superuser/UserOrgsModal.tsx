@@ -1,4 +1,24 @@
+import React from 'react';
 import { X, Building2, Globe, Lock, Crown, Shield, Edit3, Eye } from 'lucide-react';
+
+interface UserWithOrgs {
+  id: string;
+  name: string;
+  organizationCount: number;
+  membershipCount: number;
+  ownedOrganizations?: Array<{ id: string; name: string; isPublic?: boolean }>;
+  memberships?: Array<{ id: string; name: string; role: string }>;
+}
+
+interface UserOrgsModalProps {
+  user: UserWithOrgs;
+  onClose: () => void;
+}
+
+interface OrgItemProps {
+  org: { id: string; name: string; isPublic?: boolean };
+  role: string;
+}
 
 const ROLE_CONFIG = {
   owner: {
@@ -23,11 +43,11 @@ const ROLE_CONFIG = {
   },
 };
 
-export default function UserOrgsModal({ user, onClose }) {
+export default function UserOrgsModal({ user, onClose }: UserOrgsModalProps): React.JSX.Element {
   const totalOrgs = user.organizationCount + user.membershipCount;
 
-  const RoleBadge = ({ role }) => {
-    const config = ROLE_CONFIG[role] || ROLE_CONFIG.viewer;
+  const RoleBadge = ({ role }: { role: string }) => {
+    const config = ROLE_CONFIG[role as keyof typeof ROLE_CONFIG] || ROLE_CONFIG.viewer;
     const Icon = config.icon;
 
     return (
@@ -40,7 +60,7 @@ export default function UserOrgsModal({ user, onClose }) {
     );
   };
 
-  const OrgItem = ({ org, role }) => (
+  const OrgItem = ({ org, role }: OrgItemProps): React.JSX.Element => (
     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <Building2 size={18} className="text-gray-400 flex-shrink-0" />
@@ -92,9 +112,11 @@ export default function UserOrgsModal({ user, onClose }) {
                 <span className="text-sm text-gray-500">({user.ownedOrganizations.length})</span>
               </div>
               <div className="space-y-2">
-                {user.ownedOrganizations.map(org => (
-                  <OrgItem key={org.id} org={org} role="owner" />
-                ))}
+                {user.ownedOrganizations.map(
+                  (org: { id: string; name: string; isPublic?: boolean }) => (
+                    <OrgItem key={org.id} org={org} role="owner" />
+                  )
+                )}
               </div>
             </div>
           )}
@@ -108,7 +130,7 @@ export default function UserOrgsModal({ user, onClose }) {
                 <span className="text-sm text-gray-500">({user.memberships.length})</span>
               </div>
               <div className="space-y-2">
-                {user.memberships.map(membership => (
+                {user.memberships.map((membership: { id: string; name: string; role: string }) => (
                   <OrgItem key={membership.id} org={membership} role={membership.role} />
                 ))}
               </div>

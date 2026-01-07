@@ -1,15 +1,27 @@
+import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { getInitials } from '../utils/helpers';
+import type { Person } from '../types/index.js';
+
+interface PersonRowCardProps {
+  person: Person;
+  onSelect?: (person: Person) => void;
+  isLast?: boolean;
+}
 
 /**
  * PersonRowCard - Compact person card for display inside department nodes
  * Shown when a department is expanded
  * Mobile: Larger touch targets and visual feedback
  */
-export default function PersonRowCard({ person, onSelect, isLast }) {
+export default function PersonRowCard({
+  person,
+  onSelect,
+  isLast,
+}: PersonRowCardProps): React.JSX.Element {
   const initials = getInitials(person.name);
 
-  const handleClick = e => {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>): void => {
     e.stopPropagation();
     if (onSelect) {
       onSelect(person);

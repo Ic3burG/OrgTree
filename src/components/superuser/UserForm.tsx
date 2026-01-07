@@ -1,13 +1,40 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import type { User } from '../../types';
 
-export default function UserForm({ user, currentUserId, onClose, onSubmit, isSubmitting = false }) {
-  const [formData, setFormData] = useState({
+interface UserFormProps {
+  user: User | null;
+  currentUserId?: string;
+  onClose: () => void;
+  onSubmit: (formData: FormData) => void | Promise<void>;
+  isSubmitting?: boolean;
+}
+
+interface FormData {
+  name: string;
+  email: string;
+  role: User['role'];
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  role?: string;
+}
+
+export default function UserForm({
+  user,
+  currentUserId,
+  onClose,
+  onSubmit,
+  isSubmitting = false,
+}: UserFormProps): React.JSX.Element {
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     role: 'user',
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const isEditingSelf = user?.id === currentUserId;
 
@@ -22,8 +49,8 @@ export default function UserForm({ user, currentUserId, onClose, onSubmit, isSub
     setErrors({});
   }, [user]);
 
-  const validate = () => {
-    const newErrors = {};
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
@@ -43,18 +70,18 @@ export default function UserForm({ user, currentUserId, onClose, onSubmit, isSub
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (validate()) {
       onSubmit(formData);
     }
   };
 
-  const handleChange = e => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
 

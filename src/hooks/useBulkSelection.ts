@@ -2,7 +2,6 @@ import { useState, useCallback, useMemo } from 'react';
 
 interface ItemWithId {
   id: string;
-  [key: string]: unknown;
 }
 
 interface BulkSelectionReturn {

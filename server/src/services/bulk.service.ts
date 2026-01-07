@@ -6,33 +6,86 @@ import {
   emitDepartmentDeleted,
   emitDepartmentUpdated,
 } from './socket-events.service.js';
+import type { AppError } from '../types/index.js';
+
+interface Actor {
+  id: string;
+  name: string;
+}
+
+interface FailedItem {
+  id: string;
+  error: string;
+}
+
+interface BulkDeleteResult {
+  success: boolean;
+  deleted: any[];
+  failed: FailedItem[];
+  deletedCount: number;
+  failedCount: number;
+}
+
+interface BulkMoveResult {
+  success: boolean;
+  moved: any[];
+  failed: FailedItem[];
+  movedCount: number;
+  failedCount: number;
+}
+
+interface BulkEditResult {
+  success: boolean;
+  updated: any[];
+  failed: FailedItem[];
+  updatedCount: number;
+  failedCount: number;
+}
+
+interface BulkDeleteDepartmentsResult {
+  success: boolean;
+  deleted: any[];
+  failed: FailedItem[];
+  warnings: string[];
+  deletedCount: number;
+  failedCount: number;
+}
+
+interface PersonUpdates {
+  title?: string;
+  departmentId?: string;
+}
+
+interface DepartmentUpdates {
+  parentId?: string | null;
+}
+
+interface CountResult {
+  count: number;
+}
 
 /**
  * Bulk delete people with individual audit logs for each
- * @param {string} orgId - Organization ID
- * @param {string[]} personIds - Array of person IDs to delete
- * @param {Object} actor - User performing the action (with id and name)
- * @returns {{ deleted: Object[], failed: {id: string, error: string}[], deletedCount: number, failedCount: number }}
  */
-export function bulkDeletePeople(orgId, personIds, actor) {
+export function bulkDeletePeople(orgId: string, personIds: string[], actor: Actor): BulkDeleteResult {
   // Verify user has editor permission on org
   requireOrgPermission(orgId, actor.id, 'editor');
 
   // Validate input
   if (!Array.isArray(personIds) || personIds.length === 0) {
-    const error = new Error('personIds must be a non-empty array');
+    const error = new Error('personIds must be a non-empty array') as AppError;
     error.status = 400;
     throw error;
   }
 
   if (personIds.length > 100) {
-    const error = new Error('Cannot delete more than 100 items at once');
+    const error = new Error('Cannot delete more than 100 items at once') as AppError;
     error.status = 400;
     throw error;
   }
 
-  const deleted = [];
-  const failed = [];
+  const deleted: any[] = [];
+  const failed: FailedItem[] = [];
 
   // Use transaction for atomicity
   const deleteTransaction = db.transaction(() => {
@@ -49,7 +102,7 @@ export function bulkDeletePeople(orgId, personIds, actor) {
           WHERE p.id = ? AND d.organization_id = ? AND p.deleted_at IS NULL AND d.deleted_at IS NULL
         `
           )
-          .get(personId, orgId);
+          .get(personId, orgId) as any;
 
         if (!person) {
           failed.push({ id: personId, error: 'Person not found in this organization' });
@@ -69,8 +122,9 @@ export function bulkDeletePeople(orgId, personIds, actor) {
         } else {
           failed.push({ id: personId, error: 'Failed to delete' });
         }
-      } catch (err) {
-        failed.push({ id: personId, error: err.message });
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        failed.push({ id: personId, error: errorMessage });
       }
     }
   });
@@ -88,31 +142,31 @@ export function bulkDeletePeople(orgId, personIds, actor) {
 
 /**
  * Bulk move people to a different department
- * @param {string} orgId - Organization ID
- * @param {string[]} personIds - Array of person IDs to move
- * @param {string} targetDepartmentId - Target department ID
- * @param {Object} actor - User performing the action
- * @returns {{ moved: Object[], failed: {id: string, error: string}[], movedCount: number, failedCount: number }}
  */
-export function bulkMovePeople(orgId, personIds, targetDepartmentId, actor) {
+export function bulkMovePeople(
+  orgId: string,
+  personIds: string[],
+  targetDepartmentId: string,
+  actor: Actor
+): BulkMoveResult {
   // Verify user has editor permission on org
   requireOrgPermission(orgId, actor.id, 'editor');
 
   // Validate input
   if (!Array.isArray(personIds) || personIds.length === 0) {
-    const error = new Error('personIds must be a non-empty array');
+    const error = new Error('personIds must be a non-empty array') as AppError;
     error.status = 400;
     throw error;
   }
 
   if (!targetDepartmentId) {
-    const error = new Error('targetDepartmentId is required');
+    const error = new Error('targetDepartmentId is required') as AppError;
     error.status = 400;
     throw error;
   }
 
   if (personIds.length > 100) {
-    const error = new Error('Cannot move more than 100 items at once');
+    const error = new Error('Cannot move more than 100 items at once') as AppError;
     error.status = 400;
     throw error;
   }
@@ -124,16 +178,16 @@ export function bulkMovePeople(orgId, personIds, targetDepartmentId, actor) {
     SELECT id, name FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
   `
     )
-    .get(targetDepartmentId, orgId);
+    .get(targetDepartmentId, orgId) as { id: string; name: string } | undefined;
 
   if (!targetDept) {
-    const error = new Error('Target department not found in this organization');
+    const error = new Error('Target department not found in this organization') as AppError;
     error.status = 404;
     throw error;
   }
 
-  const moved = [];
-  const failed = [];
+  const moved: any[] = [];
+  const failed: FailedItem[] = [];
   const now = new Date().toISOString();
 
   const moveTransaction = db.transaction(() => {
@@ -150,7 +204,7 @@ export function bulkMovePeople(orgId, personIds, targetDepartmentId, actor) {
           WHERE p.id = ? AND d.organization_id = ? AND p.deleted_at IS NULL AND d.deleted_at IS NULL
         `
           )
-          .get(personId, orgId);
+          .get(personId, orgId) as any;
 
         if (!person) {
           failed.push({ id: personId, error: 'Person not found in this organization' });
@@ -184,8 +238,9 @@ export function bulkMovePeople(orgId, personIds, targetDepartmentId, actor) {
         } else {
           failed.push({ id: personId, error: 'Failed to move' });
         }
-      } catch (err) {
-        failed.push({ id: personId, error: err.message });
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        failed.push({ id: personId, error: errorMessage });
       }
     }
   });
@@ -203,31 +258,31 @@ export function bulkMovePeople(orgId, personIds, targetDepartmentId, actor) {
 
 /**
  * Bulk edit people fields
- * @param {string} orgId - Organization ID
- * @param {string[]} personIds - Array of person IDs to edit
- * @param {Object} updates - Fields to update (title, departmentId)
- * @param {Object} actor - User performing the action
- * @returns {{ updated: Object[], failed: {id: string, error: string}[], updatedCount: number, failedCount: number }}
  */
-export function bulkEditPeople(orgId, personIds, updates, actor) {
+export function bulkEditPeople(
+  orgId: string,
+  personIds: string[],
+  updates: PersonUpdates,
+  actor: Actor
+): BulkEditResult {
   // Verify user has editor permission on org
   requireOrgPermission(orgId, actor.id, 'editor');
 
   // Validate input
   if (!Array.isArray(personIds) || personIds.length === 0) {
-    const error = new Error('personIds must be a non-empty array');
+    const error = new Error('personIds must be a non-empty array') as AppError;
     error.status = 400;
     throw error;
   }
 
   if (!updates || Object.keys(updates).length === 0) {
-    const error = new Error('updates object is required and cannot be empty');
+    const error = new Error('updates object is required and cannot be empty') as AppError;
     error.status = 400;
     throw error;
   }
 
   if (personIds.length > 100) {
-    const error = new Error('Cannot edit more than 100 items at once');
+    const error = new Error('Cannot edit more than 100 items at once') as AppError;
     error.status = 400;
     throw error;
   }
@@ -235,25 +290,26 @@ export function bulkEditPeople(orgId, personIds, updates, actor) {
   const { title, departmentId } = updates;
 
   // If moving to new department, verify it exists
-  let targetDept = null;
+  let targetDept: { id: string; name: string } | null = null;
   if (departmentId) {
-    targetDept = db
+    const dept = db
       .prepare(
         `
       SELECT id, name FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
     `
       )
-      .get(departmentId, orgId);
+      .get(departmentId, orgId) as { id: string; name: string } | undefined;
 
-    if (!targetDept) {
-      const error = new Error('Target department not found in this organization');
+    if (!dept) {
+      const error = new Error('Target department not found in this organization') as AppError;
       error.status = 404;
       throw error;
     }
+    targetDept = dept;
   }
 
-  const updated = [];
-  const failed = [];
+  const updated: any[] = [];
+  const failed: FailedItem[] = [];
   const now = new Date().toISOString();
 
   const editTransaction = db.transaction(() => {
@@ -270,7 +326,7 @@ export function bulkEditPeople(orgId, personIds, updates, actor) {
           WHERE p.id = ? AND d.organization_id = ? AND p.deleted_at IS NULL AND d.deleted_at IS NULL
         `
           )
-          .get(personId, orgId);
+          .get(personId, orgId) as any;
 
         if (!person) {
           failed.push({ id: personId, error: 'Person not found in this organization' });
@@ -278,8 +334,8 @@ export function bulkEditPeople(orgId, personIds, updates, actor) {
         }
 
         // Build update query dynamically
-        const updateFields = [];
-        const updateValues = [];
+        const updateFields: string[] = [];
+        const updateValues: any[] = [];
 
         if (title !== undefined) {
           updateFields.push('title = ?');
@@ -316,8 +372,9 @@ export function bulkEditPeople(orgId, personIds, updates, actor) {
         } else {
           failed.push({ id: personId, error: 'Failed to update' });
         }
-      } catch (err) {
-        failed.push({ id: personId, error: err.message });
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        failed.push({ id: personId, error: errorMessage });
       }
     }
   });
@@ -335,31 +392,31 @@ export function bulkEditPeople(orgId, personIds, updates, actor) {
 
 /**
  * Bulk delete departments with warnings about child items
- * @param {string} orgId - Organization ID
- * @param {string[]} departmentIds - Array of department IDs to delete
- * @param {Object} actor - User performing the action
- * @returns {{ deleted: Object[], failed: {id: string, error: string}[], warnings: string[], deletedCount: number, failedCount: number }}
  */
-export function bulkDeleteDepartments(orgId, departmentIds, actor) {
+export function bulkDeleteDepartments(
+  orgId: string,
+  departmentIds: string[],
+  actor: Actor
+): BulkDeleteDepartmentsResult {
   // Verify user has editor permission on org
   requireOrgPermission(orgId, actor.id, 'editor');
 
   // Validate input
   if (!Array.isArray(departmentIds) || departmentIds.length === 0) {
-    const error = new Error('departmentIds must be a non-empty array');
+    const error = new Error('departmentIds must be a non-empty array') as AppError;
     error.status = 400;
     throw error;
   }
 
   if (departmentIds.length > 100) {
-    const error = new Error('Cannot delete more than 100 items at once');
+    const error = new Error('Cannot delete more than 100 items at once') as AppError;
     error.status = 400;
     throw error;
   }
 
-  const deleted = [];
-  const failed = [];
-  const warnings = [];
+  const deleted: any[] = [];
+  const failed: FailedItem[] = [];
+  const warnings: string[] = [];
 
   const deleteTransaction = db.transaction(() => {
     for (const deptId of departmentIds) {
@@ -373,7 +430,7 @@ export function bulkDeleteDepartments(orgId, departmentIds, actor) {
           WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
         `
           )
-          .get(deptId, orgId);
+          .get(deptId, orgId) as any;
 
         if (!dept) {
           failed.push({ id: deptId, error: 'Department not found in this organization' });
@@ -381,13 +438,15 @@ export function bulkDeleteDepartments(orgId, departmentIds, actor) {
         }
 
         // Check for child departments (will be cascade deleted)
-        const childCount = db
-          .prepare(
-            `
+        const childCount = (
+          db
+            .prepare(
+              `
           SELECT COUNT(*) as count FROM departments WHERE parent_id = ? AND deleted_at IS NULL
         `
-          )
-          .get(deptId).count;
+            )
+            .get(deptId) as CountResult
+        ).count;
 
         if (childCount > 0) {
           warnings.push(
@@ -396,13 +455,15 @@ export function bulkDeleteDepartments(orgId, departmentIds, actor) {
         }
 
         // Check for people (will be cascade deleted)
-        const peopleCount = db
-          .prepare(
-            `
+        const peopleCount = (
+          db
+            .prepare(
+              `
           SELECT COUNT(*) as count FROM people WHERE department_id = ? AND deleted_at IS NULL
         `
-          )
-          .get(deptId).count;
+            )
+            .get(deptId) as CountResult
+        ).count;
 
         if (peopleCount > 0) {
           warnings.push(
@@ -420,8 +481,9 @@ export function bulkDeleteDepartments(orgId, departmentIds, actor) {
         } else {
           failed.push({ id: deptId, error: 'Failed to delete' });
         }
-      } catch (err) {
-        failed.push({ id: deptId, error: err.message });
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        failed.push({ id: deptId, error: errorMessage });
       }
     }
   });
@@ -440,31 +502,31 @@ export function bulkDeleteDepartments(orgId, departmentIds, actor) {
 
 /**
  * Bulk edit departments (mainly for re-parenting)
- * @param {string} orgId - Organization ID
- * @param {string[]} departmentIds - Array of department IDs to edit
- * @param {Object} updates - Fields to update (parentId)
- * @param {Object} actor - User performing the action
- * @returns {{ updated: Object[], failed: {id: string, error: string}[], updatedCount: number, failedCount: number }}
  */
-export function bulkEditDepartments(orgId, departmentIds, updates, actor) {
+export function bulkEditDepartments(
+  orgId: string,
+  departmentIds: string[],
+  updates: DepartmentUpdates,
+  actor: Actor
+): BulkEditResult {
   // Verify user has editor permission on org
   requireOrgPermission(orgId, actor.id, 'editor');
 
   // Validate input
   if (!Array.isArray(departmentIds) || departmentIds.length === 0) {
-    const error = new Error('departmentIds must be a non-empty array');
+    const error = new Error('departmentIds must be a non-empty array') as AppError;
     error.status = 400;
     throw error;
   }
 
   if (!updates || Object.keys(updates).length === 0) {
-    const error = new Error('updates object is required and cannot be empty');
+    const error = new Error('updates object is required and cannot be empty') as AppError;
     error.status = 400;
     throw error;
   }
 
   if (departmentIds.length > 100) {
-    const error = new Error('Cannot edit more than 100 items at once');
+    const error = new Error('Cannot edit more than 100 items at once') as AppError;
     error.status = 400;
     throw error;
   }
@@ -479,24 +541,24 @@ export function bulkEditDepartments(orgId, departmentIds, updates, actor) {
       SELECT id, name FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
     `
       )
-      .get(parentId, orgId);
+      .get(parentId, orgId) as { id: string; name: string } | undefined;
 
     if (!parentDept) {
-      const error = new Error('Parent department not found in this organization');
+      const error = new Error('Parent department not found in this organization') as AppError;
       error.status = 404;
       throw error;
     }
 
     // Check for circular references - none of the departments being edited can be the parent
     if (departmentIds.includes(parentId)) {
-      const error = new Error('Cannot set a department as its own parent');
+      const error = new Error('Cannot set a department as its own parent') as AppError;
       error.status = 400;
       throw error;
     }
   }
 
-  const updated = [];
-  const failed = [];
+  const updated: any[] = [];
+  const failed: FailedItem[] = [];
   const now = new Date().toISOString();
 
   const editTransaction = db.transaction(() => {
@@ -511,7 +573,7 @@ export function bulkEditDepartments(orgId, departmentIds, updates, actor) {
           WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
         `
           )
-          .get(deptId, orgId);
+          .get(deptId, orgId) as any;
 
         if (!dept) {
           failed.push({ id: deptId, error: 'Department not found in this organization' });
@@ -548,8 +610,9 @@ export function bulkEditDepartments(orgId, departmentIds, updates, actor) {
         } else {
           failed.push({ id: deptId, error: 'Failed to update' });
         }
-      } catch (err) {
-        failed.push({ id: deptId, error: err.message });
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        failed.push({ id: deptId, error: errorMessage });
       }
     }
   });
@@ -568,9 +631,9 @@ export function bulkEditDepartments(orgId, departmentIds, updates, actor) {
 /**
  * Helper to check if potentialDescendant is a descendant of ancestorId
  */
-function checkIsDescendant(potentialDescendant, ancestorId) {
-  let current = potentialDescendant;
-  const visited = new Set();
+function checkIsDescendant(potentialDescendant: string, ancestorId: string): boolean {
+  let current: string | null | undefined = potentialDescendant;
+  const visited = new Set<string>();
 
   while (current) {
     if (visited.has(current)) break; // Prevent infinite loops
@@ -580,7 +643,7 @@ function checkIsDescendant(potentialDescendant, ancestorId) {
 
     const parent = db
       .prepare('SELECT parent_id FROM departments WHERE id = ? AND deleted_at IS NULL')
-      .get(current);
+      .get(current) as { parent_id: string | null } | undefined;
     current = parent?.parent_id;
   }
 
@@ -590,25 +653,26 @@ function checkIsDescendant(potentialDescendant, ancestorId) {
 /**
  * Helper to soft delete a department and its children
  */
-function softDeleteDepartment(deptId) {
+function softDeleteDepartment(deptId: string): { changes: number } {
   const transaction = db.transaction(() => {
     const now = new Date().toISOString();
     let totalChanges = 0;
 
     // Find all child departments recursively
-    const allDeptsToDelete = [deptId];
-    let currentDeptIds = [deptId];
+    const allDeptsToDelete: string[] = [deptId];
+    let currentDeptIds: string[] = [deptId];
 
     while (currentDeptIds.length > 0) {
-      const children = db
-        .prepare(
-          `
+      const children = (
+        db
+          .prepare(
+            `
         SELECT id FROM departments
         WHERE parent_id IN (${currentDeptIds.map(() => '?').join(',')}) AND deleted_at IS NULL
       `
-        )
-        .all(currentDeptIds)
-        .map(d => d.id);
+          )
+          .all(currentDeptIds) as Array<{ id: string }>
+      ).map(d => d.id);
 
       if (children.length > 0) {
         allDeptsToDelete.push(...children);

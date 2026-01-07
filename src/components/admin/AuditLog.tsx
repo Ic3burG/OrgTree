@@ -43,7 +43,7 @@ export default function AuditLog(): React.JSX.Element {
         ...(entityType && { entityType }),
       };
 
-      const result = await api.getAuditLogs(orgId, params);
+      const result = await api.getAuditLogs(orgId!, params);
 
       if (reset || !cursor) {
         setLogs(result.logs || []);
@@ -238,7 +238,7 @@ export default function AuditLog(): React.JSX.Element {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div className="flex items-center gap-2">
                             <Clock size={16} className="text-gray-400" />
-                            {formatDate(log.createdAt)}
+                            {formatDate(log.createdAt!)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -249,16 +249,16 @@ export default function AuditLog(): React.JSX.Element {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
-                            className={`px-2 py-1 text-xs font-medium rounded-full ${getActionColor(log.actionType)}`}
+                            className={`px-2 py-1 text-xs font-medium rounded-full ${getActionColor(log.actionType!)}`}
                           >
                             {log.actionType}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatEntityType(log.entityType)}
+                          {formatEntityType(log.entityType!)}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">
-                          {formatEntityDetails(log.entityType, log.entityData)}
+                          {formatEntityDetails(log.entityType!, log.entityData!)}
                         </td>
                       </tr>
                     ))}
@@ -273,10 +273,10 @@ export default function AuditLog(): React.JSX.Element {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Clock size={16} />
-                        {formatDate(log.createdAt)}
+                        {formatDate(log.createdAt!)}
                       </div>
                       <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${getActionColor(log.actionType)}`}
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${getActionColor(log.actionType!)}`}
                       >
                         {log.actionType}
                       </span>
@@ -289,8 +289,8 @@ export default function AuditLog(): React.JSX.Element {
                       </div>
 
                       <div className="text-sm text-gray-700">
-                        <span className="font-medium">{formatEntityType(log.entityType)}:</span>{' '}
-                        {formatEntityDetails(log.entityType, log.entityData)}
+                        <span className="font-medium">{formatEntityType(log.entityType!)}:</span>{' '}
+                        {formatEntityDetails(log.entityType!, log.entityData!)}
                       </div>
                     </div>
                   </div>

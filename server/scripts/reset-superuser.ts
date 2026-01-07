@@ -19,6 +19,24 @@ import { randomBytes } from 'crypto';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
+// Type definitions for database queries
+interface UserRow {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  created_at: string;
+  must_change_password: number;
+}
+
+interface EmailRow {
+  email: string;
+}
+
+interface UpdateResult {
+  changes: number;
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -60,13 +78,14 @@ Examples:
 }
 
 // Connect to database
-let db;
+let db: Database.Database;
 try {
   db = new Database(dbPath);
   db.pragma('foreign_keys = ON');
   console.log(`\n📁 Database: ${dbPath}\n`);
-} catch (err) {
-  console.error(`❌ Failed to open database: ${err.message}`);
+} catch (err: unknown) {
+  const errorMessage = err instanceof Error ? err.message : String(err);
+  console.error(`❌ Failed to open database: ${errorMessage}`);
   console.error(`   Path: ${dbPath}`);
   process.exit(1);
 }
@@ -82,7 +101,7 @@ if (shouldList) {
     ORDER BY created_at
   `
     )
-    .all();
+    .all() as UserRow[];
 
   if (superusers.length === 0) {
     console.log('⚠️  No superusers found in database!\n');
@@ -96,7 +115,7 @@ if (shouldList) {
       ORDER BY created_at
     `
       )
-      .all();
+      .all() as UserRow[];
 
     if (allUsers.length === 0) {
       console.log('   Database has no users at all.\n');
@@ -133,13 +152,15 @@ if (!email) {
 }
 
 // Find user
-const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase());
+const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase()) as
+  | UserRow
+  | undefined;
 
 if (!user) {
   console.error(`❌ User not found: ${email}\n`);
 
   // Suggest similar emails
-  const allUsers = db.prepare('SELECT email FROM users').all();
+  const allUsers = db.prepare('SELECT email FROM users').all() as EmailRow[];
   if (allUsers.length > 0) {
     console.log('   Available users:');
     allUsers.forEach(u => console.log(`   - ${u.email}`));
@@ -187,7 +208,7 @@ const result = db
   WHERE id = ?
 `
   )
-  .run(passwordHash, now, user.id);
+  .run(passwordHash, now, user.id) as UpdateResult;
 
 if (result.changes === 0) {
   console.error('❌ Failed to update password');

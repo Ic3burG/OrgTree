@@ -1,9 +1,18 @@
 import db from '../db.js';
 import { randomUUID } from 'crypto';
 import { requireOrgPermission } from './member.service.js';
+import type { DatabaseDepartment, DatabasePerson, AppError } from '../types/index.js';
+
+interface DepartmentWithOrg extends DatabaseDepartment {
+  organizationId: string;
+}
 
 // Helper to verify department access through org permissions
-async function verifyDeptAccess(deptId, userId, minRole = 'viewer') {
+function verifyDeptAccess(
+  deptId: string,
+  userId: string,
+  minRole: 'owner' | 'admin' | 'editor' | 'viewer' = 'viewer'
+): DepartmentWithOrg {
   const dept = db
     .prepare(
       `
@@ -12,10 +21,10 @@ async function verifyDeptAccess(deptId, userId, minRole = 'viewer') {
     WHERE d.id = ? AND d.deleted_at IS NULL
   `
     )
-    .get(deptId);
+    .get(deptId) as DepartmentWithOrg | undefined;
 
   if (!dept) {
-    const error = new Error('Department not found');
+    const error = new Error('Department not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -26,8 +35,20 @@ async function verifyDeptAccess(deptId, userId, minRole = 'viewer') {
   return dept;
 }
 
-export async function getPeopleByDepartment(deptId, userId) {
-  await verifyDeptAccess(deptId, userId, 'viewer');
+interface PersonResponse {
+  id: string;
+  departmentId: string;
+  name: string;
+  title: string | null;
+  email: string | null;
+  phone: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export function getPeopleByDepartment(deptId: string, userId: string): PersonResponse[] {
+  verifyDeptAccess(deptId, userId, 'viewer');
 
   return db
     .prepare(
@@ -40,10 +61,23 @@ export async function getPeopleByDepartment(deptId, userId) {
     ORDER BY sort_order ASC
   `
     )
-    .all(deptId);
+    .all(deptId) as PersonResponse[];
 }
 
-export async function getPersonById(personId, userId) {
+interface PersonWithDepartment extends PersonResponse {
+  department: {
+    id: string;
+    name: string;
+    organizationId: string;
+    organization: {
+      id: string;
+      name: string;
+      createdById: string;
+    };
+  };
+}
+
+export function getPersonById(personId: string, userId: string): PersonWithDepartment {
   const person = db
     .prepare(
       `
@@ -58,10 +92,17 @@ export async function getPersonById(personId, userId) {
     WHERE p.id = ? AND p.deleted_at IS NULL
   `
     )
-    .get(personId);
+    .get(personId) as
+    | (PersonResponse & {
+        departmentName: string;
+        organizationId: string;
+        organizationName: string;
+        orgCreatedBy: string;
+      })
+    | undefined;
 
   if (!person) {
-    const error = new Error('Person not found');
+    const error = new Error('Person not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -71,22 +112,34 @@ export async function getPersonById(personId, userId) {
 
   // Clean up the response to match expected format
   const { departmentName, organizationId, organizationName, orgCreatedBy, ...personData } = person;
-  personData.department = {
-    id: person.departmentId,
-    name: departmentName,
-    organizationId,
-    organization: {
-      id: organizationId,
-      name: organizationName,
-      createdById: orgCreatedBy,
+  const result: PersonWithDepartment = {
+    ...personData,
+    department: {
+      id: person.departmentId,
+      name: departmentName,
+      organizationId,
+      organization: {
+        id: organizationId,
+        name: organizationName,
+        createdById: orgCreatedBy,
+      },
     },
   };
 
-  return personData;
+  return result;
 }
 
-export async function createPerson(deptId, data, userId) {
-  await verifyDeptAccess(deptId, userId, 'editor');
+export function createPerson(
+  deptId: string,
+  data: {
+    name: string;
+    title?: string;
+    email?: string;
+    phone?: string;
+  },
+  userId: string
+): PersonResponse {
+  verifyDeptAccess(deptId, userId, 'editor');
 
   const { name, title, email, phone } = data;
 
@@ -99,9 +152,9 @@ export async function createPerson(deptId, data, userId) {
     WHERE department_id = ?
   `
     )
-    .get(deptId);
+    .get(deptId) as { maxSort: number | null } | undefined;
 
-  const sortOrder = (maxSortResult.maxSort || 0) + 1;
+  const sortOrder = (maxSortResult?.maxSort || 0) + 1;
   const personId = randomUUID();
   const now = new Date().toISOString();
 
@@ -122,17 +175,27 @@ export async function createPerson(deptId, data, userId) {
     WHERE id = ?
   `
     )
-    .get(personId);
+    .get(personId) as PersonResponse;
 }
 
-export async function updatePerson(personId, data, userId) {
-  const person = await getPersonById(personId, userId);
+export function updatePerson(
+  personId: string,
+  data: {
+    name?: string;
+    title?: string;
+    email?: string;
+    phone?: string;
+    departmentId?: string;
+  },
+  userId: string
+): PersonResponse {
+  const person = getPersonById(personId, userId);
 
   const { name, title, email, phone, departmentId } = data;
 
   // If moving to new department, verify access to that department
   if (departmentId && departmentId !== person.departmentId) {
-    await verifyDeptAccess(departmentId, userId, 'editor');
+    verifyDeptAccess(departmentId, userId, 'editor');
   }
 
   const now = new Date().toISOString();
@@ -140,9 +203,9 @@ export async function updatePerson(personId, data, userId) {
   // Get current person data
   const currentPerson = db
     .prepare('SELECT * FROM people WHERE id = ? AND deleted_at IS NULL')
-    .get(personId);
+    .get(personId) as DatabasePerson | undefined;
   if (!currentPerson) {
-    const error = new Error('Person not found');
+    const error = new Error('Person not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -179,11 +242,11 @@ export async function updatePerson(personId, data, userId) {
     WHERE id = ?
   `
     )
-    .get(personId);
+    .get(personId) as PersonResponse;
 }
 
-export async function deletePerson(personId, userId) {
-  await getPersonById(personId, userId); // Verifies access and that person exists
+export function deletePerson(personId: string, userId: string): { success: boolean } {
+  getPersonById(personId, userId); // Verifies access and that person exists
 
   const now = new Date().toISOString();
   db.prepare(
@@ -197,6 +260,6 @@ export async function deletePerson(personId, userId) {
   return { success: true };
 }
 
-export async function movePerson(personId, newDeptId, userId) {
+export function movePerson(personId: string, newDeptId: string, userId: string): PersonResponse {
   return updatePerson(personId, { departmentId: newDeptId }, userId);
 }

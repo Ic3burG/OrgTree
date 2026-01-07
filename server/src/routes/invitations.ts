@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { authenticateToken } from '../middleware/auth.js';
 import {
   createInvitation,
@@ -8,25 +8,28 @@ import {
   acceptInvitation,
   isEmailConfigured,
 } from '../services/invitation.service.js';
+import type { AuthRequest } from '../types/index.js';
 
 const router = express.Router();
 
 // POST /api/organizations/:orgId/invitations
 // Send an invitation (requires admin)
-router.post('/organizations/:orgId/invitations', authenticateToken, async (req, res, next) => {
+router.post('/organizations/:orgId/invitations', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { orgId } = req.params;
     const { email, role } = req.body;
 
     if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
+      res.status(400).json({ message: 'Email is required' });
+      return;
     }
 
     if (!role) {
-      return res.status(400).json({ message: 'Role is required' });
+      res.status(400).json({ message: 'Role is required' });
+      return;
     }
 
-    const invitation = await createInvitation(orgId, email, role, req.user.id);
+    const invitation = await createInvitation(orgId!, email, role, req.user!.id);
     res.status(201).json(invitation);
   } catch (err) {
     next(err);
@@ -35,10 +38,10 @@ router.post('/organizations/:orgId/invitations', authenticateToken, async (req, 
 
 // GET /api/organizations/:orgId/invitations
 // Get pending invitations (requires admin)
-router.get('/organizations/:orgId/invitations', authenticateToken, async (req, res, next) => {
+router.get('/organizations/:orgId/invitations', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { orgId } = req.params;
-    const invitations = getOrgInvitations(orgId, req.user.id);
+    const invitations = getOrgInvitations(orgId!, req.user!.id);
     res.json(invitations);
   } catch (err) {
     next(err);
@@ -50,10 +53,10 @@ router.get('/organizations/:orgId/invitations', authenticateToken, async (req, r
 router.delete(
   '/organizations/:orgId/invitations/:invitationId',
   authenticateToken,
-  async (req, res, next) => {
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { orgId, invitationId } = req.params;
-      await cancelInvitation(orgId, invitationId, req.user.id);
+      await cancelInvitation(orgId!, invitationId!, req.user!.id);
       res.status(204).send();
     } catch (err) {
       next(err);
@@ -63,13 +66,14 @@ router.delete(
 
 // GET /api/invitations/:token
 // Get invitation details (public - for viewing before accepting)
-router.get('/invitations/:token', async (req, res, next) => {
+router.get('/invitations/:token', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { token } = req.params;
-    const invitation = getInvitationByToken(token);
+    const invitation = getInvitationByToken(token!);
 
     if (!invitation) {
-      return res.status(404).json({ message: 'Invitation not found' });
+      res.status(404).json({ message: 'Invitation not found' });
+      return;
     }
 
     res.json(invitation);
@@ -80,10 +84,10 @@ router.get('/invitations/:token', async (req, res, next) => {
 
 // POST /api/invitations/:token/accept
 // Accept an invitation (requires authentication)
-router.post('/invitations/:token/accept', authenticateToken, async (req, res, next) => {
+router.post('/invitations/:token/accept', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { token } = req.params;
-    const result = await acceptInvitation(token, req.user.id);
+    const result = await acceptInvitation(token!, req.user!.id);
     res.json(result);
   } catch (err) {
     next(err);
@@ -92,7 +96,7 @@ router.post('/invitations/:token/accept', authenticateToken, async (req, res, ne
 
 // GET /api/invitations/status
 // Check if email service is configured
-router.get('/invitations/status', authenticateToken, async (req, res) => {
+router.get('/invitations/status', authenticateToken, async (_req: AuthRequest, res: Response): Promise<void> => {
   res.json({ emailConfigured: isEmailConfigured() });
 });
 

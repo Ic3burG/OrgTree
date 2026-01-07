@@ -2,10 +2,101 @@ import db from '../db.js';
 import { requireOrgPermission } from './member.service.js';
 import { escapeHtml } from '../utils/escape.js';
 
+// ============================================================================
+// Types
+// ============================================================================
+
+interface SearchResult {
+  type: 'department' | 'person';
+  id: string;
+  name: string;
+  highlight: string;
+  // Department-specific fields
+  description?: string | null;
+  parentId?: string | null;
+  peopleCount?: number;
+  // Person-specific fields
+  title?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  departmentId?: string;
+  departmentName?: string;
+}
+
+interface SearchOptions {
+  query: string;
+  type?: 'all' | 'departments' | 'people';
+  limit?: number;
+  offset?: number;
+}
+
+interface SearchResponse {
+  query: string;
+  total: number;
+  results: SearchResult[];
+  pagination: {
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+}
+
+interface AutocompleteSuggestion {
+  text: string;
+  type: 'department' | 'person';
+}
+
+interface AutocompleteResponse {
+  suggestions: AutocompleteSuggestion[];
+}
+
+interface DepartmentSearchRow {
+  id: string;
+  name: string;
+  description: string | null;
+  parentId: string | null;
+  nameHighlight: string;
+  descHighlight: string;
+  peopleCount: number;
+  rank: number;
+}
+
+interface PersonSearchRow {
+  id: string;
+  name: string;
+  title: string | null;
+  email: string | null;
+  phone: string | null;
+  departmentId: string;
+  departmentName: string;
+  nameHighlight: string;
+  titleHighlight: string;
+  emailHighlight: string;
+  rank: number;
+}
+
+interface DepartmentSuggestionRow {
+  name: string;
+  type: 'department';
+}
+
+interface PersonSuggestionRow {
+  name: string;
+  type: 'person';
+}
+
+interface CountResult {
+  count: number;
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
 /**
  * Escape special FTS5 characters in query to prevent syntax errors
  */
-function escapeFtsQuery(query) {
+function escapeFtsQuery(query: string): string {
   // Remove special characters that could break FTS query
   return query.replace(/['"*(){}[\]^~\\:]/g, ' ').trim();
 }
@@ -13,9 +104,9 @@ function escapeFtsQuery(query) {
 /**
  * Build FTS5 query with prefix matching for autocomplete behavior
  */
-function buildFtsQuery(query, prefixMatch = true) {
+function buildFtsQuery(query: string, prefixMatch: boolean = true): string | null {
   const escaped = escapeFtsQuery(query);
-  const terms = escaped.split(/\s+/).filter(t => t.length > 0);
+  const terms = escaped.split(/\s+/).filter((t: string) => t.length > 0);
 
   if (terms.length === 0) return null;
 
@@ -28,10 +119,19 @@ function buildFtsQuery(query, prefixMatch = true) {
   return terms.join(' ');
 }
 
+// ============================================================================
+// Search Functions
+// ============================================================================
+
 /**
  * Search departments using FTS5
  */
-function searchDepartments(orgId, ftsQuery, limit, offset) {
+function searchDepartments(
+  orgId: string,
+  ftsQuery: string,
+  limit: number,
+  offset: number
+): { total: number; results: SearchResult[] } {
   // Count total matches
   const countStmt = db.prepare(`
     SELECT COUNT(*) as count
@@ -41,7 +141,8 @@ function searchDepartments(orgId, ftsQuery, limit, offset) {
       AND d.organization_id = ?
   `);
 
-  const total = countStmt.get(ftsQuery, orgId).count;
+  const countResult = countStmt.get(ftsQuery, orgId) as CountResult;
+  const total = countResult.count;
 
   // Get matching departments with highlights
   const stmt = db.prepare(`
@@ -62,26 +163,33 @@ function searchDepartments(orgId, ftsQuery, limit, offset) {
     LIMIT ? OFFSET ?
   `);
 
-  const rows = stmt.all(ftsQuery, orgId, limit, offset);
+  const rows = stmt.all(ftsQuery, orgId, limit, offset) as DepartmentSearchRow[];
 
   return {
     total,
-    results: rows.map(row => ({
-      type: 'department',
-      id: row.id,
-      name: row.name,
-      description: row.description,
-      parentId: row.parentId,
-      highlight: escapeHtml(row.nameHighlight || row.descHighlight),
-      peopleCount: row.peopleCount,
-    })),
+    results: rows.map(
+      (row): SearchResult => ({
+        type: 'department',
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        parentId: row.parentId,
+        highlight: escapeHtml(row.nameHighlight || row.descHighlight),
+        peopleCount: row.peopleCount,
+      })
+    ),
   };
 }
 
 /**
  * Search people using FTS5
  */
-function searchPeople(orgId, ftsQuery, limit, offset) {
+function searchPeople(
+  orgId: string,
+  ftsQuery: string,
+  limit: number,
+  offset: number
+): { total: number; results: SearchResult[] } {
   // Count total matches (people through department->org relationship)
   const countStmt = db.prepare(`
     SELECT COUNT(*) as count
@@ -92,7 +200,8 @@ function searchPeople(orgId, ftsQuery, limit, offset) {
       AND d.organization_id = ?
   `);
 
-  const total = countStmt.get(ftsQuery, orgId).count;
+  const countResult = countStmt.get(ftsQuery, orgId) as CountResult;
+  const total = countResult.count;
 
   // Get matching people with highlights
   const stmt = db.prepare(`
@@ -117,28 +226,30 @@ function searchPeople(orgId, ftsQuery, limit, offset) {
     LIMIT ? OFFSET ?
   `);
 
-  const rows = stmt.all(ftsQuery, orgId, limit, offset);
+  const rows = stmt.all(ftsQuery, orgId, limit, offset) as PersonSearchRow[];
 
   return {
     total,
-    results: rows.map(row => ({
-      type: 'person',
-      id: row.id,
-      name: row.name,
-      title: row.title,
-      email: row.email,
-      phone: row.phone,
-      departmentId: row.departmentId,
-      departmentName: row.departmentName,
-      highlight: escapeHtml(row.nameHighlight || row.titleHighlight || row.emailHighlight),
-    })),
+    results: rows.map(
+      (row): SearchResult => ({
+        type: 'person',
+        id: row.id,
+        name: row.name,
+        title: row.title,
+        email: row.email,
+        phone: row.phone,
+        departmentId: row.departmentId,
+        departmentName: row.departmentName,
+        highlight: escapeHtml(row.nameHighlight || row.titleHighlight || row.emailHighlight),
+      })
+    ),
   };
 }
 
 /**
  * Main search function - searches both departments and people
  */
-export function search(orgId, userId, options = {}) {
+export function search(orgId: string, userId: string, options: SearchOptions): SearchResponse {
   // Verify user has access to this organization
   requireOrgPermission(orgId, userId, 'viewer');
 
@@ -155,7 +266,7 @@ export function search(orgId, userId, options = {}) {
     };
   }
 
-  const results = [];
+  const results: SearchResult[] = [];
   let totalDepts = 0;
   let totalPeople = 0;
 
@@ -165,7 +276,7 @@ export function search(orgId, userId, options = {}) {
       const deptResults = searchDepartments(orgId, ftsQuery, limit, offset);
       results.push(...deptResults.results);
       totalDepts = deptResults.total;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Department search error:', err);
     }
   }
@@ -178,7 +289,7 @@ export function search(orgId, userId, options = {}) {
       const peopleResults = searchPeople(orgId, ftsQuery, peopleLimit, offset);
       results.push(...peopleResults.results);
       totalPeople = peopleResults.total;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('People search error:', err);
     }
   }
@@ -200,7 +311,12 @@ export function search(orgId, userId, options = {}) {
 /**
  * Get autocomplete suggestions for search
  */
-export function getAutocompleteSuggestions(orgId, userId, query, limit = 5) {
+export function getAutocompleteSuggestions(
+  orgId: string,
+  userId: string,
+  query: string,
+  limit: number = 5
+): AutocompleteResponse {
   // Verify user has access to this organization
   requireOrgPermission(orgId, userId, 'viewer');
 
@@ -209,7 +325,7 @@ export function getAutocompleteSuggestions(orgId, userId, query, limit = 5) {
     return { suggestions: [] };
   }
 
-  const suggestions = [];
+  const suggestions: AutocompleteSuggestion[] = [];
 
   try {
     // Department name suggestions
@@ -222,14 +338,16 @@ export function getAutocompleteSuggestions(orgId, userId, query, limit = 5) {
       LIMIT ?
     `);
 
-    const deptRows = deptStmt.all(ftsQuery, orgId, Math.ceil(limit / 2));
+    const deptRows = deptStmt.all(ftsQuery, orgId, Math.ceil(limit / 2)) as DepartmentSuggestionRow[];
     suggestions.push(
-      ...deptRows.map(r => ({
-        text: r.name,
-        type: 'department',
-      }))
+      ...deptRows.map(
+        (r): AutocompleteSuggestion => ({
+          text: r.name,
+          type: 'department',
+        })
+      )
     );
-  } catch (err) {
+  } catch (err: unknown) {
     console.error('Department autocomplete error:', err);
   }
 
@@ -246,14 +364,16 @@ export function getAutocompleteSuggestions(orgId, userId, query, limit = 5) {
     `);
 
     const remainingLimit = Math.max(1, limit - suggestions.length);
-    const peopleRows = peopleStmt.all(ftsQuery, orgId, remainingLimit);
+    const peopleRows = peopleStmt.all(ftsQuery, orgId, remainingLimit) as PersonSuggestionRow[];
     suggestions.push(
-      ...peopleRows.map(r => ({
-        text: r.name,
-        type: 'person',
-      }))
+      ...peopleRows.map(
+        (r): AutocompleteSuggestion => ({
+          text: r.name,
+          type: 'person',
+        })
+      )
     );
-  } catch (err) {
+  } catch (err: unknown) {
     console.error('People autocomplete error:', err);
   }
 

@@ -1,41 +1,44 @@
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 import { authenticateToken } from '../middleware/auth.js';
 import { requireOrgPermission } from '../services/member.service.js';
 import db from '../db.js';
+import type { AuthRequest } from '../types/index.js';
 
 const router = express.Router();
 
 router.use(authenticateToken);
 
 // POST /api/organizations/:orgId/import
-router.post('/organizations/:orgId/import', async (req, res, next) => {
+router.post('/organizations/:orgId/import', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { orgId } = req.params;
     const { data } = req.body; // Array of parsed CSV rows
 
     if (!data || !Array.isArray(data)) {
-      return res.status(400).json({ message: 'Invalid data format' });
+      res.status(400).json({ message: 'Invalid data format' });
+      return;
     }
 
     // Security: Limit import size to prevent DoS
     const MAX_IMPORT_SIZE = 10000;
     if (data.length > MAX_IMPORT_SIZE) {
-      return res.status(400).json({
+      res.status(400).json({
         message: `Import size exceeds maximum limit of ${MAX_IMPORT_SIZE} items`,
       });
+      return;
     }
 
     // Security: Verify user has admin permission (owner or admin member)
-    requireOrgPermission(orgId, req.user.id, 'admin');
+    requireOrgPermission(orgId!, req.user!.id, 'admin');
 
     // Process import within a transaction
-    const pathToDeptId = new Map();
+    const pathToDeptId = new Map<string, string>();
     let departmentsCreated = 0;
     let peopleCreated = 0;
 
     // Sort rows so departments come before their children
-    const sortedData = [...data].sort((a, b) => {
+    const sortedData = [...data].sort((a: any, b: any) => {
       const depthA = (a.path.match(/\//g) || []).length;
       const depthB = (b.path.match(/\//g) || []).length;
       return depthA - depthB;

@@ -1,5 +1,15 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import type { Department } from '../../types/index.js';
+
+interface DepartmentFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: Pick<Department, 'name' | 'description' | 'parent_id'>) => void;
+  department: Department | null;
+  departments: Department[];
+  loading: boolean;
+}
 
 export default function DepartmentForm({
   isOpen,
@@ -8,10 +18,10 @@ export default function DepartmentForm({
   department,
   departments,
   loading,
-}) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [parentId, setParentId] = useState('');
+}: DepartmentFormProps): React.JSX.Element | null {
+  const [name, setName] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [parentId, setParentId] = useState<string>('');
 
   const isEditing = !!department;
 
@@ -22,7 +32,7 @@ export default function DepartmentForm({
         // Editing existing department
         setName(department.name || '');
         setDescription(department.description || '');
-        setParentId(department.parentId || '');
+        setParentId(department.parent_id || '');
       } else {
         // Creating new department
         setName('');
@@ -32,24 +42,23 @@ export default function DepartmentForm({
     }
   }, [department, isOpen]);
 
-  const handleSubmit = e => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
     // Build the data object explicitly
-    const formData = {
+    const formData: Pick<Department, 'name' | 'description' | 'parent_id'> = {
       name: name.trim(),
       description: description.trim(),
-      parentId: parentId === '' ? null : parentId,
+      parent_id: parentId === '' ? null : parentId,
     };
 
-    console.log('DepartmentForm submitting:', formData);
     onSubmit(formData);
   };
 
   // Filter departments for parent dropdown
   // Exclude current department (can't be parent of itself)
   const availableParents = Array.isArray(departments)
-    ? departments.filter(d => {
+    ? departments.filter((d: Department) => {
         if (!department) return true; // New department, show all
         return d.id !== department.id; // Exclude self when editing
       })
@@ -95,14 +104,13 @@ export default function DepartmentForm({
               </label>
               <select
                 value={parentId}
-                onChange={e => {
-                  console.log('Parent selected:', e.target.value);
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   setParentId(e.target.value);
                 }}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white"
               >
                 <option value="">None (Top Level)</option>
-                {availableParents.map(d => (
+                {availableParents.map((d: Department) => (
                   <option key={d.id} value={d.id}>
                     {d.name}
                   </option>

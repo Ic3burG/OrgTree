@@ -1,11 +1,24 @@
-import { memo, useState, useRef, useEffect, useContext } from 'react';
+import React, { memo, useState, useRef, useEffect, useContext } from 'react';
 import { createPortal } from 'react-dom';
-import { Handle, Position } from 'reactflow';
+import { Handle, Position, NodeProps } from 'reactflow';
 import { Folder, FolderOpen, ChevronDown, ChevronUp, Users } from 'lucide-react';
 import { getDepthColors } from '../utils/colors';
 import { ThemeContext } from './OrgMap';
 import PersonRowCard from './PersonRowCard';
 import DepartmentTooltip from './DepartmentTooltip';
+import type { Person } from '../types/index.js';
+
+interface DepartmentNodeData {
+  name: string;
+  depth: number;
+  people: Person[];
+  description: string | null;
+  isExpanded: boolean;
+  onToggleExpand?: () => void;
+  onSelectPerson?: (person: Person) => void;
+  isHighlighted?: boolean;
+  theme?: string;
+}
 
 /**
  * DepartmentNode - Custom React Flow node for departments
@@ -13,7 +26,7 @@ import DepartmentTooltip from './DepartmentTooltip';
  * Mobile: Larger touch targets, no tooltips on hover
  * Desktop: Standard size with hover tooltips
  */
-function DepartmentNode({ data, selected }) {
+function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): React.JSX.Element {
   const {
     name,
     depth,
@@ -33,18 +46,18 @@ function DepartmentNode({ data, selected }) {
 
   // Hover state for tooltip (disabled on touch devices)
   const [isHovered, setIsHovered] = useState(false);
-  const [hoverTimeout, setHoverTimeout] = useState(null);
-  const [leaveTimeout, setLeaveTimeout] = useState(null);
+  const [hoverTimeout, setHoverTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [leaveTimeout, setLeaveTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const headerRef = useRef(null);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   // Detect touch device
   useEffect(() => {
     setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
   }, []);
 
-  const handleHeaderClick = e => {
+  const handleHeaderClick = (e: React.MouseEvent<HTMLDivElement>): void => {
     e.stopPropagation();
     if (onToggleExpand) {
       onToggleExpand();
@@ -52,7 +65,7 @@ function DepartmentNode({ data, selected }) {
   };
 
   // Calculate tooltip position in viewport coordinates
-  const updateTooltipPosition = () => {
+  const updateTooltipPosition = (): void => {
     if (headerRef.current) {
       const rect = headerRef.current.getBoundingClientRect();
       setTooltipPosition({
@@ -64,7 +77,7 @@ function DepartmentNode({ data, selected }) {
 
   // Show tooltip after 500ms delay to avoid flashing on quick mouse passes
   // Disabled on touch devices
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (): void => {
     if (isTouchDevice) return;
 
     // Clear any pending leave timeout
@@ -80,7 +93,7 @@ function DepartmentNode({ data, selected }) {
     setHoverTimeout(timeout);
   };
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (): void => {
     if (hoverTimeout) {
       clearTimeout(hoverTimeout);
       setHoverTimeout(null);
@@ -99,7 +112,7 @@ function DepartmentNode({ data, selected }) {
       updateTooltipPosition();
 
       // Update position on scroll or resize
-      const handleUpdate = () => updateTooltipPosition();
+      const handleUpdate = (): void => updateTooltipPosition();
       window.addEventListener('scroll', handleUpdate, true);
       window.addEventListener('resize', handleUpdate);
 
@@ -108,6 +121,7 @@ function DepartmentNode({ data, selected }) {
         window.removeEventListener('resize', handleUpdate);
       };
     }
+    return undefined;
   }, [isHovered, description]);
 
   // Cleanup timeouts on unmount

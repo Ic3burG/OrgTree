@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { createCsrfTokenPair } from '../services/csrf.service.js';
 
 const router = express.Router();
@@ -23,7 +23,7 @@ const router = express.Router();
  * Security: No authentication required as this just generates a token.
  * The token only proves the request came from the same origin.
  */
-router.get('/csrf-token', (req, res) => {
+router.get('/csrf-token', (_req: Request, res: Response): void => {
   try {
     const { signedToken } = createCsrfTokenPair();
 

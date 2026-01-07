@@ -1,10 +1,26 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Database as DatabaseType } from 'better-sqlite3';
 import bcrypt from 'bcrypt';
+
+// Type definitions at module level
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  password_hash?: string;
+};
+
+type AuthResult = {
+  accessToken: string;
+  refreshToken: string;
+  user: Omit<User, 'password_hash'>;
+};
 
 // Mock the database module before importing the service
 vi.mock('../db.js', () => {
   const Database = require('better-sqlite3');
-  const db = new Database(':memory:');
+  const db: DatabaseType = new Database(':memory:');
 
   // Initialize schema
   db.exec(`
@@ -50,18 +66,22 @@ vi.mock('../db.js', () => {
 
 // Import after mocking
 import db from '../db.js';
-import { createUser, loginUser, getUserById } from './auth.service.js';
+import {
+  createUser,
+  loginUser,
+  getUserById,
+} from './auth.service.js';
 
 describe('Auth Service', () => {
   beforeEach(() => {
     // Clear users table before each test
-    db.prepare('DELETE FROM users').run();
-    db.prepare('DELETE FROM refresh_tokens').run();
+    (db as DatabaseType).prepare('DELETE FROM users').run();
+    (db as DatabaseType).prepare('DELETE FROM refresh_tokens').run();
   });
 
   describe('createUser', () => {
     it('should create a new user successfully', async () => {
-      const result = await createUser('John Doe', 'john@example.com', 'password123');
+      const result: AuthResult = await createUser('John Doe', 'john@example.com', 'password123');
 
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
@@ -75,30 +95,32 @@ describe('Auth Service', () => {
     it('should hash the password', async () => {
       await createUser('John Doe', 'john@example.com', 'password123');
 
-      const user = db
+      const user: User | undefined = (db as DatabaseType)
         .prepare('SELECT password_hash FROM users WHERE email = ?')
-        .get('john@example.com');
-      expect(user.password_hash).not.toBe('password123');
-      expect(await bcrypt.compare('password123', user.password_hash)).toBe(true);
+        .get('john@example.com') as User | undefined;
+      expect(user?.password_hash).not.toBe('password123');
+      expect(
+        user?.password_hash ? await bcrypt.compare('password123', user.password_hash) : false
+      ).toBe(true);
     });
 
     it('should throw error for duplicate email', async () => {
       await createUser('John Doe', 'john@example.com', 'password123');
 
-      await expect(createUser('Jane Doe', 'john@example.com', 'password456')).rejects.toThrow(
-        'Email already registered'
-      );
+      await expect(
+        createUser('Jane Doe', 'john@example.com', 'password456')
+      ).rejects.toThrow('Email already registered');
     });
 
     it('should set correct role for first user', async () => {
-      const result = await createUser('Admin', 'admin@example.com', 'admin123');
+      const result: AuthResult = await createUser('Admin', 'admin@example.com', 'admin123');
       // First user could be 'superuser' or 'user' depending on implementation
       expect(['user', 'superuser']).toContain(result.user.role);
     });
 
     it('should make subsequent users regular users', async () => {
       await createUser('Admin', 'admin@example.com', 'admin123');
-      const result = await createUser('User', 'user@example.com', 'user123');
+      const result: AuthResult = await createUser('User', 'user@example.com', 'user123');
       expect(result.user.role).toBe('user');
     });
   });
@@ -109,7 +131,7 @@ describe('Auth Service', () => {
     });
 
     it('should login with correct credentials', async () => {
-      const result = await loginUser('john@example.com', 'password123');
+      const result: AuthResult = await loginUser('john@example.com', 'password123');
 
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
@@ -132,9 +154,13 @@ describe('Auth Service', () => {
 
   describe('getUserById', () => {
     it('should return user by ID', async () => {
-      const { user: created } = await createUser('John Doe', 'john@example.com', 'password123');
+      const { user: created }: AuthResult = await createUser(
+        'John Doe',
+        'john@example.com',
+        'password123'
+      );
 
-      const user = await getUserById(created.id);
+      const user: User = await getUserById(created.id);
 
       expect(user.id).toBe(created.id);
       expect(user.name).toBe('John Doe');
@@ -146,9 +172,13 @@ describe('Auth Service', () => {
     });
 
     it('should not return password hash', async () => {
-      const { user: created } = await createUser('John Doe', 'john@example.com', 'password123');
+      const { user: created }: AuthResult = await createUser(
+        'John Doe',
+        'john@example.com',
+        'password123'
+      );
 
-      const user = await getUserById(created.id);
+      const user: User = await getUserById(created.id);
 
       expect(user).not.toHaveProperty('password_hash');
     });

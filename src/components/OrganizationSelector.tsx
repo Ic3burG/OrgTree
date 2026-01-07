@@ -1,20 +1,21 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Plus, LogOut, Trash2, Edit, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/client';
+import type { Organization } from '../types/index.js';
 
-export default function OrganizationSelector() {
-  const [organizations, setOrganizations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newOrgName, setNewOrgName] = useState('');
-  const [creating, setCreating] = useState(false);
-  const [showRenameModal, setShowRenameModal] = useState(false);
-  const [renamingOrg, setRenamingOrg] = useState(null);
-  const [renameOrgName, setRenameOrgName] = useState('');
-  const [renaming, setRenaming] = useState(false);
+export default function OrganizationSelector(): React.JSX.Element {
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+  const [newOrgName, setNewOrgName] = useState<string>('');
+  const [creating, setCreating] = useState<boolean>(false);
+  const [showRenameModal, setShowRenameModal] = useState<boolean>(false);
+  const [renamingOrg, setRenamingOrg] = useState<Organization | null>(null);
+  const [renameOrgName, setRenameOrgName] = useState<string>('');
+  const [renaming, setRenaming] = useState<boolean>(false);
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -23,20 +24,24 @@ export default function OrganizationSelector() {
     loadOrganizations();
   }, []);
 
-  async function loadOrganizations() {
+  async function loadOrganizations(): Promise<void> {
     try {
       setLoading(true);
       setError(null);
       const data = await api.getOrganizations();
       setOrganizations(data);
     } catch (err) {
-      setError(err.message || 'Failed to load organizations');
+      if (err instanceof Error) {
+        setError(err.message || 'Failed to load organizations');
+      } else {
+        setError('Failed to load organizations');
+      }
     } finally {
       setLoading(false);
     }
   }
 
-  const handleCreateOrg = async e => {
+  const handleCreateOrg = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (!newOrgName.trim()) return;
 
@@ -48,19 +53,23 @@ export default function OrganizationSelector() {
       // Navigate directly to the new organization
       navigate(`/org/${newOrg.id}`);
     } catch (err) {
-      alert(err.message || 'Failed to create organization');
+      if (err instanceof Error) {
+        alert(err.message || 'Failed to create organization');
+      } else {
+        alert('Failed to create organization');
+      }
     } finally {
       setCreating(false);
     }
   };
 
-  const handleRenameOrg = org => {
+  const handleRenameOrg = (org: Organization): void => {
     setRenamingOrg(org);
     setRenameOrgName(org.name);
     setShowRenameModal(true);
   };
 
-  const handleRenameSubmit = async e => {
+  const handleRenameSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (!renameOrgName.trim() || !renamingOrg) return;
 
@@ -72,13 +81,17 @@ export default function OrganizationSelector() {
       setRenameOrgName('');
       await loadOrganizations();
     } catch (err) {
-      alert(err.message || 'Failed to rename organization');
+      if (err instanceof Error) {
+        alert(err.message || 'Failed to rename organization');
+      } else {
+        alert('Failed to rename organization');
+      }
     } finally {
       setRenaming(false);
     }
   };
 
-  const handleDeleteOrg = async (orgId, orgName) => {
+  const handleDeleteOrg = async (orgId: string, orgName: string): Promise<void> => {
     if (
       !confirm(
         `Are you sure you want to delete "${orgName}"? This will delete all departments and people in this organization. This action cannot be undone.`
@@ -91,11 +104,15 @@ export default function OrganizationSelector() {
       await api.deleteOrganization(orgId);
       await loadOrganizations();
     } catch (err) {
-      alert(err.message || 'Failed to delete organization');
+      if (err instanceof Error) {
+        alert(err.message || 'Failed to delete organization');
+      } else {
+        alert('Failed to delete organization');
+      }
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     logout();
     navigate('/login');
   };

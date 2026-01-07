@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
 import {
   createBackup,
@@ -7,6 +7,7 @@ import {
   getBackupStats,
 } from '../services/backup.service.js';
 import logger from '../utils/logger.js';
+import type { AuthRequest } from '../types/index.js';
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ const router = express.Router();
  * List all available backups
  * Requires: Superuser
  */
-router.get('/admin/backups', authenticateToken, requireSuperuser, (req, res) => {
+router.get('/admin/backups', authenticateToken, requireSuperuser, (_req: AuthRequest, res: Response): void => {
   try {
     const backups = listBackups();
     const stats = getBackupStats();
@@ -24,7 +25,7 @@ router.get('/admin/backups', authenticateToken, requireSuperuser, (req, res) => 
       backups,
       stats,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to list backups', { error: error.message });
     res.status(500).json({ message: 'Failed to list backups' });
   }
@@ -35,11 +36,11 @@ router.get('/admin/backups', authenticateToken, requireSuperuser, (req, res) => 
  * Create a new backup
  * Requires: Superuser
  */
-router.post('/admin/backups', authenticateToken, requireSuperuser, async (req, res) => {
+router.post('/admin/backups', authenticateToken, requireSuperuser, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     logger.info('Manual backup triggered', {
-      userId: req.user.id,
-      userEmail: req.user.email,
+      userId: req.user!.id,
+      userEmail: req.user!.email,
     });
 
     const result = await createBackup();
@@ -63,7 +64,7 @@ router.post('/admin/backups', authenticateToken, requireSuperuser, async (req, r
     } else {
       res.status(500).json({ message: result.error });
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to create backup', { error: error.message });
     res.status(500).json({ message: 'Failed to create backup' });
   }
@@ -74,16 +75,17 @@ router.post('/admin/backups', authenticateToken, requireSuperuser, async (req, r
  * Clean up old backups (keep last N)
  * Requires: Superuser
  */
-router.delete('/admin/backups/cleanup', authenticateToken, requireSuperuser, (req, res) => {
+router.delete('/admin/backups/cleanup', authenticateToken, requireSuperuser, (req: AuthRequest, res: Response): void => {
   try {
-    const keepCount = parseInt(req.query.keep || '7', 10);
+    const keepCount = parseInt((req.query.keep as string) || '7', 10);
 
     if (keepCount < 1 || keepCount > 30) {
-      return res.status(400).json({ message: 'Keep count must be between 1 and 30' });
+      res.status(400).json({ message: 'Keep count must be between 1 and 30' });
+      return;
     }
 
     logger.info('Manual backup cleanup triggered', {
-      userId: req.user.id,
+      userId: req.user!.id,
       keepCount,
     });
 
@@ -95,7 +97,7 @@ router.delete('/admin/backups/cleanup', authenticateToken, requireSuperuser, (re
       deleted: result.deleted,
       deletedFiles: result.deletedFiles,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to cleanup backups', { error: error.message });
     res.status(500).json({ message: 'Failed to cleanup backups' });
   }
@@ -106,11 +108,11 @@ router.delete('/admin/backups/cleanup', authenticateToken, requireSuperuser, (re
  * Get backup statistics
  * Requires: Superuser
  */
-router.get('/admin/backups/stats', authenticateToken, requireSuperuser, (req, res) => {
+router.get('/admin/backups/stats', authenticateToken, requireSuperuser, (_req: AuthRequest, res: Response): void => {
   try {
     const stats = getBackupStats();
     res.json(stats);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to get backup stats', { error: error.message });
     res.status(500).json({ message: 'Failed to get backup stats' });
   }

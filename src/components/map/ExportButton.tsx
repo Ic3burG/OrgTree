@@ -1,14 +1,24 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Download, Image, FileText, ChevronDown } from 'lucide-react';
 
-export default function ExportButton({ onExportPng, onExportPdf, loading }) {
+interface ExportButtonProps {
+  onExportPng: () => void;
+  onExportPdf: () => void;
+  loading: boolean;
+}
+
+export default function ExportButton({
+  onExportPng,
+  onExportPdf,
+  loading,
+}: ExportButtonProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    function handleClickOutside(event: MouseEvent): void {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
@@ -16,6 +26,7 @@ export default function ExportButton({ onExportPng, onExportPdf, loading }) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
+    return undefined;
   }, [isOpen]);
 
   return (

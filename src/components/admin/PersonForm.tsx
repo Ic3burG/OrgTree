@@ -1,5 +1,31 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import type { Person, Department } from '../../types/index.js';
+
+interface PersonFormData {
+  name: string;
+  title: string;
+  email: string;
+  phone: string;
+  departmentId: string;
+}
+
+interface PersonFormErrors {
+  name?: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  departmentId?: string;
+}
+
+interface PersonFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: PersonFormData) => void;
+  person?: Person | null;
+  departments?: Department[];
+  isSubmitting?: boolean;
+}
 
 export default function PersonForm({
   isOpen,
@@ -8,15 +34,15 @@ export default function PersonForm({
   person = null,
   departments = [],
   isSubmitting = false,
-}) {
-  const [formData, setFormData] = useState({
+}: PersonFormProps): React.JSX.Element | null {
+  const [formData, setFormData] = useState<PersonFormData>({
     name: '',
     title: '',
     email: '',
     phone: '',
     departmentId: '',
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<PersonFormErrors>({});
 
   useEffect(() => {
     if (person) {
@@ -25,7 +51,7 @@ export default function PersonForm({
         title: person.title || '',
         email: person.email || '',
         phone: person.phone || '',
-        departmentId: person.departmentId || '',
+        departmentId: person.department_id || '',
       });
     } else {
       setFormData({
@@ -39,8 +65,8 @@ export default function PersonForm({
     setErrors({});
   }, [person, departments, isOpen]);
 
-  const validate = () => {
-    const newErrors = {};
+  const validate = (): boolean => {
+    const newErrors: PersonFormErrors = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
@@ -58,19 +84,19 @@ export default function PersonForm({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (validate()) {
       onSubmit(formData);
     }
   };
 
-  const handleChange = e => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev: PersonFormData) => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+    if (errors[name as keyof PersonFormErrors]) {
+      setErrors((prev: PersonFormErrors) => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -152,7 +178,7 @@ export default function PersonForm({
                 }`}
               >
                 <option value="">Select a department</option>
-                {departments.map(dept => (
+                {departments.map((dept: Department) => (
                   <option key={dept.id} value={dept.id}>
                     {dept.name}
                   </option>

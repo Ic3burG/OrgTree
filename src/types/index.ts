@@ -37,6 +37,9 @@ export interface Organization {
   // Optional fields populated in some contexts
   memberCount?: number;
   departmentCount?: number;
+  departments?: Department[];
+  role?: 'owner' | 'admin' | 'editor' | 'viewer';
+  createdAt?: string; // Alias for created_at
 }
 
 export interface OrgMember {
@@ -100,6 +103,7 @@ export interface Invitation {
   created_at: string;
   // Optional fields
   organization_name?: string;
+  organizationName?: string; // Alias for convenience
   status?: 'pending' | 'accepted' | 'expired';
 }
 
@@ -115,6 +119,12 @@ export interface AuditLog {
   entity_id: string | null;
   snapshot: Record<string, unknown> | null;
   created_at: string;
+  // Convenience aliases (some APIs return camelCase)
+  actorName?: string;
+  actionType?: string;
+  entityType?: string;
+  entityData?: Record<string, unknown> | null;
+  createdAt?: string;
 }
 
 // Session types
@@ -142,6 +152,12 @@ export interface SearchResult {
 export interface SearchResponse {
   results: SearchResult[];
   total: number;
+  pagination?: {
+    hasMore: boolean;
+    limit: number;
+    offset: number;
+  };
+  suggestions?: string[];
 }
 
 // Pagination types

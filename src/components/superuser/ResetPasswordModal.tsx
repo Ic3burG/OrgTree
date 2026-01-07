@@ -1,15 +1,25 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { X, AlertTriangle, Copy, Check, Key } from 'lucide-react';
 import api from '../../api/client';
+import type { User } from '../../types';
 
-export default function ResetPasswordModal({ user, onClose }) {
-  const [step, setStep] = useState('confirm'); // 'confirm' | 'success'
+interface ResetPasswordModalProps {
+  user: User | null;
+  onClose: () => void;
+}
+
+export default function ResetPasswordModal({
+  user,
+  onClose,
+}: ResetPasswordModalProps): React.JSX.Element {
+  const [step, setStep] = useState<'confirm' | 'success'>('confirm');
   const [isResetting, setIsResetting] = useState(false);
   const [tempPassword, setTempPassword] = useState('');
   const [copied, setCopied] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleReset = async () => {
+  const handleReset = async (): Promise<void> => {
+    if (!user) return;
     try {
       setIsResetting(true);
       setError(null);
@@ -17,18 +27,19 @@ export default function ResetPasswordModal({ user, onClose }) {
       setTempPassword(result.temporaryPassword);
       setStep('success');
     } catch (err) {
-      setError(err.message || 'Failed to reset password');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to reset password';
+      setError(errorMessage);
     } finally {
       setIsResetting(false);
     }
   };
 
-  const handleCopy = async () => {
+  const handleCopy = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(tempPassword);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
+    } catch (_err) {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
       textArea.value = tempPassword;

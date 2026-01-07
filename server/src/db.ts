@@ -2,6 +2,19 @@ import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
+interface TableInfoRow {
+  name: string;
+  type: string;
+}
+
+interface TableNameRow {
+  name: string;
+}
+
+interface IndexNameRow {
+  name: string;
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -75,7 +88,7 @@ db.exec(`
 
 // Migration: Add sharing columns to organizations table if they don't exist
 try {
-  const tableInfo = db.prepare('PRAGMA table_info(organizations)').all();
+  const tableInfo = db.prepare('PRAGMA table_info(organizations)').all() as TableInfoRow[];
   const columnNames = tableInfo.map(col => col.name);
 
   if (!columnNames.includes('is_public')) {
@@ -98,7 +111,7 @@ try {
 
 // Migration: Remove office column from people table if it exists
 try {
-  const peopleTableInfo = db.prepare('PRAGMA table_info(people)').all();
+  const peopleTableInfo = db.prepare('PRAGMA table_info(people)').all() as TableInfoRow[];
   const peopleColumnNames = peopleTableInfo.map(col => col.name);
 
   if (peopleColumnNames.includes('office')) {
@@ -141,7 +154,7 @@ try {
 
 // Migration: Add must_change_password column to users table
 try {
-  const usersTableInfo = db.prepare('PRAGMA table_info(users)').all();
+  const usersTableInfo = db.prepare('PRAGMA table_info(users)').all() as TableInfoRow[];
   const usersColumnNames = usersTableInfo.map(col => col.name);
 
   if (!usersColumnNames.includes('must_change_password')) {
@@ -154,7 +167,7 @@ try {
 
 // Migration: Add organization_members table
 try {
-  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as TableNameRow[];
   const tableNames = tables.map(t => t.name);
 
   if (!tableNames.includes('organization_members')) {
@@ -184,7 +197,7 @@ try {
 
 // Migration: Add invitations table
 try {
-  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as TableNameRow[];
   const tableNames = tables.map(t => t.name);
 
   if (!tableNames.includes('invitations')) {
@@ -216,7 +229,7 @@ try {
 
 // Migration: Add audit_logs table
 try {
-  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as TableNameRow[];
   const tableNames = tables.map(t => t.name);
 
   if (!tableNames.includes('audit_logs')) {
@@ -247,7 +260,7 @@ try {
 
 // Migration: Add FTS5 full-text search tables for advanced search
 try {
-  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as TableNameRow[];
   const tableNames = tables.map(t => t.name);
 
   if (!tableNames.includes('departments_fts')) {
@@ -341,7 +354,7 @@ try {
 
 // Migration: Add refresh_tokens table for secure token management
 try {
-  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as TableNameRow[];
   const tableNames = tables.map(t => t.name);
 
   if (!tableNames.includes('refresh_tokens')) {
@@ -376,14 +389,14 @@ try {
 
 // Migration: Add deleted_at column for soft deletes
 try {
-  const departmentsTableInfo = db.prepare('PRAGMA table_info(departments)').all();
+  const departmentsTableInfo = db.prepare('PRAGMA table_info(departments)').all() as TableInfoRow[];
   const departmentsColumnNames = departmentsTableInfo.map(col => col.name);
   if (!departmentsColumnNames.includes('deleted_at')) {
     db.exec('ALTER TABLE departments ADD COLUMN deleted_at DATETIME');
     console.log('Migration: Added deleted_at column to departments table');
   }
 
-  const peopleTableInfo = db.prepare('PRAGMA table_info(people)').all();
+  const peopleTableInfo = db.prepare('PRAGMA table_info(people)').all() as TableInfoRow[];
   const peopleColumnNames = peopleTableInfo.map(col => col.name);
   if (!peopleColumnNames.includes('deleted_at')) {
     db.exec('ALTER TABLE people ADD COLUMN deleted_at DATETIME');
@@ -396,14 +409,15 @@ try {
 // Migration: Add performance optimization indexes
 try {
   // Check which indexes already exist
-  const existingIndexes = db
-    .prepare(
-      `
+  const existingIndexes = (
+    db
+      .prepare(
+        `
     SELECT name FROM sqlite_master WHERE type='index'
   `
-    )
-    .all()
-    .map(idx => idx.name);
+      )
+      .all() as IndexNameRow[]
+  ).map(idx => idx.name);
 
   const indexesToCreate = [
     // CRITICAL: departments.parent_id - used for hierarchical queries (currently causes table scans)

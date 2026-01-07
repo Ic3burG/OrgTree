@@ -1,5 +1,10 @@
-interface CSVRow {
+export interface CSVRow {
   [key: string]: string;
+}
+
+export interface CSVImportResult {
+  departmentsCreated: number;
+  peopleCreated: number;
 }
 
 /**

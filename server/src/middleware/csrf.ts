@@ -1,5 +1,7 @@
+import type { Response, NextFunction } from 'express';
 import { verifyCsrfToken, compareCsrfTokens } from '../services/csrf.service.js';
 import { createAuditLog } from '../services/audit.service.js';
+import type { AuthRequest } from '../types/index.js';
 
 /**
  * CSRF Protection Middleware
@@ -18,23 +20,22 @@ const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 
 /**
  * CSRF validation middleware
- * @param {object} req - Express request object
- * @param {object} res - Express response object
- * @param {function} next - Express next middleware function
  */
-export function validateCsrf(req, res, next) {
+export function validateCsrf(req: AuthRequest, res: Response, next: NextFunction): void {
   // Skip CSRF check for safe methods
   if (SAFE_METHODS.includes(req.method)) {
     return next();
   }
 
   // Extract CSRF token from custom header
-  const headerToken = req.headers['x-csrf-token'];
+  const headerToken = Array.isArray(req.headers['x-csrf-token'])
+    ? req.headers['x-csrf-token'][0]
+    : req.headers['x-csrf-token'];
 
   // Extract CSRF token from cookie
-  const cookieToken = req.cookies['csrf-token'];
+  const cookieToken = req.cookies['csrf-token'] as string | undefined;
 
-  const ipAddress = req.ip || req.connection.remoteAddress;
+  const ipAddress = req.ip || req.connection?.remoteAddress;
 
   // Both tokens must be present
   if (!headerToken || !cookieToken) {
@@ -54,10 +55,11 @@ export function validateCsrf(req, res, next) {
       }
     );
 
-    return res.status(403).json({
+    res.status(403).json({
       message: 'CSRF token validation failed',
       code: 'CSRF_TOKEN_MISSING',
     });
+    return;
   }
 
   // Verify both tokens are properly signed
@@ -81,10 +83,11 @@ export function validateCsrf(req, res, next) {
       }
     );
 
-    return res.status(403).json({
+    res.status(403).json({
       message: 'CSRF token validation failed',
       code: 'CSRF_TOKEN_INVALID',
     });
+    return;
   }
 
   // Verify tokens match (double submit validation)
@@ -105,10 +108,11 @@ export function validateCsrf(req, res, next) {
       }
     );
 
-    return res.status(403).json({
+    res.status(403).json({
       message: 'CSRF token validation failed',
       code: 'CSRF_TOKEN_MISMATCH',
     });
+    return;
   }
 
   // CSRF validation passed
@@ -119,7 +123,7 @@ export function validateCsrf(req, res, next) {
  * Conditional CSRF middleware - only validates if user is authenticated
  * This allows public endpoints to work without CSRF tokens
  */
-export function validateCsrfIfAuthenticated(req, res, next) {
+export function validateCsrfIfAuthenticated(req: AuthRequest, res: Response, next: NextFunction): void {
   // Only validate CSRF for authenticated requests
   if (req.user) {
     return validateCsrf(req, res, next);

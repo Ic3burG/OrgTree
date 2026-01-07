@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/node';
 
-export function initSentry() {
-  const dsn = process.env.SENTRY_DSN;
+export function initSentry(): void {
+  const dsn: string | undefined = process.env.SENTRY_DSN;
 
   // Only initialize if DSN is configured
   if (!dsn) {
@@ -25,19 +25,21 @@ export function initSentry() {
     serverName: process.env.RENDER_SERVICE_NAME || 'orgtree-server',
 
     // Filter sensitive data
-    beforeSend(event, hint) {
+    beforeSend(event: Sentry.ErrorEvent, _hint: Sentry.EventHint): Sentry.ErrorEvent | null {
       // Remove sensitive headers
-      if (event.request?.headers) {
-        delete event.request.headers.authorization;
-        delete event.request.headers.cookie;
+      if (event.request?.headers && typeof event.request.headers === 'object') {
+        const headers = event.request.headers as Record<string, string>;
+        delete headers.authorization;
+        delete headers.cookie;
       }
 
       // Remove sensitive data from request body
-      if (event.request?.data) {
-        const sensitiveFields = ['password', 'oldPassword', 'newPassword', 'token'];
-        sensitiveFields.forEach(field => {
-          if (event.request.data[field]) {
-            event.request.data[field] = '[REDACTED]';
+      if (event.request?.data && typeof event.request.data === 'object') {
+        const sensitiveFields: string[] = ['password', 'oldPassword', 'newPassword', 'token'];
+        const data = event.request.data as Record<string, unknown>;
+        sensitiveFields.forEach((field: string) => {
+          if (field in data) {
+            data[field] = '[REDACTED]';
           }
         });
       }
@@ -50,13 +52,13 @@ export function initSentry() {
 }
 
 // Capture unhandled rejections
-export function setupGlobalErrorHandlers() {
-  process.on('unhandledRejection', (reason, promise) => {
+export function setupGlobalErrorHandlers(): void {
+  process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     Sentry.captureException(reason);
   });
 
-  process.on('uncaughtException', error => {
+  process.on('uncaughtException', (error: Error) => {
     console.error('Uncaught Exception:', error);
     Sentry.captureException(error);
     // Give Sentry time to send the error before crashing

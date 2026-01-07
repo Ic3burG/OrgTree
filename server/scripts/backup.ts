@@ -74,8 +74,9 @@ async function main() {
         // Default: create backup and cleanup old ones
         await createBackupWithCleanup();
     }
-  } catch (error) {
-    console.error('Error:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error:', errorMessage);
     process.exit(1);
   }
 }
@@ -136,7 +137,9 @@ function showStats() {
 
   if (stats.newestBackup) {
     console.log(`  Newest Backup:    ${stats.newestBackup.toISOString()}`);
-    console.log(`  Oldest Backup:    ${stats.oldestBackup.toISOString()}`);
+    if (stats.oldestBackup) {
+      console.log(`  Oldest Backup:    ${stats.oldestBackup.toISOString()}`);
+    }
   }
 }
 
@@ -155,7 +158,7 @@ async function cleanup() {
   }
 }
 
-async function restore(filename) {
+async function restore(filename: string) {
   const backups = listBackups();
   const backup = backups.find(b => b.filename === filename);
 

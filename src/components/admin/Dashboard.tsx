@@ -1,41 +1,49 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Building2, Users, FileText, Download, Upload, Share2 } from 'lucide-react';
+import { Building2, Users, Download, Upload, Share2 } from 'lucide-react';
 import api from '../../api/client';
 import { useToast } from '../ui/Toast';
 import { generateCSV, downloadCSV } from '../../utils/csvExport';
 import ImportModal from './ImportModal';
 import ShareModal from './ShareModal';
+import type { Organization, Department } from '../../types/index.js';
 
-export default function Dashboard() {
-  const { orgId } = useParams();
-  const [organization, setOrganization] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showImport, setShowImport] = useState(false);
-  const [showShare, setShowShare] = useState(false);
+interface OrganizationWithDetails extends Organization {
+  departments?: Department[];
+  userRole?: string;
+}
+
+export default function Dashboard(): React.JSX.Element {
+  const { orgId } = useParams<{ orgId: string }>();
+  const [organization, setOrganization] = useState<OrganizationWithDetails | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showImport, setShowImport] = useState<boolean>(false);
+  const [showShare, setShowShare] = useState<boolean>(false);
   const toast = useToast();
 
   useEffect(() => {
     loadOrganization();
   }, [orgId]);
 
-  async function loadOrganization() {
+  async function loadOrganization(): Promise<void> {
+    if (!orgId) return;
     try {
       setLoading(true);
       setError(null);
       const data = await api.getOrganization(orgId);
       setOrganization(data);
     } catch (err) {
-      setError(err.message || 'Failed to load organization');
+      setError((err as Error).message || 'Failed to load organization');
     } finally {
       setLoading(false);
     }
   }
 
-  const handleExport = () => {
+  const handleExport = (): void => {
+    if (!organization || !organization.departments) return;
     try {
-      const csv = generateCSV(organization);
+      const csv = generateCSV({ ...organization, departments: organization.departments });
       const filename = `${organization.name.replace(/\s+/g, '-')}-org.csv`;
       downloadCSV(csv, filename);
       toast.success('Organization exported successfully');
@@ -72,7 +80,8 @@ export default function Dashboard() {
   const peopleCount =
     organization.departments?.reduce((sum, dept) => sum + (dept.people?.length || 0), 0) || 0;
 
-  const topLevelDepts = organization.departments?.filter(d => !d.parentId).length || 0;
+  const topLevelDepts =
+    organization.departments?.filter((d: Department) => !d.parent_id).length || 0;
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -135,8 +144,8 @@ export default function Dashboard() {
               </div>
               <p className="text-xs text-gray-500 mt-4">
                 {topLevelDepts} top-level departments
-                {organization.createdAt && (
-                  <> • Created {new Date(organization.createdAt).toLocaleDateString()}</>
+                {organization.created_at && (
+                  <> • Created {new Date(organization.created_at).toLocaleDateString()}</>
                 )}
               </p>
             </div>
@@ -168,14 +177,14 @@ export default function Dashboard() {
               <div className="p-6">
                 <div className="space-y-4">
                   {organization.departments
-                    .sort((a, b) => {
+                    .sort((a: Department, b: Department) => {
                       // Handle missing dates safely
-                      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
                       return dateB - dateA;
                     })
                     .slice(0, 5)
-                    .map(dept => (
+                    .map((dept: Department) => (
                       <div
                         key={dept.id}
                         className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
@@ -190,9 +199,9 @@ export default function Dashboard() {
                           <p className="text-sm font-medium text-gray-900">
                             {dept.people?.length || 0} people
                           </p>
-                          {dept.createdAt && (
+                          {dept.created_at && (
                             <p className="text-xs text-gray-500">
-                              {new Date(dept.createdAt).toLocaleDateString()}
+                              {new Date(dept.created_at).toLocaleDateString()}
                             </p>
                           )}
                         </div>
@@ -215,18 +224,20 @@ export default function Dashboard() {
       </div>
 
       {/* Import Modal */}
-      <ImportModal
-        isOpen={showImport}
-        onClose={() => setShowImport(false)}
-        orgId={orgId}
-        onSuccess={() => {
-          loadOrganization();
-          toast.success('Data imported successfully');
-        }}
-      />
+      {orgId && (
+        <ImportModal
+          isOpen={showImport}
+          onClose={() => setShowImport(false)}
+          orgId={orgId}
+          onSuccess={() => {
+            loadOrganization();
+            toast.success('Data imported successfully');
+          }}
+        />
+      )}
 
       {/* Share Modal */}
-      {showShare && (
+      {showShare && orgId && organization && (
         <ShareModal
           orgId={orgId}
           orgName={organization.name}

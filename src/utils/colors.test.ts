@@ -117,7 +117,6 @@ describe('Colors Utility', () => {
     });
 
     it('should return lighter colors for deeper depths', () => {
-      const depth0 = getPersonCardColor(0);
       const depth2 = getPersonCardColor(2);
 
       // depth2 should be white or lighter

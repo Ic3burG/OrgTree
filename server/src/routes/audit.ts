@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
 import { requireOrgPermission } from '../services/member.service.js';
 import { getAuditLogs, getAllAuditLogs, cleanupOldLogs } from '../services/audit.service.js';
+import type { AuthRequest } from '../types/index.js';
 
 const router = express.Router();
 
@@ -19,10 +20,10 @@ router.use(authenticateToken);
  *   - startDate: ISO date string
  *   - endDate: ISO date string
  */
-router.get('/organizations/:orgId/audit-logs', async (req, res, next) => {
+router.get('/organizations/:orgId/audit-logs', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { orgId } = req.params;
-    const userId = req.user.id;
+    const orgId = req.params.orgId!;
+    const userId = req.user!.id;
 
     // Verify user has admin permission for this organization
     await requireOrgPermission(orgId, userId, 'admin');
@@ -31,14 +32,15 @@ router.get('/organizations/:orgId/audit-logs', async (req, res, next) => {
     cleanupOldLogs();
 
     // Get audit logs with filters
-    const result = getAuditLogs(orgId, {
-      limit: req.query.limit,
-      cursor: req.query.cursor,
-      actionType: req.query.actionType,
-      entityType: req.query.entityType,
-      startDate: req.query.startDate,
-      endDate: req.query.endDate,
-    });
+    const filters: any = {};
+    if (req.query.limit) filters.limit = String(req.query.limit);
+    if (req.query.cursor) filters.cursor = String(req.query.cursor);
+    if (req.query.actionType) filters.actionType = String(req.query.actionType);
+    if (req.query.entityType) filters.entityType = String(req.query.entityType);
+    if (req.query.startDate) filters.startDate = String(req.query.startDate);
+    if (req.query.endDate) filters.endDate = String(req.query.endDate);
+
+    const result = getAuditLogs(orgId, filters);
 
     res.json(result);
   } catch (err) {
@@ -52,21 +54,22 @@ router.get('/organizations/:orgId/audit-logs', async (req, res, next) => {
  * Access: Superuser role
  * Query params: Same as organization endpoint + optional orgId filter
  */
-router.get('/admin/audit-logs', requireSuperuser, async (req, res, next) => {
+router.get('/admin/audit-logs', requireSuperuser, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     // Clean up old logs (1 year retention)
     cleanupOldLogs();
 
     // Get all audit logs with filters
-    const result = getAllAuditLogs({
-      limit: req.query.limit,
-      cursor: req.query.cursor,
-      actionType: req.query.actionType,
-      entityType: req.query.entityType,
-      startDate: req.query.startDate,
-      endDate: req.query.endDate,
-      orgId: req.query.orgId,
-    });
+    const filters: any = {};
+    if (req.query.limit) filters.limit = String(req.query.limit);
+    if (req.query.cursor) filters.cursor = String(req.query.cursor);
+    if (req.query.actionType) filters.actionType = String(req.query.actionType);
+    if (req.query.entityType) filters.entityType = String(req.query.entityType);
+    if (req.query.startDate) filters.startDate = String(req.query.startDate);
+    if (req.query.endDate) filters.endDate = String(req.query.endDate);
+    if (req.query.orgId) filters.orgId = String(req.query.orgId);
+
+    const result = getAllAuditLogs(filters);
 
     res.json(result);
   } catch (err) {

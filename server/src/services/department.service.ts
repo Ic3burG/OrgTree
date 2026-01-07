@@ -1,14 +1,41 @@
 import db from '../db.js';
 import { randomUUID } from 'crypto';
 import { requireOrgPermission } from './member.service.js';
+import type { DatabaseDepartment, AppError } from '../types/index.js';
 
 // Helper to verify org access with permission level
-async function verifyOrgAccess(orgId, userId, minRole = 'viewer') {
-  return requireOrgPermission(orgId, userId, minRole);
+function verifyOrgAccess(
+  orgId: string,
+  userId: string,
+  minRole: 'owner' | 'admin' | 'editor' | 'viewer' = 'viewer'
+): void {
+  requireOrgPermission(orgId, userId, minRole);
 }
 
-export async function getDepartments(orgId, userId) {
-  await verifyOrgAccess(orgId, userId, 'viewer');
+interface DepartmentWithPeople {
+  id: string;
+  organizationId: string;
+  parentId: string | null;
+  name: string;
+  description: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  people: Array<{
+    id: string;
+    departmentId: string;
+    name: string;
+    title: string | null;
+    email: string | null;
+    phone: string | null;
+    sortOrder: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+}
+
+export function getDepartments(orgId: string, userId: string): DepartmentWithPeople[] {
+  verifyOrgAccess(orgId, userId, 'viewer');
 
   const departments = db
     .prepare(
@@ -22,7 +49,16 @@ export async function getDepartments(orgId, userId) {
     ORDER BY sort_order ASC
   `
     )
-    .all(orgId);
+    .all(orgId) as Array<{
+    id: string;
+    organizationId: string;
+    parentId: string | null;
+    name: string;
+    description: string | null;
+    sortOrder: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
 
   // Get people for each department
   const result = departments.map(dept => {
@@ -37,7 +73,17 @@ export async function getDepartments(orgId, userId) {
       ORDER BY sort_order ASC
     `
       )
-      .all(dept.id);
+      .all(dept.id) as Array<{
+      id: string;
+      departmentId: string;
+      name: string;
+      title: string | null;
+      email: string | null;
+      phone: string | null;
+      sortOrder: number;
+      createdAt: string;
+      updatedAt: string;
+    }>;
 
     return { ...dept, people };
   });
@@ -45,8 +91,12 @@ export async function getDepartments(orgId, userId) {
   return result;
 }
 
-export async function getDepartmentById(orgId, deptId, userId) {
-  await verifyOrgAccess(orgId, userId, 'viewer');
+export function getDepartmentById(
+  orgId: string,
+  deptId: string,
+  userId: string
+): DepartmentWithPeople {
+  verifyOrgAccess(orgId, userId, 'viewer');
 
   const dept = db
     .prepare(
@@ -59,10 +109,21 @@ export async function getDepartmentById(orgId, deptId, userId) {
     WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
   `
     )
-    .get(deptId, orgId);
+    .get(deptId, orgId) as
+    | {
+        id: string;
+        organizationId: string;
+        parentId: string | null;
+        name: string;
+        description: string | null;
+        sortOrder: number;
+        createdAt: string;
+        updatedAt: string;
+      }
+    | undefined;
 
   if (!dept) {
-    const error = new Error('Department not found');
+    const error = new Error('Department not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -79,15 +140,36 @@ export async function getDepartmentById(orgId, deptId, userId) {
     ORDER BY sort_order ASC
   `
     )
-    .all(deptId);
+    .all(deptId) as Array<{
+    id: string;
+    departmentId: string;
+    name: string;
+    title: string | null;
+    email: string | null;
+    phone: string | null;
+    sortOrder: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
 
   return { ...dept, people };
 }
 
-export async function createDepartment(orgId, data, userId) {
-  await verifyOrgAccess(orgId, userId, 'editor');
+export function createDepartment(
+  orgId: string,
+  data: {
+    name: string;
+    description?: string;
+    parentId?: string | null;
+  },
+  userId: string
+): DepartmentWithPeople {
+  verifyOrgAccess(orgId, userId, 'editor');
 
   const { name, description, parentId } = data;
+
+  // Generate ID first for circular reference check
+  const deptId = randomUUID();
 
   // Validate parentId if provided
   if (parentId) {
@@ -95,16 +177,16 @@ export async function createDepartment(orgId, data, userId) {
       .prepare(
         'SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL'
       )
-      .get(parentId, orgId);
+      .get(parentId, orgId) as DatabaseDepartment | undefined;
     if (!parentDept) {
-      const error = new Error('Parent department not found');
+      const error = new Error('Parent department not found') as AppError;
       error.status = 400;
       throw error;
     }
     // Check for circular reference by traversing up from the new parent
     const isCircular = checkIsDescendant(parentId, deptId);
     if (isCircular) {
-      const error = new Error('Cannot move a department under one of its own descendants');
+      const error = new Error('Cannot move a department under one of its own descendants') as AppError;
       error.status = 400;
       throw error;
     }
@@ -119,10 +201,9 @@ export async function createDepartment(orgId, data, userId) {
     WHERE organization_id = ? AND parent_id ${parentId ? '= ?' : 'IS NULL'} AND deleted_at IS NULL
   `
     )
-    .get(parentId ? [orgId, parentId] : [orgId]);
+    .get(parentId ? [orgId, parentId] : [orgId]) as { maxSort: number | null } | undefined;
 
-  const sortOrder = (maxSortResult.maxSort || 0) + 1;
-  const deptId = randomUUID();
+  const sortOrder = (maxSortResult?.maxSort || 0) + 1;
   const now = new Date().toISOString();
 
   db.prepare(
@@ -132,20 +213,29 @@ export async function createDepartment(orgId, data, userId) {
   `
   ).run(deptId, orgId, parentId || null, name, description || null, sortOrder, now, now);
 
-  return await getDepartmentById(orgId, deptId, userId);
+  return getDepartmentById(orgId, deptId, userId);
 }
 
-export async function updateDepartment(orgId, deptId, data, userId) {
-  await verifyOrgAccess(orgId, userId, 'editor');
+export function updateDepartment(
+  orgId: string,
+  deptId: string,
+  data: {
+    name?: string;
+    description?: string;
+    parentId?: string | null;
+  },
+  userId: string
+): DepartmentWithPeople {
+  verifyOrgAccess(orgId, userId, 'editor');
 
   const dept = db
     .prepare(
       'SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL'
     )
-    .get(deptId, orgId);
+    .get(deptId, orgId) as DatabaseDepartment | undefined;
 
   if (!dept) {
-    const error = new Error('Department not found');
+    const error = new Error('Department not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -154,7 +244,7 @@ export async function updateDepartment(orgId, deptId, data, userId) {
 
   // Prevent self-reference
   if (parentId === deptId) {
-    const error = new Error('Department cannot be its own parent');
+    const error = new Error('Department cannot be its own parent') as AppError;
     error.status = 400;
     throw error;
   }
@@ -165,9 +255,9 @@ export async function updateDepartment(orgId, deptId, data, userId) {
       .prepare(
         'SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL'
       )
-      .get(parentId, orgId);
+      .get(parentId, orgId) as DatabaseDepartment | undefined;
     if (!parentDept) {
-      const error = new Error('Parent department not found');
+      const error = new Error('Parent department not found') as AppError;
       error.status = 400;
       throw error;
     }
@@ -178,7 +268,7 @@ export async function updateDepartment(orgId, deptId, data, userId) {
 
   // CRITICAL: Always update parentId when it's in the request
   // parentId can be a string (valid ID) or null (top level)
-  let newParentId;
+  let newParentId: string | null;
   if ('parentId' in data) {
     // parentId is in the data object, use it (could be string or null)
     newParentId = parentId === '' ? null : parentId || null;
@@ -205,20 +295,24 @@ export async function updateDepartment(orgId, deptId, data, userId) {
     deptId
   );
 
-  return await getDepartmentById(orgId, deptId, userId);
+  return getDepartmentById(orgId, deptId, userId);
 }
 
-export async function deleteDepartment(orgId, deptId, userId) {
-  await verifyOrgAccess(orgId, userId, 'editor');
+export function deleteDepartment(
+  orgId: string,
+  deptId: string,
+  userId: string
+): { success: boolean } {
+  verifyOrgAccess(orgId, userId, 'editor');
 
   const dept = db
     .prepare(
       'SELECT * FROM departments WHERE id = ? AND organization_id = ? AND deleted_at IS NULL'
     )
-    .get(deptId, orgId);
+    .get(deptId, orgId) as DatabaseDepartment | undefined;
 
   if (!dept) {
-    const error = new Error('Department not found');
+    const error = new Error('Department not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -228,8 +322,8 @@ export async function deleteDepartment(orgId, deptId, userId) {
     const now = new Date().toISOString();
 
     // Find all child departments recursively
-    const allDeptsToDelete = [deptId];
-    let currentDeptIds = [deptId];
+    const allDeptsToDelete: string[] = [deptId];
+    let currentDeptIds: string[] = [deptId];
 
     while (currentDeptIds.length > 0) {
       const children = db
@@ -239,12 +333,13 @@ export async function deleteDepartment(orgId, deptId, userId) {
         WHERE parent_id IN (${currentDeptIds.map(() => '?').join(',')}) AND deleted_at IS NULL
       `
         )
-        .all(currentDeptIds)
-        .map(d => d.id);
+        .all(currentDeptIds) as Array<{ id: string }>;
 
-      if (children.length > 0) {
-        allDeptsToDelete.push(...children);
-        currentDeptIds = children;
+      const childIds = children.map(d => d.id);
+
+      if (childIds.length > 0) {
+        allDeptsToDelete.push(...childIds);
+        currentDeptIds = childIds;
       } else {
         currentDeptIds = [];
       }
@@ -277,9 +372,9 @@ export async function deleteDepartment(orgId, deptId, userId) {
 /**
  * Helper to check if potentialDescendant is an ancestor of deptId (circular reference check)
  */
-function checkIsDescendant(potentialParentId, deptId) {
-  let currentId = potentialParentId;
-  const visited = new Set();
+function checkIsDescendant(potentialParentId: string, deptId: string): boolean {
+  let currentId: string | null = potentialParentId;
+  const visited = new Set<string>();
 
   while (currentId) {
     if (visited.has(currentId)) return true; // Loop detected
@@ -289,7 +384,7 @@ function checkIsDescendant(potentialParentId, deptId) {
 
     const parent = db
       .prepare('SELECT parent_id FROM departments WHERE id = ? AND deleted_at IS NULL')
-      .get(currentId);
+      .get(currentId) as { parent_id: string | null } | undefined;
     currentId = parent ? parent.parent_id : null;
   }
 

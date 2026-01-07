@@ -683,7 +683,7 @@ const api = {
   bulkEditDepartments: (
     orgId: string,
     departmentIds: string[],
-    updates: Partial<Pick<Department, 'description'>>
+    updates: { parentId?: string | null; description?: string }
   ): Promise<BulkOperationResult> =>
     request<BulkOperationResult>(`/organizations/${orgId}/departments/bulk-edit`, {
       method: 'PUT',

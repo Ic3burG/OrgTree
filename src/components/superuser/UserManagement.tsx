@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Edit, Trash2, Key, Users, UserPlus, Crown, Shield } from 'lucide-react';
 import api from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,84 +7,105 @@ import ResetPasswordModal from './ResetPasswordModal';
 import CreateUserModal from './CreateUserModal';
 import DeleteConfirmModal from '../admin/DeleteConfirmModal';
 import UserOrgsModal from './UserOrgsModal';
+import type { User } from '../../types';
 
-const ROLE_COLORS = {
+// Extended User type with organization counts
+interface UserWithCounts extends User {
+  organizationCount: number;
+  membershipCount: number;
+  ownedOrganizations?: Array<{ id: string; name: string; is_public: boolean }>;
+  memberships?: Array<{ id: string; name: string; role: string }>;
+  createdAt?: string;
+}
+
+interface UserFormData {
+  name: string;
+  email: string;
+  role: User['role'];
+}
+
+const ROLE_COLORS: Record<User['role'], string> = {
   superuser: 'bg-purple-100 text-purple-800',
   admin: 'bg-blue-100 text-blue-800',
   user: 'bg-gray-100 text-gray-800',
 };
 
-const ROLE_LABELS = {
+const ROLE_LABELS: Record<User['role'], string> = {
   superuser: 'Superuser',
   admin: 'Admin',
   user: 'User',
 };
 
-export default function UserManagement() {
+export default function UserManagement(): React.JSX.Element {
   const { user: currentUser } = useAuth();
-  const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [users, setUsers] = useState<UserWithCounts[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filterRole, setFilterRole] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Form modal state
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+  const [editingUser, setEditingUser] = useState<UserWithCounts | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Password reset modal state
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [passwordResetUser, setPasswordResetUser] = useState(null);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false);
+  const [passwordResetUser, setPasswordResetUser] = useState<UserWithCounts | null>(null);
 
   // Delete modal state
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+  const [userToDelete, setUserToDelete] = useState<UserWithCounts | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   // Create user modal state
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
   // User orgs modal state
-  const [orgsModalUser, setOrgsModalUser] = useState(null);
-  const [loadingOrgs, setLoadingOrgs] = useState(false);
+  const [orgsModalUser, setOrgsModalUser] = useState<UserWithCounts | null>(null);
+  const [loadingOrgs, setLoadingOrgs] = useState<boolean>(false);
 
   useEffect(() => {
     loadUsers();
   }, []);
 
   // Fetch full user details including organizations when opening modal
-  const handleViewOrgs = async user => {
+  const handleViewOrgs = async (user: UserWithCounts): Promise<void> => {
     try {
       setLoadingOrgs(true);
-      const fullUserData = await api.getUser(user.id);
+      const fullUserData = (await api.getUser(user.id)) as UserWithCounts;
       setOrgsModalUser(fullUserData);
     } catch (err) {
-      alert(err.message || 'Failed to load organization details');
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to load organization details';
+      alert(errorMessage);
     } finally {
       setLoadingOrgs(false);
     }
   };
 
-  async function loadUsers() {
+  async function loadUsers(): Promise<void> {
     try {
       setLoading(true);
       setError(null);
-      const data = await api.getUsers();
+      const data = (await api.getUsers()) as UserWithCounts[];
       setUsers(data);
     } catch (err) {
-      setError(err.message || 'Failed to load users');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load users';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   }
 
-  const handleEdit = user => {
+  const handleEdit = (user: UserWithCounts): void => {
     setEditingUser(user);
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = async formData => {
+  const handleFormSubmit = async (formData: UserFormData): Promise<void> => {
+    if (!editingUser) return;
+
     try {
       setIsSubmitting(true);
 
@@ -105,23 +126,26 @@ export default function UserManagement() {
       setEditingUser(null);
       await loadUsers();
     } catch (err) {
-      alert(err.message || 'Failed to update user');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update user';
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handlePasswordReset = user => {
+  const handlePasswordReset = (user: UserWithCounts): void => {
     setPasswordResetUser(user);
     setIsPasswordModalOpen(true);
   };
 
-  const handleDeleteClick = user => {
+  const handleDeleteClick = (user: UserWithCounts): void => {
     setUserToDelete(user);
     setDeleteModalOpen(true);
   };
 
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm = async (): Promise<void> => {
+    if (!userToDelete) return;
+
     try {
       setIsDeleting(true);
       await api.deleteUser(userToDelete.id);
@@ -129,14 +153,15 @@ export default function UserManagement() {
       setUserToDelete(null);
       await loadUsers();
     } catch (err) {
-      alert(err.message || 'Failed to delete user');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete user';
+      alert(errorMessage);
     } finally {
       setIsDeleting(false);
     }
   };
 
   // Filter users
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = users.filter((user: UserWithCounts) => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -199,13 +224,13 @@ export default function UserManagement() {
             type="text"
             placeholder="Search by name or email..."
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
         </div>
         <select
           value={filterRole}
-          onChange={e => setFilterRole(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterRole(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
         >
           <option value="">All Roles</option>
@@ -246,7 +271,7 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map(user => (
+              {filteredUsers.map((user: UserWithCounts) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -269,10 +294,10 @@ export default function UserManagement() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        ROLE_COLORS[user.role] || ROLE_COLORS.user
+                        ROLE_COLORS[user.role]
                       }`}
                     >
-                      {ROLE_LABELS[user.role] || user.role}
+                      {ROLE_LABELS[user.role]}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm hidden sm:table-cell">
@@ -300,7 +325,7 @@ export default function UserManagement() {
                     </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    {new Date(user.createdAt || user.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
@@ -364,6 +389,7 @@ export default function UserManagement() {
       {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
         <DeleteConfirmModal
+          isOpen={deleteModalOpen}
           title="Delete User"
           message={`Are you sure you want to delete "${userToDelete?.name}"? This will also delete all their organizations, departments, and people. This action cannot be undone.`}
           onConfirm={handleDeleteConfirm}

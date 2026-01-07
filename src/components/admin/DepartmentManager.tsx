@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../../api/client';
 import DepartmentForm from './DepartmentForm';
@@ -9,6 +9,7 @@ import BulkEditModal from './BulkEditModal';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 import { useSearch } from '../../hooks/useSearch';
 import { useBulkSelection } from '../../hooks/useBulkSelection';
+import type { Department, SearchResult, BulkOperationResult } from '../../types/index.js';
 import {
   Plus,
   ChevronRight,
@@ -24,12 +25,17 @@ import {
   X,
 } from 'lucide-react';
 
-export default function DepartmentManager() {
-  const { orgId } = useParams();
-  const [departments, setDepartments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [expanded, setExpanded] = useState(new Set());
+interface DepartmentWithDepth extends Department {
+  depth: number;
+  children: DepartmentWithDepth[];
+}
+
+export default function DepartmentManager(): React.JSX.Element {
+  const { orgId } = useParams<{ orgId: string }>();
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   // Use the search hook for API-based search
   const {
@@ -41,31 +47,39 @@ export default function DepartmentManager() {
   } = useSearch(orgId, { debounceMs: 300, minQueryLength: 2, defaultType: 'departments' });
 
   // Modal states
-  const [showForm, setShowForm] = useState(false);
-  const [editingDept, setEditingDept] = useState(null);
-  const [showDelete, setShowDelete] = useState(false);
-  const [deletingDept, setDeletingDept] = useState(null);
-  const [formLoading, setFormLoading] = useState(false);
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [editingDept, setEditingDept] = useState<Department | null>(null);
+  const [showDelete, setShowDelete] = useState<boolean>(false);
+  const [deletingDept, setDeletingDept] = useState<Department | null>(null);
+  const [formLoading, setFormLoading] = useState<boolean>(false);
 
   // Bulk operations state
-  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
-  const [bulkEditModalOpen, setBulkEditModalOpen] = useState(false);
-  const [bulkOperationLoading, setBulkOperationLoading] = useState(false);
-  const [bulkOperationResult, setBulkOperationResult] = useState(null);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState<boolean>(false);
+  const [bulkEditModalOpen, setBulkEditModalOpen] = useState<boolean>(false);
+  const [bulkOperationLoading, setBulkOperationLoading] = useState<boolean>(false);
+  const [bulkOperationResult, setBulkOperationResult] = useState<BulkOperationResult | null>(null);
+  const [bulkDeleteResult, setBulkDeleteResult] = useState<{
+    deletedCount: number;
+    failedCount: number;
+  } | null>(null);
+  const [bulkEditResult, setBulkEditResult] = useState<{
+    updatedCount: number;
+    failedCount: number;
+  } | null>(null);
 
   const loadDepartments = useCallback(
-    async (showLoading = true) => {
+    async (showLoading = true): Promise<void> => {
+      if (!orgId) return;
       try {
         if (showLoading) setLoading(true);
         const data = await api.getDepartments(orgId);
-        console.log('Loaded departments:', data);
         setDepartments(data);
         // Auto-expand all on initial load
         if (showLoading) {
-          setExpanded(new Set(data.map(d => d.id)));
+          setExpanded(new Set(data.map((d: Department) => d.id)));
         }
       } catch (err) {
-        setError(err.message);
+        setError((err as Error).message);
       } finally {
         if (showLoading) setLoading(false);
       }
@@ -84,43 +98,43 @@ export default function DepartmentManager() {
     showNotifications: true,
   });
 
-  const handleCreateDept = async formData => {
-    console.log('handleCreateDept called with:', formData);
+  const handleCreateDept = async (
+    formData: Pick<Department, 'name' | 'description' | 'parent_id'>
+  ): Promise<void> => {
+    if (!orgId) return;
     setFormLoading(true);
     setError('');
     try {
-      const result = await api.createDepartment(orgId, formData);
-      console.log('Create result:', result);
+      await api.createDepartment(orgId, formData);
       await loadDepartments();
       setShowForm(false);
     } catch (err) {
-      console.error('Create error:', err);
-      setError(err.message);
+      setError((err as Error).message);
     } finally {
       setFormLoading(false);
     }
   };
 
-  const handleUpdateDept = async formData => {
-    console.log('handleUpdateDept called with:', formData);
-    console.log('Editing department ID:', editingDept.id);
+  const handleUpdateDept = async (
+    formData: Pick<Department, 'name' | 'description' | 'parent_id'>
+  ): Promise<void> => {
+    if (!orgId || !editingDept) return;
     setFormLoading(true);
     setError('');
     try {
-      const result = await api.updateDepartment(orgId, editingDept.id, formData);
-      console.log('Update result:', result);
+      await api.updateDepartment(orgId, editingDept.id, formData);
       await loadDepartments();
       setShowForm(false);
       setEditingDept(null);
     } catch (err) {
-      console.error('Update error:', err);
-      setError(err.message);
+      setError((err as Error).message);
     } finally {
       setFormLoading(false);
     }
   };
 
-  const handleDeleteDept = async () => {
+  const handleDeleteDept = async (): Promise<void> => {
+    if (!orgId || !deletingDept) return;
     setFormLoading(true);
     try {
       await api.deleteDepartment(orgId, deletingDept.id);
@@ -128,26 +142,23 @@ export default function DepartmentManager() {
       setShowDelete(false);
       setDeletingDept(null);
     } catch (err) {
-      setError(err.message);
+      setError((err as Error).message);
     } finally {
       setFormLoading(false);
     }
   };
 
-  const openCreateForm = () => {
-    console.log('Opening create form, departments available:', departments.length);
+  const openCreateForm = (): void => {
     setEditingDept(null);
     setShowForm(true);
   };
 
-  const openEditForm = dept => {
-    console.log('Opening edit form for:', dept);
-    console.log('Current parentId:', dept.parentId);
+  const openEditForm = (dept: Department): void => {
     setEditingDept(dept);
     setShowForm(true);
   };
 
-  const toggleExpand = id => {
+  const toggleExpand = (id: string): void => {
     const newExpanded = new Set(expanded);
     if (newExpanded.has(id)) {
       newExpanded.delete(id);
@@ -158,10 +169,14 @@ export default function DepartmentManager() {
   };
 
   // Build tree structure from flat list (only used when not searching)
-  const buildTree = (depts, parentId = null, depth = 0) => {
+  const buildTree = (
+    depts: Department[],
+    parentId: string | null = null,
+    depth = 0
+  ): DepartmentWithDepth[] => {
     return depts
-      .filter(d => d.parentId === parentId)
-      .map(dept => ({
+      .filter((d: Department) => d.parent_id === parentId)
+      .map((dept: Department) => ({
         ...dept,
         depth,
         children: buildTree(depts, dept.id, depth + 1),
@@ -188,48 +203,66 @@ export default function DepartmentManager() {
   } = useBulkSelection(departments);
 
   // Bulk operation handlers
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = async (): Promise<void> => {
+    if (!orgId) return;
     try {
       setBulkOperationLoading(true);
       setBulkOperationResult(null);
+      setBulkDeleteResult(null);
       const result = await api.bulkDeleteDepartments(orgId, selectedArray);
       setBulkOperationResult(result);
-      if (result.deletedCount > 0) {
+      setBulkDeleteResult({ deletedCount: result.success, failedCount: result.failed });
+      if (result.success > 0) {
         await loadDepartments(false);
       }
     } catch (err) {
-      setBulkOperationResult({ deletedCount: 0, failedCount: selectedCount, error: err.message });
+      setBulkOperationResult({
+        success: 0,
+        failed: selectedCount,
+        errors: [{ id: 'bulk', error: (err as Error).message }],
+      });
+      setBulkDeleteResult({ deletedCount: 0, failedCount: selectedCount });
     } finally {
       setBulkOperationLoading(false);
     }
   };
 
-  const handleBulkEdit = async updates => {
+  const handleBulkEdit = async (updates: { parentId?: string | null }): Promise<void> => {
+    if (!orgId) return;
     try {
       setBulkOperationLoading(true);
       setBulkOperationResult(null);
+      setBulkEditResult(null);
       const result = await api.bulkEditDepartments(orgId, selectedArray, updates);
       setBulkOperationResult(result);
-      if (result.updatedCount > 0) {
+      setBulkEditResult({ updatedCount: result.success, failedCount: result.failed });
+      if (result.success > 0) {
         await loadDepartments(false);
       }
     } catch (err) {
-      setBulkOperationResult({ updatedCount: 0, failedCount: selectedCount, error: err.message });
+      setBulkOperationResult({
+        success: 0,
+        failed: selectedCount,
+        errors: [{ id: 'bulk', error: (err as Error).message }],
+      });
+      setBulkEditResult({ updatedCount: 0, failedCount: selectedCount });
     } finally {
       setBulkOperationLoading(false);
     }
   };
 
-  const closeBulkModal = modalSetter => {
+  const closeBulkModal = (modalSetter: (value: boolean) => void): void => {
     modalSetter(false);
     setBulkOperationResult(null);
-    if (bulkOperationResult?.deletedCount > 0 || bulkOperationResult?.updatedCount > 0) {
+    setBulkDeleteResult(null);
+    setBulkEditResult(null);
+    if (bulkOperationResult && bulkOperationResult.success > 0) {
       exitSelectionMode();
     }
   };
 
   // Render a single department in tree view
-  const renderDepartment = dept => {
+  const renderDepartment = (dept: DepartmentWithDepth): React.JSX.Element => {
     const hasChildren = dept.children && dept.children.length > 0;
     const isExpanded = expanded.has(dept.id);
     const peopleCount = dept.people?.length || 0;
@@ -279,7 +312,7 @@ export default function DepartmentManager() {
               <Users size={14} className="inline mr-1" />
               {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
             </span>
-            {dept.parentId && <span className="ml-2 text-xs text-green-600">(has parent)</span>}
+            {dept.parent_id && <span className="ml-2 text-xs text-green-600">(has parent)</span>}
           </div>
 
           {/* Actions - hide in selection mode */}
@@ -314,10 +347,10 @@ export default function DepartmentManager() {
   };
 
   // Render a single search result (flat view)
-  const renderSearchResult = result => {
+  const renderSearchResult = (result: SearchResult): React.JSX.Element => {
     // Find the full department data from our loaded departments
-    const fullDept = departments.find(d => d.id === result.id) || result;
-    const peopleCount = result.peopleCount || fullDept.people?.length || 0;
+    const fullDept = departments.find((d: Department) => d.id === result.id);
+    const peopleCount = fullDept?.people?.length || 0;
     const recentlyChanged = isRecentlyChanged(result.id);
     const selected = isSelected(result.id);
 
@@ -345,14 +378,7 @@ export default function DepartmentManager() {
         <Building2 size={18} className="text-slate-400" />
 
         <div className="flex-1">
-          {result.highlight ? (
-            <span
-              className="font-medium text-slate-800 [&>mark]:bg-yellow-200 [&>mark]:rounded"
-              dangerouslySetInnerHTML={{ __html: result.highlight }}
-            />
-          ) : (
-            <span className="font-medium text-slate-800">{result.name}</span>
-          )}
+          <span className="font-medium text-slate-800">{result.name}</span>
           <span className="ml-2 text-sm text-slate-500">
             <Users size={14} className="inline mr-1" />
             {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
@@ -363,7 +389,7 @@ export default function DepartmentManager() {
         </div>
 
         {/* Actions - hide in selection mode */}
-        {!selectionMode && (
+        {!selectionMode && fullDept && (
           <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1">
             <button
               onClick={() => openEditForm(fullDept)}
@@ -507,7 +533,9 @@ export default function DepartmentManager() {
           ) : selectionMode ? (
             // Flat list in selection mode
             <div className="p-2">
-              {departments.map(dept => renderDepartment({ ...dept, depth: 0, children: [] }))}
+              {departments.map((dept: Department) =>
+                renderDepartment({ ...dept, depth: 0, children: [] })
+              )}
             </div>
           ) : (
             <div className="p-2">{tree.map(renderDepartment)}</div>
@@ -564,7 +592,7 @@ export default function DepartmentManager() {
         count={selectedCount}
         entityType="departments"
         isDeleting={bulkOperationLoading}
-        result={bulkOperationResult}
+        result={bulkDeleteResult}
       />
 
       {/* Bulk Edit Modal */}
@@ -576,7 +604,7 @@ export default function DepartmentManager() {
         entityType="departments"
         departments={departments}
         isUpdating={bulkOperationLoading}
-        result={bulkOperationResult}
+        result={bulkEditResult}
       />
     </div>
   );

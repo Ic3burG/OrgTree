@@ -1,17 +1,16 @@
+import type { Server as HTTPServer } from 'http';
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { checkOrgAccess } from './services/member.service.js';
 import logger from './utils/logger.js';
+import type { JWTPayload } from './types/index.js';
 
-let io = null;
+let io: Server | null = null;
 
 /**
  * Initialize Socket.IO with the HTTP server
- * @param {http.Server} httpServer - The HTTP server instance
- * @param {string[]} allowedOrigins - CORS allowed origins
- * @returns {Server} Socket.IO server instance
  */
-export function initializeSocket(httpServer, allowedOrigins) {
+export function initializeSocket(httpServer: HTTPServer, allowedOrigins: string[]): Server {
   io = new Server(httpServer, {
     cors: {
       origin: allowedOrigins,
@@ -32,7 +31,11 @@ export function initializeSocket(httpServer, allowedOrigins) {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const secret = process.env.JWT_SECRET;
+      if (!secret) {
+        throw new Error('JWT_SECRET not configured');
+      }
+      const decoded = jwt.verify(token, secret) as unknown as JWTPayload;
       socket.user = decoded;
       next();
     } catch (err) {
@@ -49,7 +52,7 @@ export function initializeSocket(httpServer, allowedOrigins) {
     });
 
     // Join organization room
-    socket.on('join:org', async orgId => {
+    socket.on('join:org', async (orgId: string) => {
       try {
         // Verify user has access to this organization
         const access = checkOrgAccess(orgId, socket.user.id);
@@ -79,14 +82,14 @@ export function initializeSocket(httpServer, allowedOrigins) {
         });
 
         socket.emit('joined:org', { orgId, role: access.role });
-      } catch (err) {
-        logger.error('Error joining org room', { error: err.message });
+      } catch (err: unknown) {
+        logger.error('Error joining org room', { error: (err as Error).message });
         socket.emit('error', { message: 'Failed to join organization' });
       }
     });
 
     // Leave organization room
-    socket.on('leave:org', orgId => {
+    socket.on('leave:org', (orgId: string) => {
       const roomName = `org:${orgId}`;
       socket.leave(roomName);
 
@@ -100,7 +103,7 @@ export function initializeSocket(httpServer, allowedOrigins) {
     });
 
     // Handle disconnection
-    socket.on('disconnect', reason => {
+    socket.on('disconnect', (reason: string) => {
       logger.info('Socket disconnected', {
         socketId: socket.id,
         userId: socket.user.id,
@@ -115,19 +118,15 @@ export function initializeSocket(httpServer, allowedOrigins) {
 
 /**
  * Get the Socket.IO server instance
- * @returns {Server|null} Socket.IO server instance
  */
-export function getIO() {
+export function getIO(): Server | null {
   return io;
 }
 
 /**
  * Emit an event to all users in an organization room
- * @param {string} orgId - Organization ID
- * @param {string} eventType - Event type (e.g., 'department:created')
- * @param {Object} payload - Event payload
  */
-export function emitToOrg(orgId, eventType, payload) {
+export function emitToOrg(orgId: string, eventType: string, payload: unknown): void {
   if (!io) {
     logger.warn('Socket.IO not initialized, skipping emit');
     return;

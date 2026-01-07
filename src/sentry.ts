@@ -5,9 +5,6 @@ export function initSentry() {
 
   // Only initialize if DSN is configured
   if (!dsn) {
-    if (import.meta.env.DEV) {
-      console.log('Sentry: No DSN configured, skipping initialization');
-    }
     return;
   }
 
@@ -38,19 +35,14 @@ export function initSentry() {
       'AbortError',
     ],
 
-    beforeSend(event, hint) {
+    beforeSend(event) {
       // Don't send errors in development unless explicitly enabled
       if (import.meta.env.DEV && import.meta.env.VITE_SENTRY_DEBUG !== 'true') {
-        console.log('Sentry would send:', event);
         return null;
       }
       return event;
     },
   });
-
-  if (import.meta.env.DEV) {
-    console.log('Sentry initialized for environment:', import.meta.env.MODE);
-  }
 }
 
 // Re-export Sentry for use elsewhere

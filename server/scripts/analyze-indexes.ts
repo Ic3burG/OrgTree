@@ -14,6 +14,23 @@ console.log('DATABASE INDEX ANALYSIS');
 console.log('='.repeat(80));
 console.log();
 
+// Type definitions for database queries
+interface TableRow {
+  name: string;
+}
+
+interface IndexRow {
+  index_name: string;
+  sql: string | null;
+}
+
+interface QueryPlanRow {
+  id: number;
+  parent: number;
+  notused: number;
+  detail: string;
+}
+
 // Get all tables
 const tables = db
   .prepare(
@@ -23,7 +40,7 @@ const tables = db
   ORDER BY name
 `
   )
-  .all();
+  .all() as TableRow[];
 
 console.log('📊 TABLES:');
 tables.forEach(t => console.log(`  - ${t.name}`));
@@ -47,7 +64,7 @@ for (const table of tables) {
     ORDER BY m.name
   `
     )
-    .all(table.name);
+    .all(table.name) as IndexRow[];
 
   if (indexes.length > 0) {
     console.log(`📋 ${table.name}:`);
@@ -108,7 +125,7 @@ testQueries.forEach(({ name, query, params }) => {
   console.log(`   Query: ${query}`);
 
   // Get query plan
-  const plan = db.prepare(`EXPLAIN QUERY PLAN ${query}`).all(...params);
+  const plan = db.prepare(`EXPLAIN QUERY PLAN ${query}`).all(...params) as QueryPlanRow[];
 
   console.log('   Query Plan:');
   plan.forEach(step => {

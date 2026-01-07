@@ -1,6 +1,31 @@
-import { useState, useEffect, useRef } from 'react';
-import { Search, X, Users, User, Loader2, Filter } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, X, Users, Loader2, Filter } from 'lucide-react';
 import { useSearch } from '../hooks/useSearch';
+import { SearchResult } from '../types/index';
+
+/**
+ * Interface for the transformed result passed to onSelectResult callback
+ */
+interface TransformedSearchResult {
+  type: 'department' | 'person';
+  id: string;
+  name: string;
+  subtitle: string;
+  nodeId: string;
+  departmentName?: string;
+  person?: {
+    id: string;
+    name: string;
+    title: string | null;
+    email: string | null;
+    phone: string | null;
+  } | null;
+}
+
+interface SearchOverlayProps {
+  orgId: string | undefined;
+  onSelectResult?: (result: TransformedSearchResult) => void;
+}
 
 /**
  * SearchOverlay - Floating search bar with dropdown results
@@ -9,10 +34,13 @@ import { useSearch } from '../hooks/useSearch';
  *
  * Uses server-side FTS5 search with autocomplete, fuzzy matching, and type filtering
  */
-export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
+export default function SearchOverlay({
+  orgId,
+  onSelectResult,
+}: SearchOverlayProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [showTypeFilter, setShowTypeFilter] = useState(false);
-  const searchRef = useRef(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const { query, setQuery, type, setType, results, suggestions, loading, total, clearSearch } =
     useSearch(orgId, { debounceMs: 300, minQueryLength: 1 });
@@ -28,8 +56,8 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = event => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -38,34 +66,40 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleClear = () => {
+  const handleClear = (): void => {
     clearSearch();
     setIsOpen(false);
     setShowTypeFilter(false);
   };
 
-  const handleSelectResult = result => {
+  const handleSelectResult = (result: SearchResult): void => {
     setIsOpen(false);
     if (onSelectResult) {
       // Transform API result to format expected by OrgMap
-      const transformedResult = {
+      const transformedResult: TransformedSearchResult = {
         type: result.type,
         id: result.id,
         name: result.name,
-        subtitle: result.type === 'department' ? `${result.peopleCount || 0} people` : result.title,
+        subtitle:
+          result.type === 'department'
+            ? `${(result as unknown as { peopleCount?: number }).peopleCount || 0} people`
+            : result.title || '',
         // For departments, nodeId is the department id itself
-        // For people, nodeId is the departmentId
-        nodeId: result.type === 'department' ? result.id : result.departmentId,
-        departmentName: result.departmentName,
+        // For people, nodeId is the departmentId (from department_name field)
+        nodeId:
+          result.type === 'department'
+            ? result.id
+            : (result as unknown as { departmentId?: string }).departmentId || result.id,
+        departmentName: result.department_name,
         // Pass person data for detail panel
         person:
           result.type === 'person'
             ? {
                 id: result.id,
                 name: result.name,
-                title: result.title,
-                email: result.email,
-                phone: result.phone,
+                title: result.title || null,
+                email: (result as unknown as { email?: string | null }).email || null,
+                phone: (result as unknown as { phone?: string | null }).phone || null,
               }
             : null,
       };
@@ -73,11 +107,14 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
     }
   };
 
-  const handleSuggestionClick = suggestion => {
+  const handleSuggestionClick = (suggestion: {
+    text: string;
+    type: 'department' | 'person';
+  }): void => {
     setQuery(suggestion.text);
   };
 
-  const typeLabels = {
+  const typeLabels: Record<string, string> = {
     all: 'All',
     departments: 'Departments',
     people: 'People',
@@ -101,7 +138,7 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
         <input
           type="text"
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
           placeholder="Search departments and people..."
           className="w-full pl-11 lg:pl-10 pr-20 lg:pr-20 py-3 lg:py-2.5 bg-white/95 backdrop-blur-sm border border-slate-300
             rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500
@@ -138,7 +175,7 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
         <div className="mt-1 bg-white rounded-lg shadow-lg border border-slate-200 p-2">
           <div className="text-xs text-slate-500 px-2 pb-1">Search in:</div>
           <div className="flex gap-1">
-            {['all', 'departments', 'people'].map(t => (
+            {(['all', 'departments', 'people'] as const).map(t => (
               <button
                 key={t}
                 onClick={() => {
@@ -184,7 +221,7 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
           {total > 0 && (
             <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 text-xs text-slate-500">
               {total} result{total !== 1 ? 's' : ''} found
-              {type !== 'all' && ` in ${typeLabels[type].toLowerCase()}`}
+              {type !== 'all' && typeLabels[type] && ` in ${typeLabels[type].toLowerCase()}`}
             </div>
           )}
 
@@ -207,7 +244,7 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
                     className="w-11 h-11 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
                     flex items-center justify-center text-white font-semibold text-sm"
                   >
-                    {getInitials(result.name)}
+                    {getInitials(result.name || '')}
                   </div>
                 )}
               </div>
@@ -215,10 +252,12 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
               {/* Info */}
               <div className="flex-grow min-w-0">
                 {/* Use highlight if available, otherwise plain name */}
-                {result.highlight ? (
+                {(result as unknown as { highlight?: string }).highlight ? (
                   <div
                     className="font-medium text-base lg:text-sm text-slate-900 truncate [&>mark]:bg-yellow-200 [&>mark]:rounded"
-                    dangerouslySetInnerHTML={{ __html: result.highlight }}
+                    dangerouslySetInnerHTML={{
+                      __html: (result as unknown as { highlight: string }).highlight,
+                    }}
                   />
                 ) : (
                   <div className="font-medium text-base lg:text-sm text-slate-900 truncate">
@@ -227,10 +266,10 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
                 )}
                 <div className="text-sm lg:text-sm text-slate-600 truncate">
                   {result.type === 'department'
-                    ? `${result.peopleCount || 0} people`
+                    ? `${(result as unknown as { peopleCount?: number }).peopleCount || 0} people`
                     : result.title}
-                  {result.type === 'person' && result.departmentName && (
-                    <span className="text-slate-400"> · {result.departmentName}</span>
+                  {result.type === 'person' && result.department_name && (
+                    <span className="text-slate-400"> · {result.department_name}</span>
                   )}
                 </div>
               </div>
@@ -282,11 +321,14 @@ export default function SearchOverlay({ orgId, nodes, onSelectResult }) {
 }
 
 // Helper function
-function getInitials(name) {
+function getInitials(name: string | null | undefined): string {
   if (!name) return '?';
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) {
-    return parts[0].substring(0, 2).toUpperCase();
+    const firstPart = parts[0];
+    return firstPart ? firstPart.substring(0, 2).toUpperCase() : '?';
   }
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  const firstChar = parts[0]?.[0] || '';
+  const lastChar = parts[parts.length - 1]?.[0] || '';
+  return (firstChar + lastChar).toUpperCase() || '?';
 }

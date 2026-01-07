@@ -3,16 +3,31 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { randomUUID, randomBytes, createHash } from 'crypto';
 import { createAuditLog } from './audit.service.js';
+import type {
+  DatabaseUser,
+  DatabaseRefreshToken,
+  CreateUserResult,
+  LoginResult,
+  AppError,
+} from '../types/index.js';
 
 // Token configuration
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
-export async function createUser(name, email, password, ipAddress = null, userAgent = null) {
+export async function createUser(
+  name: string,
+  email: string,
+  password: string,
+  ipAddress: string | null = null,
+  userAgent: string | null = null
+): Promise<CreateUserResult> {
   // Check if user exists
-  const existingUser = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const existingUser = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as
+    | DatabaseUser
+    | undefined;
   if (existingUser) {
-    const error = new Error('Email already registered');
+    const error = new Error('Email already registered') as AppError;
     error.status = 400;
     throw error;
   }
@@ -38,7 +53,7 @@ export async function createUser(name, email, password, ipAddress = null, userAg
     FROM users WHERE id = ?
   `
     )
-    .get(userId);
+    .get(userId) as DatabaseUser;
 
   // Generate access token
   const accessToken = generateToken(user);
@@ -55,9 +70,16 @@ export async function createUser(name, email, password, ipAddress = null, userAg
   };
 }
 
-export async function loginUser(email, password, ipAddress = null, userAgent = null) {
+export async function loginUser(
+  email: string,
+  password: string,
+  ipAddress: string | null = null,
+  userAgent: string | null = null
+): Promise<LoginResult> {
   // Find user
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as
+    | DatabaseUser
+    | undefined;
   if (!user) {
     // Security: Log failed login attempt - user not found
     createAuditLog(
@@ -73,7 +95,7 @@ export async function loginUser(email, password, ipAddress = null, userAgent = n
         timestamp: new Date().toISOString(),
       }
     );
-    const error = new Error('Invalid email or password');
+    const error = new Error('Invalid email or password') as AppError;
     error.status = 401;
     throw error;
   }
@@ -95,7 +117,7 @@ export async function loginUser(email, password, ipAddress = null, userAgent = n
         timestamp: new Date().toISOString(),
       }
     );
-    const error = new Error('Invalid email or password');
+    const error = new Error('Invalid email or password') as AppError;
     error.status = 401;
     throw error;
   }
@@ -105,23 +127,17 @@ export async function loginUser(email, password, ipAddress = null, userAgent = n
 
   // Generate and store refresh token
   const refreshToken = generateRefreshToken();
-  const { expiresAt } = storeRefreshToken(user.id, refreshToken, { ipAddress, userAgent });
+  storeRefreshToken(user.id, refreshToken, { ipAddress, userAgent });
 
   return {
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      mustChangePassword: user.must_change_password === 1,
-    },
+    user,
     accessToken,
     refreshToken,
     expiresIn: 900, // 15 minutes in seconds
   };
 }
 
-export async function getUserById(id) {
+export async function getUserById(id: string): Promise<DatabaseUser> {
   const user = db
     .prepare(
       `
@@ -129,28 +145,21 @@ export async function getUserById(id) {
     FROM users WHERE id = ?
   `
     )
-    .get(id);
+    .get(id) as DatabaseUser | undefined;
 
   if (!user) {
-    const error = new Error('User not found');
+    const error = new Error('User not found') as AppError;
     error.status = 404;
     throw error;
   }
 
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    mustChangePassword: user.must_change_password === 1,
-    createdAt: user.created_at,
-  };
+  return user;
 }
 
-function generateToken(user) {
+function generateToken(user: DatabaseUser): string {
   return jwt.sign(
     { id: user.id, name: user.name, email: user.email, role: user.role },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET as string,
     { expiresIn: ACCESS_TOKEN_EXPIRY }
   );
 }
@@ -161,26 +170,22 @@ function generateToken(user) {
 
 /**
  * Generate a cryptographically secure 256-bit refresh token
- * @returns {string} Base64url-encoded 32-byte token
  */
-export function generateRefreshToken() {
+export function generateRefreshToken(): string {
   return randomBytes(32).toString('base64url');
 }
 
 /**
  * Hash a refresh token for secure storage
- * @param {string} token - The raw refresh token
- * @returns {string} SHA-256 hash of the token
  */
-function hashRefreshToken(token) {
+function hashRefreshToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
 
 /**
  * Calculate expiration date for refresh token
- * @returns {string} ISO date string
  */
-function getRefreshTokenExpiry() {
+function getRefreshTokenExpiry(): string {
   const expiry = new Date();
   expiry.setDate(expiry.getDate() + REFRESH_TOKEN_EXPIRY_DAYS);
   return expiry.toISOString();
@@ -188,12 +193,12 @@ function getRefreshTokenExpiry() {
 
 /**
  * Store a refresh token in the database
- * @param {string} userId - User ID
- * @param {string} token - Raw refresh token (will be hashed)
- * @param {object} metadata - Additional info (ip, device)
- * @returns {object} Token record info
  */
-export function storeRefreshToken(userId, token, metadata = {}) {
+export function storeRefreshToken(
+  userId: string,
+  token: string,
+  metadata: { ipAddress?: string | null; userAgent?: string | null } = {}
+): { id: string; expiresAt: string } {
   const id = randomUUID();
   const tokenHash = hashRefreshToken(token);
   const expiresAt = getRefreshTokenExpiry();
@@ -208,13 +213,28 @@ export function storeRefreshToken(userId, token, metadata = {}) {
   return { id, expiresAt };
 }
 
+interface ValidateRefreshTokenResult {
+  tokenId: string;
+  userId: string;
+  name: string;
+  email: string;
+  role: 'user' | 'admin' | 'superuser';
+  mustChangePassword: boolean;
+}
+
 /**
  * Validate a refresh token and return associated user
- * @param {string} token - Raw refresh token
- * @returns {object|null} User data if valid, null otherwise
  */
-export function validateRefreshToken(token) {
+export function validateRefreshToken(token: string): ValidateRefreshTokenResult | null {
   const tokenHash = hashRefreshToken(token);
+
+  interface TokenRecordWithUser extends DatabaseRefreshToken {
+    userId: string;
+    name: string;
+    email: string;
+    role: 'user' | 'admin' | 'superuser';
+    must_change_password: number;
+  }
 
   const tokenRecord = db
     .prepare(
@@ -227,7 +247,7 @@ export function validateRefreshToken(token) {
       AND rt.revoked_at IS NULL
   `
     )
-    .get(tokenHash);
+    .get(tokenHash) as TokenRecordWithUser | undefined;
 
   if (!tokenRecord) {
     return null;
@@ -246,16 +266,14 @@ export function validateRefreshToken(token) {
     name: tokenRecord.name,
     email: tokenRecord.email,
     role: tokenRecord.role,
-    mustChangePassword: tokenRecord.must_change_password === 1,
+    mustChangePassword: Boolean(tokenRecord.must_change_password),
   };
 }
 
 /**
  * Revoke a specific refresh token (logout)
- * @param {string} token - Raw refresh token
- * @returns {boolean} True if revoked, false if not found
  */
-export function revokeRefreshToken(token) {
+export function revokeRefreshToken(token: string): boolean {
   const tokenHash = hashRefreshToken(token);
 
   const result = db
@@ -273,10 +291,8 @@ export function revokeRefreshToken(token) {
 
 /**
  * Revoke all refresh tokens for a user (password change, security event)
- * @param {string} userId - User ID
- * @returns {number} Number of tokens revoked
  */
-export function revokeAllUserTokens(userId) {
+export function revokeAllUserTokens(userId: string): number {
   const result = db
     .prepare(
       `
@@ -290,13 +306,20 @@ export function revokeAllUserTokens(userId) {
   return result.changes;
 }
 
+interface RotateRefreshTokenResult {
+  accessToken: string;
+  refreshToken: string;
+  refreshTokenExpiresAt: string;
+  user: DatabaseUser;
+}
+
 /**
  * Rotate a refresh token (issue new one, invalidate old)
- * @param {string} oldToken - Current refresh token
- * @param {object} metadata - IP, user agent for new token
- * @returns {object|null} New tokens if valid, null if invalid
  */
-export function rotateRefreshToken(oldToken, metadata = {}) {
+export function rotateRefreshToken(
+  oldToken: string,
+  metadata: { ipAddress?: string | null; userAgent?: string | null } = {}
+): RotateRefreshTokenResult | null {
   const userData = validateRefreshToken(oldToken);
 
   if (!userData) {
@@ -308,7 +331,7 @@ export function rotateRefreshToken(oldToken, metadata = {}) {
 
   // Generate new tokens
   const newRefreshToken = generateRefreshToken();
-  const newAccessToken = generateToken(userData);
+  const newAccessToken = generateToken(userData as any);
 
   // Store new refresh token
   const { expiresAt } = storeRefreshToken(userData.userId, newRefreshToken, metadata);
@@ -317,22 +340,22 @@ export function rotateRefreshToken(oldToken, metadata = {}) {
     accessToken: newAccessToken,
     refreshToken: newRefreshToken,
     refreshTokenExpiresAt: expiresAt,
-    user: {
-      id: userData.userId,
-      name: userData.name,
-      email: userData.email,
-      role: userData.role,
-      mustChangePassword: userData.mustChangePassword,
-    },
+    user: userData as any,
   };
+}
+
+interface SessionInfo {
+  id: string;
+  deviceInfo: string | null;
+  ipAddress: string | null;
+  createdAt: string;
+  lastUsedAt: string;
 }
 
 /**
  * Get all active sessions for a user
- * @param {string} userId - User ID
- * @returns {array} List of active sessions
  */
-export function getUserSessions(userId) {
+export function getUserSessions(userId: string): SessionInfo[] {
   const sessions = db
     .prepare(
       `
@@ -347,18 +370,15 @@ export function getUserSessions(userId) {
     ORDER BY last_used_at DESC
   `
     )
-    .all(userId);
+    .all(userId) as SessionInfo[];
 
   return sessions;
 }
 
 /**
  * Revoke a specific session by ID
- * @param {string} sessionId - Session/token ID
- * @param {string} userId - User ID (for authorization)
- * @returns {boolean} True if revoked, false if not found
  */
-export function revokeSession(sessionId, userId) {
+export function revokeSession(sessionId: string, userId: string): boolean {
   const result = db
     .prepare(
       `
@@ -374,11 +394,8 @@ export function revokeSession(sessionId, userId) {
 
 /**
  * Revoke all sessions except the current one
- * @param {string} userId - User ID
- * @param {string} currentToken - Current refresh token to keep
- * @returns {number} Number of sessions revoked
  */
-export function revokeOtherSessions(userId, currentToken) {
+export function revokeOtherSessions(userId: string, currentToken: string): number {
   const currentHash = hashRefreshToken(currentToken);
 
   const result = db
@@ -396,9 +413,8 @@ export function revokeOtherSessions(userId, currentToken) {
 
 /**
  * Clean up expired and revoked tokens
- * @returns {number} Number of tokens deleted
  */
-export function cleanupExpiredTokens() {
+export function cleanupExpiredTokens(): number {
   // Delete tokens that are:
   // 1. Expired (past expires_at)
   // 2. Revoked more than 7 days ago (keep revoked tokens briefly for security analysis)

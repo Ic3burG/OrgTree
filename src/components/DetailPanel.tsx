@@ -1,18 +1,29 @@
-import { X, Mail, Phone, MapPin, Building } from 'lucide-react';
+import React from 'react';
+import { X, Mail, Phone, Building } from 'lucide-react';
 import { getInitials } from '../utils/helpers';
+import type { Person } from '../types/index.js';
+
+interface DetailPanelProps {
+  person: Person | null;
+  onClose: () => void;
+}
 
 /**
  * DetailPanel - Slide-in panel showing full person details
  * Mobile: Full-screen overlay from right
  * Desktop: Side panel with max width
  */
-export default function DetailPanel({ person, onClose }) {
+export default function DetailPanel({
+  person,
+  onClose,
+}: DetailPanelProps): React.JSX.Element | null {
   if (!person) return null;
 
   const initials = getInitials(person.name);
 
   // Get department path for display (if available)
-  const pathSegments = person.path ? person.path.split('/').filter(Boolean) : [];
+  const personWithPath = person as Person & { path?: string };
+  const pathSegments = personWithPath.path ? personWithPath.path.split('/').filter(Boolean) : [];
   const departmentPath = pathSegments.length > 1 ? pathSegments.slice(0, -1).join(' / ') : null;
 
   return (

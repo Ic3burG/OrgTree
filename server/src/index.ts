@@ -64,9 +64,9 @@ app.set('trust proxy', 1);
 // Sentry request tracing is automatically handled by Sentry.init() in v10+
 
 // CORS configuration - dynamic based on environment
-const allowedOrigins =
+const allowedOrigins: string[] =
   process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL].filter(Boolean) // Production: use env var
+    ? [process.env.FRONTEND_URL].filter((origin): origin is string => Boolean(origin)) // Production: use env var
     : [
         'http://localhost:5173',
         'http://localhost:3000',
@@ -137,18 +137,18 @@ app.use(
 );
 
 // Serve raw OpenAPI spec
-app.get('/api/openapi.yaml', (req, res) => {
+app.get('/api/openapi.yaml', (_req, res) => {
   res.type('text/yaml').send(fs.readFileSync(openApiPath, 'utf8'));
 });
-app.get('/api/openapi.json', (req, res) => {
+app.get('/api/openapi.json', (_req, res) => {
   res.json(openApiSpec);
 });
 
 // Health check with database connectivity test (must be before other routes)
-app.get('/api/health', async (req, res) => {
+app.get('/api/health', async (_req, res) => {
   try {
     // Test database connectivity
-    const dbCheck = db.prepare('SELECT 1 as ok').get();
+    const dbCheck = db.prepare('SELECT 1 as ok').get() as { ok: number };
 
     // Security: Don't expose environment details
     res.json({
@@ -156,12 +156,12 @@ app.get('/api/health', async (req, res) => {
       timestamp: new Date().toISOString(),
       database: dbCheck.ok === 1 ? 'connected' : 'error',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     res.status(503).json({
       status: 'error',
       timestamp: new Date().toISOString(),
       database: 'disconnected',
-      message: error.message,
+      message: (error as Error).message,
     });
   }
 });
@@ -191,7 +191,7 @@ app.use('/api', backupRoutes);
 
 // Serve index.html for all non-API routes (SPA support) in production
 if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
+  app.get('*', (_req, res) => {
     const frontendPath = path.join(__dirname, '../dist');
     res.sendFile(path.join(frontendPath, 'index.html'));
   });

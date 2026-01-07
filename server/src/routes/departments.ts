@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { authenticateToken } from '../middleware/auth.js';
 import {
   getDepartments,
@@ -13,15 +13,16 @@ import {
   emitDepartmentDeleted,
 } from '../services/socket-events.service.js';
 import db from '../db.js';
+import type { AuthRequest } from '../types/index.js';
 
 const router = express.Router();
 
 router.use(authenticateToken);
 
 // GET /api/organizations/:orgId/departments
-router.get('/organizations/:orgId/departments', async (req, res, next) => {
+router.get('/organizations/:orgId/departments', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const depts = await getDepartments(req.params.orgId, req.user.id);
+    const depts = await getDepartments(req.params.orgId!, req.user!.id);
     res.json(depts);
   } catch (err) {
     next(err);
@@ -29,9 +30,9 @@ router.get('/organizations/:orgId/departments', async (req, res, next) => {
 });
 
 // GET /api/organizations/:orgId/departments/:deptId
-router.get('/organizations/:orgId/departments/:deptId', async (req, res, next) => {
+router.get('/organizations/:orgId/departments/:deptId', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const dept = await getDepartmentById(req.params.orgId, req.params.deptId, req.user.id);
+    const dept = await getDepartmentById(req.params.orgId!, req.params.deptId!, req.user!.id);
     res.json(dept);
   } catch (err) {
     next(err);
@@ -39,26 +40,27 @@ router.get('/organizations/:orgId/departments/:deptId', async (req, res, next) =
 });
 
 // POST /api/organizations/:orgId/departments
-router.post('/organizations/:orgId/departments', async (req, res, next) => {
+router.post('/organizations/:orgId/departments', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { name, description, parentId } = req.body;
 
     if (!name || !name.trim()) {
-      return res.status(400).json({ message: 'Department name is required' });
+      res.status(400).json({ message: 'Department name is required' });
+      return;
     }
 
     const dept = await createDepartment(
-      req.params.orgId,
+      req.params.orgId!,
       {
         name: name.trim(),
-        description: description || null,
-        parentId: parentId || null,
+        description: description !== undefined ? String(description) : undefined,
+        parentId: parentId !== undefined ? String(parentId) : undefined,
       },
-      req.user.id
+      req.user!.id
     );
 
     // Emit real-time event
-    emitDepartmentCreated(req.params.orgId, dept, req.user);
+    emitDepartmentCreated(req.params.orgId!, dept, req.user!);
 
     res.status(201).json(dept);
   } catch (err) {
@@ -67,27 +69,28 @@ router.post('/organizations/:orgId/departments', async (req, res, next) => {
 });
 
 // PUT /api/organizations/:orgId/departments/:deptId
-router.put('/organizations/:orgId/departments/:deptId', async (req, res, next) => {
+router.put('/organizations/:orgId/departments/:deptId', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { name, description, parentId } = req.body;
 
     if (name !== undefined && !name.trim()) {
-      return res.status(400).json({ message: 'Department name cannot be empty' });
+      res.status(400).json({ message: 'Department name cannot be empty' });
+      return;
     }
 
     const dept = await updateDepartment(
-      req.params.orgId,
-      req.params.deptId,
+      req.params.orgId!,
+      req.params.deptId!,
       {
         name: name?.trim(),
-        description,
-        parentId,
+        description: description !== undefined ? String(description) : undefined,
+        parentId: parentId !== undefined ? String(parentId) : undefined,
       },
-      req.user.id
+      req.user!.id
     );
 
     // Emit real-time event
-    emitDepartmentUpdated(req.params.orgId, dept, req.user);
+    emitDepartmentUpdated(req.params.orgId!, dept, req.user!);
 
     res.json(dept);
   } catch (err) {
@@ -96,7 +99,7 @@ router.put('/organizations/:orgId/departments/:deptId', async (req, res, next) =
 });
 
 // DELETE /api/organizations/:orgId/departments/:deptId
-router.delete('/organizations/:orgId/departments/:deptId', async (req, res, next) => {
+router.delete('/organizations/:orgId/departments/:deptId', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     // Get full department data before deleting for audit trail
     const department = db
@@ -107,13 +110,13 @@ router.delete('/organizations/:orgId/departments/:deptId', async (req, res, next
       WHERE id = ? AND organization_id = ?
     `
       )
-      .get(req.params.deptId, req.params.orgId);
+      .get(req.params.deptId!, req.params.orgId!) as any;
 
-    await deleteDepartment(req.params.orgId, req.params.deptId, req.user.id);
+    await deleteDepartment(req.params.orgId!, req.params.deptId!, req.user!.id);
 
     // Emit real-time event with full department data
     if (department) {
-      emitDepartmentDeleted(req.params.orgId, department, req.user);
+      emitDepartmentDeleted(req.params.orgId!, department, req.user!);
     }
 
     res.status(204).send();

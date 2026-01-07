@@ -1,12 +1,50 @@
 import db from '../db.js';
 import { randomUUID } from 'crypto';
 import { getUserOrganizations, requireOrgPermission } from './member.service.js';
+import type { AppError } from '../types/index.js';
 
-export async function getOrganizations(userId) {
+interface Department {
+  id: string;
+  organizationId: string;
+  parentId: string | null;
+  name: string;
+  description: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Person {
+  id: string;
+  departmentId: string;
+  name: string;
+  title: string | null;
+  email: string | null;
+  phone: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface DepartmentWithPeople extends Department {
+  people: Person[];
+}
+
+interface OrganizationResult {
+  id: string;
+  name: string;
+  createdById: string;
+  createdAt: string;
+  updatedAt: string;
+  departments?: DepartmentWithPeople[];
+  userRole?: 'owner' | 'admin' | 'editor' | 'viewer';
+}
+
+export async function getOrganizations(userId: string): Promise<any> {
   return getUserOrganizations(userId);
 }
 
-export async function getOrganizationById(id, userId) {
+export async function getOrganizationById(id: string, userId: string): Promise<OrganizationResult> {
   // Check access (throws if no access) and get user's role
   const access = requireOrgPermission(id, userId, 'viewer');
 
@@ -18,10 +56,10 @@ export async function getOrganizationById(id, userId) {
     WHERE id = ?
   `
     )
-    .get(id);
+    .get(id) as OrganizationResult | undefined;
 
   if (!org) {
-    const error = new Error('Organization not found');
+    const error = new Error('Organization not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -39,10 +77,10 @@ export async function getOrganizationById(id, userId) {
     ORDER BY d.sort_order ASC
   `
     )
-    .all(id);
+    .all(id) as Department[];
 
   // Get people for each department
-  const departmentsWithPeople = departments.map(dept => {
+  const departmentsWithPeople: DepartmentWithPeople[] = departments.map(dept => {
     const people = db
       .prepare(
         `
@@ -54,17 +92,17 @@ export async function getOrganizationById(id, userId) {
       ORDER BY sort_order ASC
     `
       )
-      .all(dept.id);
+      .all(dept.id) as Person[];
 
     return { ...dept, people };
   });
 
   org.departments = departmentsWithPeople;
-  org.userRole = access.role; // Include user's role in response
+  org.userRole = access.role ?? undefined; // Include user's role in response
   return org;
 }
 
-export async function createOrganization(name, userId) {
+export async function createOrganization(name: string, userId: string): Promise<OrganizationResult> {
   const orgId = randomUUID();
   const now = new Date().toISOString();
 
@@ -82,10 +120,10 @@ export async function createOrganization(name, userId) {
     FROM organizations WHERE id = ?
   `
     )
-    .get(orgId);
+    .get(orgId) as OrganizationResult;
 }
 
-export async function updateOrganization(id, name, userId) {
+export async function updateOrganization(id: string, name: string, userId: string): Promise<OrganizationResult> {
   // Require admin permission
   requireOrgPermission(id, userId, 'admin');
 
@@ -106,15 +144,15 @@ export async function updateOrganization(id, name, userId) {
     FROM organizations WHERE id = ?
   `
     )
-    .get(id);
+    .get(id) as OrganizationResult;
 }
 
-export async function deleteOrganization(id, userId) {
+export async function deleteOrganization(id: string, userId: string): Promise<{ success: boolean }> {
   // Only owner can delete
   const access = requireOrgPermission(id, userId, 'owner');
 
   if (!access.isOwner) {
-    const error = new Error('Only the organization owner can delete it');
+    const error = new Error('Only the organization owner can delete it') as AppError;
     error.status = 403;
     throw error;
   }

@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 
 // Initialize Resend client (will be null if no API key configured)
-let resend = null;
+let resend: Resend | null = null;
 if (process.env.RESEND_API_KEY) {
   resend = new Resend(process.env.RESEND_API_KEY);
 }
@@ -12,26 +12,46 @@ const FROM_EMAIL = process.env.FROM_EMAIL || 'OrgTree <onboarding@resend.dev>';
 /**
  * Check if email service is configured
  */
-export function isEmailConfigured() {
+export function isEmailConfigured(): boolean {
   return resend !== null;
+}
+
+interface SendInvitationEmailParams {
+  to: string;
+  inviterName: string;
+  orgName: string;
+  role: string;
+  token: string;
+}
+
+interface EmailResult {
+  success: boolean;
+  error?: string;
+  messageId?: string;
 }
 
 /**
  * Send an organization invitation email
  */
-export async function sendInvitationEmail({ to, inviterName, orgName, role, token }) {
+export async function sendInvitationEmail({
+  to,
+  inviterName,
+  orgName,
+  role,
+  token,
+}: SendInvitationEmailParams): Promise<EmailResult> {
   if (!resend) {
     console.warn('Email service not configured. Set RESEND_API_KEY to enable emails.');
     return { success: false, error: 'email_not_configured' };
   }
 
   const inviteUrl = `${APP_URL}/invite/${token}`;
-  const roleDescription =
-    {
-      viewer: 'view',
-      editor: 'view and edit',
-      admin: 'manage',
-    }[role] || 'access';
+  const roleDescription: Record<string, string> = {
+    viewer: 'view',
+    editor: 'view and edit',
+    admin: 'manage',
+  };
+  const roleDesc = roleDescription[role] || 'access';
 
   try {
     const { data, error } = await resend.emails.send({
@@ -56,7 +76,7 @@ export async function sendInvitationEmail({ to, inviterName, orgName, role, toke
             </p>
 
             <p style="font-size: 14px; color: #64748b;">
-              You'll be able to ${roleDescription} this organization's structure and team members.
+              You'll be able to ${roleDesc} this organization's structure and team members.
             </p>
 
             <div style="text-align: center; margin: 30px 0;">
@@ -82,7 +102,7 @@ export async function sendInvitationEmail({ to, inviterName, orgName, role, toke
       text: `
 You've been invited to join ${orgName} on OrgTree!
 
-${inviterName} has invited you to ${roleDescription} this organization.
+${inviterName} has invited you to ${roleDesc} this organization.
 
 Accept your invitation by visiting:
 ${inviteUrl}
@@ -101,6 +121,6 @@ If you didn't expect this email, you can safely ignore it.
     return { success: true, messageId: data?.id };
   } catch (err) {
     console.error('Email service error:', err);
-    return { success: false, error: err.message };
+    return { success: false, error: (err as Error).message };
   }
 }

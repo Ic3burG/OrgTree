@@ -1,8 +1,26 @@
+import React from 'react';
+
+interface DepthColor {
+  hex: string;
+  bg: string;
+  text: string;
+}
+
+interface DepartmentTooltipProps {
+  description: string | null;
+  depthColor: DepthColor;
+  placement?: 'top' | 'bottom';
+}
+
 /**
  * DepartmentTooltip - Shows department responsibilities on hover
  * Displays as a floating tooltip with bullet points
  */
-export default function DepartmentTooltip({ description, depthColor, placement = 'bottom' }) {
+export default function DepartmentTooltip({
+  description,
+  depthColor,
+  placement = 'bottom',
+}: DepartmentTooltipProps): React.JSX.Element | null {
   if (!description) return null;
 
   // Parse description into bullet points (split by periods)
@@ -66,7 +84,7 @@ export default function DepartmentTooltip({ description, depthColor, placement =
  * Parse description string into individual responsibility items
  * Splits by periods and filters out empty strings
  */
-function parseDescription(description) {
+function parseDescription(description: string | null): string[] {
   if (!description) return [];
 
   return description

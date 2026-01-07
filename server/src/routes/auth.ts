@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response, NextFunction, Request } from 'express';
 import bcrypt from 'bcrypt';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
@@ -16,6 +16,7 @@ import {
 } from '../services/auth.service.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { createAuditLog } from '../services/audit.service.js';
+import type { AuthRequest } from '../types/index.js';
 
 const router = express.Router();
 
@@ -26,7 +27,7 @@ router.use(cookieParser());
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
+  sameSite: 'strict' as const,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   path: '/api/auth', // Only sent to auth endpoints
 };
@@ -61,18 +62,20 @@ const authLimiter = rateLimit({
 });
 
 // POST /api/auth/signup
-router.post('/signup', authLimiter, async (req, res, next) => {
+router.post('/signup', authLimiter, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { name, email, password } = req.body;
 
     // Validation
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Name, email, and password are required' });
+      res.status(400).json({ message: 'Name, email, and password are required' });
+      return;
     }
 
     // Security: Enforce stronger password requirements
     if (password.length < 12) {
-      return res.status(400).json({ message: 'Password must be at least 12 characters' });
+      res.status(400).json({ message: 'Password must be at least 12 characters' });
+      return;
     }
 
     const ipAddress = req.ip || req.connection.remoteAddress;
@@ -95,12 +98,13 @@ router.post('/signup', authLimiter, async (req, res, next) => {
 });
 
 // POST /api/auth/login
-router.post('/login', authLimiter, async (req, res, next) => {
+router.post('/login', authLimiter, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+      res.status(400).json({ message: 'Email and password are required' });
+      return;
     }
 
     const ipAddress = req.ip || req.connection.remoteAddress;
@@ -123,9 +127,9 @@ router.post('/login', authLimiter, async (req, res, next) => {
 });
 
 // GET /api/auth/me
-router.get('/me', authenticateToken, async (req, res, next) => {
+router.get('/me', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const user = await getUserById(req.user.id);
+    const user = await getUserById(req.user!.id);
     res.json(user);
   } catch (err) {
     next(err);
@@ -133,44 +137,48 @@ router.get('/me', authenticateToken, async (req, res, next) => {
 });
 
 // POST /api/auth/change-password - Change password (requires auth)
-router.post('/change-password', authenticateToken, async (req, res, next) => {
+router.post('/change-password', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { oldPassword, newPassword } = req.body;
 
     // Get current user from database
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user!.id) as any;
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: 'User not found' });
+      return;
     }
 
     // Security: Require old password verification UNLESS user must change password
     // (temporary password flow allows change without knowing old password)
     if (!user.must_change_password) {
       if (!oldPassword) {
-        return res.status(400).json({ message: 'Current password is required' });
+        res.status(400).json({ message: 'Current password is required' });
+        return;
       }
 
       // Verify old password
       const isValidOldPassword = await bcrypt.compare(oldPassword, user.password_hash);
       if (!isValidOldPassword) {
-        return res.status(401).json({ message: 'Current password is incorrect' });
+        res.status(401).json({ message: 'Current password is incorrect' });
+        return;
       }
     }
 
     if (!newPassword) {
-      return res.status(400).json({ message: 'New password is required' });
+      res.status(400).json({ message: 'New password is required' });
+      return;
     }
 
     // Security: Enforce stronger password requirements
     if (newPassword.length < 12) {
-      return res.status(400).json({ message: 'Password must be at least 12 characters' });
+      res.status(400).json({ message: 'Password must be at least 12 characters' });
+      return;
     }
 
     // Security: Prevent reusing the same password
     if (oldPassword && oldPassword === newPassword) {
-      return res
-        .status(400)
-        .json({ message: 'New password must be different from current password' });
+      res.status(400).json({ message: 'New password must be different from current password' });
+      return;
     }
 
     // Hash new password
@@ -186,20 +194,21 @@ router.post('/change-password', authenticateToken, async (req, res, next) => {
       WHERE id = ?
     `
       )
-      .run(passwordHash, now, req.user.id);
+      .run(passwordHash, now, req.user!.id);
 
     if (result.changes === 0) {
-      return res.status(500).json({ message: 'Failed to update password' });
+      res.status(500).json({ message: 'Failed to update password' });
+      return;
     }
 
     // Security: Revoke all refresh tokens (force re-login on all devices)
-    const revokedCount = revokeAllUserTokens(req.user.id);
+    const revokedCount = revokeAllUserTokens(req.user!.id);
 
     // Clear the refresh token cookie
     res.clearCookie('refreshToken', { path: '/api/auth' });
 
     // Return updated user info
-    const updatedUser = await getUserById(req.user.id);
+    const updatedUser = await getUserById(req.user!.id);
     res.json({
       message: 'Password changed successfully. Please log in again.',
       user: updatedUser,
@@ -224,16 +233,17 @@ const refreshLimiter = rateLimit({
 });
 
 // POST /api/auth/refresh - Get new access token using refresh token
-router.post('/refresh', refreshLimiter, async (req, res, next) => {
+router.post('/refresh', refreshLimiter, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // Get refresh token from httpOnly cookie
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
-      return res.status(401).json({
+      res.status(401).json({
         message: 'Refresh token required',
         code: 'REFRESH_TOKEN_MISSING',
       });
+      return;
     }
 
     const ipAddress = req.ip || req.connection.remoteAddress;
@@ -252,10 +262,11 @@ router.post('/refresh', refreshLimiter, async (req, res, next) => {
         timestamp: new Date().toISOString(),
       });
 
-      return res.status(401).json({
+      res.status(401).json({
         message: 'Invalid or expired refresh token',
         code: 'REFRESH_TOKEN_INVALID',
       });
+      return;
     }
 
     // Set new refresh token cookie
@@ -272,7 +283,7 @@ router.post('/refresh', refreshLimiter, async (req, res, next) => {
 });
 
 // POST /api/auth/logout - Revoke refresh token and clear cookie
-router.post('/logout', async (req, res, next) => {
+router.post('/logout', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const refreshToken = req.cookies.refreshToken;
 
@@ -295,12 +306,11 @@ router.post('/logout', async (req, res, next) => {
 // ============================================
 
 // GET /api/auth/sessions - List all active sessions for current user
-router.get('/sessions', authenticateToken, async (req, res, next) => {
+router.get('/sessions', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const sessions = getUserSessions(req.user.id);
+    const sessions = getUserSessions(req.user!.id);
 
     // Mark current session
-    const currentToken = req.cookies.refreshToken;
     const sessionsWithCurrent = sessions.map(session => ({
       ...session,
       isCurrent: false, // We can't easily determine this without storing the hash
@@ -313,14 +323,19 @@ router.get('/sessions', authenticateToken, async (req, res, next) => {
 });
 
 // DELETE /api/auth/sessions/:sessionId - Revoke a specific session
-router.delete('/sessions/:sessionId', authenticateToken, async (req, res, next) => {
+router.delete('/sessions/:sessionId', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { sessionId } = req.params;
+    const sessionId = req.params.sessionId;
+    if (!sessionId) {
+      res.status(400).json({ message: 'Session ID is required' });
+      return;
+    }
 
-    const revoked = revokeSession(sessionId, req.user.id);
+    const revoked = revokeSession(sessionId, req.user!.id);
 
     if (!revoked) {
-      return res.status(404).json({ message: 'Session not found' });
+      res.status(404).json({ message: 'Session not found' });
+      return;
     }
 
     res.json({ message: 'Session revoked successfully' });
@@ -330,15 +345,16 @@ router.delete('/sessions/:sessionId', authenticateToken, async (req, res, next) 
 });
 
 // POST /api/auth/sessions/revoke-others - Revoke all sessions except current
-router.post('/sessions/revoke-others', authenticateToken, async (req, res, next) => {
+router.post('/sessions/revoke-others', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const currentToken = req.cookies.refreshToken;
+    const currentToken = req.cookies.refreshToken as string | undefined;
 
     if (!currentToken) {
-      return res.status(400).json({ message: 'No current session found' });
+      res.status(400).json({ message: 'No current session found' });
+      return;
     }
 
-    const revokedCount = revokeOtherSessions(req.user.id, currentToken);
+    const revokedCount = revokeOtherSessions(req.user!.id, currentToken);
 
     res.json({
       message: `Revoked ${revokedCount} other session(s)`,

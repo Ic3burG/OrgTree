@@ -1,18 +1,37 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { X, Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 import { parseCSV, validateCSVData } from '../../utils/csvImport';
+import type { CSVRow, CSVImportResult } from '../../utils/csvImport';
 import api from '../../api/client';
 
-export default function ImportModal({ isOpen, onClose, orgId, onSuccess }) {
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [errors, setErrors] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const fileInputRef = useRef(null);
+interface ImportModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  orgId: string;
+  onSuccess: () => void;
+}
 
-  const handleFileChange = e => {
-    const selectedFile = e.target.files[0];
+interface PreviewData {
+  rows: CSVRow[];
+  departments: number;
+  people: number;
+}
+
+export default function ImportModal({
+  isOpen,
+  onClose,
+  orgId,
+  onSuccess,
+}: ImportModalProps): React.JSX.Element | null {
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<PreviewData | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<CSVImportResult | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
     setFile(selectedFile);
@@ -20,9 +39,12 @@ export default function ImportModal({ isOpen, onClose, orgId, onSuccess }) {
     setResult(null);
 
     const reader = new FileReader();
-    reader.onload = event => {
+    reader.onload = (event: ProgressEvent<FileReader>): void => {
       try {
-        const rows = parseCSV(event.target.result);
+        const result = event.target?.result;
+        if (typeof result !== 'string') return;
+
+        const rows = parseCSV(result);
         const validationErrors = validateCSVData(rows);
 
         if (validationErrors.length > 0) {
@@ -31,36 +53,38 @@ export default function ImportModal({ isOpen, onClose, orgId, onSuccess }) {
         } else {
           setPreview({
             rows,
-            departments: rows.filter(r => r.type.toLowerCase() === 'department').length,
-            people: rows.filter(r => r.type.toLowerCase() === 'person').length,
+            departments: rows.filter((r: CSVRow) => r.type?.toLowerCase() === 'department').length,
+            people: rows.filter((r: CSVRow) => r.type?.toLowerCase() === 'person').length,
           });
         }
       } catch (err) {
-        setErrors(['Failed to parse CSV file: ' + err.message]);
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        setErrors(['Failed to parse CSV file: ' + errorMessage]);
       }
     };
     reader.readAsText(selectedFile);
   };
 
-  const handleImport = async () => {
+  const handleImport = async (): Promise<void> => {
     if (!preview) return;
 
     setLoading(true);
     try {
-      const result = await api.importOrganization(orgId, preview.rows);
-      setResult(result);
+      const importResult = (await api.importOrganization(orgId, preview.rows)) as CSVImportResult;
+      setResult(importResult);
       setTimeout(() => {
         onSuccess();
         handleClose();
       }, 2000);
     } catch (err) {
-      setErrors([err.message || 'Failed to import data']);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to import data';
+      setErrors([errorMessage]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     setFile(null);
     setPreview(null);
     setErrors([]);

@@ -1,6 +1,12 @@
+import type { Response, NextFunction } from 'express';
 import logger from '../utils/logger.js';
+import type { AuthRequest } from '../types/index.js';
 
-export function errorHandler(err, req, res, next) {
+interface ErrorWithStatus extends Error {
+  status?: number;
+}
+
+export function errorHandler(err: ErrorWithStatus, req: AuthRequest, res: Response, _next: NextFunction): void {
   // Log error with context
   logger.error(err.message, {
     error: err.name,
@@ -11,11 +17,13 @@ export function errorHandler(err, req, res, next) {
   });
 
   if (err.name === 'ValidationError') {
-    return res.status(400).json({ message: err.message });
+    res.status(400).json({ message: err.message });
+    return;
   }
 
   if (err.name === 'UnauthorizedError') {
-    return res.status(401).json({ message: 'Invalid or expired token' });
+    res.status(401).json({ message: 'Invalid or expired token' });
+    return;
   }
 
   const statusCode = err.status || 500;

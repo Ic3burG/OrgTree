@@ -1,17 +1,22 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { X, FolderInput } from 'lucide-react';
+import type { Department } from '../../types/index.js';
 
-/**
- * Modal for moving people to a different department
- * @param {Object} props
- * @param {boolean} props.isOpen - Whether modal is open
- * @param {Function} props.onClose - Close callback
- * @param {Function} props.onConfirm - Confirm move callback (targetDepartmentId) => void
- * @param {number} props.count - Number of people to move
- * @param {Array} props.departments - Array of departments to choose from
- * @param {boolean} props.isMoving - Loading state
- * @param {Object} props.result - Result from move { movedCount, failedCount }
- */
+interface BulkMoveResult {
+  movedCount: number;
+  failedCount: number;
+}
+
+interface BulkMoveModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (targetDepartmentId: string) => void;
+  count: number;
+  departments?: Department[];
+  isMoving?: boolean;
+  result?: BulkMoveResult | null;
+}
+
 export default function BulkMoveModal({
   isOpen,
   onClose,
@@ -20,18 +25,18 @@ export default function BulkMoveModal({
   departments = [],
   isMoving = false,
   result = null,
-}) {
-  const [selectedDeptId, setSelectedDeptId] = useState('');
+}: BulkMoveModalProps): React.JSX.Element | null {
+  const [selectedDeptId, setSelectedDeptId] = useState<string>('');
 
   if (!isOpen) return null;
 
-  const handleConfirm = () => {
+  const handleConfirm = (): void => {
     if (selectedDeptId) {
       onConfirm(selectedDeptId);
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     setSelectedDeptId('');
     onClose();
   };

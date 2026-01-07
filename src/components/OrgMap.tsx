@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, createContext, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, createContext, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactFlow, {
   Background,
@@ -7,10 +7,13 @@ import ReactFlow, {
   useEdgesState,
   MarkerType,
   useReactFlow,
+  Node,
+  Edge,
+  NodeTypes,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import DepartmentNode from './DepartmentNode';
+import DepartmentNodeComponent from './DepartmentNode';
 import DetailPanel from './DetailPanel';
 import SearchOverlay from './SearchOverlay';
 import Toolbar from './Toolbar';
@@ -21,13 +24,36 @@ import { exportToPng, exportToPdf } from '../utils/exportUtils';
 import { useToast } from './ui/Toast';
 import { useRealtimeUpdates } from '../hooks/useRealtimeUpdates';
 import api from '../api/client';
+import { Department, Person, Organization } from '../types/index';
+
+// Extended Organization type that includes departments
+interface OrganizationWithDepartments extends Organization {
+  departments: Department[];
+}
+
+// Node data structure for React Flow
+interface DepartmentNodeData {
+  name: string;
+  path: string;
+  depth: number;
+  description: string;
+  people: Person[];
+  isExpanded: boolean;
+  theme?: string;
+  isHighlighted?: boolean;
+  onToggleExpand?: () => void;
+  onSelectPerson?: (person: Person) => void;
+}
+
+// Type for layout direction
+type Direction = 'TB' | 'LR';
 
 // Theme context for providing current theme to all nodes
-export const ThemeContext = createContext('slate');
+export const ThemeContext = createContext<string>('slate');
 
 // Register custom node types
-const nodeTypes = {
-  department: DepartmentNode,
+const nodeTypes: NodeTypes = {
+  department: DepartmentNodeComponent,
 };
 
 // Default edge styling
@@ -46,14 +72,17 @@ const defaultEdgeOptions = {
 /**
  * Transform API data to React Flow format
  */
-function transformToFlowData(departments) {
-  const nodes = [];
-  const edges = [];
+function transformToFlowData(departments: Department[]): {
+  nodes: Node<DepartmentNodeData>[];
+  edges: Edge[];
+} {
+  const nodes: Node<DepartmentNodeData>[] = [];
+  const edges: Edge[] = [];
 
   // Helper to calculate depth
-  const getDepth = (dept, deptMap, depth = 0) => {
-    if (!dept.parentId) return depth;
-    const parent = deptMap.get(dept.parentId);
+  const getDepth = (dept: Department, deptMap: Map<string, Department>, depth = 0): number => {
+    if (!dept.parent_id) return depth;
+    const parent = deptMap.get(dept.parent_id);
     return parent ? getDepth(parent, deptMap, depth + 1) : depth;
   };
 
@@ -78,10 +107,10 @@ function transformToFlowData(departments) {
     });
 
     // Create edge to parent
-    if (dept.parentId) {
+    if (dept.parent_id) {
       edges.push({
-        id: `e-${dept.parentId}-${dept.id}`,
-        source: dept.parentId,
+        id: `e-${dept.parent_id}-${dept.id}`,
+        source: dept.parent_id,
         target: dept.id,
         type: 'smoothstep',
       });
@@ -94,32 +123,34 @@ function transformToFlowData(departments) {
 /**
  * OrgMap - Main organization map component with React Flow canvas
  */
-export default function OrgMap() {
-  const { orgId } = useParams();
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+export default function OrgMap(): React.JSX.Element {
+  const { orgId } = useParams<{ orgId: string }>();
+  const [nodes, setNodes, onNodesChange] = useNodesState<DepartmentNodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [selectedPerson, setSelectedPerson] = useState(null);
-  const [layoutDirection, setLayoutDirection] = useState('TB');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [highlightedNodeId, setHighlightedNodeId] = useState(null);
-  const [currentTheme, setCurrentTheme] = useState('slate');
-  const [exporting, setExporting] = useState(false);
-  const [orgName, setOrgName] = useState('Organization Chart');
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [layoutDirection, setLayoutDirection] = useState<Direction>('TB');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
+  const [currentTheme, setCurrentTheme] = useState<string>('slate');
+  const [exporting, setExporting] = useState<boolean>(false);
+  const [orgName, setOrgName] = useState<string>('Organization Chart');
 
-  const reactFlowWrapper = useRef(null);
+  const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
   const toast = useToast();
 
   // Load organization data from API
   const loadData = useCallback(
-    async (showLoading = true) => {
+    async (showLoading = true): Promise<void> => {
       try {
         if (showLoading) setIsLoading(true);
         setError(null);
 
         // Fetch organization with all departments and people
-        const org = await api.getOrganization(orgId);
+        if (!orgId) return;
+
+        const org = (await api.getOrganization(orgId)) as OrganizationWithDepartments;
 
         // Store organization name for exports
         if (org.name) {
@@ -137,17 +168,23 @@ export default function OrgMap() {
         const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(org.departments);
 
         // Apply initial layout
-        const layoutedNodes = calculateLayout(parsedNodes, parsedEdges, layoutDirection);
+        const layoutedNodes = calculateLayout(
+          parsedNodes as unknown as Node[],
+          parsedEdges,
+          layoutDirection
+        );
 
         // Add callbacks to node data
-        const nodesWithCallbacks = layoutedNodes.map(node => ({
-          ...node,
-          data: {
-            ...node.data,
-            onToggleExpand: () => handleToggleExpand(node.id),
-            onSelectPerson: person => handleSelectPerson(person),
-          },
-        }));
+        const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map(
+          (node: unknown) => ({
+            ...node,
+            data: {
+              ...node.data,
+              onToggleExpand: () => handleToggleExpand(node.id),
+              onSelectPerson: (person: Person) => handleSelectPerson(person),
+            },
+          })
+        );
 
         setNodes(nodesWithCallbacks);
         setEdges(parsedEdges);
@@ -160,7 +197,9 @@ export default function OrgMap() {
         }
       } catch (err) {
         console.error('Error loading organization data:', err);
-        setError(err.message || 'Failed to load organization data');
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to load organization data';
+        setError(errorMessage);
       } finally {
         if (showLoading) setIsLoading(false);
       }
@@ -173,7 +212,7 @@ export default function OrgMap() {
     if (orgId) {
       loadData();
     }
-  }, [orgId]);
+  }, [orgId, loadData]);
 
   // Real-time updates
   useRealtimeUpdates(orgId, {
@@ -192,7 +231,7 @@ export default function OrgMap() {
 
   // Toggle department expansion
   const handleToggleExpand = useCallback(
-    nodeId => {
+    (nodeId: string): void => {
       setNodes(nds => {
         const updatedNodes = nds.map(node => {
           if (node.id === nodeId) {
@@ -208,97 +247,119 @@ export default function OrgMap() {
         });
 
         // Recalculate layout with new dimensions
-        const layoutedNodes = calculateLayout(updatedNodes, edges, layoutDirection);
+        const layoutedNodes = calculateLayout(
+          updatedNodes as unknown as Node[],
+          edges,
+          layoutDirection
+        );
 
         // Preserve callbacks
-        return layoutedNodes.map(node => ({
-          ...node,
-          data: {
-            ...node.data,
-            onToggleExpand: () => handleToggleExpand(node.id),
-            onSelectPerson: person => handleSelectPerson(person),
-          },
-        }));
+        const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map(
+          (node: unknown) => ({
+            ...node,
+            data: {
+              ...node.data,
+              onToggleExpand: () => handleToggleExpand(node.id),
+              onSelectPerson: (person: Person) => handleSelectPerson(person),
+            },
+          })
+        );
+
+        return nodesWithCallbacks;
       });
     },
     [edges, layoutDirection, setNodes]
   );
 
   // Select person for detail panel
-  const handleSelectPerson = useCallback(person => {
+  const handleSelectPerson = useCallback((person: Person): void => {
     setSelectedPerson(person);
   }, []);
 
   // Close detail panel
-  const handleCloseDetail = useCallback(() => {
+  const handleCloseDetail = useCallback((): void => {
     setSelectedPerson(null);
   }, []);
 
   // Expand all departments
-  const handleExpandAll = useCallback(() => {
+  const handleExpandAll = useCallback((): void => {
     setNodes(nds => {
       const updatedNodes = nds.map(node => ({
         ...node,
         data: { ...node.data, isExpanded: true },
       }));
 
-      const layoutedNodes = calculateLayout(updatedNodes, edges, layoutDirection);
+      const layoutedNodes = calculateLayout(
+        updatedNodes as unknown as Node[],
+        edges,
+        layoutDirection
+      );
 
-      return layoutedNodes.map(node => ({
+      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => ({
         ...node,
         data: {
           ...node.data,
           onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: person => handleSelectPerson(person),
+          onSelectPerson: (person: Person) => handleSelectPerson(person),
         },
       }));
+
+      return nodesWithCallbacks;
     });
   }, [edges, layoutDirection, handleToggleExpand, handleSelectPerson, setNodes]);
 
   // Collapse all departments
-  const handleCollapseAll = useCallback(() => {
+  const handleCollapseAll = useCallback((): void => {
     setNodes(nds => {
       const updatedNodes = nds.map(node => ({
         ...node,
         data: { ...node.data, isExpanded: false },
       }));
 
-      const layoutedNodes = calculateLayout(updatedNodes, edges, layoutDirection);
+      const layoutedNodes = calculateLayout(
+        updatedNodes as unknown as Node[],
+        edges,
+        layoutDirection
+      );
 
-      return layoutedNodes.map(node => ({
+      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => ({
         ...node,
         data: {
           ...node.data,
           onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: person => handleSelectPerson(person),
+          onSelectPerson: (person: Person) => handleSelectPerson(person),
         },
       }));
+
+      return nodesWithCallbacks;
     });
   }, [edges, layoutDirection, handleToggleExpand, handleSelectPerson, setNodes]);
 
   // Toggle layout direction
-  const handleToggleLayout = useCallback(() => {
-    const newDirection = layoutDirection === 'TB' ? 'LR' : 'TB';
+  const handleToggleLayout = useCallback((): void => {
+    const newDirection: Direction = layoutDirection === 'TB' ? 'LR' : 'TB';
     setLayoutDirection(newDirection);
 
     setNodes(nds => {
-      const layoutedNodes = calculateLayout(nds, edges, newDirection);
+      const layoutedNodes = calculateLayout(nds as unknown as Node[], edges, newDirection);
 
-      return layoutedNodes.map(node => ({
+      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => ({
         ...node,
         data: {
           ...node.data,
           onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: person => handleSelectPerson(person),
+          onSelectPerson: (person: Person) => handleSelectPerson(person),
         },
       }));
+
+      return nodesWithCallbacks;
     });
 
     setTimeout(() => fitView({ padding: 0.2, duration: 800 }), 100);
   }, [layoutDirection, edges, fitView, handleToggleExpand, handleSelectPerson, setNodes]);
 
   // Handle theme change
-  const handleThemeChange = useCallback(themeName => {
+  const handleThemeChange = useCallback((themeName: string): void => {
     setCurrentTheme(themeName);
     localStorage.setItem('orgTreeTheme', themeName);
   }, []);
@@ -339,11 +400,25 @@ export default function OrgMap() {
 
   // Handle search result selection
   const handleSearchSelect = useCallback(
-    result => {
+    (result: {
+      type: 'department' | 'person';
+      id: string;
+      name: string;
+      subtitle: string;
+      nodeId: string;
+      departmentName?: string;
+      person?: {
+        id: string;
+        name: string;
+        title: string | null;
+        email: string | null;
+        phone: string | null;
+      } | null;
+    }): void => {
       if (result.type === 'department') {
         // Zoom to department node
         const node = nodes.find(n => n.id === result.nodeId);
-        if (node) {
+        if (node && node.position) {
           setCenter(node.position.x + 110, node.position.y + 35, { zoom: 1.5, duration: 800 });
           setHighlightedNodeId(node.id);
           setTimeout(() => setHighlightedNodeId(null), 3000);
@@ -359,7 +434,7 @@ export default function OrgMap() {
 
         setTimeout(() => {
           const updatedNode = nodes.find(n => n.id === nodeId);
-          if (updatedNode) {
+          if (updatedNode && updatedNode.position) {
             setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
               zoom: 1.5,
               duration: 800,
@@ -370,7 +445,7 @@ export default function OrgMap() {
 
           // Open detail panel
           if (result.person) {
-            setSelectedPerson(result.person);
+            setSelectedPerson(result.person as Person);
           }
         }, 300);
       }
@@ -387,7 +462,7 @@ export default function OrgMap() {
         theme: currentTheme,
         isHighlighted: node.id === highlightedNodeId,
         onToggleExpand: () => handleToggleExpand(node.id),
-        onSelectPerson: person => handleSelectPerson(person),
+        onSelectPerson: (person: Person) => handleSelectPerson(person),
       },
     }));
   }, [nodes, currentTheme, highlightedNodeId, handleToggleExpand, handleSelectPerson]);
@@ -475,7 +550,7 @@ export default function OrgMap() {
       </ThemeContext.Provider>
 
       {/* Overlay Components */}
-      <SearchOverlay orgId={orgId} nodes={nodes} onSelectResult={handleSearchSelect} />
+      <SearchOverlay orgId={orgId} onSelectResult={handleSearchSelect} />
 
       <Toolbar
         onZoomIn={() => zoomIn({ duration: 300 })}

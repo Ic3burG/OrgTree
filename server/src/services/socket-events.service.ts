@@ -1,18 +1,35 @@
 import { emitToOrg } from '../socket.js';
 import { createAuditLog } from './audit.service.js';
 
+interface Actor {
+  id: string;
+  name: string;
+  email?: string;
+}
+
+interface EventPayload<T = any> {
+  type: string;
+  action: string;
+  data: T;
+  meta: {
+    actorId: string | null;
+    actorName: string;
+    timestamp: string;
+  };
+}
+
 /**
  * Creates a standardized event payload and persists audit log
- * @param {string} orgId - Organization ID
- * @param {string} type - Entity type (person, department, member, org)
- * @param {string} action - Action type (created, updated, deleted)
- * @param {Object} data - Entity data
- * @param {Object} actor - User who performed the action
- * @returns {Object} Standardized event payload
  */
-function createPayload(orgId, type, action, data, actor) {
+function createPayload<T extends { id?: string }>(
+  orgId: string | null,
+  type: string,
+  action: string,
+  data: T,
+  actor: Actor | null
+): EventPayload<T> {
   // Persist audit log to database
-  createAuditLog(orgId, actor, action, type, data?.id, data);
+  createAuditLog(orgId, actor, action, type, data?.id || null, data);
 
   return {
     type,
@@ -27,60 +44,60 @@ function createPayload(orgId, type, action, data, actor) {
 }
 
 // Department events
-export function emitDepartmentCreated(orgId, department, actor) {
+export function emitDepartmentCreated(orgId: string, department: any, actor: Actor): void {
   const payload = createPayload(orgId, 'department', 'created', department, actor);
   emitToOrg(orgId, 'department:created', payload);
 }
 
-export function emitDepartmentUpdated(orgId, department, actor) {
+export function emitDepartmentUpdated(orgId: string, department: any, actor: Actor): void {
   const payload = createPayload(orgId, 'department', 'updated', department, actor);
   emitToOrg(orgId, 'department:updated', payload);
 }
 
-export function emitDepartmentDeleted(orgId, department, actor) {
+export function emitDepartmentDeleted(orgId: string, department: any, actor: Actor): void {
   const payload = createPayload(orgId, 'department', 'deleted', department, actor);
   emitToOrg(orgId, 'department:deleted', payload);
 }
 
 // Person events
-export function emitPersonCreated(orgId, person, actor) {
+export function emitPersonCreated(orgId: string, person: any, actor: Actor): void {
   const payload = createPayload(orgId, 'person', 'created', person, actor);
   emitToOrg(orgId, 'person:created', payload);
 }
 
-export function emitPersonUpdated(orgId, person, actor) {
+export function emitPersonUpdated(orgId: string, person: any, actor: Actor): void {
   const payload = createPayload(orgId, 'person', 'updated', person, actor);
   emitToOrg(orgId, 'person:updated', payload);
 }
 
-export function emitPersonDeleted(orgId, person, actor) {
+export function emitPersonDeleted(orgId: string, person: any, actor: Actor): void {
   const payload = createPayload(orgId, 'person', 'deleted', person, actor);
   emitToOrg(orgId, 'person:deleted', payload);
 }
 
 // Member events (for sharing)
-export function emitMemberAdded(orgId, member, actor) {
+export function emitMemberAdded(orgId: string, member: any, actor: Actor): void {
   const payload = createPayload(orgId, 'member', 'added', member, actor);
   emitToOrg(orgId, 'member:added', payload);
 }
 
-export function emitMemberUpdated(orgId, member, actor) {
+export function emitMemberUpdated(orgId: string, member: any, actor: Actor): void {
   const payload = createPayload(orgId, 'member', 'updated', member, actor);
   emitToOrg(orgId, 'member:updated', payload);
 }
 
-export function emitMemberRemoved(orgId, member, actor) {
+export function emitMemberRemoved(orgId: string, member: any, actor: Actor): void {
   const payload = createPayload(orgId, 'member', 'removed', member, actor);
   emitToOrg(orgId, 'member:removed', payload);
 }
 
 // Organization events
-export function emitOrgUpdated(orgId, org, actor) {
+export function emitOrgUpdated(orgId: string, org: any, actor: Actor): void {
   const payload = createPayload(orgId, 'org', 'updated', org, actor);
   emitToOrg(orgId, 'org:updated', payload);
 }
 
-export function emitOrgSettings(orgId, settings, actor) {
+export function emitOrgSettings(orgId: string, settings: any, actor: Actor): void {
   const payload = createPayload(orgId, 'org', 'settings', settings, actor);
   emitToOrg(orgId, 'org:settings', payload);
 }

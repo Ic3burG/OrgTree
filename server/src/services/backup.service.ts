@@ -32,11 +32,17 @@ function generateBackupFilename() {
 /**
  * Create a backup of the database
  * Uses SQLite's backup API for consistency
- *
- * @param {string} [customPath] - Optional custom backup path
- * @returns {Promise<{success: boolean, path?: string, size?: number, error?: string}>}
  */
-export async function createBackup(customPath = null) {
+export async function createBackup(
+  customPath: string | null = null
+): Promise<{
+  success: boolean;
+  path?: string;
+  size?: number;
+  sizeMB?: number;
+  timestamp?: string;
+  error?: string;
+}> {
   try {
     ensureBackupDir();
 
@@ -65,20 +71,28 @@ export async function createBackup(customPath = null) {
       sizeMB: parseFloat(sizeMB),
       timestamp: new Date().toISOString(),
     };
-  } catch (error) {
-    logger.error('Database backup failed', { error: error.message });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Database backup failed', { error: errorMessage });
     return {
       success: false,
-      error: error.message,
+      error: errorMessage,
     };
   }
 }
 
+interface BackupFile {
+  filename: string;
+  path: string;
+  size: number;
+  sizeMB: number;
+  created: Date;
+}
+
 /**
  * List all available backups
- * @returns {Array<{filename: string, path: string, size: number, created: Date}>}
  */
-export function listBackups() {
+export function listBackups(): BackupFile[] {
   ensureBackupDir();
 
   const files = fs
@@ -95,19 +109,19 @@ export function listBackups() {
         created: stats.mtime,
       };
     })
-    .sort((a, b) => b.created - a.created); // Newest first
+    .sort((a, b) => b.created.getTime() - a.created.getTime()); // Newest first
 
   return files;
 }
 
 /**
  * Clean up old backups, keeping only the most recent N
- * @param {number} [keepCount] - Number of backups to keep (default: MAX_BACKUPS)
- * @returns {{deleted: number, kept: number, deletedFiles: string[]}}
  */
-export function cleanupOldBackups(keepCount = MAX_BACKUPS) {
+export function cleanupOldBackups(
+  keepCount: number = MAX_BACKUPS
+): { deleted: number; kept: number; deletedFiles: string[] } {
   const backups = listBackups();
-  const deletedFiles = [];
+  const deletedFiles: string[] = [];
 
   if (backups.length <= keepCount) {
     logger.info('No backups to clean up', {
@@ -125,10 +139,11 @@ export function cleanupOldBackups(keepCount = MAX_BACKUPS) {
       fs.unlinkSync(backup.path);
       deletedFiles.push(backup.filename);
       logger.info('Deleted old backup', { filename: backup.filename });
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('Failed to delete backup', {
         filename: backup.filename,
-        error: error.message,
+        error: errorMessage,
       });
     }
   }
@@ -148,11 +163,10 @@ export function cleanupOldBackups(keepCount = MAX_BACKUPS) {
 /**
  * Restore database from a backup file
  * WARNING: This will overwrite the current database!
- *
- * @param {string} backupPath - Path to the backup file
- * @returns {{success: boolean, error?: string}}
  */
-export function restoreFromBackup(backupPath) {
+export function restoreFromBackup(
+  backupPath: string
+): { success: boolean; message?: string; error?: string } {
   try {
     // Verify backup file exists
     if (!fs.existsSync(backupPath)) {
@@ -160,8 +174,9 @@ export function restoreFromBackup(backupPath) {
     }
 
     // Verify it's a valid SQLite database
-    const testDb = new db.constructor(backupPath, { readonly: true });
-    const check = testDb.prepare('SELECT 1 as ok').get();
+    const Database = require('better-sqlite3');
+    const testDb = new Database(backupPath, { readonly: true });
+    const check = testDb.prepare('SELECT 1 as ok').get() as { ok: number } | undefined;
     testDb.close();
 
     if (!check || check.ok !== 1) {
@@ -191,20 +206,28 @@ export function restoreFromBackup(backupPath) {
       success: true,
       message: 'Database restored. Server restart required.',
     };
-  } catch (error) {
-    logger.error('Database restore failed', { error: error.message });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Database restore failed', { error: errorMessage });
     return {
       success: false,
-      error: error.message,
+      error: errorMessage,
     };
   }
 }
 
+interface BackupStats {
+  totalBackups: number;
+  totalSizeMB: number;
+  oldestBackup: Date | null;
+  newestBackup: Date | null;
+  backupDir: string;
+}
+
 /**
  * Get backup statistics
- * @returns {{totalBackups: number, totalSizeMB: number, oldestBackup: Date|null, newestBackup: Date|null}}
  */
-export function getBackupStats() {
+export function getBackupStats(): BackupStats {
   const backups = listBackups();
 
   if (backups.length === 0) {
@@ -222,8 +245,8 @@ export function getBackupStats() {
   return {
     totalBackups: backups.length,
     totalSizeMB: parseFloat((totalSize / (1024 * 1024)).toFixed(2)),
-    oldestBackup: backups[backups.length - 1].created,
-    newestBackup: backups[0].created,
+    oldestBackup: backups[backups.length - 1]?.created || null,
+    newestBackup: backups[0]?.created || null,
     backupDir: BACKUP_DIR,
   };
 }

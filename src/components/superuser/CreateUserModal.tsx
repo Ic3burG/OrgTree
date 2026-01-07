@@ -1,22 +1,44 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { X, Copy, Check, UserPlus } from 'lucide-react';
 import api from '../../api/client';
+import type { User } from '../../types';
 
-export default function CreateUserModal({ onClose, onSuccess }) {
-  const [step, setStep] = useState('form'); // 'form' | 'success'
-  const [formData, setFormData] = useState({
+interface CreateUserModalProps {
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+interface FormData {
+  name: string;
+  email: string;
+  role: User['role'];
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  role?: string;
+  submit?: string;
+}
+
+export default function CreateUserModal({
+  onClose,
+  onSuccess,
+}: CreateUserModalProps): React.JSX.Element {
+  const [step, setStep] = useState<'form' | 'success'>('form');
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     role: 'user',
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isCreating, setIsCreating] = useState(false);
   const [tempPassword, setTempPassword] = useState('');
-  const [newUser, setNewUser] = useState(null);
+  const [newUser, setNewUser] = useState<User | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const validate = () => {
-    const newErrors = {};
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
@@ -36,37 +58,42 @@ export default function CreateUserModal({ onClose, onSuccess }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleCreate = async e => {
+  const handleCreate = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (!validate()) return;
 
     try {
       setIsCreating(true);
-      const result = await api.createUser(formData.name, formData.email, formData.role);
+      const result = (await api.createUser(
+        formData.name,
+        formData.email,
+        formData.role
+      )) as unknown as { user: User; temporaryPassword: string };
       setNewUser(result.user);
       setTempPassword(result.temporaryPassword);
       setStep('success');
     } catch (err) {
-      setErrors({ submit: err.message || 'Failed to create user' });
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create user';
+      setErrors({ submit: errorMessage });
     } finally {
       setIsCreating(false);
     }
   };
 
-  const handleChange = e => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
 
-  const handleCopy = async () => {
+  const handleCopy = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(tempPassword);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
+    } catch (_err) {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
       textArea.value = tempPassword;
@@ -79,7 +106,7 @@ export default function CreateUserModal({ onClose, onSuccess }) {
     }
   };
 
-  const handleDone = () => {
+  const handleDone = (): void => {
     onSuccess();
     onClose();
   };

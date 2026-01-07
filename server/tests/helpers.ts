@@ -1,16 +1,12 @@
 import Database from 'better-sqlite3';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import type { Database as DatabaseType } from 'better-sqlite3';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 // Use in-memory database for tests
-let testDb = null;
+let testDb: DatabaseType | null = null;
 
-export function getTestDb() {
+export function getTestDb(): DatabaseType {
   if (!testDb) {
     testDb = new Database(':memory:');
     initializeTestDb(testDb);
@@ -18,7 +14,7 @@ export function getTestDb() {
   return testDb;
 }
 
-export function resetTestDb() {
+export function resetTestDb(): DatabaseType {
   if (testDb) {
     testDb.close();
     testDb = null;
@@ -26,7 +22,7 @@ export function resetTestDb() {
   return getTestDb();
 }
 
-function initializeTestDb(db) {
+function initializeTestDb(db: DatabaseType): void {
   // Create tables matching the production schema
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
@@ -120,12 +116,35 @@ function initializeTestDb(db) {
 }
 
 // Test data generators
-export function generateId() {
-  return Math.random().toString(36).substring(2, 15) +
-         Math.random().toString(36).substring(2, 15);
+export function generateId(): string {
+  return (
+    Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+  );
 }
 
-export async function createTestUser(db, overrides = {}) {
+interface UserOverrides {
+  id?: string;
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: 'user' | 'admin' | 'superuser';
+  mustChangePassword?: number;
+}
+
+interface TestUser {
+  id: string;
+  name: string;
+  email: string;
+  password_hash: string;
+  role: 'user' | 'admin' | 'superuser';
+  must_change_password: number;
+  password: string;
+}
+
+export async function createTestUser(
+  db: DatabaseType,
+  overrides: UserOverrides = {}
+): Promise<TestUser> {
   const id = overrides.id || generateId();
   const passwordHash = await bcrypt.hash(overrides.password || 'testpass123', 10);
 
@@ -134,8 +153,8 @@ export async function createTestUser(db, overrides = {}) {
     name: overrides.name || 'Test User',
     email: overrides.email || `test-${id}@example.com`,
     password_hash: passwordHash,
-    role: overrides.role || 'user',
-    must_change_password: overrides.mustChangePassword || 0
+    role: overrides.role || ('user' as const),
+    must_change_password: overrides.mustChangePassword || 0,
   };
 
   db.prepare(`
@@ -146,7 +165,26 @@ export async function createTestUser(db, overrides = {}) {
   return { ...user, password: overrides.password || 'testpass123' };
 }
 
-export function createTestOrg(db, createdById, overrides = {}) {
+interface OrgOverrides {
+  id?: string;
+  name?: string;
+  isPublic?: number;
+  shareToken?: string | null;
+}
+
+interface TestOrg {
+  id: string;
+  name: string;
+  created_by_id: string;
+  is_public: number;
+  share_token: string | null;
+}
+
+export function createTestOrg(
+  db: DatabaseType,
+  createdById: string,
+  overrides: OrgOverrides = {}
+): TestOrg {
   const id = overrides.id || generateId();
 
   const org = {
@@ -154,7 +192,7 @@ export function createTestOrg(db, createdById, overrides = {}) {
     name: overrides.name || 'Test Organization',
     created_by_id: createdById,
     is_public: overrides.isPublic || 0,
-    share_token: overrides.shareToken || null
+    share_token: overrides.shareToken || null,
   };
 
   db.prepare(`
@@ -165,7 +203,28 @@ export function createTestOrg(db, createdById, overrides = {}) {
   return org;
 }
 
-export function createTestDepartment(db, orgId, overrides = {}) {
+interface DepartmentOverrides {
+  id?: string;
+  parentId?: string | null;
+  name?: string;
+  description?: string | null;
+  sortOrder?: number;
+}
+
+interface TestDepartment {
+  id: string;
+  organization_id: string;
+  parent_id: string | null;
+  name: string;
+  description: string | null;
+  sort_order: number;
+}
+
+export function createTestDepartment(
+  db: DatabaseType,
+  orgId: string,
+  overrides: DepartmentOverrides = {}
+): TestDepartment {
   const id = overrides.id || generateId();
 
   const dept = {
@@ -174,7 +233,7 @@ export function createTestDepartment(db, orgId, overrides = {}) {
     parent_id: overrides.parentId || null,
     name: overrides.name || 'Test Department',
     description: overrides.description || null,
-    sort_order: overrides.sortOrder || 0
+    sort_order: overrides.sortOrder || 0,
   };
 
   db.prepare(`
@@ -185,7 +244,30 @@ export function createTestDepartment(db, orgId, overrides = {}) {
   return dept;
 }
 
-export function createTestPerson(db, departmentId, overrides = {}) {
+interface PersonOverrides {
+  id?: string;
+  name?: string;
+  title?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  sortOrder?: number;
+}
+
+interface TestPerson {
+  id: string;
+  department_id: string;
+  name: string;
+  title: string | null;
+  email: string | null;
+  phone: string | null;
+  sort_order: number;
+}
+
+export function createTestPerson(
+  db: DatabaseType,
+  departmentId: string,
+  overrides: PersonOverrides = {}
+): TestPerson {
   const id = overrides.id || generateId();
 
   const person = {
@@ -195,7 +277,7 @@ export function createTestPerson(db, departmentId, overrides = {}) {
     title: overrides.title || null,
     email: overrides.email || null,
     phone: overrides.phone || null,
-    sort_order: overrides.sortOrder || 0
+    sort_order: overrides.sortOrder || 0,
   };
 
   db.prepare(`
@@ -206,7 +288,19 @@ export function createTestPerson(db, departmentId, overrides = {}) {
   return person;
 }
 
-export function addOrgMember(db, orgId, userId, role = 'viewer') {
+interface OrgMember {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  role: string;
+}
+
+export function addOrgMember(
+  db: DatabaseType,
+  orgId: string,
+  userId: string,
+  role: string = 'viewer'
+): OrgMember {
   const id = generateId();
 
   db.prepare(`
@@ -217,7 +311,14 @@ export function addOrgMember(db, orgId, userId, role = 'viewer') {
   return { id, organization_id: orgId, user_id: userId, role };
 }
 
-export function generateToken(user) {
+interface TokenUser {
+  id: string;
+  email: string;
+  name: string;
+  role: 'user' | 'admin' | 'superuser';
+}
+
+export function generateToken(user: TokenUser): string {
   return jwt.sign(
     { id: user.id, email: user.email, name: user.name, role: user.role },
     process.env.JWT_SECRET || 'test-secret-key',
@@ -226,11 +327,11 @@ export function generateToken(user) {
 }
 
 // Clean specific tables
-export function cleanTable(db, tableName) {
+export function cleanTable(db: DatabaseType, tableName: string): void {
   db.prepare(`DELETE FROM ${tableName}`).run();
 }
 
-export function cleanAllTables(db) {
+export function cleanAllTables(db: DatabaseType): void {
   db.exec(`
     DELETE FROM audit_logs;
     DELETE FROM invitations;

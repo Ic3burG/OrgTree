@@ -1,16 +1,16 @@
 import db from '../db.js';
 import bcrypt from 'bcrypt';
 import { randomBytes, randomUUID } from 'crypto';
+import type { DatabaseUser, AppError } from '../types/index.js';
 
-const VALID_ROLES = ['superuser', 'admin', 'user'];
+const VALID_ROLES = ['superuser', 'admin', 'user'] as const;
+type UserRole = (typeof VALID_ROLES)[number];
 
 /**
  * Generate a cryptographically secure temporary password
  * Uses full entropy from crypto.randomBytes without filtering
- * @param {number} length - Desired password length (default 16)
- * @returns {string} - Secure alphanumeric password
  */
-function generateSecurePassword(length = 16) {
+function generateSecurePassword(length: number = 16): string {
   // Use base62 encoding (alphanumeric: 0-9, A-Z, a-z) for maximum entropy
   // Each random byte gives us ~8 bits of entropy
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -23,13 +23,62 @@ function generateSecurePassword(length = 16) {
   let password = '';
   for (let i = 0; i < length; i++) {
     // Use modulo to map byte value (0-255) to charset index (0-61)
-    password += charset[randomBytesBuffer[i] % charsetLength];
+    const byteValue = randomBytesBuffer[i];
+    if (byteValue !== undefined) {
+      password += charset[byteValue % charsetLength];
+    }
   }
 
   return password;
 }
 
-export function getAllUsers() {
+interface UserWithCounts {
+  id: string;
+  name: string;
+  email: string;
+  role: 'user' | 'admin' | 'superuser';
+  createdAt: string;
+  organizationCount: number;
+  membershipCount: number;
+}
+
+interface OrgSummary {
+  id: string;
+  name: string;
+  isPublic: boolean;
+  createdAt: string;
+}
+
+interface MembershipSummary {
+  id: string;
+  name: string;
+  isPublic: boolean;
+  createdAt: string;
+  role: 'owner' | 'admin' | 'editor' | 'viewer';
+  joinedAt: string;
+}
+
+interface UserWithDetails {
+  id: string;
+  name: string;
+  email: string;
+  role: 'user' | 'admin' | 'superuser';
+  createdAt: string;
+  ownedOrganizations: OrgSummary[];
+  memberships: MembershipSummary[];
+  organizationCount: number;
+  membershipCount: number;
+}
+
+interface UpdatedUser {
+  id: string;
+  name: string;
+  email: string;
+  role: 'user' | 'admin' | 'superuser';
+  createdAt: string;
+}
+
+export function getAllUsers(): UserWithCounts[] {
   const users = db
     .prepare(
       `
@@ -43,7 +92,13 @@ export function getAllUsers() {
     ORDER BY u.created_at DESC
   `
     )
-    .all();
+    .all() as Array<{
+    id: string;
+    name: string;
+    email: string;
+    role: 'user' | 'admin' | 'superuser';
+    createdAt: string;
+  }>;
 
   // Security: Only return counts, not detailed organization data
   // Detailed data available via getUserById if needed
@@ -57,7 +112,7 @@ export function getAllUsers() {
       WHERE created_by_id = ?
     `
       )
-      .get(user.id).count;
+      .get(user.id) as { count: number };
 
     // Count memberships
     const membershipCount = db
@@ -68,17 +123,17 @@ export function getAllUsers() {
       WHERE user_id = ?
     `
       )
-      .get(user.id).count;
+      .get(user.id) as { count: number };
 
     return {
       ...user,
-      organizationCount: ownedCount,
-      membershipCount: membershipCount,
+      organizationCount: ownedCount.count,
+      membershipCount: membershipCount.count,
     };
   });
 }
 
-export function getUserById(userId) {
+export function getUserById(userId: string): UserWithDetails {
   const user = db
     .prepare(
       `
@@ -86,10 +141,18 @@ export function getUserById(userId) {
     FROM users WHERE id = ?
   `
     )
-    .get(userId);
+    .get(userId) as
+    | {
+        id: string;
+        name: string;
+        email: string;
+        role: 'user' | 'admin' | 'superuser';
+        createdAt: string;
+      }
+    | undefined;
 
   if (!user) {
-    const error = new Error('User not found');
+    const error = new Error('User not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -104,7 +167,12 @@ export function getUserById(userId) {
     ORDER BY name
   `
     )
-    .all(userId);
+    .all(userId) as Array<{
+    id: string;
+    name: string;
+    isPublic: number;
+    createdAt: string;
+  }>;
 
   // Get memberships with full details
   const memberships = db
@@ -114,6 +182,7 @@ export function getUserById(userId) {
       o.id,
       o.name,
       o.is_public as isPublic,
+      o.created_at as createdAt,
       om.role,
       om.created_at as joinedAt
     FROM organization_members om
@@ -122,21 +191,43 @@ export function getUserById(userId) {
     ORDER BY o.name
   `
     )
-    .all(userId);
+    .all(userId) as Array<{
+    id: string;
+    name: string;
+    isPublic: number;
+    createdAt: string;
+    role: 'owner' | 'admin' | 'editor' | 'viewer';
+    joinedAt: string;
+  }>;
 
   return {
     ...user,
-    ownedOrganizations,
-    memberships,
+    ownedOrganizations: ownedOrganizations.map(org => ({
+      id: org.id,
+      name: org.name,
+      isPublic: Boolean(org.isPublic),
+      createdAt: org.createdAt,
+    })),
+    memberships: memberships.map(m => ({
+      id: m.id,
+      name: m.name,
+      isPublic: Boolean(m.isPublic),
+      createdAt: m.createdAt,
+      role: m.role,
+      joinedAt: m.joinedAt,
+    })),
     organizationCount: ownedOrganizations.length,
     membershipCount: memberships.length,
   };
 }
 
-export function updateUser(userId, { name, email }) {
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+export function updateUser(
+  userId: string,
+  { name, email }: { name?: string; email?: string }
+): UpdatedUser {
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DatabaseUser | undefined;
   if (!user) {
-    const error = new Error('User not found');
+    const error = new Error('User not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -145,9 +236,9 @@ export function updateUser(userId, { name, email }) {
   if (email && email !== user.email) {
     const existingUser = db
       .prepare('SELECT id FROM users WHERE email = ? AND id != ?')
-      .get(email, userId);
+      .get(email, userId) as { id: string } | undefined;
     if (existingUser) {
-      const error = new Error('Email already in use');
+      const error = new Error('Email already in use') as AppError;
       error.status = 400;
       throw error;
     }
@@ -169,27 +260,27 @@ export function updateUser(userId, { name, email }) {
     FROM users WHERE id = ?
   `
     )
-    .get(userId);
+    .get(userId) as UpdatedUser;
 }
 
-export function updateUserRole(userId, newRole, requestingUserId) {
+export function updateUserRole(userId: string, newRole: UserRole, requestingUserId: string): UpdatedUser {
   // Validate role
   if (!VALID_ROLES.includes(newRole)) {
-    const error = new Error(`Invalid role. Must be one of: ${VALID_ROLES.join(', ')}`);
+    const error = new Error(`Invalid role. Must be one of: ${VALID_ROLES.join(', ')}`) as AppError;
     error.status = 400;
     throw error;
   }
 
   // Prevent self-role change
   if (userId === requestingUserId) {
-    const error = new Error('Cannot change your own role');
+    const error = new Error('Cannot change your own role') as AppError;
     error.status = 400;
     throw error;
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DatabaseUser | undefined;
   if (!user) {
-    const error = new Error('User not found');
+    const error = new Error('User not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -210,13 +301,15 @@ export function updateUserRole(userId, newRole, requestingUserId) {
     FROM users WHERE id = ?
   `
     )
-    .get(userId);
+    .get(userId) as UpdatedUser;
 }
 
-export async function resetUserPassword(userId) {
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+export async function resetUserPassword(
+  userId: string
+): Promise<{ message: string; temporaryPassword: string }> {
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DatabaseUser | undefined;
   if (!user) {
-    const error = new Error('User not found');
+    const error = new Error('User not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -242,17 +335,17 @@ export async function resetUserPassword(userId) {
   };
 }
 
-export function deleteUser(userId, requestingUserId) {
+export function deleteUser(userId: string, requestingUserId: string): { message: string } {
   // Prevent self-deletion
   if (userId === requestingUserId) {
-    const error = new Error('Cannot delete your own account');
+    const error = new Error('Cannot delete your own account') as AppError;
     error.status = 400;
     throw error;
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DatabaseUser | undefined;
   if (!user) {
-    const error = new Error('User not found');
+    const error = new Error('User not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -263,18 +356,24 @@ export function deleteUser(userId, requestingUserId) {
   return { message: 'User deleted successfully' };
 }
 
-export async function createAdminUser(name, email, role) {
+export async function createAdminUser(
+  name: string,
+  email: string,
+  role: UserRole
+): Promise<{ user: UpdatedUser; temporaryPassword: string }> {
   // Validate role
   if (!VALID_ROLES.includes(role)) {
-    const error = new Error(`Invalid role. Must be one of: ${VALID_ROLES.join(', ')}`);
+    const error = new Error(`Invalid role. Must be one of: ${VALID_ROLES.join(', ')}`) as AppError;
     error.status = 400;
     throw error;
   }
 
   // Check if email already exists
-  const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as
+    | { id: string }
+    | undefined;
   if (existingUser) {
-    const error = new Error('Email already in use');
+    const error = new Error('Email already in use') as AppError;
     error.status = 400;
     throw error;
   }
@@ -303,7 +402,7 @@ export async function createAdminUser(name, email, role) {
     FROM users WHERE id = ?
   `
     )
-    .get(userId);
+    .get(userId) as UpdatedUser;
 
   return {
     user,

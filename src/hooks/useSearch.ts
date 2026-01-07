@@ -115,8 +115,12 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
 
       try {
         const data = await api.searchAutocomplete(orgId, q, 5);
-        setSuggestions(data.suggestions || []);
-      } catch (err) {
+        const suggestions = (data.suggestions || []).map((text: string) => ({
+          text,
+          type: 'department' as const,
+        }));
+        setSuggestions(suggestions);
+      } catch (_err) {
         setSuggestions([]);
       }
     },

@@ -1,9 +1,26 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Database as DatabaseType } from 'better-sqlite3';
+
+// Type definitions at module level
+type TestUser = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+type Organization = {
+  id: string;
+  name: string;
+  createdById?: string;
+  departmentCount?: number;
+  peopleCount?: number;
+  role?: string;
+};
 
 // Mock the database module
 vi.mock('../db.js', () => {
   const Database = require('better-sqlite3');
-  const db = new Database(':memory:');
+  const db: DatabaseType = new Database(':memory:');
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
@@ -89,11 +106,11 @@ import {
 } from './org.service.js';
 
 describe('Organization Service', () => {
-  let testUser;
+  let testUser: TestUser;
 
   beforeEach(() => {
     // Clear tables
-    db.exec(`
+    (db as DatabaseType).exec(`
       DELETE FROM people;
       DELETE FROM departments;
       DELETE FROM organization_members;
@@ -107,17 +124,19 @@ describe('Organization Service', () => {
       name: 'Test User',
       email: 'test@example.com',
     };
-    db.prepare(
-      `
+    (db as DatabaseType)
+      .prepare(
+        `
       INSERT INTO users (id, name, email, password_hash, role)
       VALUES (?, ?, ?, 'hash', 'user')
     `
-    ).run(testUser.id, testUser.name, testUser.email);
+      )
+      .run(testUser.id, testUser.name, testUser.email);
   });
 
   describe('createOrganization', () => {
     it('should create a new organization', async () => {
-      const org = await createOrganization('My Org', testUser.id);
+      const org: Organization = await createOrganization('My Org', testUser.id);
 
       expect(org).toHaveProperty('id');
       expect(org.name).toBe('My Org');
@@ -126,12 +145,14 @@ describe('Organization Service', () => {
     });
 
     it('should store organization in database', async () => {
-      const org = await createOrganization('My Org', testUser.id);
+      const org: Organization = await createOrganization('My Org', testUser.id);
 
-      const stored = db.prepare('SELECT * FROM organizations WHERE id = ?').get(org.id);
+      const stored: Organization | undefined = (db as DatabaseType)
+        .prepare('SELECT * FROM organizations WHERE id = ?')
+        .get(org.id) as Organization | undefined;
       expect(stored).toBeTruthy();
-      expect(stored.name).toBe('My Org');
-      expect(stored.created_by_id).toBe(testUser.id);
+      expect(stored?.name).toBe('My Org');
+      expect(stored?.createdById).toBe(testUser.id);
     });
   });
 
@@ -140,94 +161,104 @@ describe('Organization Service', () => {
       await createOrganization('Org 1', testUser.id);
       await createOrganization('Org 2', testUser.id);
 
-      const orgs = await getOrganizations(testUser.id);
-      orgs.sort((a, b) => a.name.localeCompare(b.name));
+      const orgs: Organization[] = await getOrganizations(testUser.id);
+      orgs.sort((a: Organization, b: Organization) => a.name.localeCompare(b.name));
 
       expect(orgs).toHaveLength(2);
-      expect(orgs[0].name).toBe('Org 1');
-      expect(orgs[1].name).toBe('Org 2');
+      expect(orgs[0]!.name).toBe('Org 1');
+      expect(orgs[1]!.name).toBe('Org 2');
     });
 
     it('should return organizations user is member of', async () => {
       // Create org by another user
-      const otherUser = { id: 'other-user-id' };
-      db.prepare(
-        `
+      const otherUser: TestUser = { id: 'other-user-id', name: '', email: '' };
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO users (id, name, email, password_hash, role)
         VALUES (?, 'Other', 'other@example.com', 'hash', 'user')
       `
-      ).run(otherUser.id);
+        )
+        .run(otherUser.id);
 
-      const org = await createOrganization('Other Org', otherUser.id);
+      const org: Organization = await createOrganization('Other Org', otherUser.id);
 
       // Add test user as member
-      db.prepare(
-        `
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('member-id', ?, ?, 'viewer')
       `
-      ).run(org.id, testUser.id);
+        )
+        .run(org.id, testUser.id);
 
-      const orgs = await getOrganizations(testUser.id);
+      const orgs: Organization[] = await getOrganizations(testUser.id);
 
       expect(orgs).toHaveLength(1);
-      expect(orgs[0].name).toBe('Other Org');
-      expect(orgs[0].role).toBe('viewer');
+      expect(orgs[0]!.name).toBe('Other Org');
+      expect(orgs[0]!.role).toBe('viewer');
     });
 
     it('should return empty array for user with no organizations', async () => {
-      const orgs = await getOrganizations(testUser.id);
+      const orgs: Organization[] = await getOrganizations(testUser.id);
       expect(orgs).toHaveLength(0);
     });
 
     it('should include department count', async () => {
-      const org = await createOrganization('My Org', testUser.id);
+      const org: Organization = await createOrganization('My Org', testUser.id);
 
       // Add departments
-      db.prepare(
-        `
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('dept-1', ?, 'Dept 1'), ('dept-2', ?, 'Dept 2')
       `
-      ).run(org.id, org.id);
+        )
+        .run(org.id, org.id);
 
-      const orgs = await getOrganizations(testUser.id);
+      const orgs: Organization[] = await getOrganizations(testUser.id);
 
-      expect(orgs[0].departmentCount).toBe(2);
+      expect(orgs[0]!.departmentCount).toBe(2);
     });
 
     it('should include people count if supported', async () => {
-      const org = await createOrganization('My Org', testUser.id);
+      const org: Organization = await createOrganization('My Org', testUser.id);
 
       // Add department and people
-      db.prepare(
-        `
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('dept-1', ?, 'Dept 1')
       `
-      ).run(org.id);
+        )
+        .run(org.id);
 
-      db.prepare(
-        `
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO people (id, department_id, name)
         VALUES ('person-1', 'dept-1', 'Person 1'), ('person-2', 'dept-1', 'Person 2')
       `
-      ).run();
+        )
+        .run();
 
-      const orgs = await getOrganizations(testUser.id);
+      const orgs: Organization[] = await getOrganizations(testUser.id);
 
       // peopleCount may or may not be returned by getOrganizations
-      if (orgs[0].peopleCount !== undefined) {
-        expect(orgs[0].peopleCount).toBe(2);
+      if (orgs[0]!.peopleCount !== undefined) {
+        expect(orgs[0]!.peopleCount).toBe(2);
       }
     });
   });
 
   describe('getOrganizationById', () => {
     it('should return organization by ID', async () => {
-      const created = await createOrganization('My Org', testUser.id);
+      const created: Organization = await createOrganization('My Org', testUser.id);
 
-      const org = await getOrganizationById(created.id, testUser.id);
+      const org: Organization = await getOrganizationById(created.id, testUser.id);
 
       expect(org.id).toBe(created.id);
       expect(org.name).toBe('My Org');
@@ -238,15 +269,17 @@ describe('Organization Service', () => {
     });
 
     it('should throw error if user has no access', async () => {
-      const otherUser = { id: 'other-user-id' };
-      db.prepare(
-        `
+      const otherUser: TestUser = { id: 'other-user-id', name: '', email: '' };
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO users (id, name, email, password_hash, role)
         VALUES (?, 'Other', 'other@example.com', 'hash', 'user')
       `
-      ).run(otherUser.id);
+        )
+        .run(otherUser.id);
 
-      const org = await createOrganization('Other Org', otherUser.id);
+      const org: Organization = await createOrganization('Other Org', otherUser.id);
 
       await expect(getOrganizationById(org.id, testUser.id)).rejects.toThrow();
     });
@@ -254,50 +287,58 @@ describe('Organization Service', () => {
 
   describe('updateOrganization', () => {
     it('should update organization name', async () => {
-      const created = await createOrganization('My Org', testUser.id);
+      const created: Organization = await createOrganization('My Org', testUser.id);
 
-      const updated = await updateOrganization(created.id, 'New Name', testUser.id);
+      const updated: Organization = await updateOrganization(created.id, 'New Name', testUser.id);
 
       expect(updated.name).toBe('New Name');
     });
 
     it('should persist update in database', async () => {
-      const created = await createOrganization('My Org', testUser.id);
+      const created: Organization = await createOrganization('My Org', testUser.id);
       await updateOrganization(created.id, 'New Name', testUser.id);
 
-      const stored = db.prepare('SELECT name FROM organizations WHERE id = ?').get(created.id);
-      expect(stored.name).toBe('New Name');
+      const stored: { name: string } | undefined = (db as DatabaseType)
+        .prepare('SELECT name FROM organizations WHERE id = ?')
+        .get(created.id) as { name: string } | undefined;
+      expect(stored?.name).toBe('New Name');
     });
   });
 
   describe('deleteOrganization', () => {
     it('should delete organization', async () => {
-      const created = await createOrganization('My Org', testUser.id);
+      const created: Organization = await createOrganization('My Org', testUser.id);
 
       await deleteOrganization(created.id, testUser.id);
 
-      const stored = db.prepare('SELECT * FROM organizations WHERE id = ?').get(created.id);
+      const stored: Organization | undefined = (db as DatabaseType)
+        .prepare('SELECT * FROM organizations WHERE id = ?')
+        .get(created.id) as Organization | undefined;
       expect(stored).toBeUndefined();
     });
 
     it('should throw error if user is not owner', async () => {
-      const otherUser = { id: 'other-user-id' };
-      db.prepare(
-        `
+      const otherUser: TestUser = { id: 'other-user-id', name: '', email: '' };
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO users (id, name, email, password_hash, role)
         VALUES (?, 'Other', 'other@example.com', 'hash', 'user')
       `
-      ).run(otherUser.id);
+        )
+        .run(otherUser.id);
 
-      const org = await createOrganization('Other Org', otherUser.id);
+      const org: Organization = await createOrganization('Other Org', otherUser.id);
 
       // Add test user as admin (not owner)
-      db.prepare(
-        `
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO organization_members (id, organization_id, user_id, role)
         VALUES ('member-id', ?, ?, 'admin')
       `
-      ).run(org.id, testUser.id);
+        )
+        .run(org.id, testUser.id);
 
       await expect(deleteOrganization(org.id, testUser.id)).rejects.toThrow();
     });

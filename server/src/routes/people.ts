@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { authenticateToken } from '../middleware/auth.js';
 import {
   getPeopleByDepartment,
@@ -14,15 +14,16 @@ import {
   emitPersonDeleted,
 } from '../services/socket-events.service.js';
 import db from '../db.js';
+import type { AuthRequest } from '../types/index.js';
 
 const router = express.Router();
 
 router.use(authenticateToken);
 
 // GET /api/departments/:deptId/people
-router.get('/departments/:deptId/people', async (req, res, next) => {
+router.get('/departments/:deptId/people', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const people = await getPeopleByDepartment(req.params.deptId, req.user.id);
+    const people = await getPeopleByDepartment(req.params.deptId!, req.user!.id);
     res.json(people);
   } catch (err) {
     next(err);
@@ -30,26 +31,27 @@ router.get('/departments/:deptId/people', async (req, res, next) => {
 });
 
 // POST /api/departments/:deptId/people
-router.post('/departments/:deptId/people', async (req, res, next) => {
+router.post('/departments/:deptId/people', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { name, title, email, phone } = req.body;
 
     if (!name || !name.trim()) {
-      return res.status(400).json({ message: 'Person name is required' });
+      res.status(400).json({ message: 'Person name is required' });
+      return;
     }
 
     const person = await createPerson(
-      req.params.deptId,
+      req.params.deptId!,
       { name: name.trim(), title, email, phone },
-      req.user.id
+      req.user!.id
     );
 
     // Get orgId from department for real-time event
     const dept = db
       .prepare('SELECT organization_id FROM departments WHERE id = ?')
-      .get(req.params.deptId);
+      .get(req.params.deptId!) as any;
     if (dept) {
-      emitPersonCreated(dept.organization_id, person, req.user);
+      emitPersonCreated(dept.organization_id, person, req.user!);
     }
 
     res.status(201).json(person);
@@ -59,9 +61,9 @@ router.post('/departments/:deptId/people', async (req, res, next) => {
 });
 
 // GET /api/people/:personId
-router.get('/people/:personId', async (req, res, next) => {
+router.get('/people/:personId', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const person = await getPersonById(req.params.personId, req.user.id);
+    const person = await getPersonById(req.params.personId!, req.user!.id);
     res.json(person);
   } catch (err) {
     next(err);
@@ -69,26 +71,27 @@ router.get('/people/:personId', async (req, res, next) => {
 });
 
 // PUT /api/people/:personId
-router.put('/people/:personId', async (req, res, next) => {
+router.put('/people/:personId', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { name, title, email, phone, departmentId } = req.body;
 
     if (name !== undefined && !name.trim()) {
-      return res.status(400).json({ message: 'Person name cannot be empty' });
+      res.status(400).json({ message: 'Person name cannot be empty' });
+      return;
     }
 
     const person = await updatePerson(
-      req.params.personId,
+      req.params.personId!,
       { name: name?.trim(), title, email, phone, departmentId },
-      req.user.id
+      req.user!.id
     );
 
     // Get orgId from person's department for real-time event
     const dept = db
       .prepare('SELECT organization_id FROM departments WHERE id = ?')
-      .get(person.departmentId);
+      .get(String((person as any).departmentId)) as any;
     if (dept) {
-      emitPersonUpdated(dept.organization_id, person, req.user);
+      emitPersonUpdated(dept.organization_id, person as any, req.user!);
     }
 
     res.json(person);
@@ -98,7 +101,7 @@ router.put('/people/:personId', async (req, res, next) => {
 });
 
 // DELETE /api/people/:personId
-router.delete('/people/:personId', async (req, res, next) => {
+router.delete('/people/:personId', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     // Get full person data before deleting for audit trail
     const person = db
@@ -110,13 +113,13 @@ router.delete('/people/:personId', async (req, res, next) => {
       WHERE p.id = ?
     `
       )
-      .get(req.params.personId);
+      .get(req.params.personId!) as any;
 
-    await deletePerson(req.params.personId, req.user.id);
+    await deletePerson(req.params.personId!, req.user!.id);
 
     // Emit real-time event with full person data
     if (person) {
-      emitPersonDeleted(person.organization_id, person, req.user);
+      emitPersonDeleted(person.organization_id, person, req.user!);
     }
 
     res.status(204).send();
@@ -126,22 +129,23 @@ router.delete('/people/:personId', async (req, res, next) => {
 });
 
 // PUT /api/people/:personId/move
-router.put('/people/:personId/move', async (req, res, next) => {
+router.put('/people/:personId/move', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { departmentId } = req.body;
 
     if (!departmentId) {
-      return res.status(400).json({ message: 'Department ID is required' });
+      res.status(400).json({ message: 'Department ID is required' });
+      return;
     }
 
-    const person = await movePerson(req.params.personId, departmentId, req.user.id);
+    const person = await movePerson(req.params.personId!, departmentId, req.user!.id);
 
     // Get orgId from new department for real-time event
     const dept = db
       .prepare('SELECT organization_id FROM departments WHERE id = ?')
-      .get(departmentId);
+      .get(departmentId) as any;
     if (dept) {
-      emitPersonUpdated(dept.organization_id, person, req.user);
+      emitPersonUpdated(dept.organization_id, person, req.user!);
     }
 
     res.json(person);

@@ -56,7 +56,9 @@ export default function AcceptInvitation(): React.JSX.Element {
       setSuccess(true);
       // Redirect to the organization after a short delay
       setTimeout(() => {
-        navigate(`/org/${result.organization.id}`);
+        if (result && result.organization && result.organization.id) {
+          navigate(`/org/${result.organization.id}`);
+        }
       }, 2000);
     } catch (err) {
       if (err instanceof Error) {

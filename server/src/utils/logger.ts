@@ -4,10 +4,23 @@
  * In production: JSON-formatted logs for log aggregation
  */
 
-const isProduction = process.env.NODE_ENV === 'production';
+type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
-function formatLog(level, message, meta = {}) {
-  const log = {
+interface LogMeta {
+  [key: string]: string | number | boolean | unknown;
+}
+
+interface FormattedLog {
+  timestamp: string;
+  level: LogLevel;
+  message: string;
+  [key: string]: string | unknown;
+}
+
+const isProduction: boolean = process.env.NODE_ENV === 'production';
+
+function formatLog(level: LogLevel, message: string, meta: LogMeta = {}): string {
+  const log: FormattedLog = {
     timestamp: new Date().toISOString(),
     level,
     message,
@@ -20,10 +33,10 @@ function formatLog(level, message, meta = {}) {
 }
 
 export const logger = {
-  info: (message, meta) => console.log(formatLog('info', message, meta)),
-  warn: (message, meta) => console.warn(formatLog('warn', message, meta)),
-  error: (message, meta) => console.error(formatLog('error', message, meta)),
-  debug: (message, meta) => {
+  info: (message: string, meta?: LogMeta): void => console.log(formatLog('info', message, meta)),
+  warn: (message: string, meta?: LogMeta): void => console.warn(formatLog('warn', message, meta)),
+  error: (message: string, meta?: LogMeta): void => console.error(formatLog('error', message, meta)),
+  debug: (message: string, meta?: LogMeta): void => {
     if (!isProduction) {
       console.debug(formatLog('debug', message, meta));
     }

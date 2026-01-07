@@ -1,5 +1,5 @@
-import React from 'react';
-import { Navigate, useLocation, type ReactNode } from 'react-router-dom';
+import React, { ReactNode } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import type { User } from '../../types/index.js';
 
@@ -36,7 +36,10 @@ export default function ProtectedRoute({
   }
 
   // Check if user must change password (but allow access to change-password page)
-  if (user?.mustChangePassword && location.pathname !== '/change-password') {
+  if (
+    (user as { mustChangePassword?: boolean })?.mustChangePassword &&
+    location.pathname !== '/change-password'
+  ) {
     return <Navigate to="/change-password" replace />;
   }
 

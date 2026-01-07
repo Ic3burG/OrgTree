@@ -1,9 +1,18 @@
+import React from 'react';
 import { getThemeList } from '../utils/colors';
+
+interface ThemePickerProps {
+  currentTheme: string;
+  onThemeChange: (theme: string) => void;
+}
 
 /**
  * ThemePicker - Color theme selector with circular swatches
  */
-export default function ThemePicker({ currentTheme, onThemeChange }) {
+export default function ThemePicker({
+  currentTheme,
+  onThemeChange,
+}: ThemePickerProps): React.JSX.Element {
   const themes = getThemeList();
 
   return (

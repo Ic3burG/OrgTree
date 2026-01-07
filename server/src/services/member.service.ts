@@ -1,15 +1,61 @@
 import db from '../db.js';
 import { randomUUID } from 'crypto';
 import { createAuditLog } from './audit.service.js';
+import type { DatabaseUser, DatabaseOrgMember, AppError } from '../types/index.js';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+interface OrgAccessResult {
+  hasAccess: boolean;
+  role: 'owner' | 'admin' | 'editor' | 'viewer' | null;
+  isOwner: boolean;
+}
+
+interface OrgMemberWithUser {
+  id: string;
+  organizationId: string;
+  userId: string;
+  role: 'owner' | 'admin' | 'editor' | 'viewer';
+  createdAt: string;
+  userName: string;
+  userEmail: string;
+}
+
+interface DatabaseOrgRecord {
+  created_by_id: string;
+}
+
+interface DatabaseMemberRecord {
+  role: 'admin' | 'editor' | 'viewer';
+}
+
+interface UserOrganization {
+  id: string;
+  name: string;
+  createdById: string;
+  createdAt: string;
+  updatedAt: string;
+  role: 'owner' | 'admin' | 'editor' | 'viewer';
+  departmentCount: number;
+  departments: { length: number };
+}
+
+// ============================================================================
+// Access Control Functions
+// ============================================================================
 
 /**
  * Check if user has access to organization and return their effective role
  * Owner always has 'owner' role (higher than admin)
  * Returns: { hasAccess: boolean, role: 'owner'|'admin'|'editor'|'viewer'|null, isOwner: boolean }
  */
-export function checkOrgAccess(orgId, userId) {
+export function checkOrgAccess(orgId: string, userId: string): OrgAccessResult {
   // Check if user is owner
-  const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId);
+  const org = db
+    .prepare('SELECT created_by_id FROM organizations WHERE id = ?')
+    .get(orgId) as DatabaseOrgRecord | undefined;
 
   if (!org) {
     return { hasAccess: false, role: null, isOwner: false };
@@ -27,7 +73,7 @@ export function checkOrgAccess(orgId, userId) {
     WHERE organization_id = ? AND user_id = ?
   `
     )
-    .get(orgId, userId);
+    .get(orgId, userId) as DatabaseMemberRecord | undefined;
 
   if (!member) {
     return { hasAccess: false, role: null, isOwner: false };
@@ -41,23 +87,29 @@ export function checkOrgAccess(orgId, userId) {
  * Throws 403/404 errors if insufficient access
  * Permission hierarchy: owner > admin > editor > viewer
  */
-export function requireOrgPermission(orgId, userId, minRole = 'viewer') {
+export function requireOrgPermission(
+  orgId: string,
+  userId: string,
+  minRole: 'owner' | 'admin' | 'editor' | 'viewer' = 'viewer'
+): OrgAccessResult {
   const access = checkOrgAccess(orgId, userId);
 
   if (!access.hasAccess) {
-    const error = new Error('Organization not found');
+    const error = new Error('Organization not found') as AppError;
     error.status = 404;
     throw error;
   }
 
-  const roleHierarchy = { viewer: 0, editor: 1, admin: 2, owner: 3 };
-  const userLevel = roleHierarchy[access.role];
-  const requiredLevel = roleHierarchy[minRole];
+  const roleHierarchy: Record<string, number> = { viewer: 0, editor: 1, admin: 2, owner: 3 };
+  const userLevel = roleHierarchy[access.role as string] ?? 0;
+  const requiredLevel = roleHierarchy[minRole] ?? 0;
 
   if (userLevel < requiredLevel) {
     // Security: Log permission denied - insufficient organization role
     // Get user details for logging
-    const user = db.prepare('SELECT id, name, email FROM users WHERE id = ?').get(userId);
+    const user = db
+      .prepare('SELECT id, name, email FROM users WHERE id = ?')
+      .get(userId) as Pick<DatabaseUser, 'id' | 'name' | 'email'> | undefined;
     createAuditLog(
       orgId, // Organization-specific security event
       user
@@ -73,7 +125,7 @@ export function requireOrgPermission(orgId, userId, minRole = 'viewer') {
         timestamp: new Date().toISOString(),
       }
     );
-    const error = new Error('Insufficient permissions');
+    const error = new Error('Insufficient permissions') as AppError;
     error.status = 403;
     throw error;
   }
@@ -81,11 +133,15 @@ export function requireOrgPermission(orgId, userId, minRole = 'viewer') {
   return access; // Return access info for further use
 }
 
+// ============================================================================
+// Member Management Functions
+// ============================================================================
+
 /**
  * Get all members of an organization (excluding owner)
  * Returns members with user details
  */
-export function getOrgMembers(orgId) {
+export function getOrgMembers(orgId: string): OrgMemberWithUser[] {
   return db
     .prepare(
       `
@@ -103,39 +159,48 @@ export function getOrgMembers(orgId) {
     ORDER BY om.created_at DESC
   `
     )
-    .all(orgId);
+    .all(orgId) as OrgMemberWithUser[];
 }
 
 /**
  * Add a member to organization
  * Only owner/admin can add members
  */
-export function addOrgMember(orgId, userId, role, addedBy) {
+export function addOrgMember(
+  orgId: string,
+  userId: string,
+  role: 'admin' | 'editor' | 'viewer',
+  addedBy: string
+): OrgMemberWithUser {
   // Verify adder has admin permission
   requireOrgPermission(orgId, addedBy, 'admin');
 
   // Verify user exists
-  const user = db.prepare('SELECT id, name, email FROM users WHERE id = ?').get(userId);
+  const user = db
+    .prepare('SELECT id, name, email FROM users WHERE id = ?')
+    .get(userId) as Pick<DatabaseUser, 'id' | 'name' | 'email'> | undefined;
   if (!user) {
-    const error = new Error('User not found');
+    const error = new Error('User not found') as AppError;
     error.status = 404;
     throw error;
   }
 
   // Check if already a member or owner
-  const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId);
-  if (org.created_by_id === userId) {
-    const error = new Error('User is already the owner of this organization');
+  const org = db
+    .prepare('SELECT created_by_id FROM organizations WHERE id = ?')
+    .get(orgId) as DatabaseOrgRecord | undefined;
+  if (org && org.created_by_id === userId) {
+    const error = new Error('User is already the owner of this organization') as AppError;
     error.status = 400;
     throw error;
   }
 
   const existingMember = db
     .prepare('SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?')
-    .get(orgId, userId);
+    .get(orgId, userId) as { id: string } | undefined;
 
   if (existingMember) {
-    const error = new Error('User is already a member');
+    const error = new Error('User is already a member') as AppError;
     error.status = 400;
     throw error;
   }
@@ -168,31 +233,36 @@ export function addOrgMember(orgId, userId, role, addedBy) {
     WHERE om.id = ?
   `
     )
-    .get(memberId);
+    .get(memberId) as OrgMemberWithUser;
 }
 
 /**
  * Update member role
  * Only owner/admin can change roles
  */
-export function updateMemberRole(orgId, memberId, newRole, updatedBy) {
+export function updateMemberRole(
+  orgId: string,
+  memberId: string,
+  newRole: 'admin' | 'editor' | 'viewer',
+  updatedBy: string
+): OrgMemberWithUser {
   // Verify updater has admin permission
   requireOrgPermission(orgId, updatedBy, 'admin');
 
   // Validate role
-  const validRoles = ['viewer', 'editor', 'admin'];
+  const validRoles: string[] = ['viewer', 'editor', 'admin'];
   if (!validRoles.includes(newRole)) {
-    const error = new Error('Invalid role. Must be: viewer, editor, or admin');
+    const error = new Error('Invalid role. Must be: viewer, editor, or admin') as AppError;
     error.status = 400;
     throw error;
   }
 
   const member = db
     .prepare('SELECT * FROM organization_members WHERE id = ? AND organization_id = ?')
-    .get(memberId, orgId);
+    .get(memberId, orgId) as DatabaseOrgMember | undefined;
 
   if (!member) {
-    const error = new Error('Member not found');
+    const error = new Error('Member not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -223,23 +293,27 @@ export function updateMemberRole(orgId, memberId, newRole, updatedBy) {
     WHERE om.id = ?
   `
     )
-    .get(memberId);
+    .get(memberId) as OrgMemberWithUser;
 }
 
 /**
  * Remove member from organization
  * Only owner/admin can remove members
  */
-export function removeOrgMember(orgId, memberId, removedBy) {
+export function removeOrgMember(
+  orgId: string,
+  memberId: string,
+  removedBy: string
+): { success: boolean } {
   // Verify remover has admin permission
   requireOrgPermission(orgId, removedBy, 'admin');
 
   const member = db
     .prepare('SELECT * FROM organization_members WHERE id = ? AND organization_id = ?')
-    .get(memberId, orgId);
+    .get(memberId, orgId) as DatabaseOrgMember | undefined;
 
   if (!member) {
-    const error = new Error('Member not found');
+    const error = new Error('Member not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -254,14 +328,21 @@ export function removeOrgMember(orgId, memberId, removedBy) {
  * Returns { success: true, member } if user exists
  * Returns { success: false, error: 'user_not_found' } if user doesn't exist
  */
-export function addMemberByEmail(orgId, email, role, addedBy) {
+export function addMemberByEmail(
+  orgId: string,
+  email: string,
+  role: 'admin' | 'editor' | 'viewer',
+  addedBy: string
+):
+  | { success: true; member: OrgMemberWithUser }
+  | { success: false; error: string; message: string } {
   // Verify adder has admin permission
   requireOrgPermission(orgId, addedBy, 'admin');
 
   // Validate role
-  const validRoles = ['viewer', 'editor', 'admin'];
+  const validRoles: string[] = ['viewer', 'editor', 'admin'];
   if (!validRoles.includes(role)) {
-    const error = new Error('Invalid role. Must be: viewer, editor, or admin');
+    const error = new Error('Invalid role. Must be: viewer, editor, or admin') as AppError;
     error.status = 400;
     throw error;
   }
@@ -269,26 +350,28 @@ export function addMemberByEmail(orgId, email, role, addedBy) {
   // Find user by email
   const user = db
     .prepare('SELECT id, name, email FROM users WHERE email = ?')
-    .get(email.toLowerCase().trim());
+    .get(email.toLowerCase().trim()) as Pick<DatabaseUser, 'id' | 'name' | 'email'> | undefined;
 
   if (!user) {
     return { success: false, error: 'user_not_found', message: 'No user with this email address' };
   }
 
   // Check if already a member or owner
-  const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId);
-  if (org.created_by_id === user.id) {
-    const error = new Error('This user is already the owner of this organization');
+  const org = db
+    .prepare('SELECT created_by_id FROM organizations WHERE id = ?')
+    .get(orgId) as DatabaseOrgRecord | undefined;
+  if (org && org.created_by_id === user.id) {
+    const error = new Error('This user is already the owner of this organization') as AppError;
     error.status = 400;
     throw error;
   }
 
   const existingMember = db
     .prepare('SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?')
-    .get(orgId, user.id);
+    .get(orgId, user.id) as { id: string } | undefined;
 
   if (existingMember) {
-    const error = new Error('This user is already a member');
+    const error = new Error('This user is already a member') as AppError;
     error.status = 400;
     throw error;
   }
@@ -321,7 +404,7 @@ export function addMemberByEmail(orgId, email, role, addedBy) {
     WHERE om.id = ?
   `
     )
-    .get(memberId);
+    .get(memberId) as OrgMemberWithUser;
 
   return { success: true, member };
 }
@@ -329,7 +412,17 @@ export function addMemberByEmail(orgId, email, role, addedBy) {
 /**
  * Get all organizations accessible by a user (owned + member)
  */
-export function getUserOrganizations(userId) {
+export function getUserOrganizations(userId: string): UserOrganization[] {
+  interface OrgQueryResult {
+    id: string;
+    name: string;
+    createdById: string;
+    createdAt: string;
+    updatedAt: string;
+    role: 'owner' | 'admin' | 'editor' | 'viewer';
+    departmentCount: number;
+  }
+
   // Get owned organizations
   const ownedOrgs = db
     .prepare(
@@ -346,7 +439,7 @@ export function getUserOrganizations(userId) {
     WHERE o.created_by_id = ?
   `
     )
-    .all(userId);
+    .all(userId) as OrgQueryResult[];
 
   // Get member organizations
   const memberOrgs = db
@@ -365,15 +458,17 @@ export function getUserOrganizations(userId) {
     WHERE om.user_id = ?
   `
     )
-    .all(userId);
+    .all(userId) as OrgQueryResult[];
 
   // Combine and sort by created date
   const allOrgs = [...ownedOrgs, ...memberOrgs].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  return allOrgs.map(org => ({
-    ...org,
-    departments: { length: org.departmentCount || 0 },
-  }));
+  return allOrgs.map(
+    (org): UserOrganization => ({
+      ...org,
+      departments: { length: org.departmentCount || 0 },
+    })
+  );
 }

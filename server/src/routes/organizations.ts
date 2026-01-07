@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response, NextFunction } from 'express';
 import { randomBytes } from 'crypto';
 import { authenticateToken } from '../middleware/auth.js';
 import db from '../db.js';
@@ -11,6 +11,7 @@ import {
 } from '../services/org.service.js';
 import { requireOrgPermission } from '../services/member.service.js';
 import { emitOrgUpdated, emitOrgSettings } from '../services/socket-events.service.js';
+import type { AuthRequest } from '../types/index.js';
 
 const router = express.Router();
 
@@ -18,9 +19,9 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // GET /api/organizations
-router.get('/organizations', async (req, res, next) => {
+router.get('/organizations', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const orgs = await getOrganizations(req.user.id);
+    const orgs = await getOrganizations(req.user!.id);
     res.json(orgs);
   } catch (err) {
     next(err);
@@ -28,9 +29,9 @@ router.get('/organizations', async (req, res, next) => {
 });
 
 // GET /api/organizations/:id
-router.get('/organizations/:id', async (req, res, next) => {
+router.get('/organizations/:id', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const org = await getOrganizationById(req.params.id, req.user.id);
+    const org = await getOrganizationById(req.params.id!, req.user!.id);
     res.json(org);
   } catch (err) {
     next(err);
@@ -38,15 +39,16 @@ router.get('/organizations/:id', async (req, res, next) => {
 });
 
 // POST /api/organizations
-router.post('/organizations', async (req, res, next) => {
+router.post('/organizations', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { name } = req.body;
 
     if (!name || !name.trim()) {
-      return res.status(400).json({ message: 'Organization name is required' });
+      res.status(400).json({ message: 'Organization name is required' });
+      return;
     }
 
-    const org = await createOrganization(name.trim(), req.user.id);
+    const org = await createOrganization(name.trim(), req.user!.id);
     res.status(201).json(org);
   } catch (err) {
     next(err);
@@ -54,18 +56,19 @@ router.post('/organizations', async (req, res, next) => {
 });
 
 // PUT /api/organizations/:id
-router.put('/organizations/:id', async (req, res, next) => {
+router.put('/organizations/:id', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { name } = req.body;
 
     if (!name || !name.trim()) {
-      return res.status(400).json({ message: 'Organization name is required' });
+      res.status(400).json({ message: 'Organization name is required' });
+      return;
     }
 
-    const org = await updateOrganization(req.params.id, name.trim(), req.user.id);
+    const org = await updateOrganization(req.params.id!, (name as string).trim(), req.user!.id);
 
     // Emit real-time event
-    emitOrgUpdated(req.params.id, org, req.user);
+    emitOrgUpdated(req.params.id!, org, req.user!);
 
     res.json(org);
   } catch (err) {
@@ -74,9 +77,9 @@ router.put('/organizations/:id', async (req, res, next) => {
 });
 
 // DELETE /api/organizations/:id
-router.delete('/organizations/:id', async (req, res, next) => {
+router.delete('/organizations/:id', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    await deleteOrganization(req.params.id, req.user.id);
+    await deleteOrganization(req.params.id!, req.user!.id);
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -85,12 +88,12 @@ router.delete('/organizations/:id', async (req, res, next) => {
 
 // GET /api/organizations/:id/share
 // Get sharing settings for an organization (any member can view)
-router.get('/organizations/:id/share', async (req, res, next) => {
+router.get('/organizations/:id/share', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
 
     // Any member can view share settings (viewer or higher)
-    requireOrgPermission(id, req.user.id, 'viewer');
+    requireOrgPermission(id!, req.user!.id, 'viewer');
 
     const org = db
       .prepare(
@@ -100,10 +103,11 @@ router.get('/organizations/:id/share', async (req, res, next) => {
       WHERE id = ?
     `
       )
-      .get(id);
+      .get(id) as any;
 
     if (!org) {
-      return res.status(404).json({ message: 'Organization not found' });
+      res.status(404).json({ message: 'Organization not found' });
+      return;
     }
 
     res.json({
@@ -120,13 +124,13 @@ router.get('/organizations/:id/share', async (req, res, next) => {
 
 // PUT /api/organizations/:id/share
 // Toggle organization public/private status (requires admin)
-router.put('/organizations/:id/share', async (req, res, next) => {
+router.put('/organizations/:id/share', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id!;
     const { isPublic } = req.body;
 
     // Verify admin permission
-    requireOrgPermission(id, req.user.id, 'admin');
+    requireOrgPermission(id, req.user!.id, 'admin');
 
     const org = db
       .prepare(
@@ -136,10 +140,11 @@ router.put('/organizations/:id/share', async (req, res, next) => {
       WHERE id = ?
     `
       )
-      .get(id);
+      .get(id) as any;
 
     if (!org) {
-      return res.status(404).json({ message: 'Organization not found' });
+      res.status(404).json({ message: 'Organization not found' });
+      return;
     }
 
     // Generate share token if making public and doesn't have one
@@ -166,7 +171,7 @@ router.put('/organizations/:id/share', async (req, res, next) => {
     };
 
     // Emit real-time event
-    emitOrgSettings(id, settings, req.user);
+    emitOrgSettings(id, settings, req.user!);
 
     res.json(settings);
   } catch (err) {
@@ -176,12 +181,12 @@ router.put('/organizations/:id/share', async (req, res, next) => {
 
 // POST /api/organizations/:id/share/regenerate
 // Regenerate share token for an organization (requires admin)
-router.post('/organizations/:id/share/regenerate', async (req, res, next) => {
+router.post('/organizations/:id/share/regenerate', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id!;
 
     // Verify admin permission
-    requireOrgPermission(id, req.user.id, 'admin');
+    requireOrgPermission(id, req.user!.id, 'admin');
 
     const org = db
       .prepare(
@@ -191,10 +196,11 @@ router.post('/organizations/:id/share/regenerate', async (req, res, next) => {
       WHERE id = ?
     `
       )
-      .get(id);
+      .get(id) as any;
 
     if (!org) {
-      return res.status(404).json({ message: 'Organization not found' });
+      res.status(404).json({ message: 'Organization not found' });
+      return;
     }
 
     // Generate new share token
@@ -216,7 +222,7 @@ router.post('/organizations/:id/share/regenerate', async (req, res, next) => {
     };
 
     // Emit real-time event
-    emitOrgSettings(id, settings, req.user);
+    emitOrgSettings(id, settings, req.user!);
 
     res.json(settings);
   } catch (err) {

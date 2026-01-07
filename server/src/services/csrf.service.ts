@@ -21,18 +21,15 @@ import { randomBytes, createHmac, timingSafeEqual } from 'crypto';
 
 /**
  * Generate a cryptographically secure CSRF token
- * @returns {string} Base64-encoded random token (128 bits of entropy)
  */
-export function generateCsrfToken() {
+export function generateCsrfToken(): string {
   return randomBytes(16).toString('base64url'); // 128 bits, URL-safe
 }
 
 /**
  * Sign a CSRF token with HMAC-SHA256
- * @param {string} token - The token to sign
- * @returns {string} Signed token in format: token.signature
  */
-export function signCsrfToken(token) {
+export function signCsrfToken(token: string): string {
   const secret = process.env.CSRF_SECRET || process.env.JWT_SECRET;
   if (!secret) {
     throw new Error('CSRF_SECRET or JWT_SECRET must be configured');
@@ -45,10 +42,8 @@ export function signCsrfToken(token) {
 
 /**
  * Verify a signed CSRF token
- * @param {string} signedToken - The signed token to verify (token.signature)
- * @returns {boolean} True if signature is valid
  */
-export function verifyCsrfToken(signedToken) {
+export function verifyCsrfToken(signedToken: string): boolean {
   if (!signedToken || typeof signedToken !== 'string') {
     return false;
   }
@@ -59,6 +54,10 @@ export function verifyCsrfToken(signedToken) {
   }
 
   const [token, receivedSignature] = parts;
+
+  if (!token || !receivedSignature) {
+    return false;
+  }
 
   const secret = process.env.CSRF_SECRET || process.env.JWT_SECRET;
   if (!secret) {
@@ -77,18 +76,15 @@ export function verifyCsrfToken(signedToken) {
     }
 
     return timingSafeEqual(receivedBuffer, expectedBuffer);
-  } catch (err) {
+  } catch (err: unknown) {
     return false;
   }
 }
 
 /**
  * Compare two CSRF tokens in a timing-safe manner
- * @param {string} token1 - First token
- * @param {string} token2 - Second token
- * @returns {boolean} True if tokens match
  */
-export function compareCsrfTokens(token1, token2) {
+export function compareCsrfTokens(token1: string, token2: string): boolean {
   if (!token1 || !token2 || typeof token1 !== 'string' || typeof token2 !== 'string') {
     return false;
   }
@@ -108,9 +104,8 @@ export function compareCsrfTokens(token1, token2) {
 
 /**
  * Generate a new CSRF token pair (unsigned and signed)
- * @returns {{ token: string, signedToken: string }}
  */
-export function createCsrfTokenPair() {
+export function createCsrfTokenPair(): { token: string; signedToken: string } {
   const token = generateCsrfToken();
   const signedToken = signCsrfToken(token);
   return { token, signedToken };

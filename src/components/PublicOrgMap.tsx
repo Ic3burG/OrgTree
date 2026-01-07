@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, createContext } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, createContext } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactFlow, {
   Background,
@@ -8,6 +8,8 @@ import ReactFlow, {
   MarkerType,
   useReactFlow,
   ReactFlowProvider,
+  Node,
+  Edge,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -17,9 +19,10 @@ import Toolbar from './Toolbar';
 import { calculateLayout } from '../utils/layoutEngine';
 import { getDepthColors } from '../utils/colors';
 import api from '../api/client';
+import type { Department, Person } from '../types/index.js';
 
 // Theme context
-export const ThemeContext = createContext('slate');
+export const ThemeContext = createContext<string>('slate');
 
 // Custom node types
 const nodeTypes = {
@@ -39,17 +42,34 @@ const defaultEdgeOptions = {
   },
 };
 
+interface NodeData {
+  name: string;
+  path: string;
+  depth: number;
+  description: string;
+  people: Person[];
+  isExpanded: boolean;
+  onToggleExpand?: () => void;
+  onSelectPerson?: (person: Person) => void;
+  theme?: string;
+  isHighlighted?: boolean;
+  [key: string]: unknown;
+}
+
 /**
  * Transform API data to React Flow format
  */
-function transformToFlowData(departments) {
-  const nodes = [];
-  const edges = [];
+function transformToFlowData(departments: Department[]): {
+  nodes: Node<NodeData>[];
+  edges: Edge[];
+} {
+  const nodes: Node<NodeData>[] = [];
+  const edges: Edge[] = [];
 
   // Helper to calculate depth
-  const getDepth = (dept, deptMap, depth = 0) => {
-    if (!dept.parentId) return depth;
-    const parent = deptMap.get(dept.parentId);
+  const getDepth = (dept: Department, deptMap: Map<string, Department>, depth = 0): number => {
+    if (!dept.parent_id) return depth;
+    const parent = deptMap.get(dept.parent_id);
     return parent ? getDepth(parent, deptMap, depth + 1) : depth;
   };
 
@@ -74,10 +94,10 @@ function transformToFlowData(departments) {
     });
 
     // Create edge to parent
-    if (dept.parentId) {
+    if (dept.parent_id) {
       edges.push({
-        id: `e-${dept.parentId}-${dept.id}`,
-        source: dept.parentId,
+        id: `e-${dept.parent_id}-${dept.id}`,
+        source: dept.parent_id,
         target: dept.id,
         type: 'smoothstep',
       });
@@ -90,14 +110,14 @@ function transformToFlowData(departments) {
 /**
  * PublicOrgMapContent - Inner component with React Flow context
  */
-function PublicOrgMapContent() {
-  const { shareToken } = useParams();
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+function PublicOrgMapContent(): React.JSX.Element {
+  const { shareToken } = useParams<{ shareToken: string }>();
+  const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [selectedPerson, setSelectedPerson] = useState(null);
-  const [layoutDirection, setLayoutDirection] = useState('TB');
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [layoutDirection, setLayoutDirection] = useState<'TB' | 'LR'>('TB');
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [orgName, setOrgName] = useState('Organization Chart');
   const [currentTheme, setCurrentTheme] = useState('slate');
 
@@ -105,10 +125,15 @@ function PublicOrgMapContent() {
 
   // Load organization data from public API
   useEffect(() => {
-    async function loadData() {
+    async function loadData(): Promise<void> {
       try {
         setIsLoading(true);
         setError(null);
+
+        if (!shareToken) {
+          setError('Missing share token');
+          return;
+        }
 
         // Fetch public organization
         const org = await api.getPublicOrganization(shareToken);
@@ -133,12 +158,13 @@ function PublicOrgMapContent() {
         // Add callbacks to node data
         const nodesWithCallbacks = layoutedNodes.map(node => ({
           ...node,
+          position: node.position || { x: 0, y: 0 },
           data: {
             ...node.data,
             onToggleExpand: () => handleToggleExpand(node.id),
-            onSelectPerson: person => handleSelectPerson(person),
+            onSelectPerson: (person: Person) => handleSelectPerson(person),
           },
-        }));
+        })) as Node<NodeData>[];
 
         setNodes(nodesWithCallbacks);
         setEdges(parsedEdges);
@@ -149,7 +175,9 @@ function PublicOrgMapContent() {
         }, 100);
       } catch (err) {
         console.error('Error loading organization data:', err);
-        setError(err.message || 'Organization not found or not publicly shared');
+        const errorMessage =
+          err instanceof Error ? err.message : 'Organization not found or not publicly shared';
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -158,11 +186,12 @@ function PublicOrgMapContent() {
     if (shareToken) {
       loadData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shareToken]);
 
   // Toggle department expansion
   const handleToggleExpand = useCallback(
-    nodeId => {
+    (nodeId: string): void => {
       setNodes(nds => {
         const updatedNodes = nds.map(node => {
           if (node.id === nodeId) {
@@ -183,29 +212,30 @@ function PublicOrgMapContent() {
         // Preserve callbacks
         return layoutedNodes.map(node => ({
           ...node,
+          position: node.position || { x: 0, y: 0 },
           data: {
             ...node.data,
             onToggleExpand: () => handleToggleExpand(node.id),
-            onSelectPerson: person => handleSelectPerson(person),
+            onSelectPerson: (person: Person) => handleSelectPerson(person),
           },
-        }));
+        })) as Node<NodeData>[];
       });
     },
     [edges, layoutDirection, setNodes]
   );
 
   // Select person for detail panel
-  const handleSelectPerson = useCallback(person => {
+  const handleSelectPerson = useCallback((person: Person): void => {
     setSelectedPerson(person);
   }, []);
 
   // Close detail panel
-  const handleCloseDetail = useCallback(() => {
+  const handleCloseDetail = useCallback((): void => {
     setSelectedPerson(null);
   }, []);
 
   // Expand all departments
-  const handleExpandAll = useCallback(() => {
+  const handleExpandAll = useCallback((): void => {
     setNodes(nds => {
       const updatedNodes = nds.map(node => ({
         ...node,
@@ -216,17 +246,19 @@ function PublicOrgMapContent() {
 
       return layoutedNodes.map(node => ({
         ...node,
+        position: node.position || { x: 0, y: 0 },
         data: {
           ...node.data,
           onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: person => handleSelectPerson(person),
+          onSelectPerson: (person: Person) => handleSelectPerson(person),
         },
-      }));
+      })) as Node<NodeData>[];
     });
-  }, [edges, layoutDirection, handleToggleExpand, handleSelectPerson, setNodes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [edges, layoutDirection, setNodes]);
 
   // Collapse all departments
-  const handleCollapseAll = useCallback(() => {
+  const handleCollapseAll = useCallback((): void => {
     setNodes(nds => {
       const updatedNodes = nds.map(node => ({
         ...node,
@@ -237,18 +269,20 @@ function PublicOrgMapContent() {
 
       return layoutedNodes.map(node => ({
         ...node,
+        position: node.position || { x: 0, y: 0 },
         data: {
           ...node.data,
           onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: person => handleSelectPerson(person),
+          onSelectPerson: (person: Person) => handleSelectPerson(person),
         },
-      }));
+      })) as Node<NodeData>[];
     });
-  }, [edges, layoutDirection, handleToggleExpand, handleSelectPerson, setNodes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [edges, layoutDirection, setNodes]);
 
   // Toggle layout direction
-  const handleToggleLayout = useCallback(() => {
-    const newDirection = layoutDirection === 'TB' ? 'LR' : 'TB';
+  const handleToggleLayout = useCallback((): void => {
+    const newDirection: 'TB' | 'LR' = layoutDirection === 'TB' ? 'LR' : 'TB';
     setLayoutDirection(newDirection);
 
     setNodes(nds => {
@@ -256,19 +290,20 @@ function PublicOrgMapContent() {
 
       return layoutedNodes.map(node => ({
         ...node,
+        position: node.position || { x: 0, y: 0 },
         data: {
           ...node.data,
           onToggleExpand: () => handleToggleExpand(node.id),
-          onSelectPerson: person => handleSelectPerson(person),
+          onSelectPerson: (person: Person) => handleSelectPerson(person),
         },
-      }));
+      })) as Node<NodeData>[];
     });
 
     setTimeout(() => fitView({ padding: 0.2, duration: 800 }), 100);
   }, [layoutDirection, edges, fitView, handleToggleExpand, handleSelectPerson, setNodes]);
 
   // Handle theme change
-  const handleThemeChange = useCallback(themeName => {
+  const handleThemeChange = useCallback((themeName: string): void => {
     setCurrentTheme(themeName);
   }, []);
 
@@ -280,7 +315,7 @@ function PublicOrgMapContent() {
         ...node.data,
         theme: currentTheme, // Include theme to trigger re-render when it changes
         onToggleExpand: () => handleToggleExpand(node.id),
-        onSelectPerson: person => handleSelectPerson(person),
+        onSelectPerson: (person: Person) => handleSelectPerson(person),
       },
     }));
   }, [nodes, currentTheme, handleToggleExpand, handleSelectPerson]);
@@ -341,7 +376,7 @@ function PublicOrgMapContent() {
         >
           <Background color="#cbd5e1" gap={20} size={1} />
           <MiniMap
-            nodeColor={node => getDepthColors(node.data.depth, currentTheme).hex}
+            nodeColor={(node: Node<NodeData>) => getDepthColors(node.data.depth, currentTheme).hex}
             maskColor="rgba(0, 0, 0, 0.1)"
             position="bottom-right"
           />
@@ -393,7 +428,7 @@ function PublicOrgMapContent() {
 /**
  * PublicOrgMap - Wrapper with React Flow Provider
  */
-export default function PublicOrgMap() {
+export default function PublicOrgMap(): React.JSX.Element {
   return (
     <ReactFlowProvider>
       <PublicOrgMapContent />

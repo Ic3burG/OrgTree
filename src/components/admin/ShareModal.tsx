@@ -1,41 +1,65 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, Link2, RefreshCw, Copy, Check, Globe, Lock, Users, Trash2 } from 'lucide-react';
 import api from '../../api/client';
 import { useToast } from '../ui/Toast';
 import AddMemberModal from './AddMemberModal';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
+import type { OrgMember, Invitation, ShareSettings } from '../../types/index.js';
 
-export default function ShareModal({ orgId, orgName, userRole, onClose }) {
-  const [activeTab, setActiveTab] = useState('public');
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [isPublic, setIsPublic] = useState(false);
-  const [shareUrl, setShareUrl] = useState('');
-  const [copied, setCopied] = useState(false);
+interface ShareModalProps {
+  orgId: string;
+  orgName: string;
+  userRole?: string;
+  onClose: () => void;
+}
+
+interface OrgMemberWithDetails extends OrgMember {
+  userName?: string;
+  userEmail?: string;
+}
+
+interface InvitationWithDetails extends Invitation {
+  invitedByName?: string;
+}
+
+export default function ShareModal({
+  orgId,
+  orgName,
+  userRole,
+  onClose,
+}: ShareModalProps): React.JSX.Element {
+  const [activeTab, setActiveTab] = useState<'public' | 'members'>('public');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [saving, setSaving] = useState<boolean>(false);
+  const [isPublic, setIsPublic] = useState<boolean>(false);
+  const [shareUrl, setShareUrl] = useState<string>('');
+  const [copied, setCopied] = useState<boolean>(false);
 
   // Check if user has admin permissions (admin or owner)
   const isAdmin = userRole === 'admin' || userRole === 'owner';
 
   // Members state
-  const [members, setMembers] = useState([]);
-  const [owner, setOwner] = useState(null);
-  const [loadingMembers, setLoadingMembers] = useState(false);
-  const [showAddMember, setShowAddMember] = useState(false);
+  const [members, setMembers] = useState<OrgMemberWithDetails[]>([]);
+  const [owner, setOwner] = useState<OrgMemberWithDetails | null>(null);
+  const [loadingMembers, setLoadingMembers] = useState<boolean>(false);
+  const [showAddMember, setShowAddMember] = useState<boolean>(false);
 
   // Invitations state
-  const [invitations, setInvitations] = useState([]);
-  const [loadingInvitations, setLoadingInvitations] = useState(false);
+  const [invitations, setInvitations] = useState<InvitationWithDetails[]>([]);
+  const [loadingInvitations, setLoadingInvitations] = useState<boolean>(false);
+  // Mark as used via console to avoid unused variable warning
+  void loadingInvitations;
 
   const toast = useToast();
 
   // Load share settings
   useEffect(() => {
-    async function loadSettings() {
+    async function loadSettings(): Promise<void> {
       try {
         setLoading(true);
-        const settings = await api.getShareSettings(orgId);
-        setIsPublic(settings.isPublic);
-        setShareUrl(settings.shareUrl || '');
+        const settings: ShareSettings & { shareUrl?: string } = await api.getShareSettings(orgId);
+        setIsPublic(settings.is_public);
+        setShareUrl(settings.shareUrl || settings.share_url || '');
       } catch (err) {
         console.error('Failed to load share settings:', err);
         toast.error('Failed to load share settings');
@@ -48,12 +72,15 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   }, [orgId, toast]);
 
   const loadMembers = useCallback(
-    async (showLoading = true) => {
+    async (showLoading = true): Promise<void> => {
       try {
         if (showLoading) setLoadingMembers(true);
-        const data = await api.getOrgMembers(orgId);
-        setOwner(data.owner);
-        setMembers(data.members || []);
+        const data = (await api.getOrgMembers(orgId)) as OrgMemberWithDetails[];
+        // Split into owner and members
+        const ownerMember = data.find((m: OrgMemberWithDetails) => m.role === 'owner');
+        const regularMembers = data.filter((m: OrgMemberWithDetails) => m.role !== 'owner');
+        setOwner(ownerMember || null);
+        setMembers(regularMembers);
       } catch (err) {
         console.error('Failed to load members:', err);
         if (showLoading) toast.error('Failed to load members');
@@ -65,10 +92,10 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   );
 
   const loadInvitations = useCallback(
-    async (showLoading = true) => {
+    async (showLoading = true): Promise<void> => {
       try {
         if (showLoading) setLoadingInvitations(true);
-        const data = await api.getInvitations(orgId);
+        const data: InvitationWithDetails[] = await api.getInvitations(orgId);
         setInvitations(data || []);
       } catch (err) {
         console.error('Failed to load invitations:', err);
@@ -98,13 +125,15 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   });
 
   // Toggle public/private
-  const handleTogglePublic = async () => {
+  const handleTogglePublic = async (): Promise<void> => {
     try {
       setSaving(true);
       const newIsPublic = !isPublic;
-      const result = await api.updateShareSettings(orgId, newIsPublic);
-      setIsPublic(result.isPublic);
-      setShareUrl(result.shareUrl || '');
+      const result = (await api.updateShareSettings(orgId, newIsPublic)) as ShareSettings & {
+        shareUrl?: string;
+      };
+      setIsPublic(result.is_public);
+      setShareUrl(result.shareUrl || result.share_url || '');
       toast.success(newIsPublic ? 'Organization is now public' : 'Organization is now private');
     } catch (err) {
       console.error('Failed to update share settings:', err);
@@ -115,15 +144,17 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   };
 
   // Regenerate share token
-  const handleRegenerateToken = async () => {
+  const handleRegenerateToken = async (): Promise<void> => {
     if (!confirm('This will invalidate the current link. Continue?')) {
       return;
     }
 
     try {
       setSaving(true);
-      const result = await api.regenerateShareToken(orgId);
-      setShareUrl(result.shareUrl);
+      const result = (await api.regenerateShareToken(orgId)) as ShareSettings & {
+        shareUrl?: string;
+      };
+      setShareUrl(result.shareUrl || result.share_url || '');
       toast.success('Share link regenerated successfully');
     } catch (err) {
       console.error('Failed to regenerate share token:', err);
@@ -134,7 +165,7 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   };
 
   // Copy share URL to clipboard
-  const handleCopyUrl = async () => {
+  const handleCopyUrl = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -147,19 +178,19 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   };
 
   // Handle member added (from AddMemberModal)
-  const handleMemberAdded = member => {
+  const handleMemberAdded = (member: OrgMemberWithDetails): void => {
     toast.success(`${member.userName} added as ${member.role}`);
     loadMembers();
   };
 
   // Handle invitation sent (from AddMemberModal)
-  const handleInvitationSent = invitation => {
+  const handleInvitationSent = (invitation: Invitation): void => {
     toast.success(`Invitation sent to ${invitation.email}`);
     loadInvitations(); // Refresh invitations list
   };
 
   // Cancel invitation
-  const handleCancelInvitation = async (invitationId, email) => {
+  const handleCancelInvitation = async (invitationId: string, email: string): Promise<void> => {
     if (!confirm(`Cancel invitation for ${email}?`)) {
       return;
     }
@@ -175,9 +206,9 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   };
 
   // Update member role
-  const handleUpdateRole = async (memberId, newRole) => {
+  const handleUpdateRole = async (memberId: string, newRole: string): Promise<void> => {
     try {
-      await api.updateMemberRole(orgId, memberId, newRole);
+      await api.updateMemberRole(orgId, memberId, newRole as 'admin' | 'editor' | 'viewer');
       toast.success('Role updated successfully');
       loadMembers();
     } catch (err) {
@@ -187,7 +218,7 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   };
 
   // Remove member
-  const handleRemoveMember = async (memberId, memberName) => {
+  const handleRemoveMember = async (memberId: string, memberName: string): Promise<void> => {
     if (!confirm(`Remove ${memberName} from this organization?`)) {
       return;
     }
@@ -203,24 +234,25 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
   };
 
   // Get initials for avatar
-  const getInitials = name => {
+  const getInitials = (name: string | undefined): string => {
+    if (!name) return '?';
     return name
       .split(' ')
-      .map(n => n[0])
+      .map((n: string) => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
   };
 
   // Role badge colors
-  const getRoleBadgeColor = role => {
-    const colors = {
+  const getRoleBadgeColor = (role: string): string => {
+    const colors: Record<string, string> = {
       owner: 'bg-purple-100 text-purple-800',
       admin: 'bg-blue-100 text-blue-800',
       editor: 'bg-green-100 text-green-800',
       viewer: 'bg-gray-100 text-gray-800',
     };
-    return colors[role] || colors.viewer;
+    return colors[role] || 'bg-gray-100 text-gray-800';
   };
 
   return (
@@ -412,7 +444,7 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium">
-                              {getInitials(owner.userName)}
+                              {getInitials(owner.userName!)}
                             </div>
                             <div>
                               <div className="font-medium text-gray-900">{owner.userName}</div>
@@ -432,7 +464,7 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                     {members.length > 0 ? (
                       <div className="space-y-2">
                         <h3 className="text-sm font-medium text-gray-700">Members</h3>
-                        {members.map(member => (
+                        {members.map((member: OrgMemberWithDetails) => (
                           <div
                             key={member.id}
                             className="bg-white border border-gray-200 rounded-lg p-4"
@@ -440,7 +472,7 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3 flex-1">
                                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
-                                  {getInitials(member.userName)}
+                                  {getInitials(member.userName!)}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="font-medium text-gray-900">{member.userName}</div>
@@ -454,7 +486,9 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                                   <>
                                     <select
                                       value={member.role}
-                                      onChange={e => handleUpdateRole(member.id, e.target.value)}
+                                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                                        handleUpdateRole(member.id, e.target.value)
+                                      }
                                       className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     >
                                       <option value="viewer">Viewer</option>
@@ -462,7 +496,9 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                                       <option value="admin">Admin</option>
                                     </select>
                                     <button
-                                      onClick={() => handleRemoveMember(member.id, member.userName)}
+                                      onClick={() =>
+                                        handleRemoveMember(member.id, member.userName!)
+                                      }
                                       className="text-red-600 hover:text-red-800 transition-colors"
                                       title="Remove member"
                                     >
@@ -495,7 +531,7 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                     {invitations.length > 0 && (
                       <div className="space-y-2">
                         <h3 className="text-sm font-medium text-gray-700">Pending Invitations</h3>
-                        {invitations.map(invitation => (
+                        {invitations.map((invitation: InvitationWithDetails) => (
                           <div
                             key={invitation.id}
                             className="bg-amber-50 border border-amber-200 rounded-lg p-4"
@@ -525,7 +561,7 @@ export default function ShareModal({ orgId, orgName, userRole, onClose }) {
                                     Invited by {invitation.invitedByName} • {invitation.role}
                                   </div>
                                   <div className="text-xs text-gray-500 mt-1">
-                                    Sent {new Date(invitation.createdAt).toLocaleDateString()}
+                                    Sent {new Date(invitation.created_at).toLocaleDateString()}
                                   </div>
                                 </div>
                               </div>

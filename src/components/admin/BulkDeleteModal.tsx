@@ -41,7 +41,7 @@ export default function BulkDeleteModal({
         : 'departments';
 
   const hasResult = result && (result.deletedCount > 0 || result.failedCount > 0);
-  const hasWarnings = result?.warnings?.length > 0;
+  const hasWarnings = result?.warnings && result.warnings.length > 0;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -87,7 +87,7 @@ export default function BulkDeleteModal({
                   </p>
                 )}
               </div>
-              {hasWarnings && (
+              {hasWarnings && result.warnings && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
                   <p className="text-sm font-medium text-amber-800 mb-2">Warnings:</p>
                   <ul className="text-sm text-amber-700 space-y-1">

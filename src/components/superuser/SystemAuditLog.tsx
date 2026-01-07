@@ -1,80 +1,90 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FileText, Clock, User, Building2, Filter, X, ChevronDown } from 'lucide-react';
 import api from '../../api/client';
 import {
-  formatActionType,
   formatEntityType,
   getActionColor,
   formatEntityDetails,
   formatDate,
 } from '../../utils/audit';
+import type { AuditLog, PaginatedResponse } from '../../types';
 
-export default function SystemAuditLog() {
-  const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [hasMore, setHasMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState(null);
-  const [loadingMore, setLoadingMore] = useState(false);
+// Extended AuditLog with additional fields
+interface AuditLogExtended extends AuditLog {
+  organizationName?: string;
+}
+
+export default function SystemAuditLog(): React.JSX.Element {
+  const [logs, setLogs] = useState<AuditLogExtended[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
 
   // Filters
-  const [actionType, setActionType] = useState('');
-  const [entityType, setEntityType] = useState('');
-  const [orgFilter, setOrgFilter] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
+  const [actionType, setActionType] = useState<string>('');
+  const [entityType, setEntityType] = useState<string>('');
+  const [orgFilter, setOrgFilter] = useState<string>('');
+  const [showFilters, setShowFilters] = useState<boolean>(false);
 
   // Fetch audit logs
-  const fetchLogs = async (cursor = null, reset = false) => {
-    try {
-      if (reset) {
-        setLoading(true);
-        setLogs([]);
-      } else if (cursor) {
-        setLoadingMore(true);
+  const fetchLogs = useCallback(
+    async (cursor: string | null = null, reset: boolean = false): Promise<void> => {
+      try {
+        if (reset) {
+          setLoading(true);
+          setLogs([]);
+        } else if (cursor) {
+          setLoadingMore(true);
+        }
+
+        const params: Record<string, string> = {
+          limit: '50',
+          ...(cursor && { cursor }),
+          ...(actionType && { actionType }),
+          ...(entityType && { entityType }),
+          ...(orgFilter && { orgId: orgFilter }),
+        };
+
+        const result: PaginatedResponse<AuditLogExtended> = await api.getAdminAuditLogs(params);
+
+        if (reset || !cursor) {
+          setLogs((result.logs || []) as AuditLogExtended[]);
+        } else {
+          setLogs(prev => [...prev, ...((result.logs || []) as AuditLogExtended[])]);
+        }
+
+        setHasMore(result.hasMore);
+        setNextCursor(result.nextCursor);
+        setError(null);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load audit logs';
+        setError(errorMessage);
+        console.error('Failed to fetch audit logs:', err);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
       }
-
-      const params = {
-        limit: 50,
-        ...(cursor && { cursor }),
-        ...(actionType && { actionType }),
-        ...(entityType && { entityType }),
-        ...(orgFilter && { orgId: orgFilter }),
-      };
-
-      const result = await api.getAdminAuditLogs(params);
-
-      if (reset || !cursor) {
-        setLogs(result.logs);
-      } else {
-        setLogs(prev => [...prev, ...result.logs]);
-      }
-
-      setHasMore(result.hasMore);
-      setNextCursor(result.nextCursor);
-      setError(null);
-    } catch (err) {
-      setError(err.message || 'Failed to load audit logs');
-      console.error('Failed to fetch audit logs:', err);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  };
+    },
+    [actionType, entityType, orgFilter]
+  );
 
   // Initial load
   useEffect(() => {
     fetchLogs(null, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionType, entityType, orgFilter]);
 
   // Handle load more
-  const handleLoadMore = () => {
+  const handleLoadMore = (): void => {
     if (nextCursor && !loadingMore) {
       fetchLogs(nextCursor);
     }
   };
 
   // Clear filters
-  const clearFilters = () => {
+  const clearFilters = (): void => {
     setActionType('');
     setEntityType('');
     setOrgFilter('');
@@ -152,7 +162,9 @@ export default function SystemAuditLog() {
                   </label>
                   <select
                     value={actionType}
-                    onChange={e => setActionType(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setActionType(e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   >
                     <option value="">All Actions</option>
@@ -172,7 +184,9 @@ export default function SystemAuditLog() {
                   </label>
                   <select
                     value={entityType}
-                    onChange={e => setEntityType(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setEntityType(e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   >
                     <option value="">All Entities</option>
@@ -191,7 +205,9 @@ export default function SystemAuditLog() {
                   <input
                     type="text"
                     value={orgFilter}
-                    onChange={e => setOrgFilter(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setOrgFilter(e.target.value)
+                    }
                     placeholder="Filter by org ID..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
@@ -244,12 +260,12 @@ export default function SystemAuditLog() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {logs.map(log => (
+                    {logs.map((log: AuditLogExtended) => (
                       <tr key={log.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div className="flex items-center gap-2">
                             <Clock size={16} className="text-gray-400" />
-                            {formatDate(log.createdAt)}
+                            {formatDate(log.createdAt || log.created_at)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -266,21 +282,26 @@ export default function SystemAuditLog() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center gap-2">
                             <User size={16} className="text-gray-400" />
-                            <span className="text-gray-900">{log.actorName}</span>
+                            <span className="text-gray-900">
+                              {log.actorName || log.user_name || 'Unknown'}
+                            </span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
-                            className={`px-2 py-1 text-xs font-medium rounded-full ${getActionColor(log.actionType)}`}
+                            className={`px-2 py-1 text-xs font-medium rounded-full ${getActionColor(log.actionType || log.action)}`}
                           >
-                            {log.actionType}
+                            {log.actionType || log.action}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatEntityType(log.entityType)}
+                          {formatEntityType(log.entityType || log.entity_type)}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">
-                          {formatEntityDetails(log.entityType, log.entityData)}
+                          {formatEntityDetails(
+                            log.entityType || log.entity_type,
+                            log.entityData || log.snapshot
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -290,17 +311,17 @@ export default function SystemAuditLog() {
 
               {/* Mobile Cards */}
               <div className="md:hidden space-y-4">
-                {logs.map(log => (
+                {logs.map((log: AuditLogExtended) => (
                   <div key={log.id} className="bg-white border border-gray-200 rounded-lg p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Clock size={16} />
-                        {formatDate(log.createdAt)}
+                        {formatDate(log.createdAt || log.created_at)}
                       </div>
                       <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${getActionColor(log.actionType)}`}
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${getActionColor(log.actionType || log.action)}`}
                       >
-                        {log.actionType}
+                        {log.actionType || log.action}
                       </span>
                     </div>
 
@@ -314,12 +335,19 @@ export default function SystemAuditLog() {
 
                       <div className="flex items-center gap-2">
                         <User size={16} className="text-gray-400" />
-                        <span className="text-sm font-medium text-gray-900">{log.actorName}</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {log.actorName || log.user_name || 'Unknown'}
+                        </span>
                       </div>
 
                       <div className="text-sm text-gray-700">
-                        <span className="font-medium">{formatEntityType(log.entityType)}:</span>{' '}
-                        {formatEntityDetails(log.entityType, log.entityData)}
+                        <span className="font-medium">
+                          {formatEntityType(log.entityType || log.entity_type)}:
+                        </span>{' '}
+                        {formatEntityDetails(
+                          log.entityType || log.entity_type,
+                          log.entityData || log.snapshot
+                        )}
                       </div>
                     </div>
                   </div>

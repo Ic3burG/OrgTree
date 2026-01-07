@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Plus,
@@ -22,14 +22,19 @@ import BulkEditModal from './BulkEditModal';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 import { useSearch } from '../../hooks/useSearch';
 import { useBulkSelection } from '../../hooks/useBulkSelection';
+import type { Person, Department, Organization, BulkOperationResult } from '../../types/index.js';
 
-export default function PersonManager() {
-  const { orgId } = useParams();
-  const [people, setPeople] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [filterDepartment, setFilterDepartment] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+interface PersonWithDepartmentName extends Person {
+  departmentName?: string;
+}
+
+export default function PersonManager(): React.JSX.Element {
+  const { orgId } = useParams<{ orgId: string }>();
+  const [people, setPeople] = useState<PersonWithDepartmentName[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [filterDepartment, setFilterDepartment] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Use the search hook for API-based search
   const {
@@ -41,36 +46,50 @@ export default function PersonManager() {
   } = useSearch(orgId, { debounceMs: 300, minQueryLength: 2, defaultType: 'people' });
 
   // Form modal state
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingPerson, setEditingPerson] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+  const [editingPerson, setEditingPerson] = useState<PersonWithDepartmentName | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Delete modal state
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [personToDelete, setPersonToDelete] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+  const [personToDelete, setPersonToDelete] = useState<PersonWithDepartmentName | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   // Bulk operations state
-  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
-  const [bulkMoveModalOpen, setBulkMoveModalOpen] = useState(false);
-  const [bulkEditModalOpen, setBulkEditModalOpen] = useState(false);
-  const [bulkOperationLoading, setBulkOperationLoading] = useState(false);
-  const [bulkOperationResult, setBulkOperationResult] = useState(null);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState<boolean>(false);
+  const [bulkMoveModalOpen, setBulkMoveModalOpen] = useState<boolean>(false);
+  const [bulkEditModalOpen, setBulkEditModalOpen] = useState<boolean>(false);
+  const [bulkOperationLoading, setBulkOperationLoading] = useState<boolean>(false);
+  const [bulkOperationResult, setBulkOperationResult] = useState<BulkOperationResult | null>(null);
+  const [bulkDeleteResult, setBulkDeleteResult] = useState<{
+    deletedCount: number;
+    failedCount: number;
+  } | null>(null);
+  const [bulkMoveResult, setBulkMoveResult] = useState<{
+    movedCount: number;
+    failedCount: number;
+  } | null>(null);
+  const [bulkEditResult, setBulkEditResult] = useState<{
+    updatedCount: number;
+    failedCount: number;
+  } | null>(null);
 
   const loadData = useCallback(
-    async (showLoading = true) => {
+    async (showLoading = true): Promise<void> => {
+      if (!orgId) return;
       try {
         if (showLoading) setLoading(true);
         setError(null);
 
         // Load organization with all departments and people
-        const orgData = await api.getOrganization(orgId);
+        const orgData: Organization & { departments?: Department[] } =
+          await api.getOrganization(orgId);
         setDepartments(orgData.departments || []);
 
         // Flatten people from all departments
-        const allPeople = [];
-        (orgData.departments || []).forEach(dept => {
-          (dept.people || []).forEach(person => {
+        const allPeople: PersonWithDepartmentName[] = [];
+        (orgData.departments || []).forEach((dept: Department) => {
+          (dept.people || []).forEach((person: Person) => {
             allPeople.push({
               ...person,
               departmentName: dept.name,
@@ -79,7 +98,7 @@ export default function PersonManager() {
         });
         setPeople(allPeople);
       } catch (err) {
-        setError(err.message || 'Failed to load data');
+        setError((err as Error).message || 'Failed to load data');
       } finally {
         if (showLoading) setLoading(false);
       }
@@ -98,17 +117,19 @@ export default function PersonManager() {
     showNotifications: true,
   });
 
-  const handleCreate = () => {
+  const handleCreate = (): void => {
     setEditingPerson(null);
     setIsFormOpen(true);
   };
 
-  const handleEdit = person => {
+  const handleEdit = (person: PersonWithDepartmentName): void => {
     setEditingPerson(person);
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = async formData => {
+  const handleFormSubmit = async (
+    formData: Partial<Person> & { departmentId: string }
+  ): Promise<void> => {
     try {
       setIsSubmitting(true);
       if (editingPerson) {
@@ -120,18 +141,19 @@ export default function PersonManager() {
       setEditingPerson(null);
       await loadData();
     } catch (err) {
-      alert(err.message || 'Failed to save person');
+      alert((err as Error).message || 'Failed to save person');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDeleteClick = person => {
+  const handleDeleteClick = (person: PersonWithDepartmentName): void => {
     setPersonToDelete(person);
     setDeleteModalOpen(true);
   };
 
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm = async (): Promise<void> => {
+    if (!personToDelete) return;
     try {
       setIsDeleting(true);
       await api.deletePerson(personToDelete.id);
@@ -139,7 +161,7 @@ export default function PersonManager() {
       setPersonToDelete(null);
       await loadData();
     } catch (err) {
-      alert(err.message || 'Failed to delete person');
+      alert((err as Error).message || 'Failed to delete person');
     } finally {
       setIsDeleting(false);
     }
@@ -148,14 +170,17 @@ export default function PersonManager() {
   // Determine which list to filter: search results (if searching) or all people
   const filteredPeople = useMemo(() => {
     // If we have a search term with enough characters, use API search results
-    const baseList = searchTerm.length >= 2 ? searchResults : people;
+    const baseList: PersonWithDepartmentName[] =
+      searchTerm.length >= 2 ? (searchResults as unknown as PersonWithDepartmentName[]) : people;
 
     // Apply department filter locally
     if (!filterDepartment) {
       return baseList;
     }
 
-    return baseList.filter(person => person.departmentId === filterDepartment);
+    return baseList.filter(
+      (person: PersonWithDepartmentName) => person.department_id === filterDepartment
+    );
   }, [searchTerm, searchResults, people, filterDepartment]);
 
   // Bulk selection hook
@@ -173,62 +198,88 @@ export default function PersonManager() {
   } = useBulkSelection(filteredPeople);
 
   // Bulk operation handlers
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = async (): Promise<void> => {
+    if (!orgId) return;
     try {
       setBulkOperationLoading(true);
       setBulkOperationResult(null);
+      setBulkDeleteResult(null);
       const result = await api.bulkDeletePeople(orgId, selectedArray);
       setBulkOperationResult(result);
-      if (result.deletedCount > 0) {
+      setBulkDeleteResult({ deletedCount: result.success, failedCount: result.failed });
+      if (result.success > 0) {
         await loadData(false);
       }
     } catch (err) {
-      setBulkOperationResult({ deletedCount: 0, failedCount: selectedCount, error: err.message });
+      setBulkOperationResult({
+        success: 0,
+        failed: selectedCount,
+        errors: [{ id: 'bulk', error: (err as Error).message }],
+      });
+      setBulkDeleteResult({ deletedCount: 0, failedCount: selectedCount });
     } finally {
       setBulkOperationLoading(false);
     }
   };
 
-  const handleBulkMove = async targetDepartmentId => {
+  const handleBulkMove = async (targetDepartmentId: string): Promise<void> => {
+    if (!orgId) return;
     try {
       setBulkOperationLoading(true);
       setBulkOperationResult(null);
+      setBulkMoveResult(null);
       const result = await api.bulkMovePeople(orgId, selectedArray, targetDepartmentId);
       setBulkOperationResult(result);
-      if (result.movedCount > 0) {
+      setBulkMoveResult({ movedCount: result.success, failedCount: result.failed });
+      if (result.success > 0) {
         await loadData(false);
       }
     } catch (err) {
-      setBulkOperationResult({ movedCount: 0, failedCount: selectedCount, error: err.message });
+      setBulkOperationResult({
+        success: 0,
+        failed: selectedCount,
+        errors: [{ id: 'bulk', error: (err as Error).message }],
+      });
+      setBulkMoveResult({ movedCount: 0, failedCount: selectedCount });
     } finally {
       setBulkOperationLoading(false);
     }
   };
 
-  const handleBulkEdit = async updates => {
+  const handleBulkEdit = async (updates: {
+    title?: string;
+    departmentId?: string;
+  }): Promise<void> => {
+    if (!orgId) return;
     try {
       setBulkOperationLoading(true);
       setBulkOperationResult(null);
+      setBulkEditResult(null);
       const result = await api.bulkEditPeople(orgId, selectedArray, updates);
       setBulkOperationResult(result);
-      if (result.updatedCount > 0) {
+      setBulkEditResult({ updatedCount: result.success, failedCount: result.failed });
+      if (result.success > 0) {
         await loadData(false);
       }
     } catch (err) {
-      setBulkOperationResult({ updatedCount: 0, failedCount: selectedCount, error: err.message });
+      setBulkOperationResult({
+        success: 0,
+        failed: selectedCount,
+        errors: [{ id: 'bulk', error: (err as Error).message }],
+      });
+      setBulkEditResult({ updatedCount: 0, failedCount: selectedCount });
     } finally {
       setBulkOperationLoading(false);
     }
   };
 
-  const closeBulkModal = modalSetter => {
+  const closeBulkModal = (modalSetter: (value: boolean) => void): void => {
     modalSetter(false);
     setBulkOperationResult(null);
-    if (
-      bulkOperationResult?.deletedCount > 0 ||
-      bulkOperationResult?.movedCount > 0 ||
-      bulkOperationResult?.updatedCount > 0
-    ) {
+    setBulkDeleteResult(null);
+    setBulkMoveResult(null);
+    setBulkEditResult(null);
+    if (bulkOperationResult && bulkOperationResult.success > 0) {
       exitSelectionMode();
     }
   };
@@ -302,7 +353,7 @@ export default function PersonManager() {
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Departments</option>
-                {departments.map(dept => (
+                {departments.map((dept: Department) => (
                   <option key={dept.id} value={dept.id}>
                     {dept.name}
                   </option>
@@ -364,13 +415,13 @@ export default function PersonManager() {
                   </div>
                 )}
                 <div className="divide-y divide-gray-200">
-                  {filteredPeople.map(person => (
+                  {filteredPeople.map((person: PersonWithDepartmentName) => (
                     <div
                       key={person.id}
                       onClick={selectionMode ? () => toggleSelect(person.id) : undefined}
                       className={`p-6 transition-all duration-300 group ${
                         selectionMode ? 'cursor-pointer' : ''
-                      } ${isRecentlyChanged(person.id) ? 'bg-blue-50 ring-2 ring-blue-200' : ''} ${
+                      } ${isRecentlyChanged(person.id) ? 'bg-blue-50 ring-2 ring-2 ring-blue-200' : ''} ${
                         selectionMode && isSelected(person.id) ? 'bg-blue-50' : 'hover:bg-gray-50'
                       }`}
                     >
@@ -511,7 +562,7 @@ export default function PersonManager() {
         count={selectedCount}
         entityType="people"
         isDeleting={bulkOperationLoading}
-        result={bulkOperationResult}
+        result={bulkDeleteResult}
       />
 
       {/* Bulk Move Modal */}
@@ -522,7 +573,7 @@ export default function PersonManager() {
         count={selectedCount}
         departments={departments}
         isMoving={bulkOperationLoading}
-        result={bulkOperationResult}
+        result={bulkMoveResult}
       />
 
       {/* Bulk Edit Modal */}
@@ -534,7 +585,7 @@ export default function PersonManager() {
         entityType="people"
         departments={departments}
         isUpdating={bulkOperationLoading}
-        result={bulkOperationResult}
+        result={bulkEditResult}
       />
     </div>
   );

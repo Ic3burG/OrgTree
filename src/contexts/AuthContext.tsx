@@ -1,11 +1,29 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { api, cancelTokenRefresh, scheduleTokenRefresh } from '../api/client';
+import type { User } from '../types';
 
-const AuthContext = createContext(null);
+interface AuthContextValue {
+  user: User | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<User>;
+  signup: (name: string, email: string, password: string) => Promise<User>;
+  logout: () => Promise<void>;
+  isAuthenticated: boolean;
+  isSuperuser: boolean;
+  isAdmin: boolean;
+  canManageUsers: boolean;
+  hasRole: (role: string) => boolean;
+}
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // Check for existing session on mount
@@ -38,7 +56,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email: string, password: string): Promise<User> => {
     const { user, accessToken } = await api.login(email, password);
     localStorage.setItem('token', accessToken);
     localStorage.setItem('user', JSON.stringify(user));
@@ -46,7 +64,7 @@ export function AuthProvider({ children }) {
     return user;
   };
 
-  const signup = async (name, email, password) => {
+  const signup = async (name: string, email: string, password: string): Promise<User> => {
     const { user, accessToken } = await api.signup(name, email, password);
     localStorage.setItem('token', accessToken);
     localStorage.setItem('user', JSON.stringify(user));
@@ -54,7 +72,7 @@ export function AuthProvider({ children }) {
     return user;
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     try {
       // Call server to revoke refresh token
       await api.logout();
@@ -72,7 +90,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const value = {
+  const value: AuthContextValue = {
     user,
     loading,
     login,
@@ -83,13 +101,13 @@ export function AuthProvider({ children }) {
     isSuperuser: user?.role === 'superuser',
     isAdmin: user?.role === 'admin' || user?.role === 'superuser',
     canManageUsers: user?.role === 'superuser',
-    hasRole: role => user?.role === role,
+    hasRole: (role: string) => user?.role === role,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');

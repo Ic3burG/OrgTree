@@ -1,16 +1,24 @@
 import db from '../db.js';
 import { randomUUID } from 'crypto';
+import type { DatabaseAuditLog } from '../types/index.js';
+
+interface Actor {
+  id?: string;
+  name?: string;
+  email?: string;
+}
 
 /**
  * Create an audit log entry
- * @param {string} orgId - Organization ID
- * @param {Object} actor - User who performed the action {id, name, email}
- * @param {string} actionType - Action performed (created, updated, deleted, added, removed, settings)
- * @param {string} entityType - Type of entity (department, person, member, org)
- * @param {string} entityId - ID of the affected entity
- * @param {Object} entityData - Entity data snapshot
  */
-export function createAuditLog(orgId, actor, actionType, entityType, entityId, entityData) {
+export function createAuditLog(
+  orgId: string | null,
+  actor: Actor | null,
+  actionType: string,
+  entityType: string,
+  entityId: string | null,
+  entityData: any
+): { id: string } | null {
   try {
     const id = randomUUID();
     const actorId = actor?.id || null;
@@ -34,25 +42,43 @@ export function createAuditLog(orgId, actor, actionType, entityType, entityId, e
   }
 }
 
+interface GetAuditLogsOptions {
+  limit?: number;
+  cursor?: string;
+  actionType?: string;
+  entityType?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+interface ParsedAuditLog {
+  id: string;
+  organizationId: string | null;
+  actorId: string | null;
+  actorName: string | null;
+  actionType: string;
+  entityType: string;
+  entityId: string | null;
+  entityData: any;
+  createdAt: string;
+}
+
+interface AuditLogsResult {
+  logs: ParsedAuditLog[];
+  hasMore: boolean;
+  nextCursor: string | null;
+}
+
 /**
  * Get audit logs for an organization with filters and pagination
- * @param {string} orgId - Organization ID
- * @param {Object} options - Query options
- * @param {number} options.limit - Max number of records (default 50)
- * @param {string} options.cursor - Pagination cursor (created_at:id)
- * @param {string} options.actionType - Filter by action type
- * @param {string} options.entityType - Filter by entity type
- * @param {string} options.startDate - Filter by start date (ISO string)
- * @param {string} options.endDate - Filter by end date (ISO string)
- * @returns {Object} { logs: [], hasMore: boolean, nextCursor: string }
  */
-export function getAuditLogs(orgId, options = {}) {
-  const limit = parseInt(options.limit) || 50;
+export function getAuditLogs(orgId: string, options: GetAuditLogsOptions = {}): AuditLogsResult {
+  const limit = parseInt(String(options.limit || 50));
   const { cursor, actionType, entityType, startDate, endDate } = options;
 
   // Build WHERE clause
-  const whereConditions = ['organization_id = ?'];
-  const params = [orgId];
+  const whereConditions: string[] = ['organization_id = ?'];
+  const params: any[] = [orgId];
 
   if (actionType) {
     whereConditions.push('action_type = ?');
@@ -107,7 +133,7 @@ export function getAuditLogs(orgId, options = {}) {
 
   params.push(limit + 1);
 
-  const logs = db.prepare(query).all(...params);
+  const logs = db.prepare(query).all(...params) as DatabaseAuditLog[];
 
   // Check if there are more records
   const hasMore = logs.length > limit;
@@ -115,18 +141,22 @@ export function getAuditLogs(orgId, options = {}) {
     logs.pop(); // Remove the extra record
   }
 
-  // Generate next cursor from last record
-  let nextCursor = null;
-  if (hasMore && logs.length > 0) {
-    const lastLog = logs[logs.length - 1];
-    nextCursor = `${lastLog.createdAt}:${lastLog.id}`;
-  }
-
   // Parse entity_data JSON strings
-  const parsedLogs = logs.map(log => ({
-    ...log,
+  const parsedLogs: ParsedAuditLog[] = logs.map(log => ({
+    id: log.id,
+    organizationId: log.organizationId,
+    actorId: log.actorId,
+    actorName: log.actorName,
+    actionType: log.actionType,
+    entityType: log.entityType,
+    entityId: log.entityId,
     entityData: log.entityData ? JSON.parse(log.entityData) : null,
+    createdAt: log.createdAt,
   }));
+
+  // Generate next cursor from last record
+  const nextCursor: string | null =
+    hasMore && logs.length > 0 ? `${logs[logs.length - 1]!.createdAt}:${logs[logs.length - 1]!.id}` : null;
 
   return {
     logs: parsedLogs,
@@ -135,18 +165,30 @@ export function getAuditLogs(orgId, options = {}) {
   };
 }
 
+interface GetAllAuditLogsOptions extends GetAuditLogsOptions {
+  orgId?: string;
+}
+
+interface ParsedAllAuditLog extends ParsedAuditLog {
+  organizationName: string | null;
+}
+
+interface AllAuditLogsResult {
+  logs: ParsedAllAuditLog[];
+  hasMore: boolean;
+  nextCursor: string | null;
+}
+
 /**
  * Get audit logs across all organizations (superuser only)
- * @param {Object} options - Query options (same as getAuditLogs but with optional orgId filter)
- * @returns {Object} { logs: [], hasMore: boolean, nextCursor: string }
  */
-export function getAllAuditLogs(options = {}) {
-  const limit = parseInt(options.limit) || 50;
+export function getAllAuditLogs(options: GetAllAuditLogsOptions = {}): AllAuditLogsResult {
+  const limit = parseInt(String(options.limit || 50));
   const { cursor, actionType, entityType, startDate, endDate, orgId } = options;
 
   // Build WHERE clause
-  const whereConditions = [];
-  const params = [];
+  const whereConditions: string[] = [];
+  const params: any[] = [];
 
   if (orgId) {
     whereConditions.push('organization_id = ?');
@@ -208,7 +250,11 @@ export function getAllAuditLogs(options = {}) {
 
   params.push(limit + 1);
 
-  const logs = db.prepare(query).all(...params);
+  interface RawAllAuditLog extends DatabaseAuditLog {
+    organizationName: string | null;
+  }
+
+  const logs = db.prepare(query).all(...params) as RawAllAuditLog[];
 
   // Check if there are more records
   const hasMore = logs.length > limit;
@@ -216,18 +262,23 @@ export function getAllAuditLogs(options = {}) {
     logs.pop(); // Remove the extra record
   }
 
-  // Generate next cursor from last record
-  let nextCursor = null;
-  if (hasMore && logs.length > 0) {
-    const lastLog = logs[logs.length - 1];
-    nextCursor = `${lastLog.createdAt}:${lastLog.id}`;
-  }
-
   // Parse entity_data JSON strings
-  const parsedLogs = logs.map(log => ({
-    ...log,
+  const parsedLogs: ParsedAllAuditLog[] = logs.map(log => ({
+    id: log.id,
+    organizationId: log.organizationId,
+    organizationName: log.organizationName,
+    actorId: log.actorId,
+    actorName: log.actorName,
+    actionType: log.actionType,
+    entityType: log.entityType,
+    entityId: log.entityId,
     entityData: log.entityData ? JSON.parse(log.entityData) : null,
+    createdAt: log.createdAt,
   }));
+
+  // Generate next cursor from last record
+  const nextCursor: string | null =
+    hasMore && logs.length > 0 ? `${logs[logs.length - 1]!.createdAt}:${logs[logs.length - 1]!.id}` : null;
 
   return {
     logs: parsedLogs,
@@ -238,9 +289,8 @@ export function getAllAuditLogs(options = {}) {
 
 /**
  * Delete audit logs older than 1 year
- * @returns {number} Number of records deleted
  */
-export function cleanupOldLogs() {
+export function cleanupOldLogs(): number {
   try {
     const result = db
       .prepare(

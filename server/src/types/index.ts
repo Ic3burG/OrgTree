@@ -106,15 +106,14 @@ export interface DatabaseRefreshToken {
 
 export interface DatabaseAuditLog {
   id: string;
-  organization_id: string | null;
-  user_id: string | null;
-  user_name: string | null;
-  user_email: string | null;
-  action: string;
-  entity_type: string;
-  entity_id: string | null;
-  snapshot: string | null; // JSON string in SQLite
-  created_at: string;
+  organizationId: string | null;
+  actorId: string | null;
+  actorName: string | null;
+  actionType: string;
+  entityType: string;
+  entityId: string | null;
+  entityData: string | null; // JSON string in SQLite
+  createdAt: string;
 }
 
 // ============================================================================

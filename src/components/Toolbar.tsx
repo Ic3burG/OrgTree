@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   ZoomIn,
   ZoomOut,
@@ -9,9 +10,20 @@ import {
   LogOut,
   Palette,
 } from 'lucide-react';
-import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ThemePicker from './ThemePicker';
+
+interface ToolbarProps {
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onFitView: () => void;
+  onExpandAll: () => void;
+  onCollapseAll: () => void;
+  onToggleLayout: () => void;
+  layoutDirection: 'TB' | 'LR';
+  currentTheme: string;
+  onThemeChange: (theme: string) => void;
+}
 
 /**
  * Toolbar - Floating controls for org map interactions
@@ -28,7 +40,7 @@ export default function Toolbar({
   layoutDirection,
   currentTheme,
   onThemeChange,
-}) {
+}: ToolbarProps): React.JSX.Element {
   const { user, logout } = useAuth();
   const [isThemeOpen, setIsThemeOpen] = useState(false);
 
@@ -44,7 +56,7 @@ export default function Toolbar({
     touch-manipulation
   `;
 
-  const Tooltip = ({ children }) => (
+  const Tooltip = ({ children }: { children: React.ReactNode }) => (
     <span
       className="hidden lg:inline absolute right-full mr-2 px-2 py-1 bg-slate-800 text-white text-xs
       rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity
@@ -139,7 +151,7 @@ export default function Toolbar({
             <div className="absolute right-full mr-2 top-0 z-50 bg-white border border-slate-300 rounded-lg p-3 shadow-xl animate-in slide-in-from-right-2 duration-200">
               <ThemePicker
                 currentTheme={currentTheme}
-                onThemeChange={theme => {
+                onThemeChange={(theme: string) => {
                   onThemeChange(theme);
                   setIsThemeOpen(false);
                 }}

@@ -34,8 +34,9 @@ export default function SessionsPage(): React.JSX.Element {
     try {
       setLoading(true);
       setError(null);
-      const data = (await api.getSessions()) as SessionsResponse;
-      setSessions(data.sessions || []);
+      const data = await api.getSessions();
+      // API returns { sessions: Session[] }
+      setSessions((data as unknown as SessionsResponse).sessions || []);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message || 'Failed to load sessions');
@@ -70,11 +71,11 @@ export default function SessionsPage(): React.JSX.Element {
   const handleRevokeOthers = async (): Promise<void> => {
     try {
       setRevokingAll(true);
-      const result = (await api.revokeOtherSessions()) as RevokeOthersResponse;
+      const result = await api.revokeOtherSessions();
       // Refresh the list
       await fetchSessions();
       // Show success message briefly
-      if (result.revokedCount > 0) {
+      if ((result as unknown as RevokeOthersResponse).revokedCount > 0) {
         setError(null);
       }
     } catch (err) {

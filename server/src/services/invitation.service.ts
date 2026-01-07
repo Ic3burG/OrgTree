@@ -2,25 +2,65 @@ import db from '../db.js';
 import { randomUUID, randomBytes } from 'crypto';
 import { requireOrgPermission } from './member.service.js';
 import { sendInvitationEmail, isEmailConfigured } from './email.service.js';
+import type { AppError } from '../types/index.js';
 
 /**
  * Generate a secure random token for invitations
  */
-function generateToken() {
+function generateToken(): string {
   return randomBytes(32).toString('hex');
+}
+
+interface CreateInvitationResult {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  expiresAt: string;
+  emailSent: boolean;
+  emailError?: string;
+}
+
+interface InvitationInfo {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  expiresAt: string;
+  createdAt: string;
+  invitedByName: string;
+}
+
+interface InvitationByToken {
+  organizationName: string;
+  role: string;
+  status: string;
+  expiresAt: string;
+}
+
+interface AcceptInvitationResult {
+  success: boolean;
+  alreadyMember?: boolean;
+  organizationId?: string;
+  role?: string;
 }
 
 /**
  * Create and send an invitation
  */
-export async function createInvitation(orgId, email, role, invitedById) {
+export async function createInvitation(
+  orgId: string,
+  email: string,
+  role: string,
+  invitedById: string
+): Promise<CreateInvitationResult> {
   // Verify inviter has admin permission
   requireOrgPermission(orgId, invitedById, 'admin');
 
   // Validate role
   const validRoles = ['viewer', 'editor', 'admin'];
   if (!validRoles.includes(role)) {
-    const error = new Error('Invalid role. Must be: viewer, editor, or admin');
+    const error = new Error('Invalid role. Must be: viewer, editor, or admin') as AppError;
     error.status = 400;
     throw error;
   }
@@ -29,24 +69,28 @@ export async function createInvitation(orgId, email, role, invitedById) {
   const normalizedEmail = email.toLowerCase().trim();
 
   // Check if user already exists with this email
-  const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(normalizedEmail);
+  const existingUser = db
+    .prepare('SELECT id FROM users WHERE email = ?')
+    .get(normalizedEmail) as { id: string } | undefined;
   if (existingUser) {
     // Check if they're already a member
-    const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId);
-    if (org.created_by_id === existingUser.id) {
+    const org = db
+      .prepare('SELECT created_by_id FROM organizations WHERE id = ?')
+      .get(orgId) as { created_by_id: string } | undefined;
+    if (org && org.created_by_id === existingUser.id) {
       // Security: Use generic message to prevent email enumeration
-      const error = new Error('Cannot send invitation to this email address');
+      const error = new Error('Cannot send invitation to this email address') as AppError;
       error.status = 400;
       throw error;
     }
 
     const existingMember = db
       .prepare('SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?')
-      .get(orgId, existingUser.id);
+      .get(orgId, existingUser.id) as { id: string } | undefined;
 
     if (existingMember) {
       // Security: Use generic message to prevent email enumeration
-      const error = new Error('Cannot send invitation to this email address');
+      const error = new Error('Cannot send invitation to this email address') as AppError;
       error.status = 400;
       throw error;
     }
@@ -60,17 +104,21 @@ export async function createInvitation(orgId, email, role, invitedById) {
     WHERE organization_id = ? AND email = ? AND status = 'pending'
   `
     )
-    .get(orgId, normalizedEmail);
+    .get(orgId, normalizedEmail) as { id: string } | undefined;
 
   if (existingInvitation) {
-    const error = new Error('An invitation has already been sent to this email');
+    const error = new Error('An invitation has already been sent to this email') as AppError;
     error.status = 400;
     throw error;
   }
 
   // Get inviter and org info for the email
-  const inviter = db.prepare('SELECT name FROM users WHERE id = ?').get(invitedById);
-  const org = db.prepare('SELECT name FROM organizations WHERE id = ?').get(orgId);
+  const inviter = db
+    .prepare('SELECT name FROM users WHERE id = ?')
+    .get(invitedById) as { name: string } | undefined;
+  const org = db
+    .prepare('SELECT name FROM organizations WHERE id = ?')
+    .get(orgId) as { name: string } | undefined;
 
   // Create invitation
   const invitationId = randomUUID();
@@ -97,8 +145,8 @@ export async function createInvitation(orgId, email, role, invitedById) {
   // Send invitation email
   const emailResult = await sendInvitationEmail({
     to: normalizedEmail,
-    inviterName: inviter.name,
-    orgName: org.name,
+    inviterName: inviter?.name || 'Unknown',
+    orgName: org?.name || 'Unknown',
     role,
     token,
   });
@@ -118,7 +166,7 @@ export async function createInvitation(orgId, email, role, invitedById) {
 /**
  * Get pending invitations for an organization
  */
-export function getOrgInvitations(orgId, userId) {
+export function getOrgInvitations(orgId: string, userId: string): InvitationInfo[] {
   // Verify user has admin permission
   requireOrgPermission(orgId, userId, 'admin');
 
@@ -139,22 +187,26 @@ export function getOrgInvitations(orgId, userId) {
     ORDER BY i.created_at DESC
   `
     )
-    .all(orgId);
+    .all(orgId) as InvitationInfo[];
 }
 
 /**
  * Cancel an invitation
  */
-export function cancelInvitation(orgId, invitationId, userId) {
+export function cancelInvitation(
+  orgId: string,
+  invitationId: string,
+  userId: string
+): { success: boolean } {
   // Verify user has admin permission
   requireOrgPermission(orgId, userId, 'admin');
 
   const invitation = db
     .prepare('SELECT id FROM invitations WHERE id = ? AND organization_id = ? AND status = ?')
-    .get(invitationId, orgId, 'pending');
+    .get(invitationId, orgId, 'pending') as { id: string } | undefined;
 
   if (!invitation) {
-    const error = new Error('Invitation not found');
+    const error = new Error('Invitation not found') as AppError;
     error.status = 404;
     throw error;
   }
@@ -167,7 +219,16 @@ export function cancelInvitation(orgId, invitationId, userId) {
 /**
  * Get invitation by token (public - for accepting)
  */
-export function getInvitationByToken(token) {
+export function getInvitationByToken(token: string): InvitationByToken | null {
+  interface InvitationQueryResult {
+    id: string;
+    organizationId: string;
+    role: string;
+    status: string;
+    expiresAt: string;
+    organizationName: string;
+  }
+
   const invitation = db
     .prepare(
       `
@@ -183,7 +244,7 @@ export function getInvitationByToken(token) {
     WHERE i.token = ?
   `
     )
-    .get(token);
+    .get(token) as InvitationQueryResult | undefined;
 
   if (!invitation) {
     return null;
@@ -213,7 +274,17 @@ export function getInvitationByToken(token) {
 /**
  * Accept an invitation
  */
-export function acceptInvitation(token, userId) {
+export function acceptInvitation(token: string, userId: string): AcceptInvitationResult {
+  interface InvitationRecord {
+    id: string;
+    organization_id: string;
+    email: string;
+    role: string;
+    status: string;
+    expires_at: string;
+    invited_by_id: string;
+  }
+
   const invitation = db
     .prepare(
       `
@@ -229,31 +300,33 @@ export function acceptInvitation(token, userId) {
     WHERE i.token = ?
   `
     )
-    .get(token);
+    .get(token) as InvitationRecord | undefined;
 
   if (!invitation) {
-    const error = new Error('Invitation not found');
+    const error = new Error('Invitation not found') as AppError;
     error.status = 404;
     throw error;
   }
 
   if (invitation.status !== 'pending') {
-    const error = new Error('This invitation has already been used or cancelled');
+    const error = new Error('This invitation has already been used or cancelled') as AppError;
     error.status = 400;
     throw error;
   }
 
   if (new Date(invitation.expires_at) < new Date()) {
-    const error = new Error('This invitation has expired');
+    const error = new Error('This invitation has expired') as AppError;
     error.status = 400;
     throw error;
   }
 
   // Get the user's email
-  const user = db.prepare('SELECT email FROM users WHERE id = ?').get(userId);
+  const user = db
+    .prepare('SELECT email FROM users WHERE id = ?')
+    .get(userId) as { email: string } | undefined;
   if (!user) {
     // Security: Generic message to prevent information disclosure
-    const error = new Error('Unable to accept invitation');
+    const error = new Error('Unable to accept invitation') as AppError;
     error.status = 403;
     throw error;
   }
@@ -261,7 +334,7 @@ export function acceptInvitation(token, userId) {
   // Verify the email matches (case-insensitive)
   if (user.email.toLowerCase() !== invitation.email.toLowerCase()) {
     // Security: Generic message to prevent email enumeration
-    const error = new Error('Unable to accept invitation');
+    const error = new Error('Unable to accept invitation') as AppError;
     error.status = 403;
     throw error;
   }
@@ -269,7 +342,7 @@ export function acceptInvitation(token, userId) {
   // Check if already a member
   const existingMember = db
     .prepare('SELECT id FROM organization_members WHERE organization_id = ? AND user_id = ?')
-    .get(invitation.organization_id, userId);
+    .get(invitation.organization_id, userId) as { id: string } | undefined;
 
   if (existingMember) {
     // Already a member, just mark invitation as accepted
@@ -283,10 +356,10 @@ export function acceptInvitation(token, userId) {
   // Check if user is owner
   const org = db
     .prepare('SELECT created_by_id FROM organizations WHERE id = ?')
-    .get(invitation.organization_id);
-  if (org.created_by_id === userId) {
+    .get(invitation.organization_id) as { created_by_id: string } | undefined;
+  if (org && org.created_by_id === userId) {
     // Security: Generic message to prevent information disclosure
-    const error = new Error('Unable to accept invitation');
+    const error = new Error('Unable to accept invitation') as AppError;
     error.status = 400;
     throw error;
   }
@@ -313,7 +386,7 @@ export function acceptInvitation(token, userId) {
     );
 
   if (insertResult.changes === 0) {
-    const error = new Error('Failed to add member to organization');
+    const error = new Error('Failed to add member to organization') as AppError;
     error.status = 500;
     throw error;
   }
@@ -324,7 +397,7 @@ export function acceptInvitation(token, userId) {
     .run(now, invitation.id);
 
   if (updateResult.changes === 0) {
-    const error = new Error('Failed to update invitation status');
+    const error = new Error('Failed to update invitation status') as AppError;
     error.status = 500;
     throw error;
   }

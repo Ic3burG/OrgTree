@@ -1,18 +1,29 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { X, Edit3 } from 'lucide-react';
+import type { Department } from '../../types/index.js';
 
-/**
- * Modal for bulk editing items
- * @param {Object} props
- * @param {boolean} props.isOpen - Whether modal is open
- * @param {Function} props.onClose - Close callback
- * @param {Function} props.onConfirm - Confirm edit callback (updates) => void
- * @param {number} props.count - Number of items to edit
- * @param {string} props.entityType - 'people' or 'departments'
- * @param {Array} props.departments - Array of departments (for people's department selector)
- * @param {boolean} props.isUpdating - Loading state
- * @param {Object} props.result - Result from edit { updatedCount, failedCount }
- */
+interface BulkEditResult {
+  updatedCount: number;
+  failedCount: number;
+}
+
+interface BulkEditUpdates {
+  title?: string;
+  departmentId?: string;
+  parentId?: string | null;
+}
+
+interface BulkEditModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (updates: BulkEditUpdates) => void;
+  count: number;
+  entityType?: 'people' | 'departments';
+  departments?: Department[];
+  isUpdating?: boolean;
+  result?: BulkEditResult | null;
+}
+
 export default function BulkEditModal({
   isOpen,
   onClose,
@@ -22,15 +33,15 @@ export default function BulkEditModal({
   departments = [],
   isUpdating = false,
   result = null,
-}) {
-  const [title, setTitle] = useState('');
-  const [departmentId, setDepartmentId] = useState('');
-  const [parentId, setParentId] = useState('');
+}: BulkEditModalProps): React.JSX.Element | null {
+  const [title, setTitle] = useState<string>('');
+  const [departmentId, setDepartmentId] = useState<string>('');
+  const [parentId, setParentId] = useState<string>('');
 
   if (!isOpen) return null;
 
-  const handleConfirm = () => {
-    const updates = {};
+  const handleConfirm = (): void => {
+    const updates: BulkEditUpdates = {};
 
     if (entityType === 'people') {
       if (title.trim()) updates.title = title.trim();
@@ -49,7 +60,7 @@ export default function BulkEditModal({
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     setTitle('');
     setDepartmentId('');
     setParentId('');
