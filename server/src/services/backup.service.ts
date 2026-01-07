@@ -33,9 +33,7 @@ function generateBackupFilename() {
  * Create a backup of the database
  * Uses SQLite's backup API for consistency
  */
-export async function createBackup(
-  customPath: string | null = null
-): Promise<{
+export async function createBackup(customPath: string | null = null): Promise<{
   success: boolean;
   path?: string;
   size?: number;
@@ -117,9 +115,11 @@ export function listBackups(): BackupFile[] {
 /**
  * Clean up old backups, keeping only the most recent N
  */
-export function cleanupOldBackups(
-  keepCount: number = MAX_BACKUPS
-): { deleted: number; kept: number; deletedFiles: string[] } {
+export function cleanupOldBackups(keepCount: number = MAX_BACKUPS): {
+  deleted: number;
+  kept: number;
+  deletedFiles: string[];
+} {
   const backups = listBackups();
   const deletedFiles: string[] = [];
 

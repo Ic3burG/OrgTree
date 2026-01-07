@@ -123,7 +123,11 @@ export function validateCsrf(req: AuthRequest, res: Response, next: NextFunction
  * Conditional CSRF middleware - only validates if user is authenticated
  * This allows public endpoints to work without CSRF tokens
  */
-export function validateCsrfIfAuthenticated(req: AuthRequest, res: Response, next: NextFunction): void {
+export function validateCsrfIfAuthenticated(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): void {
   // Only validate CSRF for authenticated requests
   if (req.user) {
     return validateCsrf(req, res, next);

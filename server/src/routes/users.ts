@@ -27,7 +27,13 @@ const passwordResetLimiter = rateLimit({
     const ipAddress = req.ip || (req.socket?.remoteAddress ?? '');
     createAuditLog(
       null, // System-wide security event
-      (req as AuthRequest).user ? { id: (req as AuthRequest).user!.id, name: (req as AuthRequest).user!.name, email: (req as AuthRequest).user!.email } : null,
+      (req as AuthRequest).user
+        ? {
+            id: (req as AuthRequest).user!.id,
+            name: (req as AuthRequest).user!.name,
+            email: (req as AuthRequest).user!.email,
+          }
+        : null,
       'rate_limit_exceeded',
       'security',
       'rate_limiting',
@@ -56,7 +62,13 @@ const adminOperationsLimiter = rateLimit({
     const ipAddress = req.ip || (req.socket?.remoteAddress ?? '');
     createAuditLog(
       null, // System-wide security event
-      (req as AuthRequest).user ? { id: (req as AuthRequest).user!.id, name: (req as AuthRequest).user!.name, email: (req as AuthRequest).user!.email } : null,
+      (req as AuthRequest).user
+        ? {
+            id: (req as AuthRequest).user!.id,
+            name: (req as AuthRequest).user!.name,
+            email: (req as AuthRequest).user!.email,
+          }
+        : null,
       'rate_limit_exceeded',
       'security',
       'rate_limiting',
@@ -78,21 +90,25 @@ router.use(authenticateToken);
 router.use(requireSuperuser);
 
 // POST /api/users - Create new user
-router.post('/users', adminOperationsLimiter, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { name, email, role } = req.body;
+router.post(
+  '/users',
+  adminOperationsLimiter,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { name, email, role } = req.body;
 
-    if (!name || !email || !role) {
-      res.status(400).json({ message: 'Name, email, and role are required' });
-      return;
+      if (!name || !email || !role) {
+        res.status(400).json({ message: 'Name, email, and role are required' });
+        return;
+      }
+
+      const result = await createAdminUser(name, email, role);
+      res.status(201).json(result);
+    } catch (err) {
+      next(err);
     }
-
-    const result = await createAdminUser(name, email, role);
-    res.status(201).json(result);
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 // GET /api/users - List all users
 router.get('/users', (_req: AuthRequest, res: Response, next: NextFunction): void => {
@@ -132,40 +148,52 @@ router.put('/users/:id', (req: AuthRequest, res: Response, next: NextFunction): 
 });
 
 // PUT /api/users/:id/role - Change user role
-router.put('/users/:id/role', adminOperationsLimiter, (req: AuthRequest, res: Response, next: NextFunction): void => {
-  try {
-    const { role } = req.body;
+router.put(
+  '/users/:id/role',
+  adminOperationsLimiter,
+  (req: AuthRequest, res: Response, next: NextFunction): void => {
+    try {
+      const { role } = req.body;
 
-    if (!role) {
-      res.status(400).json({ message: 'Role is required' });
-      return;
+      if (!role) {
+        res.status(400).json({ message: 'Role is required' });
+        return;
+      }
+
+      const user = updateUserRole(req.params.id!, role, req.user!.id);
+      res.json(user);
+    } catch (err) {
+      next(err);
     }
-
-    const user = updateUserRole(req.params.id!, role, req.user!.id);
-    res.json(user);
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 // POST /api/users/:id/reset-password - Reset user password
-router.post('/users/:id/reset-password', passwordResetLimiter, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const result = await resetUserPassword(req.params.id!);
-    res.json(result);
-  } catch (err) {
-    next(err);
+router.post(
+  '/users/:id/reset-password',
+  passwordResetLimiter,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await resetUserPassword(req.params.id!);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 // DELETE /api/users/:id - Delete user
-router.delete('/users/:id', adminOperationsLimiter, (req: AuthRequest, res: Response, next: NextFunction): void => {
-  try {
-    deleteUser(req.params.id!, req.user!.id);
-    res.status(204).send();
-  } catch (err) {
-    next(err);
+router.delete(
+  '/users/:id',
+  adminOperationsLimiter,
+  (req: AuthRequest, res: Response, next: NextFunction): void => {
+    try {
+      deleteUser(req.params.id!, req.user!.id);
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 export default router;

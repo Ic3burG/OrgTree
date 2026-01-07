@@ -69,14 +69,14 @@ export async function createInvitation(
   const normalizedEmail = email.toLowerCase().trim();
 
   // Check if user already exists with this email
-  const existingUser = db
-    .prepare('SELECT id FROM users WHERE email = ?')
-    .get(normalizedEmail) as { id: string } | undefined;
+  const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(normalizedEmail) as
+    | { id: string }
+    | undefined;
   if (existingUser) {
     // Check if they're already a member
-    const org = db
-      .prepare('SELECT created_by_id FROM organizations WHERE id = ?')
-      .get(orgId) as { created_by_id: string } | undefined;
+    const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId) as
+      | { created_by_id: string }
+      | undefined;
     if (org && org.created_by_id === existingUser.id) {
       // Security: Use generic message to prevent email enumeration
       const error = new Error('Cannot send invitation to this email address') as AppError;
@@ -113,12 +113,12 @@ export async function createInvitation(
   }
 
   // Get inviter and org info for the email
-  const inviter = db
-    .prepare('SELECT name FROM users WHERE id = ?')
-    .get(invitedById) as { name: string } | undefined;
-  const org = db
-    .prepare('SELECT name FROM organizations WHERE id = ?')
-    .get(orgId) as { name: string } | undefined;
+  const inviter = db.prepare('SELECT name FROM users WHERE id = ?').get(invitedById) as
+    | { name: string }
+    | undefined;
+  const org = db.prepare('SELECT name FROM organizations WHERE id = ?').get(orgId) as
+    | { name: string }
+    | undefined;
 
   // Create invitation
   const invitationId = randomUUID();
@@ -321,9 +321,9 @@ export function acceptInvitation(token: string, userId: string): AcceptInvitatio
   }
 
   // Get the user's email
-  const user = db
-    .prepare('SELECT email FROM users WHERE id = ?')
-    .get(userId) as { email: string } | undefined;
+  const user = db.prepare('SELECT email FROM users WHERE id = ?').get(userId) as
+    | { email: string }
+    | undefined;
   if (!user) {
     // Security: Generic message to prevent information disclosure
     const error = new Error('Unable to accept invitation') as AppError;

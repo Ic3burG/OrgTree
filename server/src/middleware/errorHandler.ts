@@ -6,7 +6,12 @@ interface ErrorWithStatus extends Error {
   status?: number;
 }
 
-export function errorHandler(err: ErrorWithStatus, req: AuthRequest, res: Response, _next: NextFunction): void {
+export function errorHandler(
+  err: ErrorWithStatus,
+  req: AuthRequest,
+  res: Response,
+  _next: NextFunction
+): void {
   // Log error with context
   logger.error(err.message, {
     error: err.name,

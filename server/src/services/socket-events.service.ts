@@ -44,49 +44,85 @@ function createPayload<T extends { id?: string }>(
 }
 
 // Department events
-export function emitDepartmentCreated(orgId: string, department: Record<string, unknown>, actor: Actor): void {
+export function emitDepartmentCreated(
+  orgId: string,
+  department: Record<string, unknown>,
+  actor: Actor
+): void {
   const payload = createPayload(orgId, 'department', 'created', department, actor);
   emitToOrg(orgId, 'department:created', payload);
 }
 
-export function emitDepartmentUpdated(orgId: string, department: Record<string, unknown>, actor: Actor): void {
+export function emitDepartmentUpdated(
+  orgId: string,
+  department: Record<string, unknown>,
+  actor: Actor
+): void {
   const payload = createPayload(orgId, 'department', 'updated', department, actor);
   emitToOrg(orgId, 'department:updated', payload);
 }
 
-export function emitDepartmentDeleted(orgId: string, department: Record<string, unknown>, actor: Actor): void {
+export function emitDepartmentDeleted(
+  orgId: string,
+  department: Record<string, unknown>,
+  actor: Actor
+): void {
   const payload = createPayload(orgId, 'department', 'deleted', department, actor);
   emitToOrg(orgId, 'department:deleted', payload);
 }
 
 // Person events
-export function emitPersonCreated(orgId: string, person: Record<string, unknown>, actor: Actor): void {
+export function emitPersonCreated(
+  orgId: string,
+  person: Record<string, unknown>,
+  actor: Actor
+): void {
   const payload = createPayload(orgId, 'person', 'created', person, actor);
   emitToOrg(orgId, 'person:created', payload);
 }
 
-export function emitPersonUpdated(orgId: string, person: Record<string, unknown>, actor: Actor): void {
+export function emitPersonUpdated(
+  orgId: string,
+  person: Record<string, unknown>,
+  actor: Actor
+): void {
   const payload = createPayload(orgId, 'person', 'updated', person, actor);
   emitToOrg(orgId, 'person:updated', payload);
 }
 
-export function emitPersonDeleted(orgId: string, person: Record<string, unknown>, actor: Actor): void {
+export function emitPersonDeleted(
+  orgId: string,
+  person: Record<string, unknown>,
+  actor: Actor
+): void {
   const payload = createPayload(orgId, 'person', 'deleted', person, actor);
   emitToOrg(orgId, 'person:deleted', payload);
 }
 
 // Member events (for sharing)
-export function emitMemberAdded(orgId: string, member: Record<string, unknown>, actor: Actor): void {
+export function emitMemberAdded(
+  orgId: string,
+  member: Record<string, unknown>,
+  actor: Actor
+): void {
   const payload = createPayload(orgId, 'member', 'added', member, actor);
   emitToOrg(orgId, 'member:added', payload);
 }
 
-export function emitMemberUpdated(orgId: string, member: Record<string, unknown>, actor: Actor): void {
+export function emitMemberUpdated(
+  orgId: string,
+  member: Record<string, unknown>,
+  actor: Actor
+): void {
   const payload = createPayload(orgId, 'member', 'updated', member, actor);
   emitToOrg(orgId, 'member:updated', payload);
 }
 
-export function emitMemberRemoved(orgId: string, member: Record<string, unknown>, actor: Actor): void {
+export function emitMemberRemoved(
+  orgId: string,
+  member: Record<string, unknown>,
+  actor: Actor
+): void {
   const payload = createPayload(orgId, 'member', 'removed', member, actor);
   emitToOrg(orgId, 'member:removed', payload);
 }
@@ -97,7 +133,11 @@ export function emitOrgUpdated(orgId: string, org: Record<string, unknown>, acto
   emitToOrg(orgId, 'org:updated', payload);
 }
 
-export function emitOrgSettings(orgId: string, settings: Record<string, unknown>, actor: Actor): void {
+export function emitOrgSettings(
+  orgId: string,
+  settings: Record<string, unknown>,
+  actor: Actor
+): void {
   const payload = createPayload(orgId, 'org', 'settings', settings, actor);
   emitToOrg(orgId, 'org:settings', payload);
 }

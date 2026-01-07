@@ -156,7 +156,9 @@ export function getAuditLogs(orgId: string, options: GetAuditLogsOptions = {}): 
 
   // Generate next cursor from last record
   const nextCursor: string | null =
-    hasMore && logs.length > 0 ? `${logs[logs.length - 1]!.createdAt}:${logs[logs.length - 1]!.id}` : null;
+    hasMore && logs.length > 0
+      ? `${logs[logs.length - 1]!.createdAt}:${logs[logs.length - 1]!.id}`
+      : null;
 
   return {
     logs: parsedLogs,
@@ -278,7 +280,9 @@ export function getAllAuditLogs(options: GetAllAuditLogsOptions = {}): AllAuditL
 
   // Generate next cursor from last record
   const nextCursor: string | null =
-    hasMore && logs.length > 0 ? `${logs[logs.length - 1]!.createdAt}:${logs[logs.length - 1]!.id}` : null;
+    hasMore && logs.length > 0
+      ? `${logs[logs.length - 1]!.createdAt}:${logs[logs.length - 1]!.id}`
+      : null;
 
   return {
     logs: parsedLogs,

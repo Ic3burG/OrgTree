@@ -35,7 +35,8 @@ function formatLog(level: LogLevel, message: string, meta: LogMeta = {}): string
 export const logger = {
   info: (message: string, meta?: LogMeta): void => console.log(formatLog('info', message, meta)),
   warn: (message: string, meta?: LogMeta): void => console.warn(formatLog('warn', message, meta)),
-  error: (message: string, meta?: LogMeta): void => console.error(formatLog('error', message, meta)),
+  error: (message: string, meta?: LogMeta): void =>
+    console.error(formatLog('error', message, meta)),
   debug: (message: string, meta?: LogMeta): void => {
     if (!isProduction) {
       console.debug(formatLog('debug', message, meta));

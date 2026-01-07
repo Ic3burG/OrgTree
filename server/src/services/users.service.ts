@@ -225,7 +225,9 @@ export function updateUser(
   userId: string,
   { name, email }: { name?: string; email?: string }
 ): UpdatedUser {
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DatabaseUser | undefined;
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as
+    | DatabaseUser
+    | undefined;
   if (!user) {
     const error = new Error('User not found') as AppError;
     error.status = 404;
@@ -263,7 +265,11 @@ export function updateUser(
     .get(userId) as UpdatedUser;
 }
 
-export function updateUserRole(userId: string, newRole: UserRole, requestingUserId: string): UpdatedUser {
+export function updateUserRole(
+  userId: string,
+  newRole: UserRole,
+  requestingUserId: string
+): UpdatedUser {
   // Validate role
   if (!VALID_ROLES.includes(newRole)) {
     const error = new Error(`Invalid role. Must be one of: ${VALID_ROLES.join(', ')}`) as AppError;
@@ -278,7 +284,9 @@ export function updateUserRole(userId: string, newRole: UserRole, requestingUser
     throw error;
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DatabaseUser | undefined;
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as
+    | DatabaseUser
+    | undefined;
   if (!user) {
     const error = new Error('User not found') as AppError;
     error.status = 404;
@@ -307,7 +315,9 @@ export function updateUserRole(userId: string, newRole: UserRole, requestingUser
 export async function resetUserPassword(
   userId: string
 ): Promise<{ message: string; temporaryPassword: string }> {
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DatabaseUser | undefined;
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as
+    | DatabaseUser
+    | undefined;
   if (!user) {
     const error = new Error('User not found') as AppError;
     error.status = 404;
@@ -343,7 +353,9 @@ export function deleteUser(userId: string, requestingUserId: string): { message:
     throw error;
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DatabaseUser | undefined;
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as
+    | DatabaseUser
+    | undefined;
   if (!user) {
     const error = new Error('User not found') as AppError;
     error.status = 404;

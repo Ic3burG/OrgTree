@@ -338,7 +338,11 @@ export function getAutocompleteSuggestions(
       LIMIT ?
     `);
 
-    const deptRows = deptStmt.all(ftsQuery, orgId, Math.ceil(limit / 2)) as DepartmentSuggestionRow[];
+    const deptRows = deptStmt.all(
+      ftsQuery,
+      orgId,
+      Math.ceil(limit / 2)
+    ) as DepartmentSuggestionRow[];
     suggestions.push(
       ...deptRows.map(
         (r): AutocompleteSuggestion => ({

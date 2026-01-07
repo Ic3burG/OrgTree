@@ -66,11 +66,7 @@ vi.mock('../db.js', async () => {
 
 // Import after mocking
 import db from '../db.js';
-import {
-  createUser,
-  loginUser,
-  getUserById,
-} from './auth.service.js';
+import { createUser, loginUser, getUserById } from './auth.service.js';
 
 describe('Auth Service', () => {
   beforeEach(() => {
@@ -107,9 +103,9 @@ describe('Auth Service', () => {
     it('should throw error for duplicate email', async () => {
       await createUser('John Doe', 'john@example.com', 'password123');
 
-      await expect(
-        createUser('Jane Doe', 'john@example.com', 'password456')
-      ).rejects.toThrow('Email already registered');
+      await expect(createUser('Jane Doe', 'john@example.com', 'password456')).rejects.toThrow(
+        'Email already registered'
+      );
     });
 
     it('should set correct role for first user', async () => {

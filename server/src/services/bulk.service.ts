@@ -116,7 +116,11 @@ interface CountResult {
 /**
  * Bulk delete people with individual audit logs for each
  */
-export function bulkDeletePeople(orgId: string, personIds: string[], actor: Actor): BulkDeleteResult {
+export function bulkDeletePeople(
+  orgId: string,
+  personIds: string[],
+  actor: Actor
+): BulkDeleteResult {
   // Verify user has editor permission on org
   requireOrgPermission(orgId, actor.id, 'editor');
 

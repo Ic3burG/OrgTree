@@ -186,7 +186,9 @@ export function createDepartment(
     // Check for circular reference by traversing up from the new parent
     const isCircular = checkIsDescendant(parentId, deptId);
     if (isCircular) {
-      const error = new Error('Cannot move a department under one of its own descendants') as AppError;
+      const error = new Error(
+        'Cannot move a department under one of its own descendants'
+      ) as AppError;
       error.status = 400;
       throw error;
     }

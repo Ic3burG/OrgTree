@@ -53,9 +53,9 @@ interface UserOrganization {
  */
 export function checkOrgAccess(orgId: string, userId: string): OrgAccessResult {
   // Check if user is owner
-  const org = db
-    .prepare('SELECT created_by_id FROM organizations WHERE id = ?')
-    .get(orgId) as DatabaseOrgRecord | undefined;
+  const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId) as
+    | DatabaseOrgRecord
+    | undefined;
 
   if (!org) {
     return { hasAccess: false, role: null, isOwner: false };
@@ -107,9 +107,9 @@ export function requireOrgPermission(
   if (userLevel < requiredLevel) {
     // Security: Log permission denied - insufficient organization role
     // Get user details for logging
-    const user = db
-      .prepare('SELECT id, name, email FROM users WHERE id = ?')
-      .get(userId) as Pick<DatabaseUser, 'id' | 'name' | 'email'> | undefined;
+    const user = db.prepare('SELECT id, name, email FROM users WHERE id = ?').get(userId) as
+      | Pick<DatabaseUser, 'id' | 'name' | 'email'>
+      | undefined;
     createAuditLog(
       orgId, // Organization-specific security event
       user
@@ -176,9 +176,9 @@ export function addOrgMember(
   requireOrgPermission(orgId, addedBy, 'admin');
 
   // Verify user exists
-  const user = db
-    .prepare('SELECT id, name, email FROM users WHERE id = ?')
-    .get(userId) as Pick<DatabaseUser, 'id' | 'name' | 'email'> | undefined;
+  const user = db.prepare('SELECT id, name, email FROM users WHERE id = ?').get(userId) as
+    | Pick<DatabaseUser, 'id' | 'name' | 'email'>
+    | undefined;
   if (!user) {
     const error = new Error('User not found') as AppError;
     error.status = 404;
@@ -186,9 +186,9 @@ export function addOrgMember(
   }
 
   // Check if already a member or owner
-  const org = db
-    .prepare('SELECT created_by_id FROM organizations WHERE id = ?')
-    .get(orgId) as DatabaseOrgRecord | undefined;
+  const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId) as
+    | DatabaseOrgRecord
+    | undefined;
   if (org && org.created_by_id === userId) {
     const error = new Error('User is already the owner of this organization') as AppError;
     error.status = 400;
@@ -357,9 +357,9 @@ export function addMemberByEmail(
   }
 
   // Check if already a member or owner
-  const org = db
-    .prepare('SELECT created_by_id FROM organizations WHERE id = ?')
-    .get(orgId) as DatabaseOrgRecord | undefined;
+  const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId) as
+    | DatabaseOrgRecord
+    | undefined;
   if (org && org.created_by_id === user.id) {
     const error = new Error('This user is already the owner of this organization') as AppError;
     error.status = 400;

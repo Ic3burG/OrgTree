@@ -167,7 +167,9 @@ try {
 
 // Migration: Add organization_members table
 try {
-  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as TableNameRow[];
+  const tables = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+    .all() as TableNameRow[];
   const tableNames = tables.map(t => t.name);
 
   if (!tableNames.includes('organization_members')) {
@@ -197,7 +199,9 @@ try {
 
 // Migration: Add invitations table
 try {
-  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as TableNameRow[];
+  const tables = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+    .all() as TableNameRow[];
   const tableNames = tables.map(t => t.name);
 
   if (!tableNames.includes('invitations')) {
@@ -229,7 +233,9 @@ try {
 
 // Migration: Add audit_logs table
 try {
-  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as TableNameRow[];
+  const tables = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+    .all() as TableNameRow[];
   const tableNames = tables.map(t => t.name);
 
   if (!tableNames.includes('audit_logs')) {
@@ -260,7 +266,9 @@ try {
 
 // Migration: Add FTS5 full-text search tables for advanced search
 try {
-  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as TableNameRow[];
+  const tables = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+    .all() as TableNameRow[];
   const tableNames = tables.map(t => t.name);
 
   if (!tableNames.includes('departments_fts')) {
@@ -354,7 +362,9 @@ try {
 
 // Migration: Add refresh_tokens table for secure token management
 try {
-  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as TableNameRow[];
+  const tables = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+    .all() as TableNameRow[];
   const tableNames = tables.map(t => t.name);
 
   if (!tableNames.includes('refresh_tokens')) {

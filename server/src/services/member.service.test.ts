@@ -373,9 +373,14 @@ describe('Member Service', () => {
     });
 
     it('should throw for invalid role', () => {
-      expect(() => updateMemberRole(org.id, 'mem-1', 'invalid' as unknown as 'admin' | 'editor' | 'viewer', owner.id)).toThrow(
-        'Invalid role'
-      );
+      expect(() =>
+        updateMemberRole(
+          org.id,
+          'mem-1',
+          'invalid' as unknown as 'admin' | 'editor' | 'viewer',
+          owner.id
+        )
+      ).toThrow('Invalid role');
     });
   });
 

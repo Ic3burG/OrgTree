@@ -14,39 +14,47 @@ const router = express.Router();
 
 // POST /api/organizations/:orgId/invitations
 // Send an invitation (requires admin)
-router.post('/organizations/:orgId/invitations', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { orgId } = req.params;
-    const { email, role } = req.body;
+router.post(
+  '/organizations/:orgId/invitations',
+  authenticateToken,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { orgId } = req.params;
+      const { email, role } = req.body;
 
-    if (!email) {
-      res.status(400).json({ message: 'Email is required' });
-      return;
+      if (!email) {
+        res.status(400).json({ message: 'Email is required' });
+        return;
+      }
+
+      if (!role) {
+        res.status(400).json({ message: 'Role is required' });
+        return;
+      }
+
+      const invitation = await createInvitation(orgId!, email, role, req.user!.id);
+      res.status(201).json(invitation);
+    } catch (err) {
+      next(err);
     }
-
-    if (!role) {
-      res.status(400).json({ message: 'Role is required' });
-      return;
-    }
-
-    const invitation = await createInvitation(orgId!, email, role, req.user!.id);
-    res.status(201).json(invitation);
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 // GET /api/organizations/:orgId/invitations
 // Get pending invitations (requires admin)
-router.get('/organizations/:orgId/invitations', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { orgId } = req.params;
-    const invitations = getOrgInvitations(orgId!, req.user!.id);
-    res.json(invitations);
-  } catch (err) {
-    next(err);
+router.get(
+  '/organizations/:orgId/invitations',
+  authenticateToken,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { orgId } = req.params;
+      const invitations = getOrgInvitations(orgId!, req.user!.id);
+      res.json(invitations);
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 // DELETE /api/organizations/:orgId/invitations/:invitationId
 // Cancel an invitation (requires admin)
@@ -66,38 +74,49 @@ router.delete(
 
 // GET /api/invitations/:token
 // Get invitation details (public - for viewing before accepting)
-router.get('/invitations/:token', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { token } = req.params;
-    const invitation = getInvitationByToken(token!);
+router.get(
+  '/invitations/:token',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { token } = req.params;
+      const invitation = getInvitationByToken(token!);
 
-    if (!invitation) {
-      res.status(404).json({ message: 'Invitation not found' });
-      return;
+      if (!invitation) {
+        res.status(404).json({ message: 'Invitation not found' });
+        return;
+      }
+
+      res.json(invitation);
+    } catch (err) {
+      next(err);
     }
-
-    res.json(invitation);
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 // POST /api/invitations/:token/accept
 // Accept an invitation (requires authentication)
-router.post('/invitations/:token/accept', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { token } = req.params;
-    const result = await acceptInvitation(token!, req.user!.id);
-    res.json(result);
-  } catch (err) {
-    next(err);
+router.post(
+  '/invitations/:token/accept',
+  authenticateToken,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { token } = req.params;
+      const result = await acceptInvitation(token!, req.user!.id);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 // GET /api/invitations/status
 // Check if email service is configured
-router.get('/invitations/status', authenticateToken, async (_req: AuthRequest, res: Response): Promise<void> => {
-  res.json({ emailConfigured: isEmailConfigured() });
-});
+router.get(
+  '/invitations/status',
+  authenticateToken,
+  async (_req: AuthRequest, res: Response): Promise<void> => {
+    res.json({ emailConfigured: isEmailConfigured() });
+  }
+);
 
 export default router;

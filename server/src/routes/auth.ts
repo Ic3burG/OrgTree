@@ -62,162 +62,180 @@ const authLimiter = rateLimit({
 });
 
 // POST /api/auth/signup
-router.post('/signup', authLimiter, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { name, email, password } = req.body;
+router.post(
+  '/signup',
+  authLimiter,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { name, email, password } = req.body;
 
-    // Validation
-    if (!name || !email || !password) {
-      res.status(400).json({ message: 'Name, email, and password are required' });
-      return;
+      // Validation
+      if (!name || !email || !password) {
+        res.status(400).json({ message: 'Name, email, and password are required' });
+        return;
+      }
+
+      // Security: Enforce stronger password requirements
+      if (password.length < 12) {
+        res.status(400).json({ message: 'Password must be at least 12 characters' });
+        return;
+      }
+
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      const userAgent = req.headers['user-agent'];
+
+      const result = await createUser(name, email, password, ipAddress, userAgent);
+
+      // Set refresh token in httpOnly cookie
+      res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
+
+      // Return access token and user (not refresh token in body)
+      res.status(201).json({
+        user: result.user,
+        accessToken: result.accessToken,
+        expiresIn: result.expiresIn,
+      });
+    } catch (err) {
+      next(err);
     }
-
-    // Security: Enforce stronger password requirements
-    if (password.length < 12) {
-      res.status(400).json({ message: 'Password must be at least 12 characters' });
-      return;
-    }
-
-    const ipAddress = req.ip || req.connection.remoteAddress;
-    const userAgent = req.headers['user-agent'];
-
-    const result = await createUser(name, email, password, ipAddress, userAgent);
-
-    // Set refresh token in httpOnly cookie
-    res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
-
-    // Return access token and user (not refresh token in body)
-    res.status(201).json({
-      user: result.user,
-      accessToken: result.accessToken,
-      expiresIn: result.expiresIn,
-    });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 // POST /api/auth/login
-router.post('/login', authLimiter, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { email, password } = req.body;
+router.post(
+  '/login',
+  authLimiter,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { email, password } = req.body;
 
-    if (!email || !password) {
-      res.status(400).json({ message: 'Email and password are required' });
-      return;
+      if (!email || !password) {
+        res.status(400).json({ message: 'Email and password are required' });
+        return;
+      }
+
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      const userAgent = req.headers['user-agent'];
+
+      const result = await loginUser(email, password, ipAddress, userAgent);
+
+      // Set refresh token in httpOnly cookie
+      res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
+
+      // Return access token and user (not refresh token in body)
+      res.json({
+        user: result.user,
+        accessToken: result.accessToken,
+        expiresIn: result.expiresIn,
+      });
+    } catch (err) {
+      next(err);
     }
-
-    const ipAddress = req.ip || req.connection.remoteAddress;
-    const userAgent = req.headers['user-agent'];
-
-    const result = await loginUser(email, password, ipAddress, userAgent);
-
-    // Set refresh token in httpOnly cookie
-    res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
-
-    // Return access token and user (not refresh token in body)
-    res.json({
-      user: result.user,
-      accessToken: result.accessToken,
-      expiresIn: result.expiresIn,
-    });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 // GET /api/auth/me
-router.get('/me', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const user = await getUserById(req.user!.id);
-    res.json(user);
-  } catch (err) {
-    next(err);
+router.get(
+  '/me',
+  authenticateToken,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = await getUserById(req.user!.id);
+      res.json(user);
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 // POST /api/auth/change-password - Change password (requires auth)
-router.post('/change-password', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { oldPassword, newPassword } = req.body;
+router.post(
+  '/change-password',
+  authenticateToken,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { oldPassword, newPassword } = req.body;
 
-    // Get current user from database
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user!.id) as { password_hash: string; must_change_password: number } | undefined;
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    // Security: Require old password verification UNLESS user must change password
-    // (temporary password flow allows change without knowing old password)
-    if (!user.must_change_password) {
-      if (!oldPassword) {
-        res.status(400).json({ message: 'Current password is required' });
+      // Get current user from database
+      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user!.id) as
+        | { password_hash: string; must_change_password: number }
+        | undefined;
+      if (!user) {
+        res.status(404).json({ message: 'User not found' });
         return;
       }
 
-      // Verify old password
-      const isValidOldPassword = await bcrypt.compare(oldPassword, user.password_hash);
-      if (!isValidOldPassword) {
-        res.status(401).json({ message: 'Current password is incorrect' });
+      // Security: Require old password verification UNLESS user must change password
+      // (temporary password flow allows change without knowing old password)
+      if (!user.must_change_password) {
+        if (!oldPassword) {
+          res.status(400).json({ message: 'Current password is required' });
+          return;
+        }
+
+        // Verify old password
+        const isValidOldPassword = await bcrypt.compare(oldPassword, user.password_hash);
+        if (!isValidOldPassword) {
+          res.status(401).json({ message: 'Current password is incorrect' });
+          return;
+        }
+      }
+
+      if (!newPassword) {
+        res.status(400).json({ message: 'New password is required' });
         return;
       }
-    }
 
-    if (!newPassword) {
-      res.status(400).json({ message: 'New password is required' });
-      return;
-    }
+      // Security: Enforce stronger password requirements
+      if (newPassword.length < 12) {
+        res.status(400).json({ message: 'Password must be at least 12 characters' });
+        return;
+      }
 
-    // Security: Enforce stronger password requirements
-    if (newPassword.length < 12) {
-      res.status(400).json({ message: 'Password must be at least 12 characters' });
-      return;
-    }
+      // Security: Prevent reusing the same password
+      if (oldPassword && oldPassword === newPassword) {
+        res.status(400).json({ message: 'New password must be different from current password' });
+        return;
+      }
 
-    // Security: Prevent reusing the same password
-    if (oldPassword && oldPassword === newPassword) {
-      res.status(400).json({ message: 'New password must be different from current password' });
-      return;
-    }
+      // Hash new password
+      const passwordHash = await bcrypt.hash(newPassword, 10);
+      const now = new Date().toISOString();
 
-    // Hash new password
-    const passwordHash = await bcrypt.hash(newPassword, 10);
-    const now = new Date().toISOString();
-
-    // Update password and clear must_change_password flag
-    const result = db
-      .prepare(
-        `
+      // Update password and clear must_change_password flag
+      const result = db
+        .prepare(
+          `
       UPDATE users
       SET password_hash = ?, must_change_password = 0, updated_at = ?
       WHERE id = ?
     `
-      )
-      .run(passwordHash, now, req.user!.id);
+        )
+        .run(passwordHash, now, req.user!.id);
 
-    if (result.changes === 0) {
-      res.status(500).json({ message: 'Failed to update password' });
-      return;
+      if (result.changes === 0) {
+        res.status(500).json({ message: 'Failed to update password' });
+        return;
+      }
+
+      // Security: Revoke all refresh tokens (force re-login on all devices)
+      const revokedCount = revokeAllUserTokens(req.user!.id);
+
+      // Clear the refresh token cookie
+      res.clearCookie('refreshToken', { path: '/api/auth' });
+
+      // Return updated user info
+      const updatedUser = await getUserById(req.user!.id);
+      res.json({
+        message: 'Password changed successfully. Please log in again.',
+        user: updatedUser,
+        sessionsRevoked: revokedCount,
+      });
+    } catch (err) {
+      next(err);
     }
-
-    // Security: Revoke all refresh tokens (force re-login on all devices)
-    const revokedCount = revokeAllUserTokens(req.user!.id);
-
-    // Clear the refresh token cookie
-    res.clearCookie('refreshToken', { path: '/api/auth' });
-
-    // Return updated user info
-    const updatedUser = await getUserById(req.user!.id);
-    res.json({
-      message: 'Password changed successfully. Please log in again.',
-      user: updatedUser,
-      sessionsRevoked: revokedCount,
-    });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 // ============================================
 // REFRESH TOKEN ENDPOINTS
@@ -233,54 +251,58 @@ const refreshLimiter = rateLimit({
 });
 
 // POST /api/auth/refresh - Get new access token using refresh token
-router.post('/refresh', refreshLimiter, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    // Get refresh token from httpOnly cookie
-    const refreshToken = req.cookies.refreshToken;
+router.post(
+  '/refresh',
+  refreshLimiter,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // Get refresh token from httpOnly cookie
+      const refreshToken = req.cookies.refreshToken;
 
-    if (!refreshToken) {
-      res.status(401).json({
-        message: 'Refresh token required',
-        code: 'REFRESH_TOKEN_MISSING',
+      if (!refreshToken) {
+        res.status(401).json({
+          message: 'Refresh token required',
+          code: 'REFRESH_TOKEN_MISSING',
+        });
+        return;
+      }
+
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      const userAgent = req.headers['user-agent'];
+
+      const result = rotateRefreshToken(refreshToken, { ipAddress, userAgent });
+
+      if (!result) {
+        // Clear invalid cookie
+        res.clearCookie('refreshToken', { path: '/api/auth' });
+
+        // Log potential token reuse attack
+        createAuditLog(null, null, 'refresh_token_invalid', 'security', 'authentication', {
+          reason: 'invalid_or_expired_refresh_token',
+          ipAddress,
+          timestamp: new Date().toISOString(),
+        });
+
+        res.status(401).json({
+          message: 'Invalid or expired refresh token',
+          code: 'REFRESH_TOKEN_INVALID',
+        });
+        return;
+      }
+
+      // Set new refresh token cookie
+      res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
+
+      res.json({
+        user: result.user,
+        accessToken: result.accessToken,
+        expiresIn: 900, // 15 minutes in seconds
       });
-      return;
+    } catch (err) {
+      next(err);
     }
-
-    const ipAddress = req.ip || req.connection.remoteAddress;
-    const userAgent = req.headers['user-agent'];
-
-    const result = rotateRefreshToken(refreshToken, { ipAddress, userAgent });
-
-    if (!result) {
-      // Clear invalid cookie
-      res.clearCookie('refreshToken', { path: '/api/auth' });
-
-      // Log potential token reuse attack
-      createAuditLog(null, null, 'refresh_token_invalid', 'security', 'authentication', {
-        reason: 'invalid_or_expired_refresh_token',
-        ipAddress,
-        timestamp: new Date().toISOString(),
-      });
-
-      res.status(401).json({
-        message: 'Invalid or expired refresh token',
-        code: 'REFRESH_TOKEN_INVALID',
-      });
-      return;
-    }
-
-    // Set new refresh token cookie
-    res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
-
-    res.json({
-      user: result.user,
-      accessToken: result.accessToken,
-      expiresIn: 900, // 15 minutes in seconds
-    });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 // POST /api/auth/logout - Revoke refresh token and clear cookie
 router.post('/logout', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -306,63 +328,75 @@ router.post('/logout', async (req: Request, res: Response, next: NextFunction): 
 // ============================================
 
 // GET /api/auth/sessions - List all active sessions for current user
-router.get('/sessions', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const sessions = getUserSessions(req.user!.id);
+router.get(
+  '/sessions',
+  authenticateToken,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const sessions = getUserSessions(req.user!.id);
 
-    // Mark current session
-    const sessionsWithCurrent = sessions.map(session => ({
-      ...session,
-      isCurrent: false, // We can't easily determine this without storing the hash
-    }));
+      // Mark current session
+      const sessionsWithCurrent = sessions.map(session => ({
+        ...session,
+        isCurrent: false, // We can't easily determine this without storing the hash
+      }));
 
-    res.json({ sessions: sessionsWithCurrent });
-  } catch (err) {
-    next(err);
+      res.json({ sessions: sessionsWithCurrent });
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 // DELETE /api/auth/sessions/:sessionId - Revoke a specific session
-router.delete('/sessions/:sessionId', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const sessionId = req.params.sessionId;
-    if (!sessionId) {
-      res.status(400).json({ message: 'Session ID is required' });
-      return;
+router.delete(
+  '/sessions/:sessionId',
+  authenticateToken,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const sessionId = req.params.sessionId;
+      if (!sessionId) {
+        res.status(400).json({ message: 'Session ID is required' });
+        return;
+      }
+
+      const revoked = revokeSession(sessionId, req.user!.id);
+
+      if (!revoked) {
+        res.status(404).json({ message: 'Session not found' });
+        return;
+      }
+
+      res.json({ message: 'Session revoked successfully' });
+    } catch (err) {
+      next(err);
     }
-
-    const revoked = revokeSession(sessionId, req.user!.id);
-
-    if (!revoked) {
-      res.status(404).json({ message: 'Session not found' });
-      return;
-    }
-
-    res.json({ message: 'Session revoked successfully' });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 // POST /api/auth/sessions/revoke-others - Revoke all sessions except current
-router.post('/sessions/revoke-others', authenticateToken, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const currentToken = req.cookies.refreshToken as string | undefined;
+router.post(
+  '/sessions/revoke-others',
+  authenticateToken,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const currentToken = req.cookies.refreshToken as string | undefined;
 
-    if (!currentToken) {
-      res.status(400).json({ message: 'No current session found' });
-      return;
+      if (!currentToken) {
+        res.status(400).json({ message: 'No current session found' });
+        return;
+      }
+
+      const revokedCount = revokeOtherSessions(req.user!.id, currentToken);
+
+      res.json({
+        message: `Revoked ${revokedCount} other session(s)`,
+        revokedCount,
+      });
+    } catch (err) {
+      next(err);
     }
-
-    const revokedCount = revokeOtherSessions(req.user!.id, currentToken);
-
-    res.json({
-      message: `Revoked ${revokedCount} other session(s)`,
-      revokedCount,
-    });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 export default router;

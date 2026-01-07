@@ -40,7 +40,9 @@ interface OrganizationResult {
   userRole?: 'owner' | 'admin' | 'editor' | 'viewer';
 }
 
-export async function getOrganizations(userId: string): Promise<ReturnType<typeof getUserOrganizations>> {
+export async function getOrganizations(
+  userId: string
+): Promise<ReturnType<typeof getUserOrganizations>> {
   return getUserOrganizations(userId);
 }
 
@@ -102,7 +104,10 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
   return org;
 }
 
-export async function createOrganization(name: string, userId: string): Promise<OrganizationResult> {
+export async function createOrganization(
+  name: string,
+  userId: string
+): Promise<OrganizationResult> {
   const orgId = randomUUID();
   const now = new Date().toISOString();
 
@@ -123,7 +128,11 @@ export async function createOrganization(name: string, userId: string): Promise<
     .get(orgId) as OrganizationResult;
 }
 
-export async function updateOrganization(id: string, name: string, userId: string): Promise<OrganizationResult> {
+export async function updateOrganization(
+  id: string,
+  name: string,
+  userId: string
+): Promise<OrganizationResult> {
   // Require admin permission
   requireOrgPermission(id, userId, 'admin');
 
@@ -147,7 +156,10 @@ export async function updateOrganization(id: string, name: string, userId: strin
     .get(id) as OrganizationResult;
 }
 
-export async function deleteOrganization(id: string, userId: string): Promise<{ success: boolean }> {
+export async function deleteOrganization(
+  id: string,
+  userId: string
+): Promise<{ success: boolean }> {
   // Only owner can delete
   const access = requireOrgPermission(id, userId, 'owner');
 

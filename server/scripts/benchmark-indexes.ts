@@ -39,10 +39,13 @@ interface IndexRow {
 // Get existing data counts
 const stats = {
   departments: (
-    db.prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL').get() as CountRow
+    db
+      .prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL')
+      .get() as CountRow
   ).count,
-  people: (db.prepare('SELECT COUNT(*) as count FROM people WHERE deleted_at IS NULL').get() as CountRow)
-    .count,
+  people: (
+    db.prepare('SELECT COUNT(*) as count FROM people WHERE deleted_at IS NULL').get() as CountRow
+  ).count,
   audit_logs: (db.prepare('SELECT COUNT(*) as count FROM audit_logs').get() as CountRow).count,
   invitations: (db.prepare('SELECT COUNT(*) as count FROM invitations').get() as CountRow).count,
 };
@@ -82,7 +85,9 @@ function benchmark(
 }
 
 // Get a sample organization and department for testing
-const sampleOrg = db.prepare('SELECT id FROM organizations LIMIT 1').get() as OrganizationRow | undefined;
+const sampleOrg = db.prepare('SELECT id FROM organizations LIMIT 1').get() as
+  | OrganizationRow
+  | undefined;
 const sampleDept = db
   .prepare('SELECT id, parent_id FROM departments WHERE deleted_at IS NULL LIMIT 1')
   .get() as DepartmentRow | undefined;
@@ -152,9 +157,9 @@ console.log(`   Total: ${test5.totalMs}ms for ${test5.iterations} queries`);
 console.log();
 
 // Test 6: Organization owner lookup
-const createdByResult = db
-  .prepare('SELECT created_by_id FROM organizations LIMIT 1')
-  .get() as CreatedByRow | undefined;
+const createdByResult = db.prepare('SELECT created_by_id FROM organizations LIMIT 1').get() as
+  | CreatedByRow
+  | undefined;
 const test6 = benchmark(
   'Get organizations by creator',
   'SELECT * FROM organizations WHERE created_by_id = ?',

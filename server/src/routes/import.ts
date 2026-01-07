@@ -10,110 +10,113 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // POST /api/organizations/:orgId/import
-router.post('/organizations/:orgId/import', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { orgId } = req.params;
-    const { data } = req.body; // Array of parsed CSV rows
+router.post(
+  '/organizations/:orgId/import',
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { orgId } = req.params;
+      const { data } = req.body; // Array of parsed CSV rows
 
-    if (!data || !Array.isArray(data)) {
-      res.status(400).json({ message: 'Invalid data format' });
-      return;
-    }
+      if (!data || !Array.isArray(data)) {
+        res.status(400).json({ message: 'Invalid data format' });
+        return;
+      }
 
-    // Security: Limit import size to prevent DoS
-    const MAX_IMPORT_SIZE = 10000;
-    if (data.length > MAX_IMPORT_SIZE) {
-      res.status(400).json({
-        message: `Import size exceeds maximum limit of ${MAX_IMPORT_SIZE} items`,
+      // Security: Limit import size to prevent DoS
+      const MAX_IMPORT_SIZE = 10000;
+      if (data.length > MAX_IMPORT_SIZE) {
+        res.status(400).json({
+          message: `Import size exceeds maximum limit of ${MAX_IMPORT_SIZE} items`,
+        });
+        return;
+      }
+
+      // Security: Verify user has admin permission (owner or admin member)
+      requireOrgPermission(orgId!, req.user!.id, 'admin');
+
+      // Process import within a transaction
+      const pathToDeptId = new Map<string, string>();
+      let departmentsCreated = 0;
+      let peopleCreated = 0;
+
+      // Sort rows so departments come before their children
+      const sortedData = [...data].sort((a: { path: string }, b: { path: string }) => {
+        const depthA = (a.path.match(/\//g) || []).length;
+        const depthB = (b.path.match(/\//g) || []).length;
+        return depthA - depthB;
       });
-      return;
-    }
 
-    // Security: Verify user has admin permission (owner or admin member)
-    requireOrgPermission(orgId!, req.user!.id, 'admin');
-
-    // Process import within a transaction
-    const pathToDeptId = new Map<string, string>();
-    let departmentsCreated = 0;
-    let peopleCreated = 0;
-
-    // Sort rows so departments come before their children
-    const sortedData = [...data].sort((a: { path: string }, b: { path: string }) => {
-      const depthA = (a.path.match(/\//g) || []).length;
-      const depthB = (b.path.match(/\//g) || []).length;
-      return depthA - depthB;
-    });
-
-    // Prepare statements
-    const insertDept = db.prepare(`
+      // Prepare statements
+      const insertDept = db.prepare(`
       INSERT INTO departments (id, organization_id, parent_id, name, description, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `);
 
-    const insertPerson = db.prepare(`
+      const insertPerson = db.prepare(`
       INSERT INTO people (id, department_id, name, title, email, phone, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `);
 
-    // Helper to generate cryptographically secure ID
-    const generateId = () => randomUUID();
+      // Helper to generate cryptographically secure ID
+      const generateId = () => randomUUID();
 
-    try {
-      // Start transaction
-      db.prepare('BEGIN TRANSACTION').run();
+      try {
+        // Start transaction
+        db.prepare('BEGIN TRANSACTION').run();
 
-      for (const row of sortedData) {
-        const type = row.type.toLowerCase();
+        for (const row of sortedData) {
+          const type = row.type.toLowerCase();
 
-        if (type === 'department') {
-          // Find parent path
-          const pathParts = row.path.split('/').filter(Boolean);
-          const parentPath = pathParts.length > 1 ? '/' + pathParts.slice(0, -1).join('/') : null;
+          if (type === 'department') {
+            // Find parent path
+            const pathParts = row.path.split('/').filter(Boolean);
+            const parentPath = pathParts.length > 1 ? '/' + pathParts.slice(0, -1).join('/') : null;
 
-          const deptId = generateId();
-          const parentId = parentPath ? pathToDeptId.get(parentPath) || null : null;
+            const deptId = generateId();
+            const parentId = parentPath ? pathToDeptId.get(parentPath) || null : null;
 
-          insertDept.run(deptId, orgId, parentId, row.name, row.description || null);
+            insertDept.run(deptId, orgId, parentId, row.name, row.description || null);
 
-          pathToDeptId.set(row.path, deptId);
-          departmentsCreated++;
-        } else if (type === 'person') {
-          // Find department from path
-          const pathParts = row.path.split('/').filter(Boolean);
-          const deptPath = '/' + pathParts.slice(0, -1).join('/');
-          const deptId = pathToDeptId.get(deptPath);
+            pathToDeptId.set(row.path, deptId);
+            departmentsCreated++;
+          } else if (type === 'person') {
+            // Find department from path
+            const pathParts = row.path.split('/').filter(Boolean);
+            const deptPath = '/' + pathParts.slice(0, -1).join('/');
+            const deptId = pathToDeptId.get(deptPath);
 
-          if (deptId) {
-            const personId = generateId();
-            insertPerson.run(
-              personId,
-              deptId,
-              row.name,
-              row.title || null,
-              row.email || null,
-              row.phone || null
-            );
-            peopleCreated++;
+            if (deptId) {
+              const personId = generateId();
+              insertPerson.run(
+                personId,
+                deptId,
+                row.name,
+                row.title || null,
+                row.email || null,
+                row.phone || null
+              );
+              peopleCreated++;
+            }
           }
         }
+
+        // Commit transaction
+        db.prepare('COMMIT').run();
+
+        res.json({
+          success: true,
+          departmentsCreated,
+          peopleCreated,
+        });
+      } catch (err) {
+        // Rollback on error
+        db.prepare('ROLLBACK').run();
+        throw err;
       }
-
-      // Commit transaction
-      db.prepare('COMMIT').run();
-
-      res.json({
-        success: true,
-        departmentsCreated,
-        peopleCreated,
-      });
     } catch (err) {
-      // Rollback on error
-      db.prepare('ROLLBACK').run();
-      throw err;
+      next(err);
     }
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 export default router;
