@@ -155,9 +155,11 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 For detailed technical debt items, feature plans, and priority recommendations, see **[ROADMAP.md](ROADMAP.md)**.
 
 ### Current Focus
+- ~~Developer Experience (Docker, CONTRIBUTING.md, API SDK)~~ ✅ **DONE** (January 7, 2026)
 - Code Cleanup & Modernization (Dead Code Elimination, CSS Optimization)
 - Increasing test coverage
 - Performance testing with larger datasets
+- Development Documentation (Architecture Decision Records)
 
 ## 🛠️ Development Environment
 
@@ -197,11 +199,12 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: TypeScript Migration + CI Pipeline - COMPLETE (January 7, 2026)
-- **Total Commits**: 185+ commits on main branch
+- **Last Major Update**: Developer Experience Improvements - COMPLETE (January 7, 2026)
+- **Total Commits**: 190+ commits on main branch
 - **Today's Progress (January 7, 2026)**:
   - 🎉 **COMPLETED**: Full TypeScript migration with 0 errors (all 8 phases)
   - 🎉 **COMPLETED**: CI Pipeline passing (ESLint + Prettier + Tests + Build)
+  - 🎉 **COMPLETED**: Developer Experience roadmap items (Docker, CONTRIBUTING.md, API SDK, LICENSE)
   - ✅ Fixed 950+ backend TypeScript errors
   - ✅ Fixed 106 frontend TypeScript errors
   - ✅ Fixed 47 ESLint errors (React imports, any types, console.log)
@@ -210,7 +213,94 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - ✅ All 76 tests passing (44 backend + 32 frontend)
   - ✅ Production build successful and deployed
   - ✅ CI Pipeline: All checks passing ✅
+  - ✅ Docker development environment with hot reload
+  - ✅ TypeScript API SDK generated from OpenAPI spec (~600 lines)
+  - ✅ Comprehensive CONTRIBUTING.md (setup, PR process, code standards)
+  - ✅ MIT LICENSE file added
 - **Recent Session Highlights**:
+
+  **January 7, 2026 - Developer Experience Improvements (Session 21)** 🛠️:
+  - ✅ **ROADMAP ITEMS COMPLETE**: All Developer Experience items from ROADMAP.md finished
+  - ✅ **DOCKER DEVELOPMENT ENVIRONMENT**:
+    - **Multi-stage Dockerfile**: Supports development and production builds
+      - Development stage: Hot reload with all devDependencies
+      - Production stage: Optimized, minimal image with only runtime deps
+      - Uses Node.js 20 Alpine for smaller image size
+      - Includes better-sqlite3 build dependencies (python3, make, g++)
+    - **docker-compose.yml** (Development):
+      - Frontend (Vite) on port 5173 with hot module reload
+      - Backend (Express) on port 3001 with nodemon
+      - Volume mounts for source code hot reload
+      - Preserves node_modules from container (avoids platform issues)
+      - SQLite database persisted via named volume
+      - Health check for backend service
+    - **docker-compose.prod.yml** (Production overrides):
+      - Production target build with optimizations
+      - Only port 3001 exposed (backend serves frontend)
+      - Environment variable validation (JWT_SECRET required)
+      - Restart policy: unless-stopped
+      - Data volume for SQLite persistence
+    - **Usage**: `docker-compose up` (dev) or `docker-compose -f docker-compose.yml -f docker-compose.prod.yml up` (prod)
+  - ✅ **CONTRIBUTING.md** - Comprehensive contributor guidelines:
+    - Code of Conduct
+    - Getting Started (prerequisites, fork & clone)
+    - Development Setup with Docker or native Node.js
+    - Project Structure overview
+    - Development Workflow (branching, development server)
+    - Code Standards (TypeScript, React, backend patterns)
+    - Testing guidelines (Vitest, test naming, coverage)
+    - Pull Request Process (template, review checklist)
+    - Commit Guidelines (conventional commits format)
+  - ✅ **API CLIENT SDK** (`src/sdk/`):
+    - **Generated from OpenAPI spec**: Type-safe API client
+    - **OrgTreeClient class** (~600 lines) with full API coverage:
+      - `auth` - login, signup, logout, refresh, sessions
+      - `organizations` - CRUD, getTree
+      - `departments` - CRUD within organizations
+      - `people` - CRUD within organizations
+      - `members` - list, updateRole, remove
+      - `invitations` - create, cancel, accept
+      - `search` - query, autocomplete
+      - `bulk` - deletePeople, movePeople, editPeople, deleteDepartments, editDepartments
+      - `audit` - list audit logs
+      - `importExport` - CSV import/export
+      - `sharing` - getSettings, generateToken, revokeToken
+      - `public` - unauthenticated org access
+      - `users` - superuser user management
+    - **Type exports**: User, Organization, Department, Person, Member, Invitation, AuditLog, etc.
+    - **Features**:
+      - Configurable base URL and fetch implementation
+      - Automatic token management (setToken, getToken)
+      - CSRF token support for browser usage
+      - Query parameter building
+      - Proper error handling with ApiError class
+      - Cookie credentials for refresh token flow
+    - **api-types.ts**: Auto-generated types from OpenAPI specification
+  - ✅ **MIT LICENSE**:
+    - Standard MIT license for open source
+    - Copyright 2025-2026 OrgTree Contributors
+    - Enables free use, modification, and distribution
+  - 📁 **FILES CREATED** (7 files):
+    - `Dockerfile` - Multi-stage build (94 lines)
+    - `docker-compose.yml` - Development configuration (47 lines)
+    - `docker-compose.prod.yml` - Production overrides (22 lines)
+    - `CONTRIBUTING.md` - Contributor guidelines (~200 lines)
+    - `src/sdk/index.ts` - API client SDK (613 lines)
+    - `src/sdk/api-types.ts` - Generated TypeScript types from OpenAPI
+    - `LICENSE` - MIT license (21 lines)
+  - 📦 **DEPENDENCIES ADDED**:
+    - `openapi-typescript` (devDependency) - Generates types from OpenAPI spec
+  - 🎯 **DEVELOPER EXPERIENCE ROADMAP STATUS**:
+    - ✅ Git Hooks (Husky) - Done January 4, 2026
+    - ✅ Docker Development Environment - Done January 7, 2026
+    - ✅ Contribution Guidelines - Done January 7, 2026
+    - ✅ API Client SDK - Done January 7, 2026
+    - ⏳ Development Documentation (ADRs) - Remaining item
+  - 🚀 **COMMITS**:
+    - `ede53bc feat: Add Docker development environment`
+    - `67bad3f docs: Add CONTRIBUTING.md with comprehensive guidelines`
+    - `99ece00 feat: Generate TypeScript API SDK from OpenAPI spec`
+    - `7497bf1 docs: Add MIT LICENSE file`
 
   **January 7, 2026 - TypeScript Migration Phases 4-8 COMPLETE (Session 19)** 🎉:
   - ✅ **MAJOR MILESTONE**: Complete TypeScript migration with ZERO errors

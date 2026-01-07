@@ -129,8 +129,10 @@ This document outlines the development roadmap for OrgTree, including technical 
 - Code Cleanup & Modernization (Dead Code Elimination, CSS Optimization)
 - Increasing test coverage
 - Performance testing with larger datasets
+- Development Documentation (Architecture Decision Records)
 
 **Recently Completed** (January 2026):
+- ✅ **Developer Experience** - Docker, CONTRIBUTING.md, API SDK, LICENSE (January 7, 2026)
 - ✅ **TypeScript Migration** - Full strict mode, 1000+ errors fixed (January 7, 2026)
 - ✅ **CI Pipeline Fixes** - All checks passing (January 7, 2026)
 - ✅ CI/CD Pipeline with GitHub Actions
