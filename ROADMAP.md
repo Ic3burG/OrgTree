@@ -19,7 +19,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 ### Performance Optimization
 - [x] **Database Indexing Audit** - Review and optimize indexes for frequently-queried fields ✅ **DONE** (January 5, 2026)
-- [ ] **Frontend Bundle Optimization** - Code splitting, lazy loading, tree shaking analysis
+- [x] **Frontend Bundle Optimization** - Code splitting, lazy loading, tree shaking analysis ✅ **DONE** (January 7, 2026)
 - [ ] **Query Profiling** - Profile slow database queries and optimize (especially for large orgs)
 - [ ] **React Performance Audit** - Review unnecessary re-renders, missing memoization
 - [ ] **Image Optimization Pipeline** - Compress and optimize profile pictures/assets
@@ -27,7 +27,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 ### Security Hardening
 - [x] **Address Medium/Low Severity Items** - Complete remaining items from SECURITY_AUDIT.md ✅ **DONE** (January 4, 2026) - All 25 items resolved
-- [ ] **CSRF Protection** - Add CSRF tokens for state-changing operations
+- [x] **CSRF Protection** - Add CSRF tokens for state-changing operations ✅ **DONE** (December 31, 2025)
 - [ ] **Dependency Scanning Automation** - GitHub Dependabot or Snyk integration
 - [ ] **Penetration Testing** - Professional security assessment
 - [ ] **SQL Injection Testing** - Automated scanning for SQL injection vulnerabilities
