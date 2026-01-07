@@ -1,4 +1,6 @@
 import js from '@eslint/js';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
 import prettierConfig from 'eslint-config-prettier';
 
 export default [
@@ -16,12 +18,19 @@ export default [
   // Base JavaScript config
   js.configs.recommended,
 
-  // Node.js configuration
+  // Node.js and TypeScript configuration
   {
-    files: ['src/**/*.js', 'scripts/**/*.js'],
+    files: ['src/**/*.{js,ts}', 'scripts/**/*.{js,ts}'],
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+    },
     languageOptions: {
+      parser: tsParser,
       ecmaVersion: 2022,
       sourceType: 'module',
+      parserOptions: {
+        project: './tsconfig.json',
+      },
       globals: {
         // Node.js globals
         process: 'readonly',
@@ -37,11 +46,17 @@ export default [
       },
     },
     rules: {
-      // General rules
-      'no-unused-vars': ['warn', { 
+      // TypeScript rules
+      ...tsPlugin.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': ['warn', {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
       }],
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+
+      // General rules
+      'no-unused-vars': 'off', // Using TypeScript version instead
       'no-console': 'off', // Allow console in Node.js
       'prefer-const': 'error',
       'no-var': 'error',
@@ -52,7 +67,7 @@ export default [
 
   // Test files configuration
   {
-    files: ['src/**/*.test.js'],
+    files: ['src/**/*.test.{js,ts}', 'tests/**/*.test.{js,ts}'],
     languageOptions: {
       globals: {
         describe: 'readonly',

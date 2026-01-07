@@ -1,4 +1,6 @@
 import js from '@eslint/js';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import prettierConfig from 'eslint-config-prettier';
@@ -13,26 +15,30 @@ export default [
       'server/**', // Server has its own config
       '*.config.js',
       '*.config.cjs',
+      '*.config.ts',
     ],
   },
 
   // Base JavaScript config
   js.configs.recommended,
 
-  // React configuration
+  // React and TypeScript configuration
   {
-    files: ['src/**/*.{js,jsx}'],
+    files: ['src/**/*.{js,jsx,ts,tsx}'],
     plugins: {
+      '@typescript-eslint': tsPlugin,
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
     },
     languageOptions: {
+      parser: tsParser,
       ecmaVersion: 2022,
       sourceType: 'module',
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
+        project: './tsconfig.json',
       },
       globals: {
         // Browser globals
@@ -80,11 +86,17 @@ export default [
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
 
-      // General rules
-      'no-unused-vars': ['warn', { 
+      // TypeScript rules
+      ...tsPlugin.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': ['warn', {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
       }],
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+
+      // General rules
+      'no-unused-vars': 'off', // Using TypeScript version instead
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'prefer-const': 'error',
       'no-var': 'error',
@@ -93,7 +105,7 @@ export default [
 
   // Test files configuration
   {
-    files: ['src/**/*.test.{js,jsx}', 'src/test/**/*.js'],
+    files: ['src/**/*.test.{js,jsx,ts,tsx}', 'src/test/**/*.{js,ts}'],
     languageOptions: {
       globals: {
         describe: 'readonly',
