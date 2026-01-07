@@ -1,0 +1,21 @@
+# Docker Compose production overrides
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  app:
+    build:
+      context: .
+      target: production
+    ports:
+      - "3001:3001"
+    volumes:
+      # Only persist data directory in production
+      - orgtree-data:/data
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
+      - DATABASE_URL=file:/data/database.db
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3001}
+      - SENTRY_DSN=${SENTRY_DSN:-}
+    restart: unless-stopped
+    command: ["npm", "start"]
