@@ -12,4 +12,24 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core - loaded on every page
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // React Flow - only needed for org chart visualization
+          'vendor-reactflow': ['reactflow', 'dagre'],
+          // PDF/Image export - only needed when exporting
+          'vendor-export': ['jspdf', 'html-to-image'],
+          // Icons - loaded progressively
+          'vendor-icons': ['lucide-react'],
+          // Real-time & monitoring
+          'vendor-realtime': ['socket.io-client', '@sentry/react'],
+          // Data parsing - only needed for import/export
+          'vendor-parsing': ['papaparse', 'xml2js'],
+        },
+      },
+    },
+  },
 });
