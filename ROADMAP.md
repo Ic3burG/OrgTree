@@ -54,7 +54,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [x] **Git Hooks** - Husky for pre-commit linting, pre-push testing ✅ **DONE** (January 4, 2026)
 - [x] **Docker Development Environment** - docker-compose for consistent local setup ✅ **DONE** (January 7, 2026)
 - [x] **Contribution Guidelines** - CONTRIBUTING.md with setup, PR process, code standards ✅ **DONE** (January 7, 2026)
-- [ ] **API Client SDK** - Generate JavaScript/TypeScript SDK from OpenAPI spec
+- [x] **API Client SDK** - Generate JavaScript/TypeScript SDK from OpenAPI spec ✅ **DONE** (January 7, 2026)
 - [ ] **Development Documentation** - Architecture decision records (ADRs)
 
 ### Observability & Analytics
