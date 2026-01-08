@@ -199,17 +199,21 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Critical Bug Fixes - Org Chart Fully Restored (January 8, 2026)
-- **Total Commits**: 197+ commits on main branch
+- **Last Major Update**: Critical Bug Fixes - Org Chart Fully Restored + CI Unblocked (January 8, 2026)
+- **Total Commits**: 199+ commits on main branch
 - **Today's Progress (January 8, 2026)**:
   - 🚨 **CRITICAL BUG FIX #1**: Fixed departments not displaying in UI
   - 🚨 **CRITICAL BUG FIX #2**: Fixed department hierarchy lines not showing in org chart
+  - 🚨 **CRITICAL CI FIX**: Fixed Prettier formatting issue blocking CI pipeline
   - ✅ Corrected field naming mismatch across all services (camelCase → snake_case)
   - ✅ Fixed department.service.ts, people.service.ts, org.service.ts SQL query aliases
-  - ✅ Updated 7 files (3 services, 3 test files, 1 route)
+  - ✅ Applied Prettier formatting to search.service.test.ts
+  - ✅ Added Sentry Express instrumentation to technical debt backlog
+  - ✅ Updated 8 files (3 services, 3 test files, 1 route, 1 roadmap)
   - ✅ All 129 tests passing (97 backend + 32 frontend)
-  - ✅ Production build successful and deployed (2 deployments)
-  - 🚀 Both fixes deployed to production via GitHub Actions
+  - ✅ Production build successful and deployed (3 deployments)
+  - 🚀 All 5 commits deployed to production via GitHub Actions
+  - 📋 Session 25 complete: 2 critical bugs + 1 CI issue resolved
 - **Previous Progress (January 7, 2026)**:
   - 🎉 **COMPLETED**: Developer Experience roadmap items (Docker, CONTRIBUTING.md, API SDK, LICENSE)
   - ✅ Fixed 950+ backend TypeScript errors
@@ -230,6 +234,51 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - ✅ License Change: Migrated project from MIT to GPL 3.0
   - ✅ CI/CD Resolution: Diagnosed and fixed formatting issues in new test files
 - **Recent Session Highlights**:
+
+  **January 8, 2026 - Technical Debt Tracking (Session 25 Part 4)** 📋:
+  - 📝 **TECHNICAL DEBT DOCUMENTED**: Added Sentry Express instrumentation to ROADMAP.md
+  - 🔍 **CONTEXT**:
+    - Render logs showed Sentry warning about Express not being instrumented with `--import` flag
+    - Current setup works and captures errors but doesn't provide full Express-specific metrics
+    - Warning is about monitoring enhancement, not critical functionality
+  - ✅ **DOCUMENTATION ADDED**:
+    - Added to ROADMAP.md under "Observability & Analytics" section
+    - Documented as medium priority improvement for future monitoring session
+    - Includes context about --import flag requirement and benefits
+  - 🚀 **DEPLOYMENT**:
+    - Pushed commit `fe93c5e` to main branch
+  - 💡 **IMPACT**:
+    - Technical debt now tracked and won't be forgotten
+    - Can be addressed during future monitoring improvements
+    - No blocking issues for current functionality
+  - 📁 **FILES MODIFIED** (1 file):
+    - `ROADMAP.md` (added Sentry instrumentation item)
+
+  **January 8, 2026 - CI Pipeline Unblocked (Session 25 Part 3)** 🚨🔧:
+  - 🐛 **CRITICAL CI ISSUE**: GitHub Actions pipeline failing on formatting checks
+  - 🔍 **ROOT CAUSE ANALYSIS**:
+    - CI format:check step was failing on search.service.test.ts
+    - Prettier found formatting inconsistencies in the test file
+    - This was blocking all deployments to production
+  - ✅ **FIX APPLIED**:
+    - Ran `prettier --write` on search.service.test.ts
+    - Fixed 62 lines of formatting inconsistencies
+    - Verified formatting checks now pass
+  - 📊 **TESTING**:
+    - All 97 backend tests passing
+    - All 32 frontend tests passing
+    - Production build verified successful
+    - Prettier format:check now passes
+  - 🚀 **DEPLOYMENT**:
+    - Pushed commit `f7d98c6` to main branch
+    - GitHub Actions CI/CD unblocked
+    - Previous commits can now deploy to production
+  - 💡 **IMPACT**:
+    - CI pipeline fully operational
+    - Deployments unblocked
+    - All previous fixes can now reach production
+  - 📁 **FILES MODIFIED** (1 file):
+    - `server/src/services/search.service.test.ts` (formatting fixed)
 
   **January 8, 2026 - Critical Bug Fix #2: Org Chart Lines Restored (Session 25 Part 2)** 🚨🔗:
   - 🐛 **CRITICAL BUG IDENTIFIED**: Department hierarchy lines not showing in Organization Map
