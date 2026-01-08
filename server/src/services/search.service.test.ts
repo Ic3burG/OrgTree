@@ -206,7 +206,7 @@ describe('Search Service', () => {
 
       expect(requireOrgPermission).toHaveBeenCalledWith(String(orgId), String(userId), 'viewer');
       expect(result.total).toBeGreaterThan(0);
-      const deptResults = result.results.filter((r) => r.type === 'department');
+      const deptResults = result.results.filter(r => r.type === 'department');
       expect(deptResults.length).toBeGreaterThan(0);
       expect(deptResults[0].name).toContain('Engineering');
       expect(result.results[0].highlight).toContain('mark');
@@ -216,23 +216,23 @@ describe('Search Service', () => {
       const result = search(String(orgId), String(userId), { query: 'software' });
 
       expect(result.total).toBeGreaterThan(0);
-      expect(result.results.some((r) => r.type === 'department')).toBe(true);
+      expect(result.results.some(r => r.type === 'department')).toBe(true);
     });
 
     it('should search people by name', () => {
       const result = search(String(orgId), String(userId), { query: 'John' });
 
       expect(result.total).toBeGreaterThan(0);
-      const personResults = result.results.filter((r) => r.type === 'person');
+      const personResults = result.results.filter(r => r.type === 'person');
       expect(personResults.length).toBeGreaterThan(0);
-      expect(personResults.some((p) => p.name === 'John Doe')).toBe(true);
+      expect(personResults.some(p => p.name === 'John Doe')).toBe(true);
     });
 
     it('should search people by title', () => {
       const result = search(String(orgId), String(userId), { query: 'Engineer' });
 
       expect(result.total).toBeGreaterThan(0);
-      const personResults = result.results.filter((r) => r.type === 'person');
+      const personResults = result.results.filter(r => r.type === 'person');
       expect(personResults.length).toBeGreaterThan(0);
     });
 
@@ -240,24 +240,27 @@ describe('Search Service', () => {
       const result = search(String(orgId), String(userId), { query: 'jane' });
 
       expect(result.total).toBeGreaterThan(0);
-      const personResults = result.results.filter((r) => r.type === 'person');
+      const personResults = result.results.filter(r => r.type === 'person');
       expect(personResults.length).toBeGreaterThan(0);
-      const janeResult = personResults.find((p) => p.email === 'jane.smith@example.com');
+      const janeResult = personResults.find(p => p.email === 'jane.smith@example.com');
       expect(janeResult).toBeDefined();
     });
 
     it('should filter by type: departments only', () => {
-      const result = search(String(orgId), String(userId), { query: 'Department', type: 'departments' });
+      const result = search(String(orgId), String(userId), {
+        query: 'Department',
+        type: 'departments',
+      });
 
       expect(result.total).toBeGreaterThan(0);
-      expect(result.results.every((r) => r.type === 'department')).toBe(true);
+      expect(result.results.every(r => r.type === 'department')).toBe(true);
     });
 
     it('should filter by type: people only', () => {
       const result = search(String(orgId), String(userId), { query: 'Manager', type: 'people' });
 
       expect(result.total).toBeGreaterThan(0);
-      expect(result.results.every((r) => r.type === 'person')).toBe(true);
+      expect(result.results.every(r => r.type === 'person')).toBe(true);
     });
 
     it('should return both departments and people for type: all', () => {
@@ -265,8 +268,8 @@ describe('Search Service', () => {
 
       expect(result.total).toBeGreaterThan(0);
       // Should find both Engineering Department and people with Engineering title
-      const hasDepartment = result.results.some((r) => r.type === 'department');
-      const hasPerson = result.results.some((r) => r.type === 'person');
+      const hasDepartment = result.results.some(r => r.type === 'department');
+      const hasPerson = result.results.some(r => r.type === 'person');
       expect(hasDepartment || hasPerson).toBe(true);
     });
 
@@ -279,8 +282,16 @@ describe('Search Service', () => {
     });
 
     it('should support pagination with offset', () => {
-      const firstPage = search(String(orgId), String(userId), { query: 'Department', limit: 1, offset: 0 });
-      const secondPage = search(String(orgId), String(userId), { query: 'Department', limit: 1, offset: 1 });
+      const firstPage = search(String(orgId), String(userId), {
+        query: 'Department',
+        limit: 1,
+        offset: 0,
+      });
+      const secondPage = search(String(orgId), String(userId), {
+        query: 'Department',
+        limit: 1,
+        offset: 1,
+      });
 
       if (firstPage.results.length > 0 && secondPage.results.length > 0) {
         expect(firstPage.results[0].id).not.toBe(secondPage.results[0].id);
@@ -336,9 +347,12 @@ describe('Search Service', () => {
     });
 
     it('should include people count for department results', () => {
-      const result = search(String(orgId), String(userId), { query: 'Engineering', type: 'departments' });
+      const result = search(String(orgId), String(userId), {
+        query: 'Engineering',
+        type: 'departments',
+      });
 
-      const deptResult = result.results.find((r) => r.type === 'department');
+      const deptResult = result.results.find(r => r.type === 'department');
       expect(deptResult).toBeDefined();
       expect(deptResult?.peopleCount).toBeDefined();
       expect(deptResult?.peopleCount).toBeGreaterThanOrEqual(0);
@@ -347,7 +361,7 @@ describe('Search Service', () => {
     it('should include department name for person results', () => {
       const result = search(String(orgId), String(userId), { query: 'John', type: 'people' });
 
-      const personResult = result.results.find((r) => r.type === 'person');
+      const personResult = result.results.find(r => r.type === 'person');
       expect(personResult).toBeDefined();
       expect(personResult?.departmentName).toBeDefined();
     });
@@ -366,7 +380,7 @@ describe('Search Service', () => {
 
       const result = search(String(orgId), String(userId), { query: 'script' });
 
-      const deptResult = result.results.find((r) => r.name.includes('script'));
+      const deptResult = result.results.find(r => r.name.includes('script'));
       expect(deptResult).toBeDefined();
       expect(deptResult?.highlight).not.toContain('<script>');
       expect(deptResult?.highlight).toContain('&lt;');
@@ -388,14 +402,14 @@ describe('Search Service', () => {
 
       expect(requireOrgPermission).toHaveBeenCalledWith(String(orgId), String(userId), 'viewer');
       expect(result.suggestions.length).toBeGreaterThan(0);
-      expect(result.suggestions.some((s) => s.type === 'department')).toBe(true);
+      expect(result.suggestions.some(s => s.type === 'department')).toBe(true);
     });
 
     it('should return person suggestions', () => {
       const result = getAutocompleteSuggestions(String(orgId), String(userId), 'John');
 
       expect(result.suggestions.length).toBeGreaterThan(0);
-      expect(result.suggestions.some((s) => s.type === 'person')).toBe(true);
+      expect(result.suggestions.some(s => s.type === 'person')).toBe(true);
     });
 
     it('should return mixed suggestions for common terms', () => {
@@ -430,7 +444,11 @@ describe('Search Service', () => {
     });
 
     it('should handle query with no matches', () => {
-      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'NonExistentTerm12345');
+      const result = getAutocompleteSuggestions(
+        String(orgId),
+        String(userId),
+        'NonExistentTerm12345'
+      );
 
       expect(result.suggestions.length).toBe(0);
     });
@@ -445,7 +463,7 @@ describe('Search Service', () => {
     it('should return unique suggestions', () => {
       const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Department');
 
-      const texts = result.suggestions.map((s) => s.text);
+      const texts = result.suggestions.map(s => s.text);
       const uniqueTexts = [...new Set(texts)];
       expect(texts.length).toBe(uniqueTexts.length);
     });
