@@ -215,7 +215,36 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - ✅ TypeScript API SDK generated from OpenAPI spec (~600 lines)
   - ✅ Comprehensive CONTRIBUTING.md (setup, PR process, code standards)
   - ✅ GPL 3.0 LICENSE file added
+  - ✅ Dead Code Elimination: Removed unused utilities and scripts
+  - ✅ Bug Fix: Search highlights now render correctly while remaining secure
+  - ✅ Increased Test Coverage: Added comprehensive tests for core backend services
+  - ✅ License Change: Migrated project from MIT to GPL 3.0
+  - ✅ CI/CD Resolution: Diagnosed and fixed formatting issues in new test files
 - **Recent Session Highlights**:
+
+  **January 7, 2026 - Code Cleanup, Testing & Compliance (Session 22)** 🧹🧪⚖️:
+  - ✅ **DEAD CODE ELIMINATION**:
+    - Removed `src/utils/parseCSVToFlow.ts` (obsolete client-side parsing)
+    - Removed `scripts/rename-to-typescript.sh` (one-time migration script)
+  - ✅ **REFACTORING**:
+    - Refactored `SearchOverlay.tsx` and `ShareModal.tsx` to use shared `getInitials` helper
+    - Centralized common utility logic to improve maintainability
+  - ✅ **BUG FIXES**:
+    - **Search Highlight Bug**: Fixed issue where `<mark>` tags were escaped by XSS protection in `search.service.ts`
+    - **CI/CD Fix**: Resolved pipeline failure by applying Prettier formatting to newly created test files
+  - ✅ **INCREASED TEST COVERAGE**:
+    - Created `server/src/services/department.service.test.ts` (15 new tests)
+    - Created `server/src/services/people.service.test.ts` (8 new tests)
+    - Total test suite increased to 99 passing tests (67 backend + 32 frontend)
+  - ✅ **LICENSE MIGRATION**:
+    - Migrated project from MIT to GPL 3.0 (GNU General Public License v3.0)
+    - Updated `LICENSE` file, `package.json` (frontend/backend), `README.md`, `DEVELOPMENT.md`, and OpenAPI spec
+  - 🚀 **COMMITS**:
+    - `873f48c refactor: Dead code elimination and increased test coverage`
+    - `ab0ed72 docs: Update ROADMAP.md with latest progress`
+    - `7ab66a9 chore: Change license from MIT to GPL 3.0`
+    - `6b19318 chore: Fix formatting issues in new test files`
+    - `[latest] docs: Final session update for January 7`
 
   **January 7, 2026 - Developer Experience Improvements (Session 21)** 🛠️:
   - ✅ **ROADMAP ITEMS COMPLETE**: All Developer Experience items from ROADMAP.md finished
@@ -1719,7 +1748,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: https://github.com/Ic3burG/OrgTree
-**Last Updated**: January 7, 2026
+**Last Updated**: January 7, 2026 (Updated late session)
 
 **Today's Major Milestone**: 🎉
 - ✅ Full TypeScript migration with 0 errors (all 8 phases)
@@ -1728,8 +1757,9 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - ✅ Dead Code Elimination: Removed unused utilities and scripts
 - ✅ Bug Fix: Search highlights now render correctly while remaining secure
 - ✅ Increased Test Coverage: Added comprehensive tests for core backend services
-- ✅ License Change: Migrated from MIT to GPL 3.0
-- ✅ 20+ commits pushed, 195 total commits
+- ✅ License Change: Migrated project from MIT to GPL 3.0
+- ✅ CI/CD Resolution: Diagnosed and fixed formatting issues in new test files
+- ✅ 25+ commits pushed, 200+ total commits
 
 **Files Created Today** (9 new files):
 ...
@@ -1757,8 +1787,10 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 | 22 | Dead Code Elimination | ✅ First pass complete | ~30 min |
 | 22 | Search Highlight Bug Fix | ✅ Fixed broken security fix | ~15 min |
 | 22 | Increase Test Coverage | ✅ Added Department & People tests | ~45 min |
+| 22 | License Migration | ✅ Migrated to GPL 3.0 | ~20 min |
+| 22 | CI/CD Troubleshooting | ✅ Fixed formatting in test files | ~15 min |
 
-**Total**: 4 major task areas completed, 20+ commits pushed
+**Total**: 6 major task areas completed, 25+ commits pushed
 
 ### Key Accomplishments Today
 
@@ -1766,7 +1798,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - ✅ Docker development environment with hot reload
 - ✅ TypeScript API SDK generated from OpenAPI spec
 - ✅ Comprehensive CONTRIBUTING.md
-- ✅ MIT LICENSE file added
+- ✅ GPL 3.0 LICENSE file added (later updated from MIT)
 
 **🧹 Code Cleanup & Modernization (Session 22)**:
 - ✅ Deleted `src/utils/parseCSVToFlow.ts` (Dead code)
@@ -1774,10 +1806,16 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - ✅ Refactored `SearchOverlay.tsx` and `ShareModal.tsx` to use `helpers.getInitials`
 - ✅ Fixed `search.service.ts` to correctly handle `<mark>` tags in highlights
 
-**🧪 Testing (Session 22)**:
+**🧪 Testing & CI/CD (Session 22)**:
 - ✅ Added `department.service.test.ts` (15 tests)
 - ✅ Added `people.service.test.ts` (8 tests)
 - ✅ Verified backend test pass rate (100%)
+- ✅ Resolved CI failure by applying Prettier formatting to new test files
+- ✅ Total test count increased to 99 (67 backend + 32 frontend)
+
+**⚖️ Legal & Compliance (Session 22)**:
+- ✅ Full migration from MIT to GPL 3.0 license
+- ✅ Updated all license headers, `package.json` files, and documentation
 
 ### Recommended Next Tasks (Priority Order)
 
@@ -1795,8 +1833,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
    - Remove unused custom CSS animations
 
 4. **Fix Lint Warnings** (Low Priority)
-   - 48 warnings total (39 frontend, 9 backend)
-   - Mostly unused variables
+   - 10 warnings total (mostly hook dependencies)
    - Can be done incrementally
 
 ### Production Environment
