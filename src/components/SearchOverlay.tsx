@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Users, Loader2, Filter } from 'lucide-react';
 import { useSearch } from '../hooks/useSearch';
 import { SearchResult } from '../types/index';
+import { getInitials } from '../utils/helpers';
 
 /**
  * Interface for the transformed result passed to onSelectResult callback
@@ -318,17 +319,4 @@ export default function SearchOverlay({
       )}
     </div>
   );
-}
-
-// Helper function
-function getInitials(name: string | null | undefined): string {
-  if (!name) return '?';
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) {
-    const firstPart = parts[0];
-    return firstPart ? firstPart.substring(0, 2).toUpperCase() : '?';
-  }
-  const firstChar = parts[0]?.[0] || '';
-  const lastChar = parts[parts.length - 1]?.[0] || '';
-  return (firstChar + lastChar).toUpperCase() || '?';
 }

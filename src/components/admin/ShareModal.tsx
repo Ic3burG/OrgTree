@@ -4,6 +4,7 @@ import api from '../../api/client';
 import { useToast } from '../ui/Toast';
 import AddMemberModal from './AddMemberModal';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
+import { getInitials } from '../../utils/helpers';
 import type { OrgMember, Invitation, ShareSettings } from '../../types/index.js';
 
 interface ShareModalProps {
@@ -231,17 +232,6 @@ export default function ShareModal({
       console.error('Failed to remove member:', err);
       toast.error('Failed to remove member');
     }
-  };
-
-  // Get initials for avatar
-  const getInitials = (name: string | undefined): string => {
-    if (!name) return '?';
-    return name
-      .split(' ')
-      .map((n: string) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   // Role badge colors

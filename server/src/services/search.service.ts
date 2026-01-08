@@ -174,7 +174,9 @@ function searchDepartments(
         name: row.name,
         description: row.description,
         parentId: row.parentId,
-        highlight: escapeHtml(row.nameHighlight || row.descHighlight),
+        highlight: escapeHtml(row.nameHighlight || row.descHighlight)
+          .replace(/&lt;mark&gt;/g, '<mark>')
+          .replace(/&lt;\/mark&gt;/g, '</mark>'),
         peopleCount: row.peopleCount,
       })
     ),
@@ -240,7 +242,9 @@ function searchPeople(
         phone: row.phone,
         departmentId: row.departmentId,
         departmentName: row.departmentName,
-        highlight: escapeHtml(row.nameHighlight || row.titleHighlight || row.emailHighlight),
+        highlight: escapeHtml(row.nameHighlight || row.titleHighlight || row.emailHighlight)
+          .replace(/&lt;mark&gt;/g, '<mark>')
+          .replace(/&lt;\/mark&gt;/g, '</mark>'),
       })
     ),
   };
