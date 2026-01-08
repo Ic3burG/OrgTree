@@ -11,7 +11,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 ### Code Quality & Testing
 - [x] **TypeScript Migration** - Convert codebase from JavaScript to TypeScript for better type safety ✅ **DONE** (January 7, 2026)
-- [ ] **Increase Test Coverage** - Expand from 76 tests to cover edge cases and integration scenarios (target: 80%+ coverage)
+- [ ] **Increase Test Coverage** - Expand from 99 tests to cover edge cases and integration scenarios (target: 80%+ coverage)
 - [ ] **E2E Testing** - Add end-to-end tests with Playwright or Cypress for critical user flows
 - [x] **ESLint/Prettier Setup** - Enforce code style consistency across the team ✅ **DONE** (January 4, 2026)
 - [ ] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces
@@ -65,7 +65,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 ### Code Cleanup & Modernization
 - [x] **Dependency Audit** - Remove unused dependencies, update outdated packages ✅ **DONE** (January 6, 2026)
-- [ ] **Dead Code Elimination** - Remove unused components, functions, routes
+- [x] **Dead Code Elimination** - Remove unused components, functions, routes ✅ **DONE** (January 7, 2026)
 - [ ] **CSS Optimization** - Purge unused Tailwind classes, optimize bundle size
 - [ ] **API Versioning Strategy** - Plan for backward-compatible API changes
 - [ ] **Accessibility Audit** - WCAG 2.1 AA compliance review and fixes
@@ -132,6 +132,8 @@ This document outlines the development roadmap for OrgTree, including technical 
 - Development Documentation (Architecture Decision Records)
 
 **Recently Completed** (January 2026):
+- ✅ **Dead Code Elimination** - Removed unused utilities and scripts (January 7, 2026)
+- ✅ **Test Coverage** - Increased to 99 tests (January 7, 2026)
 - ✅ **Developer Experience** - Docker, CONTRIBUTING.md, API SDK, LICENSE (January 7, 2026)
 - ✅ **TypeScript Migration** - Full strict mode, 1000+ errors fixed (January 7, 2026)
 - ✅ **CI Pipeline Fixes** - All checks passing (January 7, 2026)
