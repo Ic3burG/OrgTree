@@ -58,6 +58,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [x] **Development Documentation** - Architecture decision records (ADRs) ✅ **DONE** (January 7, 2026)
 
 ### Observability & Analytics
+- [ ] **Sentry Express Instrumentation** - Improve Sentry setup with `--import` flag for better Express middleware tracking, route-level performance metrics, and automatic transaction tracing (currently works but shows warning)
 - [ ] **Application Metrics Dashboard** - Response times, error rates, active users
 - [ ] **User Analytics** - Track feature usage, user journeys (privacy-respecting)
 - [ ] **Log Aggregation** - Centralized logging with search (Loki, CloudWatch, etc.)
