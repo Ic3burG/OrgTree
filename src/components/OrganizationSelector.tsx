@@ -226,7 +226,7 @@ export default function OrganizationSelector(): React.JSX.Element {
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">{org.name}</h3>
                   <div className="text-sm text-gray-500">
-                    <p>{org.departments?.length || 0} departments</p>
+                    <p>{org.departmentCount || 0} departments</p>
                     {org.createdAt && <p>Created {new Date(org.createdAt).toLocaleDateString()}</p>}
                   </div>
                 </div>
