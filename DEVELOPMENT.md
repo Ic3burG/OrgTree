@@ -243,4 +243,5 @@ When adding features:
 
 ## License
 
-MIT
+- **License**: GPL 3.0
+

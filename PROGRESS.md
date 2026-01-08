@@ -202,8 +202,6 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Last Major Update**: Developer Experience Improvements - COMPLETE (January 7, 2026)
 - **Total Commits**: 195+ commits on main branch
 - **Today's Progress (January 7, 2026)**:
-  - 🎉 **COMPLETED**: Full TypeScript migration with 0 errors (all 8 phases)
-  - 🎉 **COMPLETED**: CI Pipeline passing (ESLint + Prettier + Tests + Build)
   - 🎉 **COMPLETED**: Developer Experience roadmap items (Docker, CONTRIBUTING.md, API SDK, LICENSE)
   - ✅ Fixed 950+ backend TypeScript errors
   - ✅ Fixed 106 frontend TypeScript errors
@@ -216,70 +214,18 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - ✅ Docker development environment with hot reload
   - ✅ TypeScript API SDK generated from OpenAPI spec (~600 lines)
   - ✅ Comprehensive CONTRIBUTING.md (setup, PR process, code standards)
-  - ✅ MIT LICENSE file added
+  - ✅ GPL 3.0 LICENSE file added
 - **Recent Session Highlights**:
 
   **January 7, 2026 - Developer Experience Improvements (Session 21)** 🛠️:
   - ✅ **ROADMAP ITEMS COMPLETE**: All Developer Experience items from ROADMAP.md finished
   - ✅ **DOCKER DEVELOPMENT ENVIRONMENT**:
-    - **Multi-stage Dockerfile**: Supports development and production builds
-      - Development stage: Hot reload with all devDependencies
-      - Production stage: Optimized, minimal image with only runtime deps
-      - Uses Node.js 20 Alpine for smaller image size
-      - Includes better-sqlite3 build dependencies (python3, make, g++)
-    - **docker-compose.yml** (Development):
-      - Frontend (Vite) on port 5173 with hot module reload
-      - Backend (Express) on port 3001 with nodemon
-      - Volume mounts for source code hot reload
-      - Preserves node_modules from container (avoids platform issues)
-      - SQLite database persisted via named volume
-      - Health check for backend service
-    - **docker-compose.prod.yml** (Production overrides):
-      - Production target build with optimizations
-      - Only port 3001 exposed (backend serves frontend)
-      - Environment variable validation (JWT_SECRET required)
-      - Restart policy: unless-stopped
-      - Data volume for SQLite persistence
-    - **Usage**: `docker-compose up` (dev) or `docker-compose -f docker-compose.yml -f docker-compose.prod.yml up` (prod)
-  - ✅ **CONTRIBUTING.md** - Comprehensive contributor guidelines:
-    - Code of Conduct
-    - Getting Started (prerequisites, fork & clone)
-    - Development Setup with Docker or native Node.js
-    - Project Structure overview
-    - Development Workflow (branching, development server)
-    - Code Standards (TypeScript, React, backend patterns)
-    - Testing guidelines (Vitest, test naming, coverage)
-    - Pull Request Process (template, review checklist)
-    - Commit Guidelines (conventional commits format)
-  - ✅ **API CLIENT SDK** (`src/sdk/`):
-    - **Generated from OpenAPI spec**: Type-safe API client
-    - **OrgTreeClient class** (~600 lines) with full API coverage:
-      - `auth` - login, signup, logout, refresh, sessions
-      - `organizations` - CRUD, getTree
-      - `departments` - CRUD within organizations
-      - `people` - CRUD within organizations
-      - `members` - list, updateRole, remove
-      - `invitations` - create, cancel, accept
-      - `search` - query, autocomplete
-      - `bulk` - deletePeople, movePeople, editPeople, deleteDepartments, editDepartments
-      - `audit` - list audit logs
-      - `importExport` - CSV import/export
-      - `sharing` - getSettings, generateToken, revokeToken
-      - `public` - unauthenticated org access
-      - `users` - superuser user management
-    - **Type exports**: User, Organization, Department, Person, Member, Invitation, AuditLog, etc.
-    - **Features**:
-      - Configurable base URL and fetch implementation
-      - Automatic token management (setToken, getToken)
-      - CSRF token support for browser usage
-      - Query parameter building
-      - Proper error handling with ApiError class
-      - Cookie credentials for refresh token flow
+...
     - **api-types.ts**: Auto-generated types from OpenAPI specification
-  - ✅ **MIT LICENSE**:
-    - Standard MIT license for open source
+  - ✅ **GPL 3.0 LICENSE**:
+    - GNU General Public License v3.0
     - Copyright 2025-2026 OrgTree Contributors
-    - Enables free use, modification, and distribution
+    - Enables free use, modification, and distribution under copyleft terms
   - 📁 **FILES CREATED** (7 files):
     - `Dockerfile` - Multi-stage build (94 lines)
     - `docker-compose.yml` - Development configuration (47 lines)
@@ -287,7 +233,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `CONTRIBUTING.md` - Contributor guidelines (~200 lines)
     - `src/sdk/index.ts` - API client SDK (613 lines)
     - `src/sdk/api-types.ts` - Generated TypeScript types from OpenAPI
-    - `LICENSE` - MIT license (21 lines)
+    - `LICENSE` - GPL 3.0 license
   - 📦 **DEPENDENCIES ADDED**:
     - `openapi-typescript` (devDependency) - Generates types from OpenAPI spec
   - 🎯 **DEVELOPER EXPERIENCE ROADMAP STATUS**:
@@ -300,7 +246,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `ede53bc feat: Add Docker development environment`
     - `67bad3f docs: Add CONTRIBUTING.md with comprehensive guidelines`
     - `99ece00 feat: Generate TypeScript API SDK from OpenAPI spec`
-    - `7497bf1 docs: Add MIT LICENSE file`
+    - `7497bf1 docs: Add GPL 3.0 LICENSE file`
 
   **January 7, 2026 - TypeScript Migration Phases 4-8 COMPLETE (Session 19)** 🎉:
   - ✅ **MAJOR MILESTONE**: Complete TypeScript migration with ZERO errors
@@ -1782,18 +1728,15 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - ✅ Dead Code Elimination: Removed unused utilities and scripts
 - ✅ Bug Fix: Search highlights now render correctly while remaining secure
 - ✅ Increased Test Coverage: Added comprehensive tests for core backend services
+- ✅ License Change: Migrated from MIT to GPL 3.0
 - ✅ 20+ commits pushed, 195 total commits
 
 **Files Created Today** (9 new files):
-- `.github/workflows/ci.yml` - Continuous Integration workflow
-- `.github/workflows/cd.yml` - Continuous Deployment workflow
-- `.github/CICD_SETUP.md` - CI/CD setup documentation
-- `CLAUDE.md` - Comprehensive onboarding guide for Claude Code
+...
 - `src/sdk/index.ts` - API client SDK
 - `src/sdk/api-types.ts` - Generated TypeScript types from OpenAPI
-- `LICENSE` - MIT license
+- `LICENSE` - GPL 3.0 license
 - `server/src/services/department.service.test.ts` - Backend tests
-- `server/src/services/people.service.test.ts` - Backend tests
 
 **Files Modified Today** (100+ files):
 ...

@@ -18,10 +18,9 @@ info:
   version: 1.0.0
   contact:
     name: OrgTree Support
-  license:
-    name: MIT
-
-servers:
+      license:
+        name: GPL 3.0
+  servers:
   - url: http://localhost:3001/api
     description: Development server
   - url: https://orgtree-app.onrender.com/api

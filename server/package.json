@@ -2,6 +2,7 @@
   "name": "orgtree-server",
   "version": "1.0.0",
   "type": "module",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/index.ts",
     "start": "NODE_ENV=production tsx src/index.ts",

@@ -203,7 +203,7 @@ Track feature implementation and roadmap in **[PROGRESS.md](./PROGRESS.md)**
 
 ## License
 
-MIT
+This project is licensed under the GPL 3.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 

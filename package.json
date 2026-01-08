@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Interactive hierarchical organization directory with tree-style navigation",
   "type": "module",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
