@@ -199,9 +199,18 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Developer Experience Improvements - COMPLETE (January 7, 2026)
-- **Total Commits**: 195+ commits on main branch
-- **Today's Progress (January 7, 2026)**:
+- **Last Major Update**: Critical Bug Fix - Departments Now Visible (January 8, 2026)
+- **Total Commits**: 196+ commits on main branch
+- **Today's Progress (January 8, 2026)**:
+  - 🚨 **CRITICAL BUG FIX**: Fixed departments not displaying in UI
+  - ✅ Corrected field naming mismatch (camelCase → snake_case)
+  - ✅ Fixed department.service.ts SQL query aliases
+  - ✅ Fixed people.service.ts SQL query aliases
+  - ✅ Updated 5 files (2 services, 2 test files, 1 route)
+  - ✅ All 129 tests passing (97 backend + 32 frontend)
+  - ✅ Production build successful and deployed
+  - 🚀 Deployed to production via GitHub Actions
+- **Previous Progress (January 7, 2026)**:
   - 🎉 **COMPLETED**: Developer Experience roadmap items (Docker, CONTRIBUTING.md, API SDK, LICENSE)
   - ✅ Fixed 950+ backend TypeScript errors
   - ✅ Fixed 106 frontend TypeScript errors
@@ -221,6 +230,41 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - ✅ License Change: Migrated project from MIT to GPL 3.0
   - ✅ CI/CD Resolution: Diagnosed and fixed formatting issues in new test files
 - **Recent Session Highlights**:
+
+  **January 8, 2026 - Critical Production Bug Fix (Session 25)** 🚨🔧:
+  - 🐛 **CRITICAL BUG IDENTIFIED**: Departments not visible in Departments tab
+  - 🔍 **ROOT CAUSE ANALYSIS**:
+    - TypeScript migration (Session 19) introduced field naming mismatch
+    - Backend services returned camelCase fields (organizationId, parentId, sortOrder, etc.)
+    - Frontend types expected snake_case fields (organization_id, parent_id, sort_order, etc.)
+    - This caused silent data parsing failures - data was received but unrecognized
+    - React rendered empty lists instead of crashing, hiding the bug
+  - ✅ **FIXES APPLIED**:
+    - Reverted `department.service.ts` to return snake_case from SQL queries
+    - Reverted `people.service.ts` to return snake_case from SQL queries
+    - Fixed `people.ts` route type assertion (departmentId → department_id)
+    - Updated `department.service.test.ts` field name assertions
+    - Updated `people.service.test.ts` field name assertions
+  - 📊 **TESTING**:
+    - All 97 backend tests passing (including updated test assertions)
+    - All 32 frontend tests passing
+    - Production build verified successful
+  - 🚀 **DEPLOYMENT**:
+    - Pushed commit `1732bec` to main branch
+    - GitHub Actions CI/CD triggered
+    - Deployed to production at https://orgtree-app.onrender.com
+  - 💡 **IMPACT**:
+    - Departments now display correctly in UI
+    - Department creation/update/delete operations restored
+    - People associations with departments working
+    - Tree view, search, and bulk operations functioning
+  - 📁 **FILES MODIFIED** (5 files):
+    - `server/src/services/department.service.ts`
+    - `server/src/services/people.service.ts`
+    - `server/src/routes/people.ts`
+    - `server/src/services/department.service.test.ts`
+    - `server/src/services/people.service.test.ts`
+  - 🎯 **LESSON LEARNED**: When migrating to TypeScript, maintain consistency between database schema (snake_case), backend responses, and frontend types to prevent silent parsing failures
 
   **January 7, 2026 - Code Cleanup, Testing & Compliance (Session 22)** 🧹🧪⚖️:
   - ✅ **DEAD CODE ELIMINATION**:
