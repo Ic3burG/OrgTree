@@ -89,30 +89,46 @@ describe('People Service', () => {
     `);
 
     // Setup initial data
-    (db as DatabaseType).prepare(`
+    (db as DatabaseType)
+      .prepare(
+        `
       INSERT INTO users (id, name, email, password_hash)
       VALUES (?, 'Test User', 'test@example.com', 'hash')
-    `).run(userId);
+    `
+      )
+      .run(userId);
 
-    (db as DatabaseType).prepare(`
+    (db as DatabaseType)
+      .prepare(
+        `
       INSERT INTO organizations (id, name, created_by_id)
       VALUES (?, 'Test Org', ?)
-    `).run(orgId, userId);
+    `
+      )
+      .run(orgId, userId);
 
-    (db as DatabaseType).prepare(`
+    (db as DatabaseType)
+      .prepare(
+        `
       INSERT INTO departments (id, organization_id, name)
       VALUES (?, ?, 'Test Dept')
-    `).run(deptId, orgId);
+    `
+      )
+      .run(deptId, orgId);
 
     vi.clearAllMocks();
   });
 
   describe('getPeopleByDepartment', () => {
     it('should return all people for a department', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO people (id, department_id, name, sort_order)
         VALUES ('person-1', ?, 'Person 1', 1), ('person-2', ?, 'Person 2', 2)
-      `).run(deptId, deptId);
+      `
+        )
+        .run(deptId, deptId);
 
       const people = getPeopleByDepartment(deptId, userId);
 
@@ -123,10 +139,14 @@ describe('People Service', () => {
     });
 
     it('should not return deleted people', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO people (id, department_id, name, deleted_at)
         VALUES ('person-1', ?, 'Person 1', datetime('now'))
-      `).run(deptId);
+      `
+        )
+        .run(deptId);
 
       const people = getPeopleByDepartment(deptId, userId);
 
@@ -136,10 +156,14 @@ describe('People Service', () => {
 
   describe('getPersonById', () => {
     it('should return a person by ID with department and organization details', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO people (id, department_id, name)
         VALUES ('person-1', ?, 'Person 1')
-      `).run(deptId);
+      `
+        )
+        .run(deptId);
 
       const person = getPersonById('person-1', userId);
 
@@ -166,10 +190,14 @@ describe('People Service', () => {
 
   describe('updatePerson', () => {
     it('should update person details', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO people (id, department_id, name)
         VALUES ('person-1', ?, 'Old Name')
-      `).run(deptId);
+      `
+        )
+        .run(deptId);
 
       const updated = updatePerson('person-1', { name: 'New Name' }, userId);
 
@@ -178,15 +206,23 @@ describe('People Service', () => {
 
     it('should move person to a different department', () => {
       const newDeptId = 'new-dept-id';
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name)
         VALUES (?, ?, 'New Dept')
-      `).run(newDeptId, orgId);
+      `
+        )
+        .run(newDeptId, orgId);
 
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO people (id, department_id, name)
         VALUES ('person-1', ?, 'Person 1')
-      `).run(deptId);
+      `
+        )
+        .run(deptId);
 
       const updated = updatePerson('person-1', { departmentId: newDeptId }, userId);
 
@@ -196,14 +232,20 @@ describe('People Service', () => {
 
   describe('deletePerson', () => {
     it('should soft delete a person', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO people (id, department_id, name)
         VALUES ('person-1', ?, 'Person 1')
-      `).run(deptId);
+      `
+        )
+        .run(deptId);
 
       deletePerson('person-1', userId);
 
-      const person = (db as DatabaseType).prepare('SELECT deleted_at FROM people WHERE id = ?').get('person-1') as { deleted_at: string };
+      const person = (db as DatabaseType)
+        .prepare('SELECT deleted_at FROM people WHERE id = ?')
+        .get('person-1') as { deleted_at: string };
       expect(person.deleted_at).not.toBeNull();
     });
   });

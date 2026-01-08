@@ -101,25 +101,37 @@ describe('Department Service', () => {
     `);
 
     // Setup initial data
-    (db as DatabaseType).prepare(`
+    (db as DatabaseType)
+      .prepare(
+        `
       INSERT INTO users (id, name, email, password_hash)
       VALUES (?, 'Test User', 'test@example.com', 'hash')
-    `).run(userId);
+    `
+      )
+      .run(userId);
 
-    (db as DatabaseType).prepare(`
+    (db as DatabaseType)
+      .prepare(
+        `
       INSERT INTO organizations (id, name, created_by_id)
       VALUES (?, 'Test Org', ?)
-    `).run(orgId, userId);
+    `
+      )
+      .run(orgId, userId);
 
     vi.clearAllMocks();
   });
 
   describe('getDepartments', () => {
     it('should return all departments for an organization', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name, sort_order)
         VALUES ('dept-1', ?, 'Dept 1', 1), ('dept-2', ?, 'Dept 2', 2)
-      `).run(orgId, orgId);
+      `
+        )
+        .run(orgId, orgId);
 
       const depts = getDepartments(orgId, userId);
 
@@ -130,15 +142,23 @@ describe('Department Service', () => {
     });
 
     it('should include people in departments', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('dept-1', ?, 'Dept 1')
-      `).run(orgId);
+      `
+        )
+        .run(orgId);
 
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO people (id, department_id, name)
         VALUES ('person-1', 'dept-1', 'Person 1')
-      `).run();
+      `
+        )
+        .run();
 
       const depts = getDepartments(orgId, userId);
 
@@ -147,10 +167,14 @@ describe('Department Service', () => {
     });
 
     it('should not return deleted departments', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name, deleted_at)
         VALUES ('dept-1', ?, 'Dept 1', datetime('now'))
-      `).run(orgId);
+      `
+        )
+        .run(orgId);
 
       const depts = getDepartments(orgId, userId);
 
@@ -160,10 +184,14 @@ describe('Department Service', () => {
 
   describe('getDepartmentById', () => {
     it('should return a department by ID', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('dept-1', ?, 'Dept 1')
-      `).run(orgId);
+      `
+        )
+        .run(orgId);
 
       const dept = getDepartmentById(orgId, 'dept-1', userId);
 
@@ -172,7 +200,9 @@ describe('Department Service', () => {
     });
 
     it('should throw 404 if department not found', () => {
-      expect(() => getDepartmentById(orgId, 'non-existent', userId)).toThrow('Department not found');
+      expect(() => getDepartmentById(orgId, 'non-existent', userId)).toThrow(
+        'Department not found'
+      );
     });
   });
 
@@ -186,10 +216,14 @@ describe('Department Service', () => {
     });
 
     it('should create a department with a parent', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('parent-id', ?, 'Parent')
-      `).run(orgId);
+      `
+        )
+        .run(orgId);
 
       const dept = createDepartment(orgId, { name: 'Child', parentId: 'parent-id' }, userId);
 
@@ -197,7 +231,7 @@ describe('Department Service', () => {
     });
 
     it('should throw if parent department does not exist', () => {
-      expect(() => 
+      expect(() =>
         createDepartment(orgId, { name: 'Child', parentId: 'non-existent' }, userId)
       ).toThrow('Parent department not found');
     });
@@ -205,10 +239,14 @@ describe('Department Service', () => {
 
   describe('updateDepartment', () => {
     it('should update department details', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('dept-1', ?, 'Old Name')
-      `).run(orgId);
+      `
+        )
+        .run(orgId);
 
       const updated = updateDepartment(orgId, 'dept-1', { name: 'New Name' }, userId);
 
@@ -216,10 +254,14 @@ describe('Department Service', () => {
     });
 
     it('should change parent department', () => {
-       (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('dept-1', ?, 'Dept 1'), ('dept-2', ?, 'Dept 2')
-      `).run(orgId, orgId);
+      `
+        )
+        .run(orgId, orgId);
 
       const updated = updateDepartment(orgId, 'dept-1', { parentId: 'dept-2' }, userId);
 
@@ -227,14 +269,22 @@ describe('Department Service', () => {
     });
 
     it('should move to top level if parentId is null', () => {
-       (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('parent-id', ?, 'Parent')
-      `).run(orgId);
-       (db as DatabaseType).prepare(`
+      `
+        )
+        .run(orgId);
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name, parent_id)
         VALUES ('dept-1', ?, 'Dept 1', 'parent-id')
-      `).run(orgId);
+      `
+        )
+        .run(orgId);
 
       const updated = updateDepartment(orgId, 'dept-1', { parentId: null }, userId);
 
@@ -242,55 +292,85 @@ describe('Department Service', () => {
     });
 
     it('should throw if moving under itself', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('dept-1', ?, 'Dept 1')
-      `).run(orgId);
+      `
+        )
+        .run(orgId);
 
-      expect(() => 
-        updateDepartment(orgId, 'dept-1', { parentId: 'dept-1' }, userId)
-      ).toThrow('Department cannot be its own parent');
+      expect(() => updateDepartment(orgId, 'dept-1', { parentId: 'dept-1' }, userId)).toThrow(
+        'Department cannot be its own parent'
+      );
     });
   });
 
   describe('deleteDepartment', () => {
     it('should soft delete a department', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name)
         VALUES ('dept-1', ?, 'Dept 1')
-      `).run(orgId);
+      `
+        )
+        .run(orgId);
 
       deleteDepartment(orgId, 'dept-1', userId);
 
-      const dept = (db as DatabaseType).prepare('SELECT deleted_at FROM departments WHERE id = ?').get('dept-1') as { deleted_at: string };
+      const dept = (db as DatabaseType)
+        .prepare('SELECT deleted_at FROM departments WHERE id = ?')
+        .get('dept-1') as { deleted_at: string };
       expect(dept.deleted_at).not.toBeNull();
     });
 
     it('should recursively delete children', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name) VALUES ('parent', ?, 'Parent')
-      `).run(orgId);
-      (db as DatabaseType).prepare(`
+      `
+        )
+        .run(orgId);
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name, parent_id) VALUES ('child', ?, 'Child', 'parent')
-      `).run(orgId);
+      `
+        )
+        .run(orgId);
 
       deleteDepartment(orgId, 'parent', userId);
 
-      const child = (db as DatabaseType).prepare('SELECT deleted_at FROM departments WHERE id = ?').get('child') as { deleted_at: string };
+      const child = (db as DatabaseType)
+        .prepare('SELECT deleted_at FROM departments WHERE id = ?')
+        .get('child') as { deleted_at: string };
       expect(child.deleted_at).not.toBeNull();
     });
 
     it('should soft delete people in the department', () => {
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO departments (id, organization_id, name) VALUES ('dept-1', ?, 'Dept 1')
-      `).run(orgId);
-      (db as DatabaseType).prepare(`
+      `
+        )
+        .run(orgId);
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO people (id, department_id, name) VALUES ('person-1', 'dept-1', 'Person 1')
-      `).run();
+      `
+        )
+        .run();
 
       deleteDepartment(orgId, 'dept-1', userId);
 
-      const person = (db as DatabaseType).prepare('SELECT deleted_at FROM people WHERE id = ?').get('person-1') as { deleted_at: string };
+      const person = (db as DatabaseType)
+        .prepare('SELECT deleted_at FROM people WHERE id = ?')
+        .get('person-1') as { deleted_at: string };
       expect(person.deleted_at).not.toBeNull();
     });
   });
