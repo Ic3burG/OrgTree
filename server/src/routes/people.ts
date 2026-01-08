@@ -98,10 +98,10 @@ router.put(
       );
 
       // Get orgId from person's department for real-time event
-      const personWithDept = person as { departmentId: string };
+      const personWithDept = person as { department_id: string };
       const dept = db
         .prepare('SELECT organization_id FROM departments WHERE id = ?')
-        .get(String(personWithDept.departmentId)) as { organization_id: string } | undefined;
+        .get(String(personWithDept.department_id)) as { organization_id: string } | undefined;
       if (dept) {
         emitPersonUpdated(dept.organization_id, person as Record<string, unknown>, req.user!);
       }

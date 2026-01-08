@@ -37,14 +37,14 @@ function verifyDeptAccess(
 
 interface PersonResponse {
   id: string;
-  departmentId: string;
+  department_id: string;
   name: string;
   title: string | null;
   email: string | null;
   phone: string | null;
-  sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export function getPeopleByDepartment(deptId: string, userId: string): PersonResponse[] {
@@ -54,8 +54,8 @@ export function getPeopleByDepartment(deptId: string, userId: string): PersonRes
     .prepare(
       `
     SELECT
-      id, department_id as departmentId, name, title, email, phone,
-      sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
+      id, department_id, name, title, email, phone,
+      sort_order, created_at, updated_at
     FROM people
     WHERE department_id = ? AND deleted_at IS NULL
     ORDER BY sort_order ASC
@@ -82,8 +82,8 @@ export function getPersonById(personId: string, userId: string): PersonWithDepar
     .prepare(
       `
     SELECT
-      p.id, p.department_id as departmentId, p.name, p.title, p.email, p.phone,
-      p.sort_order as sortOrder, p.created_at as createdAt, p.updated_at as updatedAt,
+      p.id, p.department_id, p.name, p.title, p.email, p.phone,
+      p.sort_order, p.created_at, p.updated_at,
       d.name as departmentName, d.organization_id as organizationId,
       o.name as organizationName, o.created_by_id as orgCreatedBy
     FROM people p
@@ -115,7 +115,7 @@ export function getPersonById(personId: string, userId: string): PersonWithDepar
   const result: PersonWithDepartment = {
     ...personData,
     department: {
-      id: person.departmentId,
+      id: person.department_id,
       name: departmentName,
       organizationId,
       organization: {
@@ -169,8 +169,8 @@ export function createPerson(
     .prepare(
       `
     SELECT
-      id, department_id as departmentId, name, title, email, phone,
-      sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
+      id, department_id, name, title, email, phone,
+      sort_order, created_at, updated_at
     FROM people
     WHERE id = ?
   `
@@ -194,7 +194,7 @@ export function updatePerson(
   const { name, title, email, phone, departmentId } = data;
 
   // If moving to new department, verify access to that department
-  if (departmentId && departmentId !== person.departmentId) {
+  if (departmentId && departmentId !== person.department_id) {
     verifyDeptAccess(departmentId, userId, 'editor');
   }
 
@@ -236,8 +236,8 @@ export function updatePerson(
     .prepare(
       `
     SELECT
-      id, department_id as departmentId, name, title, email, phone,
-      sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
+      id, department_id, name, title, email, phone,
+      sort_order, created_at, updated_at
     FROM people
     WHERE id = ?
   `

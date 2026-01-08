@@ -226,7 +226,7 @@ describe('People Service', () => {
 
       const updated = updatePerson('person-1', { departmentId: newDeptId }, userId);
 
-      expect(updated.departmentId).toBe(newDeptId);
+      expect(updated.department_id).toBe(newDeptId);
     });
   });
 

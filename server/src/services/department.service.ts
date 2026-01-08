@@ -14,23 +14,23 @@ function verifyOrgAccess(
 
 interface DepartmentWithPeople {
   id: string;
-  organizationId: string;
-  parentId: string | null;
+  organization_id: string;
+  parent_id: string | null;
   name: string;
   description: string | null;
-  sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
   people: Array<{
     id: string;
-    departmentId: string;
+    department_id: string;
     name: string;
     title: string | null;
     email: string | null;
     phone: string | null;
-    sortOrder: number;
-    createdAt: string;
-    updatedAt: string;
+    sort_order: number;
+    created_at: string;
+    updated_at: string;
   }>;
 }
 
@@ -41,9 +41,9 @@ export function getDepartments(orgId: string, userId: string): DepartmentWithPeo
     .prepare(
       `
     SELECT
-      id, organization_id as organizationId, parent_id as parentId,
-      name, description, sort_order as sortOrder,
-      created_at as createdAt, updated_at as updatedAt
+      id, organization_id, parent_id,
+      name, description, sort_order,
+      created_at, updated_at
     FROM departments
     WHERE organization_id = ? AND deleted_at IS NULL
     ORDER BY sort_order ASC
@@ -51,13 +51,13 @@ export function getDepartments(orgId: string, userId: string): DepartmentWithPeo
     )
     .all(orgId) as Array<{
     id: string;
-    organizationId: string;
-    parentId: string | null;
+    organization_id: string;
+    parent_id: string | null;
     name: string;
     description: string | null;
-    sortOrder: number;
-    createdAt: string;
-    updatedAt: string;
+    sort_order: number;
+    created_at: string;
+    updated_at: string;
   }>;
 
   // Get people for each department
@@ -66,8 +66,8 @@ export function getDepartments(orgId: string, userId: string): DepartmentWithPeo
       .prepare(
         `
       SELECT
-        id, department_id as departmentId, name, title, email, phone,
-        sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
+        id, department_id, name, title, email, phone,
+        sort_order, created_at, updated_at
       FROM people
       WHERE department_id = ? AND deleted_at IS NULL
       ORDER BY sort_order ASC
@@ -75,14 +75,14 @@ export function getDepartments(orgId: string, userId: string): DepartmentWithPeo
       )
       .all(dept.id) as Array<{
       id: string;
-      departmentId: string;
+      department_id: string;
       name: string;
       title: string | null;
       email: string | null;
       phone: string | null;
-      sortOrder: number;
-      createdAt: string;
-      updatedAt: string;
+      sort_order: number;
+      created_at: string;
+      updated_at: string;
     }>;
 
     return { ...dept, people };
@@ -102,9 +102,9 @@ export function getDepartmentById(
     .prepare(
       `
     SELECT
-      id, organization_id as organizationId, parent_id as parentId,
-      name, description, sort_order as sortOrder,
-      created_at as createdAt, updated_at as updatedAt
+      id, organization_id, parent_id,
+      name, description, sort_order,
+      created_at, updated_at
     FROM departments
     WHERE id = ? AND organization_id = ? AND deleted_at IS NULL
   `
@@ -112,13 +112,13 @@ export function getDepartmentById(
     .get(deptId, orgId) as
     | {
         id: string;
-        organizationId: string;
-        parentId: string | null;
+        organization_id: string;
+        parent_id: string | null;
         name: string;
         description: string | null;
-        sortOrder: number;
-        createdAt: string;
-        updatedAt: string;
+        sort_order: number;
+        created_at: string;
+        updated_at: string;
       }
     | undefined;
 
@@ -133,8 +133,8 @@ export function getDepartmentById(
     .prepare(
       `
     SELECT
-      id, department_id as departmentId, name, title, email, phone,
-      sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
+      id, department_id, name, title, email, phone,
+      sort_order, created_at, updated_at
     FROM people
     WHERE department_id = ? AND deleted_at IS NULL
     ORDER BY sort_order ASC
@@ -142,14 +142,14 @@ export function getDepartmentById(
     )
     .all(deptId) as Array<{
     id: string;
-    departmentId: string;
+    department_id: string;
     name: string;
     title: string | null;
     email: string | null;
     phone: string | null;
-    sortOrder: number;
-    createdAt: string;
-    updatedAt: string;
+    sort_order: number;
+    created_at: string;
+    updated_at: string;
   }>;
 
   return { ...dept, people };

@@ -227,7 +227,7 @@ describe('Department Service', () => {
 
       const dept = createDepartment(orgId, { name: 'Child', parentId: 'parent-id' }, userId);
 
-      expect(dept.parentId).toBe('parent-id');
+      expect(dept.parent_id).toBe('parent-id');
     });
 
     it('should throw if parent department does not exist', () => {
@@ -265,7 +265,7 @@ describe('Department Service', () => {
 
       const updated = updateDepartment(orgId, 'dept-1', { parentId: 'dept-2' }, userId);
 
-      expect(updated.parentId).toBe('dept-2');
+      expect(updated.parent_id).toBe('dept-2');
     });
 
     it('should move to top level if parentId is null', () => {
@@ -288,7 +288,7 @@ describe('Department Service', () => {
 
       const updated = updateDepartment(orgId, 'dept-1', { parentId: null }, userId);
 
-      expect(updated.parentId).toBeNull();
+      expect(updated.parent_id).toBeNull();
     });
 
     it('should throw if moving under itself', () => {
