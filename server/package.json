@@ -4,8 +4,8 @@
   "type": "module",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "dev": "tsx watch --clear-screen=false src/index.ts",
-    "start": "NODE_ENV=production tsx src/index.ts",
+    "dev": "tsx watch --import ./src/instrument.ts --clear-screen=false src/index.ts",
+    "start": "NODE_ENV=production tsx --import ./src/instrument.ts src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -43,6 +43,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.3",
+    "@types/supertest": "^6.0.3",
     "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^8.52.0",
     "@typescript-eslint/parser": "^8.52.0",
@@ -51,6 +52,7 @@
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.7.4",
+    "supertest": "^7.2.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
   }

@@ -21,10 +21,10 @@ info:
   license:
     name: GPL 3.0
   servers:
-  - url: http://localhost:3001/api
-    description: Development server
-  - url: https://orgtree-app.onrender.com/api
-    description: Production server
+    - url: http://localhost:3001/api
+      description: Development server
+    - url: https://orgtree-app.onrender.com/api
+      description: Production server
 
 tags:
   - name: Health
@@ -68,7 +68,7 @@ components:
       properties:
         message:
           type: string
-          example: "Error description"
+          example: 'Error description'
 
     User:
       type: object
@@ -344,7 +344,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            message: "Access token required"
+            message: 'Access token required'
 
     Forbidden:
       description: Insufficient permissions
@@ -353,7 +353,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            message: "Access denied"
+            message: 'Access denied'
 
     NotFound:
       description: Resource not found
@@ -362,7 +362,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            message: "Resource not found"
+            message: 'Resource not found'
 
     BadRequest:
       description: Invalid request
@@ -396,12 +396,39 @@ paths:
                   timestamp:
                     type: string
                     format: date-time
-                  database:
+                  version:
                     type: string
-                    example: connected
+                    example: 1.0.0
                   environment:
                     type: string
                     example: production
+                  uptime:
+                    type: object
+                    properties:
+                      seconds:
+                        type: integer
+                      human:
+                        type: string
+                  database:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        example: connected
+                  process:
+                    type: object
+                    properties:
+                      memory:
+                        type: object
+                        properties:
+                          rss:
+                            type: string
+                          heapTotal:
+                            type: string
+                          heapUsed:
+                            type: string
+                          external:
+                            type: string
 
   # ==================== AUTHENTICATION ====================
   /auth/signup:

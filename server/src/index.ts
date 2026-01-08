@@ -28,7 +28,7 @@ import logger from './utils/logger.js';
 import db from './db.js';
 import { initializeSocket } from './socket.js';
 import { cleanupExpiredTokens } from './services/auth.service.js';
-import { initSentry, setupGlobalErrorHandlers, Sentry } from './sentry.js';
+import { setupGlobalErrorHandlers, Sentry } from './sentry.js';
 
 // Only load dotenv in development - Render sets env vars directly in production
 if (process.env.NODE_ENV !== 'production') {
@@ -36,8 +36,7 @@ if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
 }
 
-// Initialize Sentry early (after dotenv loads)
-initSentry();
+// Initialize global error handlers
 setupGlobalErrorHandlers();
 
 // Validate critical environment variables
@@ -144,17 +143,37 @@ app.get('/api/openapi.json', (_req, res) => {
   res.json(openApiSpec);
 });
 
-// Health check with database connectivity test (must be before other routes)
+// Health check with database connectivity test and system metrics
 app.get('/api/health', async (_req, res) => {
   try {
     // Test database connectivity
     const dbCheck = db.prepare('SELECT 1 as ok').get() as { ok: number };
 
-    // Security: Don't expose environment details
+    // Get process and system metrics
+    const memoryUsage = process.memoryUsage();
+    const uptime = process.uptime();
+
+    // Security: Don't expose sensitive environment details or full paths
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
-      database: dbCheck.ok === 1 ? 'connected' : 'error',
+      version: process.env.npm_package_version || '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      uptime: {
+        seconds: Math.floor(uptime),
+        human: new Date(uptime * 1000).toISOString().substr(11, 8),
+      },
+      database: {
+        status: dbCheck.ok === 1 ? 'connected' : 'error',
+      },
+      process: {
+        memory: {
+          rss: Math.round(memoryUsage.rss / 1024 / 1024) + 'MB',
+          heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024) + 'MB',
+          heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024) + 'MB',
+          external: Math.round(memoryUsage.external / 1024 / 1024) + 'MB',
+        },
+      },
     });
   } catch (error: unknown) {
     res.status(503).json({

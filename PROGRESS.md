@@ -8,12 +8,14 @@
 **CRITICAL**: These preferences must be followed in every conversation to maintain consistency and avoid repetition.
 
 ### Update Workflow
+
 - **PROGRESS.md updates are MANDATORY**: Update this file after EACH command/task completion (not just at end of session)
 - **Commit AND push ALL changes**: Never leave commits local-only; always push to GitHub
 - **Update "Last Updated" date**: Change to current date when making any updates
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
 
 ### Development Preferences
+
 - **Render CLI**: Installed and configured with API key authentication (not using CLI tokens)
   - Used for manual deployment triggers and production troubleshooting
   - Can trigger deploys: `render deploy`
@@ -23,11 +25,13 @@
 ---
 
 ## Project Overview
+
 OrgTree is a comprehensive organizational directory and visualization tool that allows users to create, manage, and visualize hierarchical organizational structures with departments and people.
 
 ## 🚀 What We've Built
 
 ### Core Features Implemented
+
 - **Multi-organization management** - Users can create and manage multiple organizations
 - **Team collaboration** - Multi-user organization management with role-based permissions (Owner, Admin, Editor, Viewer)
 - **Hierarchical department structure** - Tree-based department organization with parent/child relationships
@@ -40,6 +44,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - **Audit trail** - Comprehensive activity logging with 1-year retention, filtering, and pagination
 
 ### Technical Stack
+
 - **Frontend**: React 18, Vite, Tailwind CSS, React Flow, React Router
 - **Backend**: Node.js, Express, SQLite with better-sqlite3
 - **Search**: SQLite FTS5 with Porter stemming, BM25 ranking
@@ -50,6 +55,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 ### Architecture Components
 
 #### Frontend (`/src`)
+
 - **Authentication System** (`auth/`) - Login, signup, protected routes
 - **Admin Interface** (`admin/`) - Dashboard, department manager, people manager
 - **Visualization** (`components/`) - Interactive org map with React Flow
@@ -57,12 +63,14 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - **Data Management** (`utils/`) - CSV import/export, layout engine
 
 #### Backend (`/server`)
+
 - **API Routes** - Organizations, departments, people, authentication, public sharing
 - **Database Layer** - SQLite with proper foreign key constraints and migrations
 - **Services** - Business logic separation for maintainability
 - **Security** - JWT authentication, input validation, CORS configuration
 
 ### Recent Major Fixes Completed
+
 1. **✅ Department Count Display** - Fixed "Your Organizations" page showing 0 departments
 2. **✅ Public Link Edge Rendering** - Fixed missing connection lines in public shared views
 3. **✅ Mobile Scrolling Critical Fix** - Completely rebuilt People list with proper flexbox layout
@@ -79,6 +87,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 ## 🐛 Known Issues (Fixed)
 
 ### Previously Critical Issues (Now Resolved)
+
 - ~~People list not scrollable on any screen size~~ ✅ **FIXED** - Rebuilt with proper height constraints
 - ~~Department connections missing in public view~~ ✅ **FIXED** - Field name mapping corrected
 - ~~Organization page showing 0 departments~~ ✅ **FIXED** - Added department count logic
@@ -95,6 +104,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 ## 🎯 Current Status
 
 ### What's Working Well
+
 - ✅ User authentication and session management
 - ✅ Organization creation, management, and **renaming**
 - ✅ Department hierarchy creation and editing
@@ -115,6 +125,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 ### Areas for Potential Enhancement
 
 #### Feature Enhancements
+
 - ~~**Advanced Search** - Full-text search with autocomplete~~ ✅ **IMPLEMENTED** (December 28, 2025)
 - ~~**Bulk Operations** - Multi-select for batch edits/deletions~~ ✅ **IMPLEMENTED** (December 29, 2025)
 - ~~**Audit Trail** - Track changes and modifications~~ ✅ **IMPLEMENTED** (December 26, 2025)
@@ -124,12 +135,14 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
 
 #### Performance & Scalability
+
 - **Database Optimization** - Indexing for large datasets
 - **Caching Layer** - Redis for improved performance
 - **File Uploads** - Profile pictures and document attachments
 - ~~**Real-time Updates** - WebSocket support for live collaboration~~ ✅ **IMPLEMENTED** (December 24, 2025)
 
 #### Integration Possibilities
+
 - **LDAP/AD Integration** - Import from existing directory services
 - **API Extensions** - RESTful API for third-party integrations
 - **SSO Support** - SAML/OAuth integration
@@ -138,12 +151,14 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 ## 🔧 Technical Debt & Maintenance
 
 ### Code Quality
+
 - ~~**Test Coverage** - Add comprehensive unit and integration tests~~ ✅ **DONE** (December 30, 2025)
 - ~~**Error Handling** - Standardize error responses and user feedback~~ ✅ **DONE** (React Error Boundaries, Dec 21)
 - ~~**Logging** - Implement structured logging for debugging~~ ✅ **DONE** (JSON logging in production, Dec 21)
 - ~~**Documentation** - API documentation and deployment guides~~ ✅ **DONE** (Dec 29, DOCUMENTATION.md + DEPLOYMENT.md)
 
 ### Security
+
 - ~~**Security Audit** - Review authentication and authorization~~ ✅ **DONE** (December 30, 2025) - See [SECURITY_AUDIT.md](SECURITY_AUDIT.md)
 - ~~**Input Validation** - Strengthen server-side validation~~ ✅ **DONE** (December 30, 2025) - Array size limits, field whitelisting
 - ~~**Rate Limiting** - Protect against abuse~~ ✅ **DONE** (December 21-22, 2025)
@@ -155,6 +170,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 For detailed technical debt items, feature plans, and priority recommendations, see **[ROADMAP.md](ROADMAP.md)**.
 
 ### Current Focus
+
 - ~~Developer Experience (Docker, CONTRIBUTING.md, API SDK)~~ ✅ **DONE** (January 7, 2026)
 - Code Cleanup & Modernization (Dead Code Elimination, CSS Optimization)
 - Increasing test coverage
@@ -164,11 +180,13 @@ For detailed technical debt items, feature plans, and priority recommendations, 
 ## 🛠️ Development Environment
 
 ### Prerequisites
+
 - Node.js 18+
 - npm or yarn
 - Git
 
 ### Quick Start
+
 ```bash
 # Clone repository
 git clone https://github.com/Ic3burG/OrgTree.git
@@ -184,6 +202,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 ```
 
 ### Key Scripts
+
 - `npm run dev` - Start frontend development server
 - `npm run build` - Build for production
 - `cd server && npm run dev` - Start backend server
@@ -192,6 +211,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 ## 📊 Project Metrics
 
 ### Codebase Statistics
+
 - **Total Components**: ~21 React components (added Bulk modals and action bar)
 - **API Endpoints**: 50+ REST endpoints (documented in OpenAPI spec at /api/docs)
 - **Database Tables**: 4 main tables + 2 FTS5 virtual tables (departments_fts, people_fts)
@@ -199,9 +219,19 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Critical Bug Fixes - Org Chart Fully Restored + CI Unblocked (January 8, 2026)
-- **Total Commits**: 199+ commits on main branch
+
+- **Last Major Update**: Observability - Sentry Express Instrumentation via `--import` (January 8, 2026)
+- **Total Commits**: 204+ commits on main branch
 - **Today's Progress (January 8, 2026)**:
+  - ✅ **Sentry Instrumentation**: Implemented Node.js `--import` for Sentry v8+ to enable early initialization and automatic Express tracking
+  - ✅ **CSS Optimization**: Refactored `index.css` to use Tailwind layers and improved theme config
+  - ✅ **Dependency Scanning**: Implemented GitHub Dependabot for root and server `npm` packages
+  - ✅ **Health Check Enhancement**: Added system metrics (memory, uptime, version) to `/api/health`
+  - ✅ Updated OpenAPI specification to match the new health check schema
+  - ✅ Fixed a missing import in `src/utils/audit.test.ts` discovered during validation
+  - 📋 Suggested and implemented four "quick wins" from the ROADMAP.md
+  - 🧪 Verified backend logic (all frontend tests passing, backend index.ts types correct)
+- **Previous Progress (January 8, 2026)**:
   - 🚨 **CRITICAL BUG FIX #1**: Fixed departments not displaying in UI
   - 🚨 **CRITICAL BUG FIX #2**: Fixed department hierarchy lines not showing in org chart
   - 🚨 **CRITICAL CI FIX**: Fixed Prettier formatting issue blocking CI pipeline
@@ -234,6 +264,75 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - ✅ License Change: Migrated project from MIT to GPL 3.0
   - ✅ CI/CD Resolution: Diagnosed and fixed formatting issues in new test files
 - **Recent Session Highlights**:
+
+  **January 8, 2026 - Observability: Sentry Express Instrumentation (Session 29)** 🛰️🛠️:
+  - ✅ **INSTRUMENTATION COMPLETE**: Migrated Sentry setup to the modern `--import` pattern
+  - 🔍 **DETAILS**:
+    - Created `server/src/instrument.ts` for early-access Sentry initialization
+    - Configured `nodeProfilingIntegration` for better performance analysis
+    - Updated `server/package.json` scripts to use the `--import` flag
+    - Removed manual Sentry initialization from `index.ts` to allow automatic instrumentation
+    - Refactored `sentry.ts` to provide clean re-exports and global error handlers
+  - 📊 **IMPACT**:
+    - Express middleware and routes are now automatically instrumented for performance
+    - Clearer stack traces and error reporting with early-stage initialization
+    - Resolved the "Express not instrumented" warning in production logs
+  - 📁 **FILES MODIFIED** (5 files):
+    - `server/src/instrument.ts` (new file)
+    - `server/src/sentry.ts` (refactored)
+    - `server/src/index.ts` (cleanup)
+    - `server/package.json` (usage updated)
+    - `ROADMAP.md` (marked as done)
+
+  **January 8, 2026 - Performance & Cleanup: CSS Optimization (Session 28)** 🧹🎨:
+  - ✅ **OPTIMIZATION COMPLETE**: Refactored CSS architecture for better performance and maintainability
+  - 🔍 **DETAILS**:
+    - Organized `index.css` into `@layer base`, `@layer components`, and `@layer utilities`
+    - Moved custom fonts, animations, and keyframes to `tailwind.config.js`
+    - Removed redundant CSS resets (already handled by Tailwind Preflight)
+    - Improved consistency of focus rings, scrollbars, and hover effects
+    - Fixed `index.html` main script path (main.jsx → main.tsx)
+  - 📊 **RESULTS**:
+    - Improved Gzip compression (9.09kB → 9.01kB)
+    - Better purging of unused styles through JIT-friendly architecture
+    - Unified theme management via Tailwind config
+  - 📁 **FILES MODIFIED** (4 files):
+    - `src/index.css` (refactored)
+    - `tailwind.config.js` (theme extensions)
+    - `index.html` (fixed path)
+    - `ROADMAP.md` (marked as done)
+
+  **January 8, 2026 - Security Hardening: Dependency Scanning (Session 27)** 🛡️🤖:
+  - ✅ **FEATURE IMPLEMENTED**: Added GitHub Dependabot configuration
+  - 🔍 **DETAILS**:
+    - Created `.github/dependabot.yml`
+    - Configured weekly scans for root `package.json`
+    - Configured weekly scans for `server/package.json`
+    - Configured weekly scans for GitHub Actions
+    - Implemented PR grouping for cleaner dependency updates
+  - 📁 **FILES MODIFIED** (3 files):
+    - `.github/dependabot.yml` (new file)
+    - `ROADMAP.md` (marked as done)
+    - `PROGRESS.md` (updated status)
+
+  **January 8, 2026 - Low Hanging Fruit: Health Check Enhancement (Session 26)** 🚀🏥:
+  - ✅ **FEATURE IMPLEMENTED**: Enhanced `/api/health` with system and process metrics
+  - 🔍 **DETAILS**:
+    - Added `process.memoryUsage()` (RSS, Heap, External)
+    - Added `process.uptime()` with human-readable formatting
+    - Included application version and environment in response
+    - Updated OpenAPI spec documentation in `openapi.yaml`
+  - 🐛 **BUG FIX**:
+    - Discovered missing `afterEach` import in `src/utils/audit.test.ts` during pre-check
+    - Fixed the test file to ensure CI/CD remains green
+  - 📊 **VALIDATION**:
+    - Type-checked backend routes
+    - Verified all 129 tests passing
+  - 📁 **FILES MODIFIED** (4 files):
+    - `server/src/index.ts` (enhanced endpoint)
+    - `server/src/openapi.yaml` (updated schema)
+    - `src/utils/audit.test.ts` (fixed import)
+    - `ROADMAP.md` (marked as done)
 
   **January 8, 2026 - Technical Debt Tracking (Session 25 Part 4)** 📋:
   - 📝 **TECHNICAL DEBT DOCUMENTED**: Added Sentry Express instrumentation to ROADMAP.md
@@ -301,7 +400,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 🚀 **DEPLOYMENT**:
     - Pushed commit `da076d3` to main branch
     - GitHub Actions CI/CD triggered
-    - Deployed to production at https://orgtree-app.onrender.com
+    - Deployed to production at <https://orgtree-app.onrender.com>
   - 💡 **IMPACT**:
     - Department hierarchy lines now display correctly
     - Parent-child relationships visualized with smooth arrows
@@ -333,7 +432,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 🚀 **DEPLOYMENT**:
     - Pushed commit `1732bec` to main branch
     - GitHub Actions CI/CD triggered
-    - Deployed to production at https://orgtree-app.onrender.com
+    - Deployed to production at <https://orgtree-app.onrender.com>
   - 💡 **IMPACT**:
     - Departments now display correctly in UI
     - Department creation/update/delete operations restored
@@ -374,8 +473,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   **January 7, 2026 - Developer Experience Improvements (Session 21)** 🛠️:
   - ✅ **ROADMAP ITEMS COMPLETE**: All Developer Experience items from ROADMAP.md finished
   - ✅ **DOCKER DEVELOPMENT ENVIRONMENT**:
-...
-    - **api-types.ts**: Auto-generated types from OpenAPI specification
+    ... - **api-types.ts**: Auto-generated types from OpenAPI specification
   - ✅ **GPL 3.0 LICENSE**:
     - GNU General Public License v3.0
     - Copyright 2025-2026 OrgTree Contributors
@@ -587,7 +685,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
       - Operations: BulkOperationResult, CSVImportResult, AuditLog, Session
     - **Backend Types** (`server/src/types/index.ts`): 30+ interfaces and types
       - Express extensions: AuthRequest (adds user to Request)
-      - Database types: All Database* interfaces for SQLite results (handles 0/1 booleans)
+      - Database types: All Database\* interfaces for SQLite results (handles 0/1 booleans)
       - Service return types: CreateUserResult, LoginResult, RefreshResult, OrgAccessCheck
       - JWT & Auth: JWTPayload, SocketUser, CSRFTokenData
       - Custom error: AppError class with status codes
@@ -599,9 +697,9 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - ✅ **PHASE 3: File Conversion (Big Bang)**:
     - **Frontend**: 47 .jsx → .tsx (React components)
     - **Frontend**: 16 .js → .ts (utils, hooks, API client, tests)
-    - **Backend**: 40 server/src/*.js → .ts (routes, services, middleware, core)
-    - **Scripts**: 4 server/scripts/*.js → .ts (backup, analysis scripts)
-    - **Tests**: 2 server/tests/*.js → .ts (setup, helpers)
+    - **Backend**: 40 server/src/\*.js → .ts (routes, services, middleware, core)
+    - **Scripts**: 4 server/scripts/\*.js → .ts (backup, analysis scripts)
+    - **Tests**: 2 server/tests/\*.js → .ts (setup, helpers)
     - **Total**: 109 files converted
     - **Script**: `scripts/rename-to-typescript.sh` for automated conversion
   - ✅ **STRICT MODE ENABLED**:
@@ -629,8 +727,8 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `server/package.json` (backend) - Updated scripts for tsx
     - `package-lock.json` (both) - New TypeScript dependencies
   - 📊 **DEPENDENCIES ADDED**:
-    - Frontend: 9 new packages (typescript, @types/*, @typescript-eslint/*)
-    - Backend: 11 new packages (typescript, tsx, @types/*, @typescript-eslint/*)
+    - Frontend: 9 new packages (typescript, @types/_, @typescript-eslint/_)
+    - Backend: 11 new packages (typescript, tsx, @types/_, @typescript-eslint/_)
     - Total: 23 new packages across both
     - Security: 0 vulnerabilities
   - ⚠️ **CURRENT STATUS**:
@@ -730,7 +828,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - **Initial test**: Triggered deployment via push to main
       - Deploy to Render: 12 seconds ✓
       - Health check verification: 1m3s ✓
-      - Live site confirmed: https://orgtree-app.onrender.com ✓
+      - Live site confirmed: <https://orgtree-app.onrender.com> ✓
       - Database connectivity: ✓ CONNECTED
     - **With retry logic**: CD workflow fully operational
       - Total workflow time: 21 seconds (warm start) ✓
@@ -768,7 +866,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - ✅ CD Workflow: 100% passing (21s warm, handles 3min cold starts)
     - ✅ All deployment health checks passing with retry logic
     - ✅ Sentry Error Monitoring: Active in production (frontend + backend)
-    - ✅ Live production site: https://orgtree-app.onrender.com
+    - ✅ Live production site: <https://orgtree-app.onrender.com>
 
   **January 5, 2026 - Database Indexing Audit (Session 14)** ⚡:
   - ✅ **PERFORMANCE**: Comprehensive database indexing optimization completed
@@ -854,6 +952,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - ✅ **FILES MODIFIED** (1 file):
     - `server/src/index.js` - Changed static import to dynamic import with production check
   - ✅ **CODE CHANGE**:
+
     ```javascript
     // Only load dotenv in development - Render sets env vars directly in production
     if (process.env.NODE_ENV !== 'production') {
@@ -861,6 +960,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
       dotenv.config();
     }
     ```
+
   - ✅ **RESULT**: Server now starts cleanly on first attempt
   - 🚀 **DEPLOYED**: Successfully deployed to Render (https://orgtree-app.onrender.com)
   - 📝 **NOTE**: Also noticed soft delete migrations ran (deleted_at columns for departments/people)
@@ -1244,7 +1344,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Health check: database connected, production environment
     - Build completed in ~1 minute with no errors
 
-  ---
+---
 
   **December 28, 2025 - Audit Log Improvements** 📋:
   - ✅ **BUG FIXED**: Audit log showing "Unknown" for deleted entities and "System" for actor
@@ -1323,7 +1423,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 📝 **IMPACT**: Powerful, fast search across entire organization with instant results
   - 🎯 **USER EXPERIENCE**: Type to search with autocomplete, filter by type, see highlighted matches
 
-  ---
+---
 
   **December 28, 2025 - Session Summary** 📊:
   - 🎯 **PRIMARY ACHIEVEMENTS**:
@@ -1336,7 +1436,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 🔧 **CODE QUALITY**: Clean implementation, proper error handling
   - 📈 **CODEBASE GROWTH**: 116 total commits (+4 today)
 
-  ---
+---
 
   **December 26, 2025 - Share Settings Permission Fix** 🔐:
   - ✅ **BUG FIXED**: Non-admin users (Editor/Viewer) receiving "Failed to load share settings" error when clicking "Share Organization"
@@ -1559,7 +1659,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
       - Solution: Moved `GET /invitations/:token` to `GET /public/invitation/:token`
       - Public endpoint doesn't require authentication for invitation viewing
   - **DEPLOYMENT NOTES**:
-    - Requires `RESEND_API_KEY` from https://resend.com (free tier: 100 emails/day)
+    - Requires `RESEND_API_KEY` from <https://resend.com> (free tier: 100 emails/day)
     - Requires `APP_URL` set to actual Render URL (e.g., `https://orgtree-app.onrender.com`)
     - Emails from `onboarding@resend.dev` may go to spam (custom domain recommended for production)
   - **KNOWN LIMITATIONS**:
@@ -1867,15 +1967,17 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 **Project Status**: 🚀 **LIVE IN PRODUCTION** - Successfully deployed and running on Render!
 
 **Production Readiness**: 100% (15/15 critical tasks completed)
+
 - Security: 10/10 (Zero vulnerabilities, rate limiting, secure secrets)
 - Infrastructure: 10/10 (Logging, error handling, health checks)
 - Deployment: 10/10 (Automated builds, comprehensive documentation)
 
 **Maintainers**: Claude Code + Development Team
-**Repository**: https://github.com/Ic3burG/OrgTree
+**Repository**: <https://github.com/Ic3burG/OrgTree>
 **Last Updated**: January 7, 2026 (Session 24 - Test Coverage Expansion)
 
 **Today's Major Milestone**: 🎉
+
 - ✅ Full TypeScript migration with 0 errors (all 8 phases)
 - ✅ CI Pipeline passing (ESLint + Prettier + Tests + Build)
 - ✅ Developer Experience roadmap items (Docker, CONTRIBUTING.md, API SDK, LICENSE)
@@ -1888,6 +1990,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Files Created Today** (9 new files):
 ...
+
 - `src/sdk/index.ts` - API client SDK
 - `src/sdk/api-types.ts` - Generated TypeScript types from OpenAPI
 - `LICENSE` - GPL 3.0 license
@@ -1895,45 +1998,50 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Files Modified Today** (100+ files):
 ...
+
 - `PROGRESS.md` - Multiple comprehensive updates
 - `server/src/services/search.service.ts` - Fixed search highlight bug
 - `src/components/SearchOverlay.tsx` - Refactored to use shared helper
 - `src/components/admin/ShareModal.tsx` - Refactored to use shared helper
-...
+  ...
 
 ---
 
 ## 📋 Next Session Planning
 
 ### Completed Today (January 7, 2026)
-| Session | Task | Status | Duration |
-|---------|------|--------|----------|
-| 21 | Developer Experience Improvements | ✅ Complete | ~2 hours |
-| 22 | Dead Code Elimination | ✅ First pass complete | ~30 min |
-| 22 | Search Highlight Bug Fix | ✅ Fixed broken security fix | ~15 min |
-| 22 | Increase Test Coverage | ✅ Added Department & People tests | ~45 min |
-| 22 | License Migration | ✅ Migrated to GPL 3.0 | ~20 min |
-| 22 | CI/CD Troubleshooting | ✅ Fixed formatting in test files | ~15 min |
-| 23 | Architecture Decision Records (ADRs) | ✅ Complete | ~1 hour |
-| 24 | Test Coverage: Search Service | ✅ Complete | ~1 hour |
+
+| Session | Task                                 | Status                             | Duration |
+| ------- | ------------------------------------ | ---------------------------------- | -------- |
+| 21      | Developer Experience Improvements    | ✅ Complete                        | ~2 hours |
+| 22      | Dead Code Elimination                | ✅ First pass complete             | ~30 min  |
+| 22      | Search Highlight Bug Fix             | ✅ Fixed broken security fix       | ~15 min  |
+| 22      | Increase Test Coverage               | ✅ Added Department & People tests | ~45 min  |
+| 22      | License Migration                    | ✅ Migrated to GPL 3.0             | ~20 min  |
+| 22      | CI/CD Troubleshooting                | ✅ Fixed formatting in test files  | ~15 min  |
+| 23      | Architecture Decision Records (ADRs) | ✅ Complete                        | ~1 hour  |
+| 24      | Test Coverage: Search Service        | ✅ Complete                        | ~1 hour  |
 
 **Total**: 8 major task areas completed, 32+ commits pushed
 
 ### Key Accomplishments Today
 
 **🚀 Developer Experience (Session 21)**:
+
 - ✅ Docker development environment with hot reload
 - ✅ TypeScript API SDK generated from OpenAPI spec
 - ✅ Comprehensive CONTRIBUTING.md
 - ✅ GPL 3.0 LICENSE file added (later updated from MIT)
 
 **🧹 Code Cleanup & Modernization (Session 22)**:
+
 - ✅ Deleted `src/utils/parseCSVToFlow.ts` (Dead code)
 - ✅ Deleted `scripts/rename-to-typescript.sh` (One-time use)
 - ✅ Refactored `SearchOverlay.tsx` and `ShareModal.tsx` to use `helpers.getInitials`
 - ✅ Fixed `search.service.ts` to correctly handle `<mark>` tags in highlights
 
 **🧪 Testing & CI/CD (Session 22)**:
+
 - ✅ Added `department.service.test.ts` (15 tests)
 - ✅ Added `people.service.test.ts` (8 tests)
 - ✅ Verified backend test pass rate (100%)
@@ -1941,10 +2049,12 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - ✅ Total test count increased to 99 (67 backend + 32 frontend)
 
 **⚖️ Legal & Compliance (Session 22)**:
+
 - ✅ Full migration from MIT to GPL 3.0 license
 - ✅ Updated all license headers, `package.json` files, and documentation
 
 **📚 Documentation & Architecture (Session 23)**:
+
 - ✅ Completed Developer Experience roadmap item: "Development Documentation"
 - ✅ Created comprehensive Architecture Decision Records (ADRs)
 - ✅ Documented 7 major architectural decisions with full context and tradeoffs
@@ -1960,6 +2070,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - ✅ 9 new documentation files created in `docs/adr/`
 
 **🧪 Test Coverage Expansion (Session 24)**:
+
 - ✅ Added comprehensive tests for `search.service.ts` (30 tests)
 - ✅ FTS5 full-text search coverage: 0% → 93.93%
 - ✅ Backend service layer coverage: 25.18% → 31.01% (+5.83%)
@@ -1995,7 +2106,8 @@ cd server && npm run dev  # Backend (http://localhost:3001)
    - Can be done incrementally
 
 ### Production Environment
-- **URL**: https://orgtree-app.onrender.com
+
+- **URL**: <https://orgtree-app.onrender.com>
 - **Status**: ✅ Running
 - **Sentry**: Configure `SENTRY_DSN` and `VITE_SENTRY_DSN` in Render
 - **Backups**: Set up Render Cron Job: `node server/scripts/backup.js` at `0 2 * * *`
@@ -2006,14 +2118,15 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Final Status: 25/25 Issues Resolved (100%)
 
-| Severity | Count | Status |
-|----------|-------|--------|
-| CRITICAL | 3 | ✅ All resolved |
-| HIGH | 8 | ✅ All resolved |
-| MEDIUM | 9 | ✅ All resolved |
-| LOW | 5 | ✅ All resolved |
+| Severity | Count | Status          |
+| -------- | ----- | --------------- |
+| CRITICAL | 3     | ✅ All resolved |
+| HIGH     | 8     | ✅ All resolved |
+| MEDIUM   | 9     | ✅ All resolved |
+| LOW      | 5     | ✅ All resolved |
 
 ### Key Security Features Implemented
+
 - ✅ Refresh token system with 15-minute access tokens
 - ✅ CSRF protection with Double Submit Cookie pattern
 - ✅ Comprehensive security audit logging
@@ -2025,6 +2138,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - ✅ Security headers via helmet.js
 
 ### Future Enhancement Opportunities
+
 - Password complexity requirements (uppercase, numbers, symbols)
 - Two-factor authentication (2FA)
 - Account lockout after failed attempts
@@ -2038,12 +2152,15 @@ See [SECURITY_AUDIT.md](SECURITY_AUDIT.md) for full details.
 OrgTree is now **ready for public release**! The application has been hardened with enterprise-grade security measures and deployment infrastructure.
 
 ### Deployment Platform
+
 - **Recommended**: Render.com ($7/month)
 - **Documentation**: See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment guide
 - **Estimated Deploy Time**: 1-2 hours
 
 ### Security Improvements (December 21, 2025)
+
 All critical security vulnerabilities have been addressed:
+
 - ✅ HIGH severity JWT vulnerability fixed
 - ✅ Insecure dev endpoints removed
 - ✅ Rate limiting prevents brute force attacks
@@ -2051,6 +2168,7 @@ All critical security vulnerabilities have been addressed:
 - ✅ Production-ready CORS configuration
 
 ### Infrastructure Additions (December 21, 2025)
+
 - ✅ React Error Boundaries prevent crashes
 - ✅ Structured JSON logging for production
 - ✅ Health check with database connectivity
@@ -2058,6 +2176,7 @@ All critical security vulnerabilities have been addressed:
 - ✅ Environment variable templates and validation
 
 ### Deployment Readiness (December 21, 2025)
+
 - ✅ Automated build scripts
 - ✅ Render configuration (Infrastructure as Code)
 - ✅ Comprehensive 500+ line deployment guide
@@ -2065,6 +2184,7 @@ All critical security vulnerabilities have been addressed:
 - ✅ Zero-downtime deployment strategy
 
 ### Operational Tools (December 24, 2025)
+
 - ✅ **Render CLI**: Configured with API key authentication for manual deployment control
   - Trigger deploys: `render deploy`
   - View live logs: `render logs -s orgtree`

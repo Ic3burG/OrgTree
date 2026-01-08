@@ -10,7 +10,7 @@
 export function getInitials(name: string | null | undefined): string {
   if (!name) return '?';
 
-  const parts = name.trim().split(/\s+/);
+  const parts = name.trim().split(/[^a-zA-Z]+/);
 
   if (parts.length === 1) {
     return parts[0]?.substring(0, 2).toUpperCase() || '?';
