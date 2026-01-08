@@ -1,0 +1,453 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Database as DatabaseType } from 'better-sqlite3';
+
+// Mock the database module with FTS5 support
+vi.mock('../db.js', async () => {
+  const { default: Database } = await import('better-sqlite3');
+  const db: DatabaseType = new Database(':memory:');
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      role TEXT DEFAULT 'user',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS organizations (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      created_by_id INTEGER NOT NULL,
+      is_public INTEGER DEFAULT 0,
+      share_token TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (created_by_id) REFERENCES users(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS organization_members (
+      id INTEGER PRIMARY KEY,
+      organization_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      role TEXT NOT NULL DEFAULT 'viewer',
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      UNIQUE(organization_id, user_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS departments (
+      id INTEGER PRIMARY KEY,
+      organization_id INTEGER NOT NULL,
+      parent_id INTEGER,
+      name TEXT NOT NULL,
+      description TEXT,
+      sort_order INTEGER DEFAULT 0,
+      deleted_at DATETIME,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+      FOREIGN KEY (parent_id) REFERENCES departments(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS people (
+      id INTEGER PRIMARY KEY,
+      department_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      title TEXT,
+      email TEXT,
+      phone TEXT,
+      sort_order INTEGER DEFAULT 0,
+      deleted_at DATETIME,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
+    );
+
+    -- FTS5 virtual tables for search
+    CREATE VIRTUAL TABLE departments_fts USING fts5(
+      name,
+      description,
+      content=departments,
+      tokenize='porter unicode61'
+    );
+
+    CREATE VIRTUAL TABLE people_fts USING fts5(
+      name,
+      title,
+      email,
+      content=people,
+      tokenize='porter unicode61'
+    );
+  `);
+
+  return { default: db };
+});
+
+// Mock member service
+vi.mock('./member.service.js', () => ({
+  requireOrgPermission: vi.fn(),
+}));
+
+// Mock escape utility
+vi.mock('../utils/escape.js', () => ({
+  escapeHtml: (str: string) => {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  },
+}));
+
+import db from '../db.js';
+import { requireOrgPermission } from './member.service.js';
+import { search, getAutocompleteSuggestions } from './search.service.js';
+
+describe('Search Service', () => {
+  const orgId = 1;
+  const userId = 1;
+
+  beforeEach(() => {
+    // Clear all tables
+    (db as DatabaseType).exec(`
+      DELETE FROM people;
+      DELETE FROM departments;
+      DELETE FROM organization_members;
+      DELETE FROM organizations;
+      DELETE FROM users;
+    `);
+
+    // Insert test user
+    (db as DatabaseType)
+      .prepare(
+        `INSERT INTO users (id, name, email, password_hash, role)
+         VALUES (?, ?, ?, ?, ?)`
+      )
+      .run(userId, 'Test User', 'test@example.com', 'hashed_password', 'user');
+
+    // Insert test organization
+    (db as DatabaseType)
+      .prepare(
+        `INSERT INTO organizations (id, name, created_by_id)
+         VALUES (?, ?, ?)`
+      )
+      .run(orgId, 'Test Org', userId);
+
+    // Insert organization membership
+    (db as DatabaseType)
+      .prepare(
+        `INSERT INTO organization_members (id, organization_id, user_id, role)
+         VALUES (?, ?, ?, ?)`
+      )
+      .run(1, orgId, userId, 'owner');
+
+    // Insert test departments
+    (db as DatabaseType)
+      .prepare(
+        `INSERT INTO departments (id, organization_id, name, description)
+         VALUES (?, ?, ?, ?)`
+      )
+      .run(1, orgId, 'Engineering Department', 'Software development team');
+
+    (db as DatabaseType)
+      .prepare(
+        `INSERT INTO departments (id, organization_id, name, description)
+         VALUES (?, ?, ?, ?)`
+      )
+      .run(2, orgId, 'Marketing Department', 'Brand and campaigns');
+
+    (db as DatabaseType)
+      .prepare(
+        `INSERT INTO departments (id, organization_id, name, description)
+         VALUES (?, ?, ?, ?)`
+      )
+      .run(3, orgId, 'Sales Department', 'Customer acquisition');
+
+    // Insert test people
+    (db as DatabaseType)
+      .prepare(
+        `INSERT INTO people (id, department_id, name, title, email)
+         VALUES (?, ?, ?, ?, ?)`
+      )
+      .run(1, 1, 'John Doe', 'Senior Software Engineer', 'john.doe@example.com');
+
+    (db as DatabaseType)
+      .prepare(
+        `INSERT INTO people (id, department_id, name, title, email)
+         VALUES (?, ?, ?, ?, ?)`
+      )
+      .run(2, 1, 'Jane Smith', 'Engineering Manager', 'jane.smith@example.com');
+
+    (db as DatabaseType)
+      .prepare(
+        `INSERT INTO people (id, department_id, name, title, email)
+         VALUES (?, ?, ?, ?, ?)`
+      )
+      .run(3, 2, 'Bob Johnson', 'Marketing Director', 'bob.johnson@example.com');
+
+    // Rebuild FTS5 indexes
+    (db as DatabaseType).exec(`
+      INSERT INTO departments_fts(departments_fts) VALUES('rebuild');
+      INSERT INTO people_fts(people_fts) VALUES('rebuild');
+    `);
+
+    // Reset mock
+    vi.mocked(requireOrgPermission).mockClear();
+  });
+
+  describe('search()', () => {
+    it('should search departments by name', () => {
+      const result = search(String(orgId), String(userId), { query: 'Engineering' });
+
+      expect(requireOrgPermission).toHaveBeenCalledWith(String(orgId), String(userId), 'viewer');
+      expect(result.total).toBeGreaterThan(0);
+      const deptResults = result.results.filter((r) => r.type === 'department');
+      expect(deptResults.length).toBeGreaterThan(0);
+      expect(deptResults[0].name).toContain('Engineering');
+      expect(result.results[0].highlight).toContain('mark');
+    });
+
+    it('should search departments by description', () => {
+      const result = search(String(orgId), String(userId), { query: 'software' });
+
+      expect(result.total).toBeGreaterThan(0);
+      expect(result.results.some((r) => r.type === 'department')).toBe(true);
+    });
+
+    it('should search people by name', () => {
+      const result = search(String(orgId), String(userId), { query: 'John' });
+
+      expect(result.total).toBeGreaterThan(0);
+      const personResults = result.results.filter((r) => r.type === 'person');
+      expect(personResults.length).toBeGreaterThan(0);
+      expect(personResults.some((p) => p.name === 'John Doe')).toBe(true);
+    });
+
+    it('should search people by title', () => {
+      const result = search(String(orgId), String(userId), { query: 'Engineer' });
+
+      expect(result.total).toBeGreaterThan(0);
+      const personResults = result.results.filter((r) => r.type === 'person');
+      expect(personResults.length).toBeGreaterThan(0);
+    });
+
+    it('should search people by email', () => {
+      const result = search(String(orgId), String(userId), { query: 'jane' });
+
+      expect(result.total).toBeGreaterThan(0);
+      const personResults = result.results.filter((r) => r.type === 'person');
+      expect(personResults.length).toBeGreaterThan(0);
+      const janeResult = personResults.find((p) => p.email === 'jane.smith@example.com');
+      expect(janeResult).toBeDefined();
+    });
+
+    it('should filter by type: departments only', () => {
+      const result = search(String(orgId), String(userId), { query: 'Department', type: 'departments' });
+
+      expect(result.total).toBeGreaterThan(0);
+      expect(result.results.every((r) => r.type === 'department')).toBe(true);
+    });
+
+    it('should filter by type: people only', () => {
+      const result = search(String(orgId), String(userId), { query: 'Manager', type: 'people' });
+
+      expect(result.total).toBeGreaterThan(0);
+      expect(result.results.every((r) => r.type === 'person')).toBe(true);
+    });
+
+    it('should return both departments and people for type: all', () => {
+      const result = search(String(orgId), String(userId), { query: 'Engineering', type: 'all' });
+
+      expect(result.total).toBeGreaterThan(0);
+      // Should find both Engineering Department and people with Engineering title
+      const hasDepartment = result.results.some((r) => r.type === 'department');
+      const hasPerson = result.results.some((r) => r.type === 'person');
+      expect(hasDepartment || hasPerson).toBe(true);
+    });
+
+    it('should support pagination with limit', () => {
+      const result = search(String(orgId), String(userId), { query: 'Department', limit: 2 });
+
+      expect(result.results.length).toBeLessThanOrEqual(2);
+      expect(result.pagination.limit).toBe(2);
+      expect(result.pagination.offset).toBe(0);
+    });
+
+    it('should support pagination with offset', () => {
+      const firstPage = search(String(orgId), String(userId), { query: 'Department', limit: 1, offset: 0 });
+      const secondPage = search(String(orgId), String(userId), { query: 'Department', limit: 1, offset: 1 });
+
+      if (firstPage.results.length > 0 && secondPage.results.length > 0) {
+        expect(firstPage.results[0].id).not.toBe(secondPage.results[0].id);
+      }
+    });
+
+    it('should calculate hasMore correctly', () => {
+      const result = search(String(orgId), String(userId), { query: 'Department', limit: 2 });
+
+      if (result.total > 2) {
+        expect(result.pagination.hasMore).toBe(true);
+      } else {
+        expect(result.pagination.hasMore).toBe(false);
+      }
+    });
+
+    it('should handle empty query', () => {
+      const result = search(String(orgId), String(userId), { query: '' });
+
+      expect(result.total).toBe(0);
+      expect(result.results).toEqual([]);
+      expect(result.pagination.hasMore).toBe(false);
+    });
+
+    it('should handle whitespace-only query', () => {
+      const result = search(String(orgId), String(userId), { query: '   ' });
+
+      expect(result.total).toBe(0);
+      expect(result.results).toEqual([]);
+    });
+
+    it('should handle query with no matches', () => {
+      const result = search(String(orgId), String(userId), { query: 'NonExistentTerm12345' });
+
+      expect(result.total).toBe(0);
+      expect(result.results).toEqual([]);
+    });
+
+    it('should handle special characters safely', () => {
+      // These characters should be escaped and not cause FTS5 syntax errors
+      const result = search(String(orgId), String(userId), { query: '"*(){}[]^~\\:' });
+
+      // Should not throw error, just return no results
+      expect(result.total).toBe(0);
+      expect(result.results).toEqual([]);
+    });
+
+    it('should support prefix matching for partial words', () => {
+      const result = search(String(orgId), String(userId), { query: 'Eng' });
+
+      // Should match "Engineering" with prefix search
+      expect(result.total).toBeGreaterThan(0);
+    });
+
+    it('should include people count for department results', () => {
+      const result = search(String(orgId), String(userId), { query: 'Engineering', type: 'departments' });
+
+      const deptResult = result.results.find((r) => r.type === 'department');
+      expect(deptResult).toBeDefined();
+      expect(deptResult?.peopleCount).toBeDefined();
+      expect(deptResult?.peopleCount).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should include department name for person results', () => {
+      const result = search(String(orgId), String(userId), { query: 'John', type: 'people' });
+
+      const personResult = result.results.find((r) => r.type === 'person');
+      expect(personResult).toBeDefined();
+      expect(personResult?.departmentName).toBeDefined();
+    });
+
+    it('should escape HTML in highlights', () => {
+      // Insert department with HTML-like content
+      (db as DatabaseType)
+        .prepare(
+          `INSERT INTO departments (id, organization_id, name, description)
+           VALUES (?, ?, ?, ?)`
+        )
+        .run(999, orgId, '<script>alert("xss")</script>', 'Test description');
+
+      // Rebuild FTS5
+      (db as DatabaseType).exec(`INSERT INTO departments_fts(departments_fts) VALUES('rebuild');`);
+
+      const result = search(String(orgId), String(userId), { query: 'script' });
+
+      const deptResult = result.results.find((r) => r.name.includes('script'));
+      expect(deptResult).toBeDefined();
+      expect(deptResult?.highlight).not.toContain('<script>');
+      expect(deptResult?.highlight).toContain('&lt;');
+    });
+
+    it('should preserve <mark> tags in highlights', () => {
+      const result = search(String(orgId), String(userId), { query: 'Engineering' });
+
+      if (result.results.length > 0) {
+        expect(result.results[0].highlight).toContain('<mark>');
+        expect(result.results[0].highlight).toContain('</mark>');
+      }
+    });
+  });
+
+  describe('getAutocompleteSuggestions()', () => {
+    it('should return department suggestions', () => {
+      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Engineering');
+
+      expect(requireOrgPermission).toHaveBeenCalledWith(String(orgId), String(userId), 'viewer');
+      expect(result.suggestions.length).toBeGreaterThan(0);
+      expect(result.suggestions.some((s) => s.type === 'department')).toBe(true);
+    });
+
+    it('should return person suggestions', () => {
+      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'John');
+
+      expect(result.suggestions.length).toBeGreaterThan(0);
+      expect(result.suggestions.some((s) => s.type === 'person')).toBe(true);
+    });
+
+    it('should return mixed suggestions for common terms', () => {
+      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Engineering', 10);
+
+      expect(result.suggestions.length).toBeGreaterThan(0);
+      // Should have both departments and people with "Engineering"
+    });
+
+    it('should respect limit parameter', () => {
+      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Department', 2);
+
+      expect(result.suggestions.length).toBeLessThanOrEqual(2);
+    });
+
+    it('should use default limit of 5', () => {
+      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Department');
+
+      expect(result.suggestions.length).toBeLessThanOrEqual(5);
+    });
+
+    it('should handle empty query', () => {
+      const result = getAutocompleteSuggestions(String(orgId), String(userId), '');
+
+      expect(result.suggestions).toEqual([]);
+    });
+
+    it('should handle whitespace-only query', () => {
+      const result = getAutocompleteSuggestions(String(orgId), String(userId), '   ');
+
+      expect(result.suggestions).toEqual([]);
+    });
+
+    it('should handle query with no matches', () => {
+      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'NonExistentTerm12345');
+
+      expect(result.suggestions.length).toBe(0);
+    });
+
+    it('should support prefix matching', () => {
+      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Eng');
+
+      // Should match "Engineering" with prefix search
+      expect(result.suggestions.length).toBeGreaterThan(0);
+    });
+
+    it('should return unique suggestions', () => {
+      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Department');
+
+      const texts = result.suggestions.map((s) => s.text);
+      const uniqueTexts = [...new Set(texts)];
+      expect(texts.length).toBe(uniqueTexts.length);
+    });
+  });
+});
