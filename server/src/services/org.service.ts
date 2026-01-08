@@ -53,7 +53,7 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
   const org = db
     .prepare(
       `
-    SELECT id, name, created_by_id as createdById, created_at as createdAt, updated_at as updatedAt
+    SELECT id, name, created_by_id, created_at, updated_at
     FROM organizations
     WHERE id = ?
   `
@@ -71,9 +71,9 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
     .prepare(
       `
     SELECT
-      d.id, d.organization_id as organizationId, d.parent_id as parentId,
-      d.name, d.description, d.sort_order as sortOrder,
-      d.created_at as createdAt, d.updated_at as updatedAt
+      d.id, d.organization_id, d.parent_id,
+      d.name, d.description, d.sort_order,
+      d.created_at, d.updated_at
     FROM departments d
     WHERE d.organization_id = ?
     ORDER BY d.sort_order ASC
@@ -87,8 +87,8 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
       .prepare(
         `
       SELECT
-        id, department_id as departmentId, name, title, email, phone,
-        sort_order as sortOrder, created_at as createdAt, updated_at as updatedAt
+        id, department_id, name, title, email, phone,
+        sort_order, created_at, updated_at
       FROM people
       WHERE department_id = ?
       ORDER BY sort_order ASC
@@ -121,7 +121,7 @@ export async function createOrganization(
   return db
     .prepare(
       `
-    SELECT id, name, created_by_id as createdById, created_at as createdAt, updated_at as updatedAt
+    SELECT id, name, created_by_id, created_at, updated_at
     FROM organizations WHERE id = ?
   `
     )
@@ -149,7 +149,7 @@ export async function updateOrganization(
   return db
     .prepare(
       `
-    SELECT id, name, created_by_id as createdById, created_at as createdAt, updated_at as updatedAt
+    SELECT id, name, created_by_id, created_at, updated_at
     FROM organizations WHERE id = ?
   `
     )
