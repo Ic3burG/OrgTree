@@ -2,6 +2,7 @@ import React, { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserPlus, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import DarkModeToggle from '../ui/DarkModeToggle';
 
 export default function SignupPage(): React.JSX.Element {
   const [name, setName] = useState<string>('');
@@ -45,12 +46,19 @@ export default function SignupPage(): React.JSX.Element {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900 px-4 py-8 relative">
+      <div className="absolute top-4 right-4">
+        <DarkModeToggle />
+      </div>
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-lg shadow-lg p-6 lg:p-8">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 lg:p-8">
           <div className="text-center mb-6 lg:mb-8">
-            <h1 className="text-xl lg:text-2xl font-bold text-slate-800">Create Account</h1>
-            <p className="text-sm lg:text-base text-slate-600 mt-2">Get started with OrgTree</p>
+            <h1 className="text-xl lg:text-2xl font-bold text-slate-800 dark:text-slate-100">
+              Create Account
+            </h1>
+            <p className="text-sm lg:text-base text-slate-600 dark:text-slate-400 mt-2">
+              Get started with OrgTree
+            </p>
           </div>
 
           {error && (
@@ -62,7 +70,10 @@ export default function SignupPage(): React.JSX.Element {
 
           <form onSubmit={handleSubmit} className="space-y-5 lg:space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
                 Name
               </label>
               <div className="relative">
@@ -75,7 +86,7 @@ export default function SignupPage(): React.JSX.Element {
                   type="text"
                   value={name}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
+                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation bg-white dark:bg-slate-700 dark:text-slate-100"
                   placeholder="John Doe"
                   required
                 />
@@ -83,7 +94,10 @@ export default function SignupPage(): React.JSX.Element {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
                 Email
               </label>
               <div className="relative">
@@ -104,7 +118,10 @@ export default function SignupPage(): React.JSX.Element {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -127,7 +144,7 @@ export default function SignupPage(): React.JSX.Element {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-slate-700 mb-2"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
               >
                 Confirm Password
               </label>
@@ -166,7 +183,7 @@ export default function SignupPage(): React.JSX.Element {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm lg:text-base text-slate-600">
+          <p className="mt-6 text-center text-sm lg:text-base text-slate-600 dark:text-slate-400">
             Already have an account?{' '}
             <Link
               to="/login"

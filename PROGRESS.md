@@ -215,14 +215,29 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Total Components**: ~21 React components (added Bulk modals and action bar)
 - **API Endpoints**: 50+ REST endpoints (documented in OpenAPI spec at /api/docs)
 - **Database Tables**: 4 main tables + 2 FTS5 virtual tables (departments_fts, people_fts)
-- **Test Coverage**: 99 tests (67 backend + 32 frontend) with Vitest
+- **Test Coverage**: 210 tests (151 backend + 59 frontend) with Vitest
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
 
-- **Last Major Update**: Observability - Sentry Express Instrumentation via `--import` (January 8, 2026)
+- **Last Major Update**: Test Coverage Expansion Phase 2 - Security & Integration Tests (January 8, 2026)
 - **Total Commits**: 204+ commits on main branch
-- **Today's Progress (January 8, 2026)**:
+- **Today's Progress (January 8, 2026 - Session 30)**:
+  - 🧪 **MAJOR TEST COVERAGE EXPANSION**: Added 81 new tests (54 backend + 27 frontend)
+  - ✅ **Backend Coverage**: 15.72% → 22.11% (+6.39%) - now 151 tests total
+    - Added `auth.test.ts` middleware tests (17 tests, 100% coverage)
+    - Added `csrf.test.ts` middleware tests (17 tests, 100% coverage)
+    - Added `auth.test.ts` route integration tests (20 tests, 63% coverage)
+    - Middleware coverage: 0% → 85.48%
+    - Auth routes coverage: 0% → 63.28%
+  - ✅ **Frontend Coverage**: 1.8% → 3.2% (+1.4%) - now 59 tests total
+    - Added `helpers.test.ts` utility tests (7 tests, 100% coverage)
+    - Added `audit.test.ts` utility tests (20 tests, 100% coverage)
+    - Utils coverage: 5.55% → 25.75%
+  - ✅ **Critical Security Testing**: JWT validation, CSRF protection, token rotation, session management
+  - ✅ **Integration Testing**: Installed Supertest for API route testing
+  - 📊 **Test Statistics**: 97 → 151 backend tests, 32 → 59 frontend tests
+- **Previous Progress (January 8, 2026 - Session 29)**:
   - ✅ **Sentry Instrumentation**: Implemented Node.js `--import` for Sentry v8+ to enable early initialization and automatic Express tracking
   - ✅ **CSS Optimization**: Refactored `index.css` to use Tailwind layers and improved theme config
   - ✅ **Dependency Scanning**: Implemented GitHub Dependabot for root and server `npm` packages
@@ -1998,7 +2013,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>
-**Last Updated**: January 7, 2026 (Session 24 - Test Coverage Expansion)
+**Last Updated**: January 8, 2026 (Session 30 - Test Coverage Expansion Phase 2)
 
 **Today's Major Milestone**: 🎉
 

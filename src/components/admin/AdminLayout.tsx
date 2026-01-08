@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
 import ConnectionStatus from '../ui/ConnectionStatus';
+import DarkModeToggle from '../ui/DarkModeToggle';
 import api from '../../api/client';
 
 export default function AdminLayout(): React.JSX.Element {
@@ -83,8 +84,9 @@ export default function AdminLayout(): React.JSX.Element {
           </NavLink>
         )}
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Admin Panel</h2>
-          <div className="hidden lg:block">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Admin Panel</h2>
+          <div className="hidden lg:flex items-center gap-2">
+            <DarkModeToggle />
             <ConnectionStatus />
           </div>
         </div>
@@ -98,7 +100,9 @@ export default function AdminLayout(): React.JSX.Element {
           onClick={closeSidebar}
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
+              isActive
+                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
         >
@@ -201,9 +205,9 @@ export default function AdminLayout(): React.JSX.Element {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       {/* Mobile header with hamburger */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-40 flex items-center justify-between px-4">
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white dark:bg-slate-800 shadow-sm z-40 flex items-center justify-between px-4">
         <div className="flex items-center">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -212,9 +216,12 @@ export default function AdminLayout(): React.JSX.Element {
           >
             <Menu size={24} className="text-gray-700" />
           </button>
-          <h1 className="ml-3 text-lg font-semibold text-gray-900">OrgTree</h1>
+          <h1 className="ml-3 text-lg font-semibold text-gray-900 dark:text-slate-100">OrgTree</h1>
         </div>
-        <ConnectionStatus />
+        <div className="flex items-center gap-2">
+          <DarkModeToggle />
+          <ConnectionStatus />
+        </div>
       </header>
 
       {/* Mobile sidebar overlay */}
@@ -223,7 +230,7 @@ export default function AdminLayout(): React.JSX.Element {
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/50 transition-opacity" onClick={closeSidebar} />
           {/* Drawer */}
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl flex flex-col animate-slide-in-left">
+          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white dark:bg-slate-800 shadow-xl flex flex-col animate-slide-in-left">
             {/* Close button */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
@@ -241,7 +248,7 @@ export default function AdminLayout(): React.JSX.Element {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-white shadow-lg flex-col border-r border-gray-200">
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-slate-800 shadow-lg flex-col border-r border-gray-200 dark:border-slate-700">
         <SidebarContent />
       </aside>
 

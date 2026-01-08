@@ -322,7 +322,7 @@ function PublicOrgMapContent(): React.JSX.Element {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-slate-600">Loading organization chart...</p>
@@ -356,7 +356,7 @@ function PublicOrgMapContent(): React.JSX.Element {
   }
 
   return (
-    <div className="w-full h-screen relative bg-slate-50">
+    <div className="w-full h-screen relative bg-slate-50 dark:bg-slate-900">
       <ThemeContext.Provider value={currentTheme}>
         <ReactFlow
           nodes={nodesWithCallbacks}
@@ -384,10 +384,10 @@ function PublicOrgMapContent(): React.JSX.Element {
       </ThemeContext.Provider>
 
       {/* Public View Badge */}
-      <div className="absolute top-4 left-4 z-10 bg-white rounded-lg shadow-lg px-4 py-3 border border-slate-200">
+      <div className="absolute top-4 left-4 z-10 bg-white dark:bg-slate-800 rounded-lg shadow-lg px-4 py-3 border border-slate-200 dark:border-slate-700">
         <div className="flex items-center gap-3">
           <svg
-            className="w-6 h-6 text-blue-600"
+            className="w-6 h-6 text-blue-600 dark:text-blue-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -400,8 +400,8 @@ function PublicOrgMapContent(): React.JSX.Element {
             />
           </svg>
           <div>
-            <h1 className="font-semibold text-slate-900">{orgName}</h1>
-            <p className="text-xs text-slate-500">Public view • Read only</p>
+            <h1 className="font-semibold text-slate-900 dark:text-slate-100">{orgName}</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Public view • Read only</p>
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ThemePicker from './ThemePicker';
+import DarkModeToggle from './ui/DarkModeToggle';
 
 interface ToolbarProps {
   onZoomIn: () => void;
@@ -47,8 +48,8 @@ export default function Toolbar({
   // Mobile: compact buttons, bottom positioning
   // Desktop: standard buttons, top positioning
   const buttonClass = `
-    p-2 lg:p-2.5 bg-white border border-slate-300 rounded-lg
-    hover:bg-slate-50 hover:border-slate-400
+    p-2 lg:p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg
+    hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-400 dark:hover:border-slate-500
     transition-all duration-150 shadow-md lg:shadow-sm hover:shadow-lg lg:hover:shadow-md
     focus:outline-none focus:ring-2 focus:ring-blue-400
     disabled:opacity-50 disabled:cursor-not-allowed
@@ -148,7 +149,10 @@ export default function Toolbar({
             />
 
             {/* Theme options */}
-            <div className="absolute right-full mr-2 top-0 z-50 bg-white border border-slate-300 rounded-lg p-3 shadow-xl animate-in slide-in-from-right-2 duration-200">
+            <div className="absolute right-full mr-2 top-0 z-50 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-3 shadow-xl animate-in slide-in-from-right-2 duration-200">
+              <div className="mb-3 pb-3 border-b border-slate-200 dark:border-slate-700">
+                <DarkModeToggle />
+              </div>
               <ThemePicker
                 currentTheme={currentTheme}
                 onThemeChange={(theme: string) => {

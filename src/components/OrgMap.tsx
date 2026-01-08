@@ -484,7 +484,7 @@ export default function OrgMap(): React.JSX.Element {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-slate-600">Loading organization map...</p>
@@ -531,7 +531,7 @@ export default function OrgMap(): React.JSX.Element {
   }
 
   return (
-    <div className="w-full h-screen relative bg-slate-50">
+    <div className="w-full h-screen relative bg-slate-50 dark:bg-slate-900">
       <ThemeContext.Provider value={currentTheme}>
         <div ref={reactFlowWrapper} className="w-full h-full">
           <ReactFlow

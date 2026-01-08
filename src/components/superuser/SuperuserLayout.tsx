@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Users, FileText, LogOut, ArrowLeft, Menu, X, Shield } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import DarkModeToggle from '../ui/DarkModeToggle';
 
 export default function SuperuserLayout() {
   const { user, logout } = useAuth();
@@ -35,9 +36,16 @@ export default function SuperuserLayout() {
           <ArrowLeft size={16} />
           Back to Organizations
         </button>
-        <div className="flex items-center gap-2">
-          <Shield size={20} className="text-purple-600" />
-          <h2 className="text-lg font-semibold text-gray-900">System Admin</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield size={20} className="text-purple-600 dark:text-purple-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
+              System Admin
+            </h2>
+          </div>
+          <div className="hidden lg:block">
+            <DarkModeToggle />
+          </div>
         </div>
       </div>
 
@@ -48,7 +56,9 @@ export default function SuperuserLayout() {
           onClick={closeSidebar}
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive ? 'bg-purple-50 text-purple-700' : 'text-gray-700 hover:bg-gray-50'
+              isActive
+                ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
         >
@@ -103,9 +113,9 @@ export default function SuperuserLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       {/* Mobile header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-40 flex items-center px-4">
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white dark:bg-slate-800 shadow-sm z-40 flex items-center justify-between px-4">
         <button
           onClick={() => setSidebarOpen(true)}
           className="p-2 -ml-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -113,17 +123,29 @@ export default function SuperuserLayout() {
         >
           <Menu size={24} className="text-gray-700" />
         </button>
-        <div className="ml-3 flex items-center gap-2">
-          <Shield size={20} className="text-purple-600" />
-          <h1 className="text-lg font-semibold text-gray-900">System Admin</h1>
+        <div className="flex items-center">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 -ml-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu size={24} className="text-gray-700 dark:text-slate-300" />
+          </button>
+          <div className="ml-3 flex items-center gap-2">
+            <Shield size={20} className="text-purple-600 dark:text-purple-400" />
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
+              System Admin
+            </h1>
+          </div>
         </div>
+        <DarkModeToggle />
       </header>
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/50 transition-opacity" onClick={closeSidebar} />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl flex flex-col animate-slide-in-left">
+          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white dark:bg-slate-800 shadow-xl flex flex-col animate-slide-in-left">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
               <button
@@ -140,7 +162,7 @@ export default function SuperuserLayout() {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-white shadow-lg flex-col border-r border-gray-200">
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-slate-800 shadow-lg flex-col border-r border-gray-200 dark:border-slate-700">
         <SidebarContent />
       </aside>
 

@@ -2,6 +2,7 @@ import React, { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
+import DarkModeToggle from '../ui/DarkModeToggle';
 
 export default function LoginPage(): React.JSX.Element {
   const [email, setEmail] = useState<string>('');
@@ -35,12 +36,17 @@ export default function LoginPage(): React.JSX.Element {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900 px-4 relative">
+      <div className="absolute top-4 right-4">
+        <DarkModeToggle />
+      </div>
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-lg shadow-lg p-6 lg:p-8">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 lg:p-8">
           <div className="text-center mb-6 lg:mb-8">
-            <h1 className="text-xl lg:text-2xl font-bold text-slate-800">Welcome Back</h1>
-            <p className="text-sm lg:text-base text-slate-600 mt-2">
+            <h1 className="text-xl lg:text-2xl font-bold text-slate-800 dark:text-slate-100">
+              Welcome Back
+            </h1>
+            <p className="text-sm lg:text-base text-slate-600 dark:text-slate-400 mt-2">
               Sign in to your OrgTree account
             </p>
           </div>
@@ -54,12 +60,15 @@ export default function LoginPage(): React.JSX.Element {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
                 Email
               </label>
               <div className="relative">
                 <Mail
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                   size={20}
                 />
                 <input
@@ -67,7 +76,7 @@ export default function LoginPage(): React.JSX.Element {
                   type="email"
                   value={email}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
+                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation bg-white dark:bg-slate-700 dark:text-slate-100"
                   placeholder="you@example.com"
                   required
                 />
@@ -75,12 +84,15 @@ export default function LoginPage(): React.JSX.Element {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
                 <Lock
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                   size={20}
                 />
                 <input
@@ -88,7 +100,7 @@ export default function LoginPage(): React.JSX.Element {
                   type="password"
                   value={password}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
+                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation bg-white dark:bg-slate-700 dark:text-slate-100"
                   placeholder="••••••••"
                   required
                 />
@@ -111,7 +123,7 @@ export default function LoginPage(): React.JSX.Element {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm lg:text-base text-slate-600">
+          <p className="mt-6 text-center text-sm lg:text-base text-slate-600 dark:text-slate-400">
             Don't have an account?{' '}
             <Link
               to="/signup"

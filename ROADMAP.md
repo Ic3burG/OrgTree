@@ -12,7 +12,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 ### Code Quality & Testing
 
 - [x] **TypeScript Migration** - Convert codebase from JavaScript to TypeScript for better type safety ✅ **DONE** (January 7, 2026)
-- [ ] **Increase Test Coverage** - Expand from 99 tests to cover edge cases and integration scenarios (target: 80%+ coverage)
+- [ ] **Increase Test Coverage** - Expand from 210 tests to cover edge cases and integration scenarios (target: 80%+ coverage) 🚀 **IN PROGRESS** (Backend: 22%, Frontend: 3% - Phase 2 complete)
 - [ ] **E2E Testing** - Add end-to-end tests with Playwright or Cypress for critical user flows
 - [x] **ESLint/Prettier Setup** - Enforce code style consistency across the team ✅ **DONE** (January 4, 2026)
 - [ ] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces
@@ -94,7 +94,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 ### Medium Priority (Next month)
 
-1. **Increase Test Coverage** - Improve test coverage beyond current 76 tests
+1. **Increase Test Coverage** - Improve test coverage beyond current 210 tests (Backend: 22%, Frontend: 3%)
 2. ~~**Database Indexing Audit** - Optimize query performance~~ ✅ **DONE** (January 5, 2026)
 3. ~~**CI/CD Pipeline** - Automate testing and deployment~~ ✅ **DONE** (January 5, 2026)
 4. ~~**ESLint/Prettier Setup** - Enforce code consistency~~ ✅ **DONE**
@@ -148,9 +148,10 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 **Recently Completed** (January 2026):
 
+- ✅ **Test Coverage Expansion Phase 2** - Added 81 new tests (54 backend + 27 frontend), now at 210 total tests with 22% backend and 3% frontend coverage (January 8, 2026)
 - ✅ **Development Documentation (ADRs)** - Comprehensive architecture decision records (January 7, 2026)
 - ✅ **Dead Code Elimination** - Removed unused utilities and scripts (January 7, 2026)
-- ✅ **Test Coverage** - Increased to 99 tests (January 7, 2026)
+- ✅ **Test Coverage Phase 1** - Increased to 99 tests (January 7, 2026)
 - ✅ **Developer Experience** - Docker, CONTRIBUTING.md, API SDK, LICENSE (January 7, 2026)
 - ✅ **TypeScript Migration** - Full strict mode, 1000+ errors fixed (January 7, 2026)
 - ✅ **CI Pipeline Fixes** - All checks passing (January 7, 2026)

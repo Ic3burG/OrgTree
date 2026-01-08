@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { ToastProvider } from './components/ui/Toast';
@@ -36,91 +37,93 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <SocketProvider>
-          <ToastProvider>
-            <BrowserRouter>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route path="/public/:shareToken" element={<PublicOrgMap />} />
-                <Route path="/invite/:token" element={<AcceptInvitation />} />
+      <ThemeProvider>
+        <AuthProvider>
+          <SocketProvider>
+            <ToastProvider>
+              <BrowserRouter>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
+                  <Route path="/public/:shareToken" element={<PublicOrgMap />} />
+                  <Route path="/invite/:token" element={<AcceptInvitation />} />
 
-                {/* Change Password (Protected) */}
-                <Route
-                  path="/change-password"
-                  element={
-                    <ProtectedRoute>
-                      <ChangePasswordPage />
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Sessions Management (Protected) */}
-                <Route
-                  path="/settings/sessions"
-                  element={
-                    <ProtectedRoute>
-                      <SessionsPage />
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Protected routes */}
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <OrganizationSelector />
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Superuser routes - System Administration */}
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute requiredRole="superuser">
-                      <SuperuserLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<Navigate to="/admin/users" replace />} />
-                  <Route path="users" element={<UserManagement />} />
-                  <Route path="audit" element={<SystemAuditLog />} />
-                </Route>
-
-                {/* Admin routes */}
-                <Route
-                  path="/org/:orgId"
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<Dashboard />} />
-                  <Route path="departments" element={<DepartmentManager />} />
-                  <Route path="people" element={<PersonManager />} />
+                  {/* Change Password (Protected) */}
                   <Route
-                    path="map"
+                    path="/change-password"
                     element={
-                      <ReactFlowProvider>
-                        <OrgMap />
-                      </ReactFlowProvider>
+                      <ProtectedRoute>
+                        <ChangePasswordPage />
+                      </ProtectedRoute>
                     }
                   />
-                  <Route path="audit" element={<AuditLog />} />
-                </Route>
 
-                {/* Catch all - redirect to home */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </BrowserRouter>
-          </ToastProvider>
-        </SocketProvider>
-      </AuthProvider>
+                  {/* Sessions Management (Protected) */}
+                  <Route
+                    path="/settings/sessions"
+                    element={
+                      <ProtectedRoute>
+                        <SessionsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* Protected routes */}
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <OrganizationSelector />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* Superuser routes - System Administration */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute requiredRole="superuser">
+                        <SuperuserLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<Navigate to="/admin/users" replace />} />
+                    <Route path="users" element={<UserManagement />} />
+                    <Route path="audit" element={<SystemAuditLog />} />
+                  </Route>
+
+                  {/* Admin routes */}
+                  <Route
+                    path="/org/:orgId"
+                    element={
+                      <ProtectedRoute>
+                        <AdminLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<Dashboard />} />
+                    <Route path="departments" element={<DepartmentManager />} />
+                    <Route path="people" element={<PersonManager />} />
+                    <Route
+                      path="map"
+                      element={
+                        <ReactFlowProvider>
+                          <OrgMap />
+                        </ReactFlowProvider>
+                      }
+                    />
+                    <Route path="audit" element={<AuditLog />} />
+                  </Route>
+
+                  {/* Catch all - redirect to home */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </BrowserRouter>
+            </ToastProvider>
+          </SocketProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }
