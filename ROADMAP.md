@@ -55,7 +55,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [x] **Docker Development Environment** - docker-compose for consistent local setup ✅ **DONE** (January 7, 2026)
 - [x] **Contribution Guidelines** - CONTRIBUTING.md with setup, PR process, code standards ✅ **DONE** (January 7, 2026)
 - [x] **API Client SDK** - Generate JavaScript/TypeScript SDK from OpenAPI spec ✅ **DONE** (January 7, 2026)
-- [ ] **Development Documentation** - Architecture decision records (ADRs)
+- [x] **Development Documentation** - Architecture decision records (ADRs) ✅ **DONE** (January 7, 2026)
 
 ### Observability & Analytics
 - [ ] **Application Metrics Dashboard** - Response times, error rates, active users
@@ -126,12 +126,12 @@ This document outlines the development roadmap for OrgTree, including technical 
 ## 🎯 Current Focus
 
 **Active Work**:
-- Code Cleanup & Modernization (Dead Code Elimination, CSS Optimization)
+- Code Cleanup & Modernization (CSS Optimization)
 - Increasing test coverage
 - Performance testing with larger datasets
-- Development Documentation (Architecture Decision Records)
 
 **Recently Completed** (January 2026):
+- ✅ **Development Documentation (ADRs)** - Comprehensive architecture decision records (January 7, 2026)
 - ✅ **Dead Code Elimination** - Removed unused utilities and scripts (January 7, 2026)
 - ✅ **Test Coverage** - Increased to 99 tests (January 7, 2026)
 - ✅ **Developer Experience** - Docker, CONTRIBUTING.md, API SDK, LICENSE (January 7, 2026)
