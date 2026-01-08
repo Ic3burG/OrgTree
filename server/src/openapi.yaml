@@ -18,8 +18,8 @@ info:
   version: 1.0.0
   contact:
     name: OrgTree Support
-      license:
-        name: GPL 3.0
+  license:
+    name: GPL 3.0
   servers:
   - url: http://localhost:3001/api
     description: Development server
