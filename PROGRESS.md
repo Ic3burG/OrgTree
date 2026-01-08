@@ -199,17 +199,17 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
-- **Last Major Update**: Critical Bug Fix - Departments Now Visible (January 8, 2026)
-- **Total Commits**: 196+ commits on main branch
+- **Last Major Update**: Critical Bug Fixes - Org Chart Fully Restored (January 8, 2026)
+- **Total Commits**: 197+ commits on main branch
 - **Today's Progress (January 8, 2026)**:
-  - 🚨 **CRITICAL BUG FIX**: Fixed departments not displaying in UI
-  - ✅ Corrected field naming mismatch (camelCase → snake_case)
-  - ✅ Fixed department.service.ts SQL query aliases
-  - ✅ Fixed people.service.ts SQL query aliases
-  - ✅ Updated 5 files (2 services, 2 test files, 1 route)
+  - 🚨 **CRITICAL BUG FIX #1**: Fixed departments not displaying in UI
+  - 🚨 **CRITICAL BUG FIX #2**: Fixed department hierarchy lines not showing in org chart
+  - ✅ Corrected field naming mismatch across all services (camelCase → snake_case)
+  - ✅ Fixed department.service.ts, people.service.ts, org.service.ts SQL query aliases
+  - ✅ Updated 7 files (3 services, 3 test files, 1 route)
   - ✅ All 129 tests passing (97 backend + 32 frontend)
-  - ✅ Production build successful and deployed
-  - 🚀 Deployed to production via GitHub Actions
+  - ✅ Production build successful and deployed (2 deployments)
+  - 🚀 Both fixes deployed to production via GitHub Actions
 - **Previous Progress (January 7, 2026)**:
   - 🎉 **COMPLETED**: Developer Experience roadmap items (Docker, CONTRIBUTING.md, API SDK, LICENSE)
   - ✅ Fixed 950+ backend TypeScript errors
@@ -231,7 +231,39 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - ✅ CI/CD Resolution: Diagnosed and fixed formatting issues in new test files
 - **Recent Session Highlights**:
 
-  **January 8, 2026 - Critical Production Bug Fix (Session 25)** 🚨🔧:
+  **January 8, 2026 - Critical Bug Fix #2: Org Chart Lines Restored (Session 25 Part 2)** 🚨🔗:
+  - 🐛 **CRITICAL BUG IDENTIFIED**: Department hierarchy lines not showing in Organization Map
+  - 🔍 **ROOT CAUSE ANALYSIS**:
+    - First fix (1732bec) corrected department.service.ts and people.service.ts
+    - However, org.service.ts (used by OrgMap component) was missed
+    - Frontend transformToFlowData() checks `dept.parent_id` to create edges
+    - Backend org.service.ts still returned `dept.parentId` (camelCase)
+    - When parent_id was undefined, no edges were created
+    - Result: Departments rendered but no connecting lines displayed
+  - ✅ **FIXES APPLIED**:
+    - Fixed org.service.ts getOrganizationById() department query (3 fields: parent_id, organization_id, sort_order)
+    - Fixed org.service.ts getOrganizationById() people query (3 fields: department_id, sort_order, created_at)
+    - Fixed org.service.ts all organization queries (3 fields: created_by_id, created_at, updated_at)
+    - Updated org.service.test.ts assertions (createdById → created_by_id)
+  - 📊 **TESTING**:
+    - All 97 backend tests passing
+    - All 32 frontend tests passing
+    - Production build verified successful
+  - 🚀 **DEPLOYMENT**:
+    - Pushed commit `da076d3` to main branch
+    - GitHub Actions CI/CD triggered
+    - Deployed to production at https://orgtree-app.onrender.com
+  - 💡 **IMPACT**:
+    - Department hierarchy lines now display correctly
+    - Parent-child relationships visualized with smooth arrows
+    - OrgMap visualization fully functional
+    - Core feature of OrgTree restored
+  - 📁 **FILES MODIFIED** (2 files):
+    - `server/src/services/org.service.ts` (fixed 3 queries)
+    - `server/src/services/org.service.test.ts` (fixed 1 assertion)
+  - 🎯 **PREVENTION**: Complete field naming consistency now achieved across ALL backend services
+
+  **January 8, 2026 - Critical Bug Fix #1: Departments Now Visible (Session 25 Part 1)** 🚨🔧:
   - 🐛 **CRITICAL BUG IDENTIFIED**: Departments not visible in Departments tab
   - 🔍 **ROOT CAUSE ANALYSIS**:
     - TypeScript migration (Session 19) introduced field naming mismatch
