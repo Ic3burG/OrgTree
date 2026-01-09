@@ -1,6 +1,6 @@
 # OrgTree Development Roadmap
 
-> **Last Updated**: January 8, 2026
+> **Last Updated**: January 9, 2026
 > **Status**: Production-ready with ongoing enhancements
 
 This document outlines the development roadmap for OrgTree, including technical debt items, feature enhancements, and infrastructure improvements.
@@ -127,7 +127,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 2. ~~**Bulk Operations** - Multi-select functionality for efficiency~~ ✅ **DONE** (December 29, 2025)
 3. **Custom Fields** - Allow configurable person/department attributes
 4. ~~**API Documentation** - Complete REST API documentation~~ ✅ **DONE** (December 30, 2025)
-5. **Dark Mode** - Add dark theme support with user preference persistence
+5. ~~**Dark Mode** - Add dark theme support with user preference persistence~~ ✅ **DONE** (January 9, 2026)
 
 ### Medium-term Vision (Next quarter)
 

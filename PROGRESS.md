@@ -116,6 +116,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ✅ **Advanced Search with FTS5** - Full-text search with autocomplete, fuzzy matching, type filtering
 - ✅ Mobile responsiveness and touch controls
 - ✅ Theme switching and visual customization (works in public and private views)
+- ✅ **Dark Mode** - Global dark mode with localStorage persistence and system preference detection
 - ✅ All scrolling functionality working properly
 - ✅ Proper layout spacing for departments with many people
 - ✅ Consistent department hierarchy from XML imports (no duplicates)
@@ -220,9 +221,30 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: Test Coverage Expansion Phase 4 - Bulk Operations Testing (January 9, 2026)
-- **Total Commits**: 205+ commits on main branch
-- **Today's Progress (January 9, 2026 - Session 32)**:
+- **Last Major Update**: Dark Mode Implementation Complete (January 9, 2026)
+- **Total Commits**: 207+ commits on main branch
+- **Today's Progress (January 9, 2026 - Session 33)**:
+  - 🌙 **DARK MODE IMPLEMENTATION COMPLETE**: Full dark mode support across entire application
+  - ✅ **21+ Components Updated**: Comprehensive dark mode coverage
+    - Infrastructure: ThemeContext, DarkModeToggle, Tailwind config, global CSS
+    - Layouts: AdminLayout, SuperuserLayout with toggles
+    - Auth: LoginPage, SignupPage with toggles
+    - Visualization: OrgMap, PublicOrgMap, Toolbar, SearchOverlay, DetailPanel, PersonRowCard
+    - Utility: ErrorBoundary, OrganizationSelector
+    - Admin: Dashboard, BulkActionBar, AuditLog
+  - ✅ **Feature Highlights**:
+    - localStorage persistence (key: `orgTreeDarkMode`)
+    - System preference detection (`prefers-color-scheme`)
+    - Consistent color patterns throughout
+    - Dark mode toggle in all major layouts
+  - ✅ **Quality Metrics**:
+    - TypeScript: 0 errors ✅
+    - Tests: 275 passing ✅
+    - Build: Successful ✅
+    - Pre-commit/pre-push: All checks passing ✅
+  - 📊 **Files Changed**: 12 files modified (1,357 insertions, 125 deletions)
+  - 🚀 **Deployment**: Pushed to production
+- **Previous Progress (January 9, 2026 - Session 32)**:
   - 🧪 **CI FIX & TEST COVERAGE EXPANSION**: Fixed CI failures and added bulk operations tests
   - ✅ **CI Pipeline Fixed**: Resolved ESLint and Prettier issues in test files
     - Fixed ESLint errors in `users.service.test.ts` (`as any` → `as never`, unused imports)
