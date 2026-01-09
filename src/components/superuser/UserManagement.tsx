@@ -200,12 +200,16 @@ export default function UserManagement(): React.JSX.Element {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <Users size={28} className="text-purple-600" />
-            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-            <span className="px-2 py-1 text-sm bg-purple-100 text-purple-700 rounded-full">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
+              User Management
+            </h1>
+            <span className="px-2 py-1 text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full">
               {users.length} users
             </span>
           </div>
-          <p className="text-gray-600">Manage user accounts, roles, and permissions</p>
+          <p className="text-gray-600 dark:text-slate-400">
+            Manage user accounts, roles, and permissions
+          </p>
         </div>
         <button
           onClick={() => setIsCreateModalOpen(true)}
@@ -225,13 +229,13 @@ export default function UserManagement(): React.JSX.Element {
             placeholder="Search by name or email..."
             value={searchTerm}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100"
           />
         </div>
         <select
           value={filterRole}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterRole(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100"
         >
           <option value="">All Roles</option>
           <option value="superuser">Superuser</option>
@@ -242,16 +246,16 @@ export default function UserManagement(): React.JSX.Element {
 
       {/* Users List */}
       {filteredUsers.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
+        <div className="text-center py-12 bg-gray-50 dark:bg-slate-800 rounded-lg">
           <Users size={48} className="mx-auto text-gray-400 mb-4" />
           <p className="text-gray-600">
             {searchTerm || filterRole ? 'No users match your search' : 'No users found'}
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+            <thead className="bg-gray-50 dark:bg-slate-700">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   User
@@ -270,9 +274,9 @@ export default function UserManagement(): React.JSX.Element {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
               {filteredUsers.map((user: UserWithCounts) => (
-                <tr key={user.id} className="hover:bg-gray-50">
+                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-slate-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
@@ -281,7 +285,7 @@ export default function UserManagement(): React.JSX.Element {
                         </span>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900 dark:text-slate-100">
                           {user.name}
                           {user.id === currentUser?.id && (
                             <span className="ml-2 text-xs text-purple-600">(You)</span>
@@ -304,7 +308,7 @@ export default function UserManagement(): React.JSX.Element {
                     <button
                       onClick={() => handleViewOrgs(user)}
                       disabled={loadingOrgs}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors text-left disabled:opacity-50"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-left disabled:opacity-50"
                       title="View organization details"
                     >
                       {user.organizationCount > 0 && (

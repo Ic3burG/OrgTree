@@ -275,8 +275,10 @@ export default function DepartmentManager(): React.JSX.Element {
           onClick={selectionMode ? () => toggleSelect(dept.id) : undefined}
           className={`flex items-center gap-2 p-3 rounded-lg group transition-all duration-300 ${
             selectionMode ? 'cursor-pointer' : ''
-          } ${recentlyChanged ? 'bg-blue-50 ring-2 ring-blue-200' : ''} ${
-            selectionMode && selected ? 'bg-blue-50' : 'hover:bg-slate-50'
+          } ${recentlyChanged ? 'bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-700' : ''} ${
+            selectionMode && selected
+              ? 'bg-blue-50 dark:bg-blue-900/30'
+              : 'hover:bg-slate-50 dark:hover:bg-slate-700'
           }`}
           style={{ paddingLeft: `${dept.depth * 24 + 12}px` }}
         >
@@ -307,7 +309,7 @@ export default function DepartmentManager(): React.JSX.Element {
           <Building2 size={18} className="text-slate-400" />
 
           <div className="flex-1">
-            <span className="font-medium text-slate-800">{dept.name}</span>
+            <span className="font-medium text-slate-800 dark:text-slate-100">{dept.name}</span>
             <span className="ml-2 text-sm text-slate-500">
               <Users size={14} className="inline mr-1" />
               {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
@@ -360,8 +362,10 @@ export default function DepartmentManager(): React.JSX.Element {
         onClick={selectionMode ? () => toggleSelect(result.id) : undefined}
         className={`flex items-center gap-2 p-3 rounded-lg group transition-all duration-300 ${
           selectionMode ? 'cursor-pointer' : ''
-        } ${recentlyChanged ? 'bg-blue-50 ring-2 ring-blue-200' : ''} ${
-          selectionMode && selected ? 'bg-blue-50' : 'hover:bg-slate-50'
+        } ${recentlyChanged ? 'bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-700' : ''} ${
+          selectionMode && selected
+            ? 'bg-blue-50 dark:bg-blue-900/30'
+            : 'hover:bg-slate-50 dark:hover:bg-slate-700'
         }`}
       >
         {/* Checkbox in selection mode */}
@@ -378,7 +382,7 @@ export default function DepartmentManager(): React.JSX.Element {
         <Building2 size={18} className="text-slate-400" />
 
         <div className="flex-1">
-          <span className="font-medium text-slate-800">{result.name}</span>
+          <span className="font-medium text-slate-800 dark:text-slate-100">{result.name}</span>
           <span className="ml-2 text-sm text-slate-500">
             <Users size={14} className="inline mr-1" />
             {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
@@ -427,14 +431,14 @@ export default function DepartmentManager(): React.JSX.Element {
       {/* Header - fixed */}
       <div className="flex-shrink-0 p-8 pb-0">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">Departments</h1>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Departments</h1>
           <div className="flex items-center gap-2">
             <button
               onClick={toggleSelectionMode}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
                 selectionMode
-                  ? 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200'
-                  : 'border-slate-300 text-slate-700 hover:bg-slate-50'
+                  ? 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600'
+                  : 'border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >
               {selectionMode ? <X size={20} /> : <CheckSquare size={20} />}
@@ -443,7 +447,7 @@ export default function DepartmentManager(): React.JSX.Element {
             {!selectionMode && (
               <button
                 onClick={openCreateForm}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700 dark:bg-slate-600 text-white rounded-lg hover:bg-slate-800 dark:hover:bg-slate-500 transition-colors"
               >
                 <Plus size={20} />
                 Add Department
@@ -472,7 +476,7 @@ export default function DepartmentManager(): React.JSX.Element {
               placeholder="Search departments by name or description..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100"
             />
           </div>
           {isSearching && searchTotal > 0 && (
@@ -485,10 +489,10 @@ export default function DepartmentManager(): React.JSX.Element {
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-8 pb-8 min-h-0">
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow">
           {/* Select All header in selection mode */}
           {selectionMode && departments.length > 0 && (
-            <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
+            <div className="px-4 py-3 bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 flex items-center gap-3">
               <button
                 onClick={toggleSelectAll}
                 className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"

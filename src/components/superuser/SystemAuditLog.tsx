@@ -122,13 +122,17 @@ export default function SystemAuditLog(): React.JSX.Element {
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
               <FileText className="text-purple-600" size={32} />
-              <h1 className="text-3xl font-bold text-gray-900">System Audit Logs</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">
+                System Audit Logs
+              </h1>
             </div>
-            <p className="text-gray-600">Track all changes across all organizations</p>
+            <p className="text-gray-600 dark:text-slate-400">
+              Track all changes across all organizations
+            </p>
           </div>
 
           {/* Filters */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4 mb-6">
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -154,7 +158,7 @@ export default function SystemAuditLog(): React.JSX.Element {
             </div>
 
             {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-slate-700">
                 {/* Action Type Filter */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -165,7 +169,7 @@ export default function SystemAuditLog(): React.JSX.Element {
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                       setActionType(e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100"
                   >
                     <option value="">All Actions</option>
                     <option value="created">Created</option>
@@ -209,7 +213,7 @@ export default function SystemAuditLog(): React.JSX.Element {
                       setOrgFilter(e.target.value)
                     }
                     placeholder="Filter by org ID..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100"
                   />
                 </div>
               </div>
@@ -223,10 +227,12 @@ export default function SystemAuditLog(): React.JSX.Element {
         <div className="max-w-7xl mx-auto">
           {/* Audit Logs Table */}
           {logs.length === 0 ? (
-            <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-              <FileText className="mx-auto text-gray-400 mb-4" size={48} />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No audit logs yet</h3>
-              <p className="text-gray-600">
+            <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-12 text-center">
+              <FileText className="mx-auto text-gray-400 dark:text-slate-500 mb-4" size={48} />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">
+                No audit logs yet
+              </h3>
+              <p className="text-gray-600 dark:text-slate-400">
                 {hasActiveFilters
                   ? 'No logs match your current filters'
                   : 'System activity will appear here'}
@@ -235,9 +241,9 @@ export default function SystemAuditLog(): React.JSX.Element {
           ) : (
             <>
               {/* Desktop Table */}
-              <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+              <div className="hidden md:block bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+                  <thead className="bg-gray-50 dark:bg-slate-700">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Timestamp
@@ -259,10 +265,10 @@ export default function SystemAuditLog(): React.JSX.Element {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
                     {logs.map((log: AuditLogExtended) => (
-                      <tr key={log.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-slate-100">
                           <div className="flex items-center gap-2">
                             <Clock size={16} className="text-gray-400" />
                             {formatDate(log.createdAt || log.created_at)}
@@ -312,7 +318,10 @@ export default function SystemAuditLog(): React.JSX.Element {
               {/* Mobile Cards */}
               <div className="md:hidden space-y-4">
                 {logs.map((log: AuditLogExtended) => (
-                  <div key={log.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                  <div
+                    key={log.id}
+                    className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4"
+                  >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Clock size={16} />

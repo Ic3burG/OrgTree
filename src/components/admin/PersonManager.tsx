@@ -291,16 +291,18 @@ export default function PersonManager(): React.JSX.Element {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">People</h1>
-              <p className="text-gray-500">Manage people across all departments</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-1">People</h1>
+              <p className="text-gray-500 dark:text-slate-400">
+                Manage people across all departments
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleSelectionMode}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
                   selectionMode
-                    ? 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200'
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                    ? 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-slate-700'
                 }`}
               >
                 {selectionMode ? <X size={20} /> : <CheckSquare size={20} />}
@@ -322,7 +324,7 @@ export default function PersonManager(): React.JSX.Element {
           {error && <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">{error}</div>}
 
           {/* Filters - fixed */}
-          <div className="mb-4 bg-white rounded-lg shadow p-4">
+          <div className="mb-4 bg-white dark:bg-slate-800 rounded-lg shadow p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Search */}
               <div className="relative">
@@ -342,7 +344,7 @@ export default function PersonManager(): React.JSX.Element {
                   placeholder="Search by name, title, email, or phone..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100"
                 />
               </div>
 
@@ -350,7 +352,7 @@ export default function PersonManager(): React.JSX.Element {
               <select
                 value={filterDepartment}
                 onChange={e => setFilterDepartment(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100"
               >
                 <option value="">All Departments</option>
                 {departments.map((dept: Department) => (
@@ -372,9 +374,9 @@ export default function PersonManager(): React.JSX.Element {
               <div className="text-gray-500">Loading people...</div>
             </div>
           ) : filteredPeople.length === 0 ? (
-            <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-8 text-center text-gray-500 dark:text-slate-400">
               <Search size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">
                 {searchTerm || filterDepartment ? 'No people found' : 'No people yet'}
               </h3>
               <p className="text-gray-500 mb-4">
@@ -394,10 +396,10 @@ export default function PersonManager(): React.JSX.Element {
             </div>
           ) : (
             <>
-              <div className="bg-white rounded-lg shadow">
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow">
                 {/* Select All header in selection mode */}
                 {selectionMode && filteredPeople.length > 0 && (
-                  <div className="px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-3">
+                  <div className="px-6 py-3 bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600 flex items-center gap-3">
                     <button
                       onClick={toggleSelectAll}
                       className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
@@ -421,8 +423,10 @@ export default function PersonManager(): React.JSX.Element {
                       onClick={selectionMode ? () => toggleSelect(person.id) : undefined}
                       className={`p-6 transition-all duration-300 group ${
                         selectionMode ? 'cursor-pointer' : ''
-                      } ${isRecentlyChanged(person.id) ? 'bg-blue-50 ring-2 ring-2 ring-blue-200' : ''} ${
-                        selectionMode && isSelected(person.id) ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      } ${isRecentlyChanged(person.id) ? 'bg-blue-50 dark:bg-blue-900/30 ring-2 ring-2 ring-blue-200 dark:ring-blue-700' : ''} ${
+                        selectionMode && isSelected(person.id)
+                          ? 'bg-blue-50 dark:bg-blue-900/30'
+                          : 'hover:bg-gray-50 dark:hover:bg-slate-700'
                       }`}
                     >
                       <div className="flex items-start gap-4">
@@ -439,7 +443,9 @@ export default function PersonManager(): React.JSX.Element {
 
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">{person.name}</h3>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
+                              {person.name}
+                            </h3>
                             <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded">
                               {person.departmentName}
                             </span>
