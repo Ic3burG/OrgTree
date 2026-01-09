@@ -3,7 +3,7 @@
 > Complete User Guide and Administration Manual
 
 **Version**: 1.0
-**Last Updated**: December 29, 2025
+**Last Updated**: January 9, 2026
 **Application URL**: https://orgtree-app.onrender.com
 
 ---
@@ -18,16 +18,17 @@
 6. [People Management](#people-management)
 7. [Org Chart Visualization](#org-chart-visualization)
 8. [Search Features](#search-features)
-9. [Team Collaboration](#team-collaboration)
-10. [Sharing & Public Access](#sharing--public-access)
-11. [Bulk Operations](#bulk-operations)
-12. [Data Import & Export](#data-import--export)
-13. [Audit Trail](#audit-trail)
-14. [Administration Guide](#administration-guide)
-15. [Superuser Guide](#superuser-guide)
-16. [Troubleshooting](#troubleshooting)
-17. [Keyboard Shortcuts](#keyboard-shortcuts)
-18. [Glossary](#glossary)
+9. [Dark Mode](#dark-mode)
+10. [Team Collaboration](#team-collaboration)
+11. [Sharing & Public Access](#sharing--public-access)
+12. [Bulk Operations](#bulk-operations)
+13. [Data Import & Export](#data-import--export)
+14. [Audit Trail](#audit-trail)
+15. [Administration Guide](#administration-guide)
+16. [Superuser Guide](#superuser-guide)
+17. [Troubleshooting](#troubleshooting)
+18. [Keyboard Shortcuts](#keyboard-shortcuts)
+19. [Glossary](#glossary)
 
 ---
 
@@ -47,18 +48,18 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 
 ### Key Features
 
-| Feature | Description |
-|---------|-------------|
-| **Multi-Organization Support** | Manage multiple organizations from one account |
-| **Hierarchical Departments** | Unlimited nesting of departments and sub-departments |
-| **Interactive Org Chart** | Zoom, pan, expand/collapse, and navigate visually |
-| **Real-Time Collaboration** | Changes sync instantly across all users |
-| **Role-Based Permissions** | Owner, Admin, Editor, and Viewer roles |
-| **Advanced Search** | Full-text search with fuzzy matching and autocomplete |
-| **Bulk Operations** | Select and modify multiple items at once |
-| **Audit Trail** | Complete history of all changes with 1-year retention |
-| **Public Sharing** | Share read-only links with anyone |
-| **Data Import/Export** | CSV and GEDS XML support |
+| Feature                        | Description                                           |
+| ------------------------------ | ----------------------------------------------------- |
+| **Multi-Organization Support** | Manage multiple organizations from one account        |
+| **Hierarchical Departments**   | Unlimited nesting of departments and sub-departments  |
+| **Interactive Org Chart**      | Zoom, pan, expand/collapse, and navigate visually     |
+| **Real-Time Collaboration**    | Changes sync instantly across all users               |
+| **Role-Based Permissions**     | Owner, Admin, Editor, and Viewer roles                |
+| **Advanced Search**            | Full-text search with fuzzy matching and autocomplete |
+| **Bulk Operations**            | Select and modify multiple items at once              |
+| **Audit Trail**                | Complete history of all changes with 1-year retention |
+| **Public Sharing**             | Share read-only links with anyone                     |
+| **Data Import/Export**         | CSV and GEDS XML support                              |
 
 ### System Requirements
 
@@ -157,12 +158,12 @@ The Dashboard is your central hub for managing an organization. Access it by cli
 
 OrgTree uses a 4-tier permission system:
 
-| Role | Permissions |
-|------|-------------|
-| **Owner** | Full control. Cannot be removed or demoted. Only one per organization. |
-| **Admin** | Manage members, sharing settings, and all content. Can add/remove members. |
-| **Editor** | Create, edit, and delete departments and people. Cannot manage members. |
-| **Viewer** | Read-only access. Can view all content but cannot make changes. |
+| Role       | Permissions                                                                |
+| ---------- | -------------------------------------------------------------------------- |
+| **Owner**  | Full control. Cannot be removed or demoted. Only one per organization.     |
+| **Admin**  | Manage members, sharing settings, and all content. Can add/remove members. |
+| **Editor** | Create, edit, and delete departments and people. Cannot manage members.    |
+| **Viewer** | Read-only access. Can view all content but cannot make changes.            |
 
 Your role is displayed on organization cards and in the sidebar.
 
@@ -261,6 +262,7 @@ To change a department's parent (re-organize hierarchy):
 3. Confirm the deletion
 
 > **Warning**: Deleting a department also deletes:
+>
 > - All sub-departments
 > - All people in the department and sub-departments
 
@@ -369,30 +371,33 @@ To change a department's parent (re-organize hierarchy):
 
 ### Navigation Controls
 
-| Control | Action |
-|---------|--------|
-| **Mouse Drag** | Pan the canvas |
-| **Scroll Wheel** | Zoom in/out |
-| **Pinch (touch)** | Zoom on mobile devices |
-| **[−] / [+]** | Zoom controls |
-| **[Fit]** | Fit entire chart in view |
-| **[Center]** | Center on root node |
-| **[⛶]** | Toggle fullscreen mode |
+| Control           | Action                   |
+| ----------------- | ------------------------ |
+| **Mouse Drag**    | Pan the canvas           |
+| **Scroll Wheel**  | Zoom in/out              |
+| **Pinch (touch)** | Zoom on mobile devices   |
+| **[−] / [+]**     | Zoom controls            |
+| **[Fit]**         | Fit entire chart in view |
+| **[Center]**      | Center on root node      |
+| **[⛶]**           | Toggle fullscreen mode   |
 
 ### Department Nodes
 
 Each department node shows:
+
 - **Department name**
 - **People count**
 - **Expand/collapse control** (if has people)
 
 Click a department node to:
+
 - **Expand**: Show list of people in that department
 - **Collapse**: Hide the people list
 
 ### Themes
 
 Change the visual appearance:
+
 1. Click **"Theme"** dropdown
 2. Select from available color schemes:
    - Default (Blue)
@@ -404,6 +409,7 @@ Change the visual appearance:
 ### Layout Options
 
 Change how the chart is arranged:
+
 1. Click **"Layout"** dropdown
 2. Options:
    - **Vertical** (top-to-bottom)
@@ -429,6 +435,7 @@ OrgTree includes powerful search capabilities with full-text search, fuzzy match
 3. Results appear instantly with highlighted matches
 
 **Search supports:**
+
 - Names (people and departments)
 - Job titles
 - Email addresses
@@ -438,6 +445,7 @@ OrgTree includes powerful search capabilities with full-text search, fuzzy match
 ### Search Filters
 
 Use the **Type** dropdown to filter results:
+
 - **All**: Search everything
 - **Departments**: Only departments
 - **People**: Only people
@@ -445,6 +453,7 @@ Use the **Type** dropdown to filter results:
 ### Autocomplete
 
 As you type (minimum 2 characters):
+
 - Suggestions appear below the search box
 - Click a suggestion to navigate directly to that item
 - Results are ranked by relevance
@@ -452,6 +461,7 @@ As you type (minimum 2 characters):
 ### Fuzzy Matching
 
 Search is typo-tolerant:
+
 - "enginr" matches "Engineer"
 - "developmnt" matches "Development"
 - Word stems are matched ("manage" matches "manager", "managing", "management")
@@ -459,6 +469,7 @@ Search is typo-tolerant:
 ### People Page Search
 
 On the **People** page:
+
 1. Type in the search box
 2. Results filter in real-time
 3. Combine with department filter for refined results
@@ -466,7 +477,112 @@ On the **People** page:
 ### Departments Page Search
 
 On the **Departments** page:
+
 1. Type in the search box
+---
+
+## Dark Mode
+
+OrgTree includes a comprehensive dark mode feature that provides a comfortable viewing experience in low-light environments.
+
+### Enabling Dark Mode
+
+Dark mode can be toggled from multiple locations throughout the application:
+
+**From Login/Signup Pages:**
+1. Look for the **moon icon** (🌙) in the top-right corner
+2. Click to toggle between light and dark modes
+
+**From Admin Dashboard:**
+1. Find the **moon/sun icon** in the sidebar (desktop) or mobile header
+2. Click to toggle dark mode
+3. Your preference is saved automatically
+
+**From Org Map:**
+1. Click the **palette icon** in the toolbar
+2. Find the dark mode toggle in the theme drawer
+3. Toggle between light and dark modes
+
+### Dark Mode Features
+
+| Feature | Description |
+|---------|-------------|
+| **Persistent Preference** | Your dark mode choice is saved in your browser |
+| **System Preference Detection** | On first visit, respects your system's dark mode setting |
+| **Instant Switching** | Changes apply immediately without page refresh |
+| **Consistent Colors** | All components follow the same dark mode color scheme |
+| **Accessible** | Maintains WCAG AA contrast ratios in both modes |
+
+### Where Dark Mode Works
+
+Dark mode is available throughout the entire application:
+
+✅ **Authentication Pages**
+- Login page
+- Signup page
+- Password change page
+
+✅ **Main Layouts**
+- Admin dashboard and sidebar
+- Superuser dashboard and sidebar
+- Organization selector page
+
+✅ **Visualization**
+- Org chart map
+- Public org chart view
+- Search overlay
+- Person detail panel
+- Department nodes
+
+✅ **Admin Components**
+- Dashboard statistics
+- Department manager
+- People manager
+- Audit log
+- Bulk operation modals
+
+✅ **Utility Components**
+- Error pages
+- Loading states
+- Modals and dialogs
+- Forms and inputs
+
+### Dark Mode Color Scheme
+
+The dark mode uses a carefully selected color palette:
+
+| Element | Light Mode | Dark Mode |
+|---------|-----------|-----------|
+| **Background** | White/Gray-50 | Slate-800/900 |
+| **Text** | Gray-900 | Slate-100 |
+| **Borders** | Gray-200 | Slate-700 |
+| **Hover States** | Gray-50 | Slate-700 |
+| **Active Elements** | Blue-50 | Blue-900/30 |
+
+### Troubleshooting Dark Mode
+
+**Dark mode not persisting after refresh:**
+- Check that your browser allows localStorage
+- Try clearing browser cache and toggling again
+
+**Some elements not switching:**
+- Try a hard refresh (Ctrl+Shift+R or Cmd+Shift+R)
+- Ensure you're using a supported browser
+
+**Preference not syncing across devices:**
+- Dark mode preference is stored locally per browser
+- You'll need to enable it on each device/browser
+
+### Technical Details
+
+For developers and advanced users:
+
+- **Storage Key**: `orgTreeDarkMode` in localStorage
+- **Values**: `"true"` (dark) or `"false"` (light)
+- **System Detection**: Uses `prefers-color-scheme` media query
+- **Implementation**: Tailwind CSS class-based dark mode
+
+---
 2. View switches from tree to flat list showing matches
 3. Clear search to return to tree view
 
@@ -522,10 +638,12 @@ Team members are users who have access to your organization. Each member has a s
 4. Click **"Add"**
 
 **If the user has an OrgTree account:**
+
 - They are added immediately
 - They'll see the organization on their next login
 
 **If the user doesn't have an account:**
+
 - Click **"Send Invitation"**
 - An email invitation is sent with a 7-day expiry
 - Once they create an account and accept, they're added
@@ -585,6 +703,7 @@ Share a read-only view of your organization with anyone, even without an OrgTree
 ### Public Link Features
 
 Users with the public link can:
+
 - ✅ View the org chart
 - ✅ Navigate and zoom
 - ✅ Search departments and people
@@ -624,6 +743,7 @@ Bulk operations allow you to select multiple items and perform actions on all of
 ### Selecting Items
 
 In selection mode:
+
 - **Click** any row to toggle selection
 - **Select All**: Click the checkbox in the header to select/deselect all
 - Selected items show a **checkmark** and blue highlight
@@ -694,6 +814,7 @@ Export your organization data to CSV format:
 ### CSV Format
 
 **departments.csv:**
+
 ```csv
 id,name,description,parentId
 dept-001,Engineering,Technical teams,
@@ -702,6 +823,7 @@ dept-003,Backend,API development,dept-001
 ```
 
 **people.csv:**
+
 ```csv
 id,name,title,email,phone,departmentId
 person-001,John Smith,Developer,john@example.com,555-0101,dept-002
@@ -777,6 +899,7 @@ The audit trail provides a complete history of all changes made to your organiza
 ### Audit Log Entry Details
 
 Each entry shows:
+
 - **Action icon**: Created (➕), Updated (✏️), Deleted (🗑️)
 - **Actor**: Who made the change
 - **Action description**: What was done
@@ -808,6 +931,7 @@ This section covers administrative tasks for organization Owners and Admins.
 ### Organization Settings
 
 Access organization settings:
+
 1. Navigate to Dashboard
 2. Click organization settings (gear icon)
 
@@ -894,6 +1018,7 @@ Superusers have system-wide administrative access beyond individual organization
 4. Confirm the change
 
 **Role Hierarchy:**
+
 - **User**: Standard user, can create organizations
 - **Admin**: Can access some admin features
 - **Superuser**: Full system access
@@ -947,6 +1072,7 @@ If a superuser is locked out:
 **Cause**: Session has expired
 
 **Solution**:
+
 1. Refresh the page
 2. Log in again if prompted
 
@@ -955,6 +1081,7 @@ If a superuser is locked out:
 **Cause**: Real-time sync issue
 
 **Solution**:
+
 1. Check the connection indicator (green dot = connected)
 2. Refresh the page
 3. Check your internet connection
@@ -964,6 +1091,7 @@ If a superuser is locked out:
 **Cause**: User doesn't exist or is already a member
 
 **Solution**:
+
 1. Verify the email address is correct
 2. If user doesn't exist, send an invitation
 3. Check if user is already a member
@@ -973,6 +1101,7 @@ If a superuser is locked out:
 **Cause**: Email filtering or configuration
 
 **Solution**:
+
 1. Check spam/junk folder
 2. Verify email address is correct
 3. Ask admin to resend invitation
@@ -983,6 +1112,7 @@ If a superuser is locked out:
 **Cause**: Insufficient permissions
 
 **Solution**:
+
 1. Check your role (visible in sidebar)
 2. Contact an Admin or Owner for access
 
@@ -991,6 +1121,7 @@ If a superuser is locked out:
 **Cause**: Link disabled or regenerated
 
 **Solution**:
+
 1. Verify public sharing is enabled
 2. Get the current link from the Share modal
 3. The link may have been regenerated
@@ -1000,19 +1131,20 @@ If a superuser is locked out:
 **Cause**: Item deleted or permission changed during operation
 
 **Solution**:
+
 1. Check the failure details in the result modal
 2. Retry with remaining items
 3. Verify items still exist
 
 ### Error Messages
 
-| Error | Meaning | Solution |
-|-------|---------|----------|
-| "Department not found" | Referenced department was deleted | Refresh and try again |
-| "Person not found" | Person was deleted | Refresh the list |
-| "Permission denied" | Insufficient role | Contact admin for access |
-| "Rate limit exceeded" | Too many requests | Wait a few minutes |
-| "Invalid email format" | Email syntax error | Check the email address |
+| Error                  | Meaning                           | Solution                 |
+| ---------------------- | --------------------------------- | ------------------------ |
+| "Department not found" | Referenced department was deleted | Refresh and try again    |
+| "Person not found"     | Person was deleted                | Refresh the list         |
+| "Permission denied"    | Insufficient role                 | Contact admin for access |
+| "Rate limit exceeded"  | Too many requests                 | Wait a few minutes       |
+| "Invalid email format" | Email syntax error                | Check the email address  |
 
 ### Getting Help
 
@@ -1028,57 +1160,57 @@ If you encounter issues not covered here:
 
 ### Global Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `/` | Open search |
+| Shortcut | Action              |
+| -------- | ------------------- |
+| `/`      | Open search         |
 | `Escape` | Close modal/overlay |
 
 ### Org Chart Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `+` or `=` | Zoom in |
-| `-` | Zoom out |
-| `0` | Reset zoom to 100% |
-| `F` | Fit to screen |
-| `C` | Center on root |
-| Arrow keys | Pan canvas |
+| Shortcut   | Action             |
+| ---------- | ------------------ |
+| `+` or `=` | Zoom in            |
+| `-`        | Zoom out           |
+| `0`        | Reset zoom to 100% |
+| `F`        | Fit to screen      |
+| `C`        | Center on root     |
+| Arrow keys | Pan canvas         |
 
 ### List Views
 
-| Shortcut | Action |
-|----------|--------|
+| Shortcut       | Action                         |
+| -------------- | ------------------------------ |
 | `Ctrl/Cmd + A` | Select all (in selection mode) |
-| `Escape` | Exit selection mode |
+| `Escape`       | Exit selection mode            |
 
 ---
 
 ## Glossary
 
-| Term | Definition |
-|------|------------|
-| **Organization** | A company or entity being managed in OrgTree |
-| **Department** | A unit within an organization (can have sub-departments) |
-| **Person** | An individual belonging to a department |
-| **Member** | A user with access to an organization |
-| **Owner** | The user who created an organization (highest privileges) |
-| **Admin** | A member with administrative privileges |
-| **Editor** | A member who can create/edit/delete content |
-| **Viewer** | A read-only member |
-| **Superuser** | System-wide administrator |
-| **Public Link** | A shareable URL for read-only access |
-| **Audit Log** | History of all changes |
-| **Bulk Operation** | Action performed on multiple items at once |
-| **Org Chart** | Visual representation of organization hierarchy |
-| **Real-time** | Changes sync instantly without refresh |
+| Term               | Definition                                                |
+| ------------------ | --------------------------------------------------------- |
+| **Organization**   | A company or entity being managed in OrgTree              |
+| **Department**     | A unit within an organization (can have sub-departments)  |
+| **Person**         | An individual belonging to a department                   |
+| **Member**         | A user with access to an organization                     |
+| **Owner**          | The user who created an organization (highest privileges) |
+| **Admin**          | A member with administrative privileges                   |
+| **Editor**         | A member who can create/edit/delete content               |
+| **Viewer**         | A read-only member                                        |
+| **Superuser**      | System-wide administrator                                 |
+| **Public Link**    | A shareable URL for read-only access                      |
+| **Audit Log**      | History of all changes                                    |
+| **Bulk Operation** | Action performed on multiple items at once                |
+| **Org Chart**      | Visual representation of organization hierarchy           |
+| **Real-time**      | Changes sync instantly without refresh                    |
 
 ---
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | December 29, 2025 | Initial documentation |
+| Version | Date              | Changes               |
+| ------- | ----------------- | --------------------- |
+| 1.0     | December 29, 2025 | Initial documentation |
 
 ---
 
@@ -1090,4 +1222,4 @@ If you encounter issues not covered here:
 
 ---
 
-*This documentation is maintained as part of the OrgTree project.*
+_This documentation is maintained as part of the OrgTree project._
