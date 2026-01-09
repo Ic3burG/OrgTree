@@ -115,12 +115,18 @@ describe('Users Service', () => {
       ];
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT id, name, email, role, created_at as createdAt\n    FROM users')) {
+        if (
+          query.includes('SELECT id, name, email, role, created_at as createdAt\n    FROM users')
+        ) {
           return {
             get: vi.fn().mockReturnValue(mockUser),
           } as never;
         }
-        if (query.includes('SELECT id, name, is_public as isPublic, created_at as createdAt\n    FROM organizations')) {
+        if (
+          query.includes(
+            'SELECT id, name, is_public as isPublic, created_at as createdAt\n    FROM organizations'
+          )
+        ) {
           return {
             all: vi.fn().mockReturnValue(mockOrgs),
           } as never;
@@ -198,7 +204,9 @@ describe('Users Service', () => {
         if (query.includes('UPDATE users\n    SET name = ?, email = ?, updated_at = ?')) {
           return { run: vi.fn() } as never;
         }
-        if (query.includes('SELECT id, name, email, role, created_at as createdAt\n    FROM users')) {
+        if (
+          query.includes('SELECT id, name, email, role, created_at as createdAt\n    FROM users')
+        ) {
           return { get: vi.fn().mockReturnValue(updatedUser) } as never;
         }
         return {} as never;
@@ -217,7 +225,9 @@ describe('Users Service', () => {
         get: vi.fn().mockReturnValue(undefined),
       })) as never;
 
-      expect(() => usersService.updateUser('nonexistent', { name: 'Test' })).toThrow('User not found');
+      expect(() => usersService.updateUser('nonexistent', { name: 'Test' })).toThrow(
+        'User not found'
+      );
       try {
         usersService.updateUser('nonexistent', { name: 'Test' });
       } catch (error: unknown) {
@@ -445,7 +455,9 @@ describe('Users Service', () => {
     });
 
     it('should throw 400 error when trying to delete own account', () => {
-      expect(() => usersService.deleteUser('user1', 'user1')).toThrow('Cannot delete your own account');
+      expect(() => usersService.deleteUser('user1', 'user1')).toThrow(
+        'Cannot delete your own account'
+      );
       try {
         usersService.deleteUser('user1', 'user1');
       } catch (error: unknown) {
@@ -538,7 +550,11 @@ describe('Users Service', () => {
 
         vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword' as never);
 
-        const result = await usersService.createAdminUser(`Test ${role}`, `${role}@example.com`, role);
+        const result = await usersService.createAdminUser(
+          `Test ${role}`,
+          `${role}@example.com`,
+          role
+        );
 
         expect(result.user.role).toBe(role);
       }

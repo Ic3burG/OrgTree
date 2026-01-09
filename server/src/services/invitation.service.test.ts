@@ -46,7 +46,11 @@ describe('Invitation Service', () => {
         }
         if (sql.includes("SELECT name FROM users WHERE id = '?'")) {
           // Get inviter name
-          return { get: vi.fn(() => ({ name: 'John Inviter' })), run: vi.fn(), all: vi.fn() } as never;
+          return {
+            get: vi.fn(() => ({ name: 'John Inviter' })),
+            run: vi.fn(),
+            all: vi.fn(),
+          } as never;
         }
         if (sql.includes("SELECT name FROM organizations WHERE id = '?'")) {
           // Get org name
@@ -78,7 +82,11 @@ describe('Invitation Service', () => {
       });
       expect(result.id).toBeDefined();
       expect(result.expiresAt).toBeDefined();
-      expect(memberService.requireOrgPermission).toHaveBeenCalledWith('org-123', 'inviter-123', 'admin');
+      expect(memberService.requireOrgPermission).toHaveBeenCalledWith(
+        'org-123',
+        'inviter-123',
+        'admin'
+      );
       expect(emailService.sendInvitationEmail).toHaveBeenCalled();
     });
 
@@ -86,7 +94,12 @@ describe('Invitation Service', () => {
       vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
 
       await expect(
-        invitationService.createInvitation('org-123', 'test@example.com', 'superadmin', 'inviter-123')
+        invitationService.createInvitation(
+          'org-123',
+          'test@example.com',
+          'superadmin',
+          'inviter-123'
+        )
       ).rejects.toThrow('Invalid role. Must be: viewer, editor, or admin');
     });
 
@@ -170,7 +183,11 @@ describe('Invitation Service', () => {
           return { get: vi.fn(() => undefined), run: vi.fn(), all: vi.fn() } as never;
         }
         if (sql.includes('SELECT name FROM users')) {
-          return { get: vi.fn(() => ({ name: 'John Inviter' })), run: vi.fn(), all: vi.fn() } as never;
+          return {
+            get: vi.fn(() => ({ name: 'John Inviter' })),
+            run: vi.fn(),
+            all: vi.fn(),
+          } as never;
         }
         if (sql.includes('SELECT name FROM organizations')) {
           return { get: vi.fn(() => ({ name: 'Test Org' })), run: vi.fn(), all: vi.fn() } as never;
@@ -204,7 +221,11 @@ describe('Invitation Service', () => {
           return { get: vi.fn(() => undefined), run: vi.fn(), all: vi.fn() } as never;
         }
         if (sql.includes('SELECT name FROM users')) {
-          return { get: vi.fn(() => ({ name: 'John Inviter' })), run: vi.fn(), all: vi.fn() } as never;
+          return {
+            get: vi.fn(() => ({ name: 'John Inviter' })),
+            run: vi.fn(),
+            all: vi.fn(),
+          } as never;
         }
         if (sql.includes('SELECT name FROM organizations')) {
           return { get: vi.fn(() => ({ name: 'Test Org' })), run: vi.fn(), all: vi.fn() } as never;
@@ -267,7 +288,11 @@ describe('Invitation Service', () => {
       const result = invitationService.getOrgInvitations('org-123', 'admin-123');
 
       expect(result).toEqual(mockInvitations);
-      expect(memberService.requireOrgPermission).toHaveBeenCalledWith('org-123', 'admin-123', 'admin');
+      expect(memberService.requireOrgPermission).toHaveBeenCalledWith(
+        'org-123',
+        'admin-123',
+        'admin'
+      );
     });
 
     it('should return empty array when no pending invitations', () => {
@@ -300,7 +325,11 @@ describe('Invitation Service', () => {
       const result = invitationService.cancelInvitation('org-123', 'inv-123', 'admin-123');
 
       expect(result).toEqual({ success: true });
-      expect(memberService.requireOrgPermission).toHaveBeenCalledWith('org-123', 'admin-123', 'admin');
+      expect(memberService.requireOrgPermission).toHaveBeenCalledWith(
+        'org-123',
+        'admin-123',
+        'admin'
+      );
     });
 
     it('should throw 404 error when invitation not found', () => {
@@ -313,9 +342,9 @@ describe('Invitation Service', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
-      expect(() =>
-        invitationService.cancelInvitation('org-123', 'inv-999', 'admin-123')
-      ).toThrow('Invitation not found');
+      expect(() => invitationService.cancelInvitation('org-123', 'inv-999', 'admin-123')).toThrow(
+        'Invitation not found'
+      );
     });
   });
 
