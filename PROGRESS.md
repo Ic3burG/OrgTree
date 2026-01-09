@@ -215,14 +215,28 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Total Components**: ~21 React components (added Bulk modals and action bar)
 - **API Endpoints**: 50+ REST endpoints (documented in OpenAPI spec at /api/docs)
 - **Database Tables**: 4 main tables + 2 FTS5 virtual tables (departments_fts, people_fts)
-- **Test Coverage**: 254 tests (195 backend + 59 frontend) with Vitest
+- **Test Coverage**: 275 tests (216 backend + 59 frontend) with Vitest
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
 
-- **Last Major Update**: Test Coverage Expansion Phase 3 - Service Testing (January 9, 2026)
-- **Total Commits**: 204+ commits on main branch
-- **Today's Progress (January 9, 2026 - Session 31)**:
+- **Last Major Update**: Test Coverage Expansion Phase 4 - Bulk Operations Testing (January 9, 2026)
+- **Total Commits**: 205+ commits on main branch
+- **Today's Progress (January 9, 2026 - Session 32)**:
+  - 🧪 **CI FIX & TEST COVERAGE EXPANSION**: Fixed CI failures and added bulk operations tests
+  - ✅ **CI Pipeline Fixed**: Resolved ESLint and Prettier issues in test files
+    - Fixed ESLint errors in `users.service.test.ts` (`as any` → `as never`, unused imports)
+    - Applied Prettier formatting to both test files
+    - All CI checks now passing ✅
+  - ✅ **Backend Coverage**: 30.55% → 32% (estimated) - now 216 tests total
+    - Added `bulk.service.test.ts` (21 tests, 63.7% statement coverage)
+    - Bulk operations service coverage: 0% → 63.7% statements
+    - Tests cover delete, move, edit for people and departments
+  - ✅ **Service Layer Testing**: Comprehensive tests for bulk operations with validation and permissions
+  - ✅ **Test Patterns**: Database transaction mocking, permission checking, partial failure scenarios
+  - 📊 **Test Statistics**: 195 → 216 backend tests (+21), 12 test files
+  - 📊 **Phase 4 Total**: 275 tests (+21 from Session 31)
+- **Previous Progress (January 9, 2026 - Session 31)**:
   - 🧪 **CONTINUED TEST COVERAGE EXPANSION**: Added 44 new tests (all backend)
   - ✅ **Backend Coverage**: 22.11% → 30.55% (+8.44%) - now 195 tests total
     - Added `users.service.test.ts` (22 tests, 100% statement/function coverage, 90.9% branch)

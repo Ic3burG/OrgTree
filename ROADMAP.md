@@ -12,7 +12,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 ### Code Quality & Testing
 
 - [x] **TypeScript Migration** - Convert codebase from JavaScript to TypeScript for better type safety ✅ **DONE** (January 7, 2026)
-- [ ] **Increase Test Coverage** - Expand from 210 tests to cover edge cases and integration scenarios (target: 80%+ coverage) 🚀 **IN PROGRESS** (254 tests total: Backend: 30.55%, Frontend: 3% - Phase 3 complete)
+- [ ] **Increase Test Coverage** - Expand from 210 tests to cover edge cases and integration scenarios (target: 80%+ coverage) 🚀 **IN PROGRESS** (275 tests total: Backend: 32%, Frontend: 3% - Phase 4 complete)
 - [ ] **E2E Testing** - Add end-to-end tests with Playwright or Cypress for critical user flows
 - [x] **ESLint/Prettier Setup** - Enforce code style consistency across the team ✅ **DONE** (January 4, 2026)
 - [ ] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces
@@ -148,7 +148,8 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 **Recently Completed** (January 2026):
 
-- ✅ **Test Coverage Expansion Phase 3** - Added 44 new tests (users + invitation services), now at 254 total tests with 30.55% backend coverage (January 9, 2026)
+- ✅ **Test Coverage Expansion Phase 4** - Added 21 new tests (bulk operations service), now at 275 total tests with 32% backend coverage (January 9, 2026)
+- ✅ **Test Coverage Expansion Phase 3** - Added 44 new tests (users + invitation services), reached 254 total tests with 30.55% backend coverage (January 9, 2026)
 - ✅ **Test Coverage Expansion Phase 2** - Added 81 new tests (54 backend + 27 frontend), reached 210 total tests with 22% backend and 3% frontend coverage (January 8, 2026)
 - ✅ **Development Documentation (ADRs)** - Comprehensive architecture decision records (January 7, 2026)
 - ✅ **Dead Code Elimination** - Removed unused utilities and scripts (January 7, 2026)
