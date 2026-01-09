@@ -33,14 +33,14 @@ export default function BulkActionBar({
         : 'departments';
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-800 text-white rounded-lg shadow-xl px-4 py-3 flex items-center gap-4 z-50">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-800 dark:bg-slate-700 text-white rounded-lg shadow-xl px-4 py-3 flex items-center gap-4 z-50">
       {/* Selected count */}
       <span className="text-sm font-medium min-w-[100px]">
         {selectedCount} {itemLabel} selected
       </span>
 
       {/* Divider */}
-      <div className="h-6 w-px bg-slate-600" />
+      <div className="h-6 w-px bg-slate-600 dark:bg-slate-500" />
 
       {/* Actions */}
       <div className="flex items-center gap-2">
@@ -48,7 +48,7 @@ export default function BulkActionBar({
         {entityType === 'people' && onMove && (
           <button
             onClick={onMove}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-slate-700 hover:bg-slate-600 rounded-md transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-slate-700 dark:bg-slate-600 hover:bg-slate-600 dark:hover:bg-slate-500 rounded-md transition-colors"
           >
             <FolderInput size={16} />
             Move

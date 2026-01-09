@@ -141,9 +141,9 @@ export default function SearchOverlay({
           value={query}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
           placeholder="Search departments and people..."
-          className="w-full pl-11 lg:pl-10 pr-20 lg:pr-20 py-3 lg:py-2.5 bg-white/95 backdrop-blur-sm border border-slate-300
-            rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500
-            focus:border-transparent text-slate-900 placeholder-slate-400 text-base lg:text-sm
+          className="w-full pl-11 lg:pl-10 pr-20 lg:pr-20 py-3 lg:py-2.5 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border border-slate-300 dark:border-slate-600
+            rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+            focus:border-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-base lg:text-sm
             touch-manipulation"
           aria-label="Search organization"
         />
@@ -151,9 +151,9 @@ export default function SearchOverlay({
         {/* Type Filter Button */}
         <button
           onClick={() => setShowTypeFilter(!showTypeFilter)}
-          className={`absolute inset-y-0 right-10 flex items-center px-2 text-slate-400
-            hover:text-slate-600 transition-colors touch-manipulation
-            ${type !== 'all' ? 'text-blue-500' : ''}`}
+          className={`absolute inset-y-0 right-10 flex items-center px-2 text-slate-400 dark:text-slate-500
+            hover:text-slate-600 dark:hover:text-slate-300 transition-colors touch-manipulation
+            ${type !== 'all' ? 'text-blue-500 dark:text-blue-400' : ''}`}
           aria-label="Filter search type"
         >
           <Filter size={18} className="lg:w-4 lg:h-4" />
@@ -162,8 +162,8 @@ export default function SearchOverlay({
         {query && (
           <button
             onClick={handleClear}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400
-              hover:text-slate-600 transition-colors touch-manipulation"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 dark:text-slate-500
+              hover:text-slate-600 dark:hover:text-slate-300 transition-colors touch-manipulation"
             aria-label="Clear search"
           >
             <X size={22} className="lg:w-5 lg:h-5" />
@@ -173,8 +173,8 @@ export default function SearchOverlay({
 
       {/* Type Filter Dropdown */}
       {showTypeFilter && (
-        <div className="mt-1 bg-white rounded-lg shadow-lg border border-slate-200 p-2">
-          <div className="text-xs text-slate-500 px-2 pb-1">Search in:</div>
+        <div className="mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 p-2">
+          <div className="text-xs text-slate-500 dark:text-slate-400 px-2 pb-1">Search in:</div>
           <div className="flex gap-1">
             {(['all', 'departments', 'people'] as const).map(t => (
               <button
@@ -186,8 +186,8 @@ export default function SearchOverlay({
                 className={`px-3 py-1.5 rounded text-sm font-medium transition-colors
                   ${
                     type === t
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                   }`}
               >
                 {typeLabels[t]}
@@ -199,13 +199,13 @@ export default function SearchOverlay({
 
       {/* Suggestions (shown while typing, before results) */}
       {isOpen && suggestions.length > 0 && results.length === 0 && !loading && (
-        <div className="mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2">
-          <div className="text-xs text-slate-500 px-4 pb-1">Suggestions:</div>
+        <div className="mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-2">
+          <div className="text-xs text-slate-500 dark:text-slate-400 px-4 pb-1">Suggestions:</div>
           {suggestions.map((suggestion, index) => (
             <button
               key={`suggestion-${index}`}
               onClick={() => handleSuggestionClick(suggestion)}
-              className="w-full px-4 py-2 text-left hover:bg-slate-50 text-sm text-slate-700 flex items-center gap-2"
+              className="w-full px-4 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-700 text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2"
             >
               <Search size={14} className="text-slate-400" />
               {suggestion.text}
@@ -217,10 +217,10 @@ export default function SearchOverlay({
 
       {/* Results Dropdown */}
       {isOpen && results.length > 0 && (
-        <div className="mt-2 bg-white rounded-lg shadow-xl border border-slate-200 max-h-[60vh] lg:max-h-96 overflow-y-auto">
+        <div className="mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 max-h-[60vh] lg:max-h-96 overflow-y-auto">
           {/* Results count header */}
           {total > 0 && (
-            <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 text-xs text-slate-500">
+            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 text-xs text-slate-500 dark:text-slate-400">
               {total} result{total !== 1 ? 's' : ''} found
               {type !== 'all' && typeLabels[type] && ` in ${typeLabels[type].toLowerCase()}`}
             </div>
@@ -230,15 +230,15 @@ export default function SearchOverlay({
             <button
               key={`${result.type}-${result.id}-${index}`}
               onClick={() => handleSelectResult(result)}
-              className="w-full px-4 py-4 lg:py-3 flex items-center gap-3 hover:bg-slate-50
-                active:bg-slate-100 transition-colors text-left border-b border-slate-100 last:border-b-0
+              className="w-full px-4 py-4 lg:py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700
+                active:bg-slate-100 dark:active:bg-slate-600 transition-colors text-left border-b border-slate-100 dark:border-slate-700 last:border-b-0
                 touch-manipulation"
             >
               {/* Icon */}
               <div className="flex-shrink-0">
                 {result.type === 'department' ? (
-                  <div className="w-11 h-11 lg:w-10 lg:h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                    <Users size={22} className="lg:w-5 lg:h-5 text-slate-600" />
+                  <div className="w-11 h-11 lg:w-10 lg:h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                    <Users size={22} className="lg:w-5 lg:h-5 text-slate-600 dark:text-slate-300" />
                   </div>
                 ) : (
                   <div
@@ -255,17 +255,17 @@ export default function SearchOverlay({
                 {/* Use highlight if available, otherwise plain name */}
                 {(result as unknown as { highlight?: string }).highlight ? (
                   <div
-                    className="font-medium text-base lg:text-sm text-slate-900 truncate [&>mark]:bg-yellow-200 [&>mark]:rounded"
+                    className="font-medium text-base lg:text-sm text-slate-900 dark:text-slate-100 truncate [&>mark]:bg-yellow-200 dark:[&>mark]:bg-yellow-900/50 [&>mark]:rounded"
                     dangerouslySetInnerHTML={{
                       __html: (result as unknown as { highlight: string }).highlight,
                     }}
                   />
                 ) : (
-                  <div className="font-medium text-base lg:text-sm text-slate-900 truncate">
+                  <div className="font-medium text-base lg:text-sm text-slate-900 dark:text-slate-100 truncate">
                     {result.name}
                   </div>
                 )}
-                <div className="text-sm lg:text-sm text-slate-600 truncate">
+                <div className="text-sm lg:text-sm text-slate-600 dark:text-slate-400 truncate">
                   {result.type === 'department'
                     ? `${(result as unknown as { peopleCount?: number }).peopleCount || 0} people`
                     : result.title}
@@ -282,8 +282,8 @@ export default function SearchOverlay({
                   px-2 py-1 rounded text-xs font-medium
                   ${
                     result.type === 'department'
-                      ? 'bg-slate-100 text-slate-700'
-                      : 'bg-blue-100 text-blue-700'
+                      ? 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                   }
                 `}
                 >
@@ -297,7 +297,7 @@ export default function SearchOverlay({
 
       {/* Loading state with no results yet */}
       {isOpen && loading && results.length === 0 && (
-        <div className="mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-8 text-center">
+        <div className="mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-8 text-center">
           <Loader2 size={24} className="text-blue-500 animate-spin mx-auto mb-2" />
           <p className="text-sm text-slate-500">Searching...</p>
         </div>
@@ -305,7 +305,7 @@ export default function SearchOverlay({
 
       {/* No results state */}
       {isOpen && !loading && query.trim() && results.length === 0 && suggestions.length === 0 && (
-        <div className="mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-8 text-center">
+        <div className="mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-8 text-center">
           <p className="text-sm text-slate-500">No results found for "{query}"</p>
           {type !== 'all' && (
             <button

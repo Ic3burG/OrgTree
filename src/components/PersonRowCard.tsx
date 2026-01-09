@@ -31,10 +31,10 @@ export default function PersonRowCard({
   return (
     <div
       className={`
-        px-3 py-3 lg:py-2 cursor-pointer hover:bg-slate-50 active:bg-slate-100
+        px-3 py-3 lg:py-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 active:bg-slate-100 dark:active:bg-slate-600
         transition-colors touch-manipulation
         flex items-center gap-2.5
-        ${!isLast ? 'border-b border-slate-100' : ''}
+        ${!isLast ? 'border-b border-slate-100 dark:border-slate-700' : ''}
       `}
       onClick={handleClick}
     >
@@ -50,8 +50,12 @@ export default function PersonRowCard({
 
       {/* Name and Title */}
       <div className="flex-grow min-w-0">
-        <div className="font-medium text-sm text-slate-900 truncate">{person.name}</div>
-        {person.title && <div className="text-xs text-slate-600 truncate">{person.title}</div>}
+        <div className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate">
+          {person.name}
+        </div>
+        {person.title && (
+          <div className="text-xs text-slate-600 dark:text-slate-400 truncate">{person.title}</div>
+        )}
       </div>
 
       {/* Chevron */}

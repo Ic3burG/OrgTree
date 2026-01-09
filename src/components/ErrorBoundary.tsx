@@ -38,11 +38,13 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50">
-          <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 text-center">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+          <div className="max-w-md w-full bg-white dark:bg-slate-800 shadow-lg rounded-lg p-8 text-center">
             <div className="text-red-500 text-5xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">Something went wrong</h1>
-            <p className="text-slate-600 mb-6">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+              Something went wrong
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
               We encountered an unexpected error. Please refresh the page to try again.
             </p>
             <button
@@ -59,7 +61,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                 <summary className="cursor-pointer text-sm text-slate-500">
                   Error Details (Development Only)
                 </summary>
-                <pre className="mt-2 p-4 bg-slate-100 rounded text-xs overflow-auto">
+                <pre className="mt-2 p-4 bg-slate-100 dark:bg-slate-700 rounded text-xs overflow-auto">
                   {this.state.error.toString()}
                 </pre>
               </details>

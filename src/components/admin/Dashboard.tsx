@@ -55,7 +55,7 @@ export default function Dashboard(): React.JSX.Element {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500 dark:text-slate-400">Loading...</div>
       </div>
     );
   }
@@ -71,7 +71,7 @@ export default function Dashboard(): React.JSX.Element {
   if (!organization) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-gray-500">Organization not found</div>
+        <div className="text-gray-500 dark:text-slate-400">Organization not found</div>
       </div>
     );
   }
@@ -91,10 +91,10 @@ export default function Dashboard(): React.JSX.Element {
           {/* Header */}
           <div className="mb-6 lg:mb-8 flex flex-col lg:flex-row items-start gap-4 lg:justify-between">
             <div className="w-full lg:w-auto">
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-slate-100 mb-2">
                 {organization.name}
               </h1>
-              <p className="text-gray-500 text-sm lg:text-base">
+              <p className="text-gray-500 dark:text-slate-400 text-sm lg:text-base">
                 Organization overview and statistics
               </p>
             </div>
@@ -108,7 +108,7 @@ export default function Dashboard(): React.JSX.Element {
               </button>
               <button
                 onClick={() => setShowImport(true)}
-                className="flex items-center gap-2 px-4 py-2.5 lg:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 active:bg-gray-300 transition-colors touch-manipulation text-sm lg:text-base"
+                className="flex items-center gap-2 px-4 py-2.5 lg:py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 active:bg-gray-300 dark:active:bg-slate-500 transition-colors touch-manipulation text-sm lg:text-base"
               >
                 <Upload size={20} />
                 Import CSV
@@ -130,15 +130,17 @@ export default function Dashboard(): React.JSX.Element {
         <div className="max-w-6xl mx-auto">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
-            <div className="bg-white rounded-lg shadow p-5 lg:p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-5 lg:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs lg:text-sm font-medium text-gray-500 mb-1">
                     Total Departments
                   </p>
-                  <p className="text-2xl lg:text-3xl font-bold text-gray-900">{departmentCount}</p>
+                  <p className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-slate-100">
+                    {departmentCount}
+                  </p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                   <Building2 size={24} className="text-blue-600" />
                 </div>
               </div>
@@ -150,13 +152,15 @@ export default function Dashboard(): React.JSX.Element {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-5 lg:p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-5 lg:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs lg:text-sm font-medium text-gray-500 mb-1">Total People</p>
-                  <p className="text-2xl lg:text-3xl font-bold text-gray-900">{peopleCount}</p>
+                  <p className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-slate-100">
+                    {peopleCount}
+                  </p>
                 </div>
-                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
                   <Users size={24} className="text-emerald-600" />
                 </div>
               </div>
@@ -170,9 +174,11 @@ export default function Dashboard(): React.JSX.Element {
 
           {/* Recent Departments */}
           {organization.departments && organization.departments.length > 0 && (
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Recent Departments</h2>
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow">
+              <div className="p-6 border-b border-gray-200 dark:border-slate-700">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
+                  Recent Departments
+                </h2>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
@@ -187,16 +193,18 @@ export default function Dashboard(): React.JSX.Element {
                     .map((dept: Department) => (
                       <div
                         key={dept.id}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg"
                       >
                         <div className="flex-1">
-                          <h3 className="font-medium text-gray-900">{dept.name}</h3>
+                          <h3 className="font-medium text-gray-900 dark:text-slate-100">
+                            {dept.name}
+                          </h3>
                           {dept.description && (
                             <p className="text-sm text-gray-500 mt-1">{dept.description}</p>
                           )}
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
                             {dept.people?.length || 0} people
                           </p>
                           {dept.created_at && (
@@ -214,10 +222,14 @@ export default function Dashboard(): React.JSX.Element {
 
           {/* Empty State */}
           {(!organization.departments || organization.departments.length === 0) && (
-            <div className="bg-white rounded-lg shadow p-12 text-center">
-              <Building2 size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No departments yet</h3>
-              <p className="text-gray-500">Get started by creating your first department</p>
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-12 text-center">
+              <Building2 size={48} className="mx-auto text-gray-400 dark:text-slate-500 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">
+                No departments yet
+              </h3>
+              <p className="text-gray-500 dark:text-slate-400">
+                Get started by creating your first department
+              </p>
             </div>
           )}
         </div>

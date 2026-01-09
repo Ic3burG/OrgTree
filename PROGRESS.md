@@ -215,14 +215,25 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Total Components**: ~21 React components (added Bulk modals and action bar)
 - **API Endpoints**: 50+ REST endpoints (documented in OpenAPI spec at /api/docs)
 - **Database Tables**: 4 main tables + 2 FTS5 virtual tables (departments_fts, people_fts)
-- **Test Coverage**: 210 tests (151 backend + 59 frontend) with Vitest
+- **Test Coverage**: 254 tests (195 backend + 59 frontend) with Vitest
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
 
-- **Last Major Update**: Test Coverage Expansion Phase 2 - Security & Integration Tests (January 8, 2026)
+- **Last Major Update**: Test Coverage Expansion Phase 3 - Service Testing (January 9, 2026)
 - **Total Commits**: 204+ commits on main branch
-- **Today's Progress (January 8, 2026 - Session 30)**:
+- **Today's Progress (January 9, 2026 - Session 31)**:
+  - 🧪 **CONTINUED TEST COVERAGE EXPANSION**: Added 44 new tests (all backend)
+  - ✅ **Backend Coverage**: 22.11% → 30.55% (+8.44%) - now 195 tests total
+    - Added `users.service.test.ts` (22 tests, 100% statement/function coverage, 90.9% branch)
+    - Added `invitation.service.test.ts` (22 tests, 90.42% coverage, 100% function)
+    - Users service coverage: 0% → 100% statements
+    - Invitation service coverage: 0% → 90.42% statements
+  - ✅ **Service Layer Testing**: Comprehensive tests for user management and email invitations
+  - ✅ **Test Patterns**: Established robust mocking strategies for database operations
+  - 📊 **Test Statistics**: 173 → 195 backend tests (+22), 11 test files
+  - 📊 **Phase 3 Total**: 232 tests (+22 from Session 30)
+- **Previous Progress (January 8, 2026 - Session 30)**:
   - 🧪 **MAJOR TEST COVERAGE EXPANSION**: Added 81 new tests (54 backend + 27 frontend)
   - ✅ **Backend Coverage**: 15.72% → 22.11% (+6.39%) - now 151 tests total
     - Added `auth.test.ts` middleware tests (17 tests, 100% coverage)

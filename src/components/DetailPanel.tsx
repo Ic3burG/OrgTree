@@ -37,23 +37,26 @@ export default function DetailPanel({
 
       {/* Panel */}
       <div
-        className="fixed right-0 top-0 bottom-0 w-full lg:max-w-md bg-white shadow-2xl z-50
+        className="fixed right-0 top-0 bottom-0 w-full lg:max-w-md bg-white dark:bg-slate-800 shadow-2xl z-50
           overflow-y-auto animate-slide-in-right"
         role="dialog"
         aria-modal="true"
         aria-labelledby="detail-panel-title"
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-slate-200 p-4 lg:p-6 flex items-center justify-between">
-          <h2 id="detail-panel-title" className="text-lg lg:text-xl font-bold text-slate-900">
+        <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 lg:p-6 flex items-center justify-between">
+          <h2
+            id="detail-panel-title"
+            className="text-lg lg:text-xl font-bold text-slate-900 dark:text-slate-100"
+          >
             Contact Details
           </h2>
           <button
             onClick={onClose}
-            className="p-2.5 lg:p-2 rounded-full hover:bg-slate-100 transition-colors touch-manipulation"
+            className="p-2.5 lg:p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors touch-manipulation"
             aria-label="Close panel"
           >
-            <X size={24} className="text-slate-600" />
+            <X size={24} className="text-slate-600 dark:text-slate-300" />
           </button>
         </div>
 
@@ -67,22 +70,31 @@ export default function DetailPanel({
             >
               {initials}
             </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-slate-900">{person.name}</h3>
-            <p className="text-base lg:text-lg text-slate-600 mt-1">{person.title}</p>
+            <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100">
+              {person.name}
+            </h3>
+            <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 mt-1">
+              {person.title}
+            </p>
           </div>
 
           {/* Contact Information */}
-          <div className="space-y-4 bg-slate-50 rounded-lg p-4">
-            <h4 className="font-semibold text-slate-900 mb-3">Contact Information</h4>
+          <div className="space-y-4 bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
+            <h4 className="font-semibold text-slate-900 dark:text-slate-100 mb-3">
+              Contact Information
+            </h4>
 
             {person.email && (
               <div className="flex items-start gap-3">
-                <Mail size={20} className="text-slate-500 mt-0.5 flex-shrink-0" />
+                <Mail
+                  size={20}
+                  className="text-slate-500 dark:text-slate-400 mt-0.5 flex-shrink-0"
+                />
                 <div className="flex-grow">
-                  <p className="text-xs text-slate-500 uppercase mb-1">Email</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase mb-1">Email</p>
                   <a
                     href={`mailto:${person.email}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline break-all touch-manipulation"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline break-all touch-manipulation"
                   >
                     {person.email}
                   </a>
@@ -92,12 +104,15 @@ export default function DetailPanel({
 
             {person.phone && (
               <div className="flex items-start gap-3">
-                <Phone size={20} className="text-slate-500 mt-0.5 flex-shrink-0" />
+                <Phone
+                  size={20}
+                  className="text-slate-500 dark:text-slate-400 mt-0.5 flex-shrink-0"
+                />
                 <div className="flex-grow">
-                  <p className="text-xs text-slate-500 uppercase mb-1">Phone</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase mb-1">Phone</p>
                   <a
                     href={`tel:${person.phone}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline touch-manipulation"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline touch-manipulation"
                   >
                     {person.phone}
                   </a>
@@ -108,11 +123,14 @@ export default function DetailPanel({
 
           {/* Department Path */}
           {departmentPath && (
-            <div className="space-y-2 bg-slate-50 rounded-lg p-4">
-              <h4 className="font-semibold text-slate-900 mb-2">Department</h4>
+            <div className="space-y-2 bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
+              <h4 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Department</h4>
               <div className="flex items-start gap-3">
-                <Building size={20} className="text-slate-500 mt-0.5 flex-shrink-0" />
-                <p className="text-slate-700">{departmentPath}</p>
+                <Building
+                  size={20}
+                  className="text-slate-500 dark:text-slate-400 mt-0.5 flex-shrink-0"
+                />
+                <p className="text-slate-700 dark:text-slate-300">{departmentPath}</p>
               </div>
             </div>
           )}

@@ -119,25 +119,27 @@ export default function OrganizationSelector(): React.JSX.Element {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-gray-500">Loading organizations...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
+        <div className="text-gray-500 dark:text-slate-400">Loading organizations...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Building2 size={28} className="text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">OrgTree</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">OrgTree</h1>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
               <div className="flex items-center justify-end gap-2 mb-1">
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
+                  {user?.name}
+                </p>
                 {user?.role === 'superuser' && (
                   <span className="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full font-medium">
                     Superuser
@@ -175,8 +177,12 @@ export default function OrganizationSelector(): React.JSX.Element {
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Organizations</h2>
-            <p className="text-gray-600">Select an organization to manage or create a new one</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-2">
+              Your Organizations
+            </h2>
+            <p className="text-gray-600 dark:text-slate-400">
+              Select an organization to manage or create a new one
+            </p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
@@ -199,11 +205,11 @@ export default function OrganizationSelector(): React.JSX.Element {
             {organizations.map(org => (
               <div
                 key={org.id}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow border border-gray-200 overflow-hidden group"
+                className="bg-white dark:bg-slate-800 rounded-lg shadow hover:shadow-lg transition-shadow border border-gray-200 dark:border-slate-700 overflow-hidden group"
               >
                 <div onClick={() => navigate(`/org/${org.id}`)} className="p-6 cursor-pointer">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                       <Building2 size={24} className="text-blue-600" />
                     </div>
                     {org.role && (
@@ -224,13 +230,15 @@ export default function OrganizationSelector(): React.JSX.Element {
                       </span>
                     )}
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{org.name}</h3>
-                  <div className="text-sm text-gray-500">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-slate-100 mb-2">
+                    {org.name}
+                  </h3>
+                  <div className="text-sm text-gray-500 dark:text-slate-400">
                     <p>{org.departmentCount || 0} departments</p>
                     {org.createdAt && <p>Created {new Date(org.createdAt).toLocaleDateString()}</p>}
                   </div>
                 </div>
-                <div className="border-t border-gray-200 bg-gray-50 px-6 py-3 flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700 px-6 py-3 flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={e => {
                       e.stopPropagation();
@@ -256,10 +264,12 @@ export default function OrganizationSelector(): React.JSX.Element {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-12 text-center">
             <Building2 size={64} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No organizations yet</h3>
-            <p className="text-gray-600 mb-6">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-slate-100 mb-2">
+              No organizations yet
+            </h3>
+            <p className="text-gray-600 dark:text-slate-400 mb-6">
               Create your first organization to get started with OrgTree
             </p>
             <button
@@ -276,9 +286,11 @@ export default function OrganizationSelector(): React.JSX.Element {
       {/* Create Organization Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Create New Organization</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
+                Create New Organization
+              </h2>
             </div>
             <form onSubmit={handleCreateOrg}>
               <div className="p-6">
@@ -290,7 +302,7 @@ export default function OrganizationSelector(): React.JSX.Element {
                   type="text"
                   value={newOrgName}
                   onChange={e => setNewOrgName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100"
                   placeholder="e.g., Acme Corporation"
                   autoFocus
                   required
@@ -324,9 +336,11 @@ export default function OrganizationSelector(): React.JSX.Element {
       {/* Rename Organization Modal */}
       {showRenameModal && renamingOrg && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Rename Organization</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
+                Rename Organization
+              </h2>
             </div>
             <form onSubmit={handleRenameSubmit}>
               <div className="p-6">
@@ -341,7 +355,7 @@ export default function OrganizationSelector(): React.JSX.Element {
                   type="text"
                   value={renameOrgName}
                   onChange={e => setRenameOrgName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100"
                   placeholder="e.g., Acme Corporation"
                   autoFocus
                   required
