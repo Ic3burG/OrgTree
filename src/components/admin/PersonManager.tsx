@@ -371,7 +371,7 @@ export default function PersonManager(): React.JSX.Element {
         <div className="max-w-6xl mx-auto">
           {loading ? (
             <div className="flex items-center justify-center h-32">
-              <div className="text-gray-500">Loading people...</div>
+              <div className="text-gray-500 dark:text-slate-400">Loading people...</div>
             </div>
           ) : filteredPeople.length === 0 ? (
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-8 text-center text-gray-500 dark:text-slate-400">
@@ -379,7 +379,7 @@ export default function PersonManager(): React.JSX.Element {
               <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">
                 {searchTerm || filterDepartment ? 'No people found' : 'No people yet'}
               </h3>
-              <p className="text-gray-500 mb-4">
+              <p className="text-gray-500 dark:text-slate-400 mb-4">
                 {searchTerm || filterDepartment
                   ? 'Try adjusting your search or filters'
                   : 'Add your first person to get started'}
@@ -402,7 +402,7 @@ export default function PersonManager(): React.JSX.Element {
                   <div className="px-6 py-3 bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600 flex items-center gap-3">
                     <button
                       onClick={toggleSelectAll}
-                      className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+                      className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-slate-100"
                     >
                       {allSelected ? (
                         <CheckSquare size={18} className="text-blue-600" />
@@ -412,7 +412,9 @@ export default function PersonManager(): React.JSX.Element {
                       {allSelected ? 'Deselect all' : 'Select all'}
                     </button>
                     {hasSelection && (
-                      <span className="text-sm text-gray-500">({selectedCount} selected)</span>
+                      <span className="text-sm text-gray-500 dark:text-slate-400">
+                        ({selectedCount} selected)
+                      </span>
                     )}
                   </div>
                 )}
@@ -452,10 +454,12 @@ export default function PersonManager(): React.JSX.Element {
                           </div>
 
                           {person.title && (
-                            <p className="text-sm text-gray-600 mb-3">{person.title}</p>
+                            <p className="text-sm text-gray-600 dark:text-slate-400 mb-3">
+                              {person.title}
+                            </p>
                           )}
 
-                          <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                          <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-slate-400">
                             {person.email && (
                               <div className="flex items-center gap-2">
                                 <Mail size={16} />
@@ -504,7 +508,7 @@ export default function PersonManager(): React.JSX.Element {
 
               {/* Results count */}
               {(people.length > 0 || searchTerm.length >= 2) && (
-                <div className="mt-4 text-sm text-gray-500 text-center">
+                <div className="mt-4 text-sm text-gray-500 dark:text-slate-400 text-center">
                   {searchTerm.length >= 2 ? (
                     <>
                       Found {searchTotal} result{searchTotal !== 1 ? 's' : ''}

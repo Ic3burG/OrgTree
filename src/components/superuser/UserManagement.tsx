@@ -248,7 +248,7 @@ export default function UserManagement(): React.JSX.Element {
       {filteredUsers.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 dark:bg-slate-800 rounded-lg">
           <Users size={48} className="mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-slate-400">
             {searchTerm || filterRole ? 'No users match your search' : 'No users found'}
           </p>
         </div>
@@ -257,10 +257,10 @@ export default function UserManagement(): React.JSX.Element {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
             <thead className="bg-gray-50 dark:bg-slate-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                   Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
@@ -291,7 +291,9 @@ export default function UserManagement(): React.JSX.Element {
                             <span className="ml-2 text-xs text-purple-600">(You)</span>
                           )}
                         </div>
-                        <div className="text-sm text-gray-500">{user.email}</div>
+                        <div className="text-sm text-gray-500 dark:text-slate-400">
+                          {user.email}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -328,21 +330,21 @@ export default function UserManagement(): React.JSX.Element {
                       )}
                     </button>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-slate-400 hidden md:table-cell">
                     {new Date(user.createdAt || user.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => handleEdit(user)}
-                        className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-gray-600 dark:text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                         title="Edit user"
                       >
                         <Edit size={16} />
                       </button>
                       <button
                         onClick={() => handlePasswordReset(user)}
-                        className="p-2 text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+                        className="p-2 text-gray-600 dark:text-slate-400 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 rounded-lg transition-colors"
                         title="Reset password"
                       >
                         <Key size={16} />

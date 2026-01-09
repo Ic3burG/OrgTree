@@ -296,7 +296,7 @@ export default function DepartmentManager(): React.JSX.Element {
           {!selectionMode && (
             <button
               onClick={() => toggleExpand(dept.id)}
-              className={`p-1 rounded hover:bg-slate-200 ${hasChildren ? '' : 'invisible'}`}
+              className={`p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-600 ${hasChildren ? '' : 'invisible'}`}
             >
               {isExpanded ? (
                 <ChevronDown size={16} className="text-slate-400" />
@@ -310,7 +310,7 @@ export default function DepartmentManager(): React.JSX.Element {
 
           <div className="flex-1">
             <span className="font-medium text-slate-800 dark:text-slate-100">{dept.name}</span>
-            <span className="ml-2 text-sm text-slate-500">
+            <span className="ml-2 text-sm text-slate-500 dark:text-slate-400">
               <Users size={14} className="inline mr-1" />
               {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
             </span>
@@ -505,7 +505,9 @@ export default function DepartmentManager(): React.JSX.Element {
                 {allSelected ? 'Deselect all' : 'Select all'}
               </button>
               {hasSelection && (
-                <span className="text-sm text-slate-500">({selectedCount} selected)</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">
+                  ({selectedCount} selected)
+                </span>
               )}
             </div>
           )}
