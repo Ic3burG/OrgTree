@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { X, Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, Upload, FileText, AlertCircle, CheckCircle, FileCode } from 'lucide-react';
 import { parseCSV, validateCSVData } from '../../utils/csvImport';
+import { processXmlFiles } from '../../utils/xmlImport';
 import type { CSVRow, CSVImportResult } from '../../utils/csvImport';
 import api from '../../api/client';
 
@@ -17,52 +18,108 @@ interface PreviewData {
   people: number;
 }
 
+type ImportType = 'csv' | 'xml';
+
 export default function ImportModal({
   isOpen,
   onClose,
   orgId,
   onSuccess,
 }: ImportModalProps): React.JSX.Element | null {
-  const [file, setFile] = useState<File | null>(null);
+  const [importType, setImportType] = useState<ImportType>('csv');
+  const [files, setFiles] = useState<File[]>([]);
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CSVImportResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const selectedFiles = Array.from(e.target.files || []);
+    if (selectedFiles.length === 0) return;
 
-    setFile(selectedFile);
+    setFiles(selectedFiles);
     setErrors([]);
     setResult(null);
 
-    const reader = new FileReader();
-    reader.onload = (event: ProgressEvent<FileReader>): void => {
+    // Reset preview
+    setPreview(null);
+
+    if (importType === 'csv') {
+      const file = selectedFiles[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event: ProgressEvent<FileReader>): void => {
+        try {
+          const result = event.target?.result;
+          if (typeof result !== 'string') return;
+
+          const rows = parseCSV(result);
+          const validationErrors = validateCSVData(rows);
+
+          if (validationErrors.length > 0) {
+            setErrors(validationErrors);
+            setPreview(null);
+          } else {
+            setPreview({
+              rows,
+              departments: rows.filter((r: CSVRow) => r.type?.toLowerCase() === 'department')
+                .length,
+              people: rows.filter((r: CSVRow) => r.type?.toLowerCase() === 'person').length,
+            });
+          }
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+          setErrors(['Failed to parse CSV file: ' + errorMessage]);
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      // XML Import
+      setLoading(true);
       try {
-        const result = event.target?.result;
-        if (typeof result !== 'string') return;
+        const { rows, errors: xmlErrors } = await processXmlFiles(selectedFiles);
 
-        const rows = parseCSV(result);
-        const validationErrors = validateCSVData(rows);
+        if (xmlErrors.length > 0) {
+          setErrors(xmlErrors);
+        }
 
-        if (validationErrors.length > 0) {
-          setErrors(validationErrors);
-          setPreview(null);
-        } else {
-          setPreview({
-            rows,
-            departments: rows.filter((r: CSVRow) => r.type?.toLowerCase() === 'department').length,
-            people: rows.filter((r: CSVRow) => r.type?.toLowerCase() === 'person').length,
-          });
+        if (rows.length > 0) {
+          const validationErrors = validateCSVData(rows);
+          if (validationErrors.length > 0) {
+            setErrors(prev => [...prev, ...validationErrors]);
+          } else {
+            setPreview({
+              rows,
+              departments: rows.filter((r: CSVRow) => r.type?.toLowerCase() === 'department')
+                .length,
+              people: rows.filter((r: CSVRow) => r.type?.toLowerCase() === 'person').length,
+            });
+          }
+        } else if (xmlErrors.length === 0) {
+          setErrors(['No valid data found in the selected XML files.']);
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        setErrors(['Failed to parse CSV file: ' + errorMessage]);
+        setErrors([errorMessage]);
+      } finally {
+        setLoading(false);
       }
-    };
-    reader.readAsText(selectedFile);
+    }
+  };
+
+  const handleClose = (): void => {
+    setFiles([]);
+    setPreview(null);
+    setErrors([]);
+    setResult(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    // Consider untoggling mode? No, keep user preference or reset.
+    // Usually standard to reset state.
+    // Resetting mode to CSV or keeping it is fine.
+    onClose();
   };
 
   const handleImport = async (): Promise<void> => {
@@ -75,24 +132,13 @@ export default function ImportModal({
       setTimeout(() => {
         onSuccess();
         handleClose();
-      }, 2000);
+      }, 3000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to import data';
       setErrors([errorMessage]);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleClose = (): void => {
-    setFile(null);
-    setPreview(null);
-    setErrors([]);
-    setResult(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -104,7 +150,7 @@ export default function ImportModal({
       <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-slate-800">Import from CSV</h2>
+            <h2 className="text-xl font-semibold text-slate-800">Import Data</h2>
             <button
               onClick={handleClose}
               disabled={loading}
@@ -122,9 +168,50 @@ export default function ImportModal({
                 Created {result.departmentsCreated} department(s) and {result.peopleCreated}{' '}
                 person(s).
               </p>
+              {result.peopleSkipped > 0 && (
+                <p className="text-slate-500 text-sm mt-2">
+                  Skipped {result.peopleSkipped} person(s) (duplicates).
+                </p>
+              )}
             </div>
           ) : (
             <>
+              {/* Import Type Selection */}
+              <div className="flex bg-slate-100 rounded-lg p-1 mb-6">
+                <button
+                  className={`flex-1 py-1 px-3 text-sm font-medium rounded-md transition-colors ${
+                    importType === 'csv'
+                      ? 'bg-white text-slate-800 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                  onClick={() => {
+                    setImportType('csv');
+                    setFiles([]);
+                    setPreview(null);
+                    setErrors([]);
+                  }}
+                  disabled={loading}
+                >
+                  CSV Import
+                </button>
+                <button
+                  className={`flex-1 py-1 px-3 text-sm font-medium rounded-md transition-colors ${
+                    importType === 'xml'
+                      ? 'bg-white text-slate-800 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                  onClick={() => {
+                    setImportType('xml');
+                    setFiles([]);
+                    setPreview(null);
+                    setErrors([]);
+                  }}
+                  disabled={loading}
+                >
+                  GEDS XML
+                </button>
+              </div>
+
               {/* File upload area */}
               <div
                 onClick={() => !loading && fileInputRef.current?.click()}
@@ -135,17 +222,28 @@ export default function ImportModal({
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".csv"
+                  accept={importType === 'csv' ? '.csv' : '.xml'}
+                  multiple={importType === 'xml'}
                   onChange={handleFileChange}
                   disabled={loading}
                   className="hidden"
                 />
-                <Upload className="mx-auto text-slate-400 mb-2" size={32} />
+
+                {importType === 'csv' ? (
+                  <Upload className="mx-auto text-slate-400 mb-2" size={32} />
+                ) : (
+                  <FileCode className="mx-auto text-slate-400 mb-2" size={32} />
+                )}
+
                 <p className="text-slate-600 font-medium">
-                  {file ? file.name : 'Click to select a CSV file'}
+                  {files.length > 0
+                    ? `${files.length} file${files.length > 1 ? 's' : ''} selected`
+                    : `Click to select ${importType === 'csv' ? 'a CSV file' : 'XML files'}`}
                 </p>
                 <p className="text-sm text-slate-500 mt-1">
-                  Format: Path, Type, Name, Title, Email, Phone, Description
+                  {importType === 'csv'
+                    ? 'Format: Path, Type, Name, Title, Email, Phone...'
+                    : 'Select multiple .xml files to process them together'}
                 </p>
               </div>
 

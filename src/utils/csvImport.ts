@@ -5,6 +5,7 @@ export interface CSVRow {
 export interface CSVImportResult {
   departmentsCreated: number;
   peopleCreated: number;
+  peopleSkipped: number;
 }
 
 /**

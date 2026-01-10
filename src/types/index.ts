@@ -203,6 +203,7 @@ export interface SocketMemberEvent {
 export interface CSVImportResult {
   departmentsCreated: number;
   peopleCreated: number;
+  peopleSkipped: number;
   errors: string[];
 }
 

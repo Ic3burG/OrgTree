@@ -38,6 +38,7 @@ router.post(
       const pathToDeptId = new Map<string, string>();
       let departmentsCreated = 0;
       let peopleCreated = 0;
+      let peopleSkipped = 0;
 
       // Sort rows so departments come before their children
       const sortedData = [...data].sort((a: { path: string }, b: { path: string }) => {
@@ -56,6 +57,21 @@ router.post(
       INSERT INTO people (id, department_id, name, title, email, phone, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `);
+
+      // Check for existing person by email within the SAME organization
+      // We join departments to check organization_id
+      const checkPersonEmail = db.prepare(`
+        SELECT p.id 
+        FROM people p
+        JOIN departments d ON p.department_id = d.id
+        WHERE d.organization_id = ? AND p.email = ? AND p.deleted_at IS NULL
+      `);
+
+      // Fallback check: Name + Department (if email is empty)
+      const checkPersonNameInDept = db.prepare(`
+        SELECT id FROM people 
+        WHERE department_id = ? AND name = ? AND deleted_at IS NULL
+      `);
 
       // Helper to generate cryptographically secure ID
       const generateId = () => randomUUID();
@@ -86,6 +102,24 @@ router.post(
             const deptId = pathToDeptId.get(deptPath);
 
             if (deptId) {
+              // DUPLICATE CHECK
+              let exists = false;
+
+              if (row.email && row.email.trim()) {
+                // Check email uniqueness in organization
+                const existing = checkPersonEmail.get(orgId, row.email.trim());
+                if (existing) exists = true;
+              } else {
+                // Check name uniqueness in department (fallback)
+                const existing = checkPersonNameInDept.get(deptId, row.name.trim());
+                if (existing) exists = true;
+              }
+
+              if (exists) {
+                peopleSkipped++;
+                continue;
+              }
+
               const personId = generateId();
               insertPerson.run(
                 personId,
@@ -107,6 +141,8 @@ router.post(
           success: true,
           departmentsCreated,
           peopleCreated,
+          peopleSkipped,
+          errors: [],
         });
       } catch (err) {
         // Rollback on error

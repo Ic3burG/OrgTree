@@ -221,9 +221,16 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: Dark Mode Implementation Complete (January 9, 2026)
-- **Total Commits**: 207+ commits on main branch
-- **Today's Progress (January 9, 2026 - Session 33)**:
+- **Last Major Update**: XML Import Feature (January 10, 2026)
+- **Total Commits**: 208+ commits on main branch
+- **Today's Progress (January 10, 2026 - Session 35)**:
+  - 📥 **XML IMPORT FEATURE**: Implemented GEDS XML bulk import with duplicate detection
+  - ✅ **Duplicate Prevention**: Backend now checks for existing emails within organization to prevent duplicates (skips if found)
+  - ✅ **Frontend Utility**: Native browser-based XML parsing via `DOMParser` (no Node.js dependency)
+  - ✅ **UI Updates**: `ImportModal` supports multi-file XML selection and feedback on skipped people
+  - 📊 **Files Modified**: 4 files (`import.ts`, `ImportModal.tsx`, `xmlImport.ts`, `types/index.ts`)
+  - 📁 **New Artifacts**: `src/utils/xmlImport.ts`, `walkthrough.md`
+- **Previous Progress (January 9, 2026 - Session 33)**:
   - 🌙 **DARK MODE IMPLEMENTATION COMPLETE**: Full dark mode support across entire application
   - ✅ **21+ Components Updated**: Comprehensive dark mode coverage
     - Infrastructure: ThemeContext, DarkModeToggle, Tailwind config, global CSS
@@ -244,6 +251,15 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Pre-commit/pre-push: All checks passing ✅
   - 📊 **Files Changed**: 12 files modified (1,357 insertions, 125 deletions)
   - 🚀 **Deployment**: Pushed to production
+- **Refinement Session (January 9, 2026 - Session 34)**:
+  - 🎨 **UX IMPROVEMENTS**: Refined dark mode readability and consistency
+  - ✅ **Text Contrast**: Improved contrast for table headers, secondary text, and timestamps
+    - Updated `text-gray-500/600` to `text-gray-500 dark:text-slate-400`
+    - WCAG AA compliant text colors throughout admin interfaces
+  - ✅ **Hover Interactions**: Fixed "bright white" flash on hover in dark mode
+    - Buttons now use `dark:hover:bg-slate-700` or `dark:hover:bg-red-900/30`
+  - ✅ **Main Page Toggle**: Added Dark Mode toggle to `OrganizationSelector` (Home Page)
+  - 🔄 **Documentation**: `task.md` fully checked off, `PROGRESS.md` updated live
 - **Previous Progress (January 9, 2026 - Session 32)**:
   - 🧪 **CI FIX & TEST COVERAGE EXPANSION**: Fixed CI failures and added bulk operations tests
   - ✅ **CI Pipeline Fixed**: Resolved ESLint and Prettier issues in test files
