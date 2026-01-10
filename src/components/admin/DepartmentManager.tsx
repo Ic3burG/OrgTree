@@ -217,7 +217,7 @@ export default function DepartmentManager(): React.JSX.Element {
         deletedCount: result.deletedCount ?? 0,
         failedCount: result.failedCount ?? 0,
         warnings: result.warnings,
-        errors: result.errors,
+        errors: result.failed,
       });
       if ((result.deletedCount ?? 0) > 0) {
         await loadDepartments(false);
@@ -225,10 +225,14 @@ export default function DepartmentManager(): React.JSX.Element {
     } catch (err) {
       setBulkOperationResult({
         success: 0,
-        failed: selectedCount,
+        failed: [{ id: 'bulk', error: (err as Error).message }],
         errors: [{ id: 'bulk', error: (err as Error).message }],
       });
-      setBulkDeleteResult({ deletedCount: 0, failedCount: selectedCount });
+      setBulkDeleteResult({
+        deletedCount: 0,
+        failedCount: selectedCount,
+        errors: [{ id: 'bulk', error: (err as Error).message }],
+      });
     } finally {
       setBulkOperationLoading(false);
     }
@@ -252,7 +256,7 @@ export default function DepartmentManager(): React.JSX.Element {
     } catch (err) {
       setBulkOperationResult({
         success: 0,
-        failed: selectedCount,
+        failed: [{ id: 'bulk', error: (err as Error).message }],
         errors: [{ id: 'bulk', error: (err as Error).message }],
       });
       setBulkEditResult({ updatedCount: 0, failedCount: selectedCount });

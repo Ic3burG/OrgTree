@@ -210,7 +210,7 @@ export default function PersonManager(): React.JSX.Element {
       setBulkDeleteResult({
         deletedCount: result.deletedCount ?? 0,
         failedCount: result.failedCount ?? 0,
-        errors: result.errors,
+        errors: result.failed,
       });
       if ((result.deletedCount ?? 0) > 0) {
         await loadData(false);
@@ -218,10 +218,14 @@ export default function PersonManager(): React.JSX.Element {
     } catch (err) {
       setBulkOperationResult({
         success: 0,
-        failed: selectedCount,
+        failed: [{ id: 'bulk', error: (err as Error).message }],
         errors: [{ id: 'bulk', error: (err as Error).message }],
       });
-      setBulkDeleteResult({ deletedCount: 0, failedCount: selectedCount });
+      setBulkDeleteResult({
+        deletedCount: 0,
+        failedCount: selectedCount,
+        errors: [{ id: 'bulk', error: (err as Error).message }],
+      });
     } finally {
       setBulkOperationLoading(false);
     }
@@ -245,7 +249,7 @@ export default function PersonManager(): React.JSX.Element {
     } catch (err) {
       setBulkOperationResult({
         success: 0,
-        failed: selectedCount,
+        failed: [{ id: 'bulk', error: (err as Error).message }],
         errors: [{ id: 'bulk', error: (err as Error).message }],
       });
       setBulkMoveResult({ movedCount: 0, failedCount: selectedCount });
@@ -275,7 +279,7 @@ export default function PersonManager(): React.JSX.Element {
     } catch (err) {
       setBulkOperationResult({
         success: 0,
-        failed: selectedCount,
+        failed: [{ id: 'bulk', error: (err as Error).message }],
         errors: [{ id: 'bulk', error: (err as Error).message }],
       });
       setBulkEditResult({ updatedCount: 0, failedCount: selectedCount });
