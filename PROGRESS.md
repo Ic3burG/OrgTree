@@ -221,9 +221,26 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: Import Enhancements & Dark Mode Refinements (January 10, 2026)
-- **Total Commits**: 209+ commits on main branch
-- **Today's Progress (January 10, 2026 - Session 36)**:
+- **Last Major Update**: Critical Infinite Loop Fix (January 10, 2026)
+- **Total Commits**: 210+ commits on main branch
+- **Today's Progress (January 10, 2026 - Session 37)**:
+  - 🚨 **CRITICAL FIX**: Resolved infinite loop causing Organization Map to not load
+  - 🔧 **Root Cause**: Circular dependency in useCallback hooks
+    - `loadData` depended on `handleToggleExpand`
+    - `handleToggleExpand` depended on `edges`
+    - `loadData` updated `edges` via `setEdges()`
+    - This created an infinite re-render cycle
+  - ✅ **Solution Implemented**:
+    - Removed `handleToggleExpand` and `handleSelectPerson` from `loadData` dependencies
+    - Removed callback injection from all layout functions (`handleToggleExpand`, `handleExpandAll`, `handleCollapseAll`, `handleToggleLayout`)
+    - Callbacks now exclusively added via `nodesWithHighlight` useMemo (existing pattern)
+    - Memoized real-time update callbacks to prevent unnecessary re-subscriptions
+  - 📝 **Files Modified**:
+    - `src/components/OrgMap.tsx` - Refactored callback dependency chain
+  - ✅ **Testing**: All 275 tests pass (59 frontend + 216 backend)
+  - 🎯 **Impact**: Organization Map now loads correctly without infinite loop
+
+- **Previous Session (January 10, 2026 - Session 36)**:
   - 🎨 **DARK MODE REFINEMENTS**: Fixed visibility issues in admin layouts
   - ✅ **Sidebar Text Contrast**: Updated "All Organizations" link and inactive tab colors for better readability
     - Changed `text-gray-600` → `dark:text-slate-400` for secondary text

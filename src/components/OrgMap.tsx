@@ -169,25 +169,17 @@ export default function OrgMap(): React.JSX.Element {
           layoutDirection
         );
 
-        // Preserve callbacks
-        const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map(
-          (node: unknown) => {
-            const typedNode = node as Node<DepartmentNodeData>;
-            return {
-              ...typedNode,
-              data: {
-                ...typedNode.data,
-                onToggleExpand: () => handleToggleExpand(typedNode.id),
-                onSelectPerson: (person: Person) => handleSelectPerson(person),
-              },
-            };
-          }
-        );
-
-        return nodesWithCallbacks;
+        // Merge layout positions with original data
+        return layoutedNodes.map((layoutNode: unknown, idx: number) => {
+          const typedLayoutNode = layoutNode as Node;
+          return {
+            ...updatedNodes[idx],
+            position: typedLayoutNode.position,
+          } as Node<DepartmentNodeData>;
+        });
       });
     },
-    [edges, layoutDirection, setNodes, handleSelectPerson]
+    [edges, layoutDirection, setNodes]
   );
 
   // Load organization data from API
@@ -224,22 +216,16 @@ export default function OrgMap(): React.JSX.Element {
           layoutDirection
         );
 
-        // Add callbacks to node data
-        const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map(
-          (node: unknown) => {
-            const typedNode = node as Node<DepartmentNodeData>;
-            return {
-              ...typedNode,
-              data: {
-                ...typedNode.data,
-                onToggleExpand: () => handleToggleExpand(typedNode.id),
-                onSelectPerson: (person: Person) => handleSelectPerson(person),
-              },
-            };
-          }
-        );
+        // Merge layout positions with original data
+        const nodesWithLayout = layoutedNodes.map((layoutNode: unknown, idx: number) => {
+          const typedLayoutNode = layoutNode as Node;
+          return {
+            ...parsedNodes[idx],
+            position: typedLayoutNode.position,
+          } as Node<DepartmentNodeData>;
+        });
 
-        setNodes(nodesWithCallbacks);
+        setNodes(nodesWithLayout);
         setEdges(parsedEdges);
 
         // Fit view after initial load (only on first load)
@@ -257,7 +243,7 @@ export default function OrgMap(): React.JSX.Element {
         if (showLoading) setIsLoading(false);
       }
     },
-    [orgId, layoutDirection, fitView, setNodes, setEdges, handleToggleExpand, handleSelectPerson]
+    [orgId, layoutDirection, fitView, setNodes, setEdges]
   );
 
   // Initial load
@@ -267,10 +253,19 @@ export default function OrgMap(): React.JSX.Element {
     }
   }, [orgId, loadData]);
 
+  // Memoize callbacks for real-time updates to prevent re-subscriptions
+  const handleDepartmentChange = useCallback(() => {
+    loadData(false);
+  }, [loadData]);
+
+  const handlePersonChange = useCallback(() => {
+    loadData(false);
+  }, [loadData]);
+
   // Real-time updates
   useRealtimeUpdates(orgId, {
-    onDepartmentChange: () => loadData(false),
-    onPersonChange: () => loadData(false),
+    onDepartmentChange: handleDepartmentChange,
+    onPersonChange: handlePersonChange,
     showNotifications: true,
   });
 
@@ -301,21 +296,16 @@ export default function OrgMap(): React.JSX.Element {
         layoutDirection
       );
 
-      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => {
-        const typedNode = node as Node<DepartmentNodeData>;
+      // Merge layout positions with original data
+      return layoutedNodes.map((layoutNode: unknown, idx: number) => {
+        const typedLayoutNode = layoutNode as Node;
         return {
-          ...typedNode,
-          data: {
-            ...typedNode.data,
-            onToggleExpand: () => handleToggleExpand(typedNode.id),
-            onSelectPerson: (person: Person) => handleSelectPerson(person),
-          },
-        };
+          ...updatedNodes[idx],
+          position: typedLayoutNode.position,
+        } as Node<DepartmentNodeData>;
       });
-
-      return nodesWithCallbacks;
     });
-  }, [edges, layoutDirection, handleToggleExpand, handleSelectPerson, setNodes]);
+  }, [edges, layoutDirection, setNodes]);
 
   // Collapse all departments
   const handleCollapseAll = useCallback((): void => {
@@ -331,21 +321,16 @@ export default function OrgMap(): React.JSX.Element {
         layoutDirection
       );
 
-      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => {
-        const typedNode = node as Node<DepartmentNodeData>;
+      // Merge layout positions with original data
+      return layoutedNodes.map((layoutNode: unknown, idx: number) => {
+        const typedLayoutNode = layoutNode as Node;
         return {
-          ...typedNode,
-          data: {
-            ...typedNode.data,
-            onToggleExpand: () => handleToggleExpand(typedNode.id),
-            onSelectPerson: (person: Person) => handleSelectPerson(person),
-          },
-        };
+          ...updatedNodes[idx],
+          position: typedLayoutNode.position,
+        } as Node<DepartmentNodeData>;
       });
-
-      return nodesWithCallbacks;
     });
-  }, [edges, layoutDirection, handleToggleExpand, handleSelectPerson, setNodes]);
+  }, [edges, layoutDirection, setNodes]);
 
   // Toggle layout direction
   const handleToggleLayout = useCallback((): void => {
@@ -355,23 +340,18 @@ export default function OrgMap(): React.JSX.Element {
     setNodes(nds => {
       const layoutedNodes = calculateLayout(nds as unknown as Node[], edges, newDirection);
 
-      const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map((node: unknown) => {
-        const typedNode = node as Node<DepartmentNodeData>;
+      // Merge layout positions with original data
+      return layoutedNodes.map((layoutNode: unknown, idx: number) => {
+        const typedLayoutNode = layoutNode as Node;
         return {
-          ...typedNode,
-          data: {
-            ...typedNode.data,
-            onToggleExpand: () => handleToggleExpand(typedNode.id),
-            onSelectPerson: (person: Person) => handleSelectPerson(person),
-          },
-        };
+          ...nds[idx],
+          position: typedLayoutNode.position,
+        } as Node<DepartmentNodeData>;
       });
-
-      return nodesWithCallbacks;
     });
 
     setTimeout(() => fitView({ padding: 0.2, duration: 800 }), 100);
-  }, [layoutDirection, edges, fitView, handleToggleExpand, handleSelectPerson, setNodes]);
+  }, [layoutDirection, edges, fitView, setNodes]);
 
   // Handle theme change
   const handleThemeChange = useCallback((themeName: string): void => {
