@@ -79,7 +79,7 @@ router.put(
       const org = await updateOrganization(req.params.id!, (name as string).trim(), req.user!.id);
 
       // Emit real-time event
-      emitOrgUpdated(req.params.id!, org, req.user!);
+      emitOrgUpdated(req.params.id!, org as unknown as Record<string, unknown>, req.user!);
 
       res.json(org);
     } catch (err) {

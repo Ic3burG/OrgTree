@@ -22,6 +22,8 @@ import searchRoutes from './routes/search.js';
 import bulkRoutes from './routes/bulk.js';
 import csrfRoutes from './routes/csrf.js';
 import backupRoutes from './routes/backup.js';
+import passkeyRoutes from './routes/passkey.js';
+import totpRoutes from './routes/totp.js';
 import { validateCsrf } from './middleware/csrf.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
@@ -191,6 +193,8 @@ app.use('/api', csrfRoutes);
 
 // Public routes (no authentication or CSRF required)
 app.use('/api/auth', authRoutes);
+app.use('/api/auth/passkey', passkeyRoutes);
+app.use('/api/auth/2fa', totpRoutes);
 app.use('/api/public', publicRoutes);
 
 // Protected routes (require CSRF validation for state-changing operations)

@@ -432,6 +432,22 @@ try {
   console.error('Migration error (passkeys table):', err);
 }
 
+// Migration: Add TOTP columns for 2FA
+try {
+  const usersTableInfo = db.prepare('PRAGMA table_info(users)').all() as TableInfoRow[];
+  const hasTotp = usersTableInfo.some(col => col.name === 'totp_secret');
+
+  if (!hasTotp) {
+    db.exec(`
+      ALTER TABLE users ADD COLUMN totp_secret TEXT;
+      ALTER TABLE users ADD COLUMN totp_enabled INTEGER DEFAULT 0;
+    `);
+    console.log('Migration: Added totp_secret and totp_enabled columns to users table');
+  }
+} catch (err) {
+  console.error('Migration error (TOTP columns):', err);
+}
+
 // Migration: Add deleted_at column for soft deletes
 try {
   const departmentsTableInfo = db.prepare('PRAGMA table_info(departments)').all() as TableInfoRow[];

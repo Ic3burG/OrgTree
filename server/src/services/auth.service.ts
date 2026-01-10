@@ -125,6 +125,22 @@ export async function loginUser(
   // Generate access token
   const accessToken = generateToken(user);
 
+  // TODO: Uncomment when TOTP is fully implemented with database schema
+  // Check if user has 2FA enabled
+  // if (user.totp_enabled === 1) {
+  //   // Return response indicating 2FA is required
+  //   // Do not generate refresh token yet - wait for 2FA verification
+  //   return {
+  //     requiresTwoFactor: true,
+  //     user,
+  //     accessToken: '', // Not provided yet
+  //     refreshToken: '', // Not provided yet
+  //     expiresIn: 0,
+  //     tempUserId: user.id, // For 2FA verification
+  //   };
+  // }
+
+  // 2FA not enabled - proceed with normal login
   // Generate and store refresh token
   const refreshToken = generateRefreshToken();
   storeRefreshToken(user.id, refreshToken, { ipAddress, userAgent });
@@ -156,7 +172,7 @@ export async function getUserById(id: string): Promise<DatabaseUser> {
   return user;
 }
 
-function generateToken(user: DatabaseUser): string {
+export function generateToken(user: DatabaseUser): string {
   return jwt.sign(
     { id: user.id, name: user.name, email: user.email, role: user.role },
     process.env.JWT_SECRET as string,

@@ -28,7 +28,7 @@ describe('Import Routes', () => {
 
     // Setup Express app with router
     app = express();
-    app.use(express.json());
+    app.use(express.json({ limit: '10mb' }));
     app.use('/api', importRouter);
 
     // Setup error handler

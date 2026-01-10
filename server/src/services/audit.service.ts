@@ -32,7 +32,7 @@ export function createAuditLog(
         entity_type, entity_id, entity_data, created_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `
-    ).run(id, orgId, actorId, actorName, actionType, entityType, entityId, entityDataJson);
+    ).run(id, orgId || 'system', actorId, actorName, actionType, entityType, entityId, entityDataJson);
 
     return { id };
   } catch (err) {
@@ -104,8 +104,10 @@ export function getAuditLogs(orgId: string, options: GetAuditLogsOptions = {}): 
   if (cursor) {
     try {
       const [cursorDate, cursorId] = cursor.split(':');
-      whereConditions.push('(created_at < ? OR (created_at = ? AND id < ?))');
-      params.push(cursorDate, cursorDate, cursorId);
+      if (cursorDate && cursorId) {
+        whereConditions.push('(created_at < ? OR (created_at = ? AND id < ?))');
+        params.push(cursorDate, cursorDate, cursorId);
+      }
     } catch (err) {
       console.error('Invalid cursor format:', err);
     }
@@ -221,8 +223,10 @@ export function getAllAuditLogs(options: GetAllAuditLogsOptions = {}): AllAuditL
   if (cursor) {
     try {
       const [cursorDate, cursorId] = cursor.split(':');
-      whereConditions.push('(created_at < ? OR (created_at = ? AND id < ?))');
-      params.push(cursorDate, cursorDate, cursorId);
+      if (cursorDate && cursorId) {
+        whereConditions.push('(created_at < ? OR (created_at = ? AND id < ?))');
+        params.push(cursorDate, cursorDate, cursorId);
+      }
     } catch (err) {
       console.error('Invalid cursor format:', err);
     }

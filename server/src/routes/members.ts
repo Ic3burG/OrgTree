@@ -45,6 +45,11 @@ router.get(
         )
         .get(orgId) as { created_by_id: string; name: string; email: string } | undefined;
 
+      if (!org) {
+        res.status(404).json({ message: 'Organization not found' });
+        return;
+      }
+
       res.json({
         owner: {
           userId: org.created_by_id,
@@ -90,7 +95,7 @@ router.post(
       );
 
       // Emit real-time event
-      emitMemberAdded(orgId, member, req.user!);
+      emitMemberAdded(orgId, member as unknown as Record<string, unknown>, req.user!);
 
       res.status(201).json(member);
     } catch (err) {
@@ -130,7 +135,7 @@ router.put(
       );
 
       // Emit real-time event
-      emitMemberUpdated(orgId, member, req.user!);
+      emitMemberUpdated(orgId, member as unknown as Record<string, unknown>, req.user!);
 
       res.json(member);
     } catch (err) {
@@ -213,7 +218,7 @@ router.post(
 
       if (result.success) {
         // Emit real-time event
-        emitMemberAdded(orgId, result.member, req.user!);
+        emitMemberAdded(orgId, result.member as unknown as Record<string, unknown>, req.user!);
         res.status(201).json(result);
       } else {
         // User not found - return 200 with success: false so frontend can offer to send invite
