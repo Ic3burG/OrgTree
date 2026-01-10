@@ -308,7 +308,11 @@ describe('Backup Routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      expect(response.body).toEqual(mockStats);
+      expect(response.body).toEqual({
+        ...mockStats,
+        oldestBackup: mockStats.oldestBackup.toISOString(),
+        newestBackup: mockStats.newestBackup.toISOString(),
+      });
     });
 
     it('should handle stats retrieval errors', async () => {
