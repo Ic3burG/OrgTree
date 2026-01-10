@@ -30,6 +30,21 @@ interface DepartmentWithDepth extends Department {
   children: DepartmentWithDepth[];
 }
 
+// Build tree structure from flat list (only used when not searching)
+const buildTree = (
+  depts: Department[],
+  parentId: string | null = null,
+  depth = 0
+): DepartmentWithDepth[] => {
+  return depts
+    .filter((d: Department) => d.parent_id === parentId)
+    .map((dept: Department) => ({
+      ...dept,
+      depth,
+      children: buildTree(depts, dept.id, depth + 1),
+    }));
+};
+
 export default function DepartmentManager(): React.JSX.Element {
   const { orgId } = useParams<{ orgId: string }>();
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -166,21 +181,6 @@ export default function DepartmentManager(): React.JSX.Element {
       newExpanded.add(id);
     }
     setExpanded(newExpanded);
-  };
-
-  // Build tree structure from flat list (only used when not searching)
-  const buildTree = (
-    depts: Department[],
-    parentId: string | null = null,
-    depth = 0
-  ): DepartmentWithDepth[] => {
-    return depts
-      .filter((d: Department) => d.parent_id === parentId)
-      .map((dept: Department) => ({
-        ...dept,
-        depth,
-        children: buildTree(depts, dept.id, depth + 1),
-      }));
   };
 
   const tree = useMemo(() => buildTree(departments), [departments]);

@@ -140,6 +140,56 @@ export default function OrgMap(): React.JSX.Element {
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
   const toast = useToast();
 
+  // Select person for detail panel
+  const handleSelectPerson = useCallback((person: Person): void => {
+    setSelectedPerson(person);
+  }, []);
+
+  // Toggle department expansion
+  const handleToggleExpand = useCallback(
+    (nodeId: string): void => {
+      setNodes(nds => {
+        const updatedNodes = nds.map(node => {
+          if (node.id === nodeId) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                isExpanded: !node.data.isExpanded,
+              },
+            };
+          }
+          return node;
+        });
+
+        // Recalculate layout with new dimensions
+        const layoutedNodes = calculateLayout(
+          updatedNodes as unknown as Node[],
+          edges,
+          layoutDirection
+        );
+
+        // Preserve callbacks
+        const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map(
+          (node: unknown) => {
+            const typedNode = node as Node<DepartmentNodeData>;
+            return {
+              ...typedNode,
+              data: {
+                ...typedNode.data,
+                onToggleExpand: () => handleToggleExpand(typedNode.id),
+                onSelectPerson: (person: Person) => handleSelectPerson(person),
+              },
+            };
+          }
+        );
+
+        return nodesWithCallbacks;
+      });
+    },
+    [edges, layoutDirection, setNodes, handleSelectPerson]
+  );
+
   // Load organization data from API
   const loadData = useCallback(
     async (showLoading = true): Promise<void> => {
@@ -207,7 +257,7 @@ export default function OrgMap(): React.JSX.Element {
         if (showLoading) setIsLoading(false);
       }
     },
-    [orgId, layoutDirection, fitView, setNodes, setEdges]
+    [orgId, layoutDirection, fitView, setNodes, setEdges, handleToggleExpand, handleSelectPerson]
   );
 
   // Initial load
@@ -230,56 +280,6 @@ export default function OrgMap(): React.JSX.Element {
     if (savedTheme) {
       setCurrentTheme(savedTheme);
     }
-  }, []);
-
-  // Toggle department expansion
-  const handleToggleExpand = useCallback(
-    (nodeId: string): void => {
-      setNodes(nds => {
-        const updatedNodes = nds.map(node => {
-          if (node.id === nodeId) {
-            return {
-              ...node,
-              data: {
-                ...node.data,
-                isExpanded: !node.data.isExpanded,
-              },
-            };
-          }
-          return node;
-        });
-
-        // Recalculate layout with new dimensions
-        const layoutedNodes = calculateLayout(
-          updatedNodes as unknown as Node[],
-          edges,
-          layoutDirection
-        );
-
-        // Preserve callbacks
-        const nodesWithCallbacks: Node<DepartmentNodeData>[] = layoutedNodes.map(
-          (node: unknown) => {
-            const typedNode = node as Node<DepartmentNodeData>;
-            return {
-              ...typedNode,
-              data: {
-                ...typedNode.data,
-                onToggleExpand: () => handleToggleExpand(typedNode.id),
-                onSelectPerson: (person: Person) => handleSelectPerson(person),
-              },
-            };
-          }
-        );
-
-        return nodesWithCallbacks;
-      });
-    },
-    [edges, layoutDirection, setNodes]
-  );
-
-  // Select person for detail panel
-  const handleSelectPerson = useCallback((person: Person): void => {
-    setSelectedPerson(person);
   }, []);
 
   // Close detail panel

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Building2, Users, Download, Upload, Share2 } from 'lucide-react';
 import api from '../../api/client';
@@ -24,9 +24,9 @@ export default function Dashboard(): React.JSX.Element {
 
   useEffect(() => {
     loadOrganization();
-  }, [orgId]);
+  }, [loadOrganization, orgId]);
 
-  async function loadOrganization(): Promise<void> {
+  const loadOrganization = useCallback(async (): Promise<void> => {
     if (!orgId) return;
     try {
       setLoading(true);
@@ -38,7 +38,7 @@ export default function Dashboard(): React.JSX.Element {
     } finally {
       setLoading(false);
     }
-  }
+  }, [orgId]);
 
   const handleExport = (): void => {
     if (!organization || !organization.departments) return;
@@ -47,7 +47,7 @@ export default function Dashboard(): React.JSX.Element {
       const filename = `${organization.name.replace(/\s+/g, '-')}-org.csv`;
       downloadCSV(csv, filename);
       toast.success('Organization exported successfully');
-    } catch (err) {
+    } catch {
       toast.error('Failed to export organization');
     }
   };

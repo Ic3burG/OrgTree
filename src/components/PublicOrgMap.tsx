@@ -123,6 +123,46 @@ function PublicOrgMapContent(): React.JSX.Element {
 
   const { fitView, zoomIn, zoomOut } = useReactFlow();
 
+  // Select person for detail panel
+  const handleSelectPerson = useCallback((person: Person): void => {
+    setSelectedPerson(person);
+  }, []);
+
+  // Toggle department expansion
+  const handleToggleExpand = useCallback(
+    (nodeId: string): void => {
+      setNodes(nds => {
+        const updatedNodes = nds.map(node => {
+          if (node.id === nodeId) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                isExpanded: !node.data.isExpanded,
+              },
+            };
+          }
+          return node;
+        });
+
+        // Recalculate layout with new dimensions
+        const layoutedNodes = calculateLayout(updatedNodes, edges, layoutDirection);
+
+        // Preserve callbacks
+        return layoutedNodes.map(node => ({
+          ...node,
+          position: node.position || { x: 0, y: 0 },
+          data: {
+            ...node.data,
+            onToggleExpand: () => handleToggleExpand(node.id),
+            onSelectPerson: (person: Person) => handleSelectPerson(person),
+          },
+        })) as Node<NodeData>[];
+      });
+    },
+    [edges, layoutDirection, setNodes, handleSelectPerson]
+  );
+
   // Load organization data from public API
   useEffect(() => {
     async function loadData(): Promise<void> {
@@ -187,47 +227,7 @@ function PublicOrgMapContent(): React.JSX.Element {
       loadData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shareToken]);
-
-  // Toggle department expansion
-  const handleToggleExpand = useCallback(
-    (nodeId: string): void => {
-      setNodes(nds => {
-        const updatedNodes = nds.map(node => {
-          if (node.id === nodeId) {
-            return {
-              ...node,
-              data: {
-                ...node.data,
-                isExpanded: !node.data.isExpanded,
-              },
-            };
-          }
-          return node;
-        });
-
-        // Recalculate layout with new dimensions
-        const layoutedNodes = calculateLayout(updatedNodes, edges, layoutDirection);
-
-        // Preserve callbacks
-        return layoutedNodes.map(node => ({
-          ...node,
-          position: node.position || { x: 0, y: 0 },
-          data: {
-            ...node.data,
-            onToggleExpand: () => handleToggleExpand(node.id),
-            onSelectPerson: (person: Person) => handleSelectPerson(person),
-          },
-        })) as Node<NodeData>[];
-      });
-    },
-    [edges, layoutDirection, setNodes]
-  );
-
-  // Select person for detail panel
-  const handleSelectPerson = useCallback((person: Person): void => {
-    setSelectedPerson(person);
-  }, []);
+  }, [shareToken, handleToggleExpand, handleSelectPerson]);
 
   // Close detail panel
   const handleCloseDetail = useCallback((): void => {

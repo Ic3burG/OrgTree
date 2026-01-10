@@ -4,7 +4,7 @@
 
 **Version**: 1.0
 **Last Updated**: January 9, 2026
-**Application URL**: https://orgtree-app.onrender.com
+**Application URL**: <https://orgtree-app.onrender.com>
 
 ---
 
@@ -73,7 +73,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 
 ### Creating an Account
 
-1. Navigate to https://orgtree-app.onrender.com
+1. Navigate to <https://orgtree-app.onrender.com>
 2. Click **"Sign Up"** on the login page
 3. Enter your details:
    - **Name**: Your full name (displayed to other users)
@@ -84,7 +84,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 
 ### Logging In
 
-1. Navigate to https://orgtree-app.onrender.com
+1. Navigate to <https://orgtree-app.onrender.com>
 2. Enter your **email** and **password**
 3. Click **"Log In"**
 
@@ -102,7 +102,7 @@ If your account was created by an administrator:
 
 After logging in, you'll see the **Organization Selector** page:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  OrgTree                          [User Name] [Logout]  │
 ├─────────────────────────────────────────────────────────┤
@@ -130,7 +130,7 @@ The Dashboard is your central hub for managing an organization. Access it by cli
 
 #### Dashboard Layout
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  [Logo] Organization Name                    [User] ▼   │
 ├──────────────┬──────────────────────────────────────────┤
@@ -210,7 +210,7 @@ Your role is displayed on organization cards and in the sidebar.
 1. Navigate to **Departments** in the sidebar
 2. Departments are displayed in a tree structure showing the hierarchy
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  Departments                        [Select] [+ Add]    │
 ├─────────────────────────────────────────────────────────┤
@@ -280,7 +280,7 @@ To change a department's parent (re-organize hierarchy):
 1. Navigate to **People** in the sidebar
 2. All people across all departments are listed
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  People                             [Select] [+ Add]    │
 ├─────────────────────────────────────────────────────────┤
@@ -346,7 +346,7 @@ To change a department's parent (re-organize hierarchy):
 
 ### Org Chart Interface
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  [🔍 Search] [Theme ▼] [Layout ▼] [Export ▼] [⛶ Full]  │
 ├─────────────────────────────────────────────────────────┤
@@ -479,6 +479,9 @@ On the **People** page:
 On the **Departments** page:
 
 1. Type in the search box
+2. View switches from tree to flat list showing matches
+3. Clear search to return to tree view
+
 ---
 
 ## Dark Mode
@@ -490,44 +493,50 @@ OrgTree includes a comprehensive dark mode feature that provides a comfortable v
 Dark mode can be toggled from multiple locations throughout the application:
 
 **From Login/Signup Pages:**
+
 1. Look for the **moon icon** (🌙) in the top-right corner
 2. Click to toggle between light and dark modes
 
 **From Admin Dashboard:**
+
 1. Find the **moon/sun icon** in the sidebar (desktop) or mobile header
 2. Click to toggle dark mode
 3. Your preference is saved automatically
 
 **From Org Map:**
+
 1. Click the **palette icon** in the toolbar
 2. Find the dark mode toggle in the theme drawer
 3. Toggle between light and dark modes
 
 ### Dark Mode Features
 
-| Feature | Description |
-|---------|-------------|
-| **Persistent Preference** | Your dark mode choice is saved in your browser |
+| Feature                         | Description                                              |
+| ------------------------------- | -------------------------------------------------------- |
+| **Persistent Preference**       | Your dark mode choice is saved in your browser           |
 | **System Preference Detection** | On first visit, respects your system's dark mode setting |
-| **Instant Switching** | Changes apply immediately without page refresh |
-| **Consistent Colors** | All components follow the same dark mode color scheme |
-| **Accessible** | Maintains WCAG AA contrast ratios in both modes |
+| **Instant Switching**           | Changes apply immediately without page refresh           |
+| **Consistent Colors**           | All components follow the same dark mode color scheme    |
+| **Accessible**                  | Maintains WCAG AA contrast ratios in both modes          |
 
 ### Where Dark Mode Works
 
 Dark mode is available throughout the entire application:
 
 ✅ **Authentication Pages**
+
 - Login page
 - Signup page
 - Password change page
 
 ✅ **Main Layouts**
+
 - Admin dashboard and sidebar
 - Superuser dashboard and sidebar
 - Organization selector page
 
 ✅ **Visualization**
+
 - Org chart map
 - Public org chart view
 - Search overlay
@@ -535,6 +544,7 @@ Dark mode is available throughout the entire application:
 - Department nodes
 
 ✅ **Admin Components**
+
 - Dashboard statistics
 - Department manager
 - People manager
@@ -542,6 +552,7 @@ Dark mode is available throughout the entire application:
 - Bulk operation modals
 
 ✅ **Utility Components**
+
 - Error pages
 - Loading states
 - Modals and dialogs
@@ -551,25 +562,28 @@ Dark mode is available throughout the entire application:
 
 The dark mode uses a carefully selected color palette:
 
-| Element | Light Mode | Dark Mode |
-|---------|-----------|-----------|
-| **Background** | White/Gray-50 | Slate-800/900 |
-| **Text** | Gray-900 | Slate-100 |
-| **Borders** | Gray-200 | Slate-700 |
-| **Hover States** | Gray-50 | Slate-700 |
-| **Active Elements** | Blue-50 | Blue-900/30 |
+| Element             | Light Mode    | Dark Mode     |
+| ------------------- | ------------- | ------------- |
+| **Background**      | White/Gray-50 | Slate-800/900 |
+| **Text**            | Gray-900      | Slate-100     |
+| **Borders**         | Gray-200      | Slate-700     |
+| **Hover States**    | Gray-50       | Slate-700     |
+| **Active Elements** | Blue-50       | Blue-900/30   |
 
 ### Troubleshooting Dark Mode
 
 **Dark mode not persisting after refresh:**
+
 - Check that your browser allows localStorage
 - Try clearing browser cache and toggling again
 
 **Some elements not switching:**
+
 - Try a hard refresh (Ctrl+Shift+R or Cmd+Shift+R)
 - Ensure you're using a supported browser
 
 **Preference not syncing across devices:**
+
 - Dark mode preference is stored locally per browser
 - You'll need to enable it on each device/browser
 
@@ -583,8 +597,6 @@ For developers and advanced users:
 - **Implementation**: Tailwind CSS class-based dark mode
 
 ---
-2. View switches from tree to flat list showing matches
-3. Clear search to return to tree view
 
 ---
 
@@ -600,7 +612,7 @@ Team members are users who have access to your organization. Each member has a s
 2. Select the **"Team Members"** tab
 3. View list of all members with their roles
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  Share Organization                              [X]    │
 ├─────────────────────────────────────────────────────────┤
@@ -749,7 +761,7 @@ In selection mode:
 - Selected items show a **checkmark** and blue highlight
 - A **floating action bar** appears at the bottom
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │        5 people selected    [Move] [Edit] [Delete]  [X]│
 └─────────────────────────────────────────────────────────┘
@@ -868,7 +880,7 @@ The audit trail provides a complete history of all changes made to your organiza
 
 ### Audit Log Interface
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  Audit Log                                              │
 ├─────────────────────────────────────────────────────────┤
@@ -969,7 +981,7 @@ Superusers have system-wide administrative access beyond individual organization
 
 ### Superuser Dashboard
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  [Logo] System Administration           [Superuser] ▼   │
 ├──────────────────┬──────────────────────────────────────┤
@@ -1054,10 +1066,12 @@ If a superuser is locked out:
 
 1. Access the server via Render Shell
 2. Run the reset script:
+
    ```bash
    cd server
    node scripts/reset-superuser.js <email>
    ```
+
 3. Use the generated temporary password to log in
 4. Change password immediately
 
@@ -1152,7 +1166,7 @@ If you encounter issues not covered here:
 
 1. Check this documentation
 2. Contact your organization admin
-3. Report bugs at: https://github.com/Ic3burG/OrgTree/issues
+3. Report bugs at: <https://github.com/Ic3burG/OrgTree/issues>
 
 ---
 
@@ -1217,8 +1231,8 @@ If you encounter issues not covered here:
 ## Support
 
 - **Documentation**: You're reading it!
-- **Bug Reports**: https://github.com/Ic3burG/OrgTree/issues
-- **Repository**: https://github.com/Ic3burG/OrgTree
+- **Bug Reports**: <https://github.com/Ic3burG/OrgTree/issues>
+- **Repository**: <https://github.com/Ic3burG/OrgTree>
 
 ---
 
