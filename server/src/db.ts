@@ -397,6 +397,41 @@ try {
   console.error('Migration error (refresh_tokens table):', err);
 }
 
+// Migration: Add passkeys table for WebAuthn authentication
+try {
+  const tables = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+    .all() as TableNameRow[];
+  const tableNames = tables.map(t => t.name);
+
+  if (!tableNames.includes('passkeys')) {
+    db.exec(`
+      CREATE TABLE passkeys (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        credential_id TEXT NOT NULL UNIQUE,
+        public_key BLOB NOT NULL,
+        counter INTEGER NOT NULL DEFAULT 0,
+        transports TEXT,
+        backup_eligible BOOLEAN DEFAULT 0,
+        backup_status BOOLEAN DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        last_used_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+
+      -- Index for fast lookup by user_id
+      CREATE INDEX idx_passkeys_user_id ON passkeys(user_id);
+
+      -- Index for credential lookup during authentication
+      CREATE INDEX idx_passkeys_credential_id ON passkeys(credential_id);
+    `);
+    console.log('Migration: Created passkeys table');
+  }
+} catch (err) {
+  console.error('Migration error (passkeys table):', err);
+}
+
 // Migration: Add deleted_at column for soft deletes
 try {
   const departmentsTableInfo = db.prepare('PRAGMA table_info(departments)').all() as TableInfoRow[];

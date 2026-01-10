@@ -128,6 +128,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 3. **Custom Fields** - Allow configurable person/department attributes
 4. ~~**API Documentation** - Complete REST API documentation~~ ✅ **DONE** (December 30, 2025)
 5. ~~**Dark Mode** - Add dark theme support with user preference persistence~~ ✅ **DONE** (January 9, 2026)
+6. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
 
 ### Medium-term Vision (Next quarter)
 

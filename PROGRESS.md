@@ -86,6 +86,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 13. **✅ Organization Map Infinite Loop** - Fixed circular dependency in useCallback hooks causing map to hang
 14. **✅ XML Import Name Format** - Fixed names importing as "Last, First" instead of "First Last"
 15. **✅ Duplicate Department Prevention** - Backend now prevents duplicate departments on re-import
+16. **✅ Bulk Operations UI Refresh Bug** - Fixed bulk delete/move/edit not refreshing UI after completion
 
 ## 🐛 Known Issues (Fixed)
 
@@ -106,6 +107,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ~~Organization Map stuck in infinite loop, won't load~~ ✅ **FIXED** - Removed circular dependency in useCallback hooks (January 10, 2026)
 - ~~XML imports creating names as "Last, First" instead of "First Last"~~ ✅ **FIXED** - Construct name from firstName + lastName fields (January 10, 2026)
 - ~~Re-importing XML creates duplicate departments~~ ✅ **FIXED** - Backend checks for existing departments by name + parent (January 10, 2026)
+- ~~Bulk operations showing success but UI not refreshing~~ ✅ **FIXED** - Using correct API response field names (deletedCount, updatedCount, etc.) (January 10, 2026)
 
 ## 🎯 Current Status
 
@@ -228,7 +230,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 ### Recent Activity
 
 - **Last Major Update**: Critical Bug Fixes & Import Enhancements (January 10, 2026)
-- **Total Commits**: 213+ commits on main branch (3 commits in Session 37)
+- **Total Commits**: 214+ commits on main branch (4 commits in Session 37)
 - **Today's Progress (January 10, 2026 - Session 37)**:
   - 🚨 **CRITICAL FIX**: Resolved infinite loop causing Organization Map to not load
   - 🔧 **Root Cause**: Circular dependency in useCallback hooks
@@ -253,6 +255,16 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - **Behavior**: If department exists, reuses existing ID instead of creating duplicate
     - **Metrics**: Tracks `departmentsCreated` vs `departmentsReused` separately
     - **Impact**: Safe to re-import data without creating duplicates
+  - 🔧 **Bulk Operations UI Refresh Bug**: Fixed bulk operations not refreshing UI
+    - **Issue**: Bulk delete/move/edit showed success dialog but UI didn't refresh - counts stayed same
+    - **Root Cause**: Frontend using wrong API response field names
+      - Code was checking `result.success` (boolean) and `result.failed` instead of `result.deletedCount`, `result.updatedCount`, etc. (numbers)
+      - Condition `if (result.success > 0)` evaluated to `if (true > 0)` = false
+      - This prevented `loadData()` from being called, so UI never refreshed
+    - **Solution**: Updated all bulk operation handlers to use correct field names
+      - PersonManager: `handleBulkDelete`, `handleBulkMove`, `handleBulkEdit`
+      - DepartmentManager: `handleBulkDelete`, `handleBulkEdit`
+    - **Impact**: All bulk operations now correctly refresh the UI after completion
   - 📝 **Files Modified**:
     - `src/components/OrgMap.tsx` - Refactored callback dependency chain
     - `src/utils/xmlImport.ts` - Fixed name construction order
@@ -260,8 +272,10 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `src/types/index.ts` - Added departmentsReused field to CSVImportResult
     - `src/utils/csvImport.ts` - Added departmentsReused field to CSVImportResult
     - `src/components/admin/ImportModal.tsx` - Display departmentsReused in success message
+    - `src/components/admin/PersonManager.tsx` - Fixed bulk operation field names
+    - `src/components/admin/DepartmentManager.tsx` - Fixed bulk operation field names
   - ✅ **Testing**: All 275 tests pass (59 frontend + 216 backend)
-  - 🎯 **Impact**: Organization Map loads + XML imports correct format + No duplicate departments
+  - 🎯 **Impact**: Organization Map loads + XML imports correct format + No duplicate departments + Bulk operations refresh UI
 
 - **Previous Session (January 10, 2026 - Session 36)**:
   - 🎨 **DARK MODE REFINEMENTS**: Fixed visibility issues in admin layouts
@@ -2150,7 +2164,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>
-**Last Updated**: January 8, 2026 (Session 30 - Test Coverage Expansion Phase 2)
+**Last Updated**: January 10, 2026 (Session 37 - Critical Bug Fixes)
 
 **Today's Major Milestone**: 🎉
 

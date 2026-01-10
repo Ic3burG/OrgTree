@@ -174,6 +174,11 @@ export interface BulkOperationResult {
   success: number;
   failed: number;
   errors: Array<{ id: string; error: string }>;
+  // Additional fields returned by backend for specific operations
+  deletedCount?: number;
+  failedCount?: number;
+  movedCount?: number;
+  updatedCount?: number;
 }
 
 // API Error

@@ -206,8 +206,11 @@ export default function PersonManager(): React.JSX.Element {
       setBulkDeleteResult(null);
       const result = await api.bulkDeletePeople(orgId, selectedArray);
       setBulkOperationResult(result);
-      setBulkDeleteResult({ deletedCount: result.success, failedCount: result.failed });
-      if (result.success > 0) {
+      setBulkDeleteResult({
+        deletedCount: result.deletedCount ?? 0,
+        failedCount: result.failedCount ?? 0,
+      });
+      if ((result.deletedCount ?? 0) > 0) {
         await loadData(false);
       }
     } catch (err) {
@@ -230,8 +233,11 @@ export default function PersonManager(): React.JSX.Element {
       setBulkMoveResult(null);
       const result = await api.bulkMovePeople(orgId, selectedArray, targetDepartmentId);
       setBulkOperationResult(result);
-      setBulkMoveResult({ movedCount: result.success, failedCount: result.failed });
-      if (result.success > 0) {
+      setBulkMoveResult({
+        movedCount: result.movedCount ?? 0,
+        failedCount: result.failedCount ?? 0,
+      });
+      if ((result.movedCount ?? 0) > 0) {
         await loadData(false);
       }
     } catch (err) {
@@ -257,8 +263,11 @@ export default function PersonManager(): React.JSX.Element {
       setBulkEditResult(null);
       const result = await api.bulkEditPeople(orgId, selectedArray, updates);
       setBulkOperationResult(result);
-      setBulkEditResult({ updatedCount: result.success, failedCount: result.failed });
-      if (result.success > 0) {
+      setBulkEditResult({
+        updatedCount: result.updatedCount ?? 0,
+        failedCount: result.failedCount ?? 0,
+      });
+      if ((result.updatedCount ?? 0) > 0) {
         await loadData(false);
       }
     } catch (err) {
