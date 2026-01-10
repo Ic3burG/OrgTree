@@ -111,7 +111,7 @@ export default function Dashboard(): React.JSX.Element {
                 className="flex items-center gap-2 px-4 py-2.5 lg:py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 active:bg-gray-300 dark:active:bg-slate-500 transition-colors touch-manipulation text-sm lg:text-base"
               >
                 <Upload size={20} />
-                Import CSV
+                Import Data
               </button>
               <button
                 onClick={handleExport}

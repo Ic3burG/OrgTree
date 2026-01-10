@@ -2,6 +2,7 @@ import express, { Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 import { authenticateToken } from '../middleware/auth.js';
 import { requireOrgPermission } from '../services/member.service.js';
+import { createAuditLog } from '../services/audit.service.js';
 import db from '../db.js';
 import type { AuthRequest } from '../types/index.js';
 
@@ -136,6 +137,27 @@ router.post(
 
         // Commit transaction
         db.prepare('COMMIT').run();
+
+        // Log the import action in audit trail
+        createAuditLog(
+          orgId!,
+          {
+            id: req.user!.id,
+            name: req.user!.name,
+            email: req.user!.email,
+          },
+          'import',
+          'data_import',
+          null,
+          {
+            departmentsCreated,
+            peopleCreated,
+            peopleSkipped,
+            duplicatesFound: peopleSkipped > 0,
+            totalRows: data.length,
+            timestamp: new Date().toISOString(),
+          }
+        );
 
         res.json({
           success: true,

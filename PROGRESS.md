@@ -221,9 +221,43 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: XML Import Feature (January 10, 2026)
-- **Total Commits**: 208+ commits on main branch
-- **Today's Progress (January 10, 2026 - Session 35)**:
+- **Last Major Update**: Import Enhancements & Dark Mode Refinements (January 10, 2026)
+- **Total Commits**: 209+ commits on main branch
+- **Today's Progress (January 10, 2026 - Session 36)**:
+  - 🎨 **DARK MODE REFINEMENTS**: Fixed visibility issues in admin layouts
+  - ✅ **Sidebar Text Contrast**: Updated "All Organizations" link and inactive tab colors for better readability
+    - Changed `text-gray-600` → `dark:text-slate-400` for secondary text
+    - Changed `text-gray-700` → `dark:text-slate-300` for inactive tabs
+    - All navigation tabs now clearly visible in dark mode
+  - ✅ **User Section Dark Mode**: Fixed username, email, and badge visibility
+    - User name: `text-gray-900 dark:text-slate-100`
+    - Role badges: `dark:bg-purple-900/50 dark:text-purple-300`
+    - Border improvements throughout
+  - 🔍 **XML Duplicate Detection Enhancement**: Frontend now detects duplicates within import batch
+    - Added `warnings` array to `processXmlFiles()` return value
+    - Email-based duplicate detection (case-insensitive)
+    - Warning UI with amber/yellow color scheme (separate from errors)
+    - Shows individual duplicate warnings and summary count
+  - ✅ **Import Button Label**: Changed "Import CSV" → "Import Data" to reflect dual-format support
+  - 📊 **Audit Logging for Imports**: All CSV/XML imports now logged in audit trail
+    - Tracks: departments created, people created, people skipped, duplicates found
+    - Action type: `import`, Entity type: `data_import`
+    - Visible in organization audit logs and system audit logs
+    - Easy filtering with `duplicatesFound` boolean flag
+  - 🌙 **ImportModal Dark Mode**: Complete dark mode support for import dialog
+  - 📊 **Files Modified**: 6 files
+    - `src/components/admin/Dashboard.tsx` - Button label
+    - `src/utils/xmlImport.ts` - Duplicate detection
+    - `src/components/admin/ImportModal.tsx` - Warning UI + dark mode
+    - `src/components/admin/AdminLayout.tsx` - Dark mode visibility fixes
+    - `src/components/superuser/SuperuserLayout.tsx` - Dark mode visibility fixes
+    - `server/src/routes/import.ts` - Audit logging
+  - ✅ **Quality Metrics**:
+    - Frontend: 59 tests passing ✅
+    - Backend: 216 tests passing ✅
+    - TypeScript: 0 errors ✅
+    - Build: Successful ✅
+- **Previous Progress (January 10, 2026 - Session 35)**:
   - 📥 **XML IMPORT FEATURE**: Implemented GEDS XML bulk import with duplicate detection
   - ✅ **Duplicate Prevention**: Backend now checks for existing emails within organization to prevent duplicates (skips if found)
   - ✅ **Frontend Utility**: Native browser-based XML parsing via `DOMParser` (no Node.js dependency)

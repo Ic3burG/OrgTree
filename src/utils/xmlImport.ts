@@ -144,10 +144,11 @@ function buildPath(departments: string[], acronymMap: Map<string, string>): Dept
  */
 export async function processXmlFiles(
   files: File[]
-): Promise<{ rows: CSVRow[]; errors: string[] }> {
+): Promise<{ rows: CSVRow[]; errors: string[]; warnings: string[] }> {
   const acronymMap = new Map<string, string>();
   const parsedPeople: GedsPerson[] = [];
   const errors: string[] = [];
+  const warnings: string[] = [];
 
   // Pass 1: Read all files and collect acronyms
   for (const file of files) {
@@ -185,6 +186,8 @@ export async function processXmlFiles(
 
   const rows: CSVRow[] = [];
   const processedPaths = new Set<string>(); // avoid duplicates in output
+  const seenEmails = new Set<string>(); // track emails to detect duplicates
+  let duplicateCount = 0;
 
   for (const person of parsedPeople) {
     if (person.departments.length === 0) continue;
@@ -211,6 +214,18 @@ export async function processXmlFiles(
       }
     }
 
+    // Check for duplicate email within the XML files
+    if (person.email) {
+      const emailLower = person.email.toLowerCase().trim();
+      if (seenEmails.has(emailLower)) {
+        // Skip this person - duplicate email detected
+        duplicateCount++;
+        warnings.push(`Duplicate email detected: ${person.email} (${person.fullName}) - skipped`);
+        continue; // Skip adding this person to rows
+      }
+      seenEmails.add(emailLower);
+    }
+
     // Add person
     const personSlug = slugify(person.fullName);
 
@@ -233,7 +248,14 @@ export async function processXmlFiles(
     });
   }
 
-  return { rows, errors };
+  // Add summary warning if duplicates were found
+  if (duplicateCount > 0) {
+    warnings.unshift(
+      `Found ${duplicateCount} duplicate email(s) within the XML files. Duplicates were not included in the import.`
+    );
+  }
+
+  return { rows, errors, warnings };
 }
 
 function readFileAsText(file: File, encoding: string): Promise<string> {
