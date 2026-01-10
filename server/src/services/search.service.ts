@@ -132,19 +132,20 @@ function searchDepartments(
   limit: number,
   offset: number
 ): { total: number; results: SearchResult[] } {
-  // Count total matches
+  // Count total matches (exclude soft-deleted departments)
   const countStmt = db.prepare(`
     SELECT COUNT(*) as count
     FROM departments_fts
     JOIN departments d ON departments_fts.rowid = d.rowid
     WHERE departments_fts MATCH ?
       AND d.organization_id = ?
+      AND d.deleted_at IS NULL
   `);
 
   const countResult = countStmt.get(ftsQuery, orgId) as CountResult;
   const total = countResult.count;
 
-  // Get matching departments with highlights
+  // Get matching departments with highlights (exclude soft-deleted)
   const stmt = db.prepare(`
     SELECT
       d.id,
@@ -153,12 +154,13 @@ function searchDepartments(
       d.parent_id as parentId,
       snippet(departments_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
       snippet(departments_fts, 1, '<mark>', '</mark>', '...', 32) as descHighlight,
-      (SELECT COUNT(*) FROM people WHERE department_id = d.id) as peopleCount,
+      (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as peopleCount,
       bm25(departments_fts) as rank
     FROM departments_fts
     JOIN departments d ON departments_fts.rowid = d.rowid
     WHERE departments_fts MATCH ?
       AND d.organization_id = ?
+      AND d.deleted_at IS NULL
     ORDER BY rank
     LIMIT ? OFFSET ?
   `);
@@ -192,7 +194,7 @@ function searchPeople(
   limit: number,
   offset: number
 ): { total: number; results: SearchResult[] } {
-  // Count total matches (people through department->org relationship)
+  // Count total matches (people through department->org relationship, exclude soft-deleted)
   const countStmt = db.prepare(`
     SELECT COUNT(*) as count
     FROM people_fts
@@ -200,12 +202,14 @@ function searchPeople(
     JOIN departments d ON p.department_id = d.id
     WHERE people_fts MATCH ?
       AND d.organization_id = ?
+      AND p.deleted_at IS NULL
+      AND d.deleted_at IS NULL
   `);
 
   const countResult = countStmt.get(ftsQuery, orgId) as CountResult;
   const total = countResult.count;
 
-  // Get matching people with highlights
+  // Get matching people with highlights (exclude soft-deleted)
   const stmt = db.prepare(`
     SELECT
       p.id,
@@ -224,6 +228,8 @@ function searchPeople(
     JOIN departments d ON p.department_id = d.id
     WHERE people_fts MATCH ?
       AND d.organization_id = ?
+      AND p.deleted_at IS NULL
+      AND d.deleted_at IS NULL
     ORDER BY rank
     LIMIT ? OFFSET ?
   `);
@@ -332,13 +338,14 @@ export function getAutocompleteSuggestions(
   const suggestions: AutocompleteSuggestion[] = [];
 
   try {
-    // Department name suggestions
+    // Department name suggestions (exclude soft-deleted)
     const deptStmt = db.prepare(`
       SELECT DISTINCT d.name, 'department' as type
       FROM departments_fts
       JOIN departments d ON departments_fts.rowid = d.rowid
       WHERE departments_fts MATCH ?
         AND d.organization_id = ?
+        AND d.deleted_at IS NULL
       LIMIT ?
     `);
 
@@ -360,7 +367,7 @@ export function getAutocompleteSuggestions(
   }
 
   try {
-    // Person name suggestions
+    // Person name suggestions (exclude soft-deleted)
     const peopleStmt = db.prepare(`
       SELECT DISTINCT p.name, 'person' as type
       FROM people_fts
@@ -368,6 +375,8 @@ export function getAutocompleteSuggestions(
       JOIN departments d ON p.department_id = d.id
       WHERE people_fts MATCH ?
         AND d.organization_id = ?
+        AND p.deleted_at IS NULL
+        AND d.deleted_at IS NULL
       LIMIT ?
     `);
 

@@ -87,6 +87,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 14. **✅ XML Import Name Format** - Fixed names importing as "Last, First" instead of "First Last"
 15. **✅ Duplicate Department Prevention** - Backend now prevents duplicate departments on re-import
 16. **✅ Bulk Operations UI Refresh Bug** - Fixed bulk delete/move/edit not refreshing UI after completion
+17. **✅ Soft-Deleted Records Visibility Bug** - Fixed soft-deleted people/departments appearing in UI but unable to be deleted (January 10, 2026)
 
 ## 🐛 Known Issues (Fixed)
 
@@ -108,6 +109,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ~~XML imports creating names as "Last, First" instead of "First Last"~~ ✅ **FIXED** - Construct name from firstName + lastName fields (January 10, 2026)
 - ~~Re-importing XML creates duplicate departments~~ ✅ **FIXED** - Backend checks for existing departments by name + parent (January 10, 2026)
 - ~~Bulk operations showing success but UI not refreshing~~ ✅ **FIXED** - Using correct API response field names (deletedCount, updatedCount, etc.) (January 10, 2026)
+- ~~Soft-deleted people/departments appearing in UI but cannot be deleted~~ ✅ **FIXED** - Added deleted_at IS NULL filters to all query services (January 10, 2026)
 
 ## 🎯 Current Status
 
@@ -229,9 +231,35 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: Security Vulnerability Fixes (January 10, 2026)
-- **Total Commits**: 222 commits on main branch
-- **Today's Progress (January 10, 2026 - Session 41)**:
+- **Last Major Update**: Soft-Delete Filtering Bug Fix (January 10, 2026)
+- **Total Commits**: 222+ commits on main branch
+- **Today's Progress (January 10, 2026 - Session 42)**:
+  - 🐛 **CRITICAL BUG FIX**: Fixed soft-deleted records appearing in UI but unable to be deleted
+  - ✅ **ROOT CAUSE IDENTIFIED**:
+    - Frontend queries (org.service.ts) were loading ALL records including soft-deleted ones
+    - Backend bulk delete service properly filtered by `deleted_at IS NULL`
+    - Mismatch caused soft-deleted people/departments to appear in UI but fail validation on delete
+  - ✅ **FIXES APPLIED** (4 backend service files):
+    - `org.service.ts` - Added `deleted_at IS NULL` filters to departments and people queries
+    - `people.service.ts` - Added filter to max sort order query for new person creation
+    - `search.service.ts` - Added filters to all FTS5 search queries (departments, people, autocomplete)
+    - `org.service.test.ts` - Updated test database schema to include `deleted_at` columns
+  - 📊 **TESTING**:
+    - All 321 backend tests passing ✅
+    - Test schema aligned with production schema
+    - Verified no regressions in existing functionality
+  - 🎯 **IMPACT**:
+    - Soft-deleted records no longer visible in UI
+    - Bulk operations now work correctly
+    - Search results exclude deleted records
+    - Database integrity maintained with soft-delete pattern
+  - 📁 **FILES MODIFIED** (4 backend service files):
+    - `server/src/services/org.service.ts` - 2 queries updated
+    - `server/src/services/people.service.ts` - 1 query updated
+    - `server/src/services/search.service.ts` - 6 queries updated (search + autocomplete)
+    - `server/src/services/org.service.test.ts` - Test schema fixed
+
+- **Previous Session (January 10, 2026 - Session 41)**:
   - 🛡️ **SECURITY VULNERABILITY FIXES**: Resolved critical and high-severity npm vulnerabilities
   - ✅ **VULNERABILITIES PATCHED**:
     - **Critical**: jsPDF Local File Inclusion/Path Traversal (CVE) - Upgraded from 3.0.4 to 4.0.0
@@ -2255,7 +2283,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>
-**Last Updated**: January 10, 2026 (Session 41 - Security Vulnerability Fixes)
+**Last Updated**: January 10, 2026 (Session 42 - Soft-Delete Filtering Bug Fix)
 
 **Today's Major Milestone**: 🎉
 

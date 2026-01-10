@@ -62,6 +62,7 @@ vi.mock('../db.js', async () => {
       name TEXT NOT NULL,
       description TEXT,
       sort_order INTEGER DEFAULT 0,
+      deleted_at TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
@@ -75,6 +76,7 @@ vi.mock('../db.js', async () => {
       email TEXT,
       phone TEXT,
       sort_order INTEGER DEFAULT 0,
+      deleted_at TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE

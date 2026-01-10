@@ -70,7 +70,7 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
     throw error;
   }
 
-  // Get departments for this organization
+  // Get departments for this organization (exclude soft-deleted)
   const departments = db
     .prepare(
       `
@@ -83,13 +83,13 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
       d.created_at as createdAt,
       d.updated_at as updatedAt
     FROM departments d
-    WHERE d.organization_id = ?
+    WHERE d.organization_id = ? AND d.deleted_at IS NULL
     ORDER BY d.sort_order ASC
   `
     )
     .all(id) as Department[];
 
-  // Get people for each department
+  // Get people for each department (exclude soft-deleted)
   const departmentsWithPeople: DepartmentWithPeople[] = departments.map(dept => {
     const people = db
       .prepare(
@@ -102,7 +102,7 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
         created_at as createdAt,
         updated_at as updatedAt
       FROM people
-      WHERE department_id = ?
+      WHERE department_id = ? AND deleted_at IS NULL
       ORDER BY sort_order ASC
     `
       )

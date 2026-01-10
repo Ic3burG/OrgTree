@@ -143,13 +143,13 @@ export function createPerson(
 
   const { name, title, email, phone } = data;
 
-  // Get max sortOrder
+  // Get max sortOrder (only from non-deleted people)
   const maxSortResult = db
     .prepare(
       `
     SELECT MAX(sort_order) as maxSort
     FROM people
-    WHERE department_id = ?
+    WHERE department_id = ? AND deleted_at IS NULL
   `
     )
     .get(deptId) as { maxSort: number | null } | undefined;
