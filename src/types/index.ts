@@ -179,6 +179,7 @@ export interface BulkOperationResult {
   failedCount?: number;
   movedCount?: number;
   updatedCount?: number;
+  warnings?: string[]; // For department deletions with cascading effects
 }
 
 // API Error

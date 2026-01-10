@@ -5,6 +5,7 @@ interface BulkDeleteResult {
   deletedCount: number;
   failedCount: number;
   warnings?: string[];
+  errors?: Array<{ id: string; error: string }>;
 }
 
 interface BulkDeleteModalProps {
@@ -81,10 +82,32 @@ export default function BulkDeleteModal({
                   </p>
                 )}
                 {result.failedCount > 0 && (
-                  <p className="text-red-600">
-                    Failed to delete {result.failedCount}{' '}
-                    {result.failedCount === 1 ? 'item' : 'items'}
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-red-600 font-medium">
+                      Failed to delete {result.failedCount}{' '}
+                      {result.failedCount === 1 ? 'item' : 'items'}
+                    </p>
+                    {result.errors && result.errors.length > 0 && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                        <p className="text-sm font-medium text-red-800 mb-2">Error details:</p>
+                        <ul className="text-sm text-red-700 space-y-1">
+                          {result.errors.slice(0, 10).map((err, i) => (
+                            <li key={i} className="break-words">
+                              <span className="font-mono text-xs opacity-75">
+                                {err.id.slice(0, 8)}...
+                              </span>
+                              : {err.error}
+                            </li>
+                          ))}
+                          {result.errors.length > 10 && (
+                            <li className="text-xs opacity-75">
+                              ...and {result.errors.length - 10} more error(s)
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
               {hasWarnings && result.warnings && (

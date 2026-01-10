@@ -76,6 +76,8 @@ export default function DepartmentManager(): React.JSX.Element {
   const [bulkDeleteResult, setBulkDeleteResult] = useState<{
     deletedCount: number;
     failedCount: number;
+    warnings?: string[];
+    errors?: Array<{ id: string; error: string }>;
   } | null>(null);
   const [bulkEditResult, setBulkEditResult] = useState<{
     updatedCount: number;
@@ -214,6 +216,8 @@ export default function DepartmentManager(): React.JSX.Element {
       setBulkDeleteResult({
         deletedCount: result.deletedCount ?? 0,
         failedCount: result.failedCount ?? 0,
+        warnings: result.warnings,
+        errors: result.errors,
       });
       if ((result.deletedCount ?? 0) > 0) {
         await loadDepartments(false);

@@ -64,6 +64,7 @@ export default function PersonManager(): React.JSX.Element {
   const [bulkDeleteResult, setBulkDeleteResult] = useState<{
     deletedCount: number;
     failedCount: number;
+    errors?: Array<{ id: string; error: string }>;
   } | null>(null);
   const [bulkMoveResult, setBulkMoveResult] = useState<{
     movedCount: number;
@@ -209,6 +210,7 @@ export default function PersonManager(): React.JSX.Element {
       setBulkDeleteResult({
         deletedCount: result.deletedCount ?? 0,
         failedCount: result.failedCount ?? 0,
+        errors: result.errors,
       });
       if ((result.deletedCount ?? 0) > 0) {
         await loadData(false);
