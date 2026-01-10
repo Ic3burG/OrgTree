@@ -91,8 +91,12 @@ describe('Backup Routes', () => {
         .expect(200);
 
       expect(response.body).toEqual({
-        backups: mockBackups,
-        stats: mockStats,
+        backups: mockBackups.map(b => ({ ...b, created: b.created.toISOString() })),
+        stats: {
+          ...mockStats,
+          oldestBackup: mockStats.oldestBackup?.toISOString(),
+          newestBackup: mockStats.newestBackup?.toISOString(),
+        },
       });
     });
 
