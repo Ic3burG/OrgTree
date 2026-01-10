@@ -1,4 +1,5 @@
 import express from 'express';
+import type { Response } from 'express';
 import {
   generatePasskeyRegistrationOptions,
   verifyPasskeyRegistration,
@@ -9,29 +10,35 @@ import {
 } from '../services/passkey.service.js';
 import db from '../db.js';
 import { generateToken, storeRefreshToken, generateRefreshToken } from '../services/auth.service.js';
-import type { DatabaseUser } from '../types/index.js';
+import type { DatabaseUser, AuthRequest } from '../types/index.js';
 
 const router = express.Router();
 
+// Helper to extract error message from unknown error
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return getErrorMessage(error);
+  return String(error);
+}
+
 // Register Start
-router.post('/register/start', async (req, res) => {
+router.post('/register/start', async (req: AuthRequest, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = req.user?.id;
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
     const user = db.prepare('SELECT email FROM users WHERE id = ?').get(userId) as { email: string };
     const options = await generatePasskeyRegistrationOptions(userId, user.email);
     return res.json(options);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Passkey register start error:', error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: getErrorMessage(error) });
   }
 });
 
 // Register Finish
-router.post('/register/finish', async (req, res) => {
+router.post('/register/finish', async (req: AuthRequest, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = req.user?.id;
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
     const result = await verifyPasskeyRegistration(userId, req.body);
@@ -40,9 +47,9 @@ router.post('/register/finish', async (req, res) => {
     } else {
       return res.status(400).json({ success: false, message: 'Verification failed' });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Passkey register finish error:', error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: getErrorMessage(error) });
   }
 });
 
@@ -74,23 +81,23 @@ router.post('/login/start', async (req, res) => {
     }
 
     return res.json(options);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Passkey login start error:', error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: getErrorMessage(error) });
   }
 });
 
 // Login Finish
-router.post('/login/finish', async (req, res) => {
+router.post('/login/finish', async (req: AuthRequest, res: Response) => {
   try {
     const { email, ...body } = req.body; // Authenticator response
-    
+
     // We need to find the user ID to retrieve the challenge AND check the passkey.
     // Usually the response contains the credential ID, which maps to a user.
     // Our service `verifyPasskeyLogin` takes `userId`.
     // We can look up the user by credential ID first.
-    
-    let userId = (req as any).user?.id;
+
+    let userId = req.user?.id;
 
     if (!userId) {
        if (email) {
@@ -131,16 +138,16 @@ router.post('/login/finish', async (req, res) => {
     } else {
         return res.status(400).json({ verified: false, message: 'Verification failed' });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Passkey login finish error:', error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: getErrorMessage(error) });
   }
 });
 
 // List Passkeys
-router.get('/list', (req, res) => {
+router.get('/list', (req: AuthRequest, res: Response) => {
     try {
-        const userId = (req as any).user?.id;
+        const userId = req.user?.id;
         if (!userId) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
@@ -156,15 +163,15 @@ router.get('/list', (req, res) => {
         }));
         
         return res.json(safePasskeys);
-    } catch (error: any) {
-        return res.status(500).json({ message: error.message });
+    } catch (error: unknown) {
+        return res.status(500).json({ message: getErrorMessage(error) });
     }
 });
 
 // Delete Passkey
-router.delete('/:id', (req, res) => {
+router.delete('/:id', (req: AuthRequest, res: Response) => {
     try {
-        const userId = (req as any).user?.id;
+        const userId = req.user?.id;
         if (!userId) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
@@ -175,8 +182,8 @@ router.delete('/:id', (req, res) => {
         } else {
             return res.status(404).json({ message: 'Passkey not found' });
         }
-    } catch (error: any) {
-        return res.status(500).json({ message: error.message });
+    } catch (error: unknown) {
+        return res.status(500).json({ message: getErrorMessage(error) });
     }
 });
 

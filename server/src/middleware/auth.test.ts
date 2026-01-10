@@ -151,9 +151,9 @@ describe('authenticateToken middleware', () => {
   });
 
   it('should handle requests without IP address gracefully', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     delete (mockReq as any).ip;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     mockReq.connection = undefined as any;
 
     authenticateToken(mockReq as AuthRequest, mockRes as Response, mockNext);

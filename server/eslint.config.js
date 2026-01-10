@@ -83,6 +83,10 @@ export default [
         global: 'writable',
       },
     },
+    rules: {
+      // Allow 'any' types in test files for mocking and test scenarios
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
   },
 
   // Prettier config (must be last)

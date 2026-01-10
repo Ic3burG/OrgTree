@@ -72,7 +72,9 @@ export function verifyAndEnableTotp(userId: string, token: string): boolean {
     if (!isValid) {
       return false;
     }
-  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_err) {
+    // Silently fail verification errors
     return false;
   }
 
@@ -101,7 +103,9 @@ export function verifyTotp(userId: string, token: string): boolean {
       token,
       secret: user.totp_secret,
     });
-  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_err) {
+    // Silently fail verification errors
     return false;
   }
 }

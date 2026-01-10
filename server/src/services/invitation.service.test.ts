@@ -128,7 +128,7 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       await expect(
@@ -157,7 +157,7 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       await expect(
@@ -184,7 +184,7 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       await expect(
@@ -314,7 +314,7 @@ describe('Invitation Service', () => {
         all: vi.fn(() => mockInvitations),
         get: vi.fn(),
         run: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       const result = invitationService.getOrgInvitations('org-123', 'admin-123');
@@ -338,7 +338,7 @@ describe('Invitation Service', () => {
         all: vi.fn(() => []),
         get: vi.fn(),
         run: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       const result = invitationService.getOrgInvitations('org-123', 'admin-123');
@@ -359,7 +359,7 @@ describe('Invitation Service', () => {
         get: vi.fn(() => ({ id: 'inv-123' })),
         run: vi.fn(() => ({ changes: 1 })),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       const result = invitationService.cancelInvitation('org-123', 'inv-123', 'admin-123');
@@ -383,7 +383,7 @@ describe('Invitation Service', () => {
         get: vi.fn(() => undefined),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       expect(() => invitationService.cancelInvitation('org-123', 'inv-999', 'admin-123')).toThrow(
@@ -407,7 +407,7 @@ describe('Invitation Service', () => {
         get: vi.fn(() => mockInvitation),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       const result = invitationService.getInvitationByToken('valid-token-123');
@@ -425,7 +425,7 @@ describe('Invitation Service', () => {
         get: vi.fn(() => undefined),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       const result = invitationService.getInvitationByToken('invalid-token');
@@ -447,7 +447,7 @@ describe('Invitation Service', () => {
         get: vi.fn(() => mockInvitation),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       const result = invitationService.getInvitationByToken('expired-token');
@@ -489,7 +489,7 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(() => ({ changes: 1 })),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       const result = invitationService.acceptInvitation('valid-token', 'user-123');
@@ -506,7 +506,7 @@ describe('Invitation Service', () => {
         get: vi.fn(() => undefined),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       expect(() => invitationService.acceptInvitation('invalid-token', 'user-123')).toThrow(
@@ -529,7 +529,7 @@ describe('Invitation Service', () => {
         get: vi.fn(() => mockInvitation),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       expect(() => invitationService.acceptInvitation('used-token', 'user-123')).toThrow(
@@ -552,7 +552,7 @@ describe('Invitation Service', () => {
         get: vi.fn(() => mockInvitation),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       expect(() => invitationService.acceptInvitation('expired-token', 'user-123')).toThrow(
@@ -581,7 +581,7 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       expect(() => invitationService.acceptInvitation('token-123', 'user-123')).toThrow(
@@ -611,7 +611,7 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(() => ({ changes: 1 })),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       const result = invitationService.acceptInvitation('token-123', 'user-123');
@@ -645,7 +645,7 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       expect(() => invitationService.acceptInvitation('token-123', 'user-123')).toThrow(
@@ -676,7 +676,7 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(() => ({ changes: 1 })),
         all: vi.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
       } as any);
 
       const result = invitationService.acceptInvitation('token-123', 'user-123');

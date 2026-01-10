@@ -63,7 +63,7 @@ describe('Auth Routes', () => {
         expiresIn: 900,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       vi.mocked(authService.createUser).mockResolvedValue(mockResult as any);
 
       const response = await request(app)
@@ -164,7 +164,7 @@ describe('Auth Routes', () => {
         expiresIn: 900,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       vi.mocked(authService.loginUser).mockResolvedValue(mockResult as any);
 
       const response = await request(app)
@@ -235,7 +235,7 @@ describe('Auth Routes', () => {
         createdAt: '2024-01-01',
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       vi.mocked(authService.getUserById).mockResolvedValue(mockUser as any);
 
       const token = jwt.sign(
@@ -288,7 +288,7 @@ describe('Auth Routes', () => {
         expiresIn: 900,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       vi.mocked(authService.rotateRefreshToken).mockReturnValue(mockResult as any);
 
       const response = await request(app)
@@ -345,7 +345,7 @@ describe('Auth Routes', () => {
 
   describe('POST /api/auth/logout', () => {
     it('should logout and revoke refresh token', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       vi.mocked(authService.revokeRefreshToken).mockResolvedValue(undefined as any);
 
       const token = jwt.sign(
@@ -376,7 +376,7 @@ describe('Auth Routes', () => {
     });
 
     it('should handle logout without refresh token', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       vi.mocked(authService.revokeRefreshToken).mockResolvedValue(undefined as any);
 
       const token = jwt.sign(
@@ -417,7 +417,7 @@ describe('Auth Routes', () => {
         },
       ];
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       vi.mocked(authService.getUserSessions).mockReturnValue(mockSessions as any);
 
       const token = jwt.sign(

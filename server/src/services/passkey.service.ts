@@ -10,6 +10,9 @@ import type {
   GenerateAuthenticationOptionsOpts,
   VerifyAuthenticationResponseOpts,
   AuthenticatorTransport,
+  RegistrationResponseJSON,
+  AuthenticationResponseJSON,
+  PublicKeyCredentialDescriptorFuture,
 } from '@simplewebauthn/server';
 import db from '../db.js';
 import { randomUUID } from 'crypto';
@@ -70,7 +73,7 @@ export async function generatePasskeyRegistrationOptions(userId: string, userEma
   return options;
 }
 
-export async function verifyPasskeyRegistration(userId: string, body: any) {
+export async function verifyPasskeyRegistration(userId: string, body: RegistrationResponseJSON) {
   const challenge = userChallenges.get(userId);
 
   if (!challenge) {
@@ -124,7 +127,7 @@ export async function verifyPasskeyRegistration(userId: string, body: any) {
 export async function generatePasskeyLoginOptions(userId?: string) {
   // If userId is provided, we can fetch their passkeys to allow credentials
   // If not (conditional UI), we allow any
-  let allowCredentials: any[] | undefined;
+  let allowCredentials: PublicKeyCredentialDescriptorFuture[] | undefined;
 
   if (userId) {
     const userPasskeys = getUserPasskeys(userId);
@@ -166,7 +169,7 @@ export async function generatePasskeyLoginOptions(userId?: string) {
   return options;
 }
 
-export async function verifyPasskeyLogin(userId: string, body: any) {
+export async function verifyPasskeyLogin(userId: string, body: AuthenticationResponseJSON) {
   const challenge = userChallenges.get(userId);
 
   if (!challenge) {
