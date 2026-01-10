@@ -23,12 +23,7 @@ describe('Bulk Operations Routes', () => {
 
     // Setup error handler
     app.use(
-      (
-        _err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         res.status(500).json({ message: _err.message });
       }
     );
@@ -100,7 +95,7 @@ describe('Bulk Operations Routes', () => {
     it('should reject request exceeding maximum bulk size', async () => {
       const token = createAuthToken();
       const largeArray = Array(101).fill('person');
-      
+
       const response = await request(app)
         .post('/api/organizations/org1/people/bulk-delete')
         .set('Authorization', `Bearer ${token}`)

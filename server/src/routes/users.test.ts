@@ -30,12 +30,7 @@ describe('Users Routes', () => {
 
     // Setup error handler
     app.use(
-      (
-        _err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         res.status(500).json({ message: _err.message });
       }
     );
@@ -347,9 +342,7 @@ describe('Users Routes', () => {
     });
 
     it('should handle password reset errors', async () => {
-      vi.mocked(usersService.resetUserPassword).mockRejectedValue(
-        new Error('User not found')
-      );
+      vi.mocked(usersService.resetUserPassword).mockRejectedValue(new Error('User not found'));
 
       const token = createAuthToken();
       const response = await request(app)
@@ -368,10 +361,7 @@ describe('Users Routes', () => {
       vi.mocked(usersService.deleteUser).mockReturnValue({ message: 'User deleted' });
 
       const token = createAuthToken();
-      await request(app)
-        .delete('/api/users/1')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(204);
+      await request(app).delete('/api/users/1').set('Authorization', `Bearer ${token}`).expect(204);
 
       expect(usersService.deleteUser).toHaveBeenCalledWith('1', '1');
     });
@@ -395,9 +385,7 @@ describe('Users Routes', () => {
 
   describe('Authentication and Authorization', () => {
     it('should reject unauthenticated requests', async () => {
-      const response = await request(app)
-        .get('/api/users')
-        .expect(401);
+      const response = await request(app).get('/api/users').expect(401);
 
       expect(response.body).toEqual({
         message: 'Access token required',

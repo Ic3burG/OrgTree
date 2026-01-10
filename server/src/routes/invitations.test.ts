@@ -23,12 +23,7 @@ describe('Invitations Routes', () => {
 
     // Setup error handler
     app.use(
-      (
-        _err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         res.status(500).json({ message: _err.message });
       }
     );
@@ -155,9 +150,7 @@ describe('Invitations Routes', () => {
     });
 
     it('should reject unauthenticated requests', async () => {
-      const response = await request(app)
-        .get('/api/organizations/org1/invitations')
-        .expect(401);
+      const response = await request(app).get('/api/organizations/org1/invitations').expect(401);
 
       expect(response.body).toEqual({
         message: 'Access token required',
@@ -208,9 +201,7 @@ describe('Invitations Routes', () => {
 
       vi.mocked(invitationService.getInvitationByToken).mockReturnValue(mockInvitation as any);
 
-      const response = await request(app)
-        .get('/api/invitations/valid-token')
-        .expect(200);
+      const response = await request(app).get('/api/invitations/valid-token').expect(200);
 
       expect(response.body).toEqual(mockInvitation);
       expect(invitationService.getInvitationByToken).toHaveBeenCalledWith('valid-token');
@@ -219,9 +210,7 @@ describe('Invitations Routes', () => {
     it('should return 404 for invalid token', async () => {
       vi.mocked(invitationService.getInvitationByToken).mockReturnValue(null);
 
-      const response = await request(app)
-        .get('/api/invitations/invalid-token')
-        .expect(404);
+      const response = await request(app).get('/api/invitations/invalid-token').expect(404);
 
       expect(response.body).toEqual({
         message: 'Invitation not found',
@@ -251,9 +240,7 @@ describe('Invitations Routes', () => {
     });
 
     it('should reject unauthenticated requests', async () => {
-      const response = await request(app)
-        .post('/api/invitations/valid-token/accept')
-        .expect(401);
+      const response = await request(app).post('/api/invitations/valid-token/accept').expect(401);
 
       expect(response.body).toEqual({
         message: 'Access token required',

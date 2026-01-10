@@ -32,7 +32,16 @@ export function createAuditLog(
         entity_type, entity_id, entity_data, created_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `
-    ).run(id, orgId || 'system', actorId, actorName, actionType, entityType, entityId, entityDataJson);
+    ).run(
+      id,
+      orgId || 'system',
+      actorId,
+      actorName,
+      actionType,
+      entityType,
+      entityId,
+      entityDataJson
+    );
 
     return { id };
   } catch (err) {

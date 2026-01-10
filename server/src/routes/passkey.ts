@@ -9,7 +9,11 @@ import {
   deletePasskey,
 } from '../services/passkey.service.js';
 import db from '../db.js';
-import { generateToken, storeRefreshToken, generateRefreshToken } from '../services/auth.service.js';
+import {
+  generateToken,
+  storeRefreshToken,
+  generateRefreshToken,
+} from '../services/auth.service.js';
 import type { DatabaseUser, AuthRequest } from '../types/index.js';
 
 const router = express.Router();
@@ -26,7 +30,9 @@ router.post('/register/start', async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
-    const user = db.prepare('SELECT email FROM users WHERE id = ?').get(userId) as { email: string };
+    const user = db.prepare('SELECT email FROM users WHERE id = ?').get(userId) as {
+      email: string;
+    };
     const options = await generatePasskeyRegistrationOptions(userId, user.email);
     return res.json(options);
   } catch (error: unknown) {
@@ -60,12 +66,14 @@ router.post('/login/start', async (req, res) => {
     let userId: string | undefined;
 
     if (email) {
-      const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as { id: string } | undefined;
+      const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as
+        | { id: string }
+        | undefined;
       userId = user?.id;
     }
 
     const options = await generatePasskeyLoginOptions(userId);
-    
+
     // If we have a userId, we're doing a targeted login.
     // If not, we might be doing conditional UI.
     // The challenge is stored in memory keyed by userId in the service.
@@ -75,9 +83,9 @@ router.post('/login/start', async (req, res) => {
     // The service implementation used `if (userId) userChallenges.set...`
     // So if no userId, challenge isn't stored. This needs fixing for "user-nameless" auth if we supported it.
     // For now we assume email is provided or we fetch it.
-    
+
     if (!userId && email) {
-       return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     return res.json(options);
@@ -100,43 +108,47 @@ router.post('/login/finish', async (req: AuthRequest, res: Response) => {
     let userId = req.user?.id;
 
     if (!userId) {
-       if (email) {
-           const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as { id: string } | undefined;
-           userId = user?.id;
-       } else {
-           // Look up by credential ID
-           const passkey = db.prepare('SELECT user_id FROM passkeys WHERE credential_id = ?').get(body.id) as { user_id: string } | undefined;
-           userId = passkey?.user_id;
-       }
+      if (email) {
+        const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as
+          | { id: string }
+          | undefined;
+        userId = user?.id;
+      } else {
+        // Look up by credential ID
+        const passkey = db
+          .prepare('SELECT user_id FROM passkeys WHERE credential_id = ?')
+          .get(body.id) as { user_id: string } | undefined;
+        userId = passkey?.user_id;
+      }
     }
 
     if (!userId) {
-        return res.status(400).json({ message: 'User context could not be determined' });
+      return res.status(400).json({ message: 'User context could not be determined' });
     }
-    
+
     const verification = await verifyPasskeyLogin(userId, body);
 
     if (verification.verified) {
-        // Log the user in
-        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DatabaseUser;
-        const accessToken = generateToken(user);
-        const refreshToken = generateRefreshToken();
-        
-        // Store refresh token
-        storeRefreshToken(user.id, refreshToken, {
-             ipAddress: req.ip,
-             userAgent: req.headers['user-agent']
-        });
+      // Log the user in
+      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DatabaseUser;
+      const accessToken = generateToken(user);
+      const refreshToken = generateRefreshToken();
 
-        return res.json({
-            verified: true,
-            user,
-            accessToken,
-            refreshToken,
-            expiresIn: 900
-        });
+      // Store refresh token
+      storeRefreshToken(user.id, refreshToken, {
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+      });
+
+      return res.json({
+        verified: true,
+        user,
+        accessToken,
+        refreshToken,
+        expiresIn: 900,
+      });
     } else {
-        return res.status(400).json({ verified: false, message: 'Verification failed' });
+      return res.status(400).json({ verified: false, message: 'Verification failed' });
     }
   } catch (error: unknown) {
     console.error('Passkey login finish error:', error);
@@ -146,45 +158,45 @@ router.post('/login/finish', async (req: AuthRequest, res: Response) => {
 
 // List Passkeys
 router.get('/list', (req: AuthRequest, res: Response) => {
-    try {
-        const userId = req.user?.id;
-        if (!userId) {
-            return res.status(401).json({ message: 'Unauthorized' });
-        }
-
-        const passkeys = getUserPasskeys(userId);
-        // Don't return public keys or other sensitive/binary internal data if not needed
-        // Just return metadata
-        const safePasskeys = passkeys.map(pk => ({
-            id: pk.id,
-            created_at: pk.created_at,
-            last_used_at: pk.last_used_at,
-            backup_status: !!pk.backup_status
-        }));
-        
-        return res.json(safePasskeys);
-    } catch (error: unknown) {
-        return res.status(500).json({ message: getErrorMessage(error) });
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
     }
+
+    const passkeys = getUserPasskeys(userId);
+    // Don't return public keys or other sensitive/binary internal data if not needed
+    // Just return metadata
+    const safePasskeys = passkeys.map(pk => ({
+      id: pk.id,
+      created_at: pk.created_at,
+      last_used_at: pk.last_used_at,
+      backup_status: !!pk.backup_status,
+    }));
+
+    return res.json(safePasskeys);
+  } catch (error: unknown) {
+    return res.status(500).json({ message: getErrorMessage(error) });
+  }
 });
 
 // Delete Passkey
 router.delete('/:id', (req: AuthRequest, res: Response) => {
-    try {
-        const userId = req.user?.id;
-        if (!userId) {
-            return res.status(401).json({ message: 'Unauthorized' });
-        }
-        
-        const success = deletePasskey(req.params.id, userId);
-        if (success) {
-            return res.json({ success: true });
-        } else {
-            return res.status(404).json({ message: 'Passkey not found' });
-        }
-    } catch (error: unknown) {
-        return res.status(500).json({ message: getErrorMessage(error) });
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
     }
+
+    const success = deletePasskey(req.params.id, userId);
+    if (success) {
+      return res.json({ success: true });
+    } else {
+      return res.status(404).json({ message: 'Passkey not found' });
+    }
+  } catch (error: unknown) {
+    return res.status(500).json({ message: getErrorMessage(error) });
+  }
 });
 
 export default router;

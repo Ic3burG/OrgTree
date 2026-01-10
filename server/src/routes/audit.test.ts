@@ -25,12 +25,7 @@ describe('Audit Routes', () => {
 
     // Setup error handler
     app.use(
-      (
-        _err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         res.status(500).json({ message: _err.message });
       }
     );
@@ -159,9 +154,7 @@ describe('Audit Routes', () => {
     });
 
     it('should reject unauthenticated requests', async () => {
-      const response = await request(app)
-        .get('/api/organizations/org1/audit-logs')
-        .expect(401);
+      const response = await request(app).get('/api/organizations/org1/audit-logs').expect(401);
 
       expect(response.body).toEqual({
         message: 'Access token required',
@@ -248,9 +241,7 @@ describe('Audit Routes', () => {
     });
 
     it('should reject unauthenticated requests', async () => {
-      const response = await request(app)
-        .get('/api/admin/audit-logs')
-        .expect(401);
+      const response = await request(app).get('/api/admin/audit-logs').expect(401);
 
       expect(response.body).toEqual({
         message: 'Access token required',

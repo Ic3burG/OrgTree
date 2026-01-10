@@ -29,12 +29,7 @@ describe('Backup Routes', () => {
 
     // Setup error handler
     app.use(
-      (
-        _err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         res.status(500).json({ message: _err.message });
       }
     );
@@ -184,9 +179,7 @@ describe('Backup Routes', () => {
     });
 
     it('should handle backup service errors', async () => {
-      vi.mocked(backupService.createBackup).mockRejectedValue(
-        new Error('Database locked')
-      );
+      vi.mocked(backupService.createBackup).mockRejectedValue(new Error('Database locked'));
 
       const token = createAuthToken();
       const response = await request(app)
@@ -301,7 +294,7 @@ describe('Backup Routes', () => {
         totalSizeMB: 150,
         oldestBackup: new Date('2024-01-01'),
         newestBackup: new Date('2024-01-10'),
-        backupDir: '/tmp/backups'
+        backupDir: '/tmp/backups',
       };
 
       vi.mocked(backupService.getBackupStats).mockReturnValue(mockStats);
@@ -338,9 +331,7 @@ describe('Backup Routes', () => {
 
   describe('Authentication', () => {
     it('should reject all requests without authentication', async () => {
-      const response = await request(app)
-        .get('/api/admin/backups')
-        .expect(401);
+      const response = await request(app).get('/api/admin/backups').expect(401);
 
       expect(response.body).toEqual({
         message: 'Access token required',

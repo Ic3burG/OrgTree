@@ -78,9 +78,12 @@ describe('Users Service', () => {
     });
 
     it('should return empty array when no users exist', () => {
-      vi.mocked(db.prepare).mockImplementation(() => ({
-        all: vi.fn().mockReturnValue([]),
-      } as unknown as any));
+      vi.mocked(db.prepare).mockImplementation(
+        () =>
+          ({
+            all: vi.fn().mockReturnValue([]),
+          }) as unknown as any
+      );
 
       const result = usersService.getAllUsers();
 
@@ -163,9 +166,12 @@ describe('Users Service', () => {
     });
 
     it('should throw 404 error when user not found', () => {
-      vi.mocked(db.prepare).mockImplementation(() => ({
-        get: vi.fn().mockReturnValue(undefined),
-      } as unknown as any));
+      vi.mocked(db.prepare).mockImplementation(
+        () =>
+          ({
+            get: vi.fn().mockReturnValue(undefined),
+          }) as unknown as any
+      );
 
       expect(() => usersService.getUserById('nonexistent')).toThrow('User not found');
       try {
@@ -221,9 +227,12 @@ describe('Users Service', () => {
     });
 
     it('should throw 404 error when user not found', () => {
-      vi.mocked(db.prepare).mockImplementation(() => ({
-        get: vi.fn().mockReturnValue(undefined),
-      } as unknown as any));
+      vi.mocked(db.prepare).mockImplementation(
+        () =>
+          ({
+            get: vi.fn().mockReturnValue(undefined),
+          }) as unknown as any
+      );
 
       expect(() => usersService.updateUser('nonexistent', { name: 'Test' })).toThrow(
         'User not found'
@@ -354,9 +363,12 @@ describe('Users Service', () => {
     });
 
     it('should throw 404 error when user not found', () => {
-      vi.mocked(db.prepare).mockImplementation(() => ({
-        get: vi.fn().mockReturnValue(undefined),
-      } as unknown as any));
+      vi.mocked(db.prepare).mockImplementation(
+        () =>
+          ({
+            get: vi.fn().mockReturnValue(undefined),
+          }) as unknown as any
+      );
 
       expect(() => usersService.updateUserRole('nonexistent', 'admin', 'admin1')).toThrow(
         'User not found'
@@ -396,9 +408,12 @@ describe('Users Service', () => {
     });
 
     it('should throw 404 error when user not found', async () => {
-      vi.mocked(db.prepare).mockImplementation(() => ({
-        get: vi.fn().mockReturnValue(undefined),
-      } as unknown as any));
+      vi.mocked(db.prepare).mockImplementation(
+        () =>
+          ({
+            get: vi.fn().mockReturnValue(undefined),
+          }) as unknown as any
+      );
 
       await expect(usersService.resetUserPassword('nonexistent')).rejects.toThrow('User not found');
     });
@@ -466,9 +481,12 @@ describe('Users Service', () => {
     });
 
     it('should throw 404 error when user not found', () => {
-      vi.mocked(db.prepare).mockImplementation(() => ({
-        get: vi.fn().mockReturnValue(undefined),
-      } as unknown as any));
+      vi.mocked(db.prepare).mockImplementation(
+        () =>
+          ({
+            get: vi.fn().mockReturnValue(undefined),
+          }) as unknown as any
+      );
 
       expect(() => usersService.deleteUser('nonexistent', 'admin1')).toThrow('User not found');
     });
@@ -514,9 +532,12 @@ describe('Users Service', () => {
     });
 
     it('should throw 400 error when email already exists', async () => {
-      vi.mocked(db.prepare).mockImplementation(() => ({
-        get: vi.fn().mockReturnValue({ id: 'existing-user' }),
-      } as unknown as any));
+      vi.mocked(db.prepare).mockImplementation(
+        () =>
+          ({
+            get: vi.fn().mockReturnValue({ id: 'existing-user' }),
+          }) as unknown as any
+      );
 
       await expect(
         usersService.createAdminUser('Test', 'existing@example.com', 'user')

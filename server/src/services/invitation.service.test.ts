@@ -32,11 +32,11 @@ describe('Invitation Service', () => {
   describe('createInvitation', () => {
     it('should create invitation and send email successfully', async () => {
       // Mock permission check (should not throw)
-    vi.mocked(memberService.requireOrgPermission).mockReturnValue({
-      hasAccess: true,
-      role: 'admin',
-      isOwner: true,
-    });
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+        hasAccess: true,
+        role: 'admin',
+        isOwner: true,
+      });
 
       // Mock database queries - handle different queries
       vi.mocked(db.prepare).mockImplementation((sql: string) => {
@@ -128,7 +128,6 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       await expect(
@@ -157,7 +156,6 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       await expect(
@@ -184,7 +182,6 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       await expect(
@@ -314,7 +311,6 @@ describe('Invitation Service', () => {
         all: vi.fn(() => mockInvitations),
         get: vi.fn(),
         run: vi.fn(),
-         
       } as any);
 
       const result = invitationService.getOrgInvitations('org-123', 'admin-123');
@@ -338,7 +334,6 @@ describe('Invitation Service', () => {
         all: vi.fn(() => []),
         get: vi.fn(),
         run: vi.fn(),
-         
       } as any);
 
       const result = invitationService.getOrgInvitations('org-123', 'admin-123');
@@ -359,7 +354,6 @@ describe('Invitation Service', () => {
         get: vi.fn(() => ({ id: 'inv-123' })),
         run: vi.fn(() => ({ changes: 1 })),
         all: vi.fn(),
-         
       } as any);
 
       const result = invitationService.cancelInvitation('org-123', 'inv-123', 'admin-123');
@@ -383,7 +377,6 @@ describe('Invitation Service', () => {
         get: vi.fn(() => undefined),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       expect(() => invitationService.cancelInvitation('org-123', 'inv-999', 'admin-123')).toThrow(
@@ -407,7 +400,6 @@ describe('Invitation Service', () => {
         get: vi.fn(() => mockInvitation),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       const result = invitationService.getInvitationByToken('valid-token-123');
@@ -425,7 +417,6 @@ describe('Invitation Service', () => {
         get: vi.fn(() => undefined),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       const result = invitationService.getInvitationByToken('invalid-token');
@@ -447,7 +438,6 @@ describe('Invitation Service', () => {
         get: vi.fn(() => mockInvitation),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       const result = invitationService.getInvitationByToken('expired-token');
@@ -489,7 +479,6 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(() => ({ changes: 1 })),
         all: vi.fn(),
-         
       } as any);
 
       const result = invitationService.acceptInvitation('valid-token', 'user-123');
@@ -506,7 +495,6 @@ describe('Invitation Service', () => {
         get: vi.fn(() => undefined),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       expect(() => invitationService.acceptInvitation('invalid-token', 'user-123')).toThrow(
@@ -529,7 +517,6 @@ describe('Invitation Service', () => {
         get: vi.fn(() => mockInvitation),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       expect(() => invitationService.acceptInvitation('used-token', 'user-123')).toThrow(
@@ -552,7 +539,6 @@ describe('Invitation Service', () => {
         get: vi.fn(() => mockInvitation),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       expect(() => invitationService.acceptInvitation('expired-token', 'user-123')).toThrow(
@@ -581,7 +567,6 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       expect(() => invitationService.acceptInvitation('token-123', 'user-123')).toThrow(
@@ -611,7 +596,6 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(() => ({ changes: 1 })),
         all: vi.fn(),
-         
       } as any);
 
       const result = invitationService.acceptInvitation('token-123', 'user-123');
@@ -645,7 +629,6 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(),
         all: vi.fn(),
-         
       } as any);
 
       expect(() => invitationService.acceptInvitation('token-123', 'user-123')).toThrow(
@@ -676,7 +659,6 @@ describe('Invitation Service', () => {
         }),
         run: vi.fn(() => ({ changes: 1 })),
         all: vi.fn(),
-         
       } as any);
 
       const result = invitationService.acceptInvitation('token-123', 'user-123');

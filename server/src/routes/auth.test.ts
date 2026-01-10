@@ -63,7 +63,6 @@ describe('Auth Routes', () => {
         expiresIn: 900,
       };
 
-       
       vi.mocked(authService.createUser).mockResolvedValue(mockResult as any);
 
       const response = await request(app)
@@ -164,7 +163,6 @@ describe('Auth Routes', () => {
         expiresIn: 900,
       };
 
-       
       vi.mocked(authService.loginUser).mockResolvedValue(mockResult as any);
 
       const response = await request(app)
@@ -235,7 +233,6 @@ describe('Auth Routes', () => {
         createdAt: '2024-01-01',
       };
 
-       
       vi.mocked(authService.getUserById).mockResolvedValue(mockUser as any);
 
       const token = jwt.sign(
@@ -288,7 +285,6 @@ describe('Auth Routes', () => {
         expiresIn: 900,
       };
 
-       
       vi.mocked(authService.rotateRefreshToken).mockReturnValue(mockResult as any);
 
       const response = await request(app)
@@ -345,7 +341,6 @@ describe('Auth Routes', () => {
 
   describe('POST /api/auth/logout', () => {
     it('should logout and revoke refresh token', async () => {
-       
       vi.mocked(authService.revokeRefreshToken).mockResolvedValue(undefined as any);
 
       const token = jwt.sign(
@@ -376,7 +371,6 @@ describe('Auth Routes', () => {
     });
 
     it('should handle logout without refresh token', async () => {
-       
       vi.mocked(authService.revokeRefreshToken).mockResolvedValue(undefined as any);
 
       const token = jwt.sign(
@@ -417,7 +411,6 @@ describe('Auth Routes', () => {
         },
       ];
 
-       
       vi.mocked(authService.getUserSessions).mockReturnValue(mockSessions as any);
 
       const token = jwt.sign(

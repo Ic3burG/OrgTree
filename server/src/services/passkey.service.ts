@@ -17,7 +17,6 @@ import type {
 import db from '../db.js';
 import { randomUUID } from 'crypto';
 
-
 const rpName = process.env.RP_NAME || 'OrgTree';
 const rpID = process.env.RP_ID || 'localhost';
 const origin = process.env.ORIGIN || 'http://localhost:5173';
@@ -56,7 +55,9 @@ export async function generatePasskeyRegistrationOptions(userId: string, userEma
     attestationType: 'none',
     excludeCredentials: userPasskeys.map(passkey => ({
       id: passkey.credential_id,
-      transports: passkey.transports ? (JSON.parse(passkey.transports) as AuthenticatorTransport[]) : undefined,
+      transports: passkey.transports
+        ? (JSON.parse(passkey.transports) as AuthenticatorTransport[])
+        : undefined,
     })),
     authenticatorSelection: {
       residentKey: 'preferred',
@@ -99,12 +100,14 @@ export async function verifyPasskeyRegistration(userId: string, body: Registrati
     const id = randomUUID();
     const transports = body.response.transports ? JSON.stringify(body.response.transports) : null;
 
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO passkeys (
         id, user_id, credential_id, public_key, counter, transports, 
         backup_eligible, backup_status, created_at, last_used_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-    `).run(
+    `
+    ).run(
       id,
       userId,
       credentialID,
@@ -134,7 +137,9 @@ export async function generatePasskeyLoginOptions(userId?: string) {
     if (userPasskeys.length > 0) {
       allowCredentials = userPasskeys.map(passkey => ({
         id: passkey.credential_id,
-        transports: passkey.transports ? (JSON.parse(passkey.transports) as AuthenticatorTransport[]) : undefined,
+        transports: passkey.transports
+          ? (JSON.parse(passkey.transports) as AuthenticatorTransport[])
+          : undefined,
       }));
     }
   }
@@ -206,11 +211,13 @@ export async function verifyPasskeyLogin(userId: string, body: AuthenticationRes
     const { newCounter } = authenticationInfo;
 
     // Update counter and last used
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE passkeys 
       SET counter = ?, last_used_at = datetime('now') 
       WHERE id = ?
-    `).run(newCounter, passkey.id);
+    `
+    ).run(newCounter, passkey.id);
 
     // Clean up challenge
     userChallenges.delete(userId);
@@ -226,10 +233,14 @@ export function getUserPasskeys(userId: string): Passkey[] {
 }
 
 export function deletePasskey(passkeyId: string, userId: string) {
-  const result = db.prepare('DELETE FROM passkeys WHERE id = ? AND user_id = ?').run(passkeyId, userId);
+  const result = db
+    .prepare('DELETE FROM passkeys WHERE id = ? AND user_id = ?')
+    .run(passkeyId, userId);
   return result.changes > 0;
 }
 
 function getUserPasskeyByCredentialId(credentialId: string): Passkey | undefined {
-  return db.prepare('SELECT * FROM passkeys WHERE credential_id = ?').get(credentialId) as Passkey | undefined;
+  return db.prepare('SELECT * FROM passkeys WHERE credential_id = ?').get(credentialId) as
+    | Passkey
+    | undefined;
 }

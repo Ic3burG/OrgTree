@@ -1,6 +1,10 @@
 import { Router, type Response } from 'express';
 import { verifyTotp } from '../services/totp.service.js';
-import { generateToken, generateRefreshToken, storeRefreshToken } from '../services/auth.service.js';
+import {
+  generateToken,
+  generateRefreshToken,
+  storeRefreshToken,
+} from '../services/auth.service.js';
 import db from '../db.js';
 import type { DatabaseUser } from '../types/index.js';
 
@@ -37,7 +41,9 @@ router.post('/verify-login', async (req, res: Response): Promise<void> => {
     }
 
     // Get user
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DatabaseUser | undefined;
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as
+      | DatabaseUser
+      | undefined;
 
     if (!user) {
       res.status(404).json({ error: 'User not found' });

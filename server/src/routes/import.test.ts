@@ -5,7 +5,6 @@ import jwt from 'jsonwebtoken';
 import importRouter from './import.js';
 import * as memberService from '../services/member.service.js';
 
-
 // Mock dependencies
 vi.mock('../services/member.service.js');
 vi.mock('../services/audit.service.js');
@@ -33,12 +32,7 @@ describe('Import Routes', () => {
 
     // Setup error handler
     app.use(
-      (
-        _err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         res.status(500).json({ message: _err.message });
       }
     );
@@ -112,9 +106,7 @@ describe('Import Routes', () => {
         .post('/api/organizations/org1/import')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          data: [
-            { type: 'department', path: '/Test', name: 'Test' },
-          ],
+          data: [{ type: 'department', path: '/Test', name: 'Test' }],
         })
         .expect(500);
 
@@ -125,9 +117,7 @@ describe('Import Routes', () => {
       const response = await request(app)
         .post('/api/organizations/org1/import')
         .send({
-          data: [
-            { type: 'department', path: '/Test', name: 'Test' },
-          ],
+          data: [{ type: 'department', path: '/Test', name: 'Test' }],
         })
         .expect(401);
 

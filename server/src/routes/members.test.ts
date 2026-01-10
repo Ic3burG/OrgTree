@@ -33,12 +33,7 @@ describe('Members Routes', () => {
 
     // Setup error handler
     app.use(
-      (
-        _err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         res.status(500).json({ message: _err.message });
       }
     );
@@ -59,7 +54,13 @@ describe('Members Routes', () => {
   describe('GET /api/organizations/:orgId/members', () => {
     it('should return all members of an organization', async () => {
       const mockMembers = [
-        { id: '1', userId: 'user1', userName: 'Alice', userEmail: 'alice@example.com', role: 'admin' },
+        {
+          id: '1',
+          userId: 'user1',
+          userName: 'Alice',
+          userEmail: 'alice@example.com',
+          role: 'admin',
+        },
         { id: '2', userId: 'user2', userName: 'Bob', userEmail: 'bob@example.com', role: 'editor' },
       ];
 
@@ -96,9 +97,7 @@ describe('Members Routes', () => {
     });
 
     it('should reject unauthenticated requests', async () => {
-      const response = await request(app)
-        .get('/api/organizations/org1/members')
-        .expect(401);
+      const response = await request(app).get('/api/organizations/org1/members').expect(401);
 
       expect(response.body).toEqual({
         message: 'Access token required',

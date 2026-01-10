@@ -56,7 +56,11 @@ router.post(
         .prepare('SELECT organization_id FROM departments WHERE id = ?')
         .get(req.params.deptId!) as { organization_id: string } | undefined;
       if (dept) {
-        emitPersonCreated(dept.organization_id, person as unknown as Record<string, unknown>, req.user!);
+        emitPersonCreated(
+          dept.organization_id,
+          person as unknown as Record<string, unknown>,
+          req.user!
+        );
       }
 
       res.status(201).json(person);
@@ -103,7 +107,11 @@ router.put(
         .prepare('SELECT organization_id FROM departments WHERE id = ?')
         .get(String(personWithDept.department_id)) as { organization_id: string } | undefined;
       if (dept) {
-        emitPersonUpdated(dept.organization_id, person as unknown as Record<string, unknown>, req.user!);
+        emitPersonUpdated(
+          dept.organization_id,
+          person as unknown as Record<string, unknown>,
+          req.user!
+        );
       }
 
       res.json(person);
@@ -174,7 +182,11 @@ router.put(
         .prepare('SELECT organization_id FROM departments WHERE id = ?')
         .get(departmentId) as { organization_id: string } | undefined;
       if (dept) {
-        emitPersonUpdated(dept.organization_id, person as unknown as Record<string, unknown>, req.user!);
+        emitPersonUpdated(
+          dept.organization_id,
+          person as unknown as Record<string, unknown>,
+          req.user!
+        );
       }
 
       res.json(person);

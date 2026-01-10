@@ -68,7 +68,11 @@ router.post(
       );
 
       // Emit real-time event
-      emitDepartmentCreated(req.params.orgId!, dept as unknown as Record<string, unknown>, req.user!);
+      emitDepartmentCreated(
+        req.params.orgId!,
+        dept as unknown as Record<string, unknown>,
+        req.user!
+      );
 
       res.status(201).json(dept);
     } catch (err) {
@@ -101,7 +105,11 @@ router.put(
       );
 
       // Emit real-time event
-      emitDepartmentUpdated(req.params.orgId!, dept as unknown as Record<string, unknown>, req.user!);
+      emitDepartmentUpdated(
+        req.params.orgId!,
+        dept as unknown as Record<string, unknown>,
+        req.user!
+      );
 
       res.json(dept);
     } catch (err) {

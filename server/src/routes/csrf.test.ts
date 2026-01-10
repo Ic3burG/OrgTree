@@ -20,12 +20,7 @@ describe('CSRF Routes', () => {
 
     // Setup error handler
     app.use(
-      (
-        _err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         res.status(500).json({ message: _err.message });
       }
     );
@@ -39,9 +34,7 @@ describe('CSRF Routes', () => {
         token: 'raw-token',
       } as any);
 
-      const response = await request(app)
-        .get('/api/csrf-token')
-        .expect(200);
+      const response = await request(app).get('/api/csrf-token').expect(200);
 
       expect(response.body).toEqual({
         csrfToken: mockToken,
@@ -63,9 +56,7 @@ describe('CSRF Routes', () => {
         token: 'raw',
       } as any);
 
-      const response = await request(app)
-        .get('/api/csrf-token')
-        .expect(200);
+      const response = await request(app).get('/api/csrf-token').expect(200);
 
       const cookies = response.headers['set-cookie'] || [];
       // httpOnly flag should not be present (false)
@@ -81,9 +72,7 @@ describe('CSRF Routes', () => {
         token: 'raw',
       } as any);
 
-      const response = await request(app)
-        .get('/api/csrf-token')
-        .expect(200);
+      const response = await request(app).get('/api/csrf-token').expect(200);
 
       const cookies = response.headers['set-cookie'] || [];
       expect(cookies[0]).toContain('Secure');
@@ -96,9 +85,7 @@ describe('CSRF Routes', () => {
         throw new Error('Token generation failed');
       });
 
-      const response = await request(app)
-        .get('/api/csrf-token')
-        .expect(500);
+      const response = await request(app).get('/api/csrf-token').expect(500);
 
       expect(response.body).toEqual({
         message: 'Failed to generate CSRF token',
@@ -113,9 +100,7 @@ describe('CSRF Routes', () => {
       } as any);
 
       // No authorization header
-      const response = await request(app)
-        .get('/api/csrf-token')
-        .expect(200);
+      const response = await request(app).get('/api/csrf-token').expect(200);
 
       expect(response.body.csrfToken).toBe('public-token');
     });

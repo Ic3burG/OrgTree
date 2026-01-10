@@ -34,12 +34,7 @@ describe('Public Routes', () => {
 
     // Setup error handler
     app.use(
-      (
-        _err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         res.status(500).json({ message: _err.message });
       }
     );
@@ -79,7 +74,7 @@ describe('Public Routes', () => {
       const dbMock = await import('../db.js');
       const getMock = vi.fn();
       const allMock = vi.fn();
-      
+
       getMock.mockReturnValueOnce(mockOrg);
       allMock.mockReturnValueOnce(mockDepartments).mockReturnValueOnce(mockPeople);
 
@@ -88,9 +83,7 @@ describe('Public Routes', () => {
         all: allMock,
       } as any);
 
-      const response = await request(app)
-        .get('/api/public/org/valid-share-token')
-        .expect(200);
+      const response = await request(app).get('/api/public/org/valid-share-token').expect(200);
 
       expect(response.body).toEqual({
         id: 'org1',
@@ -126,9 +119,7 @@ describe('Public Routes', () => {
         get: vi.fn().mockReturnValue(undefined),
       } as any);
 
-      const response = await request(app)
-        .get('/api/public/org/invalid-token')
-        .expect(404);
+      const response = await request(app).get('/api/public/org/invalid-token').expect(404);
 
       expect(response.body).toEqual({
         message: 'Organization not found or not public',
@@ -151,9 +142,7 @@ describe('Public Routes', () => {
         all: allMock,
       } as any);
 
-      const response = await request(app)
-        .get('/api/public/org/valid-token')
-        .expect(200);
+      const response = await request(app).get('/api/public/org/valid-token').expect(200);
 
       expect(response.body.departments).toEqual([]);
     });
@@ -172,9 +161,7 @@ describe('Public Routes', () => {
 
       vi.mocked(invitationService.getInvitationByToken).mockReturnValue(mockInvitation as any);
 
-      const response = await request(app)
-        .get('/api/public/invitation/invite-token')
-        .expect(200);
+      const response = await request(app).get('/api/public/invitation/invite-token').expect(200);
 
       expect(response.body).toEqual(mockInvitation);
       expect(invitationService.getInvitationByToken).toHaveBeenCalledWith('invite-token');
@@ -183,9 +170,7 @@ describe('Public Routes', () => {
     it('should return 404 for invalid invitation token', async () => {
       vi.mocked(invitationService.getInvitationByToken).mockReturnValue(null);
 
-      const response = await request(app)
-        .get('/api/public/invitation/invalid-token')
-        .expect(404);
+      const response = await request(app).get('/api/public/invitation/invalid-token').expect(404);
 
       expect(response.body).toEqual({
         message: 'Invitation not found',

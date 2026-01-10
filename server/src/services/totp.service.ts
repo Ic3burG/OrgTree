@@ -23,7 +23,7 @@ export async function setupTotp(userId: string, userEmail: string): Promise<Totp
     issuer: 'OrgTree',
     algorithm: 'sha1',
     digits: 6,
-    period: 30
+    period: 30,
   });
 
   // Generate QR code as data URL
@@ -33,9 +33,7 @@ export async function setupTotp(userId: string, userEmail: string): Promise<Totp
   const backupCodes = generateBackupCodes(8);
 
   // Store secret in database (not enabled yet)
-  db.prepare(
-    `UPDATE users SET totp_secret = ?, totp_enabled = 0 WHERE id = ?`
-  ).run(secret, userId);
+  db.prepare(`UPDATE users SET totp_secret = ?, totp_enabled = 0 WHERE id = ?`).run(secret, userId);
 
   return {
     secret,
@@ -48,9 +46,9 @@ export async function setupTotp(userId: string, userEmail: string): Promise<Totp
  * Verify TOTP token and enable 2FA for user
  */
 export function verifyAndEnableTotp(userId: string, token: string): boolean {
-  const user = db
-    .prepare('SELECT totp_secret FROM users WHERE id = ?')
-    .get(userId) as { totp_secret: string | null } | undefined;
+  const user = db.prepare('SELECT totp_secret FROM users WHERE id = ?').get(userId) as
+    | { totp_secret: string | null }
+    | undefined;
 
   if (!user || !user.totp_secret) {
     const error = new Error('2FA setup not started') as AppError;
@@ -90,9 +88,7 @@ export function verifyAndEnableTotp(userId: string, token: string): boolean {
 export function verifyTotp(userId: string, token: string): boolean {
   const user = db
     .prepare('SELECT totp_secret, totp_enabled FROM users WHERE id = ?')
-    .get(userId) as
-    | { totp_secret: string | null; totp_enabled: number }
-    | undefined;
+    .get(userId) as { totp_secret: string | null; totp_enabled: number } | undefined;
 
   if (!user || !user.totp_secret || !user.totp_enabled) {
     return false;

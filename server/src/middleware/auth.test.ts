@@ -151,9 +151,8 @@ describe('authenticateToken middleware', () => {
   });
 
   it('should handle requests without IP address gracefully', () => {
-     
     delete (mockReq as any).ip;
-     
+
     mockReq.connection = undefined as any;
 
     authenticateToken(mockReq as AuthRequest, mockRes as Response, mockNext);

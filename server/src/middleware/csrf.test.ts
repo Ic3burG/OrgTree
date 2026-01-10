@@ -126,7 +126,6 @@ describe('validateCsrf middleware', () => {
     });
 
     it('should handle header token as array (Express edge case)', () => {
-       
       mockReq.headers = { 'x-csrf-token': ['header-token'] as any };
       mockReq.cookies = { 'csrf-token': 'cookie-token' };
       vi.mocked(csrfService.verifyCsrfToken).mockReturnValue(true);
@@ -267,9 +266,8 @@ describe('validateCsrf middleware', () => {
 
   describe('IP address handling', () => {
     it('should handle missing IP address gracefully', () => {
-       
       delete (mockReq as any).ip;
-       
+
       mockReq.connection = undefined as any;
 
       validateCsrf(mockReq as AuthRequest, mockRes as Response, mockNext);
