@@ -235,10 +235,16 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Removed callback injection from all layout functions (`handleToggleExpand`, `handleExpandAll`, `handleCollapseAll`, `handleToggleLayout`)
     - Callbacks now exclusively added via `nodesWithHighlight` useMemo (existing pattern)
     - Memoized real-time update callbacks to prevent unnecessary re-subscriptions
+  - 🔧 **XML Import Name Format Fix**: Corrected name order in GEDS XML imports
+    - **Issue**: Names were imported as "[Last Name], [First Name]" instead of "[First Name] [Last Name]"
+    - **Root Cause**: Code was using the `fullName` field directly from XML (which is in "Last, First" format)
+    - **Solution**: Always construct name from firstName + lastName fields in correct order
+    - **Impact**: All imported names now display correctly as "First Last"
   - 📝 **Files Modified**:
     - `src/components/OrgMap.tsx` - Refactored callback dependency chain
+    - `src/utils/xmlImport.ts` - Fixed name construction order
   - ✅ **Testing**: All 275 tests pass (59 frontend + 216 backend)
-  - 🎯 **Impact**: Organization Map now loads correctly without infinite loop
+  - 🎯 **Impact**: Organization Map loads correctly + XML imports show proper name format
 
 - **Previous Session (January 10, 2026 - Session 36)**:
   - 🎨 **DARK MODE REFINEMENTS**: Fixed visibility issues in admin layouts

@@ -60,8 +60,8 @@ async function parseGedsXMLContent(content: string): Promise<GedsPerson | null> 
 
     const firstName = getElementText(root, 'firstName');
     const lastName = getElementText(root, 'lastName');
-    const fullName = getElementText(root, 'fullName') || `${firstName} ${lastName}`;
-    const formattedName = fullName.replace(/\\,/g, ','); // Fix escaped commas if any
+    // Always construct name in "First Last" order (XML fullName is in "Last, First" format)
+    const fullName = `${firstName} ${lastName}`.trim();
 
     const title = getElementText(root, 'title');
     const email = getElementText(root, 'email');
@@ -111,7 +111,7 @@ async function parseGedsXMLContent(content: string): Promise<GedsPerson | null> 
     return {
       firstName,
       lastName,
-      fullName: formattedName,
+      fullName,
       title,
       email,
       phone,
