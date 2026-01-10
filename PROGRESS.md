@@ -83,6 +83,9 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 10. **✅ Public View Department Connections** - Fixed API field naming (camelCase) for proper edge rendering
 11. **✅ Public View Theme Switching** - Fixed React.memo optimization preventing theme color updates
 12. **✅ Mobile Org Map Scrolling** - Fixed people list scrolling on iPhone Safari using CSS touch-action property
+13. **✅ Organization Map Infinite Loop** - Fixed circular dependency in useCallback hooks causing map to hang
+14. **✅ XML Import Name Format** - Fixed names importing as "Last, First" instead of "First Last"
+15. **✅ Duplicate Department Prevention** - Backend now prevents duplicate departments on re-import
 
 ## 🐛 Known Issues (Fixed)
 
@@ -100,6 +103,9 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ~~Public view missing connection lines~~ ✅ **FIXED** - API now returns camelCase field names
 - ~~Public view theme switching not working~~ ✅ **FIXED** - Pass theme through props for memoized components
 - ~~Mobile org map people list not scrollable on iPhone Safari~~ ✅ **FIXED** - Added CSS touch-action: pan-y to prevent React Flow from intercepting vertical scroll
+- ~~Organization Map stuck in infinite loop, won't load~~ ✅ **FIXED** - Removed circular dependency in useCallback hooks (January 10, 2026)
+- ~~XML imports creating names as "Last, First" instead of "First Last"~~ ✅ **FIXED** - Construct name from firstName + lastName fields (January 10, 2026)
+- ~~Re-importing XML creates duplicate departments~~ ✅ **FIXED** - Backend checks for existing departments by name + parent (January 10, 2026)
 
 ## 🎯 Current Status
 
@@ -221,8 +227,8 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: Critical Infinite Loop Fix (January 10, 2026)
-- **Total Commits**: 210+ commits on main branch
+- **Last Major Update**: Critical Bug Fixes & Import Enhancements (January 10, 2026)
+- **Total Commits**: 213+ commits on main branch (3 commits in Session 37)
 - **Today's Progress (January 10, 2026 - Session 37)**:
   - 🚨 **CRITICAL FIX**: Resolved infinite loop causing Organization Map to not load
   - 🔧 **Root Cause**: Circular dependency in useCallback hooks
