@@ -229,9 +229,33 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: Passkeys & 2FA Authentication Complete (January 10, 2026)
-- **Total Commits**: 220+ commits on main branch (to be updated after this session)
-- **Today's Progress (January 10, 2026 - Session 40)**:
+- **Last Major Update**: Security Vulnerability Fixes (January 10, 2026)
+- **Total Commits**: 222 commits on main branch
+- **Today's Progress (January 10, 2026 - Session 41)**:
+  - 🛡️ **SECURITY VULNERABILITY FIXES**: Resolved critical and high-severity npm vulnerabilities
+  - ✅ **VULNERABILITIES PATCHED**:
+    - **Critical**: jsPDF Local File Inclusion/Path Traversal (CVE) - Upgraded from 3.0.4 to 4.0.0
+    - **High**: React Router CSRF and XSS vulnerabilities - Updated to patched version
+    - **Moderate**: Additional React Router issues resolved
+  - ✅ **DEPLOYMENT INVESTIGATION**:
+    - Investigated Render deployment logs to diagnose "build failure" report
+    - Confirmed: Build is NOT failing - deployments successful since 16:53 UTC
+    - Earlier failures (16:11-16:26) were caused by missing `passkey.ts` file
+    - Fixed in commit 37fc894 (already deployed)
+  - 📊 **TESTING**:
+    - All 380 tests passing (321 backend + 59 frontend) ✅
+    - Build successful with 0 TypeScript errors ✅
+    - PDF export functionality verified working with jsPDF 4.0.0
+  - 🚀 **DEPLOYMENT**:
+    - Commit b872f5d deployed successfully at 20:35:47 UTC
+    - Service live at https://orgtree-app.onrender.com
+    - 0 npm vulnerabilities remaining
+  - 📁 **FILES MODIFIED** (2 files):
+    - `package.json` - Updated jsPDF and react-router versions
+    - `package-lock.json` - Dependency lock updates
+  - 🎯 **IMPACT**: Production application now free of known npm security vulnerabilities
+
+- **Previous Session (January 10, 2026 - Session 40)**:
   - 🔐 **AUTHENTICATION SYSTEM OVERHAUL COMPLETE**: Implemented Passkeys (WebAuthn) and 2FA (TOTP)
   - ✅ **PASSKEYS (WEBAUTHN)**:
     - Backend: Database schema (`passkeys` table), service layer, 6 API endpoints
@@ -2231,7 +2255,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>
-**Last Updated**: January 10, 2026 (Session 37 - Critical Bug Fixes)
+**Last Updated**: January 10, 2026 (Session 41 - Security Vulnerability Fixes)
 
 **Today's Major Milestone**: 🎉
 
