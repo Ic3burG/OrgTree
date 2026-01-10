@@ -365,7 +365,7 @@ describe('Users Routes', () => {
 
   describe('DELETE /api/users/:id', () => {
     it('should delete a user', async () => {
-      vi.mocked(usersService.deleteUser).mockReturnValue(undefined);
+      vi.mocked(usersService.deleteUser).mockReturnValue({ message: 'User deleted' });
 
       const token = createAuthToken();
       await request(app)

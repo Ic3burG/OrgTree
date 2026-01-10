@@ -140,7 +140,7 @@ describe('Organization Service', () => {
 
       expect(org).toHaveProperty('id');
       expect(org.name).toBe('My Org');
-      expect(org.created_by_id).toBe(testUser.id);
+      expect(org.createdById).toBe(testUser.id);
       // role may or may not be returned by createOrganization
     });
 

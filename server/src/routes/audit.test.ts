@@ -63,8 +63,8 @@ describe('Audit Routes', () => {
         hasMore: false,
       };
 
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
-      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({ allowed: true } as any);
+      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(0);
       vi.mocked(auditService.getAuditLogs).mockReturnValue(mockLogs as any);
 
       const token = createAuthToken('1', 'admin');
@@ -79,8 +79,8 @@ describe('Audit Routes', () => {
     });
 
     it('should filter audit logs by action type', async () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
-      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({ allowed: true } as any);
+      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(0);
       vi.mocked(auditService.getAuditLogs).mockReturnValue({ logs: [], hasMore: false } as any);
 
       const token = createAuthToken('1', 'admin');
@@ -96,8 +96,8 @@ describe('Audit Routes', () => {
     });
 
     it('should filter audit logs by entity type', async () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
-      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({ allowed: true } as any);
+      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(0);
       vi.mocked(auditService.getAuditLogs).mockReturnValue({ logs: [], hasMore: false } as any);
 
       const token = createAuthToken('1', 'admin');
@@ -112,8 +112,8 @@ describe('Audit Routes', () => {
     });
 
     it('should filter audit logs by date range', async () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
-      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({ allowed: true } as any);
+      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(0);
       vi.mocked(auditService.getAuditLogs).mockReturnValue({ logs: [], hasMore: false } as any);
 
       const token = createAuthToken('1', 'admin');
@@ -129,8 +129,8 @@ describe('Audit Routes', () => {
     });
 
     it('should support pagination with cursor', async () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
-      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({ allowed: true } as any);
+      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(0);
       vi.mocked(auditService.getAuditLogs).mockReturnValue({ logs: [], hasMore: true } as any);
 
       const token = createAuthToken('1', 'admin');
@@ -189,7 +189,7 @@ describe('Audit Routes', () => {
         hasMore: false,
       };
 
-      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(undefined);
+      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(0);
       vi.mocked(auditService.getAllAuditLogs).mockReturnValue(mockLogs as any);
 
       const token = createAuthToken('1', 'superuser');
@@ -203,7 +203,7 @@ describe('Audit Routes', () => {
     });
 
     it('should filter by organization ID', async () => {
-      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(undefined);
+      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(0);
       vi.mocked(auditService.getAllAuditLogs).mockReturnValue({ logs: [], hasMore: false } as any);
 
       const token = createAuthToken('1', 'superuser');
@@ -218,7 +218,7 @@ describe('Audit Routes', () => {
     });
 
     it('should support all filters', async () => {
-      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(undefined);
+      vi.mocked(auditService.cleanupOldLogs).mockReturnValue(0);
       vi.mocked(auditService.getAllAuditLogs).mockReturnValue({ logs: [], hasMore: false } as any);
 
       const token = createAuthToken('1', 'superuser');

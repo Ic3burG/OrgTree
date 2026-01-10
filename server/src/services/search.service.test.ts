@@ -208,8 +208,8 @@ describe('Search Service', () => {
       expect(result.total).toBeGreaterThan(0);
       const deptResults = result.results.filter(r => r.type === 'department');
       expect(deptResults.length).toBeGreaterThan(0);
-      expect(deptResults[0].name).toContain('Engineering');
-      expect(result.results[0].highlight).toContain('mark');
+      expect(deptResults[0]!.name).toContain('Engineering');
+      expect(result.results[0]!.highlight).toContain('mark');
     });
 
     it('should search departments by description', () => {
@@ -294,7 +294,7 @@ describe('Search Service', () => {
       });
 
       if (firstPage.results.length > 0 && secondPage.results.length > 0) {
-        expect(firstPage.results[0].id).not.toBe(secondPage.results[0].id);
+        expect(firstPage.results[0]!.id).not.toBe(secondPage.results[0]!.id);
       }
     });
 
@@ -390,8 +390,8 @@ describe('Search Service', () => {
       const result = search(String(orgId), String(userId), { query: 'Engineering' });
 
       if (result.results.length > 0) {
-        expect(result.results[0].highlight).toContain('<mark>');
-        expect(result.results[0].highlight).toContain('</mark>');
+        expect(result.results[0]!.highlight).toContain('<mark>');
+        expect(result.results[0]!.highlight).toContain('</mark>');
       }
     });
   });

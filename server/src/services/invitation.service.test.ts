@@ -32,7 +32,11 @@ describe('Invitation Service', () => {
   describe('createInvitation', () => {
     it('should create invitation and send email successfully', async () => {
       // Mock permission check (should not throw)
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+    vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+      hasAccess: true,
+      role: 'admin',
+      isOwner: true,
+    });
 
       // Mock database queries - handle different queries
       vi.mocked(db.prepare).mockImplementation((sql: string) => {
@@ -91,7 +95,11 @@ describe('Invitation Service', () => {
     });
 
     it('should throw error for invalid role', async () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+        hasAccess: true,
+        role: 'admin',
+        isOwner: true,
+      });
 
       await expect(
         invitationService.createInvitation(
@@ -104,7 +112,11 @@ describe('Invitation Service', () => {
     });
 
     it('should throw error if user is already organization owner', async () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+        hasAccess: true,
+        role: 'admin',
+        isOwner: true,
+      });
 
       vi.mocked(db.prepare).mockReturnValue({
         get: vi.fn((emailOrId?: string) => {
@@ -125,7 +137,11 @@ describe('Invitation Service', () => {
     });
 
     it('should throw error if user is already a member', async () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+        hasAccess: true,
+        role: 'admin',
+        isOwner: true,
+      });
 
       let callCount = 0;
       vi.mocked(db.prepare).mockReturnValue({
@@ -150,7 +166,11 @@ describe('Invitation Service', () => {
     });
 
     it('should throw error if pending invitation already exists', async () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+        hasAccess: true,
+        role: 'admin',
+        isOwner: true,
+      });
 
       let callCount = 0;
       vi.mocked(db.prepare).mockReturnValue({
@@ -173,7 +193,11 @@ describe('Invitation Service', () => {
     });
 
     it('should normalize email to lowercase and trim', async () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+        hasAccess: true,
+        role: 'admin',
+        isOwner: true,
+      });
 
       vi.mocked(db.prepare).mockImplementation((sql: string) => {
         if (sql.includes('SELECT id FROM users WHERE email')) {
@@ -211,7 +235,11 @@ describe('Invitation Service', () => {
     });
 
     it('should return email error if email sending fails', async () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+        hasAccess: true,
+        role: 'admin',
+        isOwner: true,
+      });
 
       vi.mocked(db.prepare).mockImplementation((sql: string) => {
         if (sql.includes('SELECT id FROM users WHERE email')) {
@@ -255,7 +283,11 @@ describe('Invitation Service', () => {
 
   describe('getOrgInvitations', () => {
     it('should return pending invitations for organization', () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+        hasAccess: true,
+        role: 'admin',
+        isOwner: true,
+      });
 
       const mockInvitations = [
         {
@@ -296,7 +328,11 @@ describe('Invitation Service', () => {
     });
 
     it('should return empty array when no pending invitations', () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+        hasAccess: true,
+        role: 'admin',
+        isOwner: true,
+      });
 
       vi.mocked(db.prepare).mockReturnValue({
         all: vi.fn(() => []),
@@ -313,7 +349,11 @@ describe('Invitation Service', () => {
 
   describe('cancelInvitation', () => {
     it('should cancel invitation successfully', () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+        hasAccess: true,
+        role: 'admin',
+        isOwner: true,
+      });
 
       vi.mocked(db.prepare).mockReturnValue({
         get: vi.fn(() => ({ id: 'inv-123' })),
@@ -333,7 +373,11 @@ describe('Invitation Service', () => {
     });
 
     it('should throw 404 error when invitation not found', () => {
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+        hasAccess: true,
+        role: 'admin',
+        isOwner: true,
+      });
 
       vi.mocked(db.prepare).mockReturnValue({
         get: vi.fn(() => undefined),

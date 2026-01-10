@@ -4,7 +4,7 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import importRouter from './import.js';
 import * as memberService from '../services/member.service.js';
-import * as auditService from '../services/audit.service.js';
+
 
 // Mock dependencies
 vi.mock('../services/member.service.js');

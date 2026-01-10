@@ -22,7 +22,11 @@ describe('Bulk Operations Service', () => {
     vi.clearAllMocks();
 
     // Default mock for permission check
-    vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+    vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+      hasAccess: true,
+      role: 'editor',
+      isOwner: false,
+    });
 
     // Default mock for socket events
     vi.mocked(socketEventsService.emitPersonDeleted).mockReturnValue(undefined);
@@ -58,7 +62,12 @@ describe('Bulk Operations Service', () => {
       ];
 
       vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        return fn;
+        const mockTx = fn as any;
+        mockTx.default = fn;
+        mockTx.deferred = fn;
+        mockTx.immediate = fn;
+        mockTx.exclusive = fn;
+        return mockTx;
       });
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
@@ -67,14 +76,14 @@ describe('Bulk Operations Service', () => {
             get: vi.fn((id: string) => {
               return mockPeople.find(p => p.id === id);
             }),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('UPDATE people SET deleted_at')) {
           return {
             run: vi.fn(() => ({ changes: 1 })),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = bulkService.bulkDeletePeople(mockOrgId, personIds, mockActor);
@@ -95,7 +104,12 @@ describe('Bulk Operations Service', () => {
       const personIds = ['person-1', 'nonexistent'];
 
       vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        return fn;
+        const mockTx = fn as any;
+        mockTx.default = fn;
+        mockTx.deferred = fn;
+        mockTx.immediate = fn;
+        mockTx.exclusive = fn;
+        return mockTx;
       });
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
@@ -113,14 +127,14 @@ describe('Bulk Operations Service', () => {
               }
               return undefined;
             }),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('UPDATE people SET deleted_at')) {
           return {
             run: vi.fn(() => ({ changes: 1 })),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = bulkService.bulkDeletePeople(mockOrgId, personIds, mockActor);
@@ -176,14 +190,19 @@ describe('Bulk Operations Service', () => {
       const targetDeptId = 'dept-2';
 
       vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        return fn;
+        const mockTx = fn as any;
+        mockTx.default = fn;
+        mockTx.deferred = fn;
+        mockTx.immediate = fn;
+        mockTx.exclusive = fn;
+        return mockTx;
       });
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT id, name FROM departments')) {
           return {
             get: vi.fn(() => ({ id: targetDeptId, name: 'HR' })),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('SELECT p.id, p.name')) {
           return {
@@ -194,14 +213,14 @@ describe('Bulk Operations Service', () => {
               organization_id: mockOrgId,
               departmentName: 'Engineering',
             })),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('UPDATE people SET department_id')) {
           return {
             run: vi.fn(() => ({ changes: 1 })),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = bulkService.bulkMovePeople(mockOrgId, personIds, targetDeptId, mockActor);
@@ -210,7 +229,8 @@ describe('Bulk Operations Service', () => {
       expect(result.movedCount).toBe(2);
       expect(result.failedCount).toBe(0);
       expect(result.moved).toHaveLength(2);
-      expect(result.moved[0].departmentName).toBe('HR');
+      const movedFirst = result.moved[0] as any;
+      expect(movedFirst.departmentName).toBe('HR');
       expect(socketEventsService.emitPersonUpdated).toHaveBeenCalledTimes(2);
     });
 
@@ -219,9 +239,9 @@ describe('Bulk Operations Service', () => {
         if (query.includes('SELECT id, name FROM departments')) {
           return {
             get: vi.fn(() => undefined),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       try {
@@ -238,14 +258,19 @@ describe('Bulk Operations Service', () => {
       const targetDeptId = 'dept-1';
 
       vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        return fn;
+        const mockTx = fn as any;
+        mockTx.default = fn;
+        mockTx.deferred = fn;
+        mockTx.immediate = fn;
+        mockTx.exclusive = fn;
+        return mockTx;
       });
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT id, name FROM departments')) {
           return {
             get: vi.fn(() => ({ id: targetDeptId, name: 'Engineering' })),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('SELECT p.id, p.name')) {
           return {
@@ -256,9 +281,9 @@ describe('Bulk Operations Service', () => {
               organization_id: mockOrgId,
               departmentName: 'Engineering',
             })),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = bulkService.bulkMovePeople(mockOrgId, personIds, targetDeptId, mockActor);
@@ -266,7 +291,9 @@ describe('Bulk Operations Service', () => {
       expect(result.success).toBe(false);
       expect(result.movedCount).toBe(0);
       expect(result.failedCount).toBe(1);
-      expect(result.failed[0].error).toBe('Already in target department');
+      const failedItem = result.failed[0];
+      expect(failedItem).toBeDefined();
+      expect(failedItem!.error).toBe('Already in target department');
     });
 
     it('should reject missing target department ID', () => {
@@ -286,7 +313,12 @@ describe('Bulk Operations Service', () => {
       const updates = { title: 'Senior Developer' };
 
       vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        return fn;
+        const mockTx = fn as any;
+        mockTx.default = fn;
+        mockTx.deferred = fn;
+        mockTx.immediate = fn;
+        mockTx.exclusive = fn;
+        return mockTx;
       });
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
@@ -300,21 +332,21 @@ describe('Bulk Operations Service', () => {
               organization_id: mockOrgId,
               departmentName: 'Engineering',
             })),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('UPDATE people SET')) {
           return {
             run: vi.fn(() => ({ changes: 1 })),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = bulkService.bulkEditPeople(mockOrgId, personIds, updates, mockActor);
 
       expect(result.success).toBe(true);
       expect(result.updatedCount).toBe(2);
-      expect(result.updated[0].title).toBe('Senior Developer');
+      expect((result.updated[0] as any).title).toBe('Senior Developer');
     });
 
     it('should update both title and department', () => {
@@ -322,14 +354,19 @@ describe('Bulk Operations Service', () => {
       const updates = { title: 'Manager', departmentId: 'dept-2' };
 
       vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        return fn;
+        const mockTx = fn as any;
+        mockTx.default = fn;
+        mockTx.deferred = fn;
+        mockTx.immediate = fn;
+        mockTx.exclusive = fn;
+        return mockTx;
       });
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT id, name FROM departments')) {
           return {
             get: vi.fn(() => ({ id: 'dept-2', name: 'HR' })),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('SELECT p.id, p.name')) {
           return {
@@ -341,22 +378,23 @@ describe('Bulk Operations Service', () => {
               organization_id: mockOrgId,
               departmentName: 'Engineering',
             })),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('UPDATE people SET')) {
           return {
             run: vi.fn(() => ({ changes: 1 })),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = bulkService.bulkEditPeople(mockOrgId, personIds, updates, mockActor);
 
       expect(result.success).toBe(true);
-      expect(result.updated[0].title).toBe('Manager');
-      expect(result.updated[0].departmentId).toBe('dept-2');
-      expect(result.updated[0].departmentName).toBe('HR');
+      const updatedFirst = result.updated[0] as any;
+      expect(updatedFirst.title).toBe('Manager');
+      expect(updatedFirst.departmentId).toBe('dept-2');
+      expect(updatedFirst.departmentName).toBe('HR');
     });
 
     it('should reject empty updates object', () => {
@@ -374,9 +412,9 @@ describe('Bulk Operations Service', () => {
         if (query.includes('SELECT id, name FROM departments')) {
           return {
             get: vi.fn(() => undefined),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       try {
@@ -437,14 +475,19 @@ describe('Bulk Operations Service', () => {
       const updates = { parentId: 'dept-1' };
 
       vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        return fn;
+        const mockTx = fn as any;
+        mockTx.default = fn;
+        mockTx.deferred = fn;
+        mockTx.immediate = fn;
+        mockTx.exclusive = fn;
+        return mockTx;
       });
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT id, name FROM departments WHERE id = ?')) {
           return {
             get: vi.fn(() => ({ id: 'dept-1', name: 'Engineering' })),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('SELECT id, name, description, parent_id')) {
           return {
@@ -454,26 +497,26 @@ describe('Bulk Operations Service', () => {
               organization_id: mockOrgId,
               parentId: null,
             })),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('SELECT parent_id FROM departments')) {
           return {
             get: vi.fn(() => undefined),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('UPDATE departments SET parent_id')) {
           return {
             run: vi.fn(() => ({ changes: 1 })),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = bulkService.bulkEditDepartments(mockOrgId, deptIds, updates, mockActor);
 
       expect(result.success).toBe(true);
       expect(result.updatedCount).toBe(2);
-      expect(result.updated[0].parentId).toBe('dept-1');
+      expect((result.updated[0] as any).parentId).toBe('dept-1');
     });
 
     it('should reject circular reference - self as parent', () => {
@@ -484,9 +527,9 @@ describe('Bulk Operations Service', () => {
         if (query.includes('SELECT id, name FROM departments WHERE id = ?')) {
           return {
             get: vi.fn(() => ({ id: 'dept-1', name: 'Engineering' })),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       try {
@@ -503,9 +546,9 @@ describe('Bulk Operations Service', () => {
         if (query.includes('SELECT id, name FROM departments WHERE id = ?')) {
           return {
             get: vi.fn(() => undefined),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       try {
@@ -527,7 +570,12 @@ describe('Bulk Operations Service', () => {
       const updates = { parentId: null };
 
       vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        return fn;
+        const mockTx = fn as any;
+        mockTx.default = fn;
+        mockTx.deferred = fn;
+        mockTx.immediate = fn;
+        mockTx.exclusive = fn;
+        return mockTx;
       });
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
@@ -539,20 +587,20 @@ describe('Bulk Operations Service', () => {
               organization_id: mockOrgId,
               parentId: 'dept-1',
             })),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('UPDATE departments SET parent_id')) {
           return {
             run: vi.fn(() => ({ changes: 1 })),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = bulkService.bulkEditDepartments(mockOrgId, deptIds, updates, mockActor);
 
       expect(result.success).toBe(true);
-      expect(result.updated[0].parentId).toBe(null);
+      expect((result.updated[0] as any).parentId).toBe(null);
     });
 
     it('should prevent descendant from becoming parent', () => {
@@ -560,14 +608,19 @@ describe('Bulk Operations Service', () => {
       const updates = { parentId: 'dept-2' };
 
       vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        return fn;
+        const mockTx = fn as any;
+        mockTx.default = fn;
+        mockTx.deferred = fn;
+        mockTx.immediate = fn;
+        mockTx.exclusive = fn;
+        return mockTx;
       });
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT id, name FROM departments WHERE id = ?')) {
           return {
             get: vi.fn(() => ({ id: 'dept-2', name: 'HR' })),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('SELECT id, name, description, parent_id')) {
           return {
@@ -577,7 +630,7 @@ describe('Bulk Operations Service', () => {
               organization_id: mockOrgId,
               parentId: null,
             })),
-          } as never;
+          } as unknown as any;
         }
         // Make dept-2 a child of dept-1 (dept-2 -> dept-1)
         if (query.includes('SELECT parent_id FROM departments WHERE id')) {
@@ -588,9 +641,9 @@ describe('Bulk Operations Service', () => {
               }
               return undefined;
             }),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = bulkService.bulkEditDepartments(mockOrgId, deptIds, updates, mockActor);
@@ -598,7 +651,7 @@ describe('Bulk Operations Service', () => {
       // Should fail because dept-2 is a descendant of dept-1
       expect(result.success).toBe(false);
       expect(result.failedCount).toBe(1);
-      expect(result.failed[0].error).toBe('Cannot set parent to a descendant department');
+      expect(result.failed[0]!.error).toBe('Cannot set parent to a descendant department');
     });
   });
 });

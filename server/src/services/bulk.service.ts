@@ -171,7 +171,7 @@ export function bulkDeletePeople(
         if (result.changes > 0) {
           deleted.push(person);
           // Emit event (also creates audit log)
-          emitPersonDeleted(orgId, person, actor);
+          emitPersonDeleted(orgId, person as unknown as Record<string, unknown>, actor);
         } else {
           failed.push({ id: personId, error: 'Failed to delete' });
         }
@@ -287,7 +287,7 @@ export function bulkMovePeople(
           };
           moved.push(updatedPerson);
           // Emit event (also creates audit log)
-          emitPersonUpdated(orgId, updatedPerson, actor);
+          emitPersonUpdated(orgId, updatedPerson as unknown as Record<string, unknown>, actor);
         } else {
           failed.push({ id: personId, error: 'Failed to move' });
         }
@@ -421,7 +421,7 @@ export function bulkEditPeople(
           };
           updated.push(updatedPerson);
           // Emit event (also creates audit log)
-          emitPersonUpdated(orgId, updatedPerson, actor);
+          emitPersonUpdated(orgId, updatedPerson as unknown as Record<string, unknown>, actor);
         } else {
           failed.push({ id: personId, error: 'Failed to update' });
         }
@@ -530,7 +530,7 @@ export function bulkDeleteDepartments(
         if (changes > 0) {
           deleted.push(dept);
           // Emit event (also creates audit log)
-          emitDepartmentDeleted(orgId, dept, actor);
+          emitDepartmentDeleted(orgId, dept as unknown as Record<string, unknown>, actor);
         } else {
           failed.push({ id: deptId, error: 'Failed to delete' });
         }
@@ -659,7 +659,7 @@ export function bulkEditDepartments(
           };
           updated.push(updatedDept);
           // Emit event (also creates audit log)
-          emitDepartmentUpdated(orgId, updatedDept, actor);
+          emitDepartmentUpdated(orgId, updatedDept as unknown as Record<string, unknown>, actor);
         } else {
           failed.push({ id: deptId, error: 'Failed to update' });
         }

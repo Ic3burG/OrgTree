@@ -69,7 +69,7 @@ describe('Members Routes', () => {
         email: 'owner@example.com',
       };
 
-      vi.mocked(memberService.requireOrgPermission).mockReturnValue(undefined);
+      vi.mocked(memberService.requireOrgPermission).mockReturnValue({ allowed: true } as any);
       vi.mocked(memberService.getOrgMembers).mockReturnValue(mockMembers as any);
 
       const dbMock = await import('../db.js');

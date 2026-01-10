@@ -47,19 +47,19 @@ describe('Users Service', () => {
         if (query.includes('SELECT\n      u.id')) {
           return {
             all: vi.fn().mockReturnValue(mockUsers),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('COUNT(*) as count\n      FROM organizations')) {
           return {
             get: vi.fn().mockReturnValue(mockOrgCount),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('COUNT(*) as count\n      FROM organization_members')) {
           return {
             get: vi.fn().mockReturnValue(mockMembershipCount),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = usersService.getAllUsers();
@@ -80,7 +80,7 @@ describe('Users Service', () => {
     it('should return empty array when no users exist', () => {
       vi.mocked(db.prepare).mockImplementation(() => ({
         all: vi.fn().mockReturnValue([]),
-      })) as never;
+      } as unknown as any));
 
       const result = usersService.getAllUsers();
 
@@ -120,7 +120,7 @@ describe('Users Service', () => {
         ) {
           return {
             get: vi.fn().mockReturnValue(mockUser),
-          } as never;
+          } as unknown as any;
         }
         if (
           query.includes(
@@ -129,14 +129,14 @@ describe('Users Service', () => {
         ) {
           return {
             all: vi.fn().mockReturnValue(mockOrgs),
-          } as never;
+          } as unknown as any;
         }
         if (query.includes('SELECT\n      o.id,\n      o.name,\n      o.is_public as isPublic')) {
           return {
             all: vi.fn().mockReturnValue(mockMemberships),
-          } as never;
+          } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = usersService.getUserById('user1');
@@ -165,7 +165,7 @@ describe('Users Service', () => {
     it('should throw 404 error when user not found', () => {
       vi.mocked(db.prepare).mockImplementation(() => ({
         get: vi.fn().mockReturnValue(undefined),
-      })) as never;
+      } as unknown as any));
 
       expect(() => usersService.getUserById('nonexistent')).toThrow('User not found');
       try {
@@ -196,20 +196,20 @@ describe('Users Service', () => {
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT * FROM users WHERE id = ?')) {
-          return { get: vi.fn().mockReturnValue(mockUser) } as never;
+          return { get: vi.fn().mockReturnValue(mockUser) } as unknown as any;
         }
         if (query.includes('SELECT id FROM users WHERE email = ? AND id != ?')) {
-          return { get: vi.fn().mockReturnValue(undefined) } as never;
+          return { get: vi.fn().mockReturnValue(undefined) } as unknown as any;
         }
         if (query.includes('UPDATE users\n    SET name = ?, email = ?, updated_at = ?')) {
-          return { run: vi.fn() } as never;
+          return { run: vi.fn() } as unknown as any;
         }
         if (
           query.includes('SELECT id, name, email, role, created_at as createdAt\n    FROM users')
         ) {
-          return { get: vi.fn().mockReturnValue(updatedUser) } as never;
+          return { get: vi.fn().mockReturnValue(updatedUser) } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = usersService.updateUser('user1', {
@@ -223,7 +223,7 @@ describe('Users Service', () => {
     it('should throw 404 error when user not found', () => {
       vi.mocked(db.prepare).mockImplementation(() => ({
         get: vi.fn().mockReturnValue(undefined),
-      })) as never;
+      } as unknown as any));
 
       expect(() => usersService.updateUser('nonexistent', { name: 'Test' })).toThrow(
         'User not found'
@@ -245,12 +245,12 @@ describe('Users Service', () => {
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT * FROM users WHERE id = ?')) {
-          return { get: vi.fn().mockReturnValue(mockUser) } as never;
+          return { get: vi.fn().mockReturnValue(mockUser) } as unknown as any;
         }
         if (query.includes('SELECT id FROM users WHERE email = ? AND id != ?')) {
-          return { get: vi.fn().mockReturnValue({ id: 'user2' }) } as never;
+          return { get: vi.fn().mockReturnValue({ id: 'user2' }) } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       expect(() => usersService.updateUser('user1', { email: 'taken@example.com' })).toThrow(
@@ -281,15 +281,15 @@ describe('Users Service', () => {
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT * FROM users WHERE id = ?')) {
-          return { get: vi.fn().mockReturnValue(mockUser) } as never;
+          return { get: vi.fn().mockReturnValue(mockUser) } as unknown as any;
         }
         if (query.includes('UPDATE users')) {
-          return { run: vi.fn() } as never;
+          return { run: vi.fn() } as unknown as any;
         }
         if (query.includes('SELECT id, name, email, role')) {
-          return { get: vi.fn().mockReturnValue(updatedUser) } as never;
+          return { get: vi.fn().mockReturnValue(updatedUser) } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = usersService.updateUser('user1', {
@@ -320,15 +320,15 @@ describe('Users Service', () => {
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT * FROM users WHERE id = ?')) {
-          return { get: vi.fn().mockReturnValue(mockUser) } as never;
+          return { get: vi.fn().mockReturnValue(mockUser) } as unknown as any;
         }
         if (query.includes('UPDATE users\n    SET role = ?, updated_at = ?')) {
-          return { run: vi.fn() } as never;
+          return { run: vi.fn() } as unknown as any;
         }
         if (query.includes('SELECT id, name, email, role, created_at as createdAt')) {
-          return { get: vi.fn().mockReturnValue(updatedUser) } as never;
+          return { get: vi.fn().mockReturnValue(updatedUser) } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = usersService.updateUserRole('user1', 'admin', 'admin1');
@@ -337,7 +337,7 @@ describe('Users Service', () => {
     });
 
     it('should throw 400 error for invalid role', () => {
-      expect(() => usersService.updateUserRole('user1', 'invalid' as never, 'admin1')).toThrow(
+      expect(() => usersService.updateUserRole('user1', 'invalid' as any, 'admin1')).toThrow(
         'Invalid role'
       );
     });
@@ -356,7 +356,7 @@ describe('Users Service', () => {
     it('should throw 404 error when user not found', () => {
       vi.mocked(db.prepare).mockImplementation(() => ({
         get: vi.fn().mockReturnValue(undefined),
-      })) as never;
+      } as unknown as any));
 
       expect(() => usersService.updateUserRole('nonexistent', 'admin', 'admin1')).toThrow(
         'User not found'
@@ -375,15 +375,15 @@ describe('Users Service', () => {
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT * FROM users WHERE id = ?')) {
-          return { get: vi.fn().mockReturnValue(mockUser) } as never;
+          return { get: vi.fn().mockReturnValue(mockUser) } as unknown as any;
         }
         if (query.includes('UPDATE users\n    SET password_hash = ?, must_change_password = 1')) {
-          return { run: vi.fn() } as never;
+          return { run: vi.fn() } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
-      vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword' as never);
+      vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword' as any);
 
       const result = await usersService.resetUserPassword('user1');
 
@@ -398,7 +398,7 @@ describe('Users Service', () => {
     it('should throw 404 error when user not found', async () => {
       vi.mocked(db.prepare).mockImplementation(() => ({
         get: vi.fn().mockReturnValue(undefined),
-      })) as never;
+      } as unknown as any));
 
       await expect(usersService.resetUserPassword('nonexistent')).rejects.toThrow('User not found');
     });
@@ -413,15 +413,15 @@ describe('Users Service', () => {
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT * FROM users WHERE id = ?')) {
-          return { get: vi.fn().mockReturnValue(mockUser) } as never;
+          return { get: vi.fn().mockReturnValue(mockUser) } as unknown as any;
         }
         if (query.includes('UPDATE users')) {
-          return { run: vi.fn() } as never;
+          return { run: vi.fn() } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
-      vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword' as never);
+      vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword' as any);
 
       const result1 = await usersService.resetUserPassword('user1');
       const result2 = await usersService.resetUserPassword('user1');
@@ -441,12 +441,12 @@ describe('Users Service', () => {
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT * FROM users WHERE id = ?')) {
-          return { get: vi.fn().mockReturnValue(mockUser) } as never;
+          return { get: vi.fn().mockReturnValue(mockUser) } as unknown as any;
         }
         if (query.includes('DELETE FROM users WHERE id = ?')) {
-          return { run: vi.fn() } as never;
+          return { run: vi.fn() } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
       const result = usersService.deleteUser('user1', 'admin1');
@@ -468,7 +468,7 @@ describe('Users Service', () => {
     it('should throw 404 error when user not found', () => {
       vi.mocked(db.prepare).mockImplementation(() => ({
         get: vi.fn().mockReturnValue(undefined),
-      })) as never;
+      } as unknown as any));
 
       expect(() => usersService.deleteUser('nonexistent', 'admin1')).toThrow('User not found');
     });
@@ -486,18 +486,18 @@ describe('Users Service', () => {
 
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT id FROM users WHERE email = ?')) {
-          return { get: vi.fn().mockReturnValue(undefined) } as never;
+          return { get: vi.fn().mockReturnValue(undefined) } as unknown as any;
         }
         if (query.includes('INSERT INTO users')) {
-          return { run: vi.fn() } as never;
+          return { run: vi.fn() } as unknown as any;
         }
         if (query.includes('SELECT id, name, email, role, created_at as createdAt')) {
-          return { get: vi.fn().mockReturnValue(newUser) } as never;
+          return { get: vi.fn().mockReturnValue(newUser) } as unknown as any;
         }
-        return {} as never;
+        return {} as unknown as any;
       });
 
-      vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword' as never);
+      vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword' as any);
 
       const result = await usersService.createAdminUser('New Admin', 'admin@example.com', 'admin');
 
@@ -509,14 +509,14 @@ describe('Users Service', () => {
 
     it('should throw 400 error for invalid role', async () => {
       await expect(
-        usersService.createAdminUser('Test', 'test@example.com', 'invalid' as never)
+        usersService.createAdminUser('Test', 'test@example.com', 'invalid' as any)
       ).rejects.toThrow('Invalid role');
     });
 
     it('should throw 400 error when email already exists', async () => {
       vi.mocked(db.prepare).mockImplementation(() => ({
         get: vi.fn().mockReturnValue({ id: 'existing-user' }),
-      })) as never;
+      } as unknown as any));
 
       await expect(
         usersService.createAdminUser('Test', 'existing@example.com', 'user')
@@ -537,18 +537,18 @@ describe('Users Service', () => {
 
         vi.mocked(db.prepare).mockImplementation((query: string) => {
           if (query.includes('SELECT id FROM users WHERE email = ?')) {
-            return { get: vi.fn().mockReturnValue(undefined) } as never;
+            return { get: vi.fn().mockReturnValue(undefined) } as unknown as any;
           }
           if (query.includes('INSERT INTO users')) {
-            return { run: vi.fn() } as never;
+            return { run: vi.fn() } as unknown as any;
           }
           if (query.includes('SELECT id, name, email, role')) {
-            return { get: vi.fn().mockReturnValue(newUser) } as never;
+            return { get: vi.fn().mockReturnValue(newUser) } as unknown as any;
           }
-          return {} as never;
+          return {} as unknown as any;
         });
 
-        vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword' as never);
+        vi.mocked(bcrypt.hash).mockResolvedValue('hashedPassword' as any);
 
         const result = await usersService.createAdminUser(
           `Test ${role}`,

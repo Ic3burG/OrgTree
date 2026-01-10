@@ -55,18 +55,34 @@ describe('Backup Routes', () => {
   describe('GET /api/admin/backups', () => {
     it('should list all backups', async () => {
       const mockBackups = [
-        { filename: 'backup-2024-01-01.db', sizeMB: 10, timestamp: '2024-01-01' },
-        { filename: 'backup-2024-01-02.db', sizeMB: 12, timestamp: '2024-01-02' },
+        {
+          filename: 'backup-2024-01-01.db',
+          path: '/backups/backup-2024-01-01.db',
+          size: 10485760,
+          sizeMB: 10,
+          timestamp: '2024-01-01',
+          created: new Date('2024-01-01'),
+        },
+        {
+          filename: 'backup-2024-01-02.db',
+          path: '/backups/backup-2024-01-02.db',
+          size: 12582912,
+          sizeMB: 12,
+          timestamp: '2024-01-02',
+          created: new Date('2024-01-02'),
+        },
       ];
       const mockStats = {
         count: 2,
+        totalBackups: 2,
+        backupDir: '/backups',
         totalSizeMB: 22,
-        oldestBackup: '2024-01-01',
-        newestBackup: '2024-01-02',
+        oldestBackup: new Date('2024-01-01'),
+        newestBackup: new Date('2024-01-02'),
       };
 
-      vi.mocked(backupService.listBackups).mockReturnValue(mockBackups as any);
-      vi.mocked(backupService.getBackupStats).mockReturnValue(mockStats as any);
+      vi.mocked(backupService.listBackups).mockReturnValue(mockBackups);
+      vi.mocked(backupService.getBackupStats).mockReturnValue(mockStats);
 
       const token = createAuthToken();
       const response = await request(app)
@@ -123,8 +139,8 @@ describe('Backup Routes', () => {
         deletedFiles: ['old-backup-1.db', 'old-backup-2.db'],
       };
 
-      vi.mocked(backupService.createBackup).mockResolvedValue(mockBackupResult as any);
-      vi.mocked(backupService.cleanupOldBackups).mockReturnValue(mockCleanupResult as any);
+      vi.mocked(backupService.createBackup).mockResolvedValue(mockBackupResult);
+      vi.mocked(backupService.cleanupOldBackups).mockReturnValue(mockCleanupResult);
 
       const token = createAuthToken();
       const response = await request(app)
@@ -200,7 +216,7 @@ describe('Backup Routes', () => {
         deletedFiles: ['backup-1.db', 'backup-2.db', 'backup-3.db'],
       };
 
-      vi.mocked(backupService.cleanupOldBackups).mockReturnValue(mockResult as any);
+      vi.mocked(backupService.cleanupOldBackups).mockReturnValue(mockResult);
 
       const token = createAuthToken();
       const response = await request(app)
@@ -222,7 +238,7 @@ describe('Backup Routes', () => {
         kept: 10,
         deleted: 2,
         deletedFiles: [],
-      } as any);
+      });
 
       const token = createAuthToken();
       await request(app)
@@ -277,13 +293,14 @@ describe('Backup Routes', () => {
   describe('GET /api/admin/backups/stats', () => {
     it('should return backup statistics', async () => {
       const mockStats = {
-        count: 10,
+        totalBackups: 10,
         totalSizeMB: 150,
-        oldestBackup: '2024-01-01',
-        newestBackup: '2024-01-10',
+        oldestBackup: new Date('2024-01-01'),
+        newestBackup: new Date('2024-01-10'),
+        backupDir: '/tmp/backups'
       };
 
-      vi.mocked(backupService.getBackupStats).mockReturnValue(mockStats as any);
+      vi.mocked(backupService.getBackupStats).mockReturnValue(mockStats);
 
       const token = createAuthToken();
       const response = await request(app)

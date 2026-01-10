@@ -49,7 +49,7 @@ describe('CSRF Routes', () => {
       });
 
       // Verify cookie was set
-      const cookies = response.headers['set-cookie'];
+      const cookies = response.headers['set-cookie'] || [];
       expect(cookies).toBeDefined();
       expect(cookies[0]).toContain('csrf-token=' + mockToken);
       expect(cookies[0]).toContain('Path=/');
@@ -67,7 +67,7 @@ describe('CSRF Routes', () => {
         .get('/api/csrf-token')
         .expect(200);
 
-      const cookies = response.headers['set-cookie'];
+      const cookies = response.headers['set-cookie'] || [];
       // httpOnly flag should not be present (false)
       expect(cookies[0]).not.toContain('HttpOnly');
     });
@@ -85,7 +85,7 @@ describe('CSRF Routes', () => {
         .get('/api/csrf-token')
         .expect(200);
 
-      const cookies = response.headers['set-cookie'];
+      const cookies = response.headers['set-cookie'] || [];
       expect(cookies[0]).toContain('Secure');
 
       process.env.NODE_ENV = originalEnv;

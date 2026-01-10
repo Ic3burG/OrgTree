@@ -177,7 +177,7 @@ async function restore(filename: string) {
   // For CLI usage, we'll proceed directly
   console.log('Restoring database...\n');
 
-  const result = restoreFromBackup(backup.path);
+  const result = await restoreFromBackup(backup.path);
 
   if (result.success) {
     console.log('✅ Database restored successfully!');
