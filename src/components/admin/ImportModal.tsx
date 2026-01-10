@@ -191,6 +191,11 @@ export default function ImportModal({
                 Created {result.departmentsCreated} department(s) and {result.peopleCreated}{' '}
                 person(s).
               </p>
+              {result.departmentsReused !== undefined && result.departmentsReused > 0 && (
+                <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
+                  Reused {result.departmentsReused} existing department(s).
+                </p>
+              )}
               {result.peopleSkipped > 0 && (
                 <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
                   Skipped {result.peopleSkipped} person(s) (duplicates).

@@ -4,6 +4,7 @@ export interface CSVRow {
 
 export interface CSVImportResult {
   departmentsCreated: number;
+  departmentsReused?: number;
   peopleCreated: number;
   peopleSkipped: number;
 }

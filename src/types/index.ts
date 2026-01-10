@@ -202,6 +202,7 @@ export interface SocketMemberEvent {
 // Import/Export types
 export interface CSVImportResult {
   departmentsCreated: number;
+  departmentsReused?: number;
   peopleCreated: number;
   peopleSkipped: number;
   errors: string[];

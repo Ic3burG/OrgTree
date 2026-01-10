@@ -38,6 +38,7 @@ router.post(
       // Process import within a transaction
       const pathToDeptId = new Map<string, string>();
       let departmentsCreated = 0;
+      let departmentsReused = 0;
       let peopleCreated = 0;
       let peopleSkipped = 0;
 
@@ -70,8 +71,17 @@ router.post(
 
       // Fallback check: Name + Department (if email is empty)
       const checkPersonNameInDept = db.prepare(`
-        SELECT id FROM people 
+        SELECT id FROM people
         WHERE department_id = ? AND name = ? AND deleted_at IS NULL
+      `);
+
+      // Check for existing department by name and parent
+      const checkDepartment = db.prepare(`
+        SELECT id FROM departments
+        WHERE organization_id = ?
+        AND name = ?
+        AND (parent_id = ? OR (parent_id IS NULL AND ? IS NULL))
+        AND deleted_at IS NULL
       `);
 
       // Helper to generate cryptographically secure ID
@@ -88,14 +98,24 @@ router.post(
             // Find parent path
             const pathParts = row.path.split('/').filter(Boolean);
             const parentPath = pathParts.length > 1 ? '/' + pathParts.slice(0, -1).join('/') : null;
-
-            const deptId = generateId();
             const parentId = parentPath ? pathToDeptId.get(parentPath) || null : null;
 
-            insertDept.run(deptId, orgId, parentId, row.name, row.description || null);
+            // Check if department already exists
+            const existing = checkDepartment.get(orgId, row.name, parentId, parentId) as
+              | { id: string }
+              | undefined;
 
-            pathToDeptId.set(row.path, deptId);
-            departmentsCreated++;
+            if (existing) {
+              // Department exists, reuse it
+              pathToDeptId.set(row.path, existing.id);
+              departmentsReused++;
+            } else {
+              // Create new department
+              const deptId = generateId();
+              insertDept.run(deptId, orgId, parentId, row.name, row.description || null);
+              pathToDeptId.set(row.path, deptId);
+              departmentsCreated++;
+            }
           } else if (type === 'person') {
             // Find department from path
             const pathParts = row.path.split('/').filter(Boolean);
@@ -151,9 +171,10 @@ router.post(
           null,
           {
             departmentsCreated,
+            departmentsReused,
             peopleCreated,
             peopleSkipped,
-            duplicatesFound: peopleSkipped > 0,
+            duplicatesFound: peopleSkipped > 0 || departmentsReused > 0,
             totalRows: data.length,
             timestamp: new Date().toISOString(),
           }
@@ -162,6 +183,7 @@ router.post(
         res.json({
           success: true,
           departmentsCreated,
+          departmentsReused,
           peopleCreated,
           peopleSkipped,
           errors: [],

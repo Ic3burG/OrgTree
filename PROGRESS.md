@@ -240,11 +240,22 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - **Root Cause**: Code was using the `fullName` field directly from XML (which is in "Last, First" format)
     - **Solution**: Always construct name from firstName + lastName fields in correct order
     - **Impact**: All imported names now display correctly as "First Last"
+  - 🛡️ **Duplicate Department Prevention**: Backend now prevents duplicate departments
+    - **Issue**: Importing same data twice created duplicate departments
+    - **Root Cause**: Backend only checked for duplicate people, not departments
+    - **Solution**: Added department duplicate check by name + parent_id combination
+    - **Behavior**: If department exists, reuses existing ID instead of creating duplicate
+    - **Metrics**: Tracks `departmentsCreated` vs `departmentsReused` separately
+    - **Impact**: Safe to re-import data without creating duplicates
   - 📝 **Files Modified**:
     - `src/components/OrgMap.tsx` - Refactored callback dependency chain
     - `src/utils/xmlImport.ts` - Fixed name construction order
+    - `server/src/routes/import.ts` - Added duplicate department detection
+    - `src/types/index.ts` - Added departmentsReused field to CSVImportResult
+    - `src/utils/csvImport.ts` - Added departmentsReused field to CSVImportResult
+    - `src/components/admin/ImportModal.tsx` - Display departmentsReused in success message
   - ✅ **Testing**: All 275 tests pass (59 frontend + 216 backend)
-  - 🎯 **Impact**: Organization Map loads correctly + XML imports show proper name format
+  - 🎯 **Impact**: Organization Map loads + XML imports correct format + No duplicate departments
 
 - **Previous Session (January 10, 2026 - Session 36)**:
   - 🎨 **DARK MODE REFINEMENTS**: Fixed visibility issues in admin layouts
