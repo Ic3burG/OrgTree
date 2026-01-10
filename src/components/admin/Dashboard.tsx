@@ -22,10 +22,6 @@ export default function Dashboard(): React.JSX.Element {
   const [showShare, setShowShare] = useState<boolean>(false);
   const toast = useToast();
 
-  useEffect(() => {
-    loadOrganization();
-  }, [loadOrganization, orgId]);
-
   const loadOrganization = useCallback(async (): Promise<void> => {
     if (!orgId) return;
     try {
@@ -33,12 +29,16 @@ export default function Dashboard(): React.JSX.Element {
       setError(null);
       const data = await api.getOrganization(orgId);
       setOrganization(data);
-    } catch (err) {
-      setError((err as Error).message || 'Failed to load organization');
+    } catch {
+      setError('Failed to load organization');
     } finally {
       setLoading(false);
     }
   }, [orgId]);
+
+  useEffect(() => {
+    loadOrganization();
+  }, [loadOrganization, orgId]);
 
   const handleExport = (): void => {
     if (!organization || !organization.departments) return;
