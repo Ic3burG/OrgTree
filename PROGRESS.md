@@ -250,14 +250,46 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Total Components**: ~21 React components (added Bulk modals and action bar)
 - **API Endpoints**: 50+ REST endpoints (documented in OpenAPI spec at /api/docs)
 - **Database Tables**: 4 main tables + 2 FTS5 virtual tables (departments_fts, people_fts)
-- **Test Coverage**: 432 tests (373 backend + 59 frontend) with Vitest - Phase 1 Complete (Backend Routes: 93%)
+- **Test Coverage**: 435 tests (373 backend + 62 frontend) with Vitest - Phase 1 Complete (Backend Routes: 93%)
 - **Features**: 12+ major feature areas completed
 
 ### Recent Activity
 
-- **Last Major Update**: Case-Insensitive Duplicate Detection (January 11, 2026)
-- **Total Commits**: 223+ commits on main branch
-- **Today's Progress (January 11, 2026 - Session 43)**:
+- **Last Major Update**: XML Department Hierarchy Fix (January 11, 2026)
+- **Total Commits**: 224+ commits on main branch
+- **Today's Progress (January 11, 2026 - Session 44)**:
+  - 🐛 **CRITICAL BUG FIX**: Fixed XML import not extracting full department hierarchy
+  - ✅ **ISSUE IDENTIFIED**:
+    - GEDS XML imports were only creating 1-2 levels of departments instead of full 6+ level hierarchies
+    - Frontend parser looked for `<n>` tags but GEDS XML files use `<name>` tags
+    - This caused parser to fail extracting department hierarchy from `<orgStructure>` section
+    - Parser fell back to simple department/organization fields, losing all sub-departments
+  - ✅ **FIX APPLIED** (1 frontend file):
+    - `src/utils/xmlImport.ts` - Changed `getElementsByTagName('n')` to `getElementsByTagName('name')`
+    - Now correctly extracts all department levels from orgStructure
+  - 🔍 **ROOT CAUSE**:
+    - Original Node.js script used `xml2js` library which converts element names to properties
+    - Browser's DOMParser keeps actual tag names (doesn't convert `<name>` to property)
+    - Comment in original script said "xml2js parses <n> as 'name' property" but this was misleading
+    - XML actually has `<name>` tags, not `<n>` tags
+  - ✅ **TESTING**:
+    - Created comprehensive test suite (`src/utils/xmlImport.test.ts`) with 3 tests
+    - Tests verify full hierarchy extraction, fallback behavior, and duplicate detection
+    - All 62 frontend tests passing ✅ (59 existing + 3 new)
+    - All 321 backend tests passing ✅
+  - 📊 **GITHUB METADATA UPDATE**:
+    - Added repository description: "Full-stack organizational directory and visualization platform..."
+    - Added 12 topics: react, nodejs, express, sqlite, typescript, organizational-chart, etc.
+    - Added homepage URL: https://orgtree.onrender.com
+  - 🎯 **IMPACT**:
+    - GEDS XML imports now create full department hierarchies (6+ levels)
+    - Sub-departments correctly imported and organized
+    - Maintains all organizational structure from source XML files
+  - 📁 **FILES MODIFIED/CREATED**:
+    - `src/utils/xmlImport.ts` - 1 line changed (critical fix)
+    - `src/utils/xmlImport.test.ts` - New comprehensive test file (145 lines)
+
+- **Previous Session (January 11, 2026 - Session 43)**:
   - 🐛 **CRITICAL BUG FIX**: Fixed case-sensitive duplicate detection allowing duplicate records
   - ✅ **ISSUE IDENTIFIED**:
     - XML/CSV imports could create duplicate people with different email casing (e.g., "john@example.com" vs "John@Example.com")
