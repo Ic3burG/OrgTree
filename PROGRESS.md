@@ -22,6 +22,30 @@
   - Can view logs: `render logs -s orgtree`
   - Can access shell: `render shell orgtree`
 
+### Code Quality (MANDATORY)
+
+**CRITICAL**: Run ALL linters BEFORE every commit. No exceptions.
+
+**Required checks before ANY commit**:
+1. Backend: `cd server && npm run lint` - ESLint must pass with 0 errors
+2. Backend: `cd server && npm run format:check` - Prettier must pass with 0 warnings
+3. If Prettier fails: Run `cd server && npm run format` to auto-fix, then commit
+4. Frontend: `npm run lint` - ESLint must pass with 0 errors
+5. Frontend: `npm run format:check` - Prettier must pass with 0 warnings
+6. If Prettier fails: Run `npm run format` to auto-fix, then commit
+
+**Workflow**:
+```bash
+# ALWAYS run these before git commit:
+cd server && npm run lint && npm run format:check
+cd .. && npm run lint && npm run format:check
+
+# If format:check fails, auto-fix:
+cd server && npm run format  # or npm run format in root
+```
+
+**Why this matters**: The user should NEVER see lint/format errors after a push. Code quality checks are automated in pre-commit hooks, but they must be run manually during development to catch issues early.
+
 ---
 
 ## Project Overview
