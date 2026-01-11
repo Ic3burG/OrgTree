@@ -62,24 +62,31 @@ router.post(
 
       // Check for existing person by email within the SAME organization
       // We join departments to check organization_id
+      // Use LOWER() for case-insensitive comparison and TRIM() to handle whitespace
       const checkPersonEmail = db.prepare(`
-        SELECT p.id 
+        SELECT p.id
         FROM people p
         JOIN departments d ON p.department_id = d.id
-        WHERE d.organization_id = ? AND p.email = ? AND p.deleted_at IS NULL
+        WHERE d.organization_id = ?
+        AND LOWER(TRIM(p.email)) = LOWER(TRIM(?))
+        AND p.deleted_at IS NULL
       `);
 
       // Fallback check: Name + Department (if email is empty)
+      // Use LOWER() and TRIM() for case-insensitive, whitespace-tolerant comparison
       const checkPersonNameInDept = db.prepare(`
         SELECT id FROM people
-        WHERE department_id = ? AND name = ? AND deleted_at IS NULL
+        WHERE department_id = ?
+        AND LOWER(TRIM(name)) = LOWER(TRIM(?))
+        AND deleted_at IS NULL
       `);
 
       // Check for existing department by name and parent
+      // Use LOWER() and TRIM() for case-insensitive, whitespace-tolerant comparison
       const checkDepartment = db.prepare(`
         SELECT id FROM departments
         WHERE organization_id = ?
-        AND name = ?
+        AND LOWER(TRIM(name)) = LOWER(TRIM(?))
         AND (parent_id = ? OR (parent_id IS NULL AND ? IS NULL))
         AND deleted_at IS NULL
       `);

@@ -139,9 +139,50 @@ export function createPerson(
   },
   userId: string
 ): PersonResponse {
-  verifyDeptAccess(deptId, userId, 'editor');
+  const dept = verifyDeptAccess(deptId, userId, 'editor');
 
   const { name, title, email, phone } = data;
+
+  // Check for duplicates
+  if (email && email.trim()) {
+    // Check if email already exists in organization (case-insensitive, whitespace-tolerant)
+    const existingByEmail = db
+      .prepare(
+        `
+      SELECT p.id
+      FROM people p
+      JOIN departments d ON p.department_id = d.id
+      WHERE d.organization_id = ?
+      AND LOWER(TRIM(p.email)) = LOWER(TRIM(?))
+      AND p.deleted_at IS NULL
+    `
+      )
+      .get(dept.organizationId, email.trim()) as { id: string } | undefined;
+
+    if (existingByEmail) {
+      const error = new Error('A person with this email already exists in this organization') as AppError;
+      error.status = 400;
+      throw error;
+    }
+  } else {
+    // If no email, check if name already exists in department (case-insensitive, whitespace-tolerant)
+    const existingByName = db
+      .prepare(
+        `
+      SELECT id FROM people
+      WHERE department_id = ?
+      AND LOWER(TRIM(name)) = LOWER(TRIM(?))
+      AND deleted_at IS NULL
+    `
+      )
+      .get(deptId, name.trim()) as { id: string } | undefined;
+
+    if (existingByName) {
+      const error = new Error('A person with this name already exists in this department') as AppError;
+      error.status = 400;
+      throw error;
+    }
+  }
 
   // Get max sortOrder (only from non-deleted people)
   const maxSortResult = db
@@ -208,6 +249,54 @@ export function updatePerson(
     const error = new Error('Person not found') as AppError;
     error.status = 404;
     throw error;
+  }
+
+  // Check for duplicates if email is being changed
+  if (email !== undefined && email && email.trim()) {
+    const existingByEmail = db
+      .prepare(
+        `
+      SELECT p.id
+      FROM people p
+      JOIN departments d ON p.department_id = d.id
+      WHERE d.organization_id = ?
+      AND LOWER(TRIM(p.email)) = LOWER(TRIM(?))
+      AND p.id != ?
+      AND p.deleted_at IS NULL
+    `
+      )
+      .get(person.department.organizationId, email.trim(), personId) as { id: string } | undefined;
+
+    if (existingByEmail) {
+      const error = new Error('A person with this email already exists in this organization') as AppError;
+      error.status = 400;
+      throw error;
+    }
+  }
+
+  // Check for duplicate names if name is being changed and there's no email
+  const finalEmail = email !== undefined ? email : currentPerson.email;
+  const finalName = name !== undefined ? name : currentPerson.name;
+  const finalDeptId = departmentId !== undefined ? departmentId : currentPerson.department_id;
+
+  if (name !== undefined && (!finalEmail || !finalEmail.trim())) {
+    const existingByName = db
+      .prepare(
+        `
+      SELECT id FROM people
+      WHERE department_id = ?
+      AND LOWER(TRIM(name)) = LOWER(TRIM(?))
+      AND id != ?
+      AND deleted_at IS NULL
+    `
+      )
+      .get(finalDeptId, finalName.trim(), personId) as { id: string } | undefined;
+
+    if (existingByName) {
+      const error = new Error('A person with this name already exists in this department') as AppError;
+      error.status = 400;
+      throw error;
+    }
   }
 
   db.prepare(
