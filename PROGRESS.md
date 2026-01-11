@@ -231,9 +231,37 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: Soft-Delete Filtering Bug Fix (January 10, 2026)
-- **Total Commits**: 222+ commits on main branch
-- **Today's Progress (January 10, 2026 - Session 42)**:
+- **Last Major Update**: Case-Insensitive Duplicate Detection (January 11, 2026)
+- **Total Commits**: 223+ commits on main branch
+- **Today's Progress (January 11, 2026 - Session 43)**:
+  - 🐛 **CRITICAL BUG FIX**: Fixed case-sensitive duplicate detection allowing duplicate records
+  - ✅ **ISSUE IDENTIFIED**:
+    - XML/CSV imports could create duplicate people with different email casing (e.g., "john@example.com" vs "John@Example.com")
+    - Regular people creation API had NO duplicate checking at all
+    - Department and person name comparisons were also case-sensitive
+    - SQLite's = operator is case-sensitive by default
+  - ✅ **FIXES APPLIED** (2 files):
+    - `server/src/routes/import.ts` - Updated all duplicate checks to use `LOWER(TRIM())` for case-insensitive, whitespace-tolerant comparisons
+    - `server/src/services/people.service.ts` - Added duplicate detection to `createPerson()` and `updatePerson()` functions (was completely missing)
+  - 📊 **DUPLICATE DETECTION RULES**:
+    - For people with emails: Check email uniqueness within entire organization (case-insensitive)
+    - For people without emails: Check name uniqueness within department (case-insensitive)
+    - For departments: Check name uniqueness within same parent (case-insensitive)
+  - ✅ **TESTING**:
+    - All 321 backend tests passing ✅
+    - All 59 frontend tests passing ✅
+    - Build verification successful
+    - Pre-push checks passed
+  - 🎯 **IMPACT**:
+    - Users can no longer create duplicates by varying letter case or whitespace
+    - Existing duplicate records can be manually cleaned up
+    - Applies to both XML import and regular API endpoints
+    - Improves data quality and integrity
+  - 📁 **FILES MODIFIED**:
+    - `server/src/routes/import.ts` - 3 SQL queries updated
+    - `server/src/services/people.service.ts` - Added validation to create/update functions
+
+- **Previous Session (January 10, 2026 - Session 42)**:
   - 🐛 **CRITICAL BUG FIX**: Fixed soft-deleted records appearing in UI but unable to be deleted
   - ✅ **ROOT CAUSE IDENTIFIED**:
     - Frontend queries (org.service.ts) were loading ALL records including soft-deleted ones
@@ -2283,7 +2311,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>
-**Last Updated**: January 10, 2026 (Session 42 - Soft-Delete Filtering Bug Fix)
+**Last Updated**: January 11, 2026 (Session 43 - Case-Insensitive Duplicate Detection)
 
 **Today's Major Milestone**: 🎉
 
