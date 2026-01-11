@@ -91,9 +91,9 @@ async function parseGedsXMLContent(content: string): Promise<GedsPerson | null> 
       for (let i = 1; i < orgs.length; i++) {
         const org = orgs[i];
         if (!org) continue;
-        const nTag = org.getElementsByTagName('n')[0]; // <n> tag contains name
-        if (nTag && nTag.textContent) {
-          const deptName = nTag.textContent.trim();
+        const nameTag = org.getElementsByTagName('name')[0]; // <name> tag contains department name
+        if (nameTag && nameTag.textContent) {
+          const deptName = nameTag.textContent.trim();
           // Decode basic entities if DOMParser didn't (it usually does automatically)
           departments.push(deptName);
         }
