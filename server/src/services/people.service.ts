@@ -160,7 +160,9 @@ export function createPerson(
       .get(dept.organizationId, email.trim()) as { id: string } | undefined;
 
     if (existingByEmail) {
-      const error = new Error('A person with this email already exists in this organization') as AppError;
+      const error = new Error(
+        'A person with this email already exists in this organization'
+      ) as AppError;
       error.status = 400;
       throw error;
     }
@@ -178,7 +180,9 @@ export function createPerson(
       .get(deptId, name.trim()) as { id: string } | undefined;
 
     if (existingByName) {
-      const error = new Error('A person with this name already exists in this department') as AppError;
+      const error = new Error(
+        'A person with this name already exists in this department'
+      ) as AppError;
       error.status = 400;
       throw error;
     }
@@ -268,7 +272,9 @@ export function updatePerson(
       .get(person.department.organizationId, email.trim(), personId) as { id: string } | undefined;
 
     if (existingByEmail) {
-      const error = new Error('A person with this email already exists in this organization') as AppError;
+      const error = new Error(
+        'A person with this email already exists in this organization'
+      ) as AppError;
       error.status = 400;
       throw error;
     }
@@ -293,7 +299,9 @@ export function updatePerson(
       .get(finalDeptId, finalName.trim(), personId) as { id: string } | undefined;
 
     if (existingByName) {
-      const error = new Error('A person with this name already exists in this department') as AppError;
+      const error = new Error(
+        'A person with this name already exists in this department'
+      ) as AppError;
       error.status = 400;
       throw error;
     }
