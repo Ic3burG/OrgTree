@@ -151,6 +151,10 @@ app.get('/api/health', async (_req, res) => {
     // Test database connectivity
     const dbCheck = db.prepare('SELECT 1 as ok').get() as { ok: number };
 
+    // Get database mode for verification
+    const journalMode = db.pragma('journal_mode', { simple: true }) as string;
+    const busyTimeout = db.pragma('busy_timeout', { simple: true }) as number;
+
     // Get process and system metrics
     const memoryUsage = process.memoryUsage();
     const uptime = process.uptime();
@@ -167,6 +171,8 @@ app.get('/api/health', async (_req, res) => {
       },
       database: {
         status: dbCheck.ok === 1 ? 'connected' : 'error',
+        journal_mode: journalMode,
+        busy_timeout_ms: busyTimeout,
       },
       process: {
         memory: {

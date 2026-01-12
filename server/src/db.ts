@@ -31,7 +31,29 @@ if (process.env.DATABASE_URL) {
 
 const db = new Database(dbPath);
 
-// Enable foreign keys
+// ============================================================================
+// Performance & Concurrency Optimizations
+// ============================================================================
+
+// Enable Write-Ahead Logging (WAL) mode for concurrent reads during writes
+// This significantly improves performance for web applications with mixed read/write workloads
+db.pragma('journal_mode = WAL');
+
+// Wait up to 5 seconds before throwing SQLITE_BUSY error
+// Helps prevent "database is locked" errors during concurrent access
+db.pragma('busy_timeout = 5000');
+
+// NORMAL synchronous mode is safe with WAL and ~10x faster than FULL
+// In WAL mode, NORMAL guarantees durability even in power loss scenarios
+db.pragma('synchronous = NORMAL');
+
+// 64MB cache (negative value = KB) for reduced disk I/O
+db.pragma('cache_size = -64000');
+
+// Store temporary tables in memory for faster operations
+db.pragma('temp_store = MEMORY');
+
+// Enable foreign key constraints
 db.pragma('foreign_keys = ON');
 
 // Create tables
