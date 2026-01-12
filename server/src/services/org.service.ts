@@ -3,39 +3,42 @@ import { randomUUID } from 'crypto';
 import { getUserOrganizations, requireOrgPermission } from './member.service.js';
 import type { AppError } from '../types/index.js';
 
+// CRITICAL: These interfaces MUST use snake_case to match database schema and frontend types
+// Frontend OrgMap.tsx checks dept.parent_id to create edges - DO NOT change to camelCase
 interface Department {
   id: string;
-  organizationId: string;
-  parentId: string | null;
+  organization_id: string;
+  parent_id: string | null;
   name: string;
   description: string | null;
-  sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Person {
   id: string;
-  departmentId: string;
+  department_id: string;
   name: string;
   title: string | null;
   email: string | null;
   phone: string | null;
-  sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 interface DepartmentWithPeople extends Department {
   people: Person[];
 }
 
+// CRITICAL: Use snake_case to match frontend Organization interface
 interface OrganizationResult {
   id: string;
   name: string;
-  createdById: string;
-  createdAt: string;
-  updatedAt: string;
+  created_by_id: string;
+  created_at: string;
+  updated_at: string;
   departments?: DepartmentWithPeople[];
   userRole?: 'owner' | 'admin' | 'editor' | 'viewer';
 }
@@ -50,14 +53,15 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
   // Check access (throws if no access) and get user's role
   const access = requireOrgPermission(id, userId, 'viewer');
 
+  // CRITICAL: Return snake_case field names to match frontend Organization interface
   const org = db
     .prepare(
       `
     SELECT
       id, name,
-      created_by_id as createdById,
-      created_at as createdAt,
-      updated_at as updatedAt
+      created_by_id,
+      created_at,
+      updated_at
     FROM organizations
     WHERE id = ?
   `
@@ -71,17 +75,19 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
   }
 
   // Get departments for this organization (exclude soft-deleted)
+  // CRITICAL: Return snake_case field names to match frontend Department interface
+  // Frontend OrgMap.tsx depends on parent_id for rendering edges between departments
   const departments = db
     .prepare(
       `
     SELECT
       d.id,
-      d.organization_id as organizationId,
-      d.parent_id as parentId,
+      d.organization_id,
+      d.parent_id,
       d.name, d.description,
-      d.sort_order as sortOrder,
-      d.created_at as createdAt,
-      d.updated_at as updatedAt
+      d.sort_order,
+      d.created_at,
+      d.updated_at
     FROM departments d
     WHERE d.organization_id = ? AND d.deleted_at IS NULL
     ORDER BY d.sort_order ASC
@@ -90,17 +96,18 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
     .all(id) as Department[];
 
   // Get people for each department (exclude soft-deleted)
+  // CRITICAL: Return snake_case field names to match frontend Person interface
   const departmentsWithPeople: DepartmentWithPeople[] = departments.map(dept => {
     const people = db
       .prepare(
         `
       SELECT
         id,
-        department_id as departmentId,
+        department_id,
         name, title, email, phone,
-        sort_order as sortOrder,
-        created_at as createdAt,
-        updated_at as updatedAt
+        sort_order,
+        created_at,
+        updated_at
       FROM people
       WHERE department_id = ? AND deleted_at IS NULL
       ORDER BY sort_order ASC
@@ -135,9 +142,9 @@ export async function createOrganization(
       `
     SELECT
       id, name,
-      created_by_id as createdById,
-      created_at as createdAt,
-      updated_at as updatedAt
+      created_by_id,
+      created_at,
+      updated_at
     FROM organizations WHERE id = ?
   `
     )
@@ -167,9 +174,9 @@ export async function updateOrganization(
       `
     SELECT
       id, name,
-      created_by_id as createdById,
-      created_at as createdAt,
-      updated_at as updatedAt
+      created_by_id,
+      created_at,
+      updated_at
     FROM organizations WHERE id = ?
   `
     )

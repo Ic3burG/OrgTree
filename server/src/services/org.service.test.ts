@@ -11,7 +11,7 @@ type TestUser = {
 type Organization = {
   id: string;
   name: string;
-  createdById?: string;
+  created_by_id?: string;
   departmentCount?: number;
   peopleCount?: number;
   role?: string;
@@ -142,7 +142,7 @@ describe('Organization Service', () => {
 
       expect(org).toHaveProperty('id');
       expect(org.name).toBe('My Org');
-      expect(org.createdById).toBe(testUser.id);
+      expect(org.created_by_id).toBe(testUser.id);
       // role may or may not be returned by createOrganization
     });
 
@@ -150,11 +150,11 @@ describe('Organization Service', () => {
       const org: Organization = await createOrganization('My Org', testUser.id);
 
       const stored = (db as DatabaseType)
-        .prepare('SELECT id, name, created_by_id as createdById FROM organizations WHERE id = ?')
-        .get(org.id) as { id: string; name: string; createdById: string } | undefined;
+        .prepare('SELECT id, name, created_by_id FROM organizations WHERE id = ?')
+        .get(org.id) as { id: string; name: string; created_by_id: string } | undefined;
       expect(stored).toBeTruthy();
       expect(stored?.name).toBe('My Org');
-      expect(stored?.createdById).toBe(testUser.id);
+      expect(stored?.created_by_id).toBe(testUser.id);
     });
   });
 

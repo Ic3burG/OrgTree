@@ -1,4 +1,3 @@
-
 import { randomUUID } from 'crypto';
 
 const API_URL = 'http://localhost:3001/api';
@@ -6,14 +5,14 @@ let AUTH_TOKEN = '';
 let CSRF_TOKEN = '';
 
 // Configuration
-const TARGET_PEOPLE = 5000; 
+const _TARGET_PEOPLE = 5000; // Reserved for future use
 const DEPT_DEPTH = 3;
-const MAX_CHILDREN_PER_DEPT = 3; 
+const MAX_CHILDREN_PER_DEPT = 3;
 const PEOPLE_PER_DEPT_MIN = 30;
 const PEOPLE_PER_DEPT_MAX = 60;
 
-async function request(path: string, method: string = 'GET', body?: any) {
-  const headers: any = {
+async function request(path: string, method: string = 'GET', body?: Record<string, unknown>) {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
   if (AUTH_TOKEN) {
@@ -24,6 +23,8 @@ async function request(path: string, method: string = 'GET', body?: any) {
     headers['Cookie'] = `csrf-token=${CSRF_TOKEN}`;
   }
 
+  // Node 18+ provides fetch as a global
+  // eslint-disable-next-line no-undef
   const res = await fetch(`${API_URL}${path}`, {
     method,
     headers,
@@ -38,8 +39,8 @@ async function request(path: string, method: string = 'GET', body?: any) {
   // Get CSRF token from cookie if returned
   const setCookie = res.headers.get('set-cookie');
   if (setCookie && setCookie.includes('csrf-token=')) {
-      const match = setCookie.match(/csrf-token=([^;]+)/);
-      if (match) CSRF_TOKEN = match[1];
+    const match = setCookie.match(/csrf-token=([^;]+)/);
+    if (match) CSRF_TOKEN = match[1];
   }
 
   const contentType = res.headers.get('content-type');
@@ -62,26 +63,27 @@ async function main() {
   // 1. Signup / Login
   const email = `api-seed-${Date.now()}@example.com`;
   const password = 'SecurePassword123!';
-  
+
   console.log(`Creating user ${email}...`);
   try {
-      await request('/auth/signup', 'POST', {
-        name: 'API Seeder',
-        email,
-        password
-      });
-  } catch (e: any) {
-      console.log('Signup failed (maybe user exists), trying login...', e.message);
+    await request('/auth/signup', 'POST', {
+      name: 'API Seeder',
+      email,
+      password,
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Unknown error';
+    console.log('Signup failed (maybe user exists), trying login...', message);
   }
 
   const loginRes = await request('/auth/login', 'POST', {
     email,
-    password
+    password,
   });
-  
+
   AUTH_TOKEN = loginRes.accessToken;
   if (!AUTH_TOKEN) throw new Error('No token received');
-  
+
   console.log('✅ Authenticated');
 
   // 2. Create Organization
@@ -101,40 +103,42 @@ async function main() {
     if (depth > DEPT_DEPTH) return;
 
     // Create dept
-    const deptName = `Dept ${depth}-${randomUUID().substring(0,4)}`;
+    const deptName = `Dept ${depth}-${randomUUID().substring(0, 4)}`;
     // Check departments API. Assuming POST /organizations/:orgId/departments
     // needed properties: name, parentId?
     const dept = await request(`/organizations/${orgId}/departments`, 'POST', {
-        name: deptName,
-        parentId: parentId || undefined
+      name: deptName,
+      parentId: parentId || undefined,
     });
     deptCount++;
     const deptId = dept.id;
-    
+
     // Add People
-    const numPeople = Math.floor(Math.random() * (PEOPLE_PER_DEPT_MAX - PEOPLE_PER_DEPT_MIN + 1)) + PEOPLE_PER_DEPT_MIN;
-    
+    const numPeople =
+      Math.floor(Math.random() * (PEOPLE_PER_DEPT_MAX - PEOPLE_PER_DEPT_MIN + 1)) +
+      PEOPLE_PER_DEPT_MIN;
+
     const peoplePromises = [];
     for (let i = 0; i < numPeople; i++) {
-        peopleCount++;
-        const pName = `User ${peopleCount}`;
-        peoplePromises.push(
-            request(`/departments/${deptId}/people`, 'POST', {
-                name: pName,
-                title: `Role ${depth}`,
-                email: `user${peopleCount}-${randomUUID().substring(0,4)}@example.com`,
-                phone: '555-0100'
-            }).catch(e => console.error(`Failed to create person: ${e.message}`))
-        );
+      peopleCount++;
+      const pName = `User ${peopleCount}`;
+      peoplePromises.push(
+        request(`/departments/${deptId}/people`, 'POST', {
+          name: pName,
+          title: `Role ${depth}`,
+          email: `user${peopleCount}-${randomUUID().substring(0, 4)}@example.com`,
+          phone: '555-0100',
+        }).catch(e => console.error(`Failed to create person: ${e.message}`))
+      );
     }
     await Promise.all(peoplePromises);
 
     // Children
     if (depth < DEPT_DEPTH) {
-        const numChildren = Math.floor(Math.random() * MAX_CHILDREN_PER_DEPT) + 1;
-        for(let i=0; i<numChildren; i++) {
-            await createDept(deptId, depth + 1);
-        }
+      const numChildren = Math.floor(Math.random() * MAX_CHILDREN_PER_DEPT) + 1;
+      for (let i = 0; i < numChildren; i++) {
+        await createDept(deptId, depth + 1);
+      }
     }
   }
 
