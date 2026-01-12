@@ -255,9 +255,30 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: XML Department Hierarchy Fix (January 11, 2026)
-- **Total Commits**: 224+ commits on main branch
+- **Last Major Update**: Bulk Delete Cascade Fix (January 11, 2026)
+- **Total Commits**: 226+ commits on main branch
 - **Today's Progress (January 11, 2026 - Session 45)**:
+  - 🐛 **CRITICAL BUG FIX**: Fixed bulk department delete showing false errors for cascade-deleted children
+  - ✅ **ISSUE IDENTIFIED**:
+    - When bulk deleting all departments, users saw errors like "Department not found in this organization"
+    - Root cause: `softDeleteDepartment()` cascades and deletes all child departments when a parent is deleted
+    - When the loop later processed those child departments, they were already soft-deleted
+    - The query filtered `deleted_at IS NULL`, so they weren't found, triggering false errors
+  - ✅ **FIX APPLIED** (1 backend file):
+    - `server/src/services/bulk.service.ts` - Added check for already-deleted departments
+    - First checks if department exists in organization (regardless of deleted_at status)
+    - If exists but already soft-deleted → skip silently (was cascade-deleted by parent)
+    - If doesn't exist at all → mark as failed with error
+    - Only process departments that exist and aren't already deleted
+  - ✅ **TESTING**:
+    - All 321 backend tests passing ✅
+    - Bulk service tests verify cascading deletion still works correctly
+  - 🎯 **IMPACT**:
+    - Users can now bulk delete all departments without seeing false errors
+    - Cascade deletion still works as intended (deletes children with parents)
+    - Error messages only shown for truly missing departments
+  - 📁 **FILES MODIFIED**:
+    - `server/src/services/bulk.service.ts` - Added cascade-aware deletion check (18 lines added)
   - 🧪 **TEST COVERAGE EXPANSION (PHASE 2 & 3)**:
     - **Target**: `src/utils` and `src/hooks` directories
     - **`src/utils` Coverage**:
