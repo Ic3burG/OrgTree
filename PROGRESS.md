@@ -298,7 +298,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - ✅ OrgMap core functionality fully restored
     - ✅ Automated tests prevent future regressions
     - ✅ Comprehensive documentation ensures developer awareness
-  - 📁 **FILES MODIFIED/CREATED** (11 files):
+  - 📁 **FILES MODIFIED/CREATED** (12 files):
     - `server/src/services/org.service.ts` - Fixed all SQL queries
     - `server/src/services/org.service.test.ts` - Updated test assertions
     - `server/src/services/__field-naming-validation.test.ts` - NEW validation suite (7 tests)
@@ -310,13 +310,16 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `.nvmrc` - NEW Node version file
     - `README.md` - Updated prerequisites to Node 20+
     - `PROGRESS.md` - Updated prerequisites to Node 20+
+    - `.github/workflows/ci.yml` - Updated CI workflow to Node 20
   - ⬆️ **NODE.JS VERSION REQUIREMENT UPDATE**:
     - Updated project to require Node.js 20+ (Node 18 reached end-of-life April 2025)
     - Added `engines` field to both `package.json` files (root and server) requiring Node >=20.0.0, npm >=9.0.0
     - Created `.nvmrc` file for automatic Node version management
     - Updated `README.md` prerequisites documentation
     - Updated `PROGRESS.md` prerequisites section
+    - **Updated CI workflow** (`.github/workflows/ci.yml`) from Node 18 to Node 20 (all 5 jobs)
     - Resolves npm dependency warnings (better-sqlite3, vite, vitest all require Node 20+)
+    - Eliminates CI/CD deprecation warnings by aligning workflow Node version with dependency requirements
   - 💡 **LESSON LEARNED**:
     - This bug has occurred 3 times (Sessions 25, 37, 47) during refactoring
     - Backend MUST return snake_case to match frontend types
