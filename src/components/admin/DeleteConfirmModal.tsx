@@ -34,20 +34,31 @@ export default function DeleteConfirmModal({
   const isLoading = isDeleting || loading;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-confirm-title"
+    >
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-              <AlertTriangle size={20} className="text-red-600" />
+            <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+              <AlertTriangle size={20} className="text-red-600 dark:text-red-400" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+            <h2
+              id="delete-confirm-title"
+              className="text-xl font-semibold text-gray-900 dark:text-slate-100"
+            >
+              {title}
+            </h2>
           </div>
           <button
             onClick={onClose}
             disabled={isDeleting}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+            className="text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300 disabled:opacity-50"
+            aria-label="Close dialog"
           >
             <X size={24} />
           </button>

@@ -81,26 +81,42 @@ export default function BulkEditModal({
   const hasUpdates = entityType === 'people' ? title.trim() || departmentId : parentId;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="bulk-edit-title"
+    >
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                hasResult ? 'bg-green-100' : 'bg-blue-100'
+                hasResult ? 'bg-green-100 dark:bg-green-900/30' : 'bg-blue-100 dark:bg-blue-900/30'
               }`}
             >
-              <Edit3 size={20} className={hasResult ? 'text-green-600' : 'text-blue-600'} />
+              <Edit3
+                size={20}
+                className={
+                  hasResult
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-blue-600 dark:text-blue-400'
+                }
+              />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2
+              id="bulk-edit-title"
+              className="text-xl font-semibold text-gray-900 dark:text-slate-100"
+            >
               {hasResult ? 'Edit Complete' : `Edit ${count} ${itemLabel}`}
             </h2>
           </div>
           <button
             onClick={handleClose}
             disabled={isUpdating}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+            className="text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300 disabled:opacity-50"
+            aria-label="Close dialog"
           >
             <X size={24} />
           </button>
