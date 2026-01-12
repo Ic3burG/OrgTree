@@ -15,10 +15,11 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [ ] **Increase Test Coverage** - Expand from 210 tests to cover edge cases and integration scenarios (target: 80%+ coverage) 🚀 **IN PROGRESS** (Test Suites: Backend 373 tests, Frontend: 103 tests - **Phase 2 & 3: Utils & Hooks Coverage Increased**)
 - [x] **E2E Testing** - Add end-to-end tests with Playwright or Cypress for critical user flows ✅ **DONE** (January 11, 2026)
 - [x] **ESLint/Prettier Setup** - Enforce code style consistency across the team ✅ **DONE** (January 4, 2026)
-- [ ] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces
+- [ ] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces 🚀 **IN PROGRESS**
 - [ ] **Storybook Integration** - Document UI components with interactive examples
 
 ### Performance Optimization
+
 
 - [x] **Database Indexing Audit** - Review and optimize indexes for frequently-queried fields ✅ **DONE** (January 5, 2026)
 - [x] **Frontend Bundle Optimization** - Code splitting, lazy loading, tree shaking analysis ✅ **DONE** (January 7, 2026)

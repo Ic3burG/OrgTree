@@ -1,17 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Search,
-  Mail,
-  Phone,
-  Loader2,
-  CheckSquare,
-  Square,
-  X,
-} from 'lucide-react';
 import api from '../../api/client';
 import PersonForm from './PersonForm';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -19,14 +7,13 @@ import BulkActionBar from './BulkActionBar';
 import BulkDeleteModal from './BulkDeleteModal';
 import BulkMoveModal from './BulkMoveModal';
 import BulkEditModal from './BulkEditModal';
+import PersonManagerHeader from './PersonManagerHeader';
+import PersonList from './PersonList';
+import type { PersonWithDepartmentName } from './PersonItem';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 import { useSearch } from '../../hooks/useSearch';
 import { useBulkSelection } from '../../hooks/useBulkSelection';
 import type { Person, Department, Organization, BulkOperationResult } from '../../types/index.js';
-
-interface PersonWithDepartmentName extends Person {
-  departmentName?: string;
-}
 
 export default function PersonManager(): React.JSX.Element {
   const { orgId } = useParams<{ orgId: string }>();
@@ -123,10 +110,10 @@ export default function PersonManager(): React.JSX.Element {
     setIsFormOpen(true);
   };
 
-  const handleEdit = (person: PersonWithDepartmentName): void => {
+  const handleEdit = useCallback((person: PersonWithDepartmentName): void => {
     setEditingPerson(person);
     setIsFormOpen(true);
-  };
+  }, []);
 
   const handleFormSubmit = async (
     formData: Partial<Person> & { departmentId: string }
@@ -148,10 +135,10 @@ export default function PersonManager(): React.JSX.Element {
     }
   };
 
-  const handleDeleteClick = (person: PersonWithDepartmentName): void => {
+  const handleDeleteClick = useCallback((person: PersonWithDepartmentName): void => {
     setPersonToDelete(person);
     setDeleteModalOpen(true);
-  };
+  }, []);
 
   const handleDeleteConfirm = async (): Promise<void> => {
     if (!personToDelete) return;
@@ -301,245 +288,38 @@ export default function PersonManager(): React.JSX.Element {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* Header - fixed */}
-      <div className="flex-shrink-0 p-6 pb-0">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-1">People</h1>
-              <p className="text-gray-500 dark:text-slate-400">
-                Manage people across all departments
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleSelectionMode}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
-                  selectionMode
-                    ? 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600'
-                    : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-slate-700'
-                }`}
-              >
-                {selectionMode ? <X size={20} /> : <CheckSquare size={20} />}
-                {selectionMode ? 'Cancel' : 'Select'}
-              </button>
-              {!selectionMode && (
-                <button
-                  onClick={handleCreate}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  <Plus size={20} />
-                  Add Person
-                </button>
-              )}
-            </div>
-          </div>
+      <PersonManagerHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filterDepartment={filterDepartment}
+        onFilterChange={setFilterDepartment}
+        departments={departments}
+        selectionMode={selectionMode}
+        onToggleSelectionMode={toggleSelectionMode}
+        onAddPerson={handleCreate}
+        searchLoading={searchLoading}
+        error={error}
+      />
 
-          {/* Error display */}
-          {error && <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">{error}</div>}
-
-          {/* Filters - fixed */}
-          <div className="mb-4 bg-white dark:bg-slate-800 rounded-lg shadow p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Search */}
-              <div className="relative">
-                {searchLoading ? (
-                  <Loader2
-                    size={20}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 animate-spin"
-                  />
-                ) : (
-                  <Search
-                    size={20}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  />
-                )}
-                <input
-                  type="text"
-                  placeholder="Search by name, title, email, or phone..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100"
-                />
-              </div>
-
-              {/* Department Filter */}
-              <select
-                value={filterDepartment}
-                onChange={e => setFilterDepartment(e.target.value)}
-                className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100"
-              >
-                <option value="">All Departments</option>
-                {departments.map((dept: Department) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* SCROLLABLE LIST - THIS IS THE KEY PART */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6 min-h-0">
-        <div className="max-w-6xl mx-auto">
-          {loading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="text-gray-500 dark:text-slate-400">Loading people...</div>
-            </div>
-          ) : filteredPeople.length === 0 ? (
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-8 text-center text-gray-500 dark:text-slate-400">
-              <Search size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">
-                {searchTerm || filterDepartment ? 'No people found' : 'No people yet'}
-              </h3>
-              <p className="text-gray-500 dark:text-slate-400 mb-4">
-                {searchTerm || filterDepartment
-                  ? 'Try adjusting your search or filters'
-                  : 'Add your first person to get started'}
-              </p>
-              {!searchTerm && !filterDepartment && (
-                <button
-                  onClick={handleCreate}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  <Plus size={20} />
-                  Add Person
-                </button>
-              )}
-            </div>
-          ) : (
-            <>
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow">
-                {/* Select All header in selection mode */}
-                {selectionMode && filteredPeople.length > 0 && (
-                  <div className="px-6 py-3 bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600 flex items-center gap-3">
-                    <button
-                      onClick={toggleSelectAll}
-                      className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-slate-100"
-                    >
-                      {allSelected ? (
-                        <CheckSquare size={18} className="text-blue-600" />
-                      ) : (
-                        <Square size={18} />
-                      )}
-                      {allSelected ? 'Deselect all' : 'Select all'}
-                    </button>
-                    {hasSelection && (
-                      <span className="text-sm text-gray-500 dark:text-slate-400">
-                        ({selectedCount} selected)
-                      </span>
-                    )}
-                  </div>
-                )}
-                <div className="divide-y divide-gray-200">
-                  {filteredPeople.map((person: PersonWithDepartmentName) => (
-                    <div
-                      key={person.id}
-                      onClick={selectionMode ? () => toggleSelect(person.id) : undefined}
-                      className={`p-6 transition-all duration-300 group ${
-                        selectionMode ? 'cursor-pointer' : ''
-                      } ${isRecentlyChanged(person.id) ? 'bg-blue-50 dark:bg-blue-900/30 ring-2 ring-2 ring-blue-200 dark:ring-blue-700' : ''} ${
-                        selectionMode && isSelected(person.id)
-                          ? 'bg-blue-50 dark:bg-blue-900/30'
-                          : 'hover:bg-gray-50 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        {/* Checkbox in selection mode */}
-                        {selectionMode && (
-                          <div className="pt-1">
-                            {isSelected(person.id) ? (
-                              <CheckSquare size={20} className="text-blue-600" />
-                            ) : (
-                              <Square size={20} className="text-gray-400" />
-                            )}
-                          </div>
-                        )}
-
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
-                              {person.name}
-                            </h3>
-                            <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded">
-                              {person.departmentName}
-                            </span>
-                          </div>
-
-                          {person.title && (
-                            <p className="text-sm text-gray-600 dark:text-slate-400 mb-3">
-                              {person.title}
-                            </p>
-                          )}
-
-                          <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-slate-400">
-                            {person.email && (
-                              <div className="flex items-center gap-2">
-                                <Mail size={16} />
-                                <a
-                                  href={`mailto:${person.email}`}
-                                  className="hover:text-blue-600"
-                                  onClick={e => selectionMode && e.preventDefault()}
-                                >
-                                  {person.email}
-                                </a>
-                              </div>
-                            )}
-                            {person.phone && (
-                              <div className="flex items-center gap-2">
-                                <Phone size={16} />
-                                <span>{person.phone}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Actions - hide in selection mode */}
-                        {!selectionMode && (
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => handleEdit(person)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                              title="Edit person"
-                            >
-                              <Edit size={18} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteClick(person)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                              title="Delete person"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Results count */}
-              {(people.length > 0 || searchTerm.length >= 2) && (
-                <div className="mt-4 text-sm text-gray-500 dark:text-slate-400 text-center">
-                  {searchTerm.length >= 2 ? (
-                    <>
-                      Found {searchTotal} result{searchTotal !== 1 ? 's' : ''}
-                      {filterDepartment && ` (${filteredPeople.length} in selected department)`}
-                    </>
-                  ) : (
-                    <>
-                      Showing {filteredPeople.length} of {people.length} people
-                    </>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
+      <PersonList
+        people={filteredPeople}
+        totalPeopleCount={people.length}
+        loading={loading}
+        searchTerm={searchTerm}
+        filterDepartment={filterDepartment}
+        searchTotal={searchTotal}
+        onAddPerson={handleCreate}
+        selectionMode={selectionMode}
+        hasSelection={hasSelection}
+        selectedCount={selectedCount}
+        allSelected={allSelected}
+        toggleSelectAll={toggleSelectAll}
+        isSelected={isSelected}
+        toggleSelect={toggleSelect}
+        onEdit={handleEdit}
+        onDelete={handleDeleteClick}
+        isRecentlyChanged={isRecentlyChanged}
+      />
 
       {/* Person Form Modal */}
       <PersonForm
