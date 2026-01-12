@@ -103,6 +103,13 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'"], // Required for Swagger UI
         imgSrc: ["'self'", 'data:', 'https:'],
         connectSrc: ["'self'", 'wss:', 'ws:'], // WebSocket connections
+        fontSrc: ["'self'"],
+        workerSrc: ["'self'", 'blob:'], // For PDF/export workers
+        objectSrc: ["'none'"], // Block dangerous plugins (Flash, Java, etc.)
+        baseUri: ["'self'"], // Prevent base tag hijacking
+        formAction: ["'self'"], // Restrict form submissions to same origin
+        frameAncestors: ["'none'"], // Prevent clickjacking (like X-Frame-Options: DENY)
+        upgradeInsecureRequests: [], // Auto-upgrade HTTP to HTTPS
       },
     },
     crossOriginEmbedderPolicy: false, // Needed for Swagger UI
