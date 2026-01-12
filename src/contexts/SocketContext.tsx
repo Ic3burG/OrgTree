@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useCallback,
   useRef,
+  useMemo,
   ReactNode,
 } from 'react';
 import { io, Socket } from 'socket.io-client';
@@ -130,14 +131,18 @@ export function SocketProvider({ children }: SocketProviderProps): React.JSX.Ele
     [socket]
   );
 
-  const value: SocketContextValue = {
-    socket,
-    isConnected,
-    connectionError,
-    joinOrg,
-    leaveOrg,
-    subscribe,
-  };
+  // Memoize context value to prevent unnecessary re-renders of consumers
+  const value = useMemo<SocketContextValue>(
+    () => ({
+      socket,
+      isConnected,
+      connectionError,
+      joinOrg,
+      leaveOrg,
+      subscribe,
+    }),
+    [socket, isConnected, connectionError, joinOrg, leaveOrg, subscribe]
+  );
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
 }

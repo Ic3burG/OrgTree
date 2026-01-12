@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  ReactNode,
+} from 'react';
 import { api, cancelTokenRefresh, scheduleTokenRefresh } from '../api/client';
 import type { User } from '../types';
 
@@ -56,23 +64,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  const login = async (email: string, password: string): Promise<User> => {
-    const { user, accessToken } = await api.login(email, password);
+  const login = useCallback(async (email: string, password: string): Promise<User> => {
+    const { user: loggedInUser, accessToken } = await api.login(email, password);
     localStorage.setItem('token', accessToken);
-    localStorage.setItem('user', JSON.stringify(user));
-    setUser(user);
-    return user;
-  };
+    localStorage.setItem('user', JSON.stringify(loggedInUser));
+    setUser(loggedInUser);
+    return loggedInUser;
+  }, []);
 
-  const signup = async (name: string, email: string, password: string): Promise<User> => {
-    const { user, accessToken } = await api.signup(name, email, password);
-    localStorage.setItem('token', accessToken);
-    localStorage.setItem('user', JSON.stringify(user));
-    setUser(user);
-    return user;
-  };
+  const signup = useCallback(
+    async (name: string, email: string, password: string): Promise<User> => {
+      const { user: signedUpUser, accessToken } = await api.signup(name, email, password);
+      localStorage.setItem('token', accessToken);
+      localStorage.setItem('user', JSON.stringify(signedUpUser));
+      setUser(signedUpUser);
+      return signedUpUser;
+    },
+    []
+  );
 
-  const logout = async (): Promise<void> => {
+  const logout = useCallback(async (): Promise<void> => {
     try {
       // Call server to revoke refresh token
       await api.logout();
@@ -88,21 +99,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-  };
+  }, []);
 
-  const value: AuthContextValue = {
-    user,
-    loading,
-    login,
-    signup,
-    logout,
-    isAuthenticated: !!user,
-    // Role helpers
-    isSuperuser: user?.role === 'superuser',
-    isAdmin: user?.role === 'admin' || user?.role === 'superuser',
-    canManageUsers: user?.role === 'superuser',
-    hasRole: (role: string) => user?.role === role,
-  };
+  // Memoize hasRole to avoid creating new function on every render
+  const hasRole = useCallback((role: string): boolean => user?.role === role, [user]);
+
+  // Memoize context value to prevent unnecessary re-renders of consumers
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      loading,
+      login,
+      signup,
+      logout,
+      isAuthenticated: !!user,
+      // Role helpers
+      isSuperuser: user?.role === 'superuser',
+      isAdmin: user?.role === 'admin' || user?.role === 'superuser',
+      canManageUsers: user?.role === 'superuser',
+      hasRole,
+    }),
+    [user, loading, login, signup, logout, hasRole]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

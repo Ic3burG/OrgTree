@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { getInitials } from '../utils/helpers';
 import type { Person } from '../types/index.js';
@@ -14,19 +14,25 @@ interface PersonRowCardProps {
  * Shown when a department is expanded
  * Mobile: Larger touch targets and visual feedback
  */
-export default function PersonRowCard({
+/**
+ * PersonRowCard - Memoized for performance in large lists
+ */
+const PersonRowCard = memo(function PersonRowCard({
   person,
   onSelect,
   isLast,
 }: PersonRowCardProps): React.JSX.Element {
   const initials = getInitials(person.name);
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>): void => {
-    e.stopPropagation();
-    if (onSelect) {
-      onSelect(person);
-    }
-  };
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>): void => {
+      e.stopPropagation();
+      if (onSelect) {
+        onSelect(person);
+      }
+    },
+    [onSelect, person]
+  );
 
   return (
     <div
@@ -64,4 +70,6 @@ export default function PersonRowCard({
       </div>
     </div>
   );
-}
+});
+
+export default PersonRowCard;
