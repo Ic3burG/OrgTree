@@ -95,6 +95,7 @@ export function SocketProvider({ children }: SocketProviderProps): React.JSX.Ele
     return () => {
       newSocket.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   // Join organization room

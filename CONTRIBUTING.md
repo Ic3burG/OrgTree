@@ -265,6 +265,29 @@ describe('myFunction', () => {
 });
 ```
 
+### E2E Testing with Playwright
+
+End-to-end tests run in real browsers to test complete user flows.
+
+```bash
+# Start dev servers first (required)
+npm run dev                    # Terminal 1: Frontend
+cd server && npm run dev       # Terminal 2: Backend
+
+# Run E2E tests
+npm run test:e2e              # Run all E2E tests
+npm run test:e2e:chromium     # Run in Chromium only
+npm run test:e2e:ui           # Run with interactive UI
+npm run test:e2e:debug        # Run in debug mode
+```
+
+E2E tests are located in the `e2e/` directory and cover:
+- **Authentication** (login, signup, logout)
+- **Organizations** (create, navigate, manage)
+- **Departments** (CRUD operations)
+- **People** (CRUD, bulk operations)
+- **Public Sharing** (enable/disable, anonymous access)
+
 ---
 
 ## Pull Request Process

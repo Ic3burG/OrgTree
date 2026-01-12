@@ -39,7 +39,7 @@ export default function ResetPasswordModal({
       await navigator.clipboard.writeText(tempPassword);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (_err) {
+    } catch {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
       textArea.value = tempPassword;

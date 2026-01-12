@@ -65,6 +65,7 @@ export default function SecuritySettingsPage(): React.JSX.Element {
       setLoading(false);
     };
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAddPasskey = async () => {

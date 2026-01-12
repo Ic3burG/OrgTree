@@ -120,7 +120,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
           type: 'department' as const,
         }));
         setSuggestions(suggestions);
-      } catch (_err) {
+      } catch {
         setSuggestions([]);
       }
     },

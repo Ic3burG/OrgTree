@@ -216,6 +216,80 @@ Common issues:
 2. Ensure `index.css` imports Tailwind directives
 3. Clear build cache: `rm -rf dist node_modules/.vite`
 
+## Code Quality & Best Practices
+
+### ESLint & TypeScript Patterns
+
+#### Unused Catch Variables
+
+When you don't need the error object in a catch block, use an empty catch instead of naming an unused parameter:
+
+```typescript
+// ❌ Bad - unused variable warning
+try {
+  await navigator.clipboard.writeText(text);
+} catch (_err) {
+  // Fallback
+}
+
+// ✅ Good - no parameter needed
+try {
+  await navigator.clipboard.writeText(text);
+} catch {
+  // Fallback
+}
+```
+
+#### useEffect Dependencies
+
+React's `exhaustive-deps` rule ensures effects re-run when their dependencies change. However, there are valid cases to disable it:
+
+**Case 1: Functions defined in component scope**
+```typescript
+const fetchData = async () => { /* ... */ };
+
+useEffect(() => {
+  fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []); // Only run on mount - function changes every render
+```
+
+**Case 2: State being set within the effect**
+```typescript
+useEffect(() => {
+  const socket = io();
+  setSocket(socket);
+
+  return () => socket.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [isAuthenticated]); // Adding 'socket' would cause infinite loop
+```
+
+**Important**: When disabling the rule, always add a comment explaining WHY, not just suppressing the warning blindly.
+
+### Running Quality Checks
+
+Before committing code, always run:
+
+```bash
+# Lint check
+npm run lint              # Frontend
+cd server && npm run lint # Backend
+
+# Format check
+npm run format:check      # Frontend
+cd server && npm run format # Backend
+
+# Type check
+npx tsc --noEmit          # TypeScript compilation
+
+# Tests
+npm test                  # Frontend
+cd server && npm test     # Backend
+```
+
+Pre-commit hooks (via Husky) automatically run linting and formatting, but manual checks help catch issues earlier.
+
 ## Future Enhancements
 
 Potential features to add:
