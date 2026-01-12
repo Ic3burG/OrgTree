@@ -8,6 +8,10 @@
     "node": ">=20.0.0",
     "npm": ">=9.0.0"
   },
+  "workspaces": [
+    "server",
+    "."
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -15,12 +19,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:all": "npm test && cd server && npm test",
+    "test:all": "npm test --workspaces --if-present",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,json,css}\"",
-    "lint:all": "npm run lint && cd server && npm run lint",
+    "lint:all": "npm run lint --workspaces --if-present",
     "typecheck": "tsc --noEmit",
     "sdk:generate": "openapi-typescript server/src/openapi.yaml -o src/sdk/api-types.ts",
     "prepare": "husky",

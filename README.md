@@ -5,7 +5,7 @@
 
 A modern, full-stack organizational directory and visualization platform. Build, manage, and share interactive org charts with real-time collaboration.
 
-**[Live Demo](https://orgtree.onrender.com)** | **[Documentation](./DOCUMENTATION.md)** | **[CI/CD Setup](./.github/CICD_SETUP.md)**
+**[Live Demo](https://orgtree.onrender.com)** | **[Documentation](./docs/DOCUMENTATION.md)** | **[CI/CD Setup](./.github/CICD_SETUP.md)**
 
 ## Features
 
@@ -137,7 +137,10 @@ NODE_ENV=production
 │       ├── services/       # Business logic
 │       ├── middleware/     # Auth, rate limiting
 │       └── db.js           # Database setup
-├── DOCUMENTATION.md        # Full user & admin guide
+├── docs/                   # Extended documentation
+│   ├── DOCUMENTATION.md    # Full user & admin guide
+│   ├── DEPLOYMENT.md       # Deployment instructions
+│   └── ...
 └── PROGRESS.md             # Development progress
 ```
 
@@ -154,7 +157,7 @@ NODE_ENV=production
 | `POST /api/organizations/:id/invitations` | Team invitations |
 | `GET /api/share/:token` | Public share access |
 
-See [DOCUMENTATION.md](./DOCUMENTATION.md) for complete API details.
+See [DOCUMENTATION.md](./docs/DOCUMENTATION.md) for complete API details.
 
 ## Deployment
 
@@ -189,7 +192,7 @@ For comprehensive documentation including:
 - Troubleshooting
 - Keyboard shortcuts
 
-See **[DOCUMENTATION.md](./DOCUMENTATION.md)**
+See **[DOCUMENTATION.md](./docs/DOCUMENTATION.md)**
 
 ## Development Progress
 
@@ -215,4 +218,4 @@ This project is licensed under the GPL 3.0 License - see the [LICENSE](LICENSE) 
 ## Support
 
 - [Report Issues](https://github.com/yourusername/orgtree/issues)
-- [Documentation](./DOCUMENTATION.md)
+- [Documentation](./docs/DOCUMENTATION.md)
