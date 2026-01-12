@@ -35,7 +35,7 @@ const REFRESH_COOKIE_OPTIONS = {
 // Rate limiter for authentication endpoints - prevents brute force attacks
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
+  max: process.env.NODE_ENV === 'production' ? 5 : 1000, // relaxed for dev seeding
   message: { message: 'Too many login attempts, please try again later' },
   standardHeaders: true, // Return rate limit info in RateLimit-* headers
   legacyHeaders: false, // Disable X-RateLimit-* headers

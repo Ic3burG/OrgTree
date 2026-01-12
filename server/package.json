@@ -4,7 +4,7 @@
   "type": "module",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "dev": "tsx watch --import ./src/instrument.ts --clear-screen=false src/index.ts",
+    "dev": "tsx watch --import ./src/instrument.ts src/index.ts",
     "start": "NODE_ENV=production tsx --import ./src/instrument.ts src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
