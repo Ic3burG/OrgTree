@@ -216,8 +216,8 @@ For detailed technical debt items, feature plans, and priority recommendations, 
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
+- Node.js 20+ (Node 18 reached end-of-life)
+- npm 9+
 - Git
 
 ### Quick Start
@@ -298,13 +298,25 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - ✅ OrgMap core functionality fully restored
     - ✅ Automated tests prevent future regressions
     - ✅ Comprehensive documentation ensures developer awareness
-  - 📁 **FILES MODIFIED/CREATED** (6 files):
+  - 📁 **FILES MODIFIED/CREATED** (11 files):
     - `server/src/services/org.service.ts` - Fixed all SQL queries
     - `server/src/services/org.service.test.ts` - Updated test assertions
     - `server/src/services/__field-naming-validation.test.ts` - NEW validation suite (7 tests)
     - `FIELD_NAMING_CONVENTION.md` - NEW comprehensive documentation
     - `server/scripts/seed-large-dataset.ts` - Lint fixes
     - `server/scripts/seed-via-api.ts` - Lint fixes
+    - `package.json` - Added Node 20+ engine requirement
+    - `server/package.json` - Added Node 20+ engine requirement
+    - `.nvmrc` - NEW Node version file
+    - `README.md` - Updated prerequisites to Node 20+
+    - `PROGRESS.md` - Updated prerequisites to Node 20+
+  - ⬆️ **NODE.JS VERSION REQUIREMENT UPDATE**:
+    - Updated project to require Node.js 20+ (Node 18 reached end-of-life April 2025)
+    - Added `engines` field to both `package.json` files (root and server) requiring Node >=20.0.0, npm >=9.0.0
+    - Created `.nvmrc` file for automatic Node version management
+    - Updated `README.md` prerequisites documentation
+    - Updated `PROGRESS.md` prerequisites section
+    - Resolves npm dependency warnings (better-sqlite3, vite, vitest all require Node 20+)
   - 💡 **LESSON LEARNED**:
     - This bug has occurred 3 times (Sessions 25, 37, 47) during refactoring
     - Backend MUST return snake_case to match frontend types

@@ -4,6 +4,10 @@
   "description": "Interactive hierarchical organization directory with tree-style navigation",
   "type": "module",
   "license": "GPL-3.0-or-later",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

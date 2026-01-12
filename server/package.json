@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "license": "GPL-3.0-or-later",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "dev": "tsx watch --import ./src/instrument.ts src/index.ts",
     "start": "NODE_ENV=production tsx --import ./src/instrument.ts src/index.ts",

@@ -58,8 +58,8 @@ A modern, full-stack organizational directory and visualization platform. Build,
 ## Quick Start
 
 ### Prerequisites
-- Node.js 18+
-- npm or yarn
+- Node.js 20+ (Node 18 reached end-of-life)
+- npm 9+ or yarn
 
 ### Installation
 
@@ -171,7 +171,7 @@ See [DOCUMENTATION.md](./DOCUMENTATION.md) for complete API details.
 ### Docker
 
 ```dockerfile
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /app
 COPY . .
 RUN npm install && npm run build
