@@ -27,7 +27,7 @@
     "lint:all": "npm run lint --workspaces --if-present",
     "typecheck": "tsc --noEmit",
     "sdk:generate": "openapi-typescript server/src/openapi.yaml -o src/sdk/api-types.ts",
-    "prepare": "husky",
+    "prepare": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || husky",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
