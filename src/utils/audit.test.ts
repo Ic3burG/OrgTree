@@ -29,6 +29,7 @@ describe('formatEntityType', () => {
     expect(formatEntityType('department')).toBe('Department');
     expect(formatEntityType('member')).toBe('Member');
     expect(formatEntityType('org')).toBe('Organization');
+    expect(formatEntityType('data_import')).toBe('Data Import');
   });
 
   it('should return original type for unknown entities', () => {
@@ -39,17 +40,36 @@ describe('formatEntityType', () => {
 
 describe('getActionColor', () => {
   it('should return correct colors for known actions', () => {
-    expect(getActionColor('created')).toBe('bg-green-100 text-green-800');
-    expect(getActionColor('updated')).toBe('bg-blue-100 text-blue-800');
-    expect(getActionColor('deleted')).toBe('bg-red-100 text-red-800');
-    expect(getActionColor('added')).toBe('bg-purple-100 text-purple-800');
-    expect(getActionColor('removed')).toBe('bg-orange-100 text-orange-800');
-    expect(getActionColor('settings')).toBe('bg-gray-100 text-gray-800');
+    expect(getActionColor('created')).toBe(
+      'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+    );
+    expect(getActionColor('updated')).toBe(
+      'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+    );
+    expect(getActionColor('deleted')).toBe(
+      'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+    );
+    expect(getActionColor('added')).toBe(
+      'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+    );
+    expect(getActionColor('removed')).toBe(
+      'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'
+    );
+    expect(getActionColor('settings')).toBe(
+      'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
+    );
+    expect(getActionColor('import')).toBe(
+      'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'
+    );
   });
 
   it('should return default color for unknown actions', () => {
-    expect(getActionColor('unknown')).toBe('bg-gray-100 text-gray-800');
-    expect(getActionColor('custom')).toBe('bg-gray-100 text-gray-800');
+    expect(getActionColor('unknown')).toBe(
+      'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
+    );
+    expect(getActionColor('custom')).toBe(
+      'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
+    );
   });
 });
 
@@ -86,6 +106,61 @@ describe('formatEntityDetails', () => {
   it('should format organization details', () => {
     expect(formatEntityDetails('org', { name: 'Acme Corp' })).toBe('Acme Corp');
     expect(formatEntityDetails('org', {})).toBe('Organization');
+  });
+
+  it('should format data import details with all statistics', () => {
+    expect(
+      formatEntityDetails('data_import', {
+        departmentsCreated: 5,
+        departmentsReused: 2,
+        peopleCreated: 10,
+        peopleSkipped: 3,
+      })
+    ).toBe('7 depts (5 created, 2 reused), 13 people (10 added, 3 skipped)');
+  });
+
+  it('should format data import details with only departments', () => {
+    expect(
+      formatEntityDetails('data_import', {
+        departmentsCreated: 3,
+        departmentsReused: 0,
+        peopleCreated: 0,
+        peopleSkipped: 0,
+      })
+    ).toBe('3 depts (3 created)');
+  });
+
+  it('should format data import details with only people', () => {
+    expect(
+      formatEntityDetails('data_import', {
+        departmentsCreated: 0,
+        departmentsReused: 0,
+        peopleCreated: 8,
+        peopleSkipped: 1,
+      })
+    ).toBe('9 people (8 added, 1 skipped)');
+  });
+
+  it('should format data import details with singular values', () => {
+    expect(
+      formatEntityDetails('data_import', {
+        departmentsCreated: 1,
+        departmentsReused: 0,
+        peopleCreated: 1,
+        peopleSkipped: 0,
+      })
+    ).toBe('1 dept (1 created), 1 person (1 added)');
+  });
+
+  it('should handle empty data import', () => {
+    expect(
+      formatEntityDetails('data_import', {
+        departmentsCreated: 0,
+        departmentsReused: 0,
+        peopleCreated: 0,
+        peopleSkipped: 0,
+      })
+    ).toBe('No items imported');
   });
 
   it('should handle unknown entity types with fallback logic', () => {

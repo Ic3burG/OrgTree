@@ -21,6 +21,7 @@ export function formatEntityType(entityType: string): string {
     department: 'Department',
     member: 'Member',
     org: 'Organization',
+    data_import: 'Data Import',
   };
   return typeMap[entityType] || entityType;
 }
@@ -32,14 +33,15 @@ export function formatEntityType(entityType: string): string {
  */
 export function getActionColor(actionType: string): string {
   const colorMap: Record<string, string> = {
-    created: 'bg-green-100 text-green-800',
-    updated: 'bg-blue-100 text-blue-800',
-    deleted: 'bg-red-100 text-red-800',
-    added: 'bg-purple-100 text-purple-800',
-    removed: 'bg-orange-100 text-orange-800',
-    settings: 'bg-gray-100 text-gray-800',
+    created: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    updated: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    deleted: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+    added: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    removed: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+    settings: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
+    import: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
   };
-  return colorMap[actionType] || 'bg-gray-100 text-gray-800';
+  return colorMap[actionType] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
 }
 
 interface EntityData {
@@ -48,6 +50,10 @@ interface EntityData {
   userName?: string;
   role?: string;
   email?: string;
+  departmentsCreated?: number;
+  departmentsReused?: number;
+  peopleCreated?: number;
+  peopleSkipped?: number;
   [key: string]: unknown;
 }
 
@@ -75,6 +81,38 @@ export function formatEntityDetails(entityType: string, entityData: EntityData |
 
     case 'org':
       return entityData.name || 'Organization';
+
+    case 'data_import': {
+      const parts: string[] = [];
+
+      // Departments
+      const deptCreated = entityData.departmentsCreated || 0;
+      const deptReused = entityData.departmentsReused || 0;
+      const deptTotal = deptCreated + deptReused;
+
+      if (deptTotal > 0) {
+        const deptDetails: string[] = [];
+        if (deptCreated > 0) deptDetails.push(`${deptCreated} created`);
+        if (deptReused > 0) deptDetails.push(`${deptReused} reused`);
+        parts.push(`${deptTotal} dept${deptTotal !== 1 ? 's' : ''} (${deptDetails.join(', ')})`);
+      }
+
+      // People
+      const peopleCreated = entityData.peopleCreated || 0;
+      const peopleSkipped = entityData.peopleSkipped || 0;
+      const peopleTotal = peopleCreated + peopleSkipped;
+
+      if (peopleTotal > 0) {
+        const peopleDetails: string[] = [];
+        if (peopleCreated > 0) peopleDetails.push(`${peopleCreated} added`);
+        if (peopleSkipped > 0) peopleDetails.push(`${peopleSkipped} skipped`);
+        parts.push(
+          `${peopleTotal} ${peopleTotal !== 1 ? 'people' : 'person'} (${peopleDetails.join(', ')})`
+        );
+      }
+
+      return parts.length > 0 ? parts.join(', ') : 'No items imported';
+    }
 
     default:
       return entityData.name || entityData.id || 'N/A';
