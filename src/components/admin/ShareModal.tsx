@@ -76,12 +76,33 @@ export default function ShareModal({
     async (showLoading = true): Promise<void> => {
       try {
         if (showLoading) setLoadingMembers(true);
-        const data = (await api.getOrgMembers(orgId)) as OrgMemberWithDetails[];
-        // Split into owner and members
-        const ownerMember = data.find((m: OrgMemberWithDetails) => m.role === 'owner');
-        const regularMembers = data.filter((m: OrgMemberWithDetails) => m.role !== 'owner');
-        setOwner(ownerMember || null);
-        setMembers(regularMembers);
+        // API returns { owner: {...}, members: [...] } not an array
+        interface MembersResponse {
+          owner: {
+            userId: string;
+            userName: string;
+            userEmail: string;
+            role: 'owner';
+          };
+          members: OrgMemberWithDetails[];
+        }
+        const response = (await api.getOrgMembers(orgId)) as unknown as MembersResponse;
+        // Set owner with consistent shape
+        if (response.owner) {
+          setOwner({
+            id: response.owner.userId,
+            organization_id: orgId,
+            user_id: response.owner.userId,
+            userId: response.owner.userId,
+            role: 'owner',
+            joined_at: new Date().toISOString(), // Owner joined when org was created
+            userName: response.owner.userName,
+            userEmail: response.owner.userEmail,
+          } as OrgMemberWithDetails);
+        } else {
+          setOwner(null);
+        }
+        setMembers(response.members || []);
       } catch (err) {
         console.error('Failed to load members:', err);
         if (showLoading) toast.error('Failed to load members');
