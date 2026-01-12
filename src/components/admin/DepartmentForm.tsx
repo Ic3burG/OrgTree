@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { Department } from '../../types/index.js';
+import { getHierarchicalDepartments, getIndentedName } from '../../utils/departmentUtils.js';
 
 interface DepartmentFormProps {
   isOpen: boolean;
@@ -110,9 +111,9 @@ export default function DepartmentForm({
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white"
               >
                 <option value="">None (Top Level)</option>
-                {availableParents.map((d: Department) => (
+                {getHierarchicalDepartments(availableParents).map(d => (
                   <option key={d.id} value={d.id}>
-                    {d.name}
+                    {getIndentedName(d.name, d.depth)}
                   </option>
                 ))}
               </select>

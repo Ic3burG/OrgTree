@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, FolderInput } from 'lucide-react';
 import type { Department } from '../../types/index.js';
+import { getHierarchicalDepartments, getIndentedName } from '../../utils/departmentUtils.js';
 
 interface BulkMoveResult {
   movedCount: number;
@@ -113,9 +114,9 @@ export default function BulkMoveModal({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select a department...</option>
-                {departments.map(dept => (
+                {getHierarchicalDepartments(departments).map(dept => (
                   <option key={dept.id} value={dept.id}>
-                    {dept.name}
+                    {getIndentedName(dept.name, dept.depth)}
                   </option>
                 ))}
               </select>

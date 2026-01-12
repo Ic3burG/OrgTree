@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { Person, Department } from '../../types/index.js';
+import { getHierarchicalDepartments, getIndentedName } from '../../utils/departmentUtils.js';
 
 interface PersonFormData {
   name: string;
@@ -178,9 +179,9 @@ export default function PersonForm({
                 }`}
               >
                 <option value="">Select a department</option>
-                {departments.map((dept: Department) => (
+                {getHierarchicalDepartments(departments).map(dept => (
                   <option key={dept.id} value={dept.id}>
-                    {dept.name}
+                    {getIndentedName(dept.name, dept.depth)}
                   </option>
                 ))}
               </select>

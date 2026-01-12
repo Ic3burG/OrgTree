@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Edit3 } from 'lucide-react';
 import type { Department } from '../../types/index.js';
+import { getHierarchicalDepartments, getIndentedName } from '../../utils/departmentUtils.js';
 
 interface BulkEditResult {
   updatedCount: number;
@@ -172,9 +173,9 @@ export default function BulkEditModal({
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Keep existing departments</option>
-                      {departments.map(dept => (
+                      {getHierarchicalDepartments(departments).map(dept => (
                         <option key={dept.id} value={dept.id}>
-                          {dept.name}
+                          {getIndentedName(dept.name, dept.depth)}
                         </option>
                       ))}
                     </select>
@@ -193,9 +194,9 @@ export default function BulkEditModal({
                   >
                     <option value="">Keep existing parent</option>
                     <option value="root">Root level (no parent)</option>
-                    {departments.map(dept => (
+                    {getHierarchicalDepartments(departments).map(dept => (
                       <option key={dept.id} value={dept.id}>
-                        {dept.name}
+                        {getIndentedName(dept.name, dept.depth)}
                       </option>
                     ))}
                   </select>
