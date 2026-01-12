@@ -105,7 +105,7 @@ export default function SystemAuditLog(): React.JSX.Element {
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 text-red-700 dark:text-red-300">
           <p className="font-medium">Error loading audit logs</p>
           <p className="text-sm mt-1">{error}</p>
         </div>
@@ -136,7 +136,7 @@ export default function SystemAuditLog(): React.JSX.Element {
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium"
+                className="flex items-center gap-2 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-slate-100 font-medium"
               >
                 <Filter size={20} />
                 <span>Filters</span>
@@ -161,7 +161,7 @@ export default function SystemAuditLog(): React.JSX.Element {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-slate-700">
                 {/* Action Type Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                     Action Type
                   </label>
                   <select
@@ -183,7 +183,7 @@ export default function SystemAuditLog(): React.JSX.Element {
 
                 {/* Entity Type Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                     Entity Type
                   </label>
                   <select
@@ -191,7 +191,7 @@ export default function SystemAuditLog(): React.JSX.Element {
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                       setEntityType(e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100"
                   >
                     <option value="">All Entities</option>
                     <option value="department">Departments</option>
@@ -203,7 +203,7 @@ export default function SystemAuditLog(): React.JSX.Element {
 
                 {/* Organization Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                     Organization ID
                   </label>
                   <input
@@ -270,7 +270,7 @@ export default function SystemAuditLog(): React.JSX.Element {
                       <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-slate-700">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-slate-100">
                           <div className="flex items-center gap-2">
-                            <Clock size={16} className="text-gray-400" />
+                            <Clock size={16} className="text-gray-400 dark:text-slate-400" />
                             {formatDate(log.createdAt || log.created_at)}
                           </div>
                         </td>
@@ -278,7 +278,7 @@ export default function SystemAuditLog(): React.JSX.Element {
                           <div className="flex items-center gap-2">
                             <Building2 size={16} className="text-purple-400" />
                             <span
-                              className="text-gray-900 truncate max-w-[150px]"
+                              className="text-gray-900 dark:text-slate-100 truncate max-w-[150px]"
                               title={log.organizationName}
                             >
                               {log.organizationName || 'Unknown'}
@@ -287,8 +287,8 @@ export default function SystemAuditLog(): React.JSX.Element {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center gap-2">
-                            <User size={16} className="text-gray-400" />
-                            <span className="text-gray-900">
+                            <User size={16} className="text-gray-400 dark:text-slate-400" />
+                            <span className="text-gray-900 dark:text-slate-100">
                               {log.actorName || log.user_name || 'Unknown'}
                             </span>
                           </div>
@@ -300,10 +300,10 @@ export default function SystemAuditLog(): React.JSX.Element {
                             {log.actionType || log.action}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-slate-100">
                           {formatEntityType(log.entityType || log.entity_type)}
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
+                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-slate-300">
                           {formatEntityDetails(
                             log.entityType || log.entity_type,
                             log.entityData || log.snapshot
@@ -337,19 +337,19 @@ export default function SystemAuditLog(): React.JSX.Element {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Building2 size={16} className="text-purple-400" />
-                        <span className="text-sm text-gray-900">
+                        <span className="text-sm text-gray-900 dark:text-slate-100">
                           {log.organizationName || 'Unknown'}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <User size={16} className="text-gray-400" />
-                        <span className="text-sm font-medium text-gray-900">
+                        <User size={16} className="text-gray-400 dark:text-slate-400" />
+                        <span className="text-sm font-medium text-gray-900 dark:text-slate-100">
                           {log.actorName || log.user_name || 'Unknown'}
                         </span>
                       </div>
 
-                      <div className="text-sm text-gray-700">
+                      <div className="text-sm text-gray-700 dark:text-slate-300">
                         <span className="font-medium">
                           {formatEntityType(log.entityType || log.entity_type)}:
                         </span>{' '}

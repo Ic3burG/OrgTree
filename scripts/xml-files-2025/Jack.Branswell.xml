@@ -1,0 +1,49 @@
+<gedsPerson>
+	<fullName>Branswell\, Jack</fullName>
+	<firstName>Jack</firstName>
+	<lastName>Branswell</lastName>
+	<title>Director</title>
+	<workPhone />
+	<cellPhone />
+	<workFax />
+	<email />
+	<address>365 Laurier Avenue West</address>
+	<city>Ottawa</city>
+	<province>Ontario</province>
+	<country>Canada</country>
+	<postalCode>K1A 1L1</postalCode>
+	<building />
+	<floor />
+	<room />
+	<department>Immigration, Refugees and Citizenship Canada</department>
+	<departmentAcronym>IRCC-IRCC</departmentAcronym>
+	<organization>Public Affairs &amp; Strategic Communications Branch</organization>
+	<organizationAcronym>PUB-DIR</organizationAcronym>
+	<orgStructure>
+		<org>
+			<name>Canada</name>
+			<DN>Tz1HQyxDPUNB</DN>
+		</org>
+		<org>
+			<name>Immigration, Refugees and Citizenship Canada</name>
+			<DN>T1U9SVJDQy1JUkNDLE89R0MsQz1DQQ==</DN>
+		</org>
+		<org>
+			<name>National Headquarters</name>
+			<DN>T1U9TkhRLUFDLE9VPUlSQ0MtSVJDQyxPPUdDLEM9Q0E=</DN>
+		</org>
+		<org>
+			<name>Office of the Deputy Minister</name>
+			<DN>T1U9RE1PLURNTyxPVT1OSFEtQUMsT1U9SVJDQy1JUkNDLE89R0MsQz1DQQ==</DN>
+		</org>
+		<org>
+			<name>People and Communications Sector</name>
+			<DN>T1U9QURNLUJVUixPVT1ETU8tRE1PLE9VPU5IUS1BQyxPVT1JUkNDLUlSQ0MsTz1HQyxDPUNB</DN>
+		</org>
+		<org>
+			<name>Public Affairs &amp; Strategic Communications Branch</name>
+			<DN>T1U9UFVCLURJUixPVT1BRE0tQlVSLE9VPURNTy1ETU8sT1U9TkhRLUFDLE9VPUlSQ0MtSVJDQyxPPUdDLEM9Q0E=</DN>
+		</org>
+	</orgStructure>
+	<imageURL>http://geds-sage.gc.ca/GEDS20/images/defaultphoto3.jpg</imageURL>
+</gedsPerson>
