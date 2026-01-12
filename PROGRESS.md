@@ -298,7 +298,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - ✅ OrgMap core functionality fully restored
     - ✅ Automated tests prevent future regressions
     - ✅ Comprehensive documentation ensures developer awareness
-  - 📁 **FILES MODIFIED/CREATED** (12 files):
+  - 📁 **FILES MODIFIED/CREATED** (14 files):
     - `server/src/services/org.service.ts` - Fixed all SQL queries
     - `server/src/services/org.service.test.ts` - Updated test assertions
     - `server/src/services/__field-naming-validation.test.ts` - NEW validation suite (7 tests)
@@ -306,10 +306,11 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `server/scripts/seed-large-dataset.ts` - Lint fixes
     - `server/scripts/seed-via-api.ts` - Lint fixes
     - `package.json` - Added Node 20+ engine requirement
-    - `server/package.json` - Added Node 20+ engine requirement
+    - `server/package.json` - Added Node 20+ engine requirement + updated dependencies
+    - `server/package-lock.json` - Dependency lockfile updates
     - `.nvmrc` - NEW Node version file
     - `README.md` - Updated prerequisites to Node 20+
-    - `PROGRESS.md` - Updated prerequisites to Node 20+
+    - `PROGRESS.md` - Updated prerequisites to Node 20+ and dependency updates
     - `.github/workflows/ci.yml` - Updated CI workflow to Node 20
   - ⬆️ **NODE.JS VERSION REQUIREMENT UPDATE**:
     - Updated project to require Node.js 20+ (Node 18 reached end-of-life April 2025)
@@ -320,6 +321,18 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - **Updated CI workflow** (`.github/workflows/ci.yml`) from Node 18 to Node 20 (all 5 jobs)
     - Resolves npm dependency warnings (better-sqlite3, vite, vitest all require Node 20+)
     - Eliminates CI/CD deprecation warnings by aligning workflow Node version with dependency requirements
+  - 📦 **BACKEND DEPENDENCY UPDATES**:
+    - Updated **5 outdated packages** to latest versions (all safe, API-compatible updates)
+    - **@types/node**: 25.0.3 → 25.0.6 (patch - type definitions)
+    - **better-sqlite3**: 12.5.0 → 12.6.0 (minor - performance improvements, FTS5 enhancements)
+    - **otplib**: 13.0.0 → 13.0.2 (patch - bug fixes)
+    - **resend**: 6.6.0 → 6.7.0 (minor - new features)
+    - **bcrypt**: 5.1.1 → 6.0.0 (major BUT API-compatible - internal changes only)
+      - Replaced node-pre-gyp with prebuildify for more reliable installations
+      - Same API, hashes remain 100% compatible with previous versions
+      - Fixes security issues in versions < 5.0.0 (password truncation, NUL handling)
+    - ⚠️ **Skipped Express 5** upgrade (4.22.1 → 5.2.1) - requires dedicated migration due to breaking changes
+    - ✅ All 423 backend tests passing after updates
   - 💡 **LESSON LEARNED**:
     - This bug has occurred 3 times (Sessions 25, 37, 47) during refactoring
     - Backend MUST return snake_case to match frontend types
