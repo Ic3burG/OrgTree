@@ -255,9 +255,63 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: Bulk Delete Cascade Fix (January 11, 2026)
-- **Total Commits**: 226+ commits on main branch
-- **Today's Progress (January 11, 2026 - Session 46)**:
+- **Last Major Update**: OrgMap Edge Rendering Fix - PERMANENT (January 11, 2026)
+- **Total Commits**: 227+ commits on main branch
+- **Today's Progress (January 11, 2026 - Session 47)**:
+  - 🚨 **CRITICAL BUG FIX**: Restored OrgMap edge rendering - PERMANENT SOLUTION
+  - ✅ **ISSUE IDENTIFIED** (Recurring bug from Sessions 25, 37):
+    - Department hierarchy lines not displaying in organization chart
+    - Root cause: Backend `org.service.ts` was aliasing database fields to camelCase
+    - `parent_id as parentId` → Frontend checks `dept.parent_id` → undefined → no edges created
+    - Silent failure: departments rendered correctly, but connection lines disappeared
+    - This is a **data contract mismatch** between backend and frontend
+  - ✅ **FIXES APPLIED** (6 files):
+    - `server/src/services/org.service.ts` - Removed ALL camelCase aliases in SQL queries
+      - Changed "parent_id as parentId" → "parent_id" (CRITICAL for edges)
+      - Changed "organization_id as organizationId" → "organization_id"
+      - Changed "sort_order as sortOrder" → "sort_order"
+      - Applied to departments, people, and organizations queries
+    - Updated TypeScript interfaces to enforce snake_case (Department, Person, OrganizationResult)
+    - `server/src/services/org.service.test.ts` - Fixed test assertions to expect snake_case
+    - `server/scripts/seed-large-dataset.ts` - Fixed lint errors (performance import, unused vars)
+    - `server/scripts/seed-via-api.ts` - Fixed lint errors (any types, fetch global)
+  - 🛡️ **PREVENTION MEASURES** (This CANNOT happen again):
+    - **New validation test suite**: `server/src/services/__field-naming-validation.test.ts`
+      - 7 critical tests that verify snake_case field names
+      - Explicitly checks `parent_id` exists (critical for OrgMap edges)
+      - Tests fail if camelCase variants exist (parentId, organizationId, etc.)
+      - **If these tests fail, edges will break - DO NOT IGNORE**
+    - **Comprehensive documentation**: `FIELD_NAMING_CONVENTION.md` (250+ lines)
+      - Explains why snake_case is mandatory for database fields
+      - Provides correct/incorrect code examples
+      - Documents history of this recurring bug
+      - Required reading for all backend service modifications
+    - **Inline code comments**: Added CRITICAL warnings in org.service.ts explaining OrgMap dependency
+  - 📊 **TESTING**:
+    - All 328 backend tests passing ✅ (+7 validation tests)
+    - All 103 frontend tests passing ✅
+    - Production build successful ✅
+    - All linters passing (ESLint + Prettier) ✅
+  - 🎯 **IMPACT**:
+    - ✅ Department hierarchy lines now render correctly
+    - ✅ Parent-child relationships visualized properly
+    - ✅ OrgMap core functionality fully restored
+    - ✅ Automated tests prevent future regressions
+    - ✅ Comprehensive documentation ensures developer awareness
+  - 📁 **FILES MODIFIED/CREATED** (6 files):
+    - `server/src/services/org.service.ts` - Fixed all SQL queries
+    - `server/src/services/org.service.test.ts` - Updated test assertions
+    - `server/src/services/__field-naming-validation.test.ts` - NEW validation suite (7 tests)
+    - `FIELD_NAMING_CONVENTION.md` - NEW comprehensive documentation
+    - `server/scripts/seed-large-dataset.ts` - Lint fixes
+    - `server/scripts/seed-via-api.ts` - Lint fixes
+  - 💡 **LESSON LEARNED**:
+    - This bug has occurred 3 times (Sessions 25, 37, 47) during refactoring
+    - Backend MUST return snake_case to match frontend types
+    - Database schema (snake_case) → Backend → Frontend (no transformation)
+    - Automated validation is the only way to prevent architectural regressions
+
+- **Previous Session (January 11, 2026 - Session 46)**:
   - 🚀 **PERFORMANCE TESTING COMPLETE**: Successfully benchmarked application with 1,000+ records
   - ✅ **API SEEDING STRATEGY**:
     - Developed `server/scripts/seed-via-api.ts` to populate data via HTTP calls
@@ -2433,7 +2487,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>
-**Last Updated**: January 11, 2026 (Session 43 - Case-Insensitive Duplicate Detection)
+**Last Updated**: January 11, 2026 (Session 47 - OrgMap Edge Rendering Fix - PERMANENT)
 
 **Today's Major Milestone**: 🎉
 
