@@ -27,6 +27,7 @@
 **CRITICAL**: Run ALL linters BEFORE every commit. No exceptions.
 
 **Required checks before ANY commit**:
+
 1. Backend: `cd server && npm run lint` - ESLint must pass with 0 errors
 2. Backend: `cd server && npm run format:check` - Prettier must pass with 0 warnings
 3. If Prettier fails: Run `cd server && npm run format` to auto-fix, then commit
@@ -35,6 +36,7 @@
 6. If Prettier fails: Run `npm run format` to auto-fix, then commit
 
 **Workflow**:
+
 ```bash
 # ALWAYS run these before git commit:
 cd server && npm run lint && npm run format:check
@@ -255,7 +257,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: Audit Log & Dark Mode Improvements (January 12, 2026)
+- **Last Major Update**: Nested Department Dropdowns & Audit Log Improvements (January 12, 2026)
 - **Total Commits**: 236+ commits on main branch
 - **Today's Progress (January 12, 2026 - Session 50)**:
   - 🐛 **BUG FIX #1**: "Failed to load members" error in Share > Team Members
@@ -328,12 +330,30 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 📁 **FILES MODIFIED**: 2 files
   - ✅ **COMMITTED AND PUSHED**: Commit 30de1cd
 
+  - ✨ **FEATURE**: Nested Department Dropdowns
+  - ✅ **IMPROVEMENT IDENTIFIED**:
+    - Department selection dropdowns were flat, making it difficult to visualize relationships when editing records.
+    - Required hierarchical display with indentation across all admin selection points.
+  - ✅ **IMPLEMENTATION APPLIED** (6 files):
+    - `src/utils/departmentUtils.ts` - Created utility for recursive hierarchy ordering and name indentation.
+    - `src/components/admin/PersonForm.tsx` - Updated person department selection.
+    - `src/components/admin/PersonManagerHeader.tsx` - Updated department filter.
+    - `src/components/admin/BulkMoveModal.tsx` - Updated bulk move target selection.
+    - `src/components/admin/BulkEditModal.tsx` - Updated bulk edit for both person and department records.
+    - `src/components/admin/DepartmentForm.tsx` - Updated parent department selection.
+  - 🎯 **IMPACT**:
+    - Enhanced user experience for all administrative tasks involving department selection.
+    - Clear visualization of organizational depth and structure in dropdown menus.
+  - 📁 **FILES MODIFIED**: 6 files
+  - ✅ **COMMITTED AND PUSHED**: Commit da3156e
+
   - 📊 **SESSION SUMMARY**:
+    - **Features Added**: 1 (Nested Department Dropdowns)
     - **Bugs Fixed**: 3 (permission errors, dark mode readability, audit log details)
     - **Tests Added**: 5 new tests for audit formatting
     - **Total Tests**: 103 → 108 frontend tests
-    - **Files Modified**: 6 files
-    - **Commits**: 3 commits (all pushed to GitHub)
+    - **Files Modified**: 12 files
+    - **Commits**: 4 commits (all pushed to GitHub)
     - **Code Quality**: All lint/format checks passed before each commit ✅
     - **CI/CD**: All GitHub Actions passing ✅
 
@@ -615,15 +635,15 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 🧪 **TEST COVERAGE EXPANSION (PHASE 2 & 3)**:
     - **Target**: `src/utils` and `src/hooks` directories
     - **`src/utils` Coverage**:
-        - Statements: 49.68% → **93.03%**
-        - Functions: 36.36% → **89.09%**
-        - Added tests for `layoutEngine.ts`, `csvExport.ts`, `csvImport.ts`, `exportUtils.ts` (mocking jsPDF/html-to-image)
+      - Statements: 49.68% → **93.03%**
+      - Functions: 36.36% → **89.09%**
+      - Added tests for `layoutEngine.ts`, `csvExport.ts`, `csvImport.ts`, `exportUtils.ts` (mocking jsPDF/html-to-image)
     - **`src/hooks` Coverage**:
-        - Statements: 13.11% → **65.57%**
-        - Functions: 23.8% → **71.42%**
-        - Added tests for `useSearch.ts` (debouncing), `useRealtimeUpdates.ts` (socket mocking), `usePasskey.ts` (WebAuthn mocking)
+      - Statements: 13.11% → **65.57%**
+      - Functions: 23.8% → **71.42%**
+      - Added tests for `useSearch.ts` (debouncing), `useRealtimeUpdates.ts` (socket mocking), `usePasskey.ts` (WebAuthn mocking)
   - 🛠️ **BUILD PROCESS HARDENING**:
-    - **Linting Enforcement**: `npm run build` now runs `npm run lint` and `npm run format:check` *before* compilation
+    - **Linting Enforcement**: `npm run build` now runs `npm run lint` and `npm run format:check` _before_ compilation
     - **Verification**: Confirmed build failures on lint/format errors to prevent technical debt accumulation
   - 📊 **FILES MODIFIED/CREATED**:
     - `package.json` - Updated build script
