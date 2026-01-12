@@ -9,8 +9,7 @@
     "npm": ">=9.0.0"
   },
   "workspaces": [
-    "server",
-    "."
+    "server"
   ],
   "scripts": {
     "dev": "vite",
