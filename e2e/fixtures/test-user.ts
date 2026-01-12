@@ -21,8 +21,9 @@ export const test = base.extend<{
     await page.goto('/signup');
     await page.getByLabel('Name').fill(TEST_USER.name);
     await page.getByLabel('Email').fill(TEST_USER.email);
-    await page.getByLabel('Password').fill(TEST_USER.password);
-    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.getByLabel('Password', { exact: true }).fill(TEST_USER.password);
+    await page.getByLabel('Confirm Password').fill(TEST_USER.password);
+    await page.getByRole('button', { name: /sign up|create account/i }).click();
     
     // Wait for redirect to dashboard or home
     await page.waitForURL(/\/(organizations|dashboard)?$/);

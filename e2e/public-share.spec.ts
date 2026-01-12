@@ -49,7 +49,8 @@ test.describe('Public Sharing', () => {
     await page.goto('/signup');
     await page.getByLabel('Name').fill('Public Test User');
     await page.getByLabel('Email').fill(email);
-    await page.getByLabel('Password').fill('SecurePassword123!');
+    await page.getByLabel('Password', { exact: true }).fill('SecurePassword123!');
+    await page.getByLabel('Confirm Password').fill('SecurePassword123!');
     await page.getByRole('button', { name: /sign up/i }).click();
     
     // Wait for auth
