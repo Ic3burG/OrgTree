@@ -255,9 +255,58 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: OrgMap Edge Rendering Fix - PERMANENT (January 11, 2026)
-- **Total Commits**: 227+ commits on main branch
-- **Today's Progress (January 11, 2026 - Session 47)**:
+- **Last Major Update**: Express 5 Revert - Deployments Restored (January 12, 2026)
+- **Total Commits**: 229+ commits on main branch
+- **Today's Progress (January 12, 2026 - Session 48)**:
+  - 🚨 **CRITICAL DEPLOYMENT FIX**: Resolved Render deployment failures by reverting Express 5
+  - ✅ **ISSUE #1 IDENTIFIED**:
+    - Render deployments showing `update_failed` status while GitHub Actions passed
+    - Dependabot auto-merged Express 4.22.1 → 5.2.1 (major version upgrade)
+    - Express 5 uses newer `path-to-regexp` library that rejects `'*'` syntax
+    - Catch-all route `app.get('*', ...)` at `server/src/index.ts:230` crashed server at startup
+    - **Runtime error**: `PathError [TypeError]: Missing parameter name at index 1: *`
+  - ✅ **ATTEMPT #1**: Fixed path-to-regexp syntax incompatibility
+    - `server/src/index.ts` - Changed `app.get('*', ...)` → `app.get('/*', ...)`
+    - Committed and deployed (commit: ad91f68)
+    - **Result**: Deployment still failed with `update_failed` status ❌
+  - ✅ **ISSUE #2 IDENTIFIED**:
+    - Build succeeded ✅ but server exited immediately with status 1 ❌
+    - No error messages visible in logs (silent failure)
+    - GitHub Actions only tests build/lint/test (doesn't start server), so it passed
+    - Render deployed successfully but service crashed on startup (health check failed)
+    - Express 5 has additional undocumented breaking changes beyond path-to-regexp
+  - ✅ **SOLUTION APPLIED**: Reverted Express 5 → 4
+    - `server/package.json` - Reverted Express 5.2.1 → 4.22.1
+    - `server/src/index.ts` - Restored catch-all route `'/*'` → `'*'` (Express 4 syntax)
+    - Committed and deployed (commit: 39148e8)
+    - **Result**: Awaiting deployment confirmation ⏳
+  - 📊 **VALIDATION**:
+    - All 423 backend tests passing ✅
+    - All 103 frontend tests passing ✅
+    - All linters passing (ESLint + Prettier) ✅
+    - GitHub Actions CI/CD both successful ✅
+    - `npm install` successful (8 packages added, 37 removed with Express 4)
+  - 🎯 **IMPACT**:
+    - ✅ Restored working deployment configuration
+    - ✅ Application should deploy successfully again
+    - ⚠️ Express 5 upgrade deferred - requires dedicated migration effort
+    - ✅ SPA routing continues to work correctly with Express 4
+  - 📁 **FILES MODIFIED** (3 files):
+    - `server/package.json` - Reverted Express version
+    - `server/package-lock.json` - Dependency updates for Express 4
+    - `server/src/index.ts` - Restored Express 4 catch-all syntax
+  - 💡 **LESSONS LEARNED**:
+    - Express 5 has breaking changes beyond the official migration guide
+    - Silent production failures are harder to diagnose than build failures
+    - GitHub Actions should test server startup, not just compilation
+    - Dependabot should require manual approval for major version upgrades
+    - PROGRESS.md line 334 was correct: "Skipped Express 5 upgrade (requires dedicated migration)"
+  - 📋 **NEXT STEPS**:
+    - Configure Dependabot to prevent auto-merge of major version upgrades
+    - Add server startup tests to CI pipeline
+    - Plan dedicated Express 5 migration with comprehensive testing
+
+- **Previous Progress (January 11, 2026 - Session 47)**:
   - 🚨 **CRITICAL BUG FIX**: Restored OrgMap edge rendering - PERMANENT SOLUTION
   - ✅ **ISSUE IDENTIFIED** (Recurring bug from Sessions 25, 37):
     - Department hierarchy lines not displaying in organization chart
