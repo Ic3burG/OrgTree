@@ -141,8 +141,6 @@ export function requireOrgPermission(
   return access; // Return access info for further use
 }
 
-
-
 // ============================================================================
 // Member Management Functions
 // ============================================================================
