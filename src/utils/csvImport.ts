@@ -7,6 +7,7 @@ export interface CSVImportResult {
   departmentsReused?: number;
   peopleCreated: number;
   peopleSkipped: number;
+  errors: string[];
 }
 
 /**
