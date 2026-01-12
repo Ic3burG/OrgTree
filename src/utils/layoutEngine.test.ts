@@ -39,12 +39,12 @@ describe('layoutEngine', () => {
 
     it('calculates layout positions', () => {
       const layoutNodes = calculateLayout(nodes, edges);
-      
+
       expect(layoutNodes).toHaveLength(3);
       layoutNodes.forEach(node => {
+        if (!node.position) throw new Error('Node position undefined');
         expect(node.position.x).toBeDefined();
         expect(node.position.y).toBeDefined();
-        // Since initial positions were 0,0, they should likely change or at least be numbers
         expect(typeof node.position.x).toBe('number');
         expect(typeof node.position.y).toBe('number');
       });
@@ -54,27 +54,39 @@ describe('layoutEngine', () => {
       const child1 = layoutNodes.find(n => n.id === '2');
       const child2 = layoutNodes.find(n => n.id === '3');
 
-      expect(root?.position.y).toBeLessThan(child1?.position.y!);
-      expect(root?.position.y).toBeLessThan(child2?.position.y!);
+      expect(root).toBeDefined();
+      expect(child1).toBeDefined();
+      expect(child2).toBeDefined();
+      if (!root?.position || !child1?.position || !child2?.position) return;
+
+      expect(root.position.y).toBeLessThan(child1.position.y);
+      expect(root.position.y).toBeLessThan(child2.position.y);
     });
 
     it('handles LR direction', () => {
       const layoutNodes = calculateLayout(nodes, edges, 'LR');
-      
+
       const root = layoutNodes.find(n => n.id === '1');
       const child1 = layoutNodes.find(n => n.id === '2');
 
       // In LR, root x should be less than child x
-      expect(root?.position.x).toBeLessThan(child1?.position.x!);
+      expect(root).toBeDefined();
+      expect(child1).toBeDefined();
+      if (!root?.position || !child1?.position) return;
+
+      // In LR, root x should be less than child x
+      expect(root.position.x).toBeLessThan(child1.position.x);
     });
 
     it('handles isolated nodes', () => {
       const isolatedNodes = [{ id: '1', data: { label: 'Lone' }, position: { x: 0, y: 0 } }];
       const layoutNodes = calculateLayout(isolatedNodes, []);
-      
+
       expect(layoutNodes).toHaveLength(1);
-      expect(layoutNodes[0].position.x).toBeDefined();
-      expect(layoutNodes[0].position.y).toBeDefined();
+      if (!layoutNodes[0]) return;
+      expect(layoutNodes[0].position).toBeDefined();
+      expect(layoutNodes[0].position?.x).toBeDefined();
+      expect(layoutNodes[0].position?.y).toBeDefined();
     });
   });
 });

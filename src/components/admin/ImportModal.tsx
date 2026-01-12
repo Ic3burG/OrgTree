@@ -182,24 +182,93 @@ export default function ImportModal({
           </div>
 
           {result ? (
-            <div className="text-center py-8">
-              <CheckCircle className="mx-auto text-green-500 mb-4" size={48} />
-              <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-2">
-                Import Successful!
-              </h3>
-              <p className="text-slate-600 dark:text-slate-300">
-                Created {result.departmentsCreated} department(s) and {result.peopleCreated}{' '}
-                person(s).
-              </p>
-              {result.departmentsReused !== undefined && result.departmentsReused > 0 && (
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
-                  Reused {result.departmentsReused} existing department(s).
+            <div className="py-6">
+              <div className="text-center mb-6">
+                <CheckCircle className="mx-auto text-green-500 mb-3" size={48} />
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">
+                  Import Complete!
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Data has been imported successfully
                 </p>
-              )}
-              {result.peopleSkipped > 0 && (
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
-                  Skipped {result.peopleSkipped} person(s) (duplicates).
-                </p>
+              </div>
+
+              {/* Summary Stats */}
+              <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 mb-4">
+                <div className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+                  Import Summary
+                </div>
+
+                {/* Departments */}
+                <div className="mb-3">
+                  <div className="flex items-center justify-between text-sm mb-1">
+                    <span className="text-slate-600 dark:text-slate-400">Departments:</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">
+                      {result.departmentsCreated +
+                        (result.departmentsReused !== undefined ? result.departmentsReused : 0)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-500 ml-4">
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                      {result.departmentsCreated} created
+                    </span>
+                    {result.departmentsReused !== undefined && result.departmentsReused > 0 && (
+                      <span className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                        {result.departmentsReused} reused
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* People */}
+                <div>
+                  <div className="flex items-center justify-between text-sm mb-1">
+                    <span className="text-slate-600 dark:text-slate-400">People:</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">
+                      {result.peopleCreated + result.peopleSkipped}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-500 ml-4">
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                      {result.peopleCreated} created
+                    </span>
+                    {result.peopleSkipped > 0 && (
+                      <span className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                        {result.peopleSkipped} skipped (duplicates)
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Errors (if any) */}
+              {result.errors && result.errors.length > 0 && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={16} />
+                    <div className="text-sm">
+                      <p className="font-medium text-red-800 dark:text-red-300 mb-1">
+                        Some items could not be imported:
+                      </p>
+                      <ul className="text-red-700 dark:text-red-400 space-y-1 list-disc list-inside">
+                        {result.errors.slice(0, 5).map((error, i) => (
+                          <li key={i} className="text-xs">
+                            {error}
+                          </li>
+                        ))}
+                        {result.errors.length > 5 && (
+                          <li className="text-xs text-red-600 dark:text-red-500">
+                            ...and {result.errors.length - 5} more
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           ) : (

@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import useSearch from './useSearch';
 import api from '../api/client';
+import { SearchResult } from '../types';
 
 // Mock API client
 vi.mock('../api/client', () => ({
@@ -43,11 +44,11 @@ describe('useSearch', () => {
   });
 
   it('executes search after debounce', async () => {
-    const mockResults = [{ id: '1', name: 'Test Result', type: 'person' }];
+    const mockResults = [{ id: '1', name: 'Test Result', type: 'person' }] as SearchResult[];
     vi.mocked(api.search).mockResolvedValue({
       results: mockResults,
       total: 1,
-      pagination: { hasMore: false, total: 1, page: 1, limit: 20 },
+      pagination: { hasMore: false, offset: 0, limit: 20 },
     });
 
     const { result } = renderHook(() => useSearch(mockOrgId, { debounceMs: 500 }));
@@ -65,12 +66,12 @@ describe('useSearch', () => {
     });
 
     expect(api.search).toHaveBeenCalledWith(mockOrgId, expect.objectContaining({ q: 'testing' }));
-    
+
     // Wait for async state update
     await act(async () => {
-        await Promise.resolve();
+      await Promise.resolve();
     });
-    
+
     expect(result.current.results).toEqual(mockResults);
   });
 
@@ -78,69 +79,74 @@ describe('useSearch', () => {
     const { result } = renderHook(() => useSearch(mockOrgId));
 
     act(() => {
-        result.current.setQuery('');
+      result.current.setQuery('');
     });
-    
+
     // Should clear immediately without API call
     expect(api.search).not.toHaveBeenCalled();
     expect(result.current.results).toEqual([]);
   });
-  
+
   it('handles search error', async () => {
-      vi.mocked(api.search).mockRejectedValue(new Error('API Failure'));
-      
-      const { result } = renderHook(() => useSearch(mockOrgId));
-      
-      act(() => {
-          result.current.setQuery('fail');
-      });
-      
-      act(() => {
-          vi.advanceTimersByTime(500);
-      });
-      
-      // Wait for async state update
-      await act(async () => {
-          await Promise.resolve();
-      });
-      
-      expect(result.current.error).toBe('API Failure');
-      expect(result.current.results).toEqual([]);
-      expect(result.current.loading).toBe(false);
+    vi.mocked(api.search).mockRejectedValue(new Error('API Failure'));
+
+    const { result } = renderHook(() => useSearch(mockOrgId));
+
+    act(() => {
+      result.current.setQuery('fail');
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // Wait for async state update
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current.error).toBe('API Failure');
+    expect(result.current.results).toEqual([]);
+    expect(result.current.loading).toBe(false);
   });
-  
+
   it('fetches suggestions', async () => {
-      vi.mocked(api.searchAutocomplete).mockResolvedValue({
-          suggestions: ['suggestion 1', 'suggestion 2']
-      });
-      
-      const { result } = renderHook(() => useSearch(mockOrgId));
-      
-      act(() => {
-          result.current.setQuery('sug');
-      });
-      
-      act(() => {
-          vi.advanceTimersByTime(500);
-      });
-      
-      await act(async () => {
-          await Promise.resolve();
-      });
-      
-      expect(result.current.suggestions).toHaveLength(2);
+    vi.mocked(api.searchAutocomplete).mockResolvedValue({
+      suggestions: ['suggestion 1', 'suggestion 2'],
+      results: [],
+      total: 2,
+    });
+
+    const { result } = renderHook(() => useSearch(mockOrgId));
+
+    act(() => {
+      result.current.setQuery('sug');
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current.suggestions).toHaveLength(2);
+    expect(result.current.suggestions).toBeDefined();
+    if (result.current.suggestions[0]) {
       expect(result.current.suggestions[0].text).toBe('suggestion 1');
+    }
   });
 
   it('clears search', () => {
-      const { result } = renderHook(() => useSearch(mockOrgId));
-      
-      act(() => {
-          result.current.setQuery('something');
-          result.current.clearSearch();
-      });
-      
-      expect(result.current.query).toBe('');
-      expect(result.current.results).toEqual([]);
+    const { result } = renderHook(() => useSearch(mockOrgId));
+
+    act(() => {
+      result.current.setQuery('something');
+      result.current.clearSearch();
+    });
+
+    expect(result.current.query).toBe('');
+    expect(result.current.results).toEqual([]);
   });
 });
