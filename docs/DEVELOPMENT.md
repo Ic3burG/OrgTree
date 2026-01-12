@@ -31,6 +31,45 @@ Directory (main container)
 └── DetailPanel
 ```
 
+### Package Management & Build System
+
+**Architecture**: Multi-Package Repository (NOT a monorepo)
+
+This project uses a **multi-package structure** with independent frontend and backend packages, not NPM workspaces. This is an important architectural decision:
+
+**Why No Workspaces?**
+
+- **Independent Dependencies**: Frontend and backend have completely separate dependency trees
+- **Separate Lockfiles**: Each package maintains its own `package-lock.json`
+- **Isolated Builds**: CI runs `npm ci` independently in each directory
+- **No Hoisting**: Dependencies stay in their respective `node_modules` directories
+
+**When to Use Workspaces vs. Multi-Package:**
+
+Use NPM Workspaces when:
+- Dependencies should be hoisted to a single root `node_modules`
+- Cross-package references use `workspace:` protocol
+- All packages share a single lockfile
+- Packages need to reference each other during development
+
+Use Multi-Package (like OrgTree) when:
+- Frontend and backend are truly independent services
+- Each package has distinct dependency requirements
+- Packages deploy separately (frontend to CDN, backend to server)
+- No cross-package imports or shared code
+
+**Common Pitfall**: Adding `"workspaces"` configuration to a multi-package repo can cause dependency resolution errors in CI because it tries to hoist dependencies that should remain isolated (like ESLint plugins or framework-specific tools).
+
+**Testing Both Packages:**
+
+```bash
+# Run all tests (frontend + backend)
+npm run test:all    # Runs: npm test && cd server && npm test
+
+# Run all linters
+npm run lint:all    # Runs: npm run lint && cd server && npm run lint
+```
+
 ### State Management
 
 The `Directory` component manages all application state:
