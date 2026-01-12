@@ -27,9 +27,23 @@ router.get(
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const orgId = req.params.orgId!;
+      const userId = req.user!.id;
 
       // Security: Verify user has admin permission using standard pattern
-      requireOrgPermission(orgId, req.user!.id, 'admin');
+      // Log the permission check for debugging
+      try {
+        requireOrgPermission(orgId, userId, 'admin');
+      } catch (permError) {
+        // Enhanced error logging for permission failures
+        console.error('[Members] Permission check failed:', {
+          orgId,
+          userId,
+          userEmail: req.user!.email,
+          error: (permError as Error).message,
+          status: (permError as { status?: number }).status,
+        });
+        throw permError;
+      }
 
       const members = getOrgMembers(orgId);
 

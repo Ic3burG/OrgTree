@@ -58,10 +58,12 @@ export function checkOrgAccess(orgId: string, userId: string): OrgAccessResult {
     | undefined;
 
   if (!org) {
+    console.error('[checkOrgAccess] Organization not found:', { orgId, userId });
     return { hasAccess: false, role: null, isOwner: false };
   }
 
   if (org.created_by_id === userId) {
+    console.log('[checkOrgAccess] User is owner:', { orgId, userId, role: 'owner' });
     return { hasAccess: true, role: 'owner', isOwner: true };
   }
 
@@ -76,9 +78,15 @@ export function checkOrgAccess(orgId: string, userId: string): OrgAccessResult {
     .get(orgId, userId) as DatabaseMemberRecord | undefined;
 
   if (!member) {
+    console.error('[checkOrgAccess] User is not owner and not in organization_members:', {
+      orgId,
+      userId,
+      ownerUserId: org.created_by_id,
+    });
     return { hasAccess: false, role: null, isOwner: false };
   }
 
+  console.log('[checkOrgAccess] User is member:', { orgId, userId, role: member.role });
   return { hasAccess: true, role: member.role, isOwner: false };
 }
 
@@ -132,6 +140,8 @@ export function requireOrgPermission(
 
   return access; // Return access info for further use
 }
+
+
 
 // ============================================================================
 // Member Management Functions
