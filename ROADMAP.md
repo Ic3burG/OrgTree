@@ -36,7 +36,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [x] **CSRF Protection** - Add CSRF tokens for state-changing operations ✅ **DONE** (December 31, 2025)
 - [x] **Dependency Scanning Automation** - GitHub Dependabot or Snyk integration ✅ **DONE** (January 8, 2026)
 - [ ] **Penetration Testing** - Professional security assessment
-- [ ] **SQL Injection Testing** - Automated scanning for SQL injection vulnerabilities
+- [x] **SQL Injection Testing** - Automated scanning for SQL injection vulnerabilities ✅ **DONE** (January 11, 2026)
 - [ ] **Content Security Policy Tuning** - Refine CSP headers for tighter security
 
 ### Infrastructure & DevOps
