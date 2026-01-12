@@ -8,9 +8,6 @@
     "node": ">=20.0.0",
     "npm": ">=9.0.0"
   },
-  "workspaces": [
-    "server"
-  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
