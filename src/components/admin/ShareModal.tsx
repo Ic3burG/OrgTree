@@ -248,33 +248,35 @@ export default function ShareModal({
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-200">
+          <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-3">
               <Link2 className="text-blue-600" size={24} />
               <div>
-                <h2 className="text-xl font-semibold text-slate-900">Share Organization</h2>
-                <p className="text-sm text-slate-600 mt-1">{orgName}</p>
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+                  Share Organization
+                </h2>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{orgName}</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
             >
               <X size={24} />
             </button>
           </div>
 
           {/* Tabs - only show Team Members tab for admins */}
-          <div className="border-b border-slate-200">
+          <div className="border-b border-slate-200 dark:border-slate-700">
             <div className="flex px-6">
               <button
                 onClick={() => setActiveTab('public')}
                 className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
                   activeTab === 'public'
                     ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <Globe size={18} />
@@ -286,7 +288,7 @@ export default function ShareModal({
                   className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
                     activeTab === 'members'
                       ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-slate-600 hover:text-slate-900'
+                      : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <Users size={18} />
@@ -307,7 +309,7 @@ export default function ShareModal({
                 ) : (
                   <>
                     {/* Public/Private Toggle */}
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
                       <div className="flex items-center gap-3">
                         {isPublic ? (
                           <Globe className="text-green-600" size={20} />
@@ -315,10 +317,10 @@ export default function ShareModal({
                           <Lock className="text-slate-500" size={20} />
                         )}
                         <div>
-                          <p className="font-medium text-slate-900">
+                          <p className="font-medium text-slate-900 dark:text-white">
                             {isPublic ? 'Public' : 'Private'}
                           </p>
-                          <p className="text-sm text-slate-600">
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
                             {isPublic
                               ? 'Anyone with the link can view'
                               : 'Only team members can view'}
@@ -344,7 +346,7 @@ export default function ShareModal({
                     {/* Share Link */}
                     {isPublic && shareUrl && (
                       <div className="space-y-3">
-                        <label className="block text-sm font-medium text-slate-700">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                           Share Link
                         </label>
                         <div className="flex gap-2">
@@ -352,7 +354,7 @@ export default function ShareModal({
                             type="text"
                             value={shareUrl}
                             readOnly
-                            className="flex-1 px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-900 text-sm font-mono"
+                            className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm font-mono"
                           />
                           <button
                             onClick={handleCopyUrl}
@@ -377,7 +379,7 @@ export default function ShareModal({
                           <button
                             onClick={handleRegenerateToken}
                             disabled={saving}
-                            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors disabled:opacity-50"
+                            className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors disabled:opacity-50"
                           >
                             <RefreshCw size={16} />
                             Regenerate link
@@ -387,8 +389,8 @@ export default function ShareModal({
                     )}
 
                     {/* Info */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <p className="text-sm text-blue-800">
+                    <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <p className="text-sm text-blue-800 dark:text-blue-300">
                         {isPublic ? (
                           <>
                             <strong>Public sharing is enabled.</strong> Anyone with the link can
@@ -430,15 +432,19 @@ export default function ShareModal({
 
                     {/* Owner */}
                     {owner && (
-                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                      <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium">
                               {getInitials(owner.userName!)}
                             </div>
                             <div>
-                              <div className="font-medium text-gray-900">{owner.userName}</div>
-                              <div className="text-sm text-gray-500">{owner.userEmail}</div>
+                              <div className="font-medium text-gray-900 dark:text-white">
+                                {owner.userName}
+                              </div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {owner.userEmail}
+                              </div>
                             </div>
                           </div>
                           <span
@@ -453,11 +459,13 @@ export default function ShareModal({
                     {/* Members List */}
                     {members.length > 0 ? (
                       <div className="space-y-2">
-                        <h3 className="text-sm font-medium text-gray-700">Members</h3>
+                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Members
+                        </h3>
                         {members.map((member: OrgMemberWithDetails) => (
                           <div
                             key={member.id}
-                            className="bg-white border border-gray-200 rounded-lg p-4"
+                            className="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg p-4"
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3 flex-1">
@@ -465,8 +473,10 @@ export default function ShareModal({
                                   {getInitials(member.userName!)}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="font-medium text-gray-900">{member.userName}</div>
-                                  <div className="text-sm text-gray-500 truncate">
+                                  <div className="font-medium text-gray-900 dark:text-white">
+                                    {member.userName}
+                                  </div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
                                     {member.userEmail}
                                   </div>
                                 </div>
@@ -479,7 +489,7 @@ export default function ShareModal({
                                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                                         handleUpdateRole(member.id, e.target.value)
                                       }
-                                      className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      className="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     >
                                       <option value="viewer">Viewer</option>
                                       <option value="editor">Editor</option>
@@ -508,9 +518,9 @@ export default function ShareModal({
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-8 text-gray-500">
+                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                         <Users size={48} className="mx-auto mb-3 text-gray-300" />
-                        <p className="font-medium">No team members yet</p>
+                        <p className="font-medium dark:text-gray-300">No team members yet</p>
                         <p className="text-sm mt-1">
                           Add members to collaborate on this organization
                         </p>
@@ -520,11 +530,13 @@ export default function ShareModal({
                     {/* Pending Invitations */}
                     {invitations.length > 0 && (
                       <div className="space-y-2">
-                        <h3 className="text-sm font-medium text-gray-700">Pending Invitations</h3>
+                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Pending Invitations
+                        </h3>
                         {invitations.map((invitation: InvitationWithDetails) => (
                           <div
                             key={invitation.id}
-                            className="bg-amber-50 border border-amber-200 rounded-lg p-4"
+                            className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4"
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3 flex-1">
@@ -544,13 +556,13 @@ export default function ShareModal({
                                   </svg>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="font-medium text-gray-900">
+                                  <div className="font-medium text-gray-900 dark:text-white">
                                     {invitation.email}
                                   </div>
-                                  <div className="text-sm text-gray-600">
+                                  <div className="text-sm text-gray-600 dark:text-gray-400">
                                     Invited by {invitation.invitedByName} • {invitation.role}
                                   </div>
-                                  <div className="text-xs text-gray-500 mt-1">
+                                  <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                                     Sent {new Date(invitation.created_at).toLocaleDateString()}
                                   </div>
                                 </div>
@@ -578,11 +590,11 @@ export default function ShareModal({
                     )}
 
                     {/* Permission Info */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <p className="text-sm text-blue-800">
+                    <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <p className="text-sm text-blue-800 dark:text-blue-300">
                         <strong>Permission Levels:</strong>
                       </p>
-                      <ul className="text-sm text-blue-800 mt-2 space-y-1 list-disc list-inside">
+                      <ul className="text-sm text-blue-800 dark:text-blue-300 mt-2 space-y-1 list-disc list-inside">
                         <li>
                           <strong>Viewer:</strong> Can view the organization
                         </li>
@@ -602,10 +614,10 @@ export default function ShareModal({
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end gap-3 p-6 border-t border-slate-200">
+          <div className="flex justify-end gap-3 p-6 border-t border-slate-200 dark:border-slate-700">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+              className="px-4 py-2 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
             >
               Close
             </button>
