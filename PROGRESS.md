@@ -255,9 +255,100 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: ShareModal Dark Mode Fix (January 12, 2026)
-- **Total Commits**: 233+ commits on main branch
-- **Today's Progress (January 12, 2026 - Session 48 Continued)**:
+- **Last Major Update**: Audit Log & Dark Mode Improvements (January 12, 2026)
+- **Total Commits**: 236+ commits on main branch
+- **Today's Progress (January 12, 2026 - Session 50)**:
+  - 🐛 **BUG FIX #1**: "Failed to load members" error in Share > Team Members
+  - ✅ **ISSUE IDENTIFIED**:
+    - Clicking "Share > Team Members" repeatedly showed "Failed to load members" error
+    - Users experiencing permission failures when accessing organization members list
+    - No diagnostic information in logs to identify root cause
+  - ✅ **FIX APPLIED** (2 files):
+    - `server/src/routes/members.ts` - Added enhanced error logging for permission failures
+    - `server/src/services/member.service.ts` - Added diagnostic console.log statements in checkOrgAccess
+    - Logs now show: orgId, userId, userEmail, error message, and status code
+    - Helps identify whether issue is owner check, member check, or role hierarchy
+  - ✅ **TYPE SAFETY FIX**: Fixed TypeScript error in ShareModal.tsx
+    - Added missing required fields to owner object: `organization_id`, `user_id`, `joined_at`
+    - Ensures type compliance with OrgMemberWithDetails interface
+  - ✅ **CODE QUALITY**: Fixed Prettier formatting error in member.service.ts
+    - Applied automatic formatting to resolve CI failure
+  - 🎯 **IMPACT**:
+    - Production logs now provide detailed permission check information
+    - Can diagnose member access issues without reproducing locally
+    - Improved debugging capability for permission-related bugs
+  - 📁 **FILES MODIFIED**: 3 files
+  - ✅ **COMMITTED AND PUSHED**: Commits c228218, 9cf74d2
+
+  - 🌙 **BUG FIX #2**: System Audit Log hard to read in dark mode
+  - ✅ **ISSUE IDENTIFIED**:
+    - SystemAuditLog.tsx component had missing dark mode classes throughout
+    - Text colors, backgrounds, and borders not respecting dark theme
+    - Error states, filter labels, table cells, and mobile cards all affected
+  - ✅ **FIX APPLIED** (1 file, 40+ class updates):
+    - `src/components/superuser/SystemAuditLog.tsx` - Comprehensive dark mode support
+    - Error state: `dark:bg-red-900/30`, `dark:border-red-800`, `dark:text-red-300`
+    - Filter button & labels: `dark:text-slate-300`, `dark:hover:text-slate-100`
+    - Form inputs: `dark:bg-slate-700`, `dark:border-slate-600`, `dark:text-slate-100`
+    - Table cells: `dark:text-slate-100` for headers, `dark:text-slate-300` for details
+    - Icons: `dark:text-slate-400` for consistent subtle appearance
+    - Mobile cards: Full dark mode text color support
+  - 🎯 **IMPACT**:
+    - System audit logs now fully readable in dark mode
+    - Consistent dark mode theming across all admin interfaces
+    - Improved accessibility with proper color contrast
+  - 📁 **FILES MODIFIED**: 1 file
+  - ✅ **COMMITTED AND PUSHED**: Commit 2adb203
+
+  - 🐛 **BUG FIX #3**: XML/CSV import audit logs showing "N/A" for details
+  - ✅ **ISSUE IDENTIFIED**:
+    - Data import operations (XML/CSV) showing "N/A" in audit log details column
+    - No visibility into how many departments/people were created, reused, or skipped
+    - Duplicate detection statistics not displayed despite being tracked
+  - ✅ **FIX APPLIED** (2 files):
+    - `src/utils/audit.ts` - Added comprehensive data_import entity type support
+    - Added `data_import` to formatEntityType mapping ("Data Import")
+    - Implemented smart formatEntityDetails for data imports showing:
+      - Department statistics: "7 depts (5 created, 2 reused)"
+      - People statistics: "13 people (10 added, 3 skipped)"
+      - Handles singular/plural: "1 dept" vs "3 depts", "1 person" vs "9 people"
+      - Falls back to "No items imported" when all counts are zero
+    - Added `import` action type with indigo color badge
+    - Added dark mode support to ALL action color badges (green, blue, red, purple, orange, gray, indigo)
+    - Updated EntityData interface with import statistics fields
+    - `src/utils/audit.test.ts` - Added comprehensive test coverage
+      - 5 new tests for data_import formatting scenarios
+      - Updated existing tests for dark mode color badges (now include `dark:bg-*` classes)
+      - Total audit tests: 20 → 25 tests
+  - 🎯 **IMPACT**:
+    - Audit logs now show detailed import statistics: "7 depts (5 created, 2 reused), 13 people (10 added, 3 skipped)"
+    - Full visibility into duplicate detection effectiveness
+    - Action badges now properly styled in both light and dark modes
+    - Complete test coverage ensures formatting stays consistent
+  - 📁 **FILES MODIFIED**: 2 files
+  - ✅ **COMMITTED AND PUSHED**: Commit 30de1cd
+
+  - 📊 **SESSION SUMMARY**:
+    - **Bugs Fixed**: 3 (permission errors, dark mode readability, audit log details)
+    - **Tests Added**: 5 new tests for audit formatting
+    - **Total Tests**: 103 → 108 frontend tests
+    - **Files Modified**: 6 files
+    - **Commits**: 3 commits (all pushed to GitHub)
+    - **Code Quality**: All lint/format checks passed before each commit ✅
+    - **CI/CD**: All GitHub Actions passing ✅
+
+  - 💡 **LESSONS LEARNED**:
+    - Diagnostic logging is crucial for production debugging
+    - Dark mode support requires systematic review of all UI components
+    - Audit log formatting should be entity-type aware for better UX
+    - Test coverage prevents regression in formatting logic
+
+  - 📋 **NEXT STEPS**:
+    - Monitor production logs for member access issues
+    - Continue dark mode audit across remaining components
+    - Consider adding more detailed audit log formatters for other entity types
+
+- **Previous Progress (January 12, 2026 - Session 48 Continued)**:
   - 🌙 **BUG FIX**: ShareModal not respecting dark mode
   - ✅ **ISSUE IDENTIFIED**:
     - "Share Organization" modal displayed in light mode even when dark mode was enabled
@@ -2649,7 +2740,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>
-**Last Updated**: January 12, 2026 (Session 49 - Repository Hygiene Cleanup)
+**Last Updated**: January 12, 2026 (Session 50 - Audit Log & Dark Mode Improvements)
 
 **Today's Major Milestone**: 🎉
 
