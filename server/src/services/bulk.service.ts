@@ -474,6 +474,26 @@ export function bulkDeleteDepartments(
   const deleteTransaction = db.transaction(() => {
     for (const deptId of departmentIds) {
       try {
+        // First check if department exists at all (even if soft-deleted)
+        const deptCheck = db
+          .prepare(
+            `
+          SELECT id, deleted_at FROM departments
+          WHERE id = ? AND organization_id = ?
+        `
+          )
+          .get(deptId, orgId) as { id: string; deleted_at: string | null } | undefined;
+
+        if (!deptCheck) {
+          failed.push({ id: deptId, error: 'Department not found in this organization' });
+          continue;
+        }
+
+        // If already deleted (by cascade from parent department), skip silently
+        if (deptCheck.deleted_at !== null) {
+          continue;
+        }
+
         // Get full department data before delete (for audit trail)
         const dept = db
           .prepare(
@@ -486,6 +506,7 @@ export function bulkDeleteDepartments(
           .get(deptId, orgId) as DeletedDepartment | undefined;
 
         if (!dept) {
+          // This shouldn't happen since we just checked, but handle it anyway
           failed.push({ id: deptId, error: 'Department not found in this organization' });
           continue;
         }
