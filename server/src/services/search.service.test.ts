@@ -94,13 +94,16 @@ vi.mock('./member.service.js', () => ({
 
 // Mock escape utility
 vi.mock('../utils/escape.js', () => ({
-  escapeHtml: (str: string) => {
-    return str
+  escapeHtml: (str: string | null | undefined) => {
+    if (str === null || str === undefined) return '';
+    return String(str)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+      .replace(/'/g, '&#39;')
+      .replace(/`/g, '&#x60;')
+      .replace(/=/g, '&#x3D;');
   },
 }));
 

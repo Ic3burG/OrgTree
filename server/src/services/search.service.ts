@@ -178,6 +178,7 @@ function searchDepartments(
         parentId: row.parentId,
         highlight: escapeHtml(row.nameHighlight || row.descHighlight)
           .replace(/&lt;mark&gt;/g, '<mark>')
+          .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
           .replace(/&lt;\/mark&gt;/g, '</mark>'),
         peopleCount: row.peopleCount,
       })
@@ -250,6 +251,7 @@ function searchPeople(
         departmentName: row.departmentName,
         highlight: escapeHtml(row.nameHighlight || row.titleHighlight || row.emailHighlight)
           .replace(/&lt;mark&gt;/g, '<mark>')
+          .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
           .replace(/&lt;\/mark&gt;/g, '</mark>'),
       })
     ),
