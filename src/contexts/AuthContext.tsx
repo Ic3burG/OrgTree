@@ -21,6 +21,7 @@ interface AuthContextValue {
   isAdmin: boolean;
   canManageUsers: boolean;
   hasRole: (role: string) => boolean;
+  setUser: (user: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -118,8 +119,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isAdmin: user?.role === 'admin' || user?.role === 'superuser',
       canManageUsers: user?.role === 'superuser',
       hasRole,
+      setUser,
     }),
-    [user, loading, login, signup, logout, hasRole]
+    [user, loading, login, signup, logout, hasRole, setUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

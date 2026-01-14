@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  Monitor,
-  Smartphone,
-  Trash2,
-  Shield,
-  ArrowLeft,
-  RefreshCw,
-  AlertCircle,
-} from 'lucide-react';
+import { Monitor, Smartphone, Trash2, Shield, RefreshCw, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
 import type { Session } from '../../types/index.js';
@@ -22,7 +13,6 @@ interface RevokeOthersResponse {
 }
 
 export default function SessionsPage(): React.JSX.Element {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

@@ -3,7 +3,6 @@ import {
   Fingerprint,
   Trash2,
   Plus,
-  Shield,
   AlertCircle,
   CheckCircle,
   Smartphone,
