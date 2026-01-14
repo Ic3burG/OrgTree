@@ -159,7 +159,7 @@ export async function updateFieldDefinition(
   await requireOrgPermission(current.organization_id, userId, 'admin');
 
   const updates: string[] = [];
-  const params: any[] = [];
+  const params: (string | number)[] = [];
 
   if (data.name !== undefined) {
     updates.push('name = ?');
@@ -248,7 +248,7 @@ export async function reorderFieldDefinitions(
 export function getCustomHeaderFields(
   entityType: 'person' | 'department',
   entityId: string
-): Record<string, any> {
+): Record<string, unknown> {
   const rows = db
     .prepare(
       `
@@ -260,7 +260,7 @@ export function getCustomHeaderFields(
     )
     .all(entityType, entityId) as { field_key: string; value: string }[];
 
-  const result: Record<string, any> = {};
+  const result: Record<string, unknown> = {};
   for (const row of rows) {
     // Attempt to parse JSON values for select/multiselect if needed,
     // but for now we treat everything as string or let the frontend parse it.
@@ -277,7 +277,7 @@ export async function setEntityCustomFields(
   orgId: string,
   entityType: 'person' | 'department',
   entityId: string,
-  customFields: Record<string, any>
+  customFields: Record<string, unknown>
 ): Promise<void> {
   // Get all definitions for this org to map keys to IDs
   const definitions = db
@@ -353,7 +353,7 @@ function validateValue(def: DatabaseCustomFieldDefinition, value: string): void 
             throw new Error(`Invalid options for field ${def.name}`);
           }
         }
-      } catch (e) {
+      } catch {
         throw new Error(`Invalid multiselect format for field ${def.name}`);
       }
       break;

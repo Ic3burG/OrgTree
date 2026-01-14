@@ -46,7 +46,7 @@ interface PersonResponse {
   sort_order: number;
   created_at: string;
   updated_at: string;
-  custom_fields?: Record<string, any>;
+  custom_fields?: Record<string, unknown>;
 }
 
 export function getPeopleByDepartment(deptId: string, userId: string): PersonResponse[] {
@@ -143,7 +143,7 @@ export async function createPerson(
     title?: string;
     email?: string;
     phone?: string;
-    customFields?: Record<string, any>;
+    customFields?: Record<string, unknown>;
   },
   userId: string
 ): Promise<PersonResponse> {
@@ -250,7 +250,7 @@ export async function updatePerson(
     email?: string;
     phone?: string;
     departmentId?: string;
-    customFields?: Record<string, any>;
+    customFields?: Record<string, unknown>;
   },
   userId: string
 ): Promise<PersonResponse> {

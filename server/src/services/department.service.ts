@@ -33,7 +33,7 @@ interface DepartmentWithPeople {
     created_at: string;
     updated_at: string;
   }>;
-  custom_fields?: Record<string, any>;
+  custom_fields?: Record<string, unknown>;
 }
 
 export function getDepartments(orgId: string, userId: string): DepartmentWithPeople[] {
@@ -158,7 +158,7 @@ export function getDepartmentById(
 
   // Fetch custom fields
   const customFields = getCustomHeaderFields('department', deptId);
-  (result as any).custom_fields = customFields;
+  (result as DepartmentWithPeople).custom_fields = customFields;
 
   return result;
 }
@@ -169,7 +169,7 @@ export async function createDepartment(
     name: string;
     description?: string;
     parentId?: string | null;
-    customFields?: Record<string, any>;
+    customFields?: Record<string, unknown>;
   },
   userId: string
 ): Promise<DepartmentWithPeople> {
@@ -239,7 +239,7 @@ export async function updateDepartment(
     name?: string;
     description?: string;
     parentId?: string | null;
-    customFields?: Record<string, any>;
+    customFields?: Record<string, unknown>;
   },
   userId: string
 ): Promise<DepartmentWithPeople> {
