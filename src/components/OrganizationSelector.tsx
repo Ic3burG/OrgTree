@@ -1,6 +1,6 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, LogOut, Trash2, Edit, Shield } from 'lucide-react';
+import { Building2, Plus, LogOut, Trash2, Edit, Shield, Settings } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import DarkModeToggle from './ui/DarkModeToggle';
 import api from '../api/client';
@@ -163,6 +163,13 @@ export default function OrganizationSelector(): React.JSX.Element {
                 System Admin
               </button>
             )}
+            <button
+              onClick={() => navigate('/settings')}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            >
+              <Settings size={18} />
+              Settings
+            </button>
             <DarkModeToggle />
             <button
               onClick={handleLogout}
