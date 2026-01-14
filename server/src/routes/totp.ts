@@ -1,12 +1,12 @@
 import { Router, type Response } from 'express';
-import { verifyTotp } from '../services/totp.service.js';
+import { verifyTotp, setupTotp, verifyAndEnableTotp } from '../services/totp.service.js';
 import {
   generateToken,
   generateRefreshToken,
   storeRefreshToken,
 } from '../services/auth.service.js';
 import db from '../db.js';
-import type { DatabaseUser } from '../types/index.js';
+import type { DatabaseUser, AuthRequest } from '../types/index.js';
 
 const router = Router();
 
@@ -75,6 +75,117 @@ router.post('/verify-login', async (req, res: Response): Promise<void> => {
   } catch (error) {
     console.error('2FA login verification error:', error);
     res.status(500).json({ error: 'Failed to verify 2FA' });
+  }
+});
+
+/**
+ * POST /api/auth/2fa/setup
+ * Initialize 2FA setup for authenticated user
+ * Returns secret, QR code, and backup codes
+ */
+router.post('/setup', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const user = db.prepare('SELECT email FROM users WHERE id = ?').get(userId) as
+      | { email: string }
+      | undefined;
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const result = await setupTotp(userId, user.email);
+    res.json(result);
+  } catch (error) {
+    console.error('2FA setup error:', error);
+    res.status(500).json({ error: 'Failed to setup 2FA' });
+  }
+});
+
+/**
+ * GET /api/auth/2fa/status
+ * Get current 2FA status for authenticated user
+ */
+router.get('/status', (req: AuthRequest, res: Response): void => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const user = db.prepare('SELECT totp_enabled FROM users WHERE id = ?').get(userId) as
+      | { totp_enabled: number }
+      | undefined;
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    res.json({ enabled: user.totp_enabled === 1 });
+  } catch (error) {
+    console.error('2FA status error:', error);
+    res.status(500).json({ error: 'Failed to get 2FA status' });
+  }
+});
+
+/**
+ * POST /api/auth/2fa/verify
+ * Verify TOTP token and enable 2FA for authenticated user
+ */
+router.post('/verify', (req: AuthRequest, res: Response): void => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { token } = req.body;
+    if (!token) {
+      res.status(400).json({ error: 'Token is required' });
+      return;
+    }
+
+    const success = verifyAndEnableTotp(userId, token);
+
+    if (success) {
+      res.json({ success: true });
+    } else {
+      res.status(400).json({ error: 'Invalid token', success: false });
+    }
+  } catch (error) {
+    console.error('2FA verification error:', error);
+    res.status(500).json({ error: 'Failed to verify 2FA' });
+  }
+});
+
+/**
+ * POST /api/auth/2fa/disable
+ * Disable 2FA for authenticated user
+ */
+router.post('/disable', (req: AuthRequest, res: Response): void => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    // Disable 2FA and clear secret
+    db.prepare('UPDATE users SET totp_enabled = 0, totp_secret = NULL WHERE id = ?').run(userId);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('2FA disable error:', error);
+    res.status(500).json({ error: 'Failed to disable 2FA' });
   }
 });
 
