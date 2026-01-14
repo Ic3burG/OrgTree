@@ -601,6 +601,73 @@ try {
   console.error('Migration error (performance indexes):', err);
 }
 
+// Migration: Add custom fields tables
+try {
+  const tables = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+    .all() as TableNameRow[];
+  const tableNames = tables.map(t => t.name);
+
+  if (!tableNames.includes('custom_field_definitions')) {
+    db.exec(`
+      CREATE TABLE custom_field_definitions (
+        id TEXT PRIMARY KEY,
+        organization_id TEXT NOT NULL,
+        entity_type TEXT NOT NULL CHECK(entity_type IN ('person', 'department')),
+        name TEXT NOT NULL,
+        field_key TEXT NOT NULL,
+        field_type TEXT NOT NULL CHECK(field_type IN ('text', 'number', 'date', 'select', 'multiselect', 'url', 'email', 'phone')),
+        options TEXT,
+        is_required BOOLEAN DEFAULT 0,
+        is_searchable BOOLEAN DEFAULT 1,
+        sort_order INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+        UNIQUE(organization_id, entity_type, field_key)
+      );
+
+      CREATE INDEX idx_custom_field_defs_org ON custom_field_definitions(organization_id, entity_type);
+    `);
+    console.log('Migration: Created custom_field_definitions table');
+  }
+
+  if (!tableNames.includes('custom_field_values')) {
+    db.exec(`
+      CREATE TABLE custom_field_values (
+        id TEXT PRIMARY KEY,
+        field_definition_id TEXT NOT NULL,
+        entity_type TEXT NOT NULL CHECK(entity_type IN ('person', 'department')),
+        entity_id TEXT NOT NULL,
+        value TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (field_definition_id) REFERENCES custom_field_definitions(id) ON DELETE CASCADE,
+        UNIQUE(field_definition_id, entity_id)
+      );
+
+      CREATE INDEX idx_custom_field_values_entity ON custom_field_values(entity_type, entity_id);
+      CREATE INDEX idx_custom_field_values_def ON custom_field_values(field_definition_id);
+    `);
+    console.log('Migration: Created custom_field_values table');
+  }
+
+  if (!tableNames.includes('custom_fields_fts')) {
+    db.exec(`
+      CREATE VIRTUAL TABLE custom_fields_fts USING fts5(
+        entity_type,
+        entity_id UNINDEXED, -- We don't need to search BY ID, but we need to retrieve it
+        field_values,
+        content='',
+        tokenize='porter unicode61 remove_diacritics 2'
+      );
+    `);
+    console.log('Migration: Created custom_fields_fts table');
+  }
+} catch (err) {
+  console.error('Migration error (custom fields tables):', err);
+}
+
 console.log('Database initialized at:', dbPath);
 
 export default db;

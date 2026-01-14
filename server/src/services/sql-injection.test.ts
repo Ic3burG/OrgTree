@@ -319,8 +319,8 @@ describe('SQL Injection Security Tests', () => {
 
     describe('createDepartment() with injected name', () => {
       SQL_INJECTION_PAYLOADS.forEach(payload => {
-        it(`should safely store payload as literal name: ${payload.substring(0, 30)}...`, () => {
-          const dept = createDepartment(
+        it(`should safely store payload as literal name: ${payload.substring(0, 30)}...`, async () => {
+          const dept = await createDepartment(
             orgId,
             { name: payload, description: 'Test description' },
             userId
@@ -335,10 +335,10 @@ describe('SQL Injection Security Tests', () => {
     });
 
     describe('updateDepartment() with injected values', () => {
-      it('should safely handle SQL in name update', () => {
+      it('should safely handle SQL in name update', async () => {
         const payload = "'; DROP TABLE departments; --";
 
-        const updated = updateDepartment(orgId, deptId, { name: payload }, userId);
+        const updated = await updateDepartment(orgId, deptId, { name: payload }, userId);
 
         // Payload stored as literal, not executed
         expect(updated.name).toBe(payload);
@@ -348,10 +348,10 @@ describe('SQL Injection Security Tests', () => {
         expect(allDepts.length).toBeGreaterThan(0);
       });
 
-      it('should safely handle SQL in description update', () => {
+      it('should safely handle SQL in description update', async () => {
         const payload = "' UNION SELECT * FROM users --";
 
-        const updated = updateDepartment(orgId, deptId, { description: payload }, userId);
+        const updated = await updateDepartment(orgId, deptId, { description: payload }, userId);
 
         expect(updated.description).toBe(payload);
       });
@@ -383,20 +383,18 @@ describe('SQL Injection Security Tests', () => {
     });
 
     describe('createPerson() with injected fields (valid deptId)', () => {
-      it('should safely store SQL injection in name field', () => {
+      it('should safely store SQL injection in name field', async () => {
         const payload = "'; DELETE FROM people; --";
 
-        const person = createPerson(
+        const person = await createPerson(
           deptId,
           {
             name: payload,
-            title: 'Engineer',
-            email: 'safe@example.com',
+            title: 'Test',
+            email: `test-${Date.now()}@example.com`,
           },
           userId
         );
-
-        // Payload stored as literal
         expect(person.name).toBe(payload);
 
         // Verify no deletion occurred
@@ -404,33 +402,33 @@ describe('SQL Injection Security Tests', () => {
         expect(people.length).toBeGreaterThan(0);
       });
 
-      it('should safely store SQL injection in email field', () => {
+      it('should safely store SQL injection in email field', async () => {
         const payload = "test@example.com' OR '1'='1";
 
-        const person = createPerson(
+        const person = await createPerson(
           deptId,
           {
-            name: 'Test Person',
+            name: 'Test Name',
+            title: 'Test',
             email: payload,
           },
           userId
         );
-
         expect(person.email).toBe(payload);
       });
 
-      it('should safely store SQL injection in title field', () => {
+      it('should safely store SQL injection in title field', async () => {
         const payload = "Engineer'; DROP TABLE people; --";
 
-        const person = createPerson(
+        const person = await createPerson(
           deptId,
           {
-            name: 'Test Person',
+            name: 'Test Name',
             title: payload,
+            email: `test-${Date.now()}@example.com`,
           },
           userId
         );
-
         expect(person.title).toBe(payload);
 
         // Table still exists

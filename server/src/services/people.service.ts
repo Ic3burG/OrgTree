@@ -2,6 +2,7 @@ import db from '../db.js';
 import { randomUUID } from 'crypto';
 import { requireOrgPermission } from './member.service.js';
 import type { DatabaseDepartment, DatabasePerson, AppError } from '../types/index.js';
+import { getCustomHeaderFields, setEntityCustomFields } from './custom-fields.service.js';
 
 interface DepartmentWithOrg extends DatabaseDepartment {
   organizationId: string;
@@ -45,6 +46,7 @@ interface PersonResponse {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  custom_fields?: Record<string, any>;
 }
 
 export function getPeopleByDepartment(deptId: string, userId: string): PersonResponse[] {
@@ -112,8 +114,13 @@ export function getPersonById(personId: string, userId: string): PersonWithDepar
 
   // Clean up the response to match expected format
   const { departmentName, organizationId, organizationName, orgCreatedBy, ...personData } = person;
+  
+  // Fetch custom fields
+  const customFields = getCustomHeaderFields('person', person.id);
+
   const result: PersonWithDepartment = {
     ...personData,
+    custom_fields: customFields,
     department: {
       id: person.department_id,
       name: departmentName,
@@ -129,19 +136,20 @@ export function getPersonById(personId: string, userId: string): PersonWithDepar
   return result;
 }
 
-export function createPerson(
+export async function createPerson(
   deptId: string,
   data: {
     name: string;
     title?: string;
     email?: string;
     phone?: string;
+    customFields?: Record<string, any>;
   },
   userId: string
-): PersonResponse {
+): Promise<PersonResponse> {
   const dept = verifyDeptAccess(deptId, userId, 'editor');
 
-  const { name, title, email, phone } = data;
+  const { name, title, email, phone, customFields } = data;
 
   // Check for duplicates
   if (email && email.trim()) {
@@ -210,7 +218,12 @@ export function createPerson(
   `
   ).run(personId, deptId, name, title || null, email || null, phone || null, sortOrder, now, now);
 
-  return db
+  // Save custom fields if provided
+  if (customFields) {
+    await setEntityCustomFields(dept.organizationId, 'person', personId, customFields);
+  }
+
+  const createdPerson = db
     .prepare(
       `
     SELECT
@@ -221,9 +234,15 @@ export function createPerson(
   `
     )
     .get(personId) as PersonResponse;
+
+  if (customFields) {
+    createdPerson.custom_fields = customFields;
+  }
+
+  return createdPerson;
 }
 
-export function updatePerson(
+export async function updatePerson(
   personId: string,
   data: {
     name?: string;
@@ -231,12 +250,13 @@ export function updatePerson(
     email?: string;
     phone?: string;
     departmentId?: string;
+    customFields?: Record<string, any>;
   },
   userId: string
-): PersonResponse {
+): Promise<PersonResponse> {
   const person = getPersonById(personId, userId);
 
-  const { name, title, email, phone, departmentId } = data;
+  const { name, title, email, phone, departmentId, customFields } = data;
 
   // If moving to new department, verify access to that department
   if (departmentId && departmentId !== person.department_id) {
@@ -329,7 +349,17 @@ export function updatePerson(
     personId
   );
 
-  return db
+  // Update custom fields if provided
+  if (customFields) {
+    await setEntityCustomFields(
+      person.department.organizationId,
+      'person',
+      personId,
+      customFields
+    );
+  }
+
+  const updatedPerson = db
     .prepare(
       `
     SELECT
@@ -340,6 +370,11 @@ export function updatePerson(
   `
     )
     .get(personId) as PersonResponse;
+
+  // Attach custom fields to response
+  updatedPerson.custom_fields = getCustomHeaderFields('person', personId);
+
+  return updatedPerson;
 }
 
 export function deletePerson(personId: string, userId: string): { success: boolean } {
@@ -357,6 +392,6 @@ export function deletePerson(personId: string, userId: string): { success: boole
   return { success: true };
 }
 
-export function movePerson(personId: string, newDeptId: string, userId: string): PersonResponse {
+export async function movePerson(personId: string, newDeptId: string, userId: string): Promise<PersonResponse> {
   return updatePerson(personId, { departmentId: newDeptId }, userId);
 }

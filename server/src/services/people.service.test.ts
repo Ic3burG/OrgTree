@@ -179,9 +179,16 @@ describe('People Service', () => {
   });
 
   describe('createPerson', () => {
-    it('should create a new person', () => {
-      const person = createPerson(deptId, { name: 'New Person', title: 'Developer' }, userId);
-
+    it('should create a new person', async () => {
+      const person = await createPerson(
+        deptId,
+        {
+          name: 'New Person',
+          title: 'Developer',
+          email: 'new@example.com',
+        },
+        userId
+      );
       expect(person.name).toBe('New Person');
       expect(person.title).toBe('Developer');
       expect(requireOrgPermission).toHaveBeenCalledWith(orgId, userId, 'editor');
@@ -189,7 +196,7 @@ describe('People Service', () => {
   });
 
   describe('updatePerson', () => {
-    it('should update person details', () => {
+    it('should update person details', async () => {
       (db as DatabaseType)
         .prepare(
           `
@@ -199,12 +206,11 @@ describe('People Service', () => {
         )
         .run(deptId);
 
-      const updated = updatePerson('person-1', { name: 'New Name' }, userId);
-
+      const updated = await updatePerson('person-1', { name: 'New Name' }, userId);
       expect(updated.name).toBe('New Name');
     });
 
-    it('should move person to a different department', () => {
+    it('should move person to a different department', async () => {
       const newDeptId = 'new-dept-id';
       (db as DatabaseType)
         .prepare(
@@ -224,8 +230,7 @@ describe('People Service', () => {
         )
         .run(deptId);
 
-      const updated = updatePerson('person-1', { departmentId: newDeptId }, userId);
-
+      const updated = await updatePerson('person-1', { departmentId: newDeptId }, userId);
       expect(updated.department_id).toBe(newDeptId);
     });
   });

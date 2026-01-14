@@ -58,6 +58,39 @@ export interface ShareSettings {
   share_url?: string;
 }
 
+// Custom Field types
+export type CustomFieldType =
+  | 'text'
+  | 'number'
+  | 'date'
+  | 'select'
+  | 'multiselect'
+  | 'url'
+  | 'email'
+  | 'phone';
+
+export interface CustomFieldDefinition {
+  id: string;
+  organization_id: string;
+  entity_type: 'person' | 'department';
+  name: string;
+  field_key: string;
+  field_type: CustomFieldType;
+  options: string[] | null;
+  is_required: boolean;
+  is_searchable: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CustomFieldValue {
+  id: string;
+  field_definition_id: string;
+  entity_id: string;
+  value: string | null;
+}
+
 // Department types
 export interface Department {
   id: string;
@@ -73,6 +106,7 @@ export interface Department {
   people?: Person[];
   children?: Department[];
   peopleCount?: number;
+  custom_fields?: Record<string, string | null>;
 }
 
 // Person types
@@ -89,6 +123,7 @@ export interface Person {
   updated_at: string;
   // Optional department info
   department_name?: string;
+  custom_fields?: Record<string, string | null>;
 }
 
 // Invitation types
@@ -108,6 +143,43 @@ export interface Invitation {
 }
 
 // Audit log types
+export interface DatabaseAuditLog {
+  id: string;
+  organizationId: string | null;
+  actorId: string | null;
+  actorName: string | null;
+  actionType: string;
+  entityType: string;
+  entityId: string | null;
+  entityData: string | null; // JSON string in SQLite
+  createdAt: string;
+}
+
+export interface DatabaseCustomFieldDefinition {
+  id: string;
+  organization_id: string;
+  entity_type: 'person' | 'department';
+  name: string;
+  field_key: string;
+  field_type: 'text' | 'number' | 'date' | 'select' | 'multiselect' | 'url' | 'email' | 'phone';
+  options: string | null; // JSON string in SQLite
+  is_required: number; // SQLite boolean (0 or 1)
+  is_searchable: number; // SQLite boolean (0 or 1)
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DatabaseCustomFieldValue {
+  id: string;
+  field_definition_id: string;
+  entity_type: 'person' | 'department';
+  entity_id: string;
+  value: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AuditLog {
   id: string;
   organization_id: string | null;

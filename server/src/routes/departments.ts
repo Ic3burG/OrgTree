@@ -50,7 +50,7 @@ router.post(
   '/organizations/:orgId/departments',
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { name, description, parentId } = req.body;
+      const { name, description, parentId, customFields } = req.body;
 
       if (!name || !name.trim()) {
         res.status(400).json({ message: 'Department name is required' });
@@ -63,6 +63,7 @@ router.post(
           name: name.trim(),
           description: description !== undefined ? String(description) : undefined,
           parentId: parentId !== undefined ? String(parentId) : undefined,
+          customFields,
         },
         req.user!.id
       );
@@ -86,7 +87,7 @@ router.put(
   '/organizations/:orgId/departments/:deptId',
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { name, description, parentId } = req.body;
+      const { name, description, parentId, customFields } = req.body;
 
       if (name !== undefined && !name.trim()) {
         res.status(400).json({ message: 'Department name cannot be empty' });
@@ -100,6 +101,7 @@ router.put(
           name: name?.trim(),
           description: description !== undefined ? String(description) : undefined,
           parentId: parentId !== undefined ? String(parentId) : undefined,
+          customFields,
         },
         req.user!.id
       );

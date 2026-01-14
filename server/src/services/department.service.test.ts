@@ -207,15 +207,15 @@ describe('Department Service', () => {
   });
 
   describe('createDepartment', () => {
-    it('should create a new department', () => {
-      const dept = createDepartment(orgId, { name: 'New Dept', description: 'Desc' }, userId);
+    it('should create a new department', async () => {
+      const dept = await createDepartment(orgId, { name: 'New Dept', description: 'Desc' }, userId);
 
       expect(dept.name).toBe('New Dept');
       expect(dept.description).toBe('Desc');
       expect(requireOrgPermission).toHaveBeenCalledWith(orgId, userId, 'editor');
     });
 
-    it('should create a department with a parent', () => {
+    it('should create a department with a parent', async () => {
       (db as DatabaseType)
         .prepare(
           `
@@ -225,7 +225,7 @@ describe('Department Service', () => {
         )
         .run(orgId);
 
-      const dept = createDepartment(orgId, { name: 'Child', parentId: 'parent-id' }, userId);
+      const dept = await createDepartment(orgId, { name: 'Child', parentId: 'parent-id' }, userId);
 
       expect(dept.parent_id).toBe('parent-id');
     });
@@ -238,7 +238,7 @@ describe('Department Service', () => {
   });
 
   describe('updateDepartment', () => {
-    it('should update department details', () => {
+    it('should update department details', async () => {
       (db as DatabaseType)
         .prepare(
           `
@@ -248,12 +248,12 @@ describe('Department Service', () => {
         )
         .run(orgId);
 
-      const updated = updateDepartment(orgId, 'dept-1', { name: 'New Name' }, userId);
+      const updated = await updateDepartment(orgId, 'dept-1', { name: 'New Name' }, userId);
 
       expect(updated.name).toBe('New Name');
     });
 
-    it('should change parent department', () => {
+    it('should change parent department', async () => {
       (db as DatabaseType)
         .prepare(
           `
@@ -263,12 +263,12 @@ describe('Department Service', () => {
         )
         .run(orgId, orgId);
 
-      const updated = updateDepartment(orgId, 'dept-1', { parentId: 'dept-2' }, userId);
+      const updated = await updateDepartment(orgId, 'dept-1', { parentId: 'dept-2' }, userId);
 
       expect(updated.parent_id).toBe('dept-2');
     });
 
-    it('should move to top level if parentId is null', () => {
+    it('should move to top level if parentId is null', async () => {
       (db as DatabaseType)
         .prepare(
           `
@@ -286,7 +286,7 @@ describe('Department Service', () => {
         )
         .run(orgId);
 
-      const updated = updateDepartment(orgId, 'dept-1', { parentId: null }, userId);
+      const updated = await updateDepartment(orgId, 'dept-1', { parentId: null }, userId);
 
       expect(updated.parent_id).toBeNull();
     });

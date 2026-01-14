@@ -16,18 +16,10 @@ import type {
 import db from '../db.js';
 import { randomUUID } from 'crypto';
 
+// Challenges are now stored in HTTP-only cookies to support stateless verification and conditional UI flows
 const rpName = process.env.RP_NAME || 'OrgTree';
 const rpID = process.env.RP_ID || 'localhost';
 const origin = process.env.ORIGIN || 'http://localhost:5173';
-
-// Helper to get user current challenge from DB (stored in users table or separate table?)
-// For simplicity, we can store the current challenge in the users table or a temporary store.
-// Since better-sqlite3 is synchronous, we can just use a simple in-memory map for challenges if we want,
-// but for production with multiple instances (though sqlite suggests single instance), DB is better.
-// However, the `users` table schema in db.ts doesn't show a challenge column.
-// We can modify the schema or use a separate table, or just use an in-memory Map for now since this is likely a single-instance deployment (SQLite).
-// Let's use an in-memory Map for challenges for now, keyed by userId.
-const userChallenges = new Map<string, string>();
 
 interface Passkey {
   id: string;
@@ -68,22 +60,23 @@ export async function generatePasskeyRegistrationOptions(userId: string, userEma
 
   const options = await generateRegistrationOptions(opts);
 
-  // Store challenge
-  userChallenges.set(userId, options.challenge);
+  // Challenge is returned to be stored by controller (e.g. in cookie)
 
   return options;
 }
 
-export async function verifyPasskeyRegistration(userId: string, body: RegistrationResponseJSON) {
-  const challenge = userChallenges.get(userId);
-
-  if (!challenge) {
+export async function verifyPasskeyRegistration(
+  userId: string,
+  body: RegistrationResponseJSON,
+  expectedChallenge: string
+) {
+  if (!expectedChallenge) {
     throw new Error('Registration flow not started');
   }
 
   const opts: VerifyRegistrationResponseOpts = {
     response: body,
-    expectedChallenge: challenge,
+    expectedChallenge,
     expectedOrigin: origin,
     expectedRPID: rpID,
   };
@@ -117,9 +110,6 @@ export async function verifyPasskeyRegistration(userId: string, body: Registrati
       credentialBackedUp ? 1 : 0,
       credentialBackedUp ? 1 : 0 // Assuming backup_status maps to backed up state roughly or strictly
     );
-
-    // Clean up challenge
-    userChallenges.delete(userId);
 
     return { verified: true, id };
   }
@@ -166,22 +156,19 @@ export async function generatePasskeyLoginOptions(userId?: string) {
   // We'll assume userId is passed for generate for now (the UI asks for email first or we support conditional UI later).
   // If userId is provided:
   if (userId) {
-    userChallenges.set(userId, options.challenge);
+    // Legacy support or monitoring could happen here
   } else {
-    // For conditional UI without user ID known yet, we might need to store challenge by some session identifier
-    // For now, let's support explicit flow primarily.
+    // Collaborative UI support
   }
 
   return options;
 }
 
-export async function verifyPasskeyLogin(userId: string, body: AuthenticationResponseJSON) {
-  const challenge = userChallenges.get(userId);
-
-  if (!challenge) {
-    throw new Error('Authentication flow not started');
-  }
-
+export async function verifyPasskeyLogin(
+  userId: string,
+  body: AuthenticationResponseJSON,
+  expectedChallenge: string
+) {
   const passkey = getUserPasskeyByCredentialId(body.id);
   if (!passkey) {
     throw new Error('Passkey not found');
@@ -193,7 +180,7 @@ export async function verifyPasskeyLogin(userId: string, body: AuthenticationRes
 
   const opts: VerifyAuthenticationResponseOpts = {
     response: body,
-    expectedChallenge: challenge,
+    expectedChallenge,
     expectedOrigin: origin,
     expectedRPID: rpID,
     credential: {
@@ -219,9 +206,6 @@ export async function verifyPasskeyLogin(userId: string, body: AuthenticationRes
       WHERE id = ?
     `
     ).run(newCounter, passkey.id);
-
-    // Clean up challenge
-    userChallenges.delete(userId);
 
     return { verified: true };
   }

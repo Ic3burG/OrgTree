@@ -2,6 +2,7 @@ import db from '../db.js';
 import { randomUUID } from 'crypto';
 import { requireOrgPermission } from './member.service.js';
 import type { DatabaseDepartment, AppError } from '../types/index.js';
+import { getCustomHeaderFields, setEntityCustomFields } from './custom-fields.service.js';
 
 // Helper to verify org access with permission level
 function verifyOrgAccess(
@@ -32,6 +33,7 @@ interface DepartmentWithPeople {
     created_at: string;
     updated_at: string;
   }>;
+  custom_fields?: Record<string, any>;
 }
 
 export function getDepartments(orgId: string, userId: string): DepartmentWithPeople[] {
@@ -152,21 +154,28 @@ export function getDepartmentById(
     updated_at: string;
   }>;
 
-  return { ...dept, people };
+  const result = { ...dept, people };
+
+  // Fetch custom fields
+  const customFields = getCustomHeaderFields('department', deptId);
+  (result as any).custom_fields = customFields;
+
+  return result;
 }
 
-export function createDepartment(
+export async function createDepartment(
   orgId: string,
   data: {
     name: string;
     description?: string;
     parentId?: string | null;
+    customFields?: Record<string, any>;
   },
   userId: string
-): DepartmentWithPeople {
+): Promise<DepartmentWithPeople> {
   verifyOrgAccess(orgId, userId, 'editor');
 
-  const { name, description, parentId } = data;
+  const { name, description, parentId, customFields } = data;
 
   // Generate ID first for circular reference check
   const deptId = randomUUID();
@@ -215,19 +224,25 @@ export function createDepartment(
   `
   ).run(deptId, orgId, parentId || null, name, description || null, sortOrder, now, now);
 
+  // Save custom fields if provided
+  if (customFields) {
+    await setEntityCustomFields(orgId, 'department', deptId, customFields);
+  }
+
   return getDepartmentById(orgId, deptId, userId);
 }
 
-export function updateDepartment(
+export async function updateDepartment(
   orgId: string,
   deptId: string,
   data: {
     name?: string;
     description?: string;
     parentId?: string | null;
+    customFields?: Record<string, any>;
   },
   userId: string
-): DepartmentWithPeople {
+): Promise<DepartmentWithPeople> {
   verifyOrgAccess(orgId, userId, 'editor');
 
   const dept = db
@@ -242,7 +257,7 @@ export function updateDepartment(
     throw error;
   }
 
-  const { name, description, parentId } = data;
+  const { name, description, parentId, customFields } = data;
 
   // Prevent self-reference
   if (parentId === deptId) {
@@ -296,6 +311,13 @@ export function updateDepartment(
     now,
     deptId
   );
+
+
+
+  // Update custom fields if provided
+  if (customFields) {
+    await setEntityCustomFields(orgId, 'department', deptId, customFields);
+  }
 
   return getDepartmentById(orgId, deptId, userId);
 }

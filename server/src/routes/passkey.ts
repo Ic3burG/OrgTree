@@ -25,7 +25,16 @@ function getErrorMessage(error: unknown): string {
   return String(error);
 }
 
-// Register Start
+// Cookie options for passkey challenge (short lived)
+const CHALLENGE_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+  maxAge: 5 * 60 * 1000, // 5 minutes
+  path: '/api/auth/passkey', // Scope to passkey routes
+};
+
+// Start Register
 router.post('/register/start', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -35,6 +44,10 @@ router.post('/register/start', authenticateToken, async (req: AuthRequest, res: 
       email: string;
     };
     const options = await generatePasskeyRegistrationOptions(userId, user.email);
+
+    // Store challenge in cookie
+    res.cookie('passkey_challenge', options.challenge, CHALLENGE_COOKIE_OPTIONS);
+
     return res.json(options);
   } catch (error: unknown) {
     console.error('Passkey register start error:', error);
@@ -48,7 +61,16 @@ router.post('/register/finish', authenticateToken, async (req: AuthRequest, res:
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
-    const result = await verifyPasskeyRegistration(userId, req.body);
+    const challenge = req.cookies.passkey_challenge;
+    if (!challenge) {
+      return res.status(400).json({ message: 'Challenge expired or missing' });
+    }
+
+    const result = await verifyPasskeyRegistration(userId, req.body, challenge);
+
+    // Clear challenge cookie
+    res.clearCookie('passkey_challenge', { path: '/api/auth/passkey' });
+
     if (result.verified) {
       return res.json({ success: true, id: result.id });
     } else {
@@ -89,6 +111,9 @@ router.post('/login/start', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Store challenge in cookie
+    res.cookie('passkey_challenge', options.challenge, CHALLENGE_COOKIE_OPTIONS);
+
     return res.json(options);
   } catch (error: unknown) {
     console.error('Passkey login start error:', error);
@@ -127,7 +152,15 @@ router.post('/login/finish', async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: 'User context could not be determined' });
     }
 
-    const verification = await verifyPasskeyLogin(userId, body);
+    const challenge = req.cookies.passkey_challenge;
+    if (!challenge) {
+      return res.status(400).json({ message: 'Challenge expired or missing' });
+    }
+
+    const verification = await verifyPasskeyLogin(userId, body, challenge);
+
+    // Clear challenge cookie
+    res.clearCookie('passkey_challenge', { path: '/api/auth/passkey' });
 
     if (verification.verified) {
       // Log the user in

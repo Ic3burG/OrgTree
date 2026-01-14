@@ -292,8 +292,11 @@ cd server && npm run dev  # Backend (http://localhost:3001)
       - Updated `audit.service.ts` to pass `null` for system events
       - Updated TypeScript interfaces (`DatabaseUser`, `LoginResult`)
     - **Impact**: Users with 2FA enabled can now log in successfully
+  - ✅ **Fixed Passkey Authentication Flow**:
+    - **[FIX]** Refactored Passkey/WebAuthn authentication to use stateless cookie-based challenge storage.
+    - **[FIX]** Resolved persistent "Authentication flow not started" errors during login.
   - 🧹 **MAINTENANCE**: CI/Lint Fixes
-    - Fixed TypeScript errors in seed scripts (`_TARGET_PEOPLE` unused, unknown types)
+    - **[FIX]** Addressed linting and TypeScript errors in `seed-via-api.ts` and `passkey.service.ts` to ensure clean CI.
     - Fixed type mismatch in `passkey.service.ts` (`allowCredentials`, `excludeCredentials`)
     - Resolved all linting issues for clean CI run
   - 📊 **TESTING**:
