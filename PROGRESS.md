@@ -292,10 +292,11 @@ cd server && npm run dev  # Backend (http://localhost:3001)
       - Updated `audit.service.ts` to pass `null` for system events
       - Updated TypeScript interfaces (`DatabaseUser`, `LoginResult`)
     - **Impact**: Users with 2FA enabled can now log in successfully
+  - 🧹 **MAINTENANCE**: CI/Lint Fixes
+    - Fixed TypeScript errors in seed scripts (`_TARGET_PEOPLE` unused, unknown types)
+    - Fixed type mismatch in `passkey.service.ts` (`allowCredentials`, `excludeCredentials`)
+    - Resolved all linting issues for clean CI run
   - 📊 **TESTING**:
-    - All 423 backend tests passing ✅
-    - All 108 frontend tests passing ✅
-    - All linters passing (ESLint + Prettier) ✅
     - TypeScript: 0 compilation errors ✅
   - 🚀 **DEPLOYMENT**:
     - Verified live on Render (commit 9fe7234)

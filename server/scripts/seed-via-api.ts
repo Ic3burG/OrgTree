@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { randomUUID } from 'crypto';
 
 const API_URL = 'http://localhost:3001/api';
@@ -5,7 +6,7 @@ let AUTH_TOKEN = '';
 let CSRF_TOKEN = '';
 
 // Configuration
-const _TARGET_PEOPLE = 5000; // Reserved for future use
+// const _TARGET_PEOPLE = 5000; // Reserved for future use
 const DEPT_DEPTH = 3;
 const MAX_CHILDREN_PER_DEPT = 3;
 const PEOPLE_PER_DEPT_MIN = 30;
@@ -40,12 +41,12 @@ async function request(path: string, method: string = 'GET', body?: Record<strin
   const setCookie = res.headers.get('set-cookie');
   if (setCookie && setCookie.includes('csrf-token=')) {
     const match = setCookie.match(/csrf-token=([^;]+)/);
-    if (match) CSRF_TOKEN = match[1];
+    if (match) CSRF_TOKEN = match[1] || '';
   }
 
   const contentType = res.headers.get('content-type');
   if (contentType && contentType.includes('application/json')) {
-    const data = await res.json();
+    const data = (await res.json()) as any;
     if (data.csrfToken) CSRF_TOKEN = data.csrfToken;
     return data;
   }
@@ -76,10 +77,10 @@ async function main() {
     console.log('Signup failed (maybe user exists), trying login...', message);
   }
 
-  const loginRes = await request('/auth/login', 'POST', {
+  const loginRes = (await request('/auth/login', 'POST', {
     email,
     password,
-  });
+  })) as any;
 
   AUTH_TOKEN = loginRes.accessToken;
   if (!AUTH_TOKEN) throw new Error('No token received');
@@ -89,9 +90,9 @@ async function main() {
   // 2. Create Organization
   console.log('Creating Organization...');
   // The endpoint is actually POST /api/organizations based on index.ts
-  const org = await request('/organizations', 'POST', {
+  const org = (await request('/organizations', 'POST', {
     name: 'Performance Corp API',
-  });
+  })) as any;
   const orgId = org.id;
   console.log(`✅ Org created: ${orgId}`);
 
@@ -106,10 +107,10 @@ async function main() {
     const deptName = `Dept ${depth}-${randomUUID().substring(0, 4)}`;
     // Check departments API. Assuming POST /organizations/:orgId/departments
     // needed properties: name, parentId?
-    const dept = await request(`/organizations/${orgId}/departments`, 'POST', {
+    const dept = (await request(`/organizations/${orgId}/departments`, 'POST', {
       name: deptName,
       parentId: parentId || undefined,
-    });
+    })) as any;
     deptCount++;
     const deptId = dept.id;
 

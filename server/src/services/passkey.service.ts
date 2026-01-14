@@ -12,7 +12,6 @@ import type {
   AuthenticatorTransport,
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
-  PublicKeyCredentialDescriptorFuture,
 } from '@simplewebauthn/server';
 import db from '../db.js';
 import { randomUUID } from 'crypto';
@@ -55,6 +54,7 @@ export async function generatePasskeyRegistrationOptions(userId: string, userEma
     attestationType: 'none',
     excludeCredentials: userPasskeys.map(passkey => ({
       id: passkey.credential_id,
+      type: 'public-key',
       transports: passkey.transports
         ? (JSON.parse(passkey.transports) as AuthenticatorTransport[])
         : undefined,
@@ -130,13 +130,14 @@ export async function verifyPasskeyRegistration(userId: string, body: Registrati
 export async function generatePasskeyLoginOptions(userId?: string) {
   // If userId is provided, we can fetch their passkeys to allow credentials
   // If not (conditional UI), we allow any
-  let allowCredentials: PublicKeyCredentialDescriptorFuture[] | undefined;
+  let allowCredentials: GenerateAuthenticationOptionsOpts['allowCredentials'] | undefined;
 
   if (userId) {
     const userPasskeys = getUserPasskeys(userId);
     if (userPasskeys.length > 0) {
       allowCredentials = userPasskeys.map(passkey => ({
         id: passkey.credential_id,
+        type: 'public-key',
         transports: passkey.transports
           ? (JSON.parse(passkey.transports) as AuthenticatorTransport[])
           : undefined,

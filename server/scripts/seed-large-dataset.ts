@@ -17,7 +17,7 @@ console.log('='.repeat(80));
 console.log('🌱 SEEDING LARGE DATASET');
 console.log('='.repeat(80));
 
-const _TARGET_PEOPLE = 5000; // Reserved for future use
+// const _TARGET_PEOPLE = 5000; // Reserved for future use
 const DEPT_DEPTH = 5;
 const MAX_CHILDREN_PER_DEPT = 6;
 const PEOPLE_PER_DEPT_MIN = 20;
