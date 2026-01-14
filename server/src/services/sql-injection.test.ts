@@ -67,6 +67,35 @@ vi.mock('../db.js', async () => {
       FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS custom_field_definitions (
+      id TEXT PRIMARY KEY,
+      organization_id TEXT NOT NULL,
+      entity_type TEXT NOT NULL CHECK(entity_type IN ('person', 'department')),
+      name TEXT NOT NULL,
+      field_key TEXT NOT NULL,
+      field_type TEXT NOT NULL CHECK(field_type IN ('text', 'number', 'date', 'select', 'multiselect', 'url', 'email', 'phone')),
+      options TEXT,
+      is_required BOOLEAN DEFAULT 0,
+      is_searchable BOOLEAN DEFAULT 1,
+      sort_order INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+      UNIQUE(organization_id, entity_type, field_key)
+    );
+
+    CREATE TABLE IF NOT EXISTS custom_field_values (
+      id TEXT PRIMARY KEY,
+      field_definition_id TEXT NOT NULL,
+      entity_type TEXT NOT NULL CHECK(entity_type IN ('person', 'department')),
+      entity_id TEXT NOT NULL,
+      value TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (field_definition_id) REFERENCES custom_field_definitions(id) ON DELETE CASCADE,
+      UNIQUE(field_definition_id, entity_id)
+    );
+
     -- FTS5 virtual tables for search
     CREATE VIRTUAL TABLE departments_fts USING fts5(
       name,
@@ -373,11 +402,11 @@ describe('SQL Injection Security Tests', () => {
 
     describe('createPerson() with injected deptId', () => {
       SQL_INJECTION_PAYLOADS.slice(0, 3).forEach(payload => {
-        it(`should reject injected deptId: ${payload.substring(0, 30)}...`, () => {
+        it(`should reject injected deptId: ${payload.substring(0, 30)}...`, async () => {
           // Invalid department IDs should throw 404
-          expect(() => {
-            createPerson(payload, { name: 'Test Person' }, userId);
-          }).toThrow('Department not found');
+          await expect(
+            createPerson(payload, { name: 'Test Person' }, userId)
+          ).rejects.toThrow('Department not found');
         });
       });
     });

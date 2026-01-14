@@ -66,6 +66,35 @@ vi.mock('../db.js', async () => {
       updated_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS custom_field_definitions (
+      id TEXT PRIMARY KEY,
+      organization_id TEXT NOT NULL,
+      entity_type TEXT NOT NULL CHECK(entity_type IN ('person', 'department')),
+      name TEXT NOT NULL,
+      field_key TEXT NOT NULL,
+      field_type TEXT NOT NULL CHECK(field_type IN ('text', 'number', 'date', 'select', 'multiselect', 'url', 'email', 'phone')),
+      options TEXT,
+      is_required BOOLEAN DEFAULT 0,
+      is_searchable BOOLEAN DEFAULT 1,
+      sort_order INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+      UNIQUE(organization_id, entity_type, field_key)
+    );
+
+    CREATE TABLE IF NOT EXISTS custom_field_values (
+      id TEXT PRIMARY KEY,
+      field_definition_id TEXT NOT NULL,
+      entity_type TEXT NOT NULL CHECK(entity_type IN ('person', 'department')),
+      entity_id TEXT NOT NULL,
+      value TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (field_definition_id) REFERENCES custom_field_definitions(id) ON DELETE CASCADE,
+      UNIQUE(field_definition_id, entity_id)
+    );
   `);
 
   return { default: db };
@@ -230,10 +259,10 @@ describe('Department Service', () => {
       expect(dept.parent_id).toBe('parent-id');
     });
 
-    it('should throw if parent department does not exist', () => {
-      expect(() =>
+    it('should throw if parent department does not exist', async () => {
+      await expect(
         createDepartment(orgId, { name: 'Child', parentId: 'non-existent' }, userId)
-      ).toThrow('Parent department not found');
+      ).rejects.toThrow('Parent department not found');
     });
   });
 
@@ -291,7 +320,7 @@ describe('Department Service', () => {
       expect(updated.parent_id).toBeNull();
     });
 
-    it('should throw if moving under itself', () => {
+    it('should throw if moving under itself', async () => {
       (db as DatabaseType)
         .prepare(
           `
@@ -301,9 +330,9 @@ describe('Department Service', () => {
         )
         .run(orgId);
 
-      expect(() => updateDepartment(orgId, 'dept-1', { parentId: 'dept-1' }, userId)).toThrow(
-        'Department cannot be its own parent'
-      );
+      await expect(
+        updateDepartment(orgId, 'dept-1', { parentId: 'dept-1' }, userId)
+      ).rejects.toThrow('Department cannot be its own parent');
     });
   });
 
