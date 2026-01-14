@@ -282,6 +282,16 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 🐛 **BUG FIX #2**: Back Button History Navigation
     - Changed AccountLayout back button from `navigate(-1)` to `navigate('/')`
     - Now always returns to landing page instead of cycling through history
+  - 🐛 **CRITICAL BUG FIX #3**: 2FA Login Failure
+    - **Root Cause**: `SQLITE_CONSTRAINT_FOREIGNKEY` in audit logs
+    - Login flow attempts to log event with `'system'` as org ID
+    - Foreign key constraint requires valid organization reference
+    - Resulted in "Invalid email or password" error for valid 2FA users
+    - **Fix**:
+      - Added migration to recreate `audit_logs` table with nullable `organization_id`
+      - Updated `audit.service.ts` to pass `null` for system events
+      - Updated TypeScript interfaces (`DatabaseUser`, `LoginResult`)
+    - **Impact**: Users with 2FA enabled can now log in successfully
   - 📊 **TESTING**:
     - All 423 backend tests passing ✅
     - All 108 frontend tests passing ✅
