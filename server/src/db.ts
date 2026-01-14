@@ -494,7 +494,7 @@ try {
 try {
   const auditLogsTableInfo = db.prepare('PRAGMA table_info(audit_logs)').all() as TableInfoRow[];
   const orgIdColumn = auditLogsTableInfo.find(col => col.name === 'organization_id');
-  
+
   // Check if the column exists and has NOT NULL constraint (notnull = 1)
   if (orgIdColumn && (orgIdColumn as unknown as { notnull: number }).notnull === 1) {
     // SQLite doesn't support ALTER COLUMN, so we need to recreate the table
