@@ -148,6 +148,33 @@ router.get(
   }
 );
 
+/**
+ * PUT /api/auth/profile
+ * Update current user's profile information
+ */
+router.put(
+  '/profile',
+  authenticateToken,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { name, email } = req.body;
+
+      if (!name && !email) {
+        res.status(400).json({ message: 'At least one field (name or email) is required' });
+        return;
+      }
+
+      // Check for superuser route to reuse updateUser or import it
+      const { updateUser: updateUserService } = await import('../services/users.service.js');
+      const updatedUser = updateUserService(req.user!.id, { name, email });
+
+      res.json(updatedUser);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 // POST /api/auth/change-password - Change password (requires auth)
 router.post(
   '/change-password',

@@ -14,6 +14,8 @@ import type {
   Session,
   CSVImportResult,
   PaginatedResponse,
+  Passkey,
+  TotpSetup,
 } from '../types/index.js';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -378,6 +380,12 @@ const api = {
 
   getMe: (): Promise<User> => request<User>('/auth/me'),
 
+  updateProfile: (data: Partial<Pick<User, 'name' | 'email'>>): Promise<User> =>
+    request<User>('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
   // Session management
   getSessions: (): Promise<Session[]> => request<Session[]>('/auth/sessions'),
 
@@ -389,6 +397,34 @@ const api = {
   revokeOtherSessions: (): Promise<{ revoked: number }> =>
     request<{ revoked: number }>('/auth/sessions/revoke-others', {
       method: 'POST',
+    }),
+
+  // 2FA
+  get2FAStatus: (): Promise<{ enabled: boolean }> =>
+    request<{ enabled: boolean }>('/auth/2fa/status'),
+
+  setup2FA: (): Promise<TotpSetup> =>
+    request<TotpSetup>('/auth/2fa/setup', {
+      method: 'POST',
+    }),
+
+  verify2FA: (token: string): Promise<{ success: boolean }> =>
+    request<{ success: boolean }>('/auth/2fa/verify', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    }),
+
+  disable2FA: (): Promise<{ success: boolean }> =>
+    request<{ success: boolean }>('/auth/2fa/disable', {
+      method: 'POST',
+    }),
+
+  // Passkeys
+  listPasskeys: (): Promise<Passkey[]> => request<Passkey[]>('/auth/passkey/list'),
+
+  deletePasskey: (id: string): Promise<{ success: boolean }> =>
+    request<{ success: boolean }>(`/auth/passkey/${id}`, {
+      method: 'DELETE',
     }),
 
   // Organizations

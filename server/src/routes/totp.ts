@@ -7,6 +7,7 @@ import {
 } from '../services/auth.service.js';
 import db from '../db.js';
 import type { DatabaseUser, AuthRequest } from '../types/index.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -83,7 +84,7 @@ router.post('/verify-login', async (req, res: Response): Promise<void> => {
  * Initialize 2FA setup for authenticated user
  * Returns secret, QR code, and backup codes
  */
-router.post('/setup', async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/setup', authenticateToken, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -112,7 +113,7 @@ router.post('/setup', async (req: AuthRequest, res: Response): Promise<void> => 
  * GET /api/auth/2fa/status
  * Get current 2FA status for authenticated user
  */
-router.get('/status', (req: AuthRequest, res: Response): void => {
+router.get('/status', authenticateToken, (req: AuthRequest, res: Response): void => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -140,7 +141,7 @@ router.get('/status', (req: AuthRequest, res: Response): void => {
  * POST /api/auth/2fa/verify
  * Verify TOTP token and enable 2FA for authenticated user
  */
-router.post('/verify', (req: AuthRequest, res: Response): void => {
+router.post('/verify', authenticateToken, (req: AuthRequest, res: Response): void => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -171,7 +172,7 @@ router.post('/verify', (req: AuthRequest, res: Response): void => {
  * POST /api/auth/2fa/disable
  * Disable 2FA for authenticated user
  */
-router.post('/disable', (req: AuthRequest, res: Response): void => {
+router.post('/disable', authenticateToken, (req: AuthRequest, res: Response): void => {
   try {
     const userId = req.user?.id;
     if (!userId) {

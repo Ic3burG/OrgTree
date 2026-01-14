@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   Shield,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
@@ -200,15 +201,29 @@ export default function AdminLayout(): React.JSX.Element {
             <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{user?.email}</p>
           </div>
         </div>
+        <NavLink
+          to="/settings"
+          onClick={closeSidebar}
+          className={({ isActive }) =>
+            `w-full flex items-center gap-3 px-4 py-2 rounded-lg mb-2 transition-colors ${
+              isActive
+                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
+            }`
+          }
+        >
+          <Settings size={18} />
+          <span className="font-medium text-sm">Account Settings</span>
+        </NavLink>
         <button
           onClick={() => {
             handleLogout();
             closeSidebar();
           }}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+          className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
         >
-          <LogOut size={16} />
-          Logout
+          <LogOut size={18} />
+          <span className="font-medium">Logout</span>
         </button>
       </div>
     </>

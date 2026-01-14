@@ -138,6 +138,23 @@ export interface Session {
   is_current?: boolean;
 }
 
+// Security types
+export interface Passkey {
+  id: string;
+  credentialId?: string;
+  createdAt?: string; // Backwards compatible with legacy
+  created_at: string;
+  lastUsedAt?: string;
+  last_used_at: string;
+  backup_status?: boolean;
+}
+
+export interface TotpSetup {
+  secret: string;
+  qrCode: string; // Base64 image
+  backupCodes: string[];
+}
+
 // Search types
 export interface SearchResult {
   type: 'department' | 'person';

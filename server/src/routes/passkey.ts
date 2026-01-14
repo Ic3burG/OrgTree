@@ -15,6 +15,7 @@ import {
   generateRefreshToken,
 } from '../services/auth.service.js';
 import type { DatabaseUser, AuthRequest } from '../types/index.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -25,7 +26,7 @@ function getErrorMessage(error: unknown): string {
 }
 
 // Register Start
-router.post('/register/start', async (req: AuthRequest, res: Response) => {
+router.post('/register/start', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
@@ -42,7 +43,7 @@ router.post('/register/start', async (req: AuthRequest, res: Response) => {
 });
 
 // Register Finish
-router.post('/register/finish', async (req: AuthRequest, res: Response) => {
+router.post('/register/finish', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
@@ -157,7 +158,7 @@ router.post('/login/finish', async (req: AuthRequest, res: Response) => {
 });
 
 // List Passkeys
-router.get('/list', (req: AuthRequest, res: Response) => {
+router.get('/list', authenticateToken, (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -181,7 +182,7 @@ router.get('/list', (req: AuthRequest, res: Response) => {
 });
 
 // Delete Passkey
-router.delete('/:id', (req: AuthRequest, res: Response) => {
+router.delete('/:id', authenticateToken, (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {

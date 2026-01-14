@@ -25,6 +25,8 @@ import UserManagement from './components/superuser/UserManagement';
 import SystemAuditLog from './components/superuser/SystemAuditLog';
 import AcceptInvitation from './components/AcceptInvitation';
 import { initCsrf } from './api/client';
+import AccountLayout from './components/account/AccountLayout';
+import ProfileSettings from './components/account/ProfileSettings';
 
 /**
  * App - Root component
@@ -50,7 +52,7 @@ function App() {
                   <Route path="/public/:shareToken" element={<PublicOrgMap />} />
                   <Route path="/invite/:token" element={<AcceptInvitation />} />
 
-                  {/* Change Password (Protected) */}
+                  {/* Change Password (Protected) - Still needed for forced password changes */}
                   <Route
                     path="/change-password"
                     element={
@@ -60,25 +62,19 @@ function App() {
                     }
                   />
 
-                  {/* Sessions Management (Protected) */}
+                  {/* Account Settings (Protected) */}
                   <Route
-                    path="/settings/sessions"
+                    path="/settings"
                     element={
                       <ProtectedRoute>
-                        <SessionsPage />
+                        <AccountLayout />
                       </ProtectedRoute>
                     }
-                  />
-
-                  {/* Security Settings (Protected) */}
-                  <Route
-                    path="/settings/security"
-                    element={
-                      <ProtectedRoute>
-                        <SecuritySettingsPage />
-                      </ProtectedRoute>
-                    }
-                  />
+                  >
+                    <Route index element={<ProfileSettings />} />
+                    <Route path="security" element={<SecuritySettingsPage />} />
+                    <Route path="sessions" element={<SessionsPage />} />
+                  </Route>
 
                   {/* Protected routes */}
                   <Route
