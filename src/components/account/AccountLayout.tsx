@@ -17,7 +17,7 @@ export default function AccountLayout(): React.JSX.Element {
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
             className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 mb-6 transition-colors"
           >
             <ArrowLeft size={20} />

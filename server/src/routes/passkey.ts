@@ -21,7 +21,7 @@ const router = express.Router();
 
 // Helper to extract error message from unknown error
 function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return getErrorMessage(error);
+  if (error instanceof Error) return error.message;
   return String(error);
 }
 
