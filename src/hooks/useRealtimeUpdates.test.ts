@@ -41,6 +41,7 @@ describe('useRealtimeUpdates', () => {
       canManageUsers: false,
       hasRole: vi.fn(),
       loading: false,
+      setUser: vi.fn(),
     });
 
     // Mock window dispatch event
