@@ -257,9 +257,43 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: 2FA Implementation Complete (January 14, 2026)
-- **Total Commits**: 237+ commits on main branch
-- **Today's Progress (January 14, 2026 - Session 51)**:
+- **Last Major Update**: Unified Account Management & Security Fixes (January 14, 2026)
+- **Total Commits**: 241+ commits on main branch
+- **Today's Progress (January 14, 2026 - Session 52)**:
+  - ✨ **FEATURE COMPLETE**: Unified Account Management System
+  - ✅ **NEW COMPONENTS**:
+    - `AccountLayout.tsx` - Central hub for all account settings with tab navigation
+    - `ProfileSettings.tsx` - Update user name and email
+    - `SecurityCheck.tsx` - Proactive security banner prompting 2FA/Passkey setup
+  - ✅ **NAVIGATION IMPROVEMENTS**:
+    - Added "Settings" button to OrganizationSelector header (landing page access)
+    - Added "Account Settings" link to AdminLayout sidebar
+    - Unified routing at `/settings` with sub-routes for Security and Sessions
+  - ✅ **BACKEND ENHANCEMENTS**:
+    - `PUT /api/auth/profile` - New endpoint for profile updates
+    - Applied `authenticateToken` middleware to all 2FA and Passkey routes
+    - Fixed CORS configuration for local development (port 5174)
+    - Centralized 2FA/Passkey API methods in frontend client
+  - 🐛 **CRITICAL BUG FIX #1**: Passkey Registration Failure
+    - **Root Cause**: Infinite recursion in `getErrorMessage()` helper in `passkey.ts`
+    - Original code: `if (error instanceof Error) return getErrorMessage(error);` (calls itself!)
+    - Fixed to: `if (error instanceof Error) return error.message;`
+    - This bug caused ALL passkey operations to crash silently
+  - 🐛 **BUG FIX #2**: Back Button History Navigation
+    - Changed AccountLayout back button from `navigate(-1)` to `navigate('/')`
+    - Now always returns to landing page instead of cycling through history
+  - 📊 **TESTING**:
+    - All 423 backend tests passing ✅
+    - All 108 frontend tests passing ✅
+    - All linters passing (ESLint + Prettier) ✅
+    - TypeScript: 0 compilation errors ✅
+  - 🚀 **DEPLOYMENT**:
+    - Verified live on Render (commit 9fe7234)
+    - Server startup clean, no errors in logs
+  - 📁 **FILES MODIFIED/CREATED**: 15+ files
+  - ✅ **COMMITS PUSHED**: 4 commits
+
+- **Previous Progress (January 14, 2026 - Session 51)**:
   - 🔐 **FEATURE COMPLETE**: Two-Factor Authentication (2FA) System
   - ✅ **INVESTIGATION**:
     - User reported passkey sign-in not available during signup
