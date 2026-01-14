@@ -189,7 +189,12 @@ router.delete('/:id', authenticateToken, (req: AuthRequest, res: Response) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const success = deletePasskey(req.params.id, userId);
+    const passkeyId = req.params.id;
+    if (!passkeyId) {
+      return res.status(400).json({ message: 'Passkey ID required' });
+    }
+
+    const success = deletePasskey(passkeyId, userId);
     if (success) {
       return res.json({ success: true });
     } else {

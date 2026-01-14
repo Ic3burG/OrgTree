@@ -34,7 +34,7 @@ export function createAuditLog(
     `
     ).run(
       id,
-      orgId || 'system',
+      orgId, // Can be null for system-level events (e.g., failed login attempts)
       actorId,
       actorName,
       actionType,

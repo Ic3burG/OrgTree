@@ -489,6 +489,57 @@ try {
   console.error('Migration error (soft delete columns):', err);
 }
 
+// Migration: Allow NULL organization_id in audit_logs for system-level events
+// (e.g., failed login attempts don't belong to any organization)
+try {
+  const auditLogsTableInfo = db.prepare('PRAGMA table_info(audit_logs)').all() as TableInfoRow[];
+  const orgIdColumn = auditLogsTableInfo.find(col => col.name === 'organization_id');
+  
+  // Check if the column exists and has NOT NULL constraint (notnull = 1)
+  if (orgIdColumn && (orgIdColumn as unknown as { notnull: number }).notnull === 1) {
+    // SQLite doesn't support ALTER COLUMN, so we need to recreate the table
+    db.exec(`
+      BEGIN TRANSACTION;
+      
+      -- Create new table with nullable organization_id and no foreign key constraint
+      CREATE TABLE audit_logs_new (
+        id TEXT PRIMARY KEY,
+        organization_id TEXT,
+        actor_id TEXT,
+        actor_name TEXT NOT NULL,
+        action_type TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
+        entity_id TEXT,
+        entity_data TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL
+      );
+      
+      -- Copy data from old table
+      INSERT INTO audit_logs_new 
+      SELECT id, organization_id, actor_id, actor_name, action_type, entity_type, entity_id, entity_data, created_at
+      FROM audit_logs;
+      
+      -- Drop old table
+      DROP TABLE audit_logs;
+      
+      -- Rename new table
+      ALTER TABLE audit_logs_new RENAME TO audit_logs;
+      
+      -- Recreate indexes
+      CREATE INDEX idx_audit_logs_org_created ON audit_logs(organization_id, created_at DESC);
+      CREATE INDEX idx_audit_logs_created ON audit_logs(created_at DESC);
+      CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
+      CREATE INDEX idx_audit_logs_action_type ON audit_logs(action_type, created_at DESC);
+      
+      COMMIT;
+    `);
+    console.log('Migration: Made audit_logs.organization_id nullable for system-level events');
+  }
+} catch (err) {
+  console.error('Migration error (audit_logs nullable org_id):', err);
+}
+
 // Migration: Add performance optimization indexes
 try {
   // Check which indexes already exist

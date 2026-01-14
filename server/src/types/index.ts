@@ -34,6 +34,9 @@ export interface DatabaseUser {
   password_hash: string;
   name: string;
   role: 'user' | 'admin' | 'superuser';
+  totp_secret?: string | null;
+  totp_enabled?: number; // SQLite boolean (0 or 1)
+  must_change_password?: number; // SQLite boolean (0 or 1)
   created_at: string;
   updated_at: string;
 }
@@ -132,6 +135,8 @@ export interface LoginResult {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
+  requiresTwoFactor?: boolean;
+  tempUserId?: string;
 }
 
 export interface RefreshResult {
