@@ -114,7 +114,7 @@ export function getPersonById(personId: string, userId: string): PersonWithDepar
 
   // Clean up the response to match expected format
   const { departmentName, organizationId, organizationName, orgCreatedBy, ...personData } = person;
-  
+
   // Fetch custom fields
   const customFields = getCustomHeaderFields('person', person.id);
 
@@ -351,12 +351,7 @@ export async function updatePerson(
 
   // Update custom fields if provided
   if (customFields) {
-    await setEntityCustomFields(
-      person.department.organizationId,
-      'person',
-      personId,
-      customFields
-    );
+    await setEntityCustomFields(person.department.organizationId, 'person', personId, customFields);
   }
 
   const updatedPerson = db
@@ -392,6 +387,10 @@ export function deletePerson(personId: string, userId: string): { success: boole
   return { success: true };
 }
 
-export async function movePerson(personId: string, newDeptId: string, userId: string): Promise<PersonResponse> {
+export async function movePerson(
+  personId: string,
+  newDeptId: string,
+  userId: string
+): Promise<PersonResponse> {
   return updatePerson(personId, { departmentId: newDeptId }, userId);
 }

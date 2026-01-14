@@ -312,8 +312,6 @@ export async function updateDepartment(
     deptId
   );
 
-
-
   // Update custom fields if provided
   if (customFields) {
     await setEntityCustomFields(orgId, 'department', deptId, customFields);

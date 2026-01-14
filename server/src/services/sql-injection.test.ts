@@ -404,9 +404,9 @@ describe('SQL Injection Security Tests', () => {
       SQL_INJECTION_PAYLOADS.slice(0, 3).forEach(payload => {
         it(`should reject injected deptId: ${payload.substring(0, 30)}...`, async () => {
           // Invalid department IDs should throw 404
-          await expect(
-            createPerson(payload, { name: 'Test Person' }, userId)
-          ).rejects.toThrow('Department not found');
+          await expect(createPerson(payload, { name: 'Test Person' }, userId)).rejects.toThrow(
+            'Department not found'
+          );
         });
       });
     });
