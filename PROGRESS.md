@@ -257,9 +257,41 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: Nested Department Dropdowns & Audit Log Improvements (January 12, 2026)
-- **Total Commits**: 236+ commits on main branch
-- **Today's Progress (January 12, 2026 - Session 50)**:
+- **Last Major Update**: 2FA Implementation Complete (January 14, 2026)
+- **Total Commits**: 237+ commits on main branch
+- **Today's Progress (January 14, 2026 - Session 51)**:
+  - 🔐 **FEATURE COMPLETE**: Two-Factor Authentication (2FA) System
+  - ✅ **INVESTIGATION**:
+    - User reported passkey sign-in not available during signup
+    - Confirmed this is by design: passkeys require existing user account
+    - Identified that 2FA backend existed but was non-functional
+    - Found 4 missing API routes preventing frontend from working
+    - Discovered 2FA login check was commented out in auth service
+  - ✅ **IMPLEMENTATION** (2 backend files):
+    - `server/src/routes/totp.ts` - Added 4 missing 2FA routes (+110 lines):
+      - `POST /api/auth/2fa/setup` - Initialize 2FA with QR code and backup codes
+      - `GET /api/auth/2fa/status` - Check if 2FA is enabled for user
+      - `POST /api/auth/2fa/verify` - Verify TOTP token and enable 2FA
+      - `POST /api/auth/2fa/disable` - Disable 2FA and clear secret
+    - `server/src/services/auth.service.ts` - Enabled 2FA login enforcement:
+      - Uncommented `totp_enabled` check in `loginUser()` function
+      - Login now redirects to 2FA verification when enabled
+      - Refresh token generation delayed until 2FA verification completes
+  - 🎯 **IMPACT**:
+    - Security Settings page (`/settings/security`) now fully functional
+    - Users can enable 2FA with any TOTP authenticator app (Google Authenticator, Authy, 1Password)
+    - QR code setup flow working with backup codes for account recovery
+    - Login flow enforces 2FA verification when enabled
+    - Complete passwordless authentication stack: Passkeys + 2FA backup
+  - 📊 **TESTING**:
+    - All 423 backend tests passing ✅
+    - All 108 frontend tests passing ✅
+    - All linters passing (ESLint + Prettier) ✅
+    - TypeScript: 0 compilation errors ✅
+  - 📁 **FILES MODIFIED**: 2 files
+  - ✅ **COMMITTED AND PUSHED**: Commit 0abd2ae
+
+- **Previous Progress (January 12, 2026 - Session 50)**:
   - 🐛 **BUG FIX #1**: "Failed to load members" error in Share > Team Members
   - ✅ **ISSUE IDENTIFIED**:
     - Clicking "Share > Team Members" repeatedly showed "Failed to load members" error
