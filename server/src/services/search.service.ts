@@ -215,11 +215,7 @@ function searchDepartments(
   const countResult = db.prepare(countSql).get(ftsQuery, orgId, ftsQuery, orgId) as CountResult;
   const total = countResult.count;
 
-  const rows = db.prepare(sql).all(
-    ftsQuery, orgId,
-    ftsQuery, orgId,
-    limit, offset
-  ) as Array<{
+  const rows = db.prepare(sql).all(ftsQuery, orgId, ftsQuery, orgId, limit, offset) as Array<{
     id: string;
     name: string;
     description: string | null;
@@ -358,11 +354,7 @@ function searchPeople(
   const countResult = db.prepare(countSql).get(ftsQuery, orgId, ftsQuery, orgId) as CountResult;
   const total = countResult.count;
 
-  const rows = db.prepare(sql).all(
-    ftsQuery, orgId,
-    ftsQuery, orgId,
-    limit, offset
-  ) as Array<{
+  const rows = db.prepare(sql).all(ftsQuery, orgId, ftsQuery, orgId, limit, offset) as Array<{
     id: string;
     name: string;
     title: string | null;
