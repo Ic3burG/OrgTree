@@ -276,6 +276,8 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Features: Ascending/Descending toggle, case-insensitive sorting.
     - Handles sorting of mixed data sources (API search results + local list).
     - Available to all organization members (viewers, editors, admins, owners).
+  - 💄 **UI FIX**: Restored PersonForm layout
+    - Moved Email field back under Department field (full width) as requested.
 - **Previous Progress (January 15, 2026 - Session 54)**:
   - 🐛 **CRITICAL BUG FIX**: Fixed Search Crash & "Zero Results" Error
   - ✅ **SEARCH STABILITY**:

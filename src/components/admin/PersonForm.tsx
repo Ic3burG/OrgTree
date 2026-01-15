@@ -202,59 +202,57 @@ export default function PersonForm({
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Department */}
-              <div>
-                <label
-                  htmlFor="departmentId"
-                  className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
-                >
-                  Department *
-                </label>
-                <select
-                  id="departmentId"
-                  name="departmentId"
-                  value={formData.departmentId}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-50 ${
-                    errors.departmentId ? 'border-red-500' : 'border-gray-300 dark:border-slate-600'
-                  }`}
-                >
-                  <option value="">Select a department</option>
-                  {getHierarchicalDepartments(departments).map(dept => (
-                    <option key={dept.id} value={dept.id}>
-                      {getIndentedName(dept.name, dept.depth)}
-                    </option>
-                  ))}
-                </select>
-                {errors.departmentId && (
-                  <p className="text-sm text-red-600 mt-1">{errors.departmentId}</p>
-                )}
-              </div>
+            {/* Department */}
+            <div>
+              <label
+                htmlFor="departmentId"
+                className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
+              >
+                Department *
+              </label>
+              <select
+                id="departmentId"
+                name="departmentId"
+                value={formData.departmentId}
+                onChange={handleChange}
+                disabled={isSubmitting}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-50 ${
+                  errors.departmentId ? 'border-red-500' : 'border-gray-300 dark:border-slate-600'
+                }`}
+              >
+                <option value="">Select a department</option>
+                {getHierarchicalDepartments(departments).map(dept => (
+                  <option key={dept.id} value={dept.id}>
+                    {getIndentedName(dept.name, dept.depth)}
+                  </option>
+                ))}
+              </select>
+              {errors.departmentId && (
+                <p className="text-sm text-red-600 mt-1">{errors.departmentId}</p>
+              )}
+            </div>
 
-              {/* Email */}
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
-                >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-50 ${
-                    errors.email ? 'border-red-500' : 'border-gray-300 dark:border-slate-600'
-                  }`}
-                  placeholder="john.doe@example.com"
-                />
-                {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
-              </div>
+            {/* Email */}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                disabled={isSubmitting}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-50 ${
+                  errors.email ? 'border-red-500' : 'border-gray-300 dark:border-slate-600'
+                }`}
+                placeholder="john.doe@example.com"
+              />
+              {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
             </div>
 
             {/* Phone */}
