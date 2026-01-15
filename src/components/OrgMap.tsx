@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, createContext, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import ReactFlow, {
   Background,
   MiniMap,
@@ -140,6 +140,7 @@ export default function OrgMap(): React.JSX.Element {
   const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
   const toast = useToast();
+  const [searchParams] = useSearchParams();
 
   // Select person for detail panel
   const handleSelectPerson = useCallback((person: Person): void => {
@@ -250,6 +251,48 @@ export default function OrgMap(): React.JSX.Element {
     },
     [orgId, layoutDirection, fitView, setNodes, setEdges]
   );
+
+  // Handle auto-zoom from URL parameter (e.g. from department list)
+  useEffect(() => {
+    const personId = searchParams.get('personId');
+    if (personId && !isLoading && nodes.length > 0) {
+      // Find the node containing this person
+      let targetNodeId: string | undefined;
+      let targetPerson: Person | undefined;
+
+      for (const node of nodes) {
+        const person = node.data.people.find(p => p.id === personId);
+        if (person) {
+          targetNodeId = node.id;
+          targetPerson = person;
+          break;
+        }
+      }
+
+      if (targetNodeId && targetPerson) {
+        // Use the same logic as search selection
+        const node = nodes.find(n => n.id === targetNodeId);
+
+        if (node && !node.data.isExpanded) {
+          handleToggleExpand(targetNodeId);
+        }
+
+        setTimeout(() => {
+          const updatedNode = nodes.find(n => n.id === targetNodeId);
+          if (updatedNode && updatedNode.position) {
+            setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
+              zoom: 1.5,
+              duration: 800,
+            });
+            setHighlightedNodeId(targetNodeId);
+            setTimeout(() => setHighlightedNodeId(null), 3000);
+          }
+
+          setSelectedPerson(targetPerson as Person);
+        }, 300);
+      }
+    }
+  }, [isLoading, nodes, searchParams, handleToggleExpand, setCenter]);
 
   // Initial load
   useEffect(() => {

@@ -1,4 +1,5 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ChevronRight,
   ChevronDown,
@@ -44,6 +45,7 @@ const DepartmentItem = memo(function DepartmentItem({
 }: DepartmentItemProps): React.JSX.Element {
   const hasChildren = dept.children && dept.children.length > 0;
   const peopleCount = dept.people?.length || 0;
+  const [showPeople, setShowPeople] = useState(false);
 
   // Filter out empty custom fields and map to their definitions
   const activeCustomFields = fieldDefinitions
@@ -106,9 +108,36 @@ const DepartmentItem = memo(function DepartmentItem({
 
         <div className="flex-1 min-w-0">
           <span className="font-medium text-slate-800 dark:text-slate-100">{dept.name}</span>
-          <span className="ml-2 text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">
+          <span
+            className="ml-2 text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap relative cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+            onMouseEnter={() => setShowPeople(true)}
+            onMouseLeave={() => setShowPeople(false)}
+          >
             <Users size={14} className="inline mr-1" />
             {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
+            {showPeople && peopleCount > 0 && (
+              <div className="absolute left-0 bottom-full mb-2 bg-white dark:bg-slate-800 shadow-xl rounded-lg border border-slate-200 dark:border-slate-700 w-56 z-50 overflow-hidden">
+                <div className="bg-slate-50 dark:bg-slate-700/50 px-3 py-2 border-b border-slate-100 dark:border-slate-700/50 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  People in {dept.name}
+                </div>
+                <div className="p-1 max-h-48 overflow-y-auto">
+                  {dept.people?.map(person => (
+                    <Link
+                      key={person.id}
+                      to={`/org/${dept.organization_id}/map?personId=${person.id}`}
+                      className="block px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 rounded transition-colors"
+                    >
+                      {person.name}
+                      {person.title && (
+                        <span className="block text-xs text-slate-400 font-normal truncate">
+                          {person.title}
+                        </span>
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </span>
           {/* Helper text for flat view (search results) if needed in future */}
           {dept.parent_id && !selectionMode && dept.depth === 0 && (
