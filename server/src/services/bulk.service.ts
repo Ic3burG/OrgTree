@@ -320,7 +320,7 @@ export async function bulkEditPeople(
   personIds: string[],
   updates: PersonUpdates,
   actor: Actor
-): BulkEditResult {
+): Promise<BulkEditResult> {
   // Verify user has editor permission on org
   requireOrgPermission(orgId, actor.id, 'editor');
 
@@ -457,7 +457,7 @@ export async function bulkEditPeople(
           // Emit event (also creates audit log)
           emitPersonUpdated(orgId, updatedPerson as unknown as Record<string, unknown>, actor);
         } else {
-          failed.push({ id: personId, error: result.error });
+          failed.push({ id: personId, error: result.error || 'Unknown error' });
         }
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';

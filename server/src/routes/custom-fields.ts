@@ -64,7 +64,11 @@ router.post(
         req.user!.id
       );
 
-      emitCustomFieldCreated(req.params.orgId!, field as any, req.user!);
+      emitCustomFieldCreated(
+        req.params.orgId!,
+        field as unknown as Record<string, unknown>,
+        req.user!
+      );
 
       res.status(201).json(field);
     } catch (err) {
@@ -91,7 +95,11 @@ router.put(
         req.user!.id
       );
 
-      emitCustomFieldUpdated(field.organization_id, field as any, req.user!);
+      emitCustomFieldUpdated(
+        field.organization_id,
+        field as unknown as Record<string, unknown>,
+        req.user!
+      );
 
       res.json(field);
     } catch (err) {
