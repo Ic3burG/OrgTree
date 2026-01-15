@@ -46,7 +46,7 @@
   }
 
   .react-flow__minimap {
-    @apply border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden shadow-sm;
+    @apply border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden shadow-sm bg-white dark:bg-slate-800;
   }
 
   /* Hover lift effect for interactive elements */

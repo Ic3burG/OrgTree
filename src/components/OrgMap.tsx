@@ -12,7 +12,7 @@ import ReactFlow, {
   NodeTypes,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-
+import { useTheme } from '../contexts/ThemeContext';
 import DepartmentNodeComponent from './DepartmentNode';
 import DetailPanel from './DetailPanel';
 import SearchOverlay from './SearchOverlay';
@@ -140,6 +140,7 @@ export default function OrgMap(): React.JSX.Element {
   const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
   const toast = useToast();
+  const { isDarkMode } = useTheme();
   const [searchParams] = useSearchParams();
 
   // Select person for detail panel
@@ -585,7 +586,7 @@ export default function OrgMap(): React.JSX.Element {
             <Background color="#cbd5e1" gap={20} size={1} />
             <MiniMap
               nodeColor={node => getDepthColors(node.data.depth, currentTheme).hex}
-              maskColor="rgba(0, 0, 0, 0.1)"
+              maskColor={isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.1)'}
               position="bottom-right"
             />
           </ReactFlow>

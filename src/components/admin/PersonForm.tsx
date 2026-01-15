@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { X, Plus, Settings, Trash2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import api from '../../api/client.js';
 import type { Person, Department, CustomFieldDefinition } from '../../types/index.js';
 import { getHierarchicalDepartments, getIndentedName } from '../../utils/departmentUtils.js';
 import CustomFieldInput from '../ui/CustomFieldInput.js';
+import CustomFieldForm from './CustomFieldForm.js';
+import DeleteConfirmModal from './DeleteConfirmModal.js';
 
 interface PersonFormData {
   name: string;
@@ -53,21 +55,30 @@ export default function PersonForm({
   const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
   const [loadingDefinitions, setLoadingDefinitions] = useState(false);
 
-  useEffect(() => {
-    async function loadDefinitions() {
-      if (!orgId || !isOpen) return;
-      try {
-        setLoadingDefinitions(true);
-        const defs = await api.getCustomFieldDefinitions(orgId);
-        setFieldDefinitions(defs.filter(d => d.entity_type === 'person'));
-      } catch (err) {
-        console.error('Failed to load person custom field definitions:', err);
-      } finally {
-        setLoadingDefinitions(false);
-      }
+  // Field management states
+  const [isFieldFormOpen, setIsFieldFormOpen] = useState(false);
+  const [editingField, setEditingField] = useState<CustomFieldDefinition | null>(null);
+  const [isFieldSubmitting, setIsFieldSubmitting] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [fieldToDelete, setFieldToDelete] = useState<CustomFieldDefinition | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const loadDefinitions = useCallback(async () => {
+    if (!orgId || !isOpen) return;
+    try {
+      setLoadingDefinitions(true);
+      const defs = await api.getCustomFieldDefinitions(orgId);
+      setFieldDefinitions(defs.filter(d => d.entity_type === 'person'));
+    } catch (err) {
+      console.error('Failed to load person custom field definitions:', err);
+    } finally {
+      setLoadingDefinitions(false);
     }
-    loadDefinitions();
   }, [orgId, isOpen]);
+
+  useEffect(() => {
+    loadDefinitions();
+  }, [loadDefinitions]);
 
   useEffect(() => {
     if (person) {
@@ -135,6 +146,57 @@ export default function PersonForm({
         [key]: value,
       },
     }));
+  };
+
+  const handleAddField = () => {
+    setEditingField(null);
+    setIsFieldFormOpen(true);
+  };
+
+  const handleEditField = (def: CustomFieldDefinition) => {
+    setEditingField(def);
+    setIsFieldFormOpen(true);
+  };
+
+  const handleDeleteField = (def: CustomFieldDefinition) => {
+    setFieldToDelete(def);
+    setDeleteModalOpen(true);
+  };
+
+  const handleFieldFormSubmit = async (data: Partial<CustomFieldDefinition>) => {
+    if (!orgId) return;
+    try {
+      setIsFieldSubmitting(true);
+      if (editingField) {
+        await api.updateCustomFieldDefinition(orgId, editingField.id, data);
+      } else {
+        await api.createCustomFieldDefinition(orgId, {
+          ...data,
+          entity_type: 'person',
+        });
+      }
+      setIsFieldFormOpen(false);
+      await loadDefinitions();
+    } catch (err) {
+      alert((err as Error).message || 'Failed to save field');
+    } finally {
+      setIsFieldSubmitting(false);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!orgId || !fieldToDelete) return;
+    try {
+      setIsDeleting(true);
+      await api.deleteCustomFieldDefinition(orgId, fieldToDelete.id);
+      setDeleteModalOpen(false);
+      setFieldToDelete(null);
+      await loadDefinitions();
+    } catch (err) {
+      alert((err as Error).message || 'Failed to delete field');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -276,25 +338,61 @@ export default function PersonForm({
             </div>
 
             {/* Custom Fields Section */}
-            {fieldDefinitions.length > 0 && (
-              <div className="pt-4 border-t border-gray-100 dark:border-slate-700">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <div className="pt-4 border-t border-gray-100 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100 flex items-center gap-2">
                   <div className="w-1 h-4 bg-blue-500 rounded-full" />
                   Additional Information
                 </h3>
+                <button
+                  type="button"
+                  onClick={handleAddField}
+                  className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                >
+                  <Plus size={14} />
+                  Add Field
+                </button>
+              </div>
+
+              {fieldDefinitions.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {fieldDefinitions.map(def => (
-                    <CustomFieldInput
-                      key={def.id}
-                      definition={def}
-                      value={formData.customFields[def.field_key] || null}
-                      onChange={val => handleCustomFieldChange(def.field_key, val)}
-                      disabled={isSubmitting}
-                    />
+                    <div key={def.id} className="relative group">
+                      <CustomFieldInput
+                        definition={def}
+                        value={formData.customFields[def.field_key] || null}
+                        onChange={val => handleCustomFieldChange(def.field_key, val)}
+                        disabled={isSubmitting}
+                      />
+                      <div className="absolute top-0 right-0 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => handleEditField(def)}
+                          className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                          title="Edit definition"
+                        >
+                          <Settings size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteField(def)}
+                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                          title="Delete definition"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                !loadingDefinitions && (
+                  <p className="text-xs text-center text-gray-400 dark:text-slate-500 py-4 italic bg-gray-50/50 dark:bg-slate-900/20 rounded-lg border border-dashed border-gray-200 dark:border-slate-700">
+                    No additional information fields defined yet.
+                  </p>
+                )
+              )}
+            </div>
 
             {loadingDefinitions && (
               <div className="flex items-center justify-center p-4">
@@ -321,6 +419,25 @@ export default function PersonForm({
             </button>
           </div>
         </form>
+
+        {/* Field Management Modals */}
+        <CustomFieldForm
+          isOpen={isFieldFormOpen}
+          onClose={() => setIsFieldFormOpen(false)}
+          onSubmit={handleFieldFormSubmit}
+          definition={editingField}
+          isSubmitting={isFieldSubmitting}
+          fixedEntityType="person"
+        />
+
+        <DeleteConfirmModal
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Custom Field"
+          message={`Are you sure you want to delete "${fieldToDelete?.name}"? Data in this field will be lost for everyone.`}
+          isDeleting={isDeleting}
+        />
       </div>
     </div>
   );

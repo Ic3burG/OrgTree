@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useParams } from 'react-router-dom';
 import {
   Home,
@@ -16,32 +16,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
 import ConnectionStatus from '../ui/ConnectionStatus';
 import DarkModeToggle from '../ui/DarkModeToggle';
-import api from '../../api/client';
 
 export default function AdminLayout(): React.JSX.Element {
   const { orgId } = useParams<{ orgId: string }>();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const [orgRole, setOrgRole] = useState<string | null>(null);
-
-  // Fetch organization to get user's role
-  useEffect(() => {
-    async function fetchOrgRole(): Promise<void> {
-      if (!orgId) return;
-
-      try {
-        const org = await api.getOrganization(orgId);
-        setOrgRole(org.role || 'viewer');
-      } catch (err) {
-        console.error('Failed to fetch org role:', err);
-      }
-    }
-    fetchOrgRole();
-  }, [orgId]);
 
   // Check if user has admin access (admin or owner in this org)
-  const isOrgAdmin = orgRole === 'admin' || orgRole === 'owner';
 
   const handleLogout = (): void => {
     logout();
@@ -152,23 +134,6 @@ export default function AdminLayout(): React.JSX.Element {
           <Map size={20} />
           <span className="font-medium">Organization Map</span>
         </NavLink>
-
-        {isOrgAdmin && (
-          <NavLink
-            to={`/org/${orgId}/custom-fields`}
-            onClick={closeSidebar}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-                isActive
-                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                  : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
-              }`
-            }
-          >
-            <Settings size={20} />
-            <span className="font-medium">Custom Fields</span>
-          </NavLink>
-        )}
       </nav>
 
       {/* User Section */}

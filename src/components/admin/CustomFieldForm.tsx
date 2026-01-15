@@ -8,6 +8,7 @@ interface CustomFieldFormProps {
   onSubmit: (data: Partial<CustomFieldDefinition>) => void;
   definition?: CustomFieldDefinition | null;
   isSubmitting?: boolean;
+  fixedEntityType?: 'person' | 'department';
 }
 
 const FIELD_TYPES: { value: CustomFieldType; label: string }[] = [
@@ -27,6 +28,7 @@ export default function CustomFieldForm({
   onSubmit,
   definition,
   isSubmitting = false,
+  fixedEntityType,
 }: CustomFieldFormProps): React.JSX.Element | null {
   const [name, setName] = useState('');
   const [fieldKey, setFieldKey] = useState('');
@@ -50,12 +52,12 @@ export default function CustomFieldForm({
       setName('');
       setFieldKey('');
       setFieldType('text');
-      setEntityType('person');
+      setEntityType(fixedEntityType || 'person');
       setIsRequired(false);
-      setIsSearchable(false);
+      setIsSearchable(true); // Default to searchable
       setOptions([]);
     }
-  }, [definition, isOpen]);
+  }, [definition, isOpen, fixedEntityType]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,26 +131,6 @@ export default function CustomFieldForm({
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-              Field Key (Internal ID)
-            </label>
-            <input
-              type="text"
-              value={fieldKey}
-              onChange={e => setFieldKey(e.target.value)}
-              placeholder="e.g. slack_handle"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 transition-all font-mono text-sm"
-              required
-              disabled={!!definition}
-            />
-            {!definition && (
-              <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-                Lowercase, numbers, and underscores only. Cannot be changed later.
-              </p>
-            )}
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
@@ -157,7 +139,7 @@ export default function CustomFieldForm({
               <select
                 value={fieldType}
                 onChange={e => setFieldType(e.target.value as CustomFieldType)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 transition-all"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 transition-all font-sans"
               >
                 {FIELD_TYPES.map(t => (
                   <option key={t.value} value={t.value}>
@@ -166,20 +148,22 @@ export default function CustomFieldForm({
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Entity Type
-              </label>
-              <select
-                value={entityType}
-                onChange={e => setEntityType(e.target.value as 'person' | 'department')}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 transition-all"
-                disabled={!!definition}
-              >
-                <option value="person">Person</option>
-                <option value="department">Department</option>
-              </select>
-            </div>
+            {!fixedEntityType && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  Entity Type
+                </label>
+                <select
+                  value={entityType}
+                  onChange={e => setEntityType(e.target.value as 'person' | 'department')}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 transition-all font-sans"
+                  disabled={!!definition}
+                >
+                  <option value="person">Person</option>
+                  <option value="department">Department</option>
+                </select>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4">
@@ -192,17 +176,6 @@ export default function CustomFieldForm({
               />
               <span className="text-sm font-medium text-gray-700 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-slate-100">
                 Required
-              </span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={isSearchable}
-                onChange={e => setIsSearchable(e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-              />
-              <span className="text-sm font-medium text-gray-700 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-slate-100">
-                Searchable
               </span>
             </label>
           </div>

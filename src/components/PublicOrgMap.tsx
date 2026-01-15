@@ -13,6 +13,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
+import { useTheme } from '../contexts/ThemeContext';
 import DepartmentNode from './DepartmentNode';
 import DetailPanel from './DetailPanel';
 import Toolbar from './Toolbar';
@@ -122,6 +123,7 @@ function PublicOrgMapContent(): React.JSX.Element {
   const [currentTheme, setCurrentTheme] = useState('slate');
   const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
 
+  const { isDarkMode } = useTheme();
   const { fitView, zoomIn, zoomOut } = useReactFlow();
 
   // Select person for detail panel
@@ -384,7 +386,7 @@ function PublicOrgMapContent(): React.JSX.Element {
           <Background color="#cbd5e1" gap={20} size={1} />
           <MiniMap
             nodeColor={(node: Node<NodeData>) => getDepthColors(node.data.depth, currentTheme).hex}
-            maskColor="rgba(0, 0, 0, 0.1)"
+            maskColor={isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.1)'}
             position="bottom-right"
           />
         </ReactFlow>

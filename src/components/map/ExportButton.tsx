@@ -34,7 +34,7 @@ export default function ExportButton({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={loading}
-        className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 dark:text-slate-100 border border-transparent dark:border-slate-700 rounded-lg shadow hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         title="Export"
         aria-haspopup="menu"
         aria-expanded={isOpen}
@@ -46,7 +46,7 @@ export default function ExportButton({
 
       {isOpen && (
         <div
-          className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-slate-200 py-1 min-w-[160px] z-50"
+          className="absolute top-full left-0 mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 min-w-[160px] z-50"
           role="menu"
           aria-label="Export options"
         >
@@ -56,7 +56,7 @@ export default function ExportButton({
               setIsOpen(false);
             }}
             disabled={loading}
-            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-50 text-left disabled:opacity-50 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 text-left dark:text-slate-100 disabled:opacity-50 transition-colors"
             role="menuitem"
           >
             <Image size={18} className="text-blue-500" />
@@ -68,7 +68,7 @@ export default function ExportButton({
               setIsOpen(false);
             }}
             disabled={loading}
-            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-50 text-left disabled:opacity-50 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 text-left dark:text-slate-100 disabled:opacity-50 transition-colors"
             role="menuitem"
           >
             <FileText size={18} className="text-red-500" />
