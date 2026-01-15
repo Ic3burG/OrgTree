@@ -299,6 +299,14 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - **[FIX]** Addressed linting and TypeScript errors in `seed-via-api.ts` and `passkey.service.ts` to ensure clean CI.
     - Fixed type mismatch in `passkey.service.ts` (`allowCredentials`, `excludeCredentials`)
     - Resolved all linting issues for clean CI run
+  - 🐛 **CRITICAL BUG FIX #4**: 2FA Silent Redirection Loop
+    - **Root Cause**: Race condition between 2FA verification reload and AuthContext initialization.
+    - `LoginPage.tsx` performed a full page reload (`window.location.href`) immediately after 2FA success.
+    - `AuthContext.tsx` aggressively logged users out if `api.getMe()` failed during initialization (e.g., due to network race).
+    - **Fix**:
+      - **Frontend**: Switched `LoginPage.tsx` to use `useNavigate` for client-side transition (no reload).
+      - **Context**: Updated `AuthContext.tsx` to only force logout on explicit 401/403 errors.
+    - **Impact**: Seamless 2FA login experience without silent failures.
   - 📊 **TESTING**:
     - TypeScript: 0 compilation errors ✅
   - 🚀 **DEPLOYMENT**:

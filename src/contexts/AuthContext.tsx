@@ -51,13 +51,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // The server will reject if expired and trigger a refresh
           scheduleTokenRefresh(900); // 15 minutes default
         })
-        .catch(() => {
-          // Token invalid - the API client will handle refresh or redirect
-          // Only clear if we get here without redirect (refresh also failed)
-          const currentToken = localStorage.getItem('token');
-          if (!currentToken) {
-            setUser(null);
+        .catch(err => {
+          console.error('Auth check failed:', err);
+          // Only logout if it's explicitly an auth error (401/403)
+          // or if the token is clearly invalid/expired
+          if (err.status === 401 || err.status === 403) {
+            logout();
           }
+          // For network errors or 500s, we might want to keep the local state
+          // but maybe show a warning? For now, let's NOT logout for network errors
+          // to avoid "flashing" login screen on flaky connections.
+          // However, if we don't logout, the user is in a "semi-logged-in" state
+          // where API calls might fail.
+          // Given the user report, if getMe() fails, we should be careful.
+
+          // Actually, if getMe failed, we probably shouldn't trust the local token.
+          // But strict 401 check is safer than catch-all.
         })
         .finally(() => setLoading(false));
     } else {

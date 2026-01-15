@@ -1,5 +1,6 @@
 import React, { useState, type FormEvent, type ChangeEvent } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 import { LogIn, Mail, Lock, AlertCircle, Fingerprint } from 'lucide-react';
 import DarkModeToggle from '../ui/DarkModeToggle';
@@ -16,6 +17,8 @@ export default function LoginPage(): React.JSX.Element {
 
   const { loginWithPasskey, loading: passkeyLoading, error: passkeyError } = usePasskey();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const from = location.state?.from?.pathname || '/';
 
@@ -47,7 +50,8 @@ export default function LoginPage(): React.JSX.Element {
         // Normal login - store tokens and redirect
         localStorage.setItem('token', data.accessToken);
         localStorage.setItem('user', JSON.stringify(data.user));
-        window.location.href = from;
+        setUser(data.user);
+        navigate(from, { replace: true });
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -70,9 +74,10 @@ export default function LoginPage(): React.JSX.Element {
         // Store token and user
         localStorage.setItem('token', result.accessToken);
         localStorage.setItem('user', JSON.stringify(result.user));
+        setUser(result.user);
 
-        // Reload to trigger auth context update
-        window.location.href = from;
+        // Redirect
+        navigate(from, { replace: true });
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -87,7 +92,10 @@ export default function LoginPage(): React.JSX.Element {
     // Store tokens and redirect
     localStorage.setItem('token', accessToken);
     localStorage.setItem('user', JSON.stringify(user));
-    window.location.href = from;
+    // Cast user to User type as we know it comes from the API
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setUser(user as any);
+    navigate(from, { replace: true });
   };
 
   const handleBackToLogin = () => {
