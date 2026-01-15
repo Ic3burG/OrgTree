@@ -251,6 +251,17 @@ export interface SearchResponse {
   suggestions?: string[];
 }
 
+export interface AutocompleteSuggestion {
+  type: 'department' | 'person';
+  id: string;
+  text: string;
+  parentId?: string | null;
+}
+
+export interface AutocompleteResponse {
+  suggestions: AutocompleteSuggestion[];
+}
+
 // Pagination types
 export interface PaginatedResponse<T> {
   items?: T[];

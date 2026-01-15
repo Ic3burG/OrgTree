@@ -112,9 +112,10 @@ describe('useSearch', () => {
 
   it('fetches suggestions', async () => {
     vi.mocked(api.searchAutocomplete).mockResolvedValue({
-      suggestions: ['suggestion 1', 'suggestion 2'],
-      results: [],
-      total: 2,
+      suggestions: [
+        { text: 'suggestion 1', type: 'department', id: '1' },
+        { text: 'suggestion 2', type: 'person', id: '2' },
+      ],
     });
 
     const { result } = renderHook(() => useSearch(mockOrgId));

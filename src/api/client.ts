@@ -17,6 +17,7 @@ import type {
   Passkey,
   TotpSetup,
   CustomFieldDefinition,
+  AutocompleteResponse,
 } from '../types/index.js';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -679,9 +680,9 @@ const api = {
     return request<SearchResponse>(`/organizations/${orgId}/search?${query}`);
   },
 
-  searchAutocomplete: (orgId: string, q: string, limit = 5): Promise<SearchResponse> => {
+  searchAutocomplete: (orgId: string, q: string, limit = 5): Promise<AutocompleteResponse> => {
     const params = new URLSearchParams({ q, limit: limit.toString() });
-    return request<SearchResponse>(`/organizations/${orgId}/search/autocomplete?${params}`);
+    return request<AutocompleteResponse>(`/organizations/${orgId}/search/autocomplete?${params}`);
   },
 
   // Bulk Operations

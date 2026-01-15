@@ -115,9 +115,9 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
 
       try {
         const data = await api.searchAutocomplete(orgId, q, 5);
-        const suggestions = (data.suggestions || []).map((text: string) => ({
-          text,
-          type: 'department' as const,
+        const suggestions = (data.suggestions || []).map(suggestion => ({
+          text: suggestion.text,
+          type: suggestion.type,
         }));
         setSuggestions(suggestions);
       } catch {
