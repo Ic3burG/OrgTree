@@ -160,19 +160,22 @@ export default function SecuritySettingsPage(): React.JSX.Element {
 
       {/* Passkeys Section */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-4">
-          <Fingerprint size={20} />
-          Passkeys
-        </h2>
-
-        <button
-          onClick={handleAddPasskey}
-          disabled={passkeyLoading || loading}
-          className="mb-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Plus size={20} />
-          Add Passkey
-        </button>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <Fingerprint size={20} />
+            Passkeys
+          </h2>
+          {passkeys.length > 0 && (
+            <button
+              onClick={handleAddPasskey}
+              disabled={passkeyLoading || loading}
+              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus size={16} />
+              Add Backup Passkey
+            </button>
+          )}
+        </div>
 
         {loading ? (
           <div className="text-center py-8">
@@ -185,6 +188,14 @@ export default function SecuritySettingsPage(): React.JSX.Element {
             <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">
               Add a passkey to enable passwordless sign-in
             </p>
+            <button
+              onClick={handleAddPasskey}
+              disabled={passkeyLoading || loading}
+              className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus size={20} />
+              Add Passkey
+            </button>
           </div>
         ) : (
           <div className="space-y-3">
