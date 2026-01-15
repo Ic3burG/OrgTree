@@ -259,7 +259,23 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 - **Last Major Update**: Unified Account Management & Security Fixes (January 14, 2026)
 - **Total Commits**: 241+ commits on main branch
-- **Today's Progress (January 15, 2026 - Session 53)**:
+- **Today's Progress (January 15, 2026 - Session 54)**:
+  - 🐛 **CRITICAL BUG FIX**: Fixed Search Crash & "Zero Results" Error
+  - ✅ **SEARCH STABILITY**:
+    - **Crash Fix**: Resolved type mismatch in `SearchResult` causing app crash on search.
+    - **Zero Results Fix**: Refactored backend FTS5 query to `UNION ALL` to fix "unable to use function MATCH in the requested context" error.
+    - **Zoom Fix**: Added missing `departmentId` to search results so selecting a person correctly zooms to their department.
+  - ✅ **DEPARTMENT UX**:
+    - **Hover Popover**: Added "People" count hover popover in Department list to show members.
+    - **Click-to-Zoom**: Clicking a person in the popover now auto-zooms to them on the map.
+    - **Parent Editing**: Fixed `parent_id` vs `parentId` mismatch preventing department moves.
+  - ✅ **DEEP LINKING**:
+    - Added `?personId` URL parameter support to `/org/:orgId/map` for external navigation.
+  - 🧹 **CODE QUALITY**:
+    - Fixed Prettier lint errors in `server/src/services/search.service.ts`.
+  - 📁 **FILES MODIFIED**: 8+ files
+  - ✅ **COMMITS PUSHED**: Multiple commits covering frontend and backend fixes
+- **Previous Progress (January 15, 2026 - Session 53)**:
   - ✨ **FEATURE COMPLETE**: Custom Fields Framework & UI Integration
   - ✅ **CORE CAPABILITIES**:
     - **Custom Field Definitions**: Admin interface for creating attributes for People and Departments.
