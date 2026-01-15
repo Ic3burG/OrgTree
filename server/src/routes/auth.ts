@@ -127,6 +127,8 @@ router.post(
         user: result.user,
         accessToken: result.accessToken,
         expiresIn: result.expiresIn,
+        requiresTwoFactor: result.requiresTwoFactor,
+        tempUserId: result.tempUserId,
       });
     } catch (err) {
       next(err);
