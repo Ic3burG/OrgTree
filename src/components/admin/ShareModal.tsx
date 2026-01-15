@@ -58,8 +58,12 @@ export default function ShareModal({
     async function loadSettings(): Promise<void> {
       try {
         setLoading(true);
-        const settings: ShareSettings & { shareUrl?: string } = await api.getShareSettings(orgId);
-        setIsPublic(settings.is_public);
+        const settings = (await api.getShareSettings(orgId)) as ShareSettings & {
+          shareUrl?: string;
+          isPublic?: boolean;
+        };
+        // Handle both camelCase (from API) and snake_case (from type)
+        setIsPublic(settings.isPublic ?? settings.is_public);
         setShareUrl(settings.shareUrl || settings.share_url || '');
       } catch (err) {
         console.error('Failed to load share settings:', err);
@@ -153,8 +157,10 @@ export default function ShareModal({
       const newIsPublic = !isPublic;
       const result = (await api.updateShareSettings(orgId, newIsPublic)) as ShareSettings & {
         shareUrl?: string;
+        isPublic?: boolean;
       };
-      setIsPublic(result.is_public);
+      // Handle both camelCase (from API) and snake_case (from type)
+      setIsPublic(result.isPublic ?? result.is_public);
       setShareUrl(result.shareUrl || result.share_url || '');
       toast.success(newIsPublic ? 'Organization is now public' : 'Organization is now private');
     } catch (err) {
@@ -351,6 +357,7 @@ export default function ShareModal({
                       <button
                         onClick={handleTogglePublic}
                         disabled={saving || !isAdmin}
+                        aria-label="Toggle public access"
                         title={!isAdmin ? 'Only admins can change sharing settings' : ''}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                           isPublic ? 'bg-blue-600' : 'bg-slate-300'

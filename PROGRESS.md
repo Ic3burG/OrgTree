@@ -278,6 +278,13 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Available to all organization members (viewers, editors, admins, owners).
   - 💄 **UI FIX**: Restored PersonForm layout
     - Moved Email field back under Department field (full width) as requested.
+  - 🐛 **BUG FIX**: Fixed Public Link toggle in ShareModal
+    - **Issue**: Toggle button didn't update visually despite successful API call.
+    - **Root Cause 1**: Frontend expected `is_public` (snake_case) but backend returned `isPublic` (camelCase).
+    - **Root Cause 2**: `ToastProvider` context value was unstable, causing `ShareModal` to re-fetch stale data on every toast.
+    - **Fix**: Updated `ShareModal` to handle camelCase response.
+    - **Fix**: Memoized `toast` context in `ToastProvider` to prevent unnecessary re-renders.
+    - **Test**: Added `ShareModal.test.tsx` to prevent regression.
 - **Previous Progress (January 15, 2026 - Session 54)**:
   - 🐛 **CRITICAL BUG FIX**: Fixed Search Crash & "Zero Results" Error
   - ✅ **SEARCH STABILITY**:

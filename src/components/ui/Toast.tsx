@@ -4,6 +4,7 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   ReactNode,
 } from 'react';
 import { CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
@@ -73,11 +74,14 @@ export function ToastProvider({ children }: ToastProviderProps): React.JSX.Eleme
     };
   }, [addToast]);
 
-  const toast: ToastContextValue = {
-    success: (message: string) => addToast(message, 'success'),
-    error: (message: string) => addToast(message, 'error'),
-    info: (message: string) => addToast(message, 'info'),
-  };
+  const toast: ToastContextValue = useMemo(
+    () => ({
+      success: (message: string) => addToast(message, 'success'),
+      error: (message: string) => addToast(message, 'error'),
+      info: (message: string) => addToast(message, 'info'),
+    }),
+    [addToast]
+  );
 
   return (
     <ToastContext.Provider value={toast}>
