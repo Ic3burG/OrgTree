@@ -238,6 +238,7 @@ export interface SearchResult {
   department_name?: string;
   description?: string;
   rank?: number;
+  departmentId?: string;
 }
 
 export interface SearchResponse {
