@@ -270,6 +270,11 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - All tests passing locally and verified clean build.
   - 📁 **FILES MODIFIED**: 5 files
   - ✅ **COMMITS PUSHED**: Committed and pushed fix for mobile nav and search types.
+  - ✨ **FEATURE**: People List Sorting
+    - Added sorting controls to People tab in Admin UI.
+    - Supported fields: Name, Department, Title, Date Added.
+    - Features: Ascending/Descending toggle, case-insensitive sorting.
+    - Handles sorting of mixed data sources (API search results + local list).
 - **Previous Progress (January 15, 2026 - Session 54)**:
   - 🐛 **CRITICAL BUG FIX**: Fixed Search Crash & "Zero Results" Error
   - ✅ **SEARCH STABILITY**:

@@ -29,6 +29,12 @@ export default function PersonManager(): React.JSX.Element {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Sort state
+  const [sortField, setSortField] = useState<'name' | 'department' | 'title' | 'created_at'>(
+    'name'
+  );
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
   // Use the search hook for API-based search
   const {
     query: searchTerm,
@@ -173,21 +179,69 @@ export default function PersonManager(): React.JSX.Element {
     }
   };
 
-  // Determine which list to filter: search results (if searching) or all people
+  // Determine which list to filter and sort
   const filteredPeople = useMemo(() => {
-    // If we have a search term with enough characters, use API search results
-    const baseList: PersonWithDepartmentName[] =
+    // 1. Base list (API search results or all people)
+    let list: PersonWithDepartmentName[] =
       searchTerm.length >= 2 ? (searchResults as unknown as PersonWithDepartmentName[]) : people;
 
-    // Apply department filter locally
-    if (!filterDepartment) {
-      return baseList;
+    // 2. Filter by department (local)
+    if (filterDepartment) {
+      list = list.filter(
+        (person: PersonWithDepartmentName) => person.department_id === filterDepartment
+      );
     }
 
-    return baseList.filter(
-      (person: PersonWithDepartmentName) => person.department_id === filterDepartment
-    );
-  }, [searchTerm, searchResults, people, filterDepartment]);
+    // 3. Sort (local)
+    return [...list].sort((a, b) => {
+      let valA: string | number | null | undefined;
+      let valB: string | number | null | undefined;
+
+      switch (sortField) {
+        case 'name':
+          valA = a.name;
+          valB = b.name;
+          break;
+        case 'department':
+          // Handle both camelCase (from people list) and snake_case (from search results)
+          valA =
+            a.departmentName ||
+            (a as PersonWithDepartmentName & { department_name?: string }).department_name ||
+            '';
+          valB =
+            b.departmentName ||
+            (b as PersonWithDepartmentName & { department_name?: string }).department_name ||
+            '';
+          break;
+        case 'title':
+          valA = a.title || '';
+          valB = b.title || '';
+          break;
+        case 'created_at':
+          // Handle potential missing created_at in search results
+          valA = a.created_at || '';
+          valB = b.created_at || '';
+          break;
+        default:
+          valA = a.name;
+          valB = b.name;
+      }
+
+      // Handle null/undefined
+      if (valA === null || valA === undefined) valA = '';
+      if (valB === null || valB === undefined) valB = '';
+
+      // Case-insensitive string comparison
+      if (typeof valA === 'string' && typeof valB === 'string') {
+        valA = valA.toLowerCase();
+        valB = valB.toLowerCase();
+      }
+
+      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [searchTerm, searchResults, people, filterDepartment, sortField, sortDirection]);
 
   // Bulk selection hook
   const {
@@ -317,6 +371,10 @@ export default function PersonManager(): React.JSX.Element {
         onAddPerson={handleCreate}
         searchLoading={searchLoading}
         error={error}
+        sortField={sortField}
+        onSortFieldChange={setSortField}
+        sortDirection={sortDirection}
+        onSortDirectionChange={setSortDirection}
       />
 
       <PersonList

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, CheckSquare, X, Search, Loader2 } from 'lucide-react';
+import { Plus, CheckSquare, X, Search, Loader2, ArrowUpDown } from 'lucide-react';
 import type { Department } from '../../types/index.js';
 import { getHierarchicalDepartments, getIndentedName } from '../../utils/departmentUtils.js';
 
@@ -14,6 +14,10 @@ interface PersonManagerHeaderProps {
   onAddPerson: () => void;
   searchLoading: boolean;
   error?: string | null;
+  sortField: 'name' | 'department' | 'title' | 'created_at';
+  onSortFieldChange: (field: 'name' | 'department' | 'title' | 'created_at') => void;
+  sortDirection: 'asc' | 'desc';
+  onSortDirectionChange: (direction: 'asc' | 'desc') => void;
 }
 
 export default function PersonManagerHeader({
@@ -27,6 +31,10 @@ export default function PersonManagerHeader({
   onAddPerson,
   searchLoading,
   error,
+  sortField,
+  onSortFieldChange,
+  sortDirection,
+  onSortDirectionChange,
 }: PersonManagerHeaderProps): React.JSX.Element {
   return (
     <div className="flex-shrink-0 p-6 pb-0">
@@ -69,11 +77,11 @@ export default function PersonManagerHeader({
           </div>
         )}
 
-        {/* Filters - fixed */}
+        {/* Filters */}
         <div className="mb-4 bg-white dark:bg-slate-800 rounded-lg shadow p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             {/* Search */}
-            <div className="relative">
+            <div className="relative md:col-span-5">
               {searchLoading ? (
                 <Loader2
                   size={20}
@@ -95,18 +103,50 @@ export default function PersonManagerHeader({
             </div>
 
             {/* Department Filter */}
-            <select
-              value={filterDepartment}
-              onChange={e => onFilterChange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100"
-            >
-              <option value="">All Departments</option>
-              {getHierarchicalDepartments(departments).map(dept => (
-                <option key={dept.id} value={dept.id}>
-                  {getIndentedName(dept.name, dept.depth)}
-                </option>
-              ))}
-            </select>
+            <div className="md:col-span-4">
+              <select
+                value={filterDepartment}
+                onChange={e => onFilterChange(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100"
+              >
+                <option value="">All Departments</option>
+                {getHierarchicalDepartments(departments).map(dept => (
+                  <option key={dept.id} value={dept.id}>
+                    {getIndentedName(dept.name, dept.depth)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort Controls */}
+            <div className="md:col-span-3 flex gap-2">
+              <select
+                value={sortField}
+                onChange={e =>
+                  onSortFieldChange(
+                    e.target.value as 'name' | 'department' | 'title' | 'created_at'
+                  )
+                }
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100"
+              >
+                <option value="name">Name</option>
+                <option value="department">Department</option>
+                <option value="title">Title</option>
+                <option value="created_at">Date Added</option>
+              </select>
+              <button
+                onClick={() => onSortDirectionChange(sortDirection === 'asc' ? 'desc' : 'asc')}
+                className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 dark:text-slate-100 transition-colors"
+                title={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
+              >
+                <ArrowUpDown
+                  size={20}
+                  className={`text-gray-500 dark:text-slate-400 transition-transform ${
+                    sortDirection === 'desc' ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
       </div>
