@@ -48,6 +48,7 @@ describe('useSearch', () => {
     vi.mocked(api.search).mockResolvedValue({
       results: mockResults,
       total: 1,
+      query: 'testing',
       pagination: { hasMore: false, offset: 0, limit: 20 },
     });
 

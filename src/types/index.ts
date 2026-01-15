@@ -234,17 +234,26 @@ export interface SearchResult {
   type: 'department' | 'person';
   id: string;
   name: string;
-  title?: string;
+  highlight: string;
+  custom_fields?: Record<string, string | null>;
+  // Department-specific fields
+  description?: string | null;
+  parent_id?: string | null;
+  people_count?: number;
+  // Person-specific fields
+  title?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  department_id?: string;
   department_name?: string;
-  description?: string;
   rank?: number;
-  departmentId?: string;
 }
 
 export interface SearchResponse {
   results: SearchResult[];
   total: number;
-  pagination?: {
+  query: string;
+  pagination: {
     hasMore: boolean;
     limit: number;
     offset: number;

@@ -33,7 +33,7 @@ export default function MobileNav() {
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 safe-area-inset-bottom">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 z-40 safe-area-inset-bottom">
       <div className="flex justify-around items-center h-16">
         {navItems.map(item => (
           <NavLink
@@ -42,7 +42,9 @@ export default function MobileNav() {
             end={item.end}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center gap-1 px-3 py-2 min-w-[60px] transition-colors ${
-                isActive ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                isActive
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300'
               }`
             }
           >

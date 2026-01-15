@@ -14,14 +14,15 @@ interface SearchResult {
   custom_fields?: Record<string, string | null>;
   // Department-specific fields
   description?: string | null;
-  parentId?: string | null;
-  peopleCount?: number;
+  parent_id?: string | null;
+  people_count?: number;
   // Person-specific fields
   title?: string | null;
   email?: string | null;
   phone?: string | null;
-  departmentId?: string;
-  departmentName?: string;
+  department_id?: string;
+  department_name?: string;
+  rank?: number;
 }
 
 interface CountResult {
@@ -30,6 +31,7 @@ interface CountResult {
 
 export interface SearchOptions {
   query: string;
+  type?: 'all' | 'departments' | 'people';
   limit?: number;
   offset?: number;
 }
@@ -37,6 +39,13 @@ export interface SearchOptions {
 export interface SearchResponse {
   results: SearchResult[];
   total: number;
+  query: string;
+  pagination: {
+    hasMore: boolean;
+    limit: number;
+    offset: number;
+  };
+  suggestions?: string[];
 }
 
 export interface AutocompleteSuggestion {
@@ -141,11 +150,11 @@ function searchDepartments(
       id,
       name,
       description,
-      parentId,
+      parent_id,
       MAX(nameHighlight) as nameHighlight,
       MAX(descHighlight) as descHighlight,
       MAX(customHighlight) as customHighlight,
-      peopleCount,
+      people_count,
       MIN(rank) as rank
     FROM (
       -- Search in department name/description
@@ -153,11 +162,11 @@ function searchDepartments(
         d.id,
         d.name,
         d.description,
-        d.parent_id as parentId,
+        d.parent_id,
         snippet(df.departments_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
         snippet(df.departments_fts, 1, '<mark>', '</mark>', '...', 32) as descHighlight,
         NULL as customHighlight,
-        (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as peopleCount,
+        (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as people_count,
         bm25(df.departments_fts) as rank
       FROM departments_fts df
       JOIN departments d ON d.rowid = df.rowid
@@ -172,11 +181,11 @@ function searchDepartments(
         d.id,
         d.name,
         d.description,
-        d.parent_id as parentId,
+        d.parent_id,
         NULL as nameHighlight,
         NULL as descHighlight,
         snippet(cf.custom_fields_fts, 0, '<mark>', '</mark>', '...', 32) as customHighlight,
-        (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as peopleCount,
+        (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as people_count,
         bm25(cf.custom_fields_fts) as rank
       FROM custom_fields_fts cf
       JOIN departments d ON d.id = cf.entity_id
@@ -219,11 +228,12 @@ function searchDepartments(
     id: string;
     name: string;
     description: string | null;
-    parentId: string | null;
+    parent_id: string | null;
     nameHighlight: string;
     descHighlight: string;
     customHighlight: string;
-    peopleCount: number;
+    people_count: number;
+    rank: number;
   }>;
 
   const results = rows.map(
@@ -232,12 +242,13 @@ function searchDepartments(
       id: row.id,
       name: row.name,
       description: row.description,
-      parentId: row.parentId,
+      parent_id: row.parent_id,
       highlight: escapeHtml(row.nameHighlight || row.descHighlight || row.customHighlight)
         .replace(/&lt;mark&gt;/g, '<mark>')
         .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
         .replace(/&lt;\/mark&gt;/g, '</mark>'),
-      peopleCount: row.peopleCount,
+      people_count: row.people_count,
+      rank: row.rank,
     })
   );
 
@@ -265,8 +276,8 @@ function searchPeople(
       title,
       email,
       phone,
-      departmentId,
-      departmentName,
+      department_id,
+      department_name,
       MAX(nameHighlight) as nameHighlight,
       MAX(titleHighlight) as titleHighlight,
       MAX(emailHighlight) as emailHighlight,
@@ -280,8 +291,8 @@ function searchPeople(
         p.title,
         p.email,
         p.phone,
-        p.department_id as departmentId,
-        d.name as departmentName,
+        p.department_id,
+        d.name as department_name,
         snippet(pf.people_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
         snippet(pf.people_fts, 1, '<mark>', '</mark>', '...', 32) as titleHighlight,
         snippet(pf.people_fts, 2, '<mark>', '</mark>', '...', 32) as emailHighlight,
@@ -304,8 +315,8 @@ function searchPeople(
         p.title,
         p.email,
         p.phone,
-        p.department_id as departmentId,
-        d.name as departmentName,
+        p.department_id,
+        d.name as department_name,
         NULL as nameHighlight,
         NULL as titleHighlight,
         NULL as emailHighlight,
@@ -360,12 +371,13 @@ function searchPeople(
     title: string | null;
     email: string | null;
     phone: string | null;
-    departmentId: string;
-    departmentName: string;
+    department_id: string;
+    department_name: string;
     nameHighlight: string;
     titleHighlight: string;
     emailHighlight: string;
     customHighlight: string;
+    rank: number;
   }>;
 
   const results = rows.map(
@@ -376,14 +388,15 @@ function searchPeople(
       title: row.title,
       email: row.email,
       phone: row.phone,
-      departmentId: row.departmentId,
-      departmentName: row.departmentName,
+      department_id: row.department_id,
+      department_name: row.department_name,
       highlight: escapeHtml(
         row.nameHighlight || row.titleHighlight || row.emailHighlight || row.customHighlight
       )
         .replace(/&lt;mark&gt;/g, '<mark>')
         .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
         .replace(/&lt;\/mark&gt;/g, '</mark>'),
+      rank: row.rank,
     })
   );
 

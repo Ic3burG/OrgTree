@@ -87,7 +87,7 @@ export default function SearchOverlay({
             : result.title || '',
         // For departments, nodeId is the department id itself
         // For people, nodeId is the departmentId (from department_name field)
-        nodeId: result.type === 'department' ? result.id : result.departmentId || result.id,
+        nodeId: result.type === 'department' ? result.id : result.department_id || result.id,
         departmentName: result.department_name,
         // Pass person data for detail panel
         person:
