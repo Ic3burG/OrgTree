@@ -400,8 +400,8 @@ describe('Search Service', () => {
 
       const deptResult = result.results.find(r => r.type === 'department');
       expect(deptResult).toBeDefined();
-      expect(deptResult?.peopleCount).toBeDefined();
-      expect(deptResult?.peopleCount).toBeGreaterThanOrEqual(0);
+      expect(deptResult?.people_count).toBeDefined();
+      expect(deptResult?.people_count).toBeGreaterThanOrEqual(0);
     });
 
     it('should include department name for person results', () => {
@@ -409,7 +409,7 @@ describe('Search Service', () => {
 
       const personResult = result.results.find(r => r.type === 'person');
       expect(personResult).toBeDefined();
-      expect(personResult?.departmentName).toBeDefined();
+      expect(personResult?.department_name).toBeDefined();
     });
 
     it('should escape HTML in highlights', () => {

@@ -14,7 +14,7 @@ import {
   emitCustomFieldsReordered,
 } from '../services/socket-events.service.js';
 import db from '../db.js';
-import type { AuthRequest, CustomFieldDefinition } from '../types/index.js';
+import type { AuthRequest } from '../types/index.js';
 
 const router = express.Router();
 
@@ -64,7 +64,7 @@ router.post(
         req.user!.id
       );
 
-      emitCustomFieldCreated(req.params.orgId!, field as CustomFieldDefinition, req.user!);
+      emitCustomFieldCreated(req.params.orgId!, field as any, req.user!);
 
       res.status(201).json(field);
     } catch (err) {
@@ -91,7 +91,7 @@ router.put(
         req.user!.id
       );
 
-      emitCustomFieldUpdated(field.organization_id, field as CustomFieldDefinition, req.user!);
+      emitCustomFieldUpdated(field.organization_id, field as any, req.user!);
 
       res.json(field);
     } catch (err) {

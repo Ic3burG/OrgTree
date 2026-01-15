@@ -125,7 +125,7 @@ router.get(
       const valuesByEntity: Record<string, Record<string, string>> = {};
       customValues.forEach(v => {
         if (!valuesByEntity[v.entity_id]) valuesByEntity[v.entity_id] = {};
-        valuesByEntity[v.entity_id][v.field_key] = v.value;
+        valuesByEntity[v.entity_id]![v.field_key] = v.value;
       });
 
       // Get custom field definitions
@@ -202,7 +202,7 @@ router.get(
           name: fd.name,
           field_key: fd.field_key,
           field_type: fd.field_type,
-          options: fd.options ? JSON.parse(fd.options) : undefined,
+          options: fd.options ? JSON.parse(fd.options as unknown as string) : undefined,
           is_required: Boolean(fd.is_required),
           is_searchable: Boolean(fd.is_searchable),
           sort_order: fd.sort_order,

@@ -95,6 +95,27 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
     )
     .all(id) as Department[];
 
+  // Get all custom field values for this organization
+  const customValues = db
+    .prepare(
+      `
+    SELECT cv.entity_id, cd.field_key, cv.value
+    FROM custom_field_values cv
+    JOIN custom_field_definitions cd ON cv.field_definition_id = cd.id
+    WHERE cd.organization_id = ?
+  `
+    )
+    .all(id) as { entity_id: string; field_key: string; value: string }[];
+
+  // Group custom field values by entity_id
+  const valuesByEntity: Record<string, Record<string, string>> = {};
+  customValues.forEach(v => {
+    if (!valuesByEntity[v.entity_id]) {
+      valuesByEntity[v.entity_id] = {};
+    }
+    valuesByEntity[v.entity_id]![v.field_key] = v.value;
+  });
+
   // Get people for each department (exclude soft-deleted)
   // CRITICAL: Return snake_case field names to match frontend Person interface
   const departmentsWithPeople: DepartmentWithPeople[] = departments.map(dept => {
@@ -115,7 +136,17 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
       )
       .all(dept.id) as Person[];
 
-    return { ...dept, people };
+    // Add custom_fields to each person
+    const peopleWithCustomFields = people.map(person => ({
+      ...person,
+      custom_fields: valuesByEntity[person.id] || {},
+    }));
+
+    return {
+      ...dept,
+      people: peopleWithCustomFields,
+      custom_fields: valuesByEntity[dept.id] || {},
+    };
   });
 
   org.departments = departmentsWithPeople;

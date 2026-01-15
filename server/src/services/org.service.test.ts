@@ -93,6 +93,34 @@ vi.mock('../db.js', async () => {
       entity_data TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS custom_field_definitions (
+      id TEXT PRIMARY KEY,
+      organization_id TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      name TEXT NOT NULL,
+      field_key TEXT NOT NULL,
+      field_type TEXT NOT NULL,
+      options TEXT,
+      is_required INTEGER DEFAULT 0,
+      is_searchable INTEGER DEFAULT 1,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS custom_field_values (
+      id TEXT PRIMARY KEY,
+      field_definition_id TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      value TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (field_definition_id) REFERENCES custom_field_definitions(id) ON DELETE CASCADE,
+      UNIQUE(field_definition_id, entity_id)
+    );
   `);
 
   return { default: db };
@@ -113,6 +141,8 @@ describe('Organization Service', () => {
   beforeEach(() => {
     // Clear tables
     (db as DatabaseType).exec(`
+      DELETE FROM custom_field_values;
+      DELETE FROM custom_field_definitions;
       DELETE FROM people;
       DELETE FROM departments;
       DELETE FROM organization_members;

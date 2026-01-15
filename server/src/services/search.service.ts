@@ -509,6 +509,7 @@ export function getAutocompleteSuggestions(
         (r): AutocompleteSuggestion => ({
           text: r.name,
           type: 'department',
+          id: '', // Mock ID for snippet suggestions if needed
         })
       )
     );
@@ -537,6 +538,7 @@ export function getAutocompleteSuggestions(
         (r): AutocompleteSuggestion => ({
           text: r.name,
           type: 'person',
+          id: '', // Mock ID for snippet suggestions if needed
         })
       )
     );
