@@ -110,7 +110,7 @@ export default function DepartmentManager(): React.JSX.Element {
   const handleCreateDept = async (formData: {
     name: string;
     description: string;
-    parent_id: string | null;
+    parentId: string | null;
     customFields: Record<string, string | null>;
   }): Promise<void> => {
     if (!orgId) return;
@@ -130,7 +130,7 @@ export default function DepartmentManager(): React.JSX.Element {
   const handleUpdateDept = async (formData: {
     name: string;
     description: string;
-    parent_id: string | null;
+    parentId: string | null;
     customFields: Record<string, string | null>;
   }): Promise<void> => {
     if (!orgId || !editingDept) return;

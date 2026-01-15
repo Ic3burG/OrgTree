@@ -9,7 +9,7 @@ import CustomFieldInput from '../ui/CustomFieldInput.js';
 interface DepartmentFormData {
   name: string;
   description: string;
-  parent_id: string | null;
+  parentId: string | null;
   customFields: Record<string, string | null>;
 }
 
@@ -82,7 +82,7 @@ export default function DepartmentForm({
     const formData: DepartmentFormData = {
       name: name.trim(),
       description: description.trim(),
-      parent_id: parentId === '' ? null : parentId,
+      parentId: parentId === '' ? null : parentId,
       customFields,
     };
 
