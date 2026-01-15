@@ -13,6 +13,7 @@ vi.mock('../db.js', () => ({
 }));
 vi.mock('./member.service.js');
 vi.mock('./socket-events.service.js');
+vi.mock('./custom-fields.service.js');
 
 describe('Bulk Operations Service', () => {
   const mockActor = { id: 'user-1', name: 'Test User' };
@@ -308,7 +309,7 @@ describe('Bulk Operations Service', () => {
   });
 
   describe('bulkEditPeople', () => {
-    it('should successfully update title for multiple people', () => {
+    it('should successfully update title for multiple people', async () => {
       const personIds = ['person-1', 'person-2'];
       const updates = { title: 'Senior Developer' };
 
@@ -342,14 +343,14 @@ describe('Bulk Operations Service', () => {
         return {} as unknown as any;
       });
 
-      const result = bulkService.bulkEditPeople(mockOrgId, personIds, updates, mockActor);
+      const result = await bulkService.bulkEditPeople(mockOrgId, personIds, updates, mockActor);
 
       expect(result.success).toBe(true);
       expect(result.updatedCount).toBe(2);
       expect((result.updated[0] as any).title).toBe('Senior Developer');
     });
 
-    it('should update both title and department', () => {
+    it('should update both title and department', async () => {
       const personIds = ['person-1'];
       const updates = { title: 'Manager', departmentId: 'dept-2' };
 
@@ -388,7 +389,7 @@ describe('Bulk Operations Service', () => {
         return {} as unknown as any;
       });
 
-      const result = bulkService.bulkEditPeople(mockOrgId, personIds, updates, mockActor);
+      const result = await bulkService.bulkEditPeople(mockOrgId, personIds, updates, mockActor);
 
       expect(result.success).toBe(true);
       const updatedFirst = result.updated[0] as any;
@@ -397,9 +398,9 @@ describe('Bulk Operations Service', () => {
       expect(updatedFirst.departmentName).toBe('HR');
     });
 
-    it('should reject empty updates object', () => {
+    it('should reject empty updates object', async () => {
       try {
-        bulkService.bulkEditPeople(mockOrgId, ['person-1'], {}, mockActor);
+        await bulkService.bulkEditPeople(mockOrgId, ['person-1'], {}, mockActor);
         expect.fail('Should have thrown an error');
       } catch (error: unknown) {
         expect((error as { status: number }).status).toBe(400);
@@ -407,7 +408,7 @@ describe('Bulk Operations Service', () => {
       }
     });
 
-    it('should reject if target department not found', () => {
+    it('should reject if target department not found', async () => {
       vi.mocked(db.prepare).mockImplementation((query: string) => {
         if (query.includes('SELECT id, name FROM departments')) {
           return {
@@ -418,7 +419,7 @@ describe('Bulk Operations Service', () => {
       });
 
       try {
-        bulkService.bulkEditPeople(
+        await bulkService.bulkEditPeople(
           mockOrgId,
           ['person-1'],
           { departmentId: 'nonexistent' },
@@ -429,6 +430,46 @@ describe('Bulk Operations Service', () => {
         expect((error as { status: number }).status).toBe(404);
         expect((error as Error).message).toBe('Target department not found in this organization');
       }
+    });
+
+    it('should successfully update custom fields for multiple people', async () => {
+      const personIds = ['person-1'];
+      const updates = { customFields: { 'test-field': 'test-value' } };
+
+      vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
+        const mockTx = fn as any;
+        mockTx.default = fn;
+        mockTx.deferred = fn;
+        mockTx.immediate = fn;
+        mockTx.exclusive = fn;
+        return mockTx;
+      });
+
+      vi.mocked(db.prepare).mockImplementation((query: string) => {
+        if (query.includes('SELECT p.id, p.name')) {
+          return {
+            get: vi.fn((id: string) => ({
+              id,
+              name: `Person ${id}`,
+              title: 'Developer',
+              departmentId: 'dept-1',
+              organization_id: mockOrgId,
+              departmentName: 'Engineering',
+            })),
+          } as unknown as any;
+        }
+        if (query.includes('UPDATE people SET')) {
+          return {
+            run: vi.fn(() => ({ changes: 1 })),
+          } as unknown as any;
+        }
+        return {} as unknown as any;
+      });
+
+      const result = await bulkService.bulkEditPeople(mockOrgId, personIds, updates, mockActor);
+
+      expect(result.success).toBe(true);
+      expect(result.updatedCount).toBe(1);
     });
   });
 

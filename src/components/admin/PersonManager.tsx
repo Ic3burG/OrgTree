@@ -320,6 +320,7 @@ export default function PersonManager(): React.JSX.Element {
   const handleBulkEdit = async (updates: {
     title?: string;
     departmentId?: string;
+    customFields?: Record<string, string | null>;
   }): Promise<void> => {
     if (!orgId) return;
     try {
@@ -466,6 +467,7 @@ export default function PersonManager(): React.JSX.Element {
         count={selectedCount}
         entityType="people"
         departments={departments}
+        fieldDefinitions={fieldDefinitions}
         isUpdating={bulkOperationLoading}
         result={bulkEditResult}
       />

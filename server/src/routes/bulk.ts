@@ -107,7 +107,7 @@ router.put(
       }
 
       // Security: Whitelist allowed fields to prevent mass assignment
-      const allowedPersonFields = ['title', 'departmentId', 'email', 'phone'];
+      const allowedPersonFields = ['title', 'departmentId', 'email', 'phone', 'customFields'];
       const sanitizedUpdates = Object.fromEntries(
         Object.entries(updates).filter(([key]) => allowedPersonFields.includes(key))
       );
@@ -119,7 +119,7 @@ router.put(
         return;
       }
 
-      const result = bulkEditPeople(orgId!, personIds, sanitizedUpdates, req.user!);
+      const result = await bulkEditPeople(orgId!, personIds, sanitizedUpdates, req.user!);
       res.json(result);
     } catch (err) {
       next(err);
