@@ -21,6 +21,7 @@ interface RealtimeUpdateOptions {
   onPersonChange?: (payload: RealtimePayload) => void;
   onMemberChange?: (payload: RealtimePayload) => void;
   onOrgChange?: (payload: RealtimePayload) => void;
+  onCustomFieldDefinitionChange?: () => void;
   showNotifications?: boolean;
 }
 

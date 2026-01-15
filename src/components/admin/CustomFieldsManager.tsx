@@ -40,6 +40,7 @@ function FieldList({ title, fields, icon: Icon, onEdit, onDelete, onReorder }: F
 
     const newFields = [...fields];
     const [draggedItem] = newFields.splice(dragIndex, 1);
+    if (!draggedItem) return; // Type guard
     newFields.splice(dropIndex, 0, draggedItem);
 
     try {

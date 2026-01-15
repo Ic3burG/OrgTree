@@ -22,7 +22,7 @@ export default function Dashboard(): React.JSX.Element {
   const [showImport, setShowImport] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
-  const { toast } = useToast();
+  const toast = useToast();
 
   const loadOrganization = useCallback(async (): Promise<void> => {
     if (!orgId) return;
