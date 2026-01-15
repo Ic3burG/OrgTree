@@ -131,13 +131,18 @@ This document outlines the development roadmap for OrgTree, including technical 
 4. ~~**API Documentation** - Complete REST API documentation~~ ✅ **DONE** (December 30, 2025)
 5. ~~**Dark Mode** - Add dark theme support with user preference persistence~~ ✅ **DONE** (January 9, 2026)
 6. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
+7. **Bulk Invitations** - Send invitations to multiple emails at once
+8. **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
 
 ### Medium-term Vision (Next quarter)
 
 1. ~~**Team Collaboration** - Multi-user organization management~~ ✅ **DONE** (December 22-23, 2025)
 2. ~~**Advanced Permissions** - Role-based access control~~ ✅ **DONE** (December 22, 2025)
-3. **Integration APIs** - Third-party system integrations
+3. **Integration APIs** - RESTful API for third-party integrations (API Extensions)
 4. **Analytics Dashboard** - Organizational insights and reporting
+5. **LDAP/AD Integration** - Import from existing directory services
+6. **SSO Support** - SAML integration for enterprise
+7. **Webhook Support** - External system notifications
 
 ---
 
