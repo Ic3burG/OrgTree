@@ -107,12 +107,16 @@ router.get(
       // Get all custom field values for this organization
       let customValues: { entity_id: string; field_key: string; value: string }[] = [];
       try {
-        customValues = db.prepare(`
+        customValues = db
+          .prepare(
+            `
           SELECT cv.entity_id, cd.field_key, cv.value
           FROM custom_field_values cv
           JOIN custom_field_definitions cd ON cv.field_id = cd.id
           WHERE cv.organization_id = ? AND cv.deleted_at IS NULL
-        `).all(org.id) as { entity_id: string; field_key: string; value: string }[];
+        `
+          )
+          .all(org.id) as { entity_id: string; field_key: string; value: string }[];
       } catch (err) {
         // Table may not exist in older databases or tests
         console.warn('Failed to fetch custom field values:', err);
@@ -127,12 +131,16 @@ router.get(
       // Get custom field definitions
       let fieldDefinitions: CustomFieldDefinition[] = [];
       try {
-        fieldDefinitions = db.prepare(`
+        fieldDefinitions = db
+          .prepare(
+            `
           SELECT id, organization_id, entity_type, name, field_key, field_type, options, is_required, is_searchable, sort_order
           FROM custom_field_definitions
           WHERE organization_id = ? AND deleted_at IS NULL
           ORDER BY sort_order ASC
-        `).all(org.id) as CustomFieldDefinition[];
+        `
+          )
+          .all(org.id) as CustomFieldDefinition[];
       } catch (err) {
         // Table may not exist in older databases or tests
         console.warn('Failed to fetch custom field definitions:', err);
@@ -188,16 +196,16 @@ router.get(
         createdAt: org.created_at,
         departments: departmentsWithPeople,
         fieldDefinitions: fieldDefinitions.map(fd => ({
-           id: fd.id,
-           organization_id: fd.organization_id,
-           entity_type: fd.entity_type,
-           name: fd.name,
-           field_key: fd.field_key,
-           field_type: fd.field_type,
-           options: fd.options ? JSON.parse(fd.options) : undefined,
-           is_required: Boolean(fd.is_required),
-           is_searchable: Boolean(fd.is_searchable),
-           sort_order: fd.sort_order
+          id: fd.id,
+          organization_id: fd.organization_id,
+          entity_type: fd.entity_type,
+          name: fd.name,
+          field_key: fd.field_key,
+          field_type: fd.field_type,
+          options: fd.options ? JSON.parse(fd.options) : undefined,
+          is_required: Boolean(fd.is_required),
+          is_searchable: Boolean(fd.is_searchable),
+          sort_order: fd.sort_order,
         })),
       });
     } catch (err) {

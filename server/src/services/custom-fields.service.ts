@@ -345,9 +345,10 @@ export async function setEntityCustomFields(
       ).run(entityId, entityType, ftsContent);
     } else {
       // Remove from FTS if no searchable values remain
-      db.prepare(
-        `DELETE FROM custom_fields_fts WHERE entity_id = ? AND entity_type = ?`
-      ).run(entityId, entityType);
+      db.prepare(`DELETE FROM custom_fields_fts WHERE entity_id = ? AND entity_type = ?`).run(
+        entityId,
+        entityType
+      );
     }
   });
 

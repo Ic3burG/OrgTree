@@ -83,10 +83,7 @@ function buildFtsQuery(query: string): string {
 /**
  * Helper to fetch custom fields for a list of entities
  */
-function attachCustomFields(
-  orgId: string,
-  results: SearchResult[]
-): SearchResult[] {
+function attachCustomFields(orgId: string, results: SearchResult[]): SearchResult[] {
   if (results.length === 0) return results;
 
   const entityIds = results.map(r => r.id);
@@ -190,7 +187,6 @@ function searchDepartments(
     peopleCount: number;
   }>;
 
-
   const results = rows.map(
     (row): SearchResult => ({
       type: 'department',
@@ -285,7 +281,6 @@ function searchPeople(
     customHighlight: string;
   }>;
 
-
   const results = rows.map(
     (row): SearchResult => ({
       type: 'person',
@@ -296,7 +291,9 @@ function searchPeople(
       phone: row.phone,
       departmentId: row.departmentId,
       departmentName: row.departmentName,
-      highlight: escapeHtml(row.nameHighlight || row.titleHighlight || row.emailHighlight || row.customHighlight)
+      highlight: escapeHtml(
+        row.nameHighlight || row.titleHighlight || row.emailHighlight || row.customHighlight
+      )
         .replace(/&lt;mark&gt;/g, '<mark>')
         .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
         .replace(/&lt;\/mark&gt;/g, '</mark>'),

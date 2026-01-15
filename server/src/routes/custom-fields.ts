@@ -106,14 +106,22 @@ router.delete(
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Get field info before deletion for organization_id
-      const field = db.prepare('SELECT organization_id, entity_type, name FROM custom_field_definitions WHERE id = ?').get(req.params.fieldId!) as { organization_id: string; entity_type: string; name: string };
-      
+      const field = db
+        .prepare(
+          'SELECT organization_id, entity_type, name FROM custom_field_definitions WHERE id = ?'
+        )
+        .get(req.params.fieldId!) as { organization_id: string; entity_type: string; name: string };
+
       await deleteFieldDefinition(req.params.fieldId!, req.user!.id);
-      
+
       if (field) {
-        emitCustomFieldDeleted(field.organization_id, { id: req.params.fieldId!, ...field }, req.user!);
+        emitCustomFieldDeleted(
+          field.organization_id,
+          { id: req.params.fieldId!, ...field },
+          req.user!
+        );
       }
-      
+
       res.status(204).send();
     } catch (err) {
       next(err);
@@ -134,9 +142,9 @@ router.put(
       }
 
       await reorderFieldDefinitions(req.params.orgId!, entity_type, orderedIds, req.user!.id);
-      
+
       emitCustomFieldsReordered(req.params.orgId!, { entity_type, orderedIds }, req.user!);
-      
+
       res.json({ success: true });
     } catch (err) {
       next(err);
