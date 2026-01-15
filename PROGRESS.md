@@ -257,7 +257,28 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Today's Progress (January 14, 2026 - Session 55)**:
+- **Today's Progress (January 15, 2026 - Session 56)**:
+  - ✨ **FEATURE COMPLETE**: Custom Fields Redesign & Integration
+    - **Integrated Management**: Moved Custom Field management directly into Person and Department edit dialogs.
+    - **Simplified UI**: Auto-generated field keys from names (e.g., "Slack Handle" -> `slack_handle`), default searchability, and hidden technical complexity.
+    - **Cleanup**: Removed redundant "Custom Fields" sidebar link and legacy management page.
+    - **Refinement**: Added clear indicators for required fields and improved form layout.
+  - 🐛 **BUG FIX**: Fixed Session Expiry Loop with 2FA
+    - **Issue**: Infinite redirect loop when logging in with 2FA enabled.
+    - **Fix**: Updated `server/src/routes/auth.ts` to correctly return `requiresTwoFactor` and `tempUserId` in the login response, properly triggering the 2FA flow.
+  - 🐛 **BUG FIX**: Signup Page Dark Mode
+    - **Issue**: Input fields were unreadable (white text on white background) on the signup page in dark mode.
+    - **Fix**: Updated signup page styles to properly support dark mode themes.
+  - 🐛 **BUG FIX**: Department Population
+    - **Issue**: Department field failed to populate when editing a contact.
+    - **Fix**: Corrected data mapping in `getOrganizationById` service and frontend forms.
+  - 🧹 **CODE QUALITY**:
+    - Resolved TypeScript build errors in `CustomFieldsManager.tsx` and search services.
+    - Removed unused code and improved type safety across the custom fields implementation.
+  - 📁 **FILES MODIFIED**: 10+ files across frontend and backend.
+  - ✅ **COMMITS PUSHED**: Commits covering custom fields redesign and critical bug fixes.
+
+- **Previous Progress (January 14, 2026 - Session 55)**:
   - 🐛 **BUG FIX**: Fixed Mobile Bottom Navigation Dark Mode
     - Added `dark:bg-slate-800`, `dark:border-slate-700`, and dark mode text color variants to `MobileNav.tsx`.
     - Navigation bar now correctly blends with the dark theme on mobile devices.
