@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
+import type { User } from '../types';
 
 interface PasskeyRegistrationResult {
   verified: boolean;
@@ -7,12 +8,7 @@ interface PasskeyRegistrationResult {
 }
 
 interface PasskeyLoginResult {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
+  user: User;
   accessToken: string;
   expiresIn: number;
 }

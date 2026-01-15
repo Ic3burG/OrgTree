@@ -307,6 +307,9 @@ cd server && npm run dev  # Backend (http://localhost:3001)
       - **Frontend**: Switched `LoginPage.tsx` to use `useNavigate` for client-side transition (no reload).
       - **Context**: Updated `AuthContext.tsx` to only force logout on explicit 401/403 errors.
     - **Impact**: Seamless 2FA login experience without silent failures.
+  - ✅ **BUILD FIX**: Resolved TypeScript error in `usePasskey.ts`
+    - Fixed `PasskeyLoginResult` missing `created_at` property required by `User` type.
+    - Updated hook to use shared `User` interface from `types/index.ts`.
   - 📊 **TESTING**:
     - TypeScript: 0 compilation errors ✅
   - 🚀 **DEPLOYMENT**:
