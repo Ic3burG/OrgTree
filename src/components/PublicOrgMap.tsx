@@ -19,7 +19,7 @@ import Toolbar from './Toolbar';
 import { calculateLayout } from '../utils/layoutEngine';
 import { getDepthColors } from '../utils/colors';
 import api from '../api/client';
-import type { Department, Person } from '../types/index.js';
+import type { Department, Person, CustomFieldDefinition } from '../types/index.js';
 
 // Theme context
 export const ThemeContext = createContext<string>('slate');
@@ -120,6 +120,7 @@ function PublicOrgMapContent(): React.JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [orgName, setOrgName] = useState('Organization Chart');
   const [currentTheme, setCurrentTheme] = useState('slate');
+  const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
 
   const { fitView, zoomIn, zoomOut } = useReactFlow();
 
@@ -180,6 +181,12 @@ function PublicOrgMapContent(): React.JSX.Element {
 
         if (org.name) {
           setOrgName(org.name);
+        }
+
+        if (org.fieldDefinitions) {
+          setFieldDefinitions(org.fieldDefinitions);
+        } else if (org.field_definitions) {
+          setFieldDefinitions(org.field_definitions);
         }
 
         if (!org.departments || org.departments.length === 0) {
@@ -420,7 +427,13 @@ function PublicOrgMapContent(): React.JSX.Element {
       />
 
       {/* Detail Panel */}
-      {selectedPerson && <DetailPanel person={selectedPerson} onClose={handleCloseDetail} />}
+      {selectedPerson && (
+        <DetailPanel
+          person={selectedPerson}
+          onClose={handleCloseDetail}
+          fieldDefinitions={fieldDefinitions}
+        />
+      )}
     </div>
   );
 }

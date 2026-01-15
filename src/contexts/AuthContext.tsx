@@ -34,6 +34,43 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const logout = useCallback(async (): Promise<void> => {
+    try {
+      // Call server to revoke refresh token
+      await api.logout();
+    } catch (err) {
+      // Continue with local logout even if server call fails
+      console.error('Server logout failed:', err);
+    }
+
+    // Cancel any scheduled refresh
+    cancelTokenRefresh();
+
+    // Clear local storage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  }, []);
+
+  const login = useCallback(async (email: string, password: string): Promise<User> => {
+    const { user: loggedInUser, accessToken } = await api.login(email, password);
+    localStorage.setItem('token', accessToken);
+    localStorage.setItem('user', JSON.stringify(loggedInUser));
+    setUser(loggedInUser);
+    return loggedInUser;
+  }, []);
+
+  const signup = useCallback(
+    async (name: string, email: string, password: string): Promise<User> => {
+      const { user: signedUpUser, accessToken } = await api.signup(name, email, password);
+      localStorage.setItem('token', accessToken);
+      localStorage.setItem('user', JSON.stringify(signedUpUser));
+      setUser(signedUpUser);
+      return signedUpUser;
+    },
+    []
+  );
+
   useEffect(() => {
     // Check for existing session on mount
     const token = localStorage.getItem('token');
@@ -58,58 +95,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (err.status === 401 || err.status === 403) {
             logout();
           }
-          // For network errors or 500s, we might want to keep the local state
-          // but maybe show a warning? For now, let's NOT logout for network errors
-          // to avoid "flashing" login screen on flaky connections.
-          // However, if we don't logout, the user is in a "semi-logged-in" state
-          // where API calls might fail.
-          // Given the user report, if getMe() fails, we should be careful.
-
-          // Actually, if getMe failed, we probably shouldn't trust the local token.
-          // But strict 401 check is safer than catch-all.
         })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
-  }, []);
-
-  const login = useCallback(async (email: string, password: string): Promise<User> => {
-    const { user: loggedInUser, accessToken } = await api.login(email, password);
-    localStorage.setItem('token', accessToken);
-    localStorage.setItem('user', JSON.stringify(loggedInUser));
-    setUser(loggedInUser);
-    return loggedInUser;
-  }, []);
-
-  const signup = useCallback(
-    async (name: string, email: string, password: string): Promise<User> => {
-      const { user: signedUpUser, accessToken } = await api.signup(name, email, password);
-      localStorage.setItem('token', accessToken);
-      localStorage.setItem('user', JSON.stringify(signedUpUser));
-      setUser(signedUpUser);
-      return signedUpUser;
-    },
-    []
-  );
-
-  const logout = useCallback(async (): Promise<void> => {
-    try {
-      // Call server to revoke refresh token
-      await api.logout();
-    } catch (err) {
-      // Continue with local logout even if server call fails
-      console.error('Server logout failed:', err);
-    }
-
-    // Cancel any scheduled refresh
-    cancelTokenRefresh();
-
-    // Clear local storage
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-  }, []);
+  }, [logout]);
 
   // Memoize hasRole to avoid creating new function on every render
   const hasRole = useCallback((role: string): boolean => user?.role === role, [user]);

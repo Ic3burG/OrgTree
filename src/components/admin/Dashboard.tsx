@@ -6,7 +6,7 @@ import { useToast } from '../ui/Toast';
 import { generateCSV, downloadCSV } from '../../utils/csvExport';
 import ImportModal from './ImportModal';
 import ShareModal from './ShareModal';
-import type { Organization, Department } from '../../types/index.js';
+import type { Organization, Department, CustomFieldDefinition } from '../../types/index.js';
 import SecurityCheck from '../account/SecurityCheck';
 
 interface OrganizationWithDetails extends Organization {
@@ -17,19 +17,24 @@ interface OrganizationWithDetails extends Organization {
 export default function Dashboard(): React.JSX.Element {
   const { orgId } = useParams<{ orgId: string }>();
   const [organization, setOrganization] = useState<OrganizationWithDetails | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showImport, setShowImport] = useState<boolean>(false);
-  const [showShare, setShowShare] = useState<boolean>(false);
-  const toast = useToast();
+  const [showImport, setShowImport] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
+  const { toast } = useToast();
 
   const loadOrganization = useCallback(async (): Promise<void> => {
     if (!orgId) return;
     try {
       setLoading(true);
       setError(null);
-      const data = await api.getOrganization(orgId);
-      setOrganization(data);
+      const [orgData, customFields] = await Promise.all([
+        api.getOrganization(orgId),
+        api.getCustomFieldDefinitions(orgId),
+      ]);
+      setOrganization(orgData);
+      setFieldDefinitions(customFields);
     } catch {
       setError('Failed to load organization');
     } finally {
@@ -44,7 +49,10 @@ export default function Dashboard(): React.JSX.Element {
   const handleExport = (): void => {
     if (!organization || !organization.departments) return;
     try {
-      const csv = generateCSV({ ...organization, departments: organization.departments });
+      const csv = generateCSV(
+        { ...organization, departments: organization.departments },
+        fieldDefinitions
+      );
       const filename = `${organization.name.replace(/\s+/g, '-')}-org.csv`;
       downloadCSV(csv, filename);
       toast.success('Organization exported successfully');

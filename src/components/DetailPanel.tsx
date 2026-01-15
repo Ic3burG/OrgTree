@@ -1,11 +1,12 @@
 import React from 'react';
-import { X, Mail, Phone, Building } from 'lucide-react';
+import { X, Mail, Phone, Building, Info } from 'lucide-react';
 import { getInitials } from '../utils/helpers';
-import type { Person } from '../types/index.js';
+import type { Person, CustomFieldDefinition } from '../types/index.js';
 
 interface DetailPanelProps {
   person: Person | null;
   onClose: () => void;
+  fieldDefinitions?: CustomFieldDefinition[];
 }
 
 /**
@@ -16,6 +17,7 @@ interface DetailPanelProps {
 export default function DetailPanel({
   person,
   onClose,
+  fieldDefinitions = [],
 }: DetailPanelProps): React.JSX.Element | null {
   if (!person) return null;
 
@@ -25,6 +27,15 @@ export default function DetailPanel({
   const personWithPath = person as Person & { path?: string };
   const pathSegments = personWithPath.path ? personWithPath.path.split('/').filter(Boolean) : [];
   const departmentPath = pathSegments.length > 1 ? pathSegments.slice(0, -1).join(' / ') : null;
+
+  // Filter and pair custom field definitions with values
+  const personFieldDefs = fieldDefinitions.filter(d => d.entity_type === 'person');
+  const activeCustomFields = personFieldDefs
+    .map(def => ({
+      def,
+      value: person.custom_fields?.[def.field_key] || person.custom_fields?.[def.id],
+    }))
+    .filter(f => f.value && f.value.trim() !== '');
 
   return (
     <>
@@ -120,6 +131,44 @@ export default function DetailPanel({
               </div>
             )}
           </div>
+
+          {/* Custom Fields */}
+          {activeCustomFields.length > 0 && (
+            <div className="space-y-4 bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
+              <h4 className="font-semibold text-slate-900 dark:text-slate-100 mb-3">
+                Additional Information
+              </h4>
+              <div className="grid grid-cols-1 gap-4">
+                {activeCustomFields.map(({ def, value }) => (
+                  <div key={def.id} className="flex items-start gap-3">
+                    <Info
+                      size={20}
+                      className="text-slate-500 dark:text-slate-400 mt-0.5 flex-shrink-0"
+                    />
+                    <div className="flex-grow">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 uppercase mb-1">
+                        {def.name}
+                      </p>
+                      <div className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap break-words">
+                        {def.field_type === 'url' ? (
+                          <a
+                            href={value?.startsWith('http') ? value : `https://${value}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            {value}
+                          </a>
+                        ) : (
+                          value
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Department Path */}
           {departmentPath && (

@@ -24,7 +24,7 @@ import { exportToPng, exportToPdf } from '../utils/exportUtils';
 import { useToast } from './ui/Toast';
 import { useRealtimeUpdates } from '../hooks/useRealtimeUpdates';
 import api from '../api/client';
-import { Department, Person, Organization } from '../types/index';
+import { Department, Person, Organization, CustomFieldDefinition } from '../types/index';
 
 // Extended Organization type that includes departments
 interface OrganizationWithDepartments extends Organization {
@@ -135,6 +135,7 @@ export default function OrgMap(): React.JSX.Element {
   const [currentTheme, setCurrentTheme] = useState<string>('slate');
   const [exporting, setExporting] = useState<boolean>(false);
   const [orgName, setOrgName] = useState<string>('Organization Chart');
+  const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
 
   const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
@@ -227,6 +228,10 @@ export default function OrgMap(): React.JSX.Element {
 
         setNodes(nodesWithLayout);
         setEdges(parsedEdges);
+
+        // Fetch custom field definitions
+        const defs = await api.getCustomFieldDefinitions(orgId);
+        setFieldDefinitions(defs);
 
         // Fit view after initial load (only on first load)
         if (showLoading) {
@@ -569,7 +574,13 @@ export default function OrgMap(): React.JSX.Element {
       </div>
 
       {/* Detail Panel */}
-      {selectedPerson && <DetailPanel person={selectedPerson} onClose={handleCloseDetail} />}
+      {selectedPerson && (
+        <DetailPanel
+          person={selectedPerson}
+          onClose={handleCloseDetail}
+          fieldDefinitions={fieldDefinitions}
+        />
+      )}
     </div>
   );
 }

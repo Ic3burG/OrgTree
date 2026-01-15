@@ -12,7 +12,7 @@ import type { DepartmentWithDepth } from './DepartmentItem';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 import { useSearch } from '../../hooks/useSearch';
 import { useBulkSelection } from '../../hooks/useBulkSelection';
-import type { Department, BulkOperationResult } from '../../types/index.js';
+import type { Department, BulkOperationResult, CustomFieldDefinition } from '../../types/index.js';
 
 // Build tree structure from flat list
 const buildTree = (
@@ -68,6 +68,8 @@ export default function DepartmentManager(): React.JSX.Element {
     failedCount: number;
   } | null>(null);
 
+  const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
+
   const loadDepartments = useCallback(
     async (showLoading = true): Promise<void> => {
       if (!orgId) return;
@@ -75,6 +77,11 @@ export default function DepartmentManager(): React.JSX.Element {
         if (showLoading) setLoading(true);
         const data = await api.getDepartments(orgId);
         setDepartments(data);
+
+        // Fetch custom field definitions for departments
+        const defs = await api.getCustomFieldDefinitions(orgId);
+        setFieldDefinitions(defs.filter(d => d.entity_type === 'department'));
+
         // Auto-expand all on initial load
         if (showLoading) {
           setExpanded(new Set(data.map((d: Department) => d.id)));
@@ -96,12 +103,16 @@ export default function DepartmentManager(): React.JSX.Element {
   const { isRecentlyChanged } = useRealtimeUpdates(orgId, {
     onDepartmentChange: () => loadDepartments(false),
     onPersonChange: () => loadDepartments(false),
+    onCustomFieldDefinitionChange: () => loadDepartments(false),
     showNotifications: true,
   });
 
-  const handleCreateDept = async (
-    formData: Pick<Department, 'name' | 'description' | 'parent_id'>
-  ): Promise<void> => {
+  const handleCreateDept = async (formData: {
+    name: string;
+    description: string;
+    parent_id: string | null;
+    customFields: Record<string, string | null>;
+  }): Promise<void> => {
     if (!orgId) return;
     setFormLoading(true);
     setError('');
@@ -116,9 +127,12 @@ export default function DepartmentManager(): React.JSX.Element {
     }
   };
 
-  const handleUpdateDept = async (
-    formData: Pick<Department, 'name' | 'description' | 'parent_id'>
-  ): Promise<void> => {
+  const handleUpdateDept = async (formData: {
+    name: string;
+    description: string;
+    parent_id: string | null;
+    customFields: Record<string, string | null>;
+  }): Promise<void> => {
     if (!orgId || !editingDept) return;
     setFormLoading(true);
     setError('');
@@ -305,6 +319,7 @@ export default function DepartmentManager(): React.JSX.Element {
         onDelete={openDeleteModal}
         isRecentlyChanged={isRecentlyChanged}
         searchResults={searchResults}
+        fieldDefinitions={fieldDefinitions}
       />
 
       <DepartmentForm

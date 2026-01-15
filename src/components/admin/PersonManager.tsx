@@ -13,7 +13,13 @@ import type { PersonWithDepartmentName } from './PersonItem';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 import { useSearch } from '../../hooks/useSearch';
 import { useBulkSelection } from '../../hooks/useBulkSelection';
-import type { Person, Department, Organization, BulkOperationResult } from '../../types/index.js';
+import type {
+  Person,
+  Department,
+  Organization,
+  BulkOperationResult,
+  CustomFieldDefinition,
+} from '../../types/index.js';
 
 export default function PersonManager(): React.JSX.Element {
   const { orgId } = useParams<{ orgId: string }>();
@@ -62,6 +68,8 @@ export default function PersonManager(): React.JSX.Element {
     failedCount: number;
   } | null>(null);
 
+  const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
+
   const loadData = useCallback(
     async (showLoading = true): Promise<void> => {
       if (!orgId) return;
@@ -73,6 +81,10 @@ export default function PersonManager(): React.JSX.Element {
         const orgData: Organization & { departments?: Department[] } =
           await api.getOrganization(orgId);
         setDepartments(orgData.departments || []);
+
+        // Load custom field definitions
+        const defs = await api.getCustomFieldDefinitions(orgId);
+        setFieldDefinitions(defs.filter(d => d.entity_type === 'person'));
 
         // Flatten people from all departments
         const allPeople: PersonWithDepartmentName[] = [];
@@ -102,6 +114,7 @@ export default function PersonManager(): React.JSX.Element {
   const { isRecentlyChanged } = useRealtimeUpdates(orgId, {
     onDepartmentChange: () => loadData(false),
     onPersonChange: () => loadData(false),
+    onCustomFieldDefinitionChange: () => loadData(false),
     showNotifications: true,
   });
 
@@ -115,9 +128,14 @@ export default function PersonManager(): React.JSX.Element {
     setIsFormOpen(true);
   }, []);
 
-  const handleFormSubmit = async (
-    formData: Partial<Person> & { departmentId: string }
-  ): Promise<void> => {
+  const handleFormSubmit = async (formData: {
+    name: string;
+    title: string;
+    email: string;
+    phone: string;
+    departmentId: string;
+    customFields: Record<string, string | null>;
+  }): Promise<void> => {
     try {
       setIsSubmitting(true);
       if (editingPerson) {
@@ -319,6 +337,7 @@ export default function PersonManager(): React.JSX.Element {
         onEdit={handleEdit}
         onDelete={handleDeleteClick}
         isRecentlyChanged={isRecentlyChanged}
+        fieldDefinitions={fieldDefinitions}
       />
 
       {/* Person Form Modal */}

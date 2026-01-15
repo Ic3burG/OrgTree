@@ -5,7 +5,6 @@ import {
   Users,
   Building2,
   Map,
-  FileText,
   LogOut,
   ArrowLeft,
   Menu,
@@ -158,7 +157,7 @@ export default function AdminLayout(): React.JSX.Element {
 
         {isOrgAdmin && (
           <NavLink
-            to={`/org/${orgId}/audit`}
+            to={`/org/${orgId}/custom-fields`}
             onClick={closeSidebar}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
@@ -168,8 +167,8 @@ export default function AdminLayout(): React.JSX.Element {
               }`
             }
           >
-            <FileText size={20} />
-            <span className="font-medium">Audit Log</span>
+            <Settings size={20} />
+            <span className="font-medium">Custom Fields</span>
           </NavLink>
         )}
       </nav>

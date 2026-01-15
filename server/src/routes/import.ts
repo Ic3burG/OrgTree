@@ -49,6 +49,16 @@ router.post(
         return depthA - depthB;
       });
 
+      // Fetch custom field definitions for this organization
+      const fieldDefinitions = db
+        .prepare(
+          'SELECT id, field_key, entity_type FROM custom_field_definitions WHERE organization_id = ? AND deleted_at IS NULL'
+        )
+        .all(orgId) as { id: string; field_key: string; entity_type: string }[];
+
+      const personFields = fieldDefinitions.filter(f => f.entity_type === 'person');
+      const deptFields = fieldDefinitions.filter(f => f.entity_type === 'department');
+
       // Prepare statements
       const insertDept = db.prepare(`
       INSERT INTO departments (id, organization_id, parent_id, name, description, created_at, updated_at)
@@ -59,6 +69,16 @@ router.post(
       INSERT INTO people (id, department_id, name, title, email, phone, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `);
+
+      const insertFieldValue = db.prepare(`
+        INSERT INTO custom_field_values (id, organization_id, entity_type, entity_id, field_id, value, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      `);
+
+      const updateFts = db.prepare(`
+        INSERT OR REPLACE INTO custom_fields_fts (entity_id, entity_type, content)
+        VALUES (?, ?, ?)
+      `);
 
       // Check for existing person by email within the SAME organization
       // We join departments to check organization_id
@@ -112,16 +132,31 @@ router.post(
               | { id: string }
               | undefined;
 
+            let deptId;
             if (existing) {
               // Department exists, reuse it
-              pathToDeptId.set(row.path, existing.id);
+              deptId = existing.id;
+              pathToDeptId.set(row.path, deptId);
               departmentsReused++;
             } else {
               // Create new department
-              const deptId = generateId();
+              deptId = generateId();
               insertDept.run(deptId, orgId, parentId, row.name, row.description || null);
               pathToDeptId.set(row.path, deptId);
               departmentsCreated++;
+            }
+
+            // Process custom fields for department
+            const ftsContent: string[] = [];
+            for (const field of deptFields) {
+              const val = row[field.field_key];
+              if (val !== undefined && val !== null && val !== '') {
+                insertFieldValue.run(generateId(), orgId, 'department', deptId, field.id, val);
+                ftsContent.push(String(val));
+              }
+            }
+            if (ftsContent.length > 0) {
+              updateFts.run(deptId, 'department', ftsContent.join(' '));
             }
           } else if (type === 'person') {
             // Find department from path
@@ -158,6 +193,19 @@ router.post(
                 row.phone || null
               );
               peopleCreated++;
+
+              // Process custom fields for person
+              const ftsContent: string[] = [];
+              for (const field of personFields) {
+                const val = row[field.field_key];
+                if (val !== undefined && val !== null && val !== '') {
+                  insertFieldValue.run(generateId(), orgId, 'person', personId, field.id, val);
+                  ftsContent.push(String(val));
+                }
+              }
+              if (ftsContent.length > 0) {
+                updateFts.run(personId, 'person', ftsContent.join(' '));
+              }
             }
           }
         }

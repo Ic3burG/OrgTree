@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Mail, Phone, Edit, Trash2, CheckSquare, Square } from 'lucide-react';
-import type { Person } from '../../types/index.js';
+import type { Person, CustomFieldDefinition } from '../../types/index.js';
 
 export interface PersonWithDepartmentName extends Person {
   departmentName?: string;
@@ -14,6 +14,7 @@ interface PersonItemProps {
   onEdit: (person: PersonWithDepartmentName) => void;
   onDelete: (person: PersonWithDepartmentName) => void;
   isRecentlyChanged: boolean;
+  fieldDefinitions?: CustomFieldDefinition[];
 }
 
 const PersonItem = memo(function PersonItem({
@@ -24,13 +25,22 @@ const PersonItem = memo(function PersonItem({
   onEdit,
   onDelete,
   isRecentlyChanged,
+  fieldDefinitions = [],
 }: PersonItemProps): React.JSX.Element {
+  // Filter out empty custom fields and map to their definitions
+  const activeCustomFields = fieldDefinitions
+    .filter(def => person.custom_fields && person.custom_fields[def.field_key])
+    .map(def => ({
+      definition: def,
+      value: person.custom_fields![def.field_key],
+    }));
+
   return (
     <div
       onClick={selectionMode ? () => onToggleSelect(person.id) : undefined}
       className={`p-6 transition-all duration-300 group ${selectionMode ? 'cursor-pointer' : ''} ${
         isRecentlyChanged
-          ? 'bg-blue-50 dark:bg-blue-900/30 ring-2 ring-2 ring-blue-200 dark:ring-blue-700'
+          ? 'bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-200 dark:ring-blue-700'
           : ''
       } ${
         selectionMode && isSelected
@@ -68,7 +78,7 @@ const PersonItem = memo(function PersonItem({
             </p>
           )}
 
-          <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-slate-400">
+          <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-slate-400 mb-4">
             {person.email && (
               <div className="flex items-center gap-2 max-w-full">
                 <Mail size={16} className="flex-shrink-0" />
@@ -88,6 +98,22 @@ const PersonItem = memo(function PersonItem({
               </div>
             )}
           </div>
+
+          {/* Custom Fields */}
+          {activeCustomFields.length > 0 && (
+            <div className="flex flex-wrap gap-x-6 gap-y-2 pt-3 border-t border-gray-100 dark:border-slate-700">
+              {activeCustomFields.map(({ definition, value }) => (
+                <div key={definition.id} className="flex items-center gap-2 min-w-0">
+                  <span className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">
+                    {definition.name}:
+                  </span>
+                  <span className="text-sm text-gray-700 dark:text-slate-300 truncate">
+                    {value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Actions - hide in selection mode */}

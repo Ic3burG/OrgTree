@@ -16,6 +16,7 @@ import type {
   PaginatedResponse,
   Passkey,
   TotpSetup,
+  CustomFieldDefinition,
 } from '../types/index.js';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -724,6 +725,46 @@ const api = {
     request<BulkOperationResult>(`/organizations/${orgId}/departments/bulk-edit`, {
       method: 'PUT',
       body: JSON.stringify({ departmentIds, updates }),
+    }),
+  // Custom Fields
+  getCustomFieldDefinitions: (orgId: string): Promise<CustomFieldDefinition[]> =>
+    request<CustomFieldDefinition[]>(`/organizations/${orgId}/custom-fields`),
+
+  createCustomFieldDefinition: (
+    orgId: string,
+    data: Partial<
+      Omit<CustomFieldDefinition, 'id' | 'created_at' | 'updated_at' | 'organization_id'>
+    >
+  ): Promise<CustomFieldDefinition> =>
+    request<CustomFieldDefinition>(`/organizations/${orgId}/custom-fields`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateCustomFieldDefinition: (
+    orgId: string,
+    fieldId: string,
+    data: Partial<
+      Omit<CustomFieldDefinition, 'id' | 'created_at' | 'updated_at' | 'organization_id'>
+    >
+  ): Promise<CustomFieldDefinition> =>
+    request<CustomFieldDefinition>(`/organizations/${orgId}/custom-fields/${fieldId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteCustomFieldDefinition: (orgId: string, fieldId: string): Promise<void> =>
+    request<void>(`/organizations/${orgId}/custom-fields/${fieldId}`, {
+      method: 'DELETE',
+    }),
+
+  reorderCustomFieldDefinitions: (
+    orgId: string,
+    fieldIds: string[]
+  ): Promise<{ success: boolean }> =>
+    request<{ success: boolean }>(`/organizations/${orgId}/custom-fields/reorder`, {
+      method: 'POST',
+      body: JSON.stringify({ fieldIds }),
     }),
 };
 

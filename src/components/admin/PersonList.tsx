@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, Plus, CheckSquare, Square } from 'lucide-react';
 import PersonItem, { type PersonWithDepartmentName } from './PersonItem';
+import type { CustomFieldDefinition } from '../../types/index.js';
 
 interface PersonListProps {
   people: PersonWithDepartmentName[];
@@ -22,6 +23,7 @@ interface PersonListProps {
   onEdit: (person: PersonWithDepartmentName) => void;
   onDelete: (person: PersonWithDepartmentName) => void;
   isRecentlyChanged: (id: string) => boolean;
+  fieldDefinitions?: CustomFieldDefinition[];
 }
 
 export default function PersonList({
@@ -42,6 +44,7 @@ export default function PersonList({
   onEdit,
   onDelete,
   isRecentlyChanged,
+  fieldDefinitions = [],
 }: PersonListProps): React.JSX.Element {
   if (loading) {
     return (
@@ -121,6 +124,7 @@ export default function PersonList({
                 onEdit={onEdit}
                 onDelete={onDelete}
                 isRecentlyChanged={isRecentlyChanged(person.id)}
+                fieldDefinitions={fieldDefinitions}
               />
             ))}
           </div>

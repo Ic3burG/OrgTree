@@ -7,7 +7,14 @@ import {
   deleteFieldDefinition,
   reorderFieldDefinitions,
 } from '../services/custom-fields.service.js';
-import type { AuthRequest } from '../types/index.js';
+import {
+  emitCustomFieldCreated,
+  emitCustomFieldUpdated,
+  emitCustomFieldDeleted,
+  emitCustomFieldsReordered,
+} from '../services/socket-events.service.js';
+import db from '../db.js';
+import type { AuthRequest, CustomFieldDefinition } from '../types/index.js';
 
 const router = express.Router();
 
@@ -57,6 +64,8 @@ router.post(
         req.user!.id
       );
 
+      emitCustomFieldCreated(req.params.orgId!, field as CustomFieldDefinition, req.user!);
+
       res.status(201).json(field);
     } catch (err) {
       next(err);
@@ -82,6 +91,8 @@ router.put(
         req.user!.id
       );
 
+      emitCustomFieldUpdated(field.organization_id, field as CustomFieldDefinition, req.user!);
+
       res.json(field);
     } catch (err) {
       next(err);
@@ -94,7 +105,15 @@ router.delete(
   '/custom-fields/:fieldId',
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
+      // Get field info before deletion for organization_id
+      const field = db.prepare('SELECT organization_id, entity_type, name FROM custom_field_definitions WHERE id = ?').get(req.params.fieldId!) as { organization_id: string; entity_type: string; name: string };
+      
       await deleteFieldDefinition(req.params.fieldId!, req.user!.id);
+      
+      if (field) {
+        emitCustomFieldDeleted(field.organization_id, { id: req.params.fieldId!, ...field }, req.user!);
+      }
+      
       res.status(204).send();
     } catch (err) {
       next(err);
@@ -115,6 +134,9 @@ router.put(
       }
 
       await reorderFieldDefinitions(req.params.orgId!, entity_type, orderedIds, req.user!.id);
+      
+      emitCustomFieldsReordered(req.params.orgId!, { entity_type, orderedIds }, req.user!);
+      
       res.json({ success: true });
     } catch (err) {
       next(err);

@@ -38,6 +38,8 @@ export interface Organization {
   memberCount?: number;
   departmentCount?: number;
   departments?: Department[];
+  fieldDefinitions?: CustomFieldDefinition[];
+  field_definitions?: CustomFieldDefinition[]; // Alias for some contexts
   role?: 'owner' | 'admin' | 'editor' | 'viewer';
   createdAt?: string; // Alias for created_at
 }

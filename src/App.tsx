@@ -20,6 +20,7 @@ import Dashboard from './components/admin/Dashboard';
 import DepartmentManager from './components/admin/DepartmentManager';
 import PersonManager from './components/admin/PersonManager';
 import AuditLog from './components/admin/AuditLog';
+import CustomFieldsManager from './components/admin/CustomFieldsManager';
 import SuperuserLayout from './components/superuser/SuperuserLayout';
 import UserManagement from './components/superuser/UserManagement';
 import SystemAuditLog from './components/superuser/SystemAuditLog';
@@ -121,6 +122,7 @@ function App() {
                       }
                     />
                     <Route path="audit" element={<AuditLog />} />
+                    <Route path="custom-fields" element={<CustomFieldsManager />} />
                   </Route>
 
                   {/* Catch all - redirect to home */}

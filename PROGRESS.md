@@ -167,7 +167,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ~~**Bulk Operations** - Multi-select for batch edits/deletions~~ ✅ **IMPLEMENTED** (December 29, 2025)
 - ~~**Audit Trail** - Track changes and modifications~~ ✅ **IMPLEMENTED** (December 26, 2025)
 - ~~**Email Invitations** - Invite users who don't have OrgTree accounts yet~~ ✅ **IMPLEMENTED** (December 23, 2025)
-- **Custom Fields** - Configurable person/department attributes
+- ✅ **Custom Fields** - Configurable person/department attributes with drag-and-drop reordering, search integration, and public view support (January 15, 2026)
 - **Bulk Invitations** - Send invitations to multiple emails at once
 - **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
 
@@ -259,7 +259,32 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 - **Last Major Update**: Unified Account Management & Security Fixes (January 14, 2026)
 - **Total Commits**: 241+ commits on main branch
-- **Today's Progress (January 14, 2026 - Session 52)**:
+- **Today's Progress (January 15, 2026 - Session 53)**:
+  - ✨ **FEATURE COMPLETE**: Custom Fields Framework & UI Integration
+  - ✅ **CORE CAPABILITIES**:
+    - **Custom Field Definitions**: Admin interface for creating attributes for People and Departments.
+    - **Flexible Types**: Support for Text, Number, Date, Select, Multiselect, URL, Email, and Phone.
+    - **Dynamic Reordering**: Native drag-and-drop interface for managing attribute priority.
+    - **Search Integration**: SQLite FTS5 now indexes and searches within custom field values.
+    - **Public Map Support**: Custom fields are visible in shared public organization charts.
+  - ✅ **UI/UX REFINEMENT**:
+    - Integrated `CustomFieldInput` for dynamic form rendering in `PersonForm` and `DepartmentForm`.
+    - Added "Additional Information" section to `DetailPanel` (map view).
+    - Updated `PersonList` and `DepartmentList` (admin view) to display active custom fields.
+  - ✅ **DATA PORTABILITY**:
+    - CSV Export: Now includes all custom fields as dynamic columns.
+    - CSV Import: Automatically maps and persists custom fields from imported data.
+  - ✅ **SYSTEM INTEGRITY**:
+    - Real-time Sync: Socket events for field definition changes (creation, updates, deletion, reordering).
+    - Audit Logging: Standardized tracking of all custom field administrative actions.
+    - Type Safety: Full TypeScript coverage for custom field interfaces and API methods.
+  - 📊 **VERIFICATION**:
+    - Verified search results correctly highlight matches in custom fields.
+    - Confirmed drag-and-drop reordering persists to backend.
+    - Validated CSV import/export round-trip for custom data.
+  - 📁 **FILES MODIFIED/CREATED**: 25+ files
+  - ✅ **COMMITS PUSHED**: Multiple commits covering backend and frontend integration
+- **Previous Progress (January 14, 2026 - Session 52)**:
   - ✨ **FEATURE COMPLETE**: Unified Account Management System
   - ✅ **NEW COMPONENTS**:
     - `AccountLayout.tsx` - Central hub for all account settings with tab navigation

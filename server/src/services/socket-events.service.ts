@@ -142,6 +142,43 @@ export function emitOrgSettings(
   emitToOrg(orgId, 'org:settings', payload);
 }
 
+// Custom Field events
+export function emitCustomFieldCreated(
+  orgId: string,
+  field: Record<string, unknown>,
+  actor: Actor
+): void {
+  const payload = createPayload(orgId, 'custom_field', 'created', field, actor);
+  emitToOrg(orgId, 'custom_field:created', payload);
+}
+
+export function emitCustomFieldUpdated(
+  orgId: string,
+  field: Record<string, unknown>,
+  actor: Actor
+): void {
+  const payload = createPayload(orgId, 'custom_field', 'updated', field, actor);
+  emitToOrg(orgId, 'custom_field:updated', payload);
+}
+
+export function emitCustomFieldDeleted(
+  orgId: string,
+  field: Record<string, unknown>,
+  actor: Actor
+): void {
+  const payload = createPayload(orgId, 'custom_field', 'deleted', field, actor);
+  emitToOrg(orgId, 'custom_field:deleted', payload);
+}
+
+export function emitCustomFieldsReordered(
+  orgId: string,
+  data: Record<string, unknown>,
+  actor: Actor
+): void {
+  const payload = createPayload(orgId, 'custom_field', 'reordered', data, actor);
+  emitToOrg(orgId, 'custom_field:reordered', payload);
+}
+
 export default {
   emitDepartmentCreated,
   emitDepartmentUpdated,
@@ -154,4 +191,8 @@ export default {
   emitMemberRemoved,
   emitOrgUpdated,
   emitOrgSettings,
+  emitCustomFieldCreated,
+  emitCustomFieldUpdated,
+  emitCustomFieldDeleted,
+  emitCustomFieldsReordered,
 };

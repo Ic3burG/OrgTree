@@ -11,6 +11,7 @@ interface SearchResult {
   id: string;
   name: string;
   highlight: string;
+  custom_fields?: Record<string, string | null>;
   // Department-specific fields
   description?: string | null;
   parentId?: string | null;
@@ -23,105 +24,107 @@ interface SearchResult {
   departmentName?: string;
 }
 
-interface SearchOptions {
-  query: string;
-  type?: 'all' | 'departments' | 'people';
-  limit?: number;
-  offset?: number;
-}
-
-interface SearchResponse {
-  query: string;
-  total: number;
-  results: SearchResult[];
-  pagination: {
-    limit: number;
-    offset: number;
-    hasMore: boolean;
-  };
-}
-
-interface AutocompleteSuggestion {
-  text: string;
-  type: 'department' | 'person';
-}
-
-interface AutocompleteResponse {
-  suggestions: AutocompleteSuggestion[];
-}
-
-interface DepartmentSearchRow {
-  id: string;
-  name: string;
-  description: string | null;
-  parentId: string | null;
-  nameHighlight: string;
-  descHighlight: string;
-  peopleCount: number;
-  rank: number;
-}
-
-interface PersonSearchRow {
-  id: string;
-  name: string;
-  title: string | null;
-  email: string | null;
-  phone: string | null;
-  departmentId: string;
-  departmentName: string;
-  nameHighlight: string;
-  titleHighlight: string;
-  emailHighlight: string;
-  rank: number;
-}
-
-interface DepartmentSuggestionRow {
-  name: string;
-  type: 'department';
-}
-
-interface PersonSuggestionRow {
-  name: string;
-  type: 'person';
-}
-
 interface CountResult {
   count: number;
 }
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
+export interface SearchOptions {
+  query: string;
+  limit?: number;
+  offset?: number;
+}
 
-/**
- * Escape special FTS5 characters in query to prevent syntax errors
- */
-function escapeFtsQuery(query: string): string {
-  // Remove special characters that could break FTS query
-  return query.replace(/['"*(){}[\]^~\\:]/g, ' ').trim();
+export interface SearchResponse {
+  results: SearchResult[];
+  total: number;
+}
+
+export interface AutocompleteSuggestion {
+  type: 'department' | 'person';
+  id: string;
+  text: string;
+  parentId?: string | null;
+}
+
+export interface AutocompleteResponse {
+  suggestions: AutocompleteSuggestion[];
+}
+
+interface DepartmentSuggestionRow {
+  id: string;
+  name: string;
+  parent_id: string | null;
+}
+
+interface PersonSuggestionRow {
+  id: string;
+  name: string;
+  title: string | null;
+  department_id: string;
 }
 
 /**
- * Build FTS5 query with prefix matching for autocomplete behavior
+ * Build FTS query from simple search string
  */
-function buildFtsQuery(query: string, prefixMatch: boolean = true): string | null {
-  const escaped = escapeFtsQuery(query);
-  const terms = escaped.split(/\s+/).filter((t: string) => t.length > 0);
-
-  if (terms.length === 0) return null;
-
-  // Add prefix matching to last term (autocomplete behavior)
-  if (prefixMatch && terms.length > 0) {
-    const lastTerm = terms.pop();
-    terms.push(`${lastTerm}*`);
-  }
-
-  return terms.join(' ');
+function buildFtsQuery(query: string): string {
+  if (!query) return '';
+  // Split into tokens, escape, and add asterisk for prefix matching
+  return query
+    .trim()
+    .split(/\s+/)
+    .map(token => {
+      // Escape single and double quotes by doubling them, then wrap in double quotes
+      const escapedToken = token.replace(/'/g, "''").replace(/"/g, '""');
+      return `"${escapedToken}"*`;
+    })
+    .join(' ');
 }
 
-// ============================================================================
-// Search Functions
-// ============================================================================
+/**
+ * Helper to fetch custom fields for a list of entities
+ */
+function attachCustomFields(
+  orgId: string,
+  results: SearchResult[]
+): SearchResult[] {
+  if (results.length === 0) return results;
+
+  const entityIds = results.map(r => r.id);
+  const placeholders = entityIds.map(() => '?').join(',');
+
+  const stmt = db.prepare(`
+    SELECT 
+      cv.entity_id, 
+      cv.entity_type,
+      cd.field_key, 
+      cv.value
+    FROM custom_field_values cv
+    JOIN custom_field_definitions cd ON cv.field_id = cd.id
+    WHERE cv.organization_id = ?
+      AND cv.entity_id IN (${placeholders})
+      AND cv.deleted_at IS NULL
+  `);
+
+  const rows = stmt.all(orgId, ...entityIds) as {
+    entity_id: string;
+    entity_type: string;
+    field_key: string;
+    value: string;
+  }[];
+
+  const fieldMap = new Map<string, Record<string, string>>();
+  rows.forEach(row => {
+    if (!fieldMap.has(row.entity_id)) {
+      fieldMap.set(row.entity_id, {});
+    }
+    fieldMap.get(row.entity_id)![row.field_key] = row.value;
+  });
+
+  return results.map(r => ({
+    ...r,
+    custom_fields: fieldMap.get(r.id) || {},
+  }));
+}
 
 /**
  * Search departments using FTS5
@@ -133,16 +136,21 @@ function searchDepartments(
   offset: number
 ): { total: number; results: SearchResult[] } {
   // Count total matches (exclude soft-deleted departments)
+  // Search in both departments_fts (name, desc) and custom_fields_fts
   const countStmt = db.prepare(`
-    SELECT COUNT(*) as count
-    FROM departments_fts
-    JOIN departments d ON departments_fts.rowid = d.rowid
-    WHERE departments_fts MATCH ?
-      AND d.organization_id = ?
+    SELECT COUNT(DISTINCT d.id) as count
+    FROM departments d
+    LEFT JOIN departments_fts df ON df.rowid = d.rowid
+    LEFT JOIN custom_fields_fts cf ON cf.entity_id = d.id AND cf.entity_type = 'department'
+    WHERE d.organization_id = ?
       AND d.deleted_at IS NULL
+      AND (
+        (df.departments_fts MATCH ?) OR
+        (cf.custom_fields_fts MATCH ?)
+      )
   `);
 
-  const countResult = countStmt.get(ftsQuery, orgId) as CountResult;
+  const countResult = countStmt.get(orgId, ftsQuery, ftsQuery) as CountResult;
   const total = countResult.count;
 
   // Get matching departments with highlights (exclude soft-deleted)
@@ -152,37 +160,55 @@ function searchDepartments(
       d.name,
       d.description,
       d.parent_id as parentId,
-      snippet(departments_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
-      snippet(departments_fts, 1, '<mark>', '</mark>', '...', 32) as descHighlight,
-      (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as peopleCount,
-      bm25(departments_fts) as rank
-    FROM departments_fts
-    JOIN departments d ON departments_fts.rowid = d.rowid
-    WHERE departments_fts MATCH ?
-      AND d.organization_id = ?
+      COALESCE(snippet(df.departments_fts, 0, '<mark>', '</mark>', '...', 32), '') as nameHighlight,
+      COALESCE(snippet(df.departments_fts, 1, '<mark>', '</mark>', '...', 32), '') as descHighlight,
+      COALESCE(snippet(cf.custom_fields_fts, 0, '<mark>', '</mark>', '...', 32), '') as customHighlight,
+      (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as peopleCount
+    FROM departments d
+    LEFT JOIN departments_fts df ON df.rowid = d.rowid
+    LEFT JOIN custom_fields_fts cf ON cf.entity_id = d.id AND cf.entity_type = 'department'
+    WHERE d.organization_id = ?
       AND d.deleted_at IS NULL
-    ORDER BY rank
+      AND (
+        (df.departments_fts MATCH ?) OR
+        (cf.custom_fields_fts MATCH ?)
+      )
+    GROUP BY d.id
+    ORDER BY (CASE WHEN df.departments_fts MATCH ? THEN bm25(df.departments_fts) ELSE 0 END) + 
+             (CASE WHEN cf.custom_fields_fts MATCH ? THEN bm25(cf.custom_fields_fts) ELSE 0 END)
     LIMIT ? OFFSET ?
   `);
 
-  const rows = stmt.all(ftsQuery, orgId, limit, offset) as DepartmentSearchRow[];
+  const rows = stmt.all(orgId, ftsQuery, ftsQuery, ftsQuery, ftsQuery, limit, offset) as Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    parentId: string | null;
+    nameHighlight: string;
+    descHighlight: string;
+    customHighlight: string;
+    peopleCount: number;
+  }>;
+
+
+  const results = rows.map(
+    (row): SearchResult => ({
+      type: 'department',
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      parentId: row.parentId,
+      highlight: escapeHtml(row.nameHighlight || row.descHighlight || row.customHighlight)
+        .replace(/&lt;mark&gt;/g, '<mark>')
+        .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
+        .replace(/&lt;\/mark&gt;/g, '</mark>'),
+      peopleCount: row.peopleCount,
+    })
+  );
 
   return {
     total,
-    results: rows.map(
-      (row): SearchResult => ({
-        type: 'department',
-        id: row.id,
-        name: row.name,
-        description: row.description,
-        parentId: row.parentId,
-        highlight: escapeHtml(row.nameHighlight || row.descHighlight)
-          .replace(/&lt;mark&gt;/g, '<mark>')
-          .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
-          .replace(/&lt;\/mark&gt;/g, '</mark>'),
-        peopleCount: row.peopleCount,
-      })
-    ),
+    results: attachCustomFields(orgId, results),
   };
 }
 
@@ -195,22 +221,26 @@ function searchPeople(
   limit: number,
   offset: number
 ): { total: number; results: SearchResult[] } {
-  // Count total matches (people through department->org relationship, exclude soft-deleted)
+  // Count total matches
   const countStmt = db.prepare(`
-    SELECT COUNT(*) as count
-    FROM people_fts
-    JOIN people p ON people_fts.rowid = p.rowid
+    SELECT COUNT(DISTINCT p.id) as count
+    FROM people p
     JOIN departments d ON p.department_id = d.id
-    WHERE people_fts MATCH ?
-      AND d.organization_id = ?
+    LEFT JOIN people_fts pf ON pf.rowid = p.rowid
+    LEFT JOIN custom_fields_fts cf ON cf.entity_id = p.id AND cf.entity_type = 'person'
+    WHERE d.organization_id = ?
       AND p.deleted_at IS NULL
       AND d.deleted_at IS NULL
+      AND (
+        (pf.people_fts MATCH ?) OR
+        (cf.custom_fields_fts MATCH ?)
+      )
   `);
 
-  const countResult = countStmt.get(ftsQuery, orgId) as CountResult;
+  const countResult = countStmt.get(orgId, ftsQuery, ftsQuery) as CountResult;
   const total = countResult.count;
 
-  // Get matching people with highlights (exclude soft-deleted)
+  // Get matching people with highlights
   const stmt = db.prepare(`
     SELECT
       p.id,
@@ -220,41 +250,62 @@ function searchPeople(
       p.phone,
       p.department_id as departmentId,
       d.name as departmentName,
-      snippet(people_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
-      snippet(people_fts, 1, '<mark>', '</mark>', '...', 32) as titleHighlight,
-      snippet(people_fts, 2, '<mark>', '</mark>', '...', 32) as emailHighlight,
-      bm25(people_fts) as rank
-    FROM people_fts
-    JOIN people p ON people_fts.rowid = p.rowid
+      COALESCE(snippet(pf.people_fts, 0, '<mark>', '</mark>', '...', 32), '') as nameHighlight,
+      COALESCE(snippet(pf.people_fts, 1, '<mark>', '</mark>', '...', 32), '') as titleHighlight,
+      COALESCE(snippet(pf.people_fts, 2, '<mark>', '</mark>', '...', 32), '') as emailHighlight,
+      COALESCE(snippet(cf.custom_fields_fts, 0, '<mark>', '</mark>', '...', 32), '') as customHighlight
+    FROM people p
     JOIN departments d ON p.department_id = d.id
-    WHERE people_fts MATCH ?
-      AND d.organization_id = ?
+    LEFT JOIN people_fts pf ON pf.rowid = p.rowid
+    LEFT JOIN custom_fields_fts cf ON cf.entity_id = p.id AND cf.entity_type = 'person'
+    WHERE d.organization_id = ?
       AND p.deleted_at IS NULL
       AND d.deleted_at IS NULL
-    ORDER BY rank
+      AND (
+        (pf.people_fts MATCH ?) OR
+        (cf.custom_fields_fts MATCH ?)
+      )
+    GROUP BY p.id
+    ORDER BY (CASE WHEN pf.people_fts MATCH ? THEN bm25(pf.people_fts) ELSE 0 END) + 
+             (CASE WHEN cf.custom_fields_fts MATCH ? THEN bm25(cf.custom_fields_fts) ELSE 0 END)
     LIMIT ? OFFSET ?
   `);
 
-  const rows = stmt.all(ftsQuery, orgId, limit, offset) as PersonSearchRow[];
+  const rows = stmt.all(orgId, ftsQuery, ftsQuery, ftsQuery, ftsQuery, limit, offset) as Array<{
+    id: string;
+    name: string;
+    title: string | null;
+    email: string | null;
+    phone: string | null;
+    departmentId: string;
+    departmentName: string;
+    nameHighlight: string;
+    titleHighlight: string;
+    emailHighlight: string;
+    customHighlight: string;
+  }>;
+
+
+  const results = rows.map(
+    (row): SearchResult => ({
+      type: 'person',
+      id: row.id,
+      name: row.name,
+      title: row.title,
+      email: row.email,
+      phone: row.phone,
+      departmentId: row.departmentId,
+      departmentName: row.departmentName,
+      highlight: escapeHtml(row.nameHighlight || row.titleHighlight || row.emailHighlight || row.customHighlight)
+        .replace(/&lt;mark&gt;/g, '<mark>')
+        .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
+        .replace(/&lt;\/mark&gt;/g, '</mark>'),
+    })
+  );
 
   return {
     total,
-    results: rows.map(
-      (row): SearchResult => ({
-        type: 'person',
-        id: row.id,
-        name: row.name,
-        title: row.title,
-        email: row.email,
-        phone: row.phone,
-        departmentId: row.departmentId,
-        departmentName: row.departmentName,
-        highlight: escapeHtml(row.nameHighlight || row.titleHighlight || row.emailHighlight)
-          .replace(/&lt;mark&gt;/g, '<mark>')
-          .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
-          .replace(/&lt;\/mark&gt;/g, '</mark>'),
-      })
-    ),
+    results: attachCustomFields(orgId, results),
   };
 }
 
@@ -268,7 +319,7 @@ export function search(orgId: string, userId: string, options: SearchOptions): S
   const { query, type = 'all', limit = 20, offset = 0 } = options;
 
   // Build FTS query with prefix matching
-  const ftsQuery = buildFtsQuery(query, true);
+  const ftsQuery = buildFtsQuery(query);
   if (!ftsQuery) {
     return {
       query,
@@ -332,7 +383,7 @@ export function getAutocompleteSuggestions(
   // Verify user has access to this organization
   requireOrgPermission(orgId, userId, 'viewer');
 
-  const ftsQuery = buildFtsQuery(query, true);
+  const ftsQuery = buildFtsQuery(query);
   if (!ftsQuery) {
     return { suggestions: [] };
   }
