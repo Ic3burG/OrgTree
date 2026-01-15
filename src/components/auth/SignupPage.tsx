@@ -62,7 +62,7 @@ export default function SignupPage(): React.JSX.Element {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700">
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-3 text-red-700 dark:text-red-400">
               <AlertCircle size={20} />
               <span>{error}</span>
             </div>
@@ -78,7 +78,7 @@ export default function SignupPage(): React.JSX.Element {
               </label>
               <div className="relative">
                 <User
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                   size={20}
                 />
                 <input
@@ -102,7 +102,7 @@ export default function SignupPage(): React.JSX.Element {
               </label>
               <div className="relative">
                 <Mail
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                   size={20}
                 />
                 <input
@@ -110,7 +110,7 @@ export default function SignupPage(): React.JSX.Element {
                   type="email"
                   value={email}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
+                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation bg-white dark:bg-slate-700 dark:text-slate-100"
                   placeholder="you@example.com"
                   required
                 />
@@ -126,7 +126,7 @@ export default function SignupPage(): React.JSX.Element {
               </label>
               <div className="relative">
                 <Lock
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                   size={20}
                 />
                 <input
@@ -134,7 +134,7 @@ export default function SignupPage(): React.JSX.Element {
                   type="password"
                   value={password}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
+                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation bg-white dark:bg-slate-700 dark:text-slate-100"
                   placeholder="••••••••"
                   required
                 />
@@ -150,7 +150,7 @@ export default function SignupPage(): React.JSX.Element {
               </label>
               <div className="relative">
                 <Lock
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
                   size={20}
                 />
                 <input
@@ -160,7 +160,7 @@ export default function SignupPage(): React.JSX.Element {
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setConfirmPassword(e.target.value)
                   }
-                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation"
+                  className="w-full pl-10 pr-4 py-3 lg:py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-base lg:text-sm touch-manipulation bg-white dark:bg-slate-700 dark:text-slate-100"
                   placeholder="••••••••"
                   required
                 />
@@ -187,7 +187,7 @@ export default function SignupPage(): React.JSX.Element {
             Already have an account?{' '}
             <Link
               to="/login"
-              className="text-slate-800 font-medium hover:underline touch-manipulation"
+              className="text-slate-800 dark:text-slate-200 font-medium hover:underline touch-manipulation"
             >
               Sign in
             </Link>
