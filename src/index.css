@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
 @layer base {
   body {
@@ -77,10 +75,10 @@
 
   button,
   .no-print {
-    @apply hidden !important;
+    @apply !hidden;
   }
 
   .border {
-    @apply border-black !important;
+    @apply !border-black;
   }
 }
