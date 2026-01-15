@@ -368,102 +368,102 @@ export async function bulkEditPeople(
   const failed: FailedItem[] = [];
   const now = new Date().toISOString();
 
-    for (const personId of personIds) {
-      try {
-        // Use a transaction for the person's core fields to ensure FTS triggers and updates are atomic
-        const personUpdateTransaction = db.transaction(() => {
-          // Get current person data
-          const person = db
-            .prepare(
-              `
+  for (const personId of personIds) {
+    try {
+      // Use a transaction for the person's core fields to ensure FTS triggers and updates are atomic
+      const personUpdateTransaction = db.transaction(() => {
+        // Get current person data
+        const person = db
+          .prepare(
+            `
             SELECT p.id, p.name, p.title, p.email, p.phone, p.department_id as departmentId,
                    d.organization_id, d.name as departmentName
             FROM people p
             JOIN departments d ON p.department_id = d.id
             WHERE p.id = ? AND d.organization_id = ? AND p.deleted_at IS NULL AND d.deleted_at IS NULL
           `
-            )
-            .get(personId, orgId) as UpdatedPerson | undefined;
+          )
+          .get(personId, orgId) as UpdatedPerson | undefined;
 
-          if (!person) {
-            return { success: false, error: 'Person not found in this organization' };
-          }
+        if (!person) {
+          return { success: false, error: 'Person not found in this organization' };
+        }
 
-          // Build update query dynamically
-          const updateFields: string[] = [];
-          const updateValues: (string | undefined)[] = [];
+        // Build update query dynamically
+        const updateFields: string[] = [];
+        const updateValues: (string | undefined)[] = [];
 
-          if (title !== undefined) {
-            updateFields.push('title = ?');
-            updateValues.push(title);
-          }
+        if (title !== undefined) {
+          updateFields.push('title = ?');
+          updateValues.push(title);
+        }
 
-          if (departmentId !== undefined) {
-            updateFields.push('department_id = ?');
-            updateValues.push(departmentId);
-          }
+        if (departmentId !== undefined) {
+          updateFields.push('department_id = ?');
+          updateValues.push(departmentId);
+        }
 
-          if (email !== undefined) {
-            updateFields.push('email = ?');
-            updateValues.push(email);
-          }
+        if (email !== undefined) {
+          updateFields.push('email = ?');
+          updateValues.push(email);
+        }
 
-          if (phone !== undefined) {
-            updateFields.push('phone = ?');
-            updateValues.push(phone);
-          }
+        if (phone !== undefined) {
+          updateFields.push('phone = ?');
+          updateValues.push(phone);
+        }
 
-          updateFields.push('updated_at = ?');
-          updateValues.push(now);
-          updateValues.push(personId);
+        updateFields.push('updated_at = ?');
+        updateValues.push(now);
+        updateValues.push(personId);
 
-          const result = db
-            .prepare(
-              `
+        const result = db
+          .prepare(
+            `
             UPDATE people SET ${updateFields.join(', ')} WHERE id = ?
           `
-            )
-            .run(...updateValues);
+          )
+          .run(...updateValues);
 
-          if (result.changes > 0) {
-            return {
-              success: true,
-              person: {
-                ...person,
-                title: title !== undefined ? title : person.title,
-                email: email !== undefined ? email : person.email,
-                phone: phone !== undefined ? phone : person.phone,
-                departmentId: departmentId !== undefined ? departmentId : person.departmentId,
-                departmentName: targetDept ? targetDept.name : person.departmentName,
-              },
-            };
-          } else {
-            return { success: false, error: 'Failed to update' };
-          }
-        });
-
-        const result = personUpdateTransaction();
-
-        if (result.success) {
-          const updatedPerson = result.person!;
-
-          // Bulk update custom fields if provided
-          if (customFields && Object.keys(customFields).length > 0) {
-            const { setEntityCustomFields } = await import('./custom-fields.service.js');
-            await setEntityCustomFields(orgId, 'person', personId, customFields);
-          }
-
-          updated.push(updatedPerson);
-          // Emit event (also creates audit log)
-          emitPersonUpdated(orgId, updatedPerson as unknown as Record<string, unknown>, actor);
+        if (result.changes > 0) {
+          return {
+            success: true,
+            person: {
+              ...person,
+              title: title !== undefined ? title : person.title,
+              email: email !== undefined ? email : person.email,
+              phone: phone !== undefined ? phone : person.phone,
+              departmentId: departmentId !== undefined ? departmentId : person.departmentId,
+              departmentName: targetDept ? targetDept.name : person.departmentName,
+            },
+          };
         } else {
-          failed.push({ id: personId, error: result.error || 'Unknown error' });
+          return { success: false, error: 'Failed to update' };
         }
-      } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        failed.push({ id: personId, error: errorMessage });
+      });
+
+      const result = personUpdateTransaction();
+
+      if (result.success) {
+        const updatedPerson = result.person!;
+
+        // Bulk update custom fields if provided
+        if (customFields && Object.keys(customFields).length > 0) {
+          const { setEntityCustomFields } = await import('./custom-fields.service.js');
+          await setEntityCustomFields(orgId, 'person', personId, customFields);
+        }
+
+        updated.push(updatedPerson);
+        // Emit event (also creates audit log)
+        emitPersonUpdated(orgId, updatedPerson as unknown as Record<string, unknown>, actor);
+      } else {
+        failed.push({ id: personId, error: result.error || 'Unknown error' });
       }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      failed.push({ id: personId, error: errorMessage });
     }
+  }
 
   return {
     success: updated.length > 0,
