@@ -257,9 +257,20 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Last Major Update**: Unified Account Management & Security Fixes (January 14, 2026)
-- **Total Commits**: 241+ commits on main branch
-- **Today's Progress (January 15, 2026 - Session 54)**:
+- **Today's Progress (January 14, 2026 - Session 55)**:
+  - 🐛 **BUG FIX**: Fixed Mobile Bottom Navigation Dark Mode
+    - Added `dark:bg-slate-800`, `dark:border-slate-700`, and dark mode text color variants to `MobileNav.tsx`.
+    - Navigation bar now correctly blends with the dark theme on mobile devices.
+  - 🐛 **BUG FIX**: Resolved Search Type Mismatches
+    - Updated `SearchOverlay.tsx` to use `department_id` instead of `departmentId` to match backend `snake_case` conventions.
+    - Updated `src/types/index.ts` `SearchResult` and `SearchResponse` interfaces to reflect recent backend changes.
+    - Fixed `useSearch.test.ts` by adding the required `query` property to the mock API response.
+  - 🧹 **CODE QUALITY**:
+    - Verified all changes with `npm run typecheck` and `npm run lint`.
+    - All tests passing locally and verified clean build.
+  - 📁 **FILES MODIFIED**: 5 files
+  - ✅ **COMMITS PUSHED**: Committed and pushed fix for mobile nav and search types.
+- **Previous Progress (January 15, 2026 - Session 54)**:
   - 🐛 **CRITICAL BUG FIX**: Fixed Search Crash & "Zero Results" Error
   - ✅ **SEARCH STABILITY**:
     - **Crash Fix**: Resolved type mismatch in `SearchResult` causing app crash on search.
