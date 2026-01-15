@@ -10,7 +10,7 @@ import type { OrgMember, Invitation, ShareSettings } from '../../types/index.js'
 interface ShareModalProps {
   orgId: string;
   orgName: string;
-  userRole?: string;
+  role?: string;
   onClose: () => void;
 }
 
@@ -26,7 +26,7 @@ interface InvitationWithDetails extends Invitation {
 export default function ShareModal({
   orgId,
   orgName,
-  userRole,
+  role,
   onClose,
 }: ShareModalProps): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'public' | 'members'>('public');
@@ -37,7 +37,7 @@ export default function ShareModal({
   const [copied, setCopied] = useState<boolean>(false);
 
   // Check if user has admin permissions (admin or owner)
-  const isAdmin = userRole === 'admin' || userRole === 'owner';
+  const isAdmin = role === 'admin' || role === 'owner';
 
   // Members state
   const [members, setMembers] = useState<OrgMemberWithDetails[]>([]);

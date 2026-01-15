@@ -68,7 +68,7 @@ describe('ShareModal', () => {
 
     render(
       <ToastProvider>
-        <ShareModal orgId={orgId} orgName={orgName} userRole="admin" onClose={mockOnClose} />
+        <ShareModal orgId={orgId} orgName={orgName} role="admin" onClose={mockOnClose} />
       </ToastProvider>
     );
 

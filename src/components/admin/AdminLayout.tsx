@@ -31,10 +31,8 @@ export default function AdminLayout(): React.JSX.Element {
       if (!orgId) return;
 
       try {
-        await api.getOrganization(orgId);
-        // Note: Organization type doesn't have userRole, need to get from members
-        // For now, set a default role
-        setOrgRole('viewer');
+        const org = await api.getOrganization(orgId);
+        setOrgRole(org.role || 'viewer');
       } catch (err) {
         console.error('Failed to fetch org role:', err);
       }

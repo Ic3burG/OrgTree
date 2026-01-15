@@ -40,7 +40,7 @@ interface OrganizationResult {
   created_at: string;
   updated_at: string;
   departments?: DepartmentWithPeople[];
-  userRole?: 'owner' | 'admin' | 'editor' | 'viewer';
+  role?: 'owner' | 'admin' | 'editor' | 'viewer';
 }
 
 export async function getOrganizations(
@@ -150,7 +150,7 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
   });
 
   org.departments = departmentsWithPeople;
-  org.userRole = access.role ?? undefined; // Include user's role in response
+  org.role = access.role ?? undefined; // Include user's role in response
   return org;
 }
 

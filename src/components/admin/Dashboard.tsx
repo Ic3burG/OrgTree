@@ -11,7 +11,7 @@ import SecurityCheck from '../account/SecurityCheck';
 
 interface OrganizationWithDetails extends Organization {
   departments?: Department[];
-  userRole?: string;
+  role?: 'owner' | 'admin' | 'editor' | 'viewer';
 }
 
 export default function Dashboard(): React.JSX.Element {
@@ -263,7 +263,7 @@ export default function Dashboard(): React.JSX.Element {
         <ShareModal
           orgId={orgId}
           orgName={organization.name}
-          userRole={organization.userRole}
+          role={organization.role}
           onClose={() => setShowShare(false)}
         />
       )}
