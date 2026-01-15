@@ -76,7 +76,7 @@ router.post(
       `);
 
       const updateFts = db.prepare(`
-        INSERT OR REPLACE INTO custom_fields_fts (entity_id, entity_type, content)
+        INSERT OR REPLACE INTO custom_fields_fts (entity_id, entity_type, field_values)
         VALUES (?, ?, ?)
       `);
 

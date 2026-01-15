@@ -67,6 +67,44 @@ vi.mock('../db.js', async () => {
       FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
     );
 
+    -- Custom Fields
+    CREATE TABLE IF NOT EXISTS custom_field_definitions (
+      id TEXT PRIMARY KEY,
+      organization_id TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      name TEXT NOT NULL,
+      field_key TEXT NOT NULL,
+      field_type TEXT NOT NULL,
+      options TEXT,
+      is_required INTEGER DEFAULT 0,
+      is_searchable INTEGER DEFAULT 1,
+      sort_order INTEGER DEFAULT 0,
+      deleted_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS custom_field_values (
+      id TEXT PRIMARY KEY,
+      organization_id TEXT NOT NULL,
+      field_id TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      value TEXT NOT NULL,
+      deleted_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(field_id, entity_id)
+    );
+
+    CREATE VIRTUAL TABLE custom_fields_fts USING fts5(
+      entity_type,
+      entity_id UNINDEXED,
+      field_values,
+      content='',
+      tokenize='porter unicode61'
+    );
+
     -- FTS5 virtual tables for search
     CREATE VIRTUAL TABLE departments_fts USING fts5(
       name,
@@ -120,6 +158,8 @@ describe('Search Service', () => {
     (db as DatabaseType).exec(`
       DELETE FROM people;
       DELETE FROM departments;
+      DELETE FROM custom_field_values;
+      DELETE FROM custom_field_definitions;
       DELETE FROM organization_members;
       DELETE FROM organizations;
       DELETE FROM users;
@@ -193,10 +233,13 @@ describe('Search Service', () => {
       )
       .run(3, 2, 'Bob Johnson', 'Marketing Director', 'bob.johnson@example.com');
 
-    // Rebuild FTS5 indexes
+    // Manually populate FTS tables (mock DB doesn't have triggers)
     (db as DatabaseType).exec(`
-      INSERT INTO departments_fts(departments_fts) VALUES('rebuild');
-      INSERT INTO people_fts(people_fts) VALUES('rebuild');
+      INSERT INTO departments_fts (rowid, name, description)
+      SELECT rowid, name, description FROM departments;
+      
+      INSERT INTO people_fts (rowid, name, title, email)
+      SELECT rowid, name, title, email FROM people;
     `);
 
     // Reset mock

@@ -322,6 +322,33 @@ export async function setEntityCustomFields(
 
       insertStmt.run(randomUUID(), def.id, entityType, entityId, stringValue);
     }
+
+    // 2. Update FTS index with all searchable values for this entity
+    const searchableValues = db
+      .prepare(
+        `SELECT v.value
+         FROM custom_field_values v
+         JOIN custom_field_definitions d ON v.field_definition_id = d.id
+         WHERE v.entity_id = ? AND v.entity_type = ? AND d.is_searchable = 1`
+      )
+      .all(entityId, entityType) as { value: string }[];
+
+    const ftsContent = searchableValues
+      .map(v => v.value)
+      .filter(v => v && v.trim())
+      .join(' ');
+
+    if (ftsContent) {
+      db.prepare(
+        `INSERT OR REPLACE INTO custom_fields_fts (entity_id, entity_type, field_values)
+         VALUES (?, ?, ?)`
+      ).run(entityId, entityType, ftsContent);
+    } else {
+      // Remove from FTS if no searchable values remain
+      db.prepare(
+        `DELETE FROM custom_fields_fts WHERE entity_id = ? AND entity_type = ?`
+      ).run(entityId, entityType);
+    }
   });
 
   transaction();
