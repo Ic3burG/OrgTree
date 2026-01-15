@@ -132,51 +132,94 @@ function searchDepartments(
   limit: number,
   offset: number
 ): { total: number; results: SearchResult[] } {
-  // Count total matches (exclude soft-deleted departments)
-  // Search in both departments_fts (name, desc) and custom_fields_fts
-  const countStmt = db.prepare(`
-    SELECT COUNT(DISTINCT d.id) as count
-    FROM departments d
-    LEFT JOIN departments_fts df ON df.rowid = d.rowid
-    LEFT JOIN custom_fields_fts cf ON cf.entity_id = d.id AND cf.entity_type = 'department'
-    WHERE d.organization_id = ?
-      AND d.deleted_at IS NULL
-      AND (
-        (df.departments_fts MATCH ?) OR
-        (cf.custom_fields_fts MATCH ?)
-      )
-  `);
+  // Use UNION to combine matches from departments_fts and custom_fields_fts
+  // This avoids "unable to use function MATCH in the requested context" errors
+  // that occur when using OR with MATCH on nullable LEFT JOIN tables
 
-  const countResult = countStmt.get(orgId, ftsQuery, ftsQuery) as CountResult;
+  const sql = `
+    SELECT
+      id,
+      name,
+      description,
+      parentId,
+      MAX(nameHighlight) as nameHighlight,
+      MAX(descHighlight) as descHighlight,
+      MAX(customHighlight) as customHighlight,
+      peopleCount,
+      MIN(rank) as rank
+    FROM (
+      -- Search in department name/description
+      SELECT
+        d.id,
+        d.name,
+        d.description,
+        d.parent_id as parentId,
+        snippet(df.departments_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
+        snippet(df.departments_fts, 1, '<mark>', '</mark>', '...', 32) as descHighlight,
+        NULL as customHighlight,
+        (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as peopleCount,
+        bm25(df.departments_fts) as rank
+      FROM departments_fts df
+      JOIN departments d ON d.rowid = df.rowid
+      WHERE df.departments_fts MATCH ?
+        AND d.organization_id = ?
+        AND d.deleted_at IS NULL
+
+      UNION ALL
+
+      -- Search in custom fields
+      SELECT
+        d.id,
+        d.name,
+        d.description,
+        d.parent_id as parentId,
+        NULL as nameHighlight,
+        NULL as descHighlight,
+        snippet(cf.custom_fields_fts, 0, '<mark>', '</mark>', '...', 32) as customHighlight,
+        (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as peopleCount,
+        bm25(cf.custom_fields_fts) as rank
+      FROM custom_fields_fts cf
+      JOIN departments d ON d.id = cf.entity_id
+      WHERE cf.custom_fields_fts MATCH ?
+        AND cf.entity_type = 'department'
+        AND d.organization_id = ?
+        AND d.deleted_at IS NULL
+    )
+    GROUP BY id
+    ORDER BY rank
+    LIMIT ? OFFSET ?
+  `;
+
+  // Count query
+  const countSql = `
+    SELECT COUNT(DISTINCT id) as count FROM (
+      SELECT d.id
+      FROM departments_fts df
+      JOIN departments d ON d.rowid = df.rowid
+      WHERE df.departments_fts MATCH ?
+        AND d.organization_id = ?
+        AND d.deleted_at IS NULL
+
+      UNION ALL
+
+      SELECT d.id
+      FROM custom_fields_fts cf
+      JOIN departments d ON d.id = cf.entity_id
+      WHERE cf.custom_fields_fts MATCH ?
+        AND cf.entity_type = 'department'
+        AND d.organization_id = ?
+        AND d.deleted_at IS NULL
+    )
+  `;
+
+  const countResult = db.prepare(countSql).get(ftsQuery, orgId, ftsQuery, orgId) as CountResult;
   const total = countResult.count;
 
-  // Get matching departments with highlights (exclude soft-deleted)
-  const stmt = db.prepare(`
-    SELECT
-      d.id,
-      d.name,
-      d.description,
-      d.parent_id as parentId,
-      COALESCE(snippet(df.departments_fts, 0, '<mark>', '</mark>', '...', 32), '') as nameHighlight,
-      COALESCE(snippet(df.departments_fts, 1, '<mark>', '</mark>', '...', 32), '') as descHighlight,
-      COALESCE(snippet(cf.custom_fields_fts, 0, '<mark>', '</mark>', '...', 32), '') as customHighlight,
-      (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as peopleCount
-    FROM departments d
-    LEFT JOIN departments_fts df ON df.rowid = d.rowid
-    LEFT JOIN custom_fields_fts cf ON cf.entity_id = d.id AND cf.entity_type = 'department'
-    WHERE d.organization_id = ?
-      AND d.deleted_at IS NULL
-      AND (
-        (df.departments_fts MATCH ?) OR
-        (cf.custom_fields_fts MATCH ?)
-      )
-    GROUP BY d.id
-    ORDER BY (CASE WHEN df.departments_fts MATCH ? THEN bm25(df.departments_fts) ELSE 0 END) + 
-             (CASE WHEN cf.custom_fields_fts MATCH ? THEN bm25(cf.custom_fields_fts) ELSE 0 END)
-    LIMIT ? OFFSET ?
-  `);
-
-  const rows = stmt.all(orgId, ftsQuery, ftsQuery, ftsQuery, ftsQuery, limit, offset) as Array<{
+  const rows = db.prepare(sql).all(
+    ftsQuery, orgId,
+    ftsQuery, orgId,
+    limit, offset
+  ) as Array<{
     id: string;
     name: string;
     description: string | null;
@@ -217,57 +260,109 @@ function searchPeople(
   limit: number,
   offset: number
 ): { total: number; results: SearchResult[] } {
-  // Count total matches
-  const countStmt = db.prepare(`
-    SELECT COUNT(DISTINCT p.id) as count
-    FROM people p
-    JOIN departments d ON p.department_id = d.id
-    LEFT JOIN people_fts pf ON pf.rowid = p.rowid
-    LEFT JOIN custom_fields_fts cf ON cf.entity_id = p.id AND cf.entity_type = 'person'
-    WHERE d.organization_id = ?
-      AND p.deleted_at IS NULL
-      AND d.deleted_at IS NULL
-      AND (
-        (pf.people_fts MATCH ?) OR
-        (cf.custom_fields_fts MATCH ?)
-      )
-  `);
+  // Use UNION to combine matches from people_fts and custom_fields_fts
 
-  const countResult = countStmt.get(orgId, ftsQuery, ftsQuery) as CountResult;
+  const sql = `
+    SELECT
+      id,
+      name,
+      title,
+      email,
+      phone,
+      departmentId,
+      departmentName,
+      MAX(nameHighlight) as nameHighlight,
+      MAX(titleHighlight) as titleHighlight,
+      MAX(emailHighlight) as emailHighlight,
+      MAX(customHighlight) as customHighlight,
+      MIN(rank) as rank
+    FROM (
+      -- Search in people fields
+      SELECT
+        p.id,
+        p.name,
+        p.title,
+        p.email,
+        p.phone,
+        p.department_id as departmentId,
+        d.name as departmentName,
+        snippet(pf.people_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
+        snippet(pf.people_fts, 1, '<mark>', '</mark>', '...', 32) as titleHighlight,
+        snippet(pf.people_fts, 2, '<mark>', '</mark>', '...', 32) as emailHighlight,
+        NULL as customHighlight,
+        bm25(pf.people_fts) as rank
+      FROM people_fts pf
+      JOIN people p ON p.rowid = pf.rowid
+      JOIN departments d ON p.department_id = d.id
+      WHERE pf.people_fts MATCH ?
+        AND d.organization_id = ?
+        AND p.deleted_at IS NULL
+        AND d.deleted_at IS NULL
+
+      UNION ALL
+
+      -- Search in custom fields
+      SELECT
+        p.id,
+        p.name,
+        p.title,
+        p.email,
+        p.phone,
+        p.department_id as departmentId,
+        d.name as departmentName,
+        NULL as nameHighlight,
+        NULL as titleHighlight,
+        NULL as emailHighlight,
+        snippet(cf.custom_fields_fts, 0, '<mark>', '</mark>', '...', 32) as customHighlight,
+        bm25(cf.custom_fields_fts) as rank
+      FROM custom_fields_fts cf
+      JOIN people p ON p.id = cf.entity_id
+      JOIN departments d ON p.department_id = d.id
+      WHERE cf.custom_fields_fts MATCH ?
+        AND cf.entity_type = 'person'
+        AND d.organization_id = ?
+        AND p.deleted_at IS NULL
+        AND d.deleted_at IS NULL
+    )
+    GROUP BY id
+    ORDER BY rank
+    LIMIT ? OFFSET ?
+  `;
+
+  // Count query
+  const countSql = `
+    SELECT COUNT(DISTINCT id) as count FROM (
+      SELECT p.id
+      FROM people_fts pf
+      JOIN people p ON p.rowid = pf.rowid
+      JOIN departments d ON p.department_id = d.id
+      WHERE pf.people_fts MATCH ?
+        AND d.organization_id = ?
+        AND p.deleted_at IS NULL
+        AND d.deleted_at IS NULL
+
+      UNION ALL
+
+      SELECT p.id
+      FROM custom_fields_fts cf
+      JOIN people p ON p.id = cf.entity_id
+      JOIN departments d ON p.department_id = d.id
+      WHERE cf.custom_fields_fts MATCH ?
+        AND cf.entity_type = 'person'
+        AND d.organization_id = ?
+        AND p.deleted_at IS NULL
+        AND d.deleted_at IS NULL
+    )
+  `;
+
+  const countResult = db.prepare(countSql).get(ftsQuery, orgId, ftsQuery, orgId) as CountResult;
   const total = countResult.count;
 
-  // Get matching people with highlights
-  const stmt = db.prepare(`
-    SELECT
-      p.id,
-      p.name,
-      p.title,
-      p.email,
-      p.phone,
-      p.department_id as departmentId,
-      d.name as departmentName,
-      COALESCE(snippet(pf.people_fts, 0, '<mark>', '</mark>', '...', 32), '') as nameHighlight,
-      COALESCE(snippet(pf.people_fts, 1, '<mark>', '</mark>', '...', 32), '') as titleHighlight,
-      COALESCE(snippet(pf.people_fts, 2, '<mark>', '</mark>', '...', 32), '') as emailHighlight,
-      COALESCE(snippet(cf.custom_fields_fts, 0, '<mark>', '</mark>', '...', 32), '') as customHighlight
-    FROM people p
-    JOIN departments d ON p.department_id = d.id
-    LEFT JOIN people_fts pf ON pf.rowid = p.rowid
-    LEFT JOIN custom_fields_fts cf ON cf.entity_id = p.id AND cf.entity_type = 'person'
-    WHERE d.organization_id = ?
-      AND p.deleted_at IS NULL
-      AND d.deleted_at IS NULL
-      AND (
-        (pf.people_fts MATCH ?) OR
-        (cf.custom_fields_fts MATCH ?)
-      )
-    GROUP BY p.id
-    ORDER BY (CASE WHEN pf.people_fts MATCH ? THEN bm25(pf.people_fts) ELSE 0 END) + 
-             (CASE WHEN cf.custom_fields_fts MATCH ? THEN bm25(cf.custom_fields_fts) ELSE 0 END)
-    LIMIT ? OFFSET ?
-  `);
-
-  const rows = stmt.all(orgId, ftsQuery, ftsQuery, ftsQuery, ftsQuery, limit, offset) as Array<{
+  const rows = db.prepare(sql).all(
+    ftsQuery, orgId,
+    ftsQuery, orgId,
+    limit, offset
+  ) as Array<{
     id: string;
     name: string;
     title: string | null;
