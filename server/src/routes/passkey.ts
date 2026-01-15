@@ -72,9 +72,9 @@ router.post('/register/finish', authenticateToken, async (req: AuthRequest, res:
     res.clearCookie('passkey_challenge', { path: '/api/auth/passkey' });
 
     if (result.verified) {
-      return res.json({ success: true, id: result.id });
+      return res.json({ verified: true, id: result.id });
     } else {
-      return res.status(400).json({ success: false, message: 'Verification failed' });
+      return res.status(400).json({ verified: false, message: 'Verification failed' });
     }
   } catch (error: unknown) {
     console.error('Passkey register finish error:', error);
