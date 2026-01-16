@@ -154,6 +154,11 @@ export default function OrgMap(): React.JSX.Element {
   const { isDarkMode } = useTheme();
   const [searchParams] = useSearchParams();
 
+  // Use ref for fitView to avoid dependency issues in useCallback
+  // fitView from useReactFlow() can cause infinite re-render loops when used as dependency
+  const fitViewRef = useRef(fitView);
+  fitViewRef.current = fitView;
+
   // Select person for detail panel
   const handleSelectPerson = useCallback((person: Person): void => {
     setSelectedPerson(person);
@@ -249,7 +254,7 @@ export default function OrgMap(): React.JSX.Element {
         // Fit view after initial load (only on first load)
         if (showLoading) {
           setTimeout(() => {
-            fitView({ padding: 0.2, duration: 800 });
+            fitViewRef.current({ padding: 0.2, duration: 800 });
           }, 100);
         }
       } catch (err) {
@@ -261,7 +266,7 @@ export default function OrgMap(): React.JSX.Element {
         if (showLoading) setIsLoading(false);
       }
     },
-    [orgId, layoutDirection, fitView, setNodes, setEdges]
+    [orgId, layoutDirection, setNodes, setEdges]
   );
 
   // Handle auto-zoom from URL parameter (e.g. from department list)
@@ -410,8 +415,8 @@ export default function OrgMap(): React.JSX.Element {
       });
     });
 
-    setTimeout(() => fitView({ padding: 0.2, duration: 800 }), 100);
-  }, [layoutDirection, edges, fitView, setNodes]);
+    setTimeout(() => fitViewRef.current({ padding: 0.2, duration: 800 }), 100);
+  }, [layoutDirection, edges, setNodes]);
 
   // Handle theme change
   const handleThemeChange = useCallback((themeName: string): void => {
