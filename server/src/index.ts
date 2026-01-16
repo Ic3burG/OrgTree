@@ -231,7 +231,7 @@ app.use('/api', backupRoutes);
 
 // Serve index.html for all non-API routes (SPA support) in production
 if (process.env.NODE_ENV === 'production') {
-  app.get('*', (_req, res) => {
+  app.get(/.*/, (_req, res) => {
     const frontendPath = path.join(__dirname, '../dist');
     res.sendFile(path.join(frontendPath, 'index.html'));
   });
