@@ -80,10 +80,23 @@ function transformToFlowData(departments: Department[]): {
   const edges: Edge[] = [];
 
   // Helper to calculate depth
-  const getDepth = (dept: Department, deptMap: Map<string, Department>, depth = 0): number => {
+  const getDepth = (
+    dept: Department,
+    deptMap: Map<string, Department>,
+    depth = 0,
+    visited = new Set<string>()
+  ): number => {
     if (!dept.parent_id) return depth;
+
+    // Check for circular reference
+    if (visited.has(dept.id)) {
+      console.warn(`Circular reference detected for department: ${dept.name} (${dept.id})`);
+      return depth;
+    }
+    visited.add(dept.id);
+
     const parent = deptMap.get(dept.parent_id);
-    return parent ? getDepth(parent, deptMap, depth + 1) : depth;
+    return parent ? getDepth(parent, deptMap, depth + 1, visited) : depth;
   };
 
   // Create a map for quick lookups
