@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, createContext, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import ReactFlow, {
   Background,
@@ -13,6 +13,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useTheme } from '../contexts/ThemeContext';
+import { OrgChartThemeContext } from '../contexts/OrgChartThemeContext';
 import DepartmentNodeComponent from './DepartmentNode';
 import DetailPanel from './DetailPanel';
 import SearchOverlay from './SearchOverlay';
@@ -47,9 +48,6 @@ interface DepartmentNodeData {
 
 // Type for layout direction
 type Direction = 'TB' | 'LR';
-
-// Theme context for providing current theme to all nodes
-export const ThemeContext = createContext<string>('slate');
 
 // Register custom node types
 const nodeTypes: NodeTypes = {
@@ -574,7 +572,7 @@ export default function OrgMap(): React.JSX.Element {
 
   return (
     <div className="w-full h-screen relative bg-slate-50 dark:bg-slate-900">
-      <ThemeContext.Provider value={currentTheme}>
+      <OrgChartThemeContext.Provider value={currentTheme}>
         <div ref={reactFlowWrapper} className="w-full h-full">
           <ReactFlow
             nodes={nodesWithHighlight}
@@ -604,7 +602,7 @@ export default function OrgMap(): React.JSX.Element {
             />
           </ReactFlow>
         </div>
-      </ThemeContext.Provider>
+      </OrgChartThemeContext.Provider>
 
       {/* Overlay Components */}
       <SearchOverlay orgId={orgId} onSelectResult={handleSearchSelect} />

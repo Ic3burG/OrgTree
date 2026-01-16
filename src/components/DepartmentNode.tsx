@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { Folder, FolderOpen, ChevronDown, ChevronUp, Users } from 'lucide-react';
 import { getDepthColors } from '../utils/colors';
-import { ThemeContext } from './OrgMap';
+import { OrgChartThemeContext } from '../contexts/OrgChartThemeContext';
 import PersonRowCard from './PersonRowCard';
 import DepartmentTooltip from './DepartmentTooltip';
 import type { Person } from '../types/index.js';
@@ -38,7 +38,7 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
     isHighlighted,
     theme: dataTheme,
   } = data;
-  const contextTheme = useContext(ThemeContext);
+  const contextTheme = useContext(OrgChartThemeContext);
   // Use theme from data if provided (for memoized nodes), otherwise fall back to context
   const theme = dataTheme || contextTheme;
   const colors = getDepthColors(depth, theme);
