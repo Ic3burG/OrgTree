@@ -2,7 +2,7 @@ services:
   - type: web
     name: orgtree-app
     runtime: node
-    buildCommand: cd .. && npm install --include=dev && npm run build && cp -r dist server/ && cd server && npm install --production
+    buildCommand: cd .. && npm ci && npm run build && rm -rf server/dist && cp -r dist server/ && cd server && npm ci --only=production && npm rebuild better-sqlite3
     startCommand: npm start
     rootDir: server
     envVars:
