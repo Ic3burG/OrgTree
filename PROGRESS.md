@@ -2948,7 +2948,36 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ## 📋 Next Session Planning
 
-### Completed Today (January 7, 2026)
+### Completed Today (January 16, 2026)
+
+| Session | Task                              | Status      | Duration |
+| ------- | --------------------------------- | ----------- | -------- |
+| 25      | Fix OrgMap Infinite Loading Loop  | ✅ Complete | ~30 min  |
+
+**Total**: 1 critical bug fix
+
+### Session 25 Details - OrgMap Infinite Loading Fix
+
+**Problem**: Organization Map stuck on "Loading organization map..." in infinite loop
+
+**Root Cause**: `fitView` from `useReactFlow()` was unstable across renders:
+1. `fitView` recreated on each render
+2. `loadData` useCallback depended on `fitView`
+3. When `loadData` called `setNodes()`, component re-rendered
+4. `fitView` changed → `loadData` recreated → useEffect triggered again
+5. `setIsLoading(true)` reset before content could display
+
+**Solution**: Used ref pattern to stabilize `fitView`:
+- Created `fitViewRef` to store the function
+- Replaced `fitView` with `fitViewRef.current` in callbacks
+- Removed `fitView` from dependency arrays of `loadData` and `handleToggleLayout`
+
+**Files Modified**: `src/components/OrgMap.tsx`
+**Commit**: `78733fe`
+
+---
+
+### Previously Completed (January 7, 2026)
 
 | Session | Task                                 | Status                             | Duration |
 | ------- | ------------------------------------ | ---------------------------------- | -------- |
