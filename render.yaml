@@ -2,10 +2,12 @@ services:
   - type: web
     name: orgtree-app
     runtime: node
-    buildCommand: cd .. && npm ci && npm run build && rm -rf server/dist && cp -r dist server/ && cd server && npm ci --only=production && npm rebuild better-sqlite3
+    buildCommand: cd .. && ./scripts/render-build.sh
     startCommand: npm start
     rootDir: server
     envVars:
+      - key: NODE_VERSION
+        value: 20
       - key: NODE_ENV
         value: production
       - key: JWT_EXPIRES_IN
