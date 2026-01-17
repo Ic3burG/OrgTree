@@ -82,9 +82,7 @@ export default function SearchOverlay({
         id: result.id,
         name: result.name,
         subtitle:
-          result.type === 'department'
-            ? `${(result as unknown as { peopleCount?: number }).peopleCount || 0} people`
-            : result.title || '',
+          result.type === 'department' ? `${result.people_count || 0} people` : result.title || '',
         // For departments, nodeId is the department id itself
         // For people, nodeId is the departmentId (from department_name field)
         nodeId: result.type === 'department' ? result.id : result.department_id || result.id,
@@ -264,7 +262,7 @@ export default function SearchOverlay({
                 )}
                 <div className="text-sm lg:text-sm text-slate-600 dark:text-slate-400 truncate">
                   {result.type === 'department'
-                    ? `${(result as unknown as { peopleCount?: number }).peopleCount || 0} people`
+                    ? `${result.people_count || 0} people`
                     : result.title}
                   {result.type === 'person' && result.department_name && (
                     <span className="text-slate-400"> · {result.department_name}</span>
