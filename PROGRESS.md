@@ -2964,12 +2964,32 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Completed Today (January 16, 2026)
 
-| Session | Task                             | Status      | Duration |
-| ------- | -------------------------------- | ----------- | -------- |
-| 25      | Fix OrgMap Infinite Loading Loop | ✅ Complete | ~30 min  |
-| 26      | Fix Search Navigation in OrgMap  | ✅ Complete | ~20 min  |
+| Session | Task                              | Status      | Duration |
+| ------- | --------------------------------- | ----------- | -------- |
+| 25      | Fix OrgMap Infinite Loading Loop  | ✅ Complete | ~30 min  |
+| 26      | Fix Search Navigation in OrgMap   | ✅ Complete | ~20 min  |
+| 27      | Relocate SecurityCheck to Landing | ✅ Complete | ~10 min  |
 
-**Total**: 2 critical bug fixes
+**Total**: 2 bug fixes, 1 UX improvement
+
+### Session 27 Details - SecurityCheck Relocation (January 17, 2026)
+
+**Request**: Move the security prompt from organization dashboard to landing page
+
+**Change**: Relocated `SecurityCheck` component so users see it once after login rather than inside each organization
+
+**Files Modified**:
+- `src/components/admin/Dashboard.tsx` - Removed SecurityCheck import and usage
+- `src/components/OrganizationSelector.tsx` - Added SecurityCheck to main content area
+
+**Behavior**:
+- Security prompt (2FA/Passkeys recommendation) now appears on "Your Organizations" page
+- Uses `sessionStorage` to track dismissal (resets each browser session)
+- No longer appears redundantly within each organization
+
+**Commit**: `676c5a4`
+
+---
 
 ### Session 26 Details - Search Navigation Fix (January 16, 2026)
 
