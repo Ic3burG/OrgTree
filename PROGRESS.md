@@ -231,7 +231,21 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Today's Progress (January 15, 2026 - Session 56)**:
+- **Today's Progress (January 16, 2026 - Session 57)**:
+  - 🐛 **BUG FIX**: Department Hover Tooltip Links Not Working
+    - **Issue**: When hovering over the people count in the Departments tab, a tooltip appeared showing people's names. These were intended to be clickable links to navigate to the Org Map, but the tooltip would disappear before users could click on them.
+    - **Root Cause**: The tooltip was configured to appear on `onMouseEnter` and disappear on `onMouseLeave` of the trigger element. When users moved their mouse from the trigger to the tooltip to click a link, they would leave the trigger element, causing `onMouseLeave` to fire and hide the tooltip before the click could register.
+    - **Fix**: Added `onMouseEnter` and `onMouseLeave` handlers to the tooltip div itself in `DepartmentItem.tsx`, keeping the tooltip visible when users move their mouse into it.
+    - **Impact**: Users can now hover over any department's people count, move their mouse into the tooltip, click on any person's name, and be taken directly to the Org Map with that person's department expanded and in focus.
+  - 📁 **FILES MODIFIED**: 1 file (`src/components/admin/DepartmentItem.tsx`)
+  - ✅ **COMMITS PUSHED**: Commit 3328a32 - "Fix department hover tooltip links"
+  - 📊 **TESTING**:
+    - All 110 frontend tests passing ✅
+    - All 168 backend tests passing ✅
+    - Production build successful ✅
+    - All linters passing (ESLint + Prettier) ✅
+
+- **Previous Progress (January 15, 2026 - Session 56)**:
   - ✨ **FEATURE COMPLETE**: Custom Fields Redesign & Integration
     - **Integrated Management**: Moved Custom Field management directly into Person and Department edit dialogs.
     - **Simplified UI**: Auto-generated field keys from names (e.g., "Slack Handle" -> `slack_handle`), default searchability, and hidden technical complexity.
@@ -2950,10 +2964,10 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Completed Today (January 16, 2026)
 
-| Session | Task                              | Status      | Duration |
-| ------- | --------------------------------- | ----------- | -------- |
-| 25      | Fix OrgMap Infinite Loading Loop  | ✅ Complete | ~30 min  |
-| 26      | Fix Search Navigation in OrgMap   | ✅ Complete | ~20 min  |
+| Session | Task                             | Status      | Duration |
+| ------- | -------------------------------- | ----------- | -------- |
+| 25      | Fix OrgMap Infinite Loading Loop | ✅ Complete | ~30 min  |
+| 26      | Fix Search Navigation in OrgMap  | ✅ Complete | ~20 min  |
 
 **Total**: 2 critical bug fixes
 
@@ -2962,12 +2976,14 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 **Problem**: Search in Org Map was showing names but not navigating to them when selected
 
 **Root Cause**: Stale closure issue in `handleSearchSelect` function:
+
 1. When searching for a person, code uses `setTimeout` to wait for department expansion
 2. The callback captured stale `nodes` reference from when it was created
 3. After `handleToggleExpand` updated state, the callback still used old nodes array
 4. Node lookup failed or used outdated position data
 
 **Solution**: Used ref pattern to track current nodes:
+
 - Created `nodesRef` to always reference current nodes state
 - Updated setTimeout callbacks to use `nodesRef.current` instead of `nodes`
 - Applied fix to both `handleSearchSelect` and URL parameter handler
@@ -2982,6 +2998,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 **Problem**: Organization Map stuck on "Loading organization map..." in infinite loop
 
 **Root Cause**: `fitView` from `useReactFlow()` was unstable across renders:
+
 1. `fitView` recreated on each render
 2. `loadData` useCallback depended on `fitView`
 3. When `loadData` called `setNodes()`, component re-rendered
@@ -2989,6 +3006,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 5. `setIsLoading(true)` reset before content could display
 
 **Solution**: Used ref pattern to stabilize `fitView`:
+
 - Created `fitViewRef` to store the function
 - Replaced `fitView` with `fitViewRef.current` in callbacks
 - Removed `fitView` from dependency arrays of `loadData` and `handleToggleLayout`
