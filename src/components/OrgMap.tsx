@@ -159,6 +159,12 @@ export default function OrgMap(): React.JSX.Element {
   const fitViewRef = useRef(fitView);
   fitViewRef.current = fitView;
 
+  // Use ref for nodes to avoid stale closure issues in setTimeout callbacks
+  // When handleSearchSelect uses setTimeout, the callback captures the old nodes reference.
+  // Using a ref ensures we always access the current nodes state.
+  const nodesRef = useRef(nodes);
+  nodesRef.current = nodes;
+
   // Select person for detail panel
   const handleSelectPerson = useCallback((person: Person): void => {
     setSelectedPerson(person);
@@ -295,7 +301,8 @@ export default function OrgMap(): React.JSX.Element {
         }
 
         setTimeout(() => {
-          const updatedNode = nodes.find(n => n.id === targetNodeId);
+          // Use nodesRef.current to get the latest nodes after handleToggleExpand state update
+          const updatedNode = nodesRef.current.find(n => n.id === targetNodeId);
           if (updatedNode && updatedNode.position) {
             setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
               zoom: 1.5,
@@ -493,7 +500,9 @@ export default function OrgMap(): React.JSX.Element {
         }
 
         setTimeout(() => {
-          const updatedNode = nodes.find(n => n.id === nodeId);
+          // Use nodesRef.current to get the latest nodes after state update
+          // This avoids the stale closure issue where 'nodes' would be the old reference
+          const updatedNode = nodesRef.current.find(n => n.id === nodeId);
           if (updatedNode && updatedNode.position) {
             setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
               zoom: 1.5,
