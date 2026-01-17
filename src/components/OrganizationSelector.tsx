@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Building2, Plus, LogOut, Trash2, Edit, Shield, Settings } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import DarkModeToggle from './ui/DarkModeToggle';
+import SecurityCheck from './account/SecurityCheck';
 import api from '../api/client';
 import type { Organization } from '../types/index.js';
 
@@ -184,6 +185,9 @@ export default function OrganizationSelector(): React.JSX.Element {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-12">
+        {/* Security prompt - shown once per session if 2FA/Passkeys not set up */}
+        <SecurityCheck />
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-2">

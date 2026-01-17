@@ -7,7 +7,6 @@ import { generateCSV, downloadCSV } from '../../utils/csvExport';
 import ImportModal from './ImportModal';
 import ShareModal from './ShareModal';
 import type { Organization, Department, CustomFieldDefinition } from '../../types/index.js';
-import SecurityCheck from '../account/SecurityCheck';
 
 interface OrganizationWithDetails extends Organization {
   departments?: Department[];
@@ -97,7 +96,6 @@ export default function Dashboard(): React.JSX.Element {
       {/* Header - fixed */}
       <div className="flex-shrink-0 p-4 lg:p-8 pb-0 overflow-y-auto">
         <div className="max-w-6xl mx-auto">
-          <SecurityCheck />
           {/* Header */}
           <div className="mb-6 lg:mb-8 flex flex-col lg:flex-row items-start gap-4 lg:justify-between">
             <div className="w-full lg:w-auto">
