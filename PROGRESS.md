@@ -2953,8 +2953,29 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 | Session | Task                              | Status      | Duration |
 | ------- | --------------------------------- | ----------- | -------- |
 | 25      | Fix OrgMap Infinite Loading Loop  | ✅ Complete | ~30 min  |
+| 26      | Fix Search Navigation in OrgMap   | ✅ Complete | ~20 min  |
 
-**Total**: 1 critical bug fix
+**Total**: 2 critical bug fixes
+
+### Session 26 Details - Search Navigation Fix (January 16, 2026)
+
+**Problem**: Search in Org Map was showing names but not navigating to them when selected
+
+**Root Cause**: Stale closure issue in `handleSearchSelect` function:
+1. When searching for a person, code uses `setTimeout` to wait for department expansion
+2. The callback captured stale `nodes` reference from when it was created
+3. After `handleToggleExpand` updated state, the callback still used old nodes array
+4. Node lookup failed or used outdated position data
+
+**Solution**: Used ref pattern to track current nodes:
+- Created `nodesRef` to always reference current nodes state
+- Updated setTimeout callbacks to use `nodesRef.current` instead of `nodes`
+- Applied fix to both `handleSearchSelect` and URL parameter handler
+
+**Files Modified**: `src/components/OrgMap.tsx`
+**Commit**: `3328a32`
+
+---
 
 ### Session 25 Details - OrgMap Infinite Loading Fix
 
