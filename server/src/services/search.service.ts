@@ -25,10 +25,6 @@ interface SearchResult {
   rank?: number;
 }
 
-interface CountResult {
-  count: number;
-}
-
 export interface SearchOptions {
   query: string;
   type?: 'all' | 'departments' | 'people';
@@ -134,6 +130,9 @@ function attachCustomFields(orgId: string, results: SearchResult[]): SearchResul
 
 /**
  * Search departments using FTS5
+ *
+ * Note: SQLite FTS5's bm25() function cannot be used inside subqueries or UNION statements.
+ * We run separate queries and merge results in JavaScript to work around this limitation.
  */
 function searchDepartments(
   orgId: string,
@@ -141,109 +140,119 @@ function searchDepartments(
   limit: number,
   offset: number
 ): { total: number; results: SearchResult[] } {
-  // Use UNION to combine matches from departments_fts and custom_fields_fts
-  // This avoids "unable to use function MATCH in the requested context" errors
-  // that occur when using OR with MATCH on nullable LEFT JOIN tables
-
-  const sql = `
+  // Query 1: Search in department name/description
+  const nameSql = `
     SELECT
-      id,
-      name,
-      description,
-      parent_id,
-      MAX(nameHighlight) as nameHighlight,
-      MAX(descHighlight) as descHighlight,
-      MAX(customHighlight) as customHighlight,
-      people_count,
-      MIN(rank) as rank
-    FROM (
-      -- Search in department name/description
-      SELECT
-        d.id,
-        d.name,
-        d.description,
-        d.parent_id,
-        snippet(df.departments_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
-        snippet(df.departments_fts, 1, '<mark>', '</mark>', '...', 32) as descHighlight,
-        NULL as customHighlight,
-        (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as people_count,
-        bm25(df.departments_fts) as rank
-      FROM departments_fts df
-      JOIN departments d ON d.rowid = df.rowid
-      WHERE df.departments_fts MATCH ?
-        AND d.organization_id = ?
-        AND d.deleted_at IS NULL
-
-      UNION ALL
-
-      -- Search in custom fields
-      SELECT
-        d.id,
-        d.name,
-        d.description,
-        d.parent_id,
-        NULL as nameHighlight,
-        NULL as descHighlight,
-        snippet(cf.custom_fields_fts, 0, '<mark>', '</mark>', '...', 32) as customHighlight,
-        (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as people_count,
-        bm25(cf.custom_fields_fts) as rank
-      FROM custom_fields_fts cf
-      JOIN departments d ON d.id = cf.entity_id
-      WHERE cf.custom_fields_fts MATCH ?
-        AND cf.entity_type = 'department'
-        AND d.organization_id = ?
-        AND d.deleted_at IS NULL
-    )
-    GROUP BY id
-    ORDER BY rank
-    LIMIT ? OFFSET ?
+      d.id,
+      d.name,
+      d.description,
+      d.parent_id,
+      snippet(df.departments_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
+      snippet(df.departments_fts, 1, '<mark>', '</mark>', '...', 32) as descHighlight,
+      (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as people_count,
+      bm25(df.departments_fts) as rank
+    FROM departments_fts df
+    JOIN departments d ON d.rowid = df.rowid
+    WHERE df.departments_fts MATCH ?
+      AND d.organization_id = ?
+      AND d.deleted_at IS NULL
   `;
 
-  // Count query
-  const countSql = `
-    SELECT COUNT(DISTINCT id) as count FROM (
-      SELECT d.id
-      FROM departments_fts df
-      JOIN departments d ON d.rowid = df.rowid
-      WHERE df.departments_fts MATCH ?
-        AND d.organization_id = ?
-        AND d.deleted_at IS NULL
-
-      UNION ALL
-
-      SELECT d.id
-      FROM custom_fields_fts cf
-      JOIN departments d ON d.id = cf.entity_id
-      WHERE cf.custom_fields_fts MATCH ?
-        AND cf.entity_type = 'department'
-        AND d.organization_id = ?
-        AND d.deleted_at IS NULL
-    )
+  // Query 2: Search in custom fields
+  const customSql = `
+    SELECT
+      d.id,
+      d.name,
+      d.description,
+      d.parent_id,
+      snippet(cf.custom_fields_fts, 2, '<mark>', '</mark>', '...', 32) as customHighlight,
+      (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as people_count,
+      bm25(cf.custom_fields_fts) as rank
+    FROM custom_fields_fts cf
+    JOIN departments d ON d.id = cf.entity_id
+    WHERE cf.custom_fields_fts MATCH ?
+      AND cf.entity_type = 'department'
+      AND d.organization_id = ?
+      AND d.deleted_at IS NULL
   `;
 
-  const countResult = db.prepare(countSql).get(ftsQuery, orgId, ftsQuery, orgId) as CountResult;
-  const total = countResult.count;
-
-  const rows = db.prepare(sql).all(ftsQuery, orgId, ftsQuery, orgId, limit, offset) as Array<{
+  // Execute both queries
+  const nameRows = db.prepare(nameSql).all(ftsQuery, orgId) as Array<{
     id: string;
     name: string;
     description: string | null;
     parent_id: string | null;
-    nameHighlight: string;
-    descHighlight: string;
-    customHighlight: string;
+    nameHighlight: string | null;
+    descHighlight: string | null;
     people_count: number;
     rank: number;
   }>;
 
-  const results = rows.map(
+  const customRows = db.prepare(customSql).all(ftsQuery, orgId) as Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    parent_id: string | null;
+    customHighlight: string | null;
+    people_count: number;
+    rank: number;
+  }>;
+
+  // Merge results, keeping best rank for duplicates
+  const resultMap = new Map<
+    string,
+    {
+      id: string;
+      name: string;
+      description: string | null;
+      parent_id: string | null;
+      nameHighlight: string | null;
+      descHighlight: string | null;
+      customHighlight: string | null;
+      people_count: number;
+      rank: number;
+    }
+  >();
+
+  // Add name/description matches
+  for (const row of nameRows) {
+    resultMap.set(row.id, {
+      ...row,
+      customHighlight: null,
+    });
+  }
+
+  // Add custom field matches (merge with existing if present)
+  for (const row of customRows) {
+    const existing = resultMap.get(row.id);
+    if (existing) {
+      // Keep existing data but add custom highlight and use best rank
+      existing.customHighlight = row.customHighlight;
+      existing.rank = Math.min(existing.rank, row.rank);
+    } else {
+      resultMap.set(row.id, {
+        ...row,
+        nameHighlight: null,
+        descHighlight: null,
+      });
+    }
+  }
+
+  // Convert to array, sort by rank, and apply pagination
+  const allResults = Array.from(resultMap.values());
+  allResults.sort((a, b) => a.rank - b.rank);
+
+  const total = allResults.length;
+  const paginatedResults = allResults.slice(offset, offset + limit);
+
+  const results = paginatedResults.map(
     (row): SearchResult => ({
       type: 'department',
       id: row.id,
       name: row.name,
       description: row.description,
       parent_id: row.parent_id,
-      highlight: escapeHtml(row.nameHighlight || row.descHighlight || row.customHighlight)
+      highlight: escapeHtml(row.nameHighlight || row.descHighlight || row.customHighlight || row.name)
         .replace(/&lt;mark&gt;/g, '<mark>')
         .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
         .replace(/&lt;\/mark&gt;/g, '</mark>'),
@@ -260,6 +269,9 @@ function searchDepartments(
 
 /**
  * Search people using FTS5
+ *
+ * Note: SQLite FTS5's bm25() function cannot be used inside subqueries or UNION statements.
+ * We run separate queries and merge results in JavaScript to work around this limitation.
  */
 function searchPeople(
   orgId: string,
@@ -267,105 +279,53 @@ function searchPeople(
   limit: number,
   offset: number
 ): { total: number; results: SearchResult[] } {
-  // Use UNION to combine matches from people_fts and custom_fields_fts
-
-  const sql = `
+  // Query 1: Search in people name/title/email/phone
+  const peopleSql = `
     SELECT
-      id,
-      name,
-      title,
-      email,
-      phone,
-      department_id,
-      department_name,
-      MAX(nameHighlight) as nameHighlight,
-      MAX(titleHighlight) as titleHighlight,
-      MAX(emailHighlight) as emailHighlight,
-      MAX(customHighlight) as customHighlight,
-      MIN(rank) as rank
-    FROM (
-      -- Search in people fields
-      SELECT
-        p.id,
-        p.name,
-        p.title,
-        p.email,
-        p.phone,
-        p.department_id,
-        d.name as department_name,
-        snippet(pf.people_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
-        snippet(pf.people_fts, 1, '<mark>', '</mark>', '...', 32) as titleHighlight,
-        snippet(pf.people_fts, 2, '<mark>', '</mark>', '...', 32) as emailHighlight,
-        NULL as customHighlight,
-        bm25(pf.people_fts) as rank
-      FROM people_fts pf
-      JOIN people p ON p.rowid = pf.rowid
-      JOIN departments d ON p.department_id = d.id
-      WHERE pf.people_fts MATCH ?
-        AND d.organization_id = ?
-        AND p.deleted_at IS NULL
-        AND d.deleted_at IS NULL
-
-      UNION ALL
-
-      -- Search in custom fields
-      SELECT
-        p.id,
-        p.name,
-        p.title,
-        p.email,
-        p.phone,
-        p.department_id,
-        d.name as department_name,
-        NULL as nameHighlight,
-        NULL as titleHighlight,
-        NULL as emailHighlight,
-        snippet(cf.custom_fields_fts, 0, '<mark>', '</mark>', '...', 32) as customHighlight,
-        bm25(cf.custom_fields_fts) as rank
-      FROM custom_fields_fts cf
-      JOIN people p ON p.id = cf.entity_id
-      JOIN departments d ON p.department_id = d.id
-      WHERE cf.custom_fields_fts MATCH ?
-        AND cf.entity_type = 'person'
-        AND d.organization_id = ?
-        AND p.deleted_at IS NULL
-        AND d.deleted_at IS NULL
-    )
-    GROUP BY id
-    ORDER BY rank
-    LIMIT ? OFFSET ?
+      p.id,
+      p.name,
+      p.title,
+      p.email,
+      p.phone,
+      p.department_id,
+      d.name as department_name,
+      snippet(pf.people_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
+      snippet(pf.people_fts, 1, '<mark>', '</mark>', '...', 32) as titleHighlight,
+      snippet(pf.people_fts, 2, '<mark>', '</mark>', '...', 32) as emailHighlight,
+      bm25(pf.people_fts) as rank
+    FROM people_fts pf
+    JOIN people p ON p.rowid = pf.rowid
+    JOIN departments d ON p.department_id = d.id
+    WHERE pf.people_fts MATCH ?
+      AND d.organization_id = ?
+      AND p.deleted_at IS NULL
+      AND d.deleted_at IS NULL
   `;
 
-  // Count query
-  const countSql = `
-    SELECT COUNT(DISTINCT id) as count FROM (
-      SELECT p.id
-      FROM people_fts pf
-      JOIN people p ON p.rowid = pf.rowid
-      JOIN departments d ON p.department_id = d.id
-      WHERE pf.people_fts MATCH ?
-        AND d.organization_id = ?
-        AND p.deleted_at IS NULL
-        AND d.deleted_at IS NULL
-
-      UNION ALL
-
-      SELECT p.id
-      FROM custom_fields_fts cf
-      JOIN people p ON p.id = cf.entity_id
-      JOIN departments d ON p.department_id = d.id
-      WHERE cf.custom_fields_fts MATCH ?
-        AND cf.entity_type = 'person'
-        AND d.organization_id = ?
-        AND p.deleted_at IS NULL
-        AND d.deleted_at IS NULL
-    )
+  // Query 2: Search in custom fields
+  const customSql = `
+    SELECT
+      p.id,
+      p.name,
+      p.title,
+      p.email,
+      p.phone,
+      p.department_id,
+      d.name as department_name,
+      snippet(cf.custom_fields_fts, 2, '<mark>', '</mark>', '...', 32) as customHighlight,
+      bm25(cf.custom_fields_fts) as rank
+    FROM custom_fields_fts cf
+    JOIN people p ON p.id = cf.entity_id
+    JOIN departments d ON p.department_id = d.id
+    WHERE cf.custom_fields_fts MATCH ?
+      AND cf.entity_type = 'person'
+      AND d.organization_id = ?
+      AND p.deleted_at IS NULL
+      AND d.deleted_at IS NULL
   `;
 
-  const countResult = db.prepare(countSql).get(ftsQuery, orgId, ftsQuery, orgId) as CountResult;
-  const total = countResult.count;
-
-  const rows = db.prepare(sql).all(ftsQuery, orgId, ftsQuery, orgId, limit, offset) as Array<{
+  // Execute both queries
+  const peopleRows = db.prepare(peopleSql).all(ftsQuery, orgId) as Array<{
     id: string;
     name: string;
     title: string | null;
@@ -373,14 +333,76 @@ function searchPeople(
     phone: string | null;
     department_id: string;
     department_name: string;
-    nameHighlight: string;
-    titleHighlight: string;
-    emailHighlight: string;
-    customHighlight: string;
+    nameHighlight: string | null;
+    titleHighlight: string | null;
+    emailHighlight: string | null;
     rank: number;
   }>;
 
-  const results = rows.map(
+  const customRows = db.prepare(customSql).all(ftsQuery, orgId) as Array<{
+    id: string;
+    name: string;
+    title: string | null;
+    email: string | null;
+    phone: string | null;
+    department_id: string;
+    department_name: string;
+    customHighlight: string | null;
+    rank: number;
+  }>;
+
+  // Merge results, keeping best rank for duplicates
+  const resultMap = new Map<
+    string,
+    {
+      id: string;
+      name: string;
+      title: string | null;
+      email: string | null;
+      phone: string | null;
+      department_id: string;
+      department_name: string;
+      nameHighlight: string | null;
+      titleHighlight: string | null;
+      emailHighlight: string | null;
+      customHighlight: string | null;
+      rank: number;
+    }
+  >();
+
+  // Add people field matches
+  for (const row of peopleRows) {
+    resultMap.set(row.id, {
+      ...row,
+      customHighlight: null,
+    });
+  }
+
+  // Add custom field matches (merge with existing if present)
+  for (const row of customRows) {
+    const existing = resultMap.get(row.id);
+    if (existing) {
+      // Keep existing data but add custom highlight and use best rank
+      existing.customHighlight = row.customHighlight;
+      existing.rank = Math.min(existing.rank, row.rank);
+    } else {
+      resultMap.set(row.id, {
+        ...row,
+        nameHighlight: null,
+        titleHighlight: null,
+        emailHighlight: null,
+      });
+    }
+  }
+
+  // Convert to array, sort by rank, and apply pagination
+  const allResults = Array.from(resultMap.values());
+  allResults.sort((a, b) => a.rank - b.rank);
+
+  const total = allResults.length;
+  const paginatedResults = allResults.slice(offset, offset + limit);
+
+  const results = paginatedResults.map(
     (row): SearchResult => ({
       type: 'person',
       id: row.id,
@@ -391,7 +413,7 @@ function searchPeople(
       department_id: row.department_id,
       department_name: row.department_name,
       highlight: escapeHtml(
-        row.nameHighlight || row.titleHighlight || row.emailHighlight || row.customHighlight
+        row.nameHighlight || row.titleHighlight || row.emailHighlight || row.customHighlight || row.name
       )
         .replace(/&lt;mark&gt;/g, '<mark>')
         .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
