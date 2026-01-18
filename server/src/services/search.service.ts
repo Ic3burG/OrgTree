@@ -94,17 +94,19 @@ function attachCustomFields(orgId: string, results: SearchResult[]): SearchResul
   const entityIds = results.map(r => r.id);
   const placeholders = entityIds.map(() => '?').join(',');
 
+  // Note: custom_field_values uses field_definition_id (not field_id)
+  // and doesn't have organization_id or deleted_at columns.
+  // We filter by org through the custom_field_definitions table.
   const stmt = db.prepare(`
-    SELECT 
-      cv.entity_id, 
+    SELECT
+      cv.entity_id,
       cv.entity_type,
-      cd.field_key, 
+      cd.field_key,
       cv.value
     FROM custom_field_values cv
-    JOIN custom_field_definitions cd ON cv.field_id = cd.id
-    WHERE cv.organization_id = ?
+    JOIN custom_field_definitions cd ON cv.field_definition_id = cd.id
+    WHERE cd.organization_id = ?
       AND cv.entity_id IN (${placeholders})
-      AND cv.deleted_at IS NULL
   `);
 
   const rows = stmt.all(orgId, ...entityIds) as {
