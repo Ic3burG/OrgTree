@@ -93,15 +93,11 @@ export default function AdminLayout(): React.JSX.Element {
             {/* Collapse toggle button - desktop only */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors bg-gray-50 dark:bg-slate-700/50"
+              className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-all duration-200 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md text-gray-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              {isCollapsed ? (
-                <PanelLeft size={20} className="text-gray-700 dark:text-slate-300" />
-              ) : (
-                <PanelLeftClose size={20} className="text-gray-700 dark:text-slate-300" />
-              )}
+              {isCollapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
             </button>
           </div>
         </div>
@@ -120,7 +116,7 @@ export default function AdminLayout(): React.JSX.Element {
                 : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
-          title="Dashboard"
+          title={isCollapsed ? 'Dashboard' : undefined}
         >
           <Home size={20} />
           <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>Dashboard</span>
@@ -136,7 +132,7 @@ export default function AdminLayout(): React.JSX.Element {
                 : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
-          title="Departments"
+          title={isCollapsed ? 'Departments' : undefined}
         >
           <Building2 size={20} />
           <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>Departments</span>
@@ -152,7 +148,7 @@ export default function AdminLayout(): React.JSX.Element {
                 : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
-          title="People"
+          title={isCollapsed ? 'People' : undefined}
         >
           <Users size={20} />
           <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>People</span>
@@ -168,7 +164,7 @@ export default function AdminLayout(): React.JSX.Element {
                 : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
-          title="Organization Map"
+          title={isCollapsed ? 'Organization Map' : undefined}
         >
           <Map size={20} />
           <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>Organization Map</span>
