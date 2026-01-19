@@ -143,6 +143,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 5. **LDAP/AD Integration** - Import from existing directory services
 6. **SSO Support** - SAML integration for enterprise
 7. **Webhook Support** - External system notifications
+8. **Hierarchical Tree Selector Component** - Replace native selects with interactive, collapsible tree dropdowns for department selection (improved UX with search, expand/collapse, keyboard navigation)
 
 ---
 

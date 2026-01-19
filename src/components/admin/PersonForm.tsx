@@ -32,6 +32,7 @@ interface PersonFormProps {
   person?: Person | null;
   departments?: Department[];
   isSubmitting?: boolean;
+  defaultDepartmentId?: string;
 }
 
 export default function PersonForm({
@@ -41,6 +42,7 @@ export default function PersonForm({
   person = null,
   departments = [],
   isSubmitting = false,
+  defaultDepartmentId,
 }: PersonFormProps): React.JSX.Element | null {
   const { orgId } = useParams<{ orgId: string }>();
   const [formData, setFormData] = useState<PersonFormData>({
@@ -96,12 +98,12 @@ export default function PersonForm({
         title: '',
         email: '',
         phone: '',
-        departmentId: departments[0]?.id || '',
+        departmentId: defaultDepartmentId || departments[0]?.id || '',
         customFields: {},
       });
     }
     setErrors({});
-  }, [person, departments, isOpen]);
+  }, [person, departments, isOpen, defaultDepartmentId]);
 
   const validate = (): boolean => {
     const newErrors: PersonFormErrors = {};
@@ -278,14 +280,14 @@ export default function PersonForm({
                 value={formData.departmentId}
                 onChange={handleChange}
                 disabled={isSubmitting}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-50 ${
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-50 font-mono text-sm ${
                   errors.departmentId ? 'border-red-500' : 'border-gray-300 dark:border-slate-600'
                 }`}
               >
                 <option value="">Select a department</option>
                 {getHierarchicalDepartments(departments).map(dept => (
                   <option key={dept.id} value={dept.id}>
-                    {getIndentedName(dept.name, dept.depth)}
+                    {getIndentedName(dept.name, dept.depth, dept)}
                   </option>
                 ))}
               </select>

@@ -293,7 +293,7 @@ export default function BulkEditModal({
                             value={departmentId}
                             onChange={e => setDepartmentId(e.target.value)}
                             disabled={!enabledFields.has('departmentId') || isUpdating}
-                            className="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-40 disabled:bg-gray-50 dark:disabled:bg-slate-800 transition-all appearance-none cursor-pointer"
+                            className="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-40 disabled:bg-gray-50 dark:disabled:bg-slate-800 transition-all appearance-none cursor-pointer font-mono text-sm"
                           >
                             <option value="">
                               {enabledFields.has('departmentId')
@@ -302,7 +302,7 @@ export default function BulkEditModal({
                             </option>
                             {getHierarchicalDepartments(departments).map(dept => (
                               <option key={dept.id} value={dept.id}>
-                                {getIndentedName(dept.name, dept.depth)}
+                                {getIndentedName(dept.name, dept.depth, dept)}
                               </option>
                             ))}
                           </select>
@@ -401,7 +401,7 @@ export default function BulkEditModal({
                       value={parentId}
                       onChange={e => setParentId(e.target.value)}
                       disabled={!enabledFields.has('parentId') || isUpdating}
-                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-40 disabled:bg-gray-50 dark:disabled:bg-slate-800 transition-all appearance-none cursor-pointer"
+                      className="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-40 disabled:bg-gray-50 dark:disabled:bg-slate-800 transition-all appearance-none cursor-pointer font-mono text-sm"
                     >
                       <option value="">
                         {enabledFields.has('parentId') ? 'Keep existing parent' : 'Field disabled'}
@@ -409,7 +409,7 @@ export default function BulkEditModal({
                       <option value="root">Root level (no parent)</option>
                       {getHierarchicalDepartments(departments).map(dept => (
                         <option key={dept.id} value={dept.id}>
-                          {getIndentedName(dept.name, dept.depth)}
+                          {getIndentedName(dept.name, dept.depth, dept)}
                         </option>
                       ))}
                     </select>

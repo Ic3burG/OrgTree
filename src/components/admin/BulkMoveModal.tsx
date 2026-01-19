@@ -111,12 +111,12 @@ export default function BulkMoveModal({
               <select
                 value={selectedDeptId}
                 onChange={e => setSelectedDeptId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100 font-mono text-sm"
               >
                 <option value="">Select a department...</option>
                 {getHierarchicalDepartments(departments).map(dept => (
                   <option key={dept.id} value={dept.id}>
-                    {getIndentedName(dept.name, dept.depth)}
+                    {getIndentedName(dept.name, dept.depth, dept)}
                   </option>
                 ))}
               </select>

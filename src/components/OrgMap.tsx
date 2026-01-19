@@ -768,31 +768,10 @@ export default function OrgMap(): React.JSX.Element {
         isOpen={isPersonFormOpen}
         onClose={handlePersonFormClose}
         onSubmit={handlePersonFormSubmit}
-        person={
-          editingPerson
-            ? {
-                ...editingPerson,
-                // Ensure department_id is set for the form
-                department_id: editingPerson.department_id,
-              }
-            : createDepartmentId
-              ? {
-                  // Create a minimal person object with pre-selected department
-                  id: '',
-                  department_id: createDepartmentId,
-                  name: '',
-                  title: null,
-                  email: null,
-                  phone: null,
-                  sort_order: 0,
-                  deleted_at: null,
-                  created_at: '',
-                  updated_at: '',
-                }
-              : null
-        }
+        person={editingPerson}
         departments={flatDepartments}
         isSubmitting={isFormSubmitting}
+        defaultDepartmentId={createDepartmentId || undefined}
       />
     </div>
   );
