@@ -61,6 +61,7 @@ vi.mock('../db.js', async () => {
       email TEXT,
       phone TEXT,
       sort_order INTEGER DEFAULT 0,
+      is_starred INTEGER DEFAULT 0,
       deleted_at DATETIME,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
