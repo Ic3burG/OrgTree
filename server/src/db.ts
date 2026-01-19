@@ -668,6 +668,19 @@ try {
   console.error('Migration error (custom fields tables):', err);
 }
 
+// Migration: Add is_starred column to people table for favorite/star feature
+try {
+  const peopleTableInfo = db.prepare('PRAGMA table_info(people)').all() as TableInfoRow[];
+  const peopleColumnNames = peopleTableInfo.map(col => col.name);
+
+  if (!peopleColumnNames.includes('is_starred')) {
+    db.exec('ALTER TABLE people ADD COLUMN is_starred INTEGER DEFAULT 0');
+    console.log('Migration: Added is_starred column to people table');
+  }
+} catch (err) {
+  console.error('Migration error (is_starred column):', err);
+}
+
 console.log('Database initialized at:', dbPath);
 
 export default db;

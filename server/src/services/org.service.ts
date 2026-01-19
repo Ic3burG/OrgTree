@@ -24,6 +24,7 @@ interface Person {
   email: string | null;
   phone: string | null;
   sort_order: number;
+  is_starred: number;
   created_at: string;
   updated_at: string;
 }
@@ -127,11 +128,12 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
         department_id,
         name, title, email, phone,
         sort_order,
+        is_starred,
         created_at,
         updated_at
       FROM people
       WHERE department_id = ? AND deleted_at IS NULL
-      ORDER BY sort_order ASC
+      ORDER BY is_starred DESC, sort_order ASC
     `
       )
       .all(dept.id) as Person[];

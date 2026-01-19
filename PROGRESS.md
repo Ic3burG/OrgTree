@@ -232,6 +232,17 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 ### Recent Activity
 
 - **Today's Progress (January 19, 2026 - Session 58)**:
+  - ✨ **FEATURE**: Star/Favorite People
+    - **Implementation**: Added ability to "star" people to mark them as favorites. Starred people appear at the top of their department lists on the OrgMap.
+    - **Database**: Added `is_starred` column (boolean) to `people` table.
+    - **Frontend**: Added Star toggle in Person Form, Star icon in Person lists (Admin & OrgMap), and sorting logic.
+    - **Backend**: Updated services to handle `is_starred` persistence and sorting.
+    - **Testing**: Added backend tests for persistence and sorting logic. Verified frontend type safety.
+  - 📁 **FILES MODIFIED**: 8+ files across stack (`server/src/db.ts`, `services/people.service.ts`, `types/index.ts`, `PersonForm.tsx`, `OrgMap.tsx`, `PersonRowCard.tsx`, etc.)
+  - ✅ **COMMITS PUSHED**: Commit [hash] - "feat: implement star/favorite person feature"
+  - 📊 **TESTING**:
+    - Backend tests passing ✅ (including new star logic)
+    - Frontend type check passing ✅
   - ✨ **FEATURE**: Collapsible Admin Sidebar (Option B)
     - **Implementation**: Added a user-controlled toggle to the admin sidebar with `localStorage` persistence to remember user preference across sessions.
     - **Visual Design**: Switched from simple arrows to modern `PanelLeftClose` and `PanelLeft` icons, matching high-end agent manager interfaces.

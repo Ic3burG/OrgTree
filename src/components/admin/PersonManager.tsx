@@ -140,14 +140,25 @@ export default function PersonManager(): React.JSX.Element {
     email: string;
     phone: string;
     departmentId: string;
+    isStarred: boolean;
     customFields: Record<string, string | null>;
   }): Promise<void> => {
     try {
       setIsSubmitting(true);
+      const personData = {
+        name: formData.name,
+        title: formData.title,
+        email: formData.email,
+        phone: formData.phone,
+        department_id: formData.departmentId,
+        is_starred: formData.isStarred,
+        custom_fields: formData.customFields,
+      };
+
       if (editingPerson) {
-        await api.updatePerson(editingPerson.id, formData);
+        await api.updatePerson(editingPerson.id, personData);
       } else {
-        await api.createPerson(formData.departmentId, formData);
+        await api.createPerson(formData.departmentId, personData);
       }
       setIsFormOpen(false);
       setEditingPerson(null);

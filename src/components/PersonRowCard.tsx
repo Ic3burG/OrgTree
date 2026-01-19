@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Star } from 'lucide-react';
 import { getInitials } from '../utils/helpers';
 import type { Person } from '../types/index.js';
 
@@ -56,8 +56,11 @@ const PersonRowCard = memo(function PersonRowCard({
 
       {/* Name and Title */}
       <div className="flex-grow min-w-0">
-        <div className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate">
+        <div className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate flex items-center gap-1.5">
           {person.name}
+          {person.is_starred && (
+            <Star size={12} className="text-amber-400 flex-shrink-0" fill="currentColor" />
+          )}
         </div>
         {person.title && (
           <div className="text-xs text-slate-600 dark:text-slate-400 truncate">{person.title}</div>

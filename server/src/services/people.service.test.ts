@@ -49,6 +49,7 @@ vi.mock('../db.js', async () => {
       email TEXT,
       phone TEXT,
       sort_order INTEGER DEFAULT 0,
+      is_starred INTEGER DEFAULT 0,
       deleted_at DATETIME,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
@@ -181,6 +182,25 @@ describe('People Service', () => {
 
       expect(people).toHaveLength(0);
     });
+
+    it('should return starred people first', () => {
+      (db as DatabaseType)
+        .prepare(
+          `
+        INSERT INTO people (id, department_id, name, sort_order, is_starred)
+        VALUES 
+          ('person-1', ?, 'Regular Person', 1, 0), 
+          ('person-2', ?, 'Starred Person', 2, 1)
+      `
+        )
+        .run(deptId, deptId);
+
+      const people = getPeopleByDepartment(deptId, userId);
+
+      expect(people).toHaveLength(2);
+      expect(people[0]?.name).toBe('Starred Person');
+      expect(people[1]?.name).toBe('Regular Person');
+    });
   });
 
   describe('getPersonById', () => {
@@ -221,6 +241,19 @@ describe('People Service', () => {
       expect(person.name).toBe('New Person');
       expect(person.title).toBe('Developer');
       expect(requireOrgPermission).toHaveBeenCalledWith(orgId, userId, 'editor');
+    });
+
+    it('should create a starred person', async () => {
+      const person = await createPerson(
+        deptId,
+        {
+          name: 'Starred Person',
+          isStarred: true,
+        },
+        userId
+      );
+      expect(person.name).toBe('Starred Person');
+      expect(person.is_starred).toBe(1);
     });
   });
 

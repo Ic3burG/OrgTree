@@ -79,6 +79,7 @@ export interface DatabasePerson {
   email: string | null;
   phone: string | null;
   sort_order: number;
+  is_starred: number; // SQLite boolean (0 or 1)
   deleted_at: string | null;
   created_at: string;
   updated_at: string;

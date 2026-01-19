@@ -44,6 +44,7 @@ interface PersonResponse {
   email: string | null;
   phone: string | null;
   sort_order: number;
+  is_starred: number;
   created_at: string;
   updated_at: string;
   custom_fields?: Record<string, unknown>;
@@ -57,10 +58,10 @@ export function getPeopleByDepartment(deptId: string, userId: string): PersonRes
       `
     SELECT
       id, department_id, name, title, email, phone,
-      sort_order, created_at, updated_at
+      sort_order, is_starred, created_at, updated_at
     FROM people
     WHERE department_id = ? AND deleted_at IS NULL
-    ORDER BY sort_order ASC
+    ORDER BY is_starred DESC, sort_order ASC
   `
     )
     .all(deptId) as PersonResponse[];
@@ -85,7 +86,7 @@ export function getPersonById(personId: string, userId: string): PersonWithDepar
       `
     SELECT
       p.id, p.department_id, p.name, p.title, p.email, p.phone,
-      p.sort_order, p.created_at, p.updated_at,
+      p.sort_order, p.is_starred, p.created_at, p.updated_at,
       d.name as departmentName, d.organization_id as organizationId,
       o.name as organizationName, o.created_by_id as orgCreatedBy
     FROM people p
@@ -143,13 +144,14 @@ export async function createPerson(
     title?: string;
     email?: string;
     phone?: string;
+    isStarred?: boolean;
     customFields?: Record<string, unknown>;
   },
   userId: string
 ): Promise<PersonResponse> {
   const dept = verifyDeptAccess(deptId, userId, 'editor');
 
-  const { name, title, email, phone, customFields } = data;
+  const { name, title, email, phone, isStarred, customFields } = data;
 
   // Check for duplicates
   if (email && email.trim()) {
@@ -213,10 +215,21 @@ export async function createPerson(
 
   db.prepare(
     `
-    INSERT INTO people (id, department_id, name, title, email, phone, sort_order, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO people (id, department_id, name, title, email, phone, sort_order, is_starred, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
-  ).run(personId, deptId, name, title || null, email || null, phone || null, sortOrder, now, now);
+  ).run(
+    personId,
+    deptId,
+    name,
+    title || null,
+    email || null,
+    phone || null,
+    sortOrder,
+    isStarred ? 1 : 0,
+    now,
+    now
+  );
 
   // Save custom fields if provided
   if (customFields) {
@@ -228,7 +241,7 @@ export async function createPerson(
       `
     SELECT
       id, department_id, name, title, email, phone,
-      sort_order, created_at, updated_at
+      sort_order, is_starred, created_at, updated_at
     FROM people
     WHERE id = ?
   `
@@ -250,13 +263,14 @@ export async function updatePerson(
     email?: string;
     phone?: string;
     departmentId?: string;
+    isStarred?: boolean;
     customFields?: Record<string, unknown>;
   },
   userId: string
 ): Promise<PersonResponse> {
   const person = getPersonById(personId, userId);
 
-  const { name, title, email, phone, departmentId, customFields } = data;
+  const { name, title, email, phone, departmentId, isStarred, customFields } = data;
 
   // If moving to new department, verify access to that department
   if (departmentId && departmentId !== person.department_id) {
@@ -336,6 +350,7 @@ export async function updatePerson(
       email = ?,
       phone = ?,
       department_id = ?,
+      is_starred = ?,
       updated_at = ?
     WHERE id = ?
   `
@@ -345,6 +360,7 @@ export async function updatePerson(
     email !== undefined ? email : currentPerson.email,
     phone !== undefined ? phone : currentPerson.phone,
     departmentId !== undefined ? departmentId : currentPerson.department_id,
+    isStarred !== undefined ? (isStarred ? 1 : 0) : currentPerson.is_starred,
     now,
     personId
   );
@@ -359,7 +375,7 @@ export async function updatePerson(
       `
     SELECT
       id, department_id, name, title, email, phone,
-      sort_order, created_at, updated_at
+      sort_order, is_starred, created_at, updated_at
     FROM people
     WHERE id = ?
   `

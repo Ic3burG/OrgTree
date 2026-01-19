@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Mail, Phone, Edit, Trash2, CheckSquare, Square } from 'lucide-react';
+import { Mail, Phone, Edit, Trash2, CheckSquare, Square, Star } from 'lucide-react';
 import type { Person, CustomFieldDefinition } from '../../types/index.js';
 
 export interface PersonWithDepartmentName extends Person {
@@ -62,8 +62,11 @@ const PersonItem = memo(function PersonItem({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-2">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 truncate">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 truncate flex items-center gap-2">
               {person.name}
+              {person.is_starred && (
+                <Star size={16} className="text-amber-400 flex-shrink-0" fill="currentColor" />
+              )}
             </h3>
             {person.departmentName && (
               <span className="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded whitespace-nowrap">

@@ -571,6 +571,7 @@ export default function OrgMap(): React.JSX.Element {
       email: string;
       phone: string;
       departmentId: string;
+      isStarred: boolean;
       customFields: Record<string, string | null>;
     }): Promise<void> => {
       if (!orgId) return;
@@ -583,6 +584,7 @@ export default function OrgMap(): React.JSX.Element {
           title: formData.title || null,
           email: formData.email || null,
           phone: formData.phone || null,
+          is_starred: formData.isStarred,
           custom_fields: formData.customFields,
         };
 

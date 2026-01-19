@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Mail, Phone, Building, Info, Pencil } from 'lucide-react';
+import { X, Mail, Phone, Building, Info, Pencil, Star } from 'lucide-react';
 import { getInitials } from '../utils/helpers';
 import type { Person, CustomFieldDefinition } from '../types/index.js';
 
@@ -89,15 +89,29 @@ export default function DetailPanel({
         <div className="p-4 lg:p-6 space-y-6">
           {/* Avatar and Name */}
           <div className="flex flex-col items-center text-center">
-            <div
-              className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
-              flex items-center justify-center text-white font-bold text-2xl lg:text-3xl shadow-lg mb-4"
-            >
-              {initials}
+            <div className="relative">
+              <div
+                className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
+                flex items-center justify-center text-white font-bold text-2xl lg:text-3xl shadow-lg mb-4"
+              >
+                {initials}
+              </div>
+              {person.is_starred && (
+                <div className="absolute -top-1 -right-1 bg-amber-400 rounded-full p-1.5 shadow-lg">
+                  <Star size={14} className="text-white" fill="currentColor" />
+                </div>
+              )}
             </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100">
-              {person.name}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100">
+                {person.name}
+              </h3>
+              {person.is_starred && (
+                <span className="text-xs bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full font-medium">
+                  Starred
+                </span>
+              )}
+            </div>
             <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 mt-1">
               {person.title}
             </p>

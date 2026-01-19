@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Plus, Settings, Trash2 } from 'lucide-react';
+import { X, Plus, Settings, Trash2, Star } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import api from '../../api/client.js';
 import type { Person, Department, CustomFieldDefinition } from '../../types/index.js';
@@ -14,6 +14,7 @@ interface PersonFormData {
   email: string;
   phone: string;
   departmentId: string;
+  isStarred: boolean;
   customFields: Record<string, string | null>;
 }
 
@@ -51,6 +52,7 @@ export default function PersonForm({
     email: '',
     phone: '',
     departmentId: '',
+    isStarred: false,
     customFields: {},
   });
   const [errors, setErrors] = useState<PersonFormErrors>({});
@@ -90,6 +92,7 @@ export default function PersonForm({
         email: person.email || '',
         phone: person.phone || '',
         departmentId: person.department_id || '',
+        isStarred: Boolean(person.is_starred),
         customFields: person.custom_fields || {},
       });
     } else {
@@ -99,6 +102,7 @@ export default function PersonForm({
         email: '',
         phone: '',
         departmentId: defaultDepartmentId || departments[0]?.id || '',
+        isStarred: false,
         customFields: {},
       });
     }
@@ -337,6 +341,31 @@ export default function PersonForm({
                 className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-50"
                 placeholder="(555) 123-4567"
               />
+            </div>
+
+            {/* Star/Favorite Toggle */}
+            <div className="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, isStarred: !prev.isStarred }))}
+                disabled={isSubmitting}
+                className={`p-2 rounded-lg transition-all duration-200 ${
+                  formData.isStarred
+                    ? 'bg-amber-400 text-white shadow-lg shadow-amber-500/25'
+                    : 'bg-white dark:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-amber-500 border border-gray-200 dark:border-slate-600'
+                }`}
+                aria-label={formData.isStarred ? 'Remove from favorites' : 'Add to favorites'}
+              >
+                <Star size={20} fill={formData.isStarred ? 'currentColor' : 'none'} />
+              </button>
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
+                  {formData.isStarred ? 'Starred Contact' : 'Star this Contact'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">
+                  Starred contacts appear at the top of their department
+                </p>
+              </div>
             </div>
 
             {/* Custom Fields Section */}
