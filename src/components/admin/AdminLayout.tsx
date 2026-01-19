@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useParams } from 'react-router-dom';
 import {
   Home,
@@ -11,6 +11,8 @@ import {
   X,
   Shield,
   Settings,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
@@ -22,6 +24,17 @@ export default function AdminLayout(): React.JSX.Element {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+
+  // Collapsible sidebar state with localStorage persistence
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+    const saved = localStorage.getItem('adminSidebarCollapsed');
+    return saved === 'true';
+  });
+
+  // Persist collapse state to localStorage
+  useEffect(() => {
+    localStorage.setItem('adminSidebarCollapsed', String(isCollapsed));
+  }, [isCollapsed]);
 
   // Check if user has admin access (admin or owner in this org)
 
@@ -51,23 +64,45 @@ export default function AdminLayout(): React.JSX.Element {
           className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 mb-2"
         >
           <ArrowLeft size={16} />
-          All Organizations
+          {!isCollapsed && <span>All Organizations</span>}
         </button>
         {user?.role === 'superuser' && (
           <NavLink
             to="/admin/users"
             onClick={closeSidebar}
             className="flex items-center gap-2 text-sm text-purple-600 hover:text-purple-800 mb-2"
+            title="System Admin"
           >
             <Shield size={16} />
-            System Admin
+            {!isCollapsed && <span>System Admin</span>}
           </NavLink>
         )}
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Admin Panel</h2>
+          <h2
+            className={`text-lg font-semibold text-gray-900 dark:text-slate-100 ${isCollapsed ? 'sr-only' : ''}`}
+          >
+            Admin Panel
+          </h2>
           <div className="hidden lg:flex items-center gap-2">
-            <DarkModeToggle />
-            <ConnectionStatus />
+            {!isCollapsed && (
+              <>
+                <DarkModeToggle />
+                <ConnectionStatus />
+              </>
+            )}
+            {/* Collapse toggle button - desktop only */}
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isCollapsed ? (
+                <ChevronRight size={20} className="text-gray-600 dark:text-slate-400" />
+              ) : (
+                <ChevronLeft size={20} className="text-gray-600 dark:text-slate-400" />
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -79,113 +114,126 @@ export default function AdminLayout(): React.JSX.Element {
           end
           onClick={closeSidebar}
           className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
+            `flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg mb-2 transition-colors ${
               isActive
                 ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                 : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
+          title="Dashboard"
         >
           <Home size={20} />
-          <span className="font-medium">Dashboard</span>
+          <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>Dashboard</span>
         </NavLink>
 
         <NavLink
           to={`/org/${orgId}/departments`}
           onClick={closeSidebar}
           className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
+            `flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg mb-2 transition-colors ${
               isActive
                 ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                 : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
+          title="Departments"
         >
           <Building2 size={20} />
-          <span className="font-medium">Departments</span>
+          <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>Departments</span>
         </NavLink>
 
         <NavLink
           to={`/org/${orgId}/people`}
           onClick={closeSidebar}
           className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
+            `flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg mb-2 transition-colors ${
               isActive
                 ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                 : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
+          title="People"
         >
           <Users size={20} />
-          <span className="font-medium">People</span>
+          <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>People</span>
         </NavLink>
 
         <NavLink
           to={`/org/${orgId}/map`}
           onClick={closeSidebar}
           className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
+            `flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg mb-2 transition-colors ${
               isActive
                 ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                 : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
+          title="Organization Map"
         >
           <Map size={20} />
-          <span className="font-medium">Organization Map</span>
+          <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>Organization Map</span>
         </NavLink>
       </nav>
 
       {/* User Section */}
       <div className="p-4 border-t border-gray-200 dark:border-slate-700">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0">
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} mb-2`}>
+          <div
+            className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0"
+            title={isCollapsed ? user?.name : undefined}
+          >
             <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
               {user?.name?.charAt(0).toUpperCase()}
             </span>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <p className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">
-                {user?.name}
-              </p>
-              {user?.role === 'superuser' && (
-                <span className="px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full font-medium flex-shrink-0">
-                  Superuser
-                </span>
-              )}
-              {user?.role === 'admin' && (
-                <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full font-medium flex-shrink-0">
-                  Admin
-                </span>
-              )}
+          {!isCollapsed && (
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <p className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">
+                  {user?.name}
+                </p>
+                {user?.role === 'superuser' && (
+                  <span className="px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full font-medium flex-shrink-0">
+                    Superuser
+                  </span>
+                )}
+                {user?.role === 'admin' && (
+                  <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full font-medium flex-shrink-0">
+                    Admin
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{user?.email}</p>
             </div>
-            <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{user?.email}</p>
-          </div>
+          )}
         </div>
         <NavLink
           to="/settings"
           onClick={closeSidebar}
           className={({ isActive }) =>
-            `w-full flex items-center gap-3 px-4 py-2 rounded-lg mb-2 transition-colors ${
+            `w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-4 py-2 rounded-lg mb-2 transition-colors ${
               isActive
                 ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                 : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
+          title="Account Settings"
         >
           <Settings size={18} />
-          <span className="font-medium text-sm">Account Settings</span>
+          <span className={`font-medium text-sm ${isCollapsed ? 'sr-only' : ''}`}>
+            Account Settings
+          </span>
         </NavLink>
         <button
           onClick={() => {
             handleLogout();
             closeSidebar();
           }}
-          className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+          className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors`}
+          title="Logout"
         >
           <LogOut size={18} />
-          <span className="font-medium">Logout</span>
+          <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>Logout</span>
         </button>
       </div>
     </>
@@ -235,12 +283,20 @@ export default function AdminLayout(): React.JSX.Element {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-slate-800 shadow-lg flex-col border-r border-gray-200 dark:border-slate-700">
+      <aside
+        className={`hidden lg:flex fixed left-0 top-0 bottom-0 bg-white dark:bg-slate-800 shadow-lg flex-col border-r border-gray-200 dark:border-slate-700 transition-all duration-300 ${
+          isCollapsed ? 'w-20' : 'w-64'
+        }`}
+      >
         <SidebarContent />
       </aside>
 
       {/* Main content - adjust padding for mobile header and bottom nav */}
-      <main className="lg:ml-64 pt-14 lg:pt-0 pb-16 lg:pb-0 h-screen overflow-hidden">
+      <main
+        className={`pt-14 lg:pt-0 pb-16 lg:pb-0 h-screen overflow-hidden transition-all duration-300 ${
+          isCollapsed ? 'lg:ml-20' : 'lg:ml-64'
+        }`}
+      >
         <div className="h-full">
           <Outlet />
         </div>

@@ -144,6 +144,12 @@ This document outlines the development roadmap for OrgTree, including technical 
 6. **SSO Support** - SAML integration for enterprise
 7. **Webhook Support** - External system notifications
 8. **Hierarchical Tree Selector Component** - Replace native selects with interactive, collapsible tree dropdowns for department selection (improved UX with search, expand/collapse, keyboard navigation)
+9. **Advanced Sidebar UI Enhancements**:
+   - Multi-level collapse (Icon-only → Minimized → Hidden)
+   - Resizable sidebar with drag handle for custom width
+   - Floating action button for quick access when fully hidden
+   - Workspace layout presets (save/load layout configurations)
+   - Sidebar pinning (auto-hide on route change unless pinned)
 
 ---
 
