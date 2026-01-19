@@ -9,7 +9,7 @@ test.describe('Public Sharing', () => {
     
     await authenticatedPage.getByRole('button', { name: /create|new|add/i }).first().click();
     await authenticatedPage.getByLabel(/name/i).fill(orgName);
-    await authenticatedPage.getByRole('button', { name: /create|save|submit/i }).click();
+    await authenticatedPage.getByRole('button', { name: 'Create Organization', exact: true }).click();
     
     // Navigate to org
     await authenticatedPage.getByText(orgName).click();
@@ -51,7 +51,7 @@ test.describe('Public Sharing', () => {
     await page.getByLabel('Email').fill(email);
     await page.getByLabel('Password', { exact: true }).fill('SecurePassword123!');
     await page.getByLabel('Confirm Password').fill('SecurePassword123!');
-    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.getByRole('button', { name: /create account/i }).click();
     
     // Wait for auth
     await page.waitForURL(url => !url.pathname.includes('/signup'), { timeout: 10000 });
@@ -59,7 +59,7 @@ test.describe('Public Sharing', () => {
     // Create org
     await page.getByRole('button', { name: /create|new|add/i }).first().click();
     await page.getByLabel(/name/i).fill(orgName);
-    await page.getByRole('button', { name: /create|save|submit/i }).click();
+    await page.getByRole('button', { name: 'Create Organization', exact: true }).click();
     
     // Navigate to org
     await page.getByText(orgName).click();

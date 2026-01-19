@@ -204,18 +204,7 @@ function PublicOrgMapContent(): React.JSX.Element {
         // Apply initial layout
         const layoutedNodes = calculateLayout(parsedNodes, parsedEdges, layoutDirection);
 
-        // Add callbacks to node data
-        const nodesWithCallbacks = layoutedNodes.map(node => ({
-          ...node,
-          position: node.position || { x: 0, y: 0 },
-          data: {
-            ...node.data,
-            onToggleExpand: () => handleToggleExpand(node.id),
-            onSelectPerson: (person: Person) => handleSelectPerson(person),
-          },
-        })) as Node<NodeData>[];
-
-        setNodes(nodesWithCallbacks);
+        setNodes(layoutedNodes as Node<NodeData>[]);
         setEdges(parsedEdges);
 
         // Fit view after initial load
@@ -236,7 +225,7 @@ function PublicOrgMapContent(): React.JSX.Element {
       loadData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shareToken, handleToggleExpand, handleSelectPerson]);
+  }, [shareToken]);
 
   // Close detail panel
   const handleCloseDetail = useCallback((): void => {
