@@ -254,7 +254,9 @@ function searchDepartments(
       name: row.name,
       description: row.description,
       parent_id: row.parent_id,
-      highlight: escapeHtml(row.nameHighlight || row.descHighlight || row.customHighlight || row.name)
+      highlight: escapeHtml(
+        row.nameHighlight || row.descHighlight || row.customHighlight || row.name
+      )
         .replace(/&lt;mark&gt;/g, '<mark>')
         .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
         .replace(/&lt;\/mark&gt;/g, '</mark>'),
@@ -415,7 +417,11 @@ function searchPeople(
       department_id: row.department_id,
       department_name: row.department_name,
       highlight: escapeHtml(
-        row.nameHighlight || row.titleHighlight || row.emailHighlight || row.customHighlight || row.name
+        row.nameHighlight ||
+          row.titleHighlight ||
+          row.emailHighlight ||
+          row.customHighlight ||
+          row.name
       )
         .replace(/&lt;mark&gt;/g, '<mark>')
         .replace(/&lt;&#x2F;mark&gt;/g, '</mark>')
