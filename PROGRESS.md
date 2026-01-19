@@ -2962,15 +2962,37 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ## 📋 Next Session Planning
 
-### Completed Today (January 16, 2026)
+### Completed Today (January 19, 2026)
 
-| Session | Task                              | Status      | Duration |
-| ------- | --------------------------------- | ----------- | -------- |
-| 25      | Fix OrgMap Infinite Loading Loop  | ✅ Complete | ~30 min  |
-| 26      | Fix Search Navigation in OrgMap   | ✅ Complete | ~20 min  |
-| 27      | Relocate SecurityCheck to Landing | ✅ Complete | ~10 min  |
+| Session | Task                                        | Status      | Duration |
+| ------- | ------------------------------------------- | ----------- | -------- |
+| 28      | Edit & Create Contacts from Organization Map | ✅ Complete | ~15 min  |
 
-**Total**: 2 bug fixes, 1 UX improvement
+**Total**: 1 feature implementation
+
+### Session 28 Details - Edit & Create Contacts from OrgMap (January 19, 2026)
+
+**Request**: Enable users to edit and create contacts directly from the Organization Map view
+
+**Implementation**:
+- Added "Edit" button to DetailPanel (pencil icon) - opens PersonForm modal with person data pre-filled
+- Added "Add Person" button to DepartmentNode (UserPlus icon) - opens PersonForm modal with department pre-selected
+- Both buttons only visible to users with editor+ permissions (owner, admin, editor)
+- Form supports changing department (moving person to different department)
+- Real-time updates via Socket.IO after save
+
+**Files Modified**:
+- `src/components/DetailPanel.tsx` - Added `onEdit` prop and edit button in header
+- `src/components/DepartmentNode.tsx` - Added `onAddPerson` prop and add person button in header
+- `src/components/OrgMap.tsx` - Added form state management, permission checking, and PersonForm modal integration
+
+**Key Technical Details**:
+- Permission check uses `org.role` from API response (owner/admin/editor can edit)
+- PersonForm reused from admin panel - handles both create and edit modes
+- `stopPropagation()` on add button prevents triggering department expand/collapse
+- Form closes DetailPanel when editing to avoid UI overlap
+
+---
 
 ### Session 27 Details - SecurityCheck Relocation (January 17, 2026)
 

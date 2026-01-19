@@ -1,7 +1,7 @@
 import React, { memo, useState, useRef, useEffect, useContext } from 'react';
 import { createPortal } from 'react-dom';
 import { Handle, Position, NodeProps } from 'reactflow';
-import { Folder, FolderOpen, ChevronDown, ChevronUp, Users } from 'lucide-react';
+import { Folder, FolderOpen, ChevronDown, ChevronUp, Users, UserPlus } from 'lucide-react';
 import { getDepthColors } from '../utils/colors';
 import { OrgChartThemeContext } from '../contexts/OrgChartThemeContext';
 import PersonRowCard from './PersonRowCard';
@@ -9,6 +9,7 @@ import DepartmentTooltip from './DepartmentTooltip';
 import type { Person } from '../types/index.js';
 
 interface DepartmentNodeData {
+  id: string;
   name: string;
   depth: number;
   people: Person[];
@@ -16,6 +17,7 @@ interface DepartmentNodeData {
   isExpanded: boolean;
   onToggleExpand?: () => void;
   onSelectPerson?: (person: Person) => void;
+  onAddPerson?: (departmentId: string) => void;
   isHighlighted?: boolean;
   theme?: string;
 }
@@ -28,6 +30,7 @@ interface DepartmentNodeData {
  */
 function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): React.JSX.Element {
   const {
+    id,
     name,
     depth,
     people,
@@ -35,6 +38,7 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
     isExpanded,
     onToggleExpand,
     onSelectPerson,
+    onAddPerson,
     isHighlighted,
     theme: dataTheme,
   } = data;
@@ -175,12 +179,27 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
             )}
           </div>
 
-          {/* People count */}
-          <div className="flex items-center gap-1.5 text-xs lg:text-xs opacity-90">
-            <Users size={16} className="lg:w-[14px] lg:h-[14px]" />
-            <span>
-              {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
-            </span>
+          {/* People count and Add Person button */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs lg:text-xs opacity-90">
+              <Users size={16} className="lg:w-[14px] lg:h-[14px]" />
+              <span>
+                {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
+              </span>
+            </div>
+            {onAddPerson && (
+              <button
+                onClick={e => {
+                  e.stopPropagation();
+                  onAddPerson(id);
+                }}
+                className="p-1 rounded hover:bg-white/20 transition-colors"
+                aria-label="Add person to department"
+                title="Add person"
+              >
+                <UserPlus size={16} className="lg:w-[14px] lg:h-[14px]" />
+              </button>
+            )}
           </div>
         </div>
 

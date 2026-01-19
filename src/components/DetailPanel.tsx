@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Mail, Phone, Building, Info } from 'lucide-react';
+import { X, Mail, Phone, Building, Info, Pencil } from 'lucide-react';
 import { getInitials } from '../utils/helpers';
 import type { Person, CustomFieldDefinition } from '../types/index.js';
 
@@ -7,6 +7,7 @@ interface DetailPanelProps {
   person: Person | null;
   onClose: () => void;
   fieldDefinitions?: CustomFieldDefinition[];
+  onEdit?: (person: Person) => void;
 }
 
 /**
@@ -18,6 +19,7 @@ export default function DetailPanel({
   person,
   onClose,
   fieldDefinitions = [],
+  onEdit,
 }: DetailPanelProps): React.JSX.Element | null {
   if (!person) return null;
 
@@ -62,13 +64,25 @@ export default function DetailPanel({
           >
             Contact Details
           </h2>
-          <button
-            onClick={onClose}
-            className="p-2.5 lg:p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors touch-manipulation"
-            aria-label="Close panel"
-          >
-            <X size={24} className="text-slate-600 dark:text-slate-300" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onEdit && (
+              <button
+                onClick={() => onEdit(person)}
+                className="p-2.5 lg:p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors touch-manipulation"
+                aria-label="Edit contact"
+                title="Edit contact"
+              >
+                <Pencil size={20} className="text-slate-600 dark:text-slate-300" />
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="p-2.5 lg:p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors touch-manipulation"
+              aria-label="Close panel"
+            >
+              <X size={24} className="text-slate-600 dark:text-slate-300" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}

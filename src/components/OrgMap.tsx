@@ -19,6 +19,7 @@ import DetailPanel from './DetailPanel';
 import SearchOverlay from './SearchOverlay';
 import Toolbar from './Toolbar';
 import ExportButton from './map/ExportButton';
+import PersonForm from './admin/PersonForm';
 import { calculateLayout } from '../utils/layoutEngine';
 import { getDepthColors } from '../utils/colors';
 import { exportToPng, exportToPdf } from '../utils/exportUtils';
@@ -148,6 +149,14 @@ export default function OrgMap(): React.JSX.Element {
   const [orgName, setOrgName] = useState<string>('Organization Chart');
   const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
 
+  // Person form state
+  const [isPersonFormOpen, setIsPersonFormOpen] = useState<boolean>(false);
+  const [editingPerson, setEditingPerson] = useState<Person | null>(null);
+  const [createDepartmentId, setCreateDepartmentId] = useState<string | null>(null);
+  const [isFormSubmitting, setIsFormSubmitting] = useState<boolean>(false);
+  const [flatDepartments, setFlatDepartments] = useState<Department[]>([]);
+  const [canEdit, setCanEdit] = useState<boolean>(false);
+
   const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
   const toast = useToast();
@@ -222,6 +231,15 @@ export default function OrgMap(): React.JSX.Element {
         // Store organization name for exports
         if (org.name) {
           setOrgName(org.name);
+        }
+
+        // Check if user can edit (editor, admin, or owner)
+        const editableRoles = ['owner', 'admin', 'editor'];
+        setCanEdit(org.role ? editableRoles.includes(org.role) : false);
+
+        // Store flat department list for PersonForm dropdown
+        if (org.departments) {
+          setFlatDepartments(org.departments);
         }
 
         if (!org.departments || org.departments.length === 0) {
@@ -522,19 +540,112 @@ export default function OrgMap(): React.JSX.Element {
     [nodes, setCenter, handleToggleExpand]
   );
 
+  // Handle edit person from DetailPanel
+  const handleEditPerson = useCallback((person: Person): void => {
+    setEditingPerson(person);
+    setCreateDepartmentId(null);
+    setIsPersonFormOpen(true);
+    // Close the detail panel when opening edit form
+    setSelectedPerson(null);
+  }, []);
+
+  // Handle add person from DepartmentNode
+  const handleAddPerson = useCallback((departmentId: string): void => {
+    setEditingPerson(null);
+    setCreateDepartmentId(departmentId);
+    setIsPersonFormOpen(true);
+  }, []);
+
+  // Handle form close
+  const handlePersonFormClose = useCallback((): void => {
+    setIsPersonFormOpen(false);
+    setEditingPerson(null);
+    setCreateDepartmentId(null);
+  }, []);
+
+  // Handle person form submission
+  const handlePersonFormSubmit = useCallback(
+    async (formData: {
+      name: string;
+      title: string;
+      email: string;
+      phone: string;
+      departmentId: string;
+      customFields: Record<string, string | null>;
+    }): Promise<void> => {
+      if (!orgId) return;
+
+      try {
+        setIsFormSubmitting(true);
+
+        const personData = {
+          name: formData.name,
+          title: formData.title || null,
+          email: formData.email || null,
+          phone: formData.phone || null,
+          custom_fields: formData.customFields,
+        };
+
+        if (editingPerson) {
+          // Update existing person
+          // If department changed, we need to handle that separately
+          const currentDeptId = editingPerson.department_id;
+          const newDeptId = formData.departmentId;
+
+          if (currentDeptId !== newDeptId) {
+            // Move person to new department by updating with department_id
+            await api.updatePerson(editingPerson.id, {
+              ...personData,
+              department_id: newDeptId,
+            } as unknown as Partial<Person>);
+          } else {
+            await api.updatePerson(editingPerson.id, personData);
+          }
+          toast.success('Person updated successfully');
+        } else if (createDepartmentId || formData.departmentId) {
+          // Create new person
+          const targetDeptId = createDepartmentId || formData.departmentId;
+          await api.createPerson(targetDeptId, personData);
+          toast.success('Person created successfully');
+        }
+
+        // Close form and refresh data
+        handlePersonFormClose();
+        await loadData(false);
+      } catch (err) {
+        console.error('Error saving person:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to save person';
+        toast.error(errorMessage);
+      } finally {
+        setIsFormSubmitting(false);
+      }
+    },
+    [orgId, editingPerson, createDepartmentId, toast, handlePersonFormClose, loadData]
+  );
+
   // Update highlighted state and callbacks in nodes
   const nodesWithHighlight = useMemo(() => {
     return nodes.map(node => ({
       ...node,
       data: {
         ...node.data,
+        id: node.id, // Pass node ID for add person callback
         theme: currentTheme,
         isHighlighted: node.id === highlightedNodeId,
         onToggleExpand: () => handleToggleExpand(node.id),
         onSelectPerson: (person: Person) => handleSelectPerson(person),
+        onAddPerson: canEdit ? (departmentId: string) => handleAddPerson(departmentId) : undefined,
       },
     }));
-  }, [nodes, currentTheme, highlightedNodeId, handleToggleExpand, handleSelectPerson]);
+  }, [
+    nodes,
+    currentTheme,
+    highlightedNodeId,
+    handleToggleExpand,
+    handleSelectPerson,
+    canEdit,
+    handleAddPerson,
+  ]);
 
   if (isLoading) {
     return (
@@ -648,8 +759,41 @@ export default function OrgMap(): React.JSX.Element {
           person={selectedPerson}
           onClose={handleCloseDetail}
           fieldDefinitions={fieldDefinitions}
+          onEdit={canEdit ? handleEditPerson : undefined}
         />
       )}
+
+      {/* Person Form Modal */}
+      <PersonForm
+        isOpen={isPersonFormOpen}
+        onClose={handlePersonFormClose}
+        onSubmit={handlePersonFormSubmit}
+        person={
+          editingPerson
+            ? {
+                ...editingPerson,
+                // Ensure department_id is set for the form
+                department_id: editingPerson.department_id,
+              }
+            : createDepartmentId
+              ? {
+                  // Create a minimal person object with pre-selected department
+                  id: '',
+                  department_id: createDepartmentId,
+                  name: '',
+                  title: null,
+                  email: null,
+                  phone: null,
+                  sort_order: 0,
+                  deleted_at: null,
+                  created_at: '',
+                  updated_at: '',
+                }
+              : null
+        }
+        departments={flatDepartments}
+        isSubmitting={isFormSubmitting}
+      />
     </div>
   );
 }
