@@ -9,10 +9,12 @@ import {
   ArrowRight,
   LogOut,
   Palette,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import ThemePicker from './ThemePicker';
-import DarkModeToggle from './ui/DarkModeToggle';
 
 interface ToolbarProps {
   onZoomIn: () => void;
@@ -43,6 +45,7 @@ export default function Toolbar({
   onThemeChange,
 }: ToolbarProps): React.JSX.Element {
   const { user, logout } = useAuth();
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [isThemeOpen, setIsThemeOpen] = useState(false);
 
   // Mobile: compact buttons, bottom positioning
@@ -71,39 +74,39 @@ export default function Toolbar({
     <div className="absolute bottom-20 right-4 lg:bottom-auto lg:top-4 lg:right-4 z-10 flex flex-col items-end gap-1.5 lg:gap-2">
       {/* Zoom In */}
       <button onClick={onZoomIn} className={buttonClass} aria-label="Zoom in">
-        <ZoomIn size={20} className="lg:w-5 lg:h-5 text-slate-700" />
+        <ZoomIn size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
         <Tooltip>Zoom In</Tooltip>
       </button>
 
       {/* Zoom Out */}
       <button onClick={onZoomOut} className={buttonClass} aria-label="Zoom out">
-        <ZoomOut size={20} className="lg:w-5 lg:h-5 text-slate-700" />
+        <ZoomOut size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
         <Tooltip>Zoom Out</Tooltip>
       </button>
 
       {/* Fit View */}
       <button onClick={onFitView} className={buttonClass} aria-label="Fit view">
-        <Maximize2 size={20} className="lg:w-5 lg:h-5 text-slate-700" />
+        <Maximize2 size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
         <Tooltip>Fit to Screen</Tooltip>
       </button>
 
       {/* Divider */}
-      <div className="h-px bg-slate-300 my-0.5" />
+      <div className="h-px bg-slate-300 dark:bg-slate-600 my-0.5" />
 
       {/* Expand All */}
       <button onClick={onExpandAll} className={buttonClass} aria-label="Expand all departments">
-        <ChevronDown size={20} className="lg:w-5 lg:h-5 text-slate-700" />
+        <ChevronDown size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
         <Tooltip>Expand All</Tooltip>
       </button>
 
       {/* Collapse All */}
       <button onClick={onCollapseAll} className={buttonClass} aria-label="Collapse all departments">
-        <ChevronUp size={20} className="lg:w-5 lg:h-5 text-slate-700" />
+        <ChevronUp size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
         <Tooltip>Collapse All</Tooltip>
       </button>
 
       {/* Divider */}
-      <div className="h-px bg-slate-300 my-0.5" />
+      <div className="h-px bg-slate-300 dark:bg-slate-600 my-0.5" />
 
       {/* Layout Direction Toggle */}
       <button
@@ -113,19 +116,33 @@ export default function Toolbar({
       >
         {layoutDirection === 'TB' ? (
           <>
-            <ArrowRight size={20} className="lg:w-5 lg:h-5 text-slate-700" />
+            <ArrowRight size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
             <Tooltip>Horizontal Layout</Tooltip>
           </>
         ) : (
           <>
-            <ArrowDown size={20} className="lg:w-5 lg:h-5 text-slate-700" />
+            <ArrowDown size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
             <Tooltip>Vertical Layout</Tooltip>
           </>
         )}
       </button>
 
       {/* Divider */}
-      <div className="h-px bg-slate-300 my-0.5" />
+      <div className="h-px bg-slate-300 dark:bg-slate-600 my-0.5" />
+
+      {/* Dark Mode Toggle */}
+      <button
+        onClick={toggleDarkMode}
+        className={buttonClass}
+        aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+      >
+        {isDarkMode ? (
+          <Sun size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
+        ) : (
+          <Moon size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
+        )}
+        <Tooltip>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</Tooltip>
+      </button>
 
       {/* Theme Picker - Collapsible */}
       <div className="relative">
@@ -134,7 +151,7 @@ export default function Toolbar({
           className={buttonClass}
           aria-label="Change theme"
         >
-          <Palette size={20} className="lg:w-5 lg:h-5 text-slate-700" />
+          <Palette size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
           <Tooltip>Theme</Tooltip>
         </button>
 
@@ -150,9 +167,6 @@ export default function Toolbar({
 
             {/* Theme options */}
             <div className="absolute right-full mr-2 top-0 z-50 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-3 shadow-xl animate-in slide-in-from-right-2 duration-200">
-              <div className="mb-3 pb-3 border-b border-slate-200 dark:border-slate-700">
-                <DarkModeToggle />
-              </div>
               <ThemePicker
                 currentTheme={currentTheme}
                 onThemeChange={(theme: string) => {
@@ -166,7 +180,7 @@ export default function Toolbar({
       </div>
 
       {/* Divider */}
-      <div className="h-px bg-slate-300 my-0.5" />
+      <div className="h-px bg-slate-300 dark:bg-slate-600 my-0.5" />
 
       {/* Logout Button */}
       <button
@@ -175,7 +189,7 @@ export default function Toolbar({
         aria-label={`Logout (${user?.name})`}
         title={`Logout (${user?.name})`}
       >
-        <LogOut size={20} className="lg:w-5 lg:h-5 text-slate-700" />
+        <LogOut size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
         <Tooltip>Logout {user?.name && `(${user.name})`}</Tooltip>
       </button>
     </div>

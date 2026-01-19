@@ -69,8 +69,11 @@ function transformToFlowData(departments: Department[]): {
 
   // Helper to calculate depth
   const getDepth = (dept: Department, deptMap: Map<string, Department>, depth = 0): number => {
-    if (!dept.parent_id) return depth;
-    const parent = deptMap.get(dept.parent_id);
+    // Public API returns camelCase 'parentId', internal API uses snake_case 'parent_id'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const parentId = (dept as any).parentId || dept.parent_id;
+    if (!parentId) return depth;
+    const parent = deptMap.get(parentId);
     return parent ? getDepth(parent, deptMap, depth + 1) : depth;
   };
 
@@ -94,11 +97,15 @@ function transformToFlowData(departments: Department[]): {
       },
     });
 
+    // Public API returns camelCase 'parentId', internal API uses snake_case 'parent_id'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const parentId = (dept as any).parentId || dept.parent_id;
+
     // Create edge to parent
-    if (dept.parent_id) {
+    if (parentId) {
       edges.push({
-        id: `e-${dept.parent_id}-${dept.id}`,
-        source: dept.parent_id,
+        id: `e-${parentId}-${dept.id}`,
+        source: parentId,
         target: dept.id,
         type: 'smoothstep',
       });
