@@ -231,7 +231,21 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Today's Progress (January 16, 2026 - Session 57)**:
+- **Today's Progress (January 19, 2026 - Session 58)**:
+  - ✨ **FEATURE**: Collapsible Admin Sidebar (Option B)
+    - **Implementation**: Added a user-controlled toggle to the admin sidebar with `localStorage` persistence to remember user preference across sessions.
+    - **Visual Design**: Switched from simple arrows to modern `PanelLeftClose` and `PanelLeft` icons, matching high-end agent manager interfaces.
+    - **Responsive Layout**: Sidebar transitions smoothly between `w-64` (256px) and `w-20` (80px), with main content margins adjusting dynamically.
+    - **Accessibility**: Implemented `sr-only` labels for screen readers and native browser tooltips (via `title` attribute) for collapsed navigation icons.
+    - **Future-Proofing**: Updated `ROADMAP.md` with advanced sidebar features (resizable sidebar, multi-level collapse).
+  - 📁 **FILES MODIFIED**: 2 files (`src/components/admin/AdminLayout.tsx`, `ROADMAP.md`)
+  - ✅ **COMMITS PUSHED**: Commit 821e627 - "feat: improve sidebar collapse button with panel icons"
+  - 📊 **TESTING**:
+    - All 110 frontend tests passing ✅
+    - All 403 backend tests passing ✅
+    - Production build successful ✅
+
+- **Previous Progress (January 16, 2026 - Session 57)**:
   - 🐛 **BUG FIX**: Department Hover Tooltip Links Not Working
     - **Issue**: When hovering over the people count in the Departments tab, a tooltip appeared showing people's names. These were intended to be clickable links to navigate to the Org Map, but the tooltip would disappear before users could click on them.
     - **Root Cause**: The tooltip was configured to appear on `onMouseEnter` and disappear on `onMouseLeave` of the trigger element. When users moved their mouse from the trigger to the tooltip to click a link, they would leave the trigger element, causing `onMouseLeave` to fire and hide the tooltip before the click could register.
@@ -2927,7 +2941,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>
-**Last Updated**: January 12, 2026 (Session 50 - Audit Log & Dark Mode Improvements)
+**Last Updated**: January 19, 2026 (Session 58 - Collapsible Admin Sidebar)
 
 **Today's Major Milestone**: 🎉
 
@@ -2964,8 +2978,8 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Completed Today (January 19, 2026)
 
-| Session | Task                                        | Status      | Duration |
-| ------- | ------------------------------------------- | ----------- | -------- |
+| Session | Task                                         | Status      | Duration |
+| ------- | -------------------------------------------- | ----------- | -------- |
 | 28      | Edit & Create Contacts from Organization Map | ✅ Complete | ~15 min  |
 
 **Total**: 1 feature implementation
@@ -2975,6 +2989,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 **Request**: Enable users to edit and create contacts directly from the Organization Map view
 
 **Implementation**:
+
 - Added "Edit" button to DetailPanel (pencil icon) - opens PersonForm modal with person data pre-filled
 - Added "Add Person" button to DepartmentNode (UserPlus icon) - opens PersonForm modal with department pre-selected
 - Both buttons only visible to users with editor+ permissions (owner, admin, editor)
@@ -2982,11 +2997,13 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - Real-time updates via Socket.IO after save
 
 **Files Modified**:
+
 - `src/components/DetailPanel.tsx` - Added `onEdit` prop and edit button in header
 - `src/components/DepartmentNode.tsx` - Added `onAddPerson` prop and add person button in header
 - `src/components/OrgMap.tsx` - Added form state management, permission checking, and PersonForm modal integration
 
 **Key Technical Details**:
+
 - Permission check uses `org.role` from API response (owner/admin/editor can edit)
 - PersonForm reused from admin panel - handles both create and edit modes
 - `stopPropagation()` on add button prevents triggering department expand/collapse
@@ -3001,10 +3018,12 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 **Change**: Relocated `SecurityCheck` component so users see it once after login rather than inside each organization
 
 **Files Modified**:
+
 - `src/components/admin/Dashboard.tsx` - Removed SecurityCheck import and usage
 - `src/components/OrganizationSelector.tsx` - Added SecurityCheck to main content area
 
 **Behavior**:
+
 - Security prompt (2FA/Passkeys recommendation) now appears on "Your Organizations" page
 - Uses `sessionStorage` to track dismissal (resets each browser session)
 - No longer appears redundantly within each organization
