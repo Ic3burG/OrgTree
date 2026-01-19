@@ -11,8 +11,8 @@ import {
   X,
   Shield,
   Settings,
-  ChevronLeft,
-  ChevronRight,
+  PanelLeftClose,
+  PanelLeft,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
@@ -93,14 +93,14 @@ export default function AdminLayout(): React.JSX.Element {
             {/* Collapse toggle button - desktop only */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors bg-gray-50 dark:bg-slate-700/50"
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {isCollapsed ? (
-                <ChevronRight size={20} className="text-gray-600 dark:text-slate-400" />
+                <PanelLeft size={20} className="text-gray-700 dark:text-slate-300" />
               ) : (
-                <ChevronLeft size={20} className="text-gray-600 dark:text-slate-400" />
+                <PanelLeftClose size={20} className="text-gray-700 dark:text-slate-300" />
               )}
             </button>
           </div>
