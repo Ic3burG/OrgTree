@@ -9,10 +9,10 @@ import {
   ArrowLeft,
   Menu,
   X,
-  Shield,
   Settings,
   PanelLeftClose,
   PanelLeft,
+  Terminal,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
@@ -61,7 +61,8 @@ export default function AdminLayout(): React.JSX.Element {
             handleBackToOrgs();
             closeSidebar();
           }}
-          className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 mb-2"
+          className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 mb-2 transition-all`}
+          title={isCollapsed ? 'All Organizations' : undefined}
         >
           <ArrowLeft size={16} />
           {!isCollapsed && <span>All Organizations</span>}
@@ -70,26 +71,32 @@ export default function AdminLayout(): React.JSX.Element {
           <NavLink
             to="/admin/users"
             onClick={closeSidebar}
-            className="flex items-center gap-2 text-sm text-purple-600 hover:text-purple-800 mb-2"
-            title="System Admin"
+            className={({ isActive }) =>
+              `w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} text-sm text-purple-600 hover:text-purple-800 mb-2 transition-all ${
+                isActive ? 'font-semibold' : ''
+              }`
+            }
+            title={isCollapsed ? 'System Admin' : undefined}
           >
-            <Shield size={16} />
+            <Terminal size={16} />
             {!isCollapsed && <span>System Admin</span>}
           </NavLink>
         )}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-4">
           <h2
             className={`text-lg font-semibold text-gray-900 dark:text-slate-100 ${isCollapsed ? 'sr-only' : ''}`}
           >
             Admin Panel
           </h2>
-          <div className="hidden lg:flex items-center gap-2">
-            {!isCollapsed && (
-              <>
-                <DarkModeToggle />
-                <ConnectionStatus />
-              </>
-            )}
+          <div
+            className={`flex items-center gap-2 ${isCollapsed ? 'w-full justify-center flex-col-reverse' : ''}`}
+          >
+            {/* Controls */}
+            <div className={`flex items-center ${isCollapsed ? 'flex-col gap-3' : 'gap-2'}`}>
+              <DarkModeToggle />
+              <ConnectionStatus />
+            </div>
+
             {/* Collapse toggle button - desktop only */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
