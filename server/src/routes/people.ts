@@ -97,7 +97,15 @@ router.put(
 
       const person = await updatePerson(
         req.params.personId!,
-        { name: name?.trim(), title, email, phone, departmentId, isStarred: is_starred, customFields },
+        {
+          name: name?.trim(),
+          title,
+          email,
+          phone,
+          departmentId,
+          isStarred: is_starred,
+          customFields,
+        },
         req.user!.id
       );
 
