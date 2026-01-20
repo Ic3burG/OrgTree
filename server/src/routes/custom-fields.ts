@@ -77,9 +77,9 @@ router.post(
   }
 );
 
-// PUT /api/custom-fields/:fieldId
+// PUT /api/organizations/:orgId/custom-fields/:fieldId
 router.put(
-  '/custom-fields/:fieldId',
+  '/organizations/:orgId/custom-fields/:fieldId',
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { name, options, is_required, is_searchable } = req.body;
@@ -108,9 +108,9 @@ router.put(
   }
 );
 
-// DELETE /api/custom-fields/:fieldId
+// DELETE /api/organizations/:orgId/custom-fields/:fieldId
 router.delete(
-  '/custom-fields/:fieldId',
+  '/organizations/:orgId/custom-fields/:fieldId',
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Get field info before deletion for organization_id
