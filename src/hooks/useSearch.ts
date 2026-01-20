@@ -9,6 +9,7 @@ interface SearchOptions {
   minQueryLength?: number;
   defaultType?: SearchType;
   limit?: number;
+  defaultStarredOnly?: boolean;
 }
 
 interface SearchSuggestion {
@@ -19,6 +20,7 @@ interface SearchSuggestion {
 interface UseSearchReturn {
   query: string;
   type: SearchType;
+  starredOnly: boolean;
   results: SearchResult[];
   suggestions: SearchSuggestion[];
   loading: boolean;
@@ -27,6 +29,7 @@ interface UseSearchReturn {
   hasMore: boolean;
   setQuery: (query: string) => void;
   setType: (type: SearchType) => void;
+  setStarredOnly: (starred: boolean) => void;
   updateQuery: (query: string, type?: SearchType) => void;
   clearSearch: () => void;
   searchNow: (q?: string, t?: SearchType) => void;
@@ -39,7 +42,13 @@ interface UseSearchReturn {
  * @param options - Configuration options
  */
 export function useSearch(orgId: string | undefined, options: SearchOptions = {}): UseSearchReturn {
-  const { debounceMs = 300, minQueryLength = 1, defaultType = 'all', limit = 20 } = options;
+  const {
+    debounceMs = 300,
+    minQueryLength = 1,
+    defaultType = 'all',
+    limit = 20,
+    defaultStarredOnly = false,
+  } = options;
 
   const [query, setQuery] = useState<string>('');
   const [type, setType] = useState<SearchType>(defaultType);
@@ -49,6 +58,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(false);
+  const [starredOnly, setStarredOnly] = useState<boolean>(defaultStarredOnly);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortController = useRef<AbortController | null>(null);
@@ -84,6 +94,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
           type: searchType,
           limit: limit.toString(),
           offset: searchOffset.toString(),
+          ...(starredOnly && { starred: 'true' }),
         });
 
         setResults(data.results || []);
@@ -100,7 +111,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
         setLoading(false);
       }
     },
-    [orgId, minQueryLength, limit]
+    [orgId, minQueryLength, limit, starredOnly]
   );
 
   /**
@@ -153,7 +164,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [query, type, executeSearch, fetchSuggestions, debounceMs, minQueryLength]);
+  }, [query, type, starredOnly, executeSearch, fetchSuggestions, debounceMs, minQueryLength]);
 
   /**
    * Clear all search state
@@ -181,6 +192,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
     // State
     query,
     type,
+    starredOnly,
     results,
     suggestions,
     loading,
@@ -191,6 +203,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
     // Actions
     setQuery,
     setType,
+    setStarredOnly,
     updateQuery,
     clearSearch,
 

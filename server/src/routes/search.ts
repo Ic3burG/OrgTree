@@ -23,7 +23,7 @@ router.get(
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { orgId } = req.params;
-      const { q, type = 'all', limit = '20', offset = '0' } = req.query;
+      const { q, type = 'all', limit = '20', offset = '0', starred } = req.query;
 
       // Validate query
       if (!q || (q as string).trim().length === 0) {
@@ -42,11 +42,15 @@ router.get(
       const parsedLimit = Math.min(Math.max(1, parseInt(limit as string, 10) || 20), 100);
       const parsedOffset = Math.max(0, parseInt(offset as string, 10) || 0);
 
+      // Parse starred filter (any truthy value enables it)
+      const starredOnly = starred === 'true' || starred === '1';
+
       const results = search(orgId!, req.user!.id, {
         query: (q as string).trim(),
         type: type as 'all' | 'departments' | 'people',
         limit: parsedLimit,
         offset: parsedOffset,
+        starredOnly,
       });
 
       res.json(results);

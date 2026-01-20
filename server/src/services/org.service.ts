@@ -16,7 +16,8 @@ interface Department {
   updated_at: string;
 }
 
-interface Person {
+// RawPerson represents the data directly from SQLite (is_starred is 0/1)
+interface RawPerson {
   id: string;
   department_id: string;
   name: string;
@@ -25,6 +26,20 @@ interface Person {
   phone: string | null;
   sort_order: number;
   is_starred: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// Person with is_starred converted to boolean for frontend
+interface Person {
+  id: string;
+  department_id: string;
+  name: string;
+  title: string | null;
+  email: string | null;
+  phone: string | null;
+  sort_order: number;
+  is_starred: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -136,11 +151,12 @@ export async function getOrganizationById(id: string, userId: string): Promise<O
       ORDER BY is_starred DESC, sort_order ASC
     `
       )
-      .all(dept.id) as Person[];
+      .all(dept.id) as RawPerson[];
 
-    // Add custom_fields to each person
+    // Add custom_fields to each person and convert is_starred to boolean
     const peopleWithCustomFields = people.map(person => ({
       ...person,
+      is_starred: Boolean(person.is_starred), // Convert SQLite 0/1 to boolean
       custom_fields: valuesByEntity[person.id] || {},
     }));
 

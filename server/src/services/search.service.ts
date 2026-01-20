@@ -30,6 +30,7 @@ export interface SearchOptions {
   type?: 'all' | 'departments' | 'people';
   limit?: number;
   offset?: number;
+  starredOnly?: boolean;
 }
 
 export interface SearchResponse {
@@ -281,8 +282,12 @@ function searchPeople(
   orgId: string,
   ftsQuery: string,
   limit: number,
-  offset: number
+  offset: number,
+  starredOnly: boolean = false
 ): { total: number; results: SearchResult[] } {
+  // Build the starred filter clause
+  const starredClause = starredOnly ? 'AND p.is_starred = 1' : '';
+
   // Query 1: Search in people name/title/email/phone
   const peopleSql = `
     SELECT
@@ -304,6 +309,7 @@ function searchPeople(
       AND d.organization_id = ?
       AND p.deleted_at IS NULL
       AND d.deleted_at IS NULL
+      ${starredClause}
   `;
 
   // Query 2: Search in custom fields
@@ -326,6 +332,7 @@ function searchPeople(
       AND d.organization_id = ?
       AND p.deleted_at IS NULL
       AND d.deleted_at IS NULL
+      ${starredClause}
   `;
 
   // Execute both queries
@@ -443,7 +450,7 @@ export function search(orgId: string, userId: string, options: SearchOptions): S
   // Verify user has access to this organization
   requireOrgPermission(orgId, userId, 'viewer');
 
-  const { query, type = 'all', limit = 20, offset = 0 } = options;
+  const { query, type = 'all', limit = 20, offset = 0, starredOnly = false } = options;
 
   // Build FTS query with prefix matching
   const ftsQuery = buildFtsQuery(query);
@@ -476,7 +483,7 @@ export function search(orgId: string, userId: string, options: SearchOptions): S
     try {
       // Adjust limit for people if we already have department results
       const peopleLimit = type === 'all' ? Math.max(1, limit - results.length) : limit;
-      const peopleResults = searchPeople(orgId, ftsQuery, peopleLimit, offset);
+      const peopleResults = searchPeople(orgId, ftsQuery, peopleLimit, offset, starredOnly);
       results.push(...peopleResults.results);
       totalPeople = peopleResults.total;
     } catch (err: unknown) {
