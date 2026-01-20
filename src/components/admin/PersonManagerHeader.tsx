@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, CheckSquare, X, Search, Loader2, ArrowUpDown } from 'lucide-react';
+import { Plus, CheckSquare, X, Search, Loader2, ArrowUpDown, Star } from 'lucide-react';
 import type { Department } from '../../types/index.js';
 import { getHierarchicalDepartments, getIndentedName } from '../../utils/departmentUtils.js';
 
@@ -8,6 +8,8 @@ interface PersonManagerHeaderProps {
   onSearchChange: (term: string) => void;
   filterDepartment: string;
   onFilterChange: (deptId: string) => void;
+  filterStarred: boolean;
+  onFilterStarredChange: (starred: boolean) => void;
   departments: Department[];
   selectionMode: boolean;
   onToggleSelectionMode: () => void;
@@ -25,6 +27,8 @@ export default function PersonManagerHeader({
   onSearchChange,
   filterDepartment,
   onFilterChange,
+  filterStarred,
+  onFilterStarredChange,
   departments,
   selectionMode,
   onToggleSelectionMode,
@@ -81,7 +85,7 @@ export default function PersonManagerHeader({
         <div className="mb-4 bg-white dark:bg-slate-800 rounded-lg shadow p-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             {/* Search */}
-            <div className="relative md:col-span-5">
+            <div className="relative md:col-span-4">
               {searchLoading ? (
                 <Loader2
                   size={20}
@@ -103,7 +107,7 @@ export default function PersonManagerHeader({
             </div>
 
             {/* Department Filter */}
-            <div className="md:col-span-4">
+            <div className="md:col-span-3">
               <select
                 value={filterDepartment}
                 onChange={e => onFilterChange(e.target.value)}
@@ -116,6 +120,22 @@ export default function PersonManagerHeader({
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Starred Filter */}
+            <div className="md:col-span-2">
+              <button
+                onClick={() => onFilterStarredChange(!filterStarred)}
+                className={`w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-lg transition-colors ${
+                  filterStarred
+                    ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-400'
+                    : 'border-gray-300 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
+                }`}
+                title={filterStarred ? 'Showing starred only' : 'Show starred only'}
+              >
+                <Star size={18} className={filterStarred ? 'fill-current' : ''} />
+                <span className="text-sm">{filterStarred ? 'Starred' : 'All'}</span>
+              </button>
             </div>
 
             {/* Sort Controls */}

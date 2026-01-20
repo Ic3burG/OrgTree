@@ -26,6 +26,7 @@ export default function PersonManager(): React.JSX.Element {
   const [people, setPeople] = useState<PersonWithDepartmentName[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [filterDepartment, setFilterDepartment] = useState<string>('');
+  const [filterStarred, setFilterStarred] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -203,7 +204,12 @@ export default function PersonManager(): React.JSX.Element {
       );
     }
 
-    // 3. Sort (local)
+    // 3. Filter by starred (local)
+    if (filterStarred) {
+      list = list.filter((person: PersonWithDepartmentName) => person.is_starred);
+    }
+
+    // 4. Sort (local)
     return [...list].sort((a, b) => {
       let valA: string | number | null | undefined;
       let valB: string | number | null | undefined;
@@ -252,7 +258,15 @@ export default function PersonManager(): React.JSX.Element {
       if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [searchTerm, searchResults, people, filterDepartment, sortField, sortDirection]);
+  }, [
+    searchTerm,
+    searchResults,
+    people,
+    filterDepartment,
+    filterStarred,
+    sortField,
+    sortDirection,
+  ]);
 
   // Bulk selection hook
   const {
@@ -377,6 +391,8 @@ export default function PersonManager(): React.JSX.Element {
         onSearchChange={setSearchTerm}
         filterDepartment={filterDepartment}
         onFilterChange={setFilterDepartment}
+        filterStarred={filterStarred}
+        onFilterStarredChange={setFilterStarred}
         departments={departments}
         selectionMode={selectionMode}
         onToggleSelectionMode={toggleSelectionMode}
