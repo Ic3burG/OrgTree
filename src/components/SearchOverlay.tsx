@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Users, Loader2, Filter } from 'lucide-react';
+import { Search, X, Users, Loader2, Filter, Star } from 'lucide-react';
 import { useSearch } from '../hooks/useSearch';
 import { SearchResult } from '../types/index';
 import { getInitials } from '../utils/helpers';
@@ -43,8 +43,19 @@ export default function SearchOverlay({
   const [showTypeFilter, setShowTypeFilter] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const { query, setQuery, type, setType, results, suggestions, loading, total, clearSearch } =
-    useSearch(orgId, { debounceMs: 300, minQueryLength: 1 });
+  const {
+    query,
+    setQuery,
+    type,
+    setType,
+    starredOnly,
+    setStarredOnly,
+    results,
+    suggestions,
+    loading,
+    total,
+    clearSearch,
+  } = useSearch(orgId, { debounceMs: 300, minQueryLength: 1 });
 
   // Open dropdown when we have results
   useEffect(() => {
@@ -154,6 +165,21 @@ export default function SearchOverlay({
           <Filter size={18} className="lg:w-4 lg:h-4" />
         </button>
 
+        {/* Starred Filter Toggle */}
+        <button
+          onClick={() => setStarredOnly(!starredOnly)}
+          className={`absolute inset-y-0 right-16 flex items-center px-2 transition-colors touch-manipulation
+            ${
+              starredOnly
+                ? 'text-amber-500 dark:text-amber-400'
+                : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+            }`}
+          aria-label="Filter starred only"
+          title={starredOnly ? 'Showing starred only' : 'Show all'}
+        >
+          <Star size={18} className={`lg:w-4 lg:h-4 ${starredOnly ? 'fill-current' : ''}`} />
+        </button>
+
         {query && (
           <button
             onClick={handleClear}
@@ -165,6 +191,20 @@ export default function SearchOverlay({
           </button>
         )}
       </div>
+
+      {/* Starred filter indicator */}
+      {starredOnly && (
+        <div className="mt-1 flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+          <Star size={12} className="fill-current" />
+          <span>Showing starred people only</span>
+          <button
+            onClick={() => setStarredOnly(false)}
+            className="ml-1 underline hover:no-underline"
+          >
+            Clear
+          </button>
+        </div>
+      )}
 
       {/* Type Filter Dropdown */}
       {showTypeFilter && (
