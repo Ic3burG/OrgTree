@@ -97,9 +97,23 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
           ...(starredOnly && { starred: 'true' }),
         });
 
-        setResults(data.results || []);
-        setTotal(data.total || 0);
+        const newResults = data.results || [];
+        const newTotal = data.total || 0;
+
+        setResults(newResults);
+        setTotal(newTotal);
         setHasMore(data.pagination?.hasMore || false);
+
+        // Track search event (only for first page to avoid duplicates on pagination)
+        // if (searchOffset === 0) {
+        //   track('search_performed', {
+        //     query_length: searchQuery.length,
+        //     type: searchType,
+        //     results_count: newTotal,
+        //     has_results: newTotal > 0,
+        //     starred_only: starredOnly
+        //   });
+        // }
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
           setError((err as Error).message || 'Search failed');
