@@ -231,7 +231,33 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Today's Progress (January 19, 2026 - Session 58)**:
+- **Today's Progress (January 21, 2026 - Session 59)**:
+  - ✨ **FEATURE**: Staging Environment Implementation
+    - **Branch Strategy**: Created `develop` branch for staging deployments, `main` remains for production
+    - **CI/CD Fix**: Rewrote CD workflow to use `workflow_run` trigger instead of direct push trigger. Fixed critical bug where `needs: []` (empty) allowed deployments even when CI failed.
+    - **Staging Service**: Set up `orgtree-staging` on Render (free tier) pointing to `develop` branch
+    - **Environment Isolation**: Staging uses separate JWT_SECRET, DATABASE_URL, and URLs
+    - **Build Fix**: Updated `render-build.sh` to use `npm ci --include=dev` to ensure devDependencies (TypeScript, Vite) are installed during build
+    - **Documentation**: Comprehensive update to `.github/CICD_SETUP.md` with branch strategy diagram, staging setup guide, and troubleshooting
+  - 📁 **FILES MODIFIED**:
+    - `.github/workflows/ci.yml` - Added `develop` branch to triggers
+    - `.github/workflows/cd.yml` - Full rewrite with workflow_run trigger and staging support
+    - `.github/CICD_SETUP.md` - Complete documentation overhaul
+    - `scripts/render-build.sh` - Fixed devDependencies installation
+  - ✅ **COMMITS PUSHED**:
+    - `d9985b3` - feat(ci): add staging environment with workflow_run trigger
+    - `40f3d1c` - docs(ci): add free tier limitations note for staging
+    - `5ad7751` - fix(build): include devDependencies in Render build
+  - 🌐 **ENVIRONMENTS**:
+    - Staging: https://orgtree-staging.onrender.com ✅ Live
+    - Production: https://orgtree-app.onrender.com ✅ Live
+  - 📊 **TESTING**:
+    - All frontend tests passing ✅
+    - All backend tests passing ✅
+    - CI/CD pipeline verified working ✅
+    - Health checks passing on both environments ✅
+
+- **Previous Progress (January 19, 2026 - Session 58)**:
   - ✨ **FEATURE**: Star/Favorite People
     - **Implementation**: Added ability to "star" people to mark them as favorites. Starred people appear at the top of their department lists on the OrgMap.
     - **Database**: Added `is_starred` column (boolean) to `people` table.

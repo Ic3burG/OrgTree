@@ -44,7 +44,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [x] **Monitoring & Alerting** - Sentry for error tracking ✅ **DONE** (January 4, 2026)
 - [ ] **APM (Application Performance Monitoring)** - New Relic, DataDog, or similar
 - [x] **CI/CD Pipeline** - GitHub Actions for automated testing and deployment ✅ **DONE** (January 5, 2026)
-- [ ] **Staging Environment** - Separate staging server for pre-production testing
+- [x] **Staging Environment** - Separate staging server for pre-production testing ✅ **DONE** (January 21, 2026)
 - [ ] **Database Migration Rollback** - Strategy and scripts for safe rollbacks
 - [x] **Health Check Enhancement** - Add memory usage, disk space, connection pool metrics ✅ **DONE** (January 8, 2026)
 
@@ -163,6 +163,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 **Recently Completed** (January 2026):
 
+- ✅ **Staging Environment** - Implemented develop→staging, main→production deployment pipeline with workflow_run trigger for CI gating (January 21, 2026)
 - ✅ **Test Coverage Expansion Phase 6** - Added 21 new tests (frontend hooks + components), now at 124 total frontend tests (January 21, 2026)
 - ✅ **Test Coverage Expansion Phase 5** - Added backend route integration tests (January 21, 2026)
 - ✅ **Performance Testing & Benchmarking** - Successfully tested 1000+ records with 467ms load time (January 11, 2026)
