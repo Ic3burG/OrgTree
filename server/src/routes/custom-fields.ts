@@ -77,6 +77,29 @@ router.post(
   }
 );
 
+// PUT /api/organizations/:orgId/custom-fields/reorder
+router.put(
+  '/organizations/:orgId/custom-fields/reorder',
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { entity_type, orderedIds } = req.body;
+
+      if (!entity_type || !orderedIds || !Array.isArray(orderedIds)) {
+        res.status(400).json({ message: 'Invalid reorder data' });
+        return;
+      }
+
+      await reorderFieldDefinitions(req.params.orgId!, entity_type, orderedIds, req.user!.id);
+
+      emitCustomFieldsReordered(req.params.orgId!, { entity_type, orderedIds }, req.user!);
+
+      res.json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 // PUT /api/organizations/:orgId/custom-fields/:fieldId
 router.put(
   '/organizations/:orgId/custom-fields/:fieldId',
@@ -137,27 +160,6 @@ router.delete(
   }
 );
 
-// PUT /api/organizations/:orgId/custom-fields/reorder
-router.put(
-  '/organizations/:orgId/custom-fields/reorder',
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { entity_type, orderedIds } = req.body;
 
-      if (!entity_type || !orderedIds || !Array.isArray(orderedIds)) {
-        res.status(400).json({ message: 'Invalid reorder data' });
-        return;
-      }
-
-      await reorderFieldDefinitions(req.params.orgId!, entity_type, orderedIds, req.user!.id);
-
-      emitCustomFieldsReordered(req.params.orgId!, { entity_type, orderedIds }, req.user!);
-
-      res.json({ success: true });
-    } catch (err) {
-      next(err);
-    }
-  }
-);
 
 export default router;

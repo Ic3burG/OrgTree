@@ -12,7 +12,8 @@ import type { DepartmentWithDepth } from './DepartmentItem';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 import { useSearch } from '../../hooks/useSearch';
 import { useBulkSelection } from '../../hooks/useBulkSelection';
-import type { Department, BulkOperationResult, CustomFieldDefinition } from '../../types/index.js';
+import { useDepartments } from '../../hooks/useDepartments';
+import type { Department, BulkOperationResult } from '../../types/index.js';
 
 // Build tree structure from flat list
 const buildTree = (
@@ -31,12 +32,17 @@ const buildTree = (
 
 export default function DepartmentManager(): React.JSX.Element {
   const { orgId } = useParams<{ orgId: string }>();
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+
+  // UI State
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [editingDept, setEditingDept] = useState<Department | null>(null);
+  const [showDelete, setShowDelete] = useState<boolean>(false);
+  const [deletingDept, setDeletingDept] = useState<Department | null>(null);
+  const [formLoading, setFormLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  // Use the search hook for API-based search
+  // Search hook
   const {
     query: searchQuery,
     setQuery: setSearchQuery,
@@ -44,13 +50,6 @@ export default function DepartmentManager(): React.JSX.Element {
     loading: searchLoading,
     total: searchTotal,
   } = useSearch(orgId, { debounceMs: 300, minQueryLength: 2, defaultType: 'departments' });
-
-  // Modal states
-  const [showForm, setShowForm] = useState<boolean>(false);
-  const [editingDept, setEditingDept] = useState<Department | null>(null);
-  const [showDelete, setShowDelete] = useState<boolean>(false);
-  const [deletingDept, setDeletingDept] = useState<Department | null>(null);
-  const [formLoading, setFormLoading] = useState<boolean>(false);
 
   // Bulk operations state
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState<boolean>(false);
@@ -68,36 +67,28 @@ export default function DepartmentManager(): React.JSX.Element {
     failedCount: number;
   } | null>(null);
 
-  const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
+  // Use custom hook for data management
+  const {
+    departments,
+    fieldDefinitions,
+    loading,
+    error: hookError,
+    loadDepartments,
+    createDepartment,
+    updateDepartment,
+    deleteDepartment,
+  } = useDepartments(orgId);
 
-  const loadDepartments = useCallback(
-    async (showLoading = true): Promise<void> => {
-      if (!orgId) return;
-      try {
-        if (showLoading) setLoading(true);
-        const data = await api.getDepartments(orgId);
-        setDepartments(data);
-
-        // Fetch custom field definitions for departments
-        const defs = await api.getCustomFieldDefinitions(orgId);
-        setFieldDefinitions(defs.filter(d => d.entity_type === 'department'));
-
-        // Auto-expand all on initial load
-        if (showLoading) {
-          setExpanded(new Set(data.map((d: Department) => d.id)));
-        }
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        if (showLoading) setLoading(false);
-      }
-    },
-    [orgId]
-  );
-
+  // Auto-expand all on initial load
   useEffect(() => {
-    loadDepartments();
-  }, [loadDepartments]);
+    if (departments.length > 0 && expanded.size === 0) {
+      setExpanded(new Set(departments.map((d: Department) => d.id)));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [departments]); // Only run when departments load mostly
+
+  // Sync hook error to local error specific to other ops if needed
+  const displayError = error || hookError;
 
   // Real-time updates
   const { isRecentlyChanged } = useRealtimeUpdates(orgId, {
@@ -117,8 +108,7 @@ export default function DepartmentManager(): React.JSX.Element {
     setFormLoading(true);
     setError('');
     try {
-      await api.createDepartment(orgId, formData);
-      await loadDepartments();
+      await createDepartment(formData);
       setShowForm(false);
     } catch (err) {
       setError((err as Error).message);
@@ -137,8 +127,7 @@ export default function DepartmentManager(): React.JSX.Element {
     setFormLoading(true);
     setError('');
     try {
-      await api.updateDepartment(orgId, editingDept.id, formData);
-      await loadDepartments();
+      await updateDepartment(editingDept.id, formData);
       setShowForm(false);
       setEditingDept(null);
     } catch (err) {
@@ -152,8 +141,7 @@ export default function DepartmentManager(): React.JSX.Element {
     if (!orgId || !deletingDept) return;
     setFormLoading(true);
     try {
-      await api.deleteDepartment(orgId, deletingDept.id);
-      await loadDepartments();
+      await deleteDepartment(deletingDept.id);
       setShowDelete(false);
       setDeletingDept(null);
     } catch (err) {
@@ -195,7 +183,7 @@ export default function DepartmentManager(): React.JSX.Element {
   // Determine if we're in search mode
   const isSearching = searchQuery.length >= 2;
 
-  // Bulk selection hook - use flat list for selection
+  // Bulk selection hook
   const {
     selectionMode,
     toggleSelectionMode,
@@ -293,10 +281,10 @@ export default function DepartmentManager(): React.JSX.Element {
         isSearching={isSearching}
       />
 
-      {error && (
+      {displayError && (
         <div className="px-8 pb-4">
           <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg">
-            {error}
+            {displayError}
           </div>
         </div>
       )}

@@ -7,6 +7,9 @@ import * as backupService from '../services/backup.service.js';
 
 // Mock dependencies
 vi.mock('../services/backup.service.js');
+vi.mock('../services/audit.service.js', () => ({
+  createAuditLog: vi.fn().mockResolvedValue(undefined),
+}));
 vi.mock('../utils/logger.js', () => ({
   default: {
     info: vi.fn(),

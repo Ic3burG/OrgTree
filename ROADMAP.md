@@ -12,7 +12,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 ### Code Quality & Testing
 
 - [x] **TypeScript Migration** - Convert codebase from JavaScript to TypeScript for better type safety ✅ **DONE** (January 7, 2026)
-- [ ] **Increase Test Coverage** - Expand from 210 tests to cover edge cases and integration scenarios (target: 80%+ coverage) 🚀 **IN PROGRESS** (Test Suites: Backend 373 tests, Frontend: 103 tests - **Phase 2 & 3: Utils & Hooks Coverage Increased**)
+- [ ] **Increase Test Coverage** - Expand from 210 tests to cover edge cases and integration scenarios (target: 80%+ coverage) 🚀 **IN PROGRESS** (Test Suites: Backend 373 tests, Frontend: 124 tests - **Phase 6: Components & Hooks Coverage Increased**)
 - [x] **E2E Testing** - Add end-to-end tests with Playwright or Cypress for critical user flows ✅ **DONE** (January 11, 2026)
 - [x] **ESLint/Prettier Setup** - Enforce code style consistency across the team ✅ **DONE** (January 4, 2026)
 - [x] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces ✅ **DONE** (January 11, 2026)
@@ -163,6 +163,8 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 **Recently Completed** (January 2026):
 
+- ✅ **Test Coverage Expansion Phase 6** - Added 21 new tests (frontend hooks + components), now at 124 total frontend tests (January 21, 2026)
+- ✅ **Test Coverage Expansion Phase 5** - Added backend route integration tests (January 21, 2026)
 - ✅ **Performance Testing & Benchmarking** - Successfully tested 1000+ records with 467ms load time (January 11, 2026)
 
 - ✅ **Test Coverage Expansion Phase 4** - Added 21 new tests (bulk operations service), now at 275 total tests with 32% backend coverage (January 9, 2026)

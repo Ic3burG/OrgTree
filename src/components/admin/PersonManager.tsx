@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import api from '../../api/client';
+import { api } from '../../api/client';
 import PersonForm from './PersonForm';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import BulkActionBar from './BulkActionBar';
@@ -13,22 +13,32 @@ import type { PersonWithDepartmentName } from './PersonItem';
 import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 import { useSearch } from '../../hooks/useSearch';
 import { useBulkSelection } from '../../hooks/useBulkSelection';
-import type {
-  Person,
-  Department,
-  Organization,
-  BulkOperationResult,
-  CustomFieldDefinition,
-} from '../../types/index.js';
+import { usePeople } from '../../hooks/usePeople';
+import type { BulkOperationResult } from '../../types/index.js';
 
 export default function PersonManager(): React.JSX.Element {
   const { orgId } = useParams<{ orgId: string }>();
-  const [people, setPeople] = useState<PersonWithDepartmentName[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
+
+  // Filter state
   const [filterDepartment, setFilterDepartment] = useState<string>('');
   const [filterStarred, setFilterStarred] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Use custom hook for data management
+  const {
+    people,
+    departments,
+    fieldDefinitions,
+    loading,
+    error: hookError,
+    loadData,
+    createPerson,
+    updatePerson,
+    deletePerson,
+  } = usePeople(orgId);
+
+  // Sync hook error or merge
+  const displayError = error || hookError;
 
   // Sort state
   const [sortField, setSortField] = useState<'name' | 'department' | 'title' | 'created_at'>(
@@ -75,48 +85,6 @@ export default function PersonManager(): React.JSX.Element {
     failedCount: number;
   } | null>(null);
 
-  const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
-
-  const loadData = useCallback(
-    async (showLoading = true): Promise<void> => {
-      if (!orgId) return;
-      try {
-        if (showLoading) setLoading(true);
-        setError(null);
-
-        // Load organization with all departments and people
-        const orgData: Organization & { departments?: Department[] } =
-          await api.getOrganization(orgId);
-        setDepartments(orgData.departments || []);
-
-        // Load custom field definitions
-        const defs = await api.getCustomFieldDefinitions(orgId);
-        setFieldDefinitions(defs.filter(d => d.entity_type === 'person'));
-
-        // Flatten people from all departments
-        const allPeople: PersonWithDepartmentName[] = [];
-        (orgData.departments || []).forEach((dept: Department) => {
-          (dept.people || []).forEach((person: Person) => {
-            allPeople.push({
-              ...person,
-              departmentName: dept.name,
-            });
-          });
-        });
-        setPeople(allPeople);
-      } catch (err) {
-        setError((err as Error).message || 'Failed to load data');
-      } finally {
-        if (showLoading) setLoading(false);
-      }
-    },
-    [orgId]
-  );
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
   // Real-time updates
   const { isRecentlyChanged } = useRealtimeUpdates(orgId, {
     onDepartmentChange: () => loadData(false),
@@ -157,15 +125,14 @@ export default function PersonManager(): React.JSX.Element {
       };
 
       if (editingPerson) {
-        await api.updatePerson(editingPerson.id, personData);
+        await updatePerson(editingPerson.id, personData);
       } else {
-        await api.createPerson(formData.departmentId, personData);
+        await createPerson(formData.departmentId, personData);
       }
       setIsFormOpen(false);
       setEditingPerson(null);
-      await loadData();
     } catch (err) {
-      alert((err as Error).message || 'Failed to save person');
+      setError((err as Error).message || 'Failed to save person');
     } finally {
       setIsSubmitting(false);
     }
@@ -180,12 +147,11 @@ export default function PersonManager(): React.JSX.Element {
     if (!personToDelete) return;
     try {
       setIsDeleting(true);
-      await api.deletePerson(personToDelete.id);
+      await deletePerson(personToDelete.id);
       setDeleteModalOpen(false);
       setPersonToDelete(null);
-      await loadData();
     } catch (err) {
-      alert((err as Error).message || 'Failed to delete person');
+      setError((err as Error).message || 'Failed to delete person');
     } finally {
       setIsDeleting(false);
     }
@@ -398,7 +364,7 @@ export default function PersonManager(): React.JSX.Element {
         onToggleSelectionMode={toggleSelectionMode}
         onAddPerson={handleCreate}
         searchLoading={searchLoading}
-        error={error}
+        error={displayError}
         sortField={sortField}
         onSortFieldChange={setSortField}
         sortDirection={sortDirection}
