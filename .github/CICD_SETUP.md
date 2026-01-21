@@ -12,17 +12,43 @@ The project uses two GitHub Actions workflows:
    - Ensures code quality before merging
 
 2. **CD (Continuous Deployment)** - `cd.yml`
-   - Runs on pushes to `main` branch
-   - Automatically deploys to Render
+   - Triggers automatically when CI passes
+   - Deploys to staging (develop branch) or production (main branch)
    - Verifies deployment health
+
+## Branch Strategy
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Feature   │────▶│   develop   │────▶│    main     │
+│   Branches  │     │  (staging)  │     │(production) │
+└─────────────┘     └─────────────┘     └─────────────┘
+                           │                    │
+                           ▼                    ▼
+                    ┌─────────────┐     ┌─────────────┐
+                    │  Staging    │     │ Production  │
+                    │   Server    │     │   Server    │
+                    └─────────────┘     └─────────────┘
+```
+
+- **develop branch** → Deploys to staging environment
+- **main branch** → Deploys to production environment
+- Feature branches merge into `develop` first for testing
+
+## Environments
+
+| Environment | Branch | URL |
+|-------------|--------|-----|
+| Staging | `develop` | https://orgtree-staging.onrender.com |
+| Production | `main` | https://orgtree-app.onrender.com |
 
 ## Workflows
 
 ### CI Workflow
 
 **Triggers:**
-- Push to `main` branch
-- Pull requests targeting `main`
+- Push to `main` or `develop` branches
+- Pull requests targeting `main` or `develop`
 
 **Jobs:**
 
@@ -31,12 +57,12 @@ The project uses two GitHub Actions workflows:
    - Prettier format verification
 
 2. **Test Frontend** - Frontend testing
-   - Runs Vitest test suite (32 tests)
+   - Runs Vitest test suite
    - Generates coverage report
    - Uploads coverage to Codecov (optional)
 
 3. **Test Backend** - Backend testing
-   - Runs Vitest test suite (44 tests)
+   - Runs Vitest test suite
    - Generates coverage report
    - Uploads coverage to Codecov (optional)
 
@@ -52,46 +78,60 @@ The project uses two GitHub Actions workflows:
 ### CD Workflow
 
 **Triggers:**
-- Push to `main` branch (after CI passes)
-- Manual workflow dispatch (via GitHub UI)
+- Runs automatically when CI workflow completes successfully
+- Only deploys when CI passes (uses `workflow_run` trigger)
 
 **Jobs:**
 
-1. **Deploy** - Trigger Render deployment
-   - Calls Render deploy hook webhook
-   - Initiates new deployment on Render
+For **develop** branch (staging):
+1. **Deploy to Staging** - Triggers Render staging deployment
+2. **Verify Staging** - Health check with retry logic
 
-2. **Verify Deployment** - Health check
-   - Waits 60 seconds for deployment
-   - Calls `/api/health` endpoint
-   - Verifies HTTP 200 response
-   - Creates deployment summary
+For **main** branch (production):
+1. **Deploy to Production** - Triggers Render production deployment
+2. **Verify Production** - Health check with retry logic
+
+**Key Feature:** The CD workflow uses `workflow_run` trigger with `conclusion == 'success'` check. This ensures deployments only happen after CI passes - broken code cannot be deployed.
 
 ## Required GitHub Secrets
 
-To enable the CD workflow, configure the following secret in your GitHub repository:
+### Production Deployment
 
-### `RENDER_DEPLOY_HOOK_URL`
+#### `RENDER_DEPLOY_HOOK_URL`
 
-**Description:** Webhook URL to trigger Render deployments
+**Description:** Webhook URL to trigger Render production deployments
 
 **How to obtain:**
 
 1. Go to [Render Dashboard](https://dashboard.render.com/)
-2. Select your service (orgtree-app)
+2. Select your production service (orgtree-app)
 3. Navigate to **Settings** → **Deploy Hook**
-4. Copy the deploy hook URL (looks like: `https://api.render.com/deploy/srv-xxxxx?key=xxxxx`)
-5. Add it to GitHub:
+4. Copy the deploy hook URL
+5. Add to GitHub:
    - Go to your GitHub repository
    - Settings → Secrets and variables → Actions
    - Click "New repository secret"
    - Name: `RENDER_DEPLOY_HOOK_URL`
    - Value: (paste the Render deploy hook URL)
-   - Click "Add secret"
+
+### Staging Deployment
+
+#### `RENDER_STAGING_DEPLOY_HOOK_URL`
+
+**Description:** Webhook URL to trigger Render staging deployments
+
+**How to obtain:**
+
+1. Create a staging service on Render (see "Setting Up Staging Environment" below)
+2. Navigate to **Settings** → **Deploy Hook**
+3. Copy the deploy hook URL
+4. Add to GitHub:
+   - Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `RENDER_STAGING_DEPLOY_HOOK_URL`
+   - Value: (paste the staging deploy hook URL)
 
 ### Optional: Codecov Integration
-
-If you want code coverage reports, configure:
 
 **`CODECOV_TOKEN`** (optional)
 
@@ -103,6 +143,37 @@ If you want code coverage reports, configure:
 
 **Note:** The workflows will continue without this token (using `continue-on-error: true`)
 
+## Setting Up Staging Environment
+
+### Create Staging Service on Render
+
+1. Go to Render Dashboard → **New Web Service**
+2. Connect to your GitHub repository
+3. Configure:
+   - **Name:** `orgtree-staging`
+   - **Branch:** `develop`
+   - **Root Directory:** `server`
+   - **Build Command:** `cd .. && ./scripts/render-build.sh`
+   - **Start Command:** `npm start`
+4. Add persistent disk (1GB) at `/opt/render/project/src/data`
+5. Set environment variables:
+
+| Variable | Value |
+|----------|-------|
+| `NODE_ENV` | `production` |
+| `JWT_SECRET` | `<unique-staging-secret>` (different from production!) |
+| `DATABASE_URL` | `file:/opt/render/project/src/data/staging.db` |
+| `FRONTEND_URL` | `https://orgtree-staging.onrender.com` |
+| `RP_ID` | `orgtree-staging.onrender.com` |
+| `ORIGIN` | `https://orgtree-staging.onrender.com` |
+
+6. Copy the Deploy Hook URL and add it as `RENDER_STAGING_DEPLOY_HOOK_URL` secret in GitHub
+
+### Cost
+
+- **Free tier:** $0/month (spins down after 15min inactivity)
+- **Starter tier:** $7/month (always-on, faster cold starts)
+
 ## Workflow Status Badges
 
 Add these badges to your README.md:
@@ -112,43 +183,50 @@ Add these badges to your README.md:
 [![CD](https://github.com/Ic3burG/OrgTree/actions/workflows/cd.yml/badge.svg)](https://github.com/Ic3burG/OrgTree/actions/workflows/cd.yml)
 ```
 
+## Deployment Flow
+
+```
+┌─────────────────┐
+│ Push to branch  │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   CI Workflow   │
+│ (lint, test,    │
+│  build)         │
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    │         │
+    ▼         ▼
+  FAIL      SUCCESS
+    │         │
+    ▼         ▼
+  STOP    ┌───┴───┐
+          │       │
+          ▼       ▼
+      develop    main
+          │       │
+          ▼       ▼
+      STAGING  PRODUCTION
+          │       │
+          ▼       ▼
+      Health   Health
+      Check    Check
+```
+
 ## Manual Deployment
 
 To manually trigger a deployment:
 
 1. Go to your GitHub repository
 2. Click **Actions** tab
-3. Select **CD** workflow from the left sidebar
+3. Select **CI** workflow from the left sidebar
 4. Click **Run workflow** dropdown (top right)
-5. Select `main` branch
+5. Select branch (`main` or `develop`)
 6. Click **Run workflow** button
-
-## Deployment Flow
-
-```
-┌─────────────────┐
-│  Push to main   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   CI Workflow   │
-│   (tests pass)  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   CD Workflow   │
-│ (deploy to      │
-│  Render)        │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Health Check    │
-│ Verification    │
-└─────────────────┘
-```
+7. CD will automatically trigger after CI passes
 
 ## Monitoring Deployments
 
@@ -161,7 +239,7 @@ To manually trigger a deployment:
 ### Via Render Dashboard
 
 1. Go to [Render Dashboard](https://dashboard.render.com/)
-2. Select your service
+2. Select your service (staging or production)
 3. View **Events** tab for deployment history
 4. Check **Logs** tab for runtime logs
 
@@ -173,12 +251,23 @@ To manually trigger a deployment:
 - Run tests locally: `npm test && cd server && npm test`
 - Fix failing tests before pushing
 
+### CD Doesn't Run After CI
+
+**Issue:** CI passes but CD workflow doesn't trigger
+
+**Solution:**
+1. Verify CI completed (not just individual jobs)
+2. Check that the branch is `main` or `develop`
+3. CD uses `workflow_run` trigger - it waits for full CI completion
+
 ### CD Fails to Deploy
 
 **Issue:** "Trigger Render deployment" step fails
 
 **Solution:**
-1. Verify `RENDER_DEPLOY_HOOK_URL` secret is set correctly
+1. Verify the correct secret is set:
+   - `RENDER_DEPLOY_HOOK_URL` for production
+   - `RENDER_STAGING_DEPLOY_HOOK_URL` for staging
 2. Check the deploy hook URL is still valid in Render settings
 3. Ensure Render service is active (not paused)
 
@@ -198,15 +287,16 @@ To manually trigger a deployment:
 
 ## Best Practices
 
-1. **Always create Pull Requests** - Let CI verify changes before merging
-2. **Review CI failures** - Don't merge PRs with failing tests
-3. **Monitor deployment health** - Check the health check step after deployment
-4. **Use semantic commit messages** - Helps track what was deployed
-5. **Tag releases** - Use git tags for production releases
+1. **Use feature branches** - Create branches from `develop` for new features
+2. **Test on staging first** - Merge to `develop` and verify on staging before production
+3. **Review CI failures** - Don't merge PRs with failing tests
+4. **Monitor deployment health** - Check the health check step after deployment
+5. **Use semantic commit messages** - Helps track what was deployed
+6. **Tag releases** - Use git tags for production releases
 
 ## Environment Variables on Render
 
-Ensure these are set in Render (Settings → Environment):
+### Production (orgtree-app)
 
 **Required:**
 - `JWT_SECRET` - Secure random string
@@ -218,9 +308,16 @@ Ensure these are set in Render (Settings → Environment):
 - `RESEND_API_KEY` - Email invitations
 - `FRONTEND_URL` - CORS configuration
 
+### Staging (orgtree-staging)
+
+Same as production, but with:
+- **Different `JWT_SECRET`** - Security isolation
+- **Different database file** - Data isolation
+- **Staging-specific URLs** - `FRONTEND_URL`, `RP_ID`, `ORIGIN`
+
 ## Additional Resources
 
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [GitHub workflow_run Trigger](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run)
 - [Render Deploy Hooks](https://render.com/docs/deploy-hooks)
 - [Codecov Documentation](https://docs.codecov.com/)
-# Test CD deployment

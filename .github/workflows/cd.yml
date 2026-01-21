@@ -1,50 +1,41 @@
 name: CD
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch: # Allow manual deployment triggers
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main, develop]
 
 jobs:
-  deploy:
-    name: Deploy to Render
+  deploy-staging:
+    name: Deploy to Staging
     runs-on: ubuntu-latest
-    # Only deploy after CI passes
-    needs: []
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'develop'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Trigger Render deployment
-        run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
-        continue-on-error: false
-
-      - name: Wait for deployment
-        run: |
-          echo "Deployment triggered. Check Render dashboard for status:"
-          echo "https://dashboard.render.com/"
-          sleep 5
+      - name: Trigger Render staging deployment
+        run: curl -X POST "${{ secrets.RENDER_STAGING_DEPLOY_HOOK_URL }}"
 
       - name: Deployment notification
+        env:
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
-          echo "✅ Deployment initiated successfully!"
-          echo "Commit: ${{ github.sha }}"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Author: ${{ github.actor }}"
+          echo "✅ Staging deployment initiated!"
+          echo "Commit: $COMMIT_SHA"
+          echo "Branch: $BRANCH"
 
-  verify-deployment:
-    name: Verify Deployment
+  verify-staging:
+    name: Verify Staging
     runs-on: ubuntu-latest
-    needs: [deploy]
-    if: success()
+    needs: [deploy-staging]
 
     steps:
       - name: Health check with retry
         run: |
-          echo "Waiting for deployment to complete and service to be healthy..."
+          echo "Waiting for staging deployment to complete..."
           echo "This may take 2-3 minutes on Render's free tier..."
           echo ""
 
@@ -54,11 +45,11 @@ jobs:
 
           while [ $attempt -le $max_attempts ]; do
             echo "Attempt $attempt/$max_attempts: Checking health endpoint..."
-            response=$(curl -s -o /dev/null -w "%{http_code}" https://orgtree-app.onrender.com/api/health)
+            response=$(curl -s -o /dev/null -w "%{http_code}" https://orgtree-staging.onrender.com/api/health)
 
             if [ $response -eq 200 ]; then
               echo "✅ Health check passed (HTTP $response)"
-              echo "Service is live and healthy!"
+              echo "Staging service is live and healthy!"
               exit 0
             else
               echo "⚠️  Health check returned HTTP $response"
@@ -75,15 +66,91 @@ jobs:
           echo "❌ Health check failed after $max_attempts attempts"
           exit 1
 
-      - name: Deployment summary
+      - name: Staging deployment summary
         if: always()
+        env:
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
-          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Staging Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: Staging" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: https://orgtree-staging.onrender.com" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`$COMMIT_SHA\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`$BRANCH\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Staging deployment complete!" >> $GITHUB_STEP_SUMMARY
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+
+    steps:
+      - name: Trigger Render production deployment
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+      - name: Deployment notification
+        env:
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          echo "✅ Production deployment initiated!"
+          echo "Commit: $COMMIT_SHA"
+          echo "Branch: $BRANCH"
+
+  verify-production:
+    name: Verify Production
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+
+    steps:
+      - name: Health check with retry
+        run: |
+          echo "Waiting for production deployment to complete..."
+          echo "This may take 2-3 minutes on Render's free tier..."
+          echo ""
+
+          max_attempts=10
+          wait_time=20
+          attempt=1
+
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt/$max_attempts: Checking health endpoint..."
+            response=$(curl -s -o /dev/null -w "%{http_code}" https://orgtree-app.onrender.com/api/health)
+
+            if [ $response -eq 200 ]; then
+              echo "✅ Health check passed (HTTP $response)"
+              echo "Production service is live and healthy!"
+              exit 0
+            else
+              echo "⚠️  Health check returned HTTP $response"
+
+              if [ $attempt -lt $max_attempts ]; then
+                echo "Waiting ${wait_time}s before retry..."
+                sleep $wait_time
+              fi
+            fi
+
+            attempt=$((attempt + 1))
+          done
+
+          echo "❌ Health check failed after $max_attempts attempts"
+          exit 1
+
+      - name: Production deployment summary
+        if: always()
+        env:
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          echo "## Production Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Environment**: Production" >> $GITHUB_STEP_SUMMARY
           echo "- **URL**: https://orgtree-app.onrender.com" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Author**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`$COMMIT_SHA\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`$BRANCH\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Deployment complete!" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Production deployment complete!" >> $GITHUB_STEP_SUMMARY
