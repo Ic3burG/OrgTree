@@ -1,6 +1,6 @@
 # OrgTree Development Roadmap
 
-> **Last Updated**: January 11, 2026
+> **Last Updated**: January 21, 2026
 > **Status**: Production-ready with ongoing enhancements
 
 This document outlines the development roadmap for OrgTree, including technical debt items, feature enhancements, and infrastructure improvements.
@@ -157,31 +157,25 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 **Active Work**:
 
-- Code Cleanup & Modernization (CSS Optimization)
-- Increasing test coverage
-- Performance testing with larger datasets
+- Increasing test coverage (currently 497+ tests across frontend and backend)
+- Performance optimization for large organizations
+- User experience refinements
 
 **Recently Completed** (January 2026):
 
-- ✅ **Staging Environment** - Implemented develop→staging, main→production deployment pipeline with workflow_run trigger for CI gating (January 21, 2026)
-- ✅ **Test Coverage Expansion Phase 6** - Added 21 new tests (frontend hooks + components), now at 124 total frontend tests (January 21, 2026)
-- ✅ **Test Coverage Expansion Phase 5** - Added backend route integration tests (January 21, 2026)
-- ✅ **Performance Testing & Benchmarking** - Successfully tested 1000+ records with 467ms load time (January 11, 2026)
-
-- ✅ **Test Coverage Expansion Phase 4** - Added 21 new tests (bulk operations service), now at 275 total tests with 32% backend coverage (January 9, 2026)
-- ✅ **Test Coverage Expansion Phase 3** - Added 44 new tests (users + invitation services), reached 254 total tests with 30.55% backend coverage (January 9, 2026)
-- ✅ **Test Coverage Expansion Phase 2** - Added 81 new tests (54 backend + 27 frontend), reached 210 total tests with 22% backend and 3% frontend coverage (January 8, 2026)
-- ✅ **Development Documentation (ADRs)** - Comprehensive architecture decision records (January 7, 2026)
-- ✅ **Dead Code Elimination** - Removed unused utilities and scripts (January 7, 2026)
-- ✅ **Test Coverage Phase 1** - Increased to 99 tests (January 7, 2026)
-- ✅ **Developer Experience** - Docker, CONTRIBUTING.md, API SDK, LICENSE (January 7, 2026)
-- ✅ **TypeScript Migration** - Full strict mode, 1000+ errors fixed (January 7, 2026)
-- ✅ **CI Pipeline Fixes** - All checks passing (January 7, 2026)
-- ✅ CI/CD Pipeline with GitHub Actions
-- ✅ Sentry error monitoring integration
-- ✅ Database indexing optimization
-- ✅ Dependency audit and cleanup
-- ✅ ESLint/Prettier setup
+- ✅ **Custom Fields System** - Organization-scoped custom fields with FTS5 search integration (January 15, 2026)
+- ✅ **Star/Favorite People** - Mark key individuals with starred filter in search (January 14, 2026)
+- ✅ **Collapsible Admin Sidebar** - Icon-only mode with localStorage persistence (January 13, 2026)
+- ✅ **Dark Mode Refinements** - Applied to org map, MiniMap, and all components (January 12, 2026)
+- ✅ **Staging Environment** - develop→staging, main→production pipeline with workflow_run trigger (January 21, 2026)
+- ✅ **Test Coverage Expansion** - 497+ tests total (373 backend, 124 frontend) (January 21, 2026)
+- ✅ **Performance Testing** - Successfully tested 1000+ records with 467ms load time (January 11, 2026)
+- ✅ **E2E Testing** - Playwright tests for critical user flows (January 11, 2026)
+- ✅ **TypeScript Migration** - Full strict mode compilation (January 7, 2026)
+- ✅ **Developer Experience** - Docker, CONTRIBUTING.md, API SDK, ADRs (January 7, 2026)
+- ✅ **CI/CD Pipeline** - GitHub Actions with automated testing and deployment
+- ✅ **Sentry Integration** - Error monitoring with Express instrumentation
+- ✅ **Database Optimization** - WAL mode, indexing, connection pooling
 
 **Production Status**: 🚀 Live at <https://orgtree-app.onrender.com>
 

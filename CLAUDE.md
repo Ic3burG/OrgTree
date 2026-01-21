@@ -73,28 +73,45 @@ This is a monorepo with separate frontend and backend:
 - Development: `server/database.db`
 - Production: Configured via `DATABASE_URL` env var (typically `/data/database.db` on Render)
 
-**Schema** (defined in `server/src/db.js`):
-- `users` - User accounts with roles (user, admin, superuser)
+**Schema** (defined in `server/src/db.ts`):
+- `users` - User accounts with roles, 2FA settings, and passkey support
 - `organizations` - Organizations with sharing settings
 - `org_members` - Many-to-many relationship (users ↔ organizations) with roles (owner, admin, editor, viewer)
 - `departments` - Hierarchical department structure (self-referencing via `parent_id`)
-- `people` - People belonging to departments
+- `people` - People belonging to departments with `is_starred` flag
 - `invitations` - Email invitations with expiry
-- `audit_logs` - Change history (1-year retention)
-- `refresh_tokens` - JWT refresh tokens (httpOnly cookies)
+- `audit_logs` - Change history (1-year retention, nullable org_id for system events)
+- `refresh_tokens` - JWT refresh tokens with device tracking (IP, user agent)
+- `passkeys` - WebAuthn credentials for passwordless authentication
+- `custom_field_definitions` - Organization-scoped custom field schemas
+- `custom_field_values` - Custom field instance data per entity
+- `departments_fts` / `people_fts` / `custom_fields_fts` - Full-text search tables
 
 **Key Features**:
 - Foreign key constraints enabled
 - Soft deletes via `deleted_at` timestamp
-- Full-text search (FTS5) for departments and people (see `server/src/db.js:200+`)
-- Migrations handled inline in `db.js` (check column existence, add if missing)
+- Full-text search (FTS5) with Porter stemming and diacritics support
+- WAL mode for concurrent reads, 64MB cache
+- Migrations handled inline in `db.ts` (check column existence, add if missing)
 
 ### Authentication & Authorization
 
 **Token Strategy**: Dual-token system (access + refresh)
 - **Access Token**: Short-lived JWT (15 min), stored in localStorage, sent via Authorization header
 - **Refresh Token**: Long-lived (7 days), stored in httpOnly cookie, used to renew access token
-- Auto-refresh at 80% of token lifetime (see `src/api/client.js:151`)
+- Auto-refresh at 80% of token lifetime (see `src/api/client.ts:151`)
+
+**Passkey/WebAuthn Support**:
+- Passwordless authentication using biometrics or security keys
+- Implemented with `@simplewebauthn/server` and `@simplewebauthn/browser`
+- Routes: `/api/auth/passkey/register-options`, `/api/auth/passkey/verify-registration`, etc.
+- Multiple passkeys per user supported
+
+**Two-Factor Authentication (2FA)**:
+- TOTP-based (Time-based One-Time Password)
+- 8 backup codes generated on setup (single-use)
+- Routes: `/api/auth/totp/setup`, `/api/auth/totp/verify`, `/api/auth/totp/disable`
+- QR code generation for authenticator apps
 
 **Roles**:
 - **System-level** (users table): `user`, `admin`, `superuser`
@@ -102,20 +119,20 @@ This is a monorepo with separate frontend and backend:
   - `admin`: Standard user with some privileges
   - `user`: Default role
 - **Organization-level** (org_members table): `owner`, `admin`, `editor`, `viewer`
-  - Checked via `checkOrgAccess()` in `server/src/services/member.service.js`
+  - Checked via `checkOrgAccess()` in `server/src/services/member.service.ts`
   - Owner cannot be removed or demoted
 
 **Session Management**:
 - Multiple concurrent sessions supported per user
-- Each refresh token tracked in database with device info
-- Users can view active sessions and revoke them
+- Each refresh token tracked in database with device info (IP, user agent)
+- Users can view active sessions and revoke them via Account Settings
 
 ### Real-Time Collaboration
 
 **Technology**: Socket.IO with JWT authentication
 
 **Architecture**:
-- Socket server initialized in `server/src/socket.js`
+- Socket server initialized in `server/src/socket.ts`
 - Clients authenticate via `socket.handshake.auth.token`
 - Organization-based rooms: `org:{orgId}`
 - Users join rooms on organization view, leave when switching orgs
@@ -123,12 +140,12 @@ This is a monorepo with separate frontend and backend:
 **Event Flow** (example - department creation):
 1. Client calls REST API (`POST /api/organizations/:id/departments`)
 2. Server creates department, logs audit trail
-3. Server calls `emitToOrg(orgId, 'department:created', payload)` (see `server/src/services/socket-events.service.js`)
+3. Server calls `emitToOrg(orgId, 'department:created', payload)` (see `server/src/services/socket-events.service.ts`)
 4. All connected clients in that org's room receive the event
 5. Frontend updates UI without page refresh
 
 **Frontend Integration**:
-- `src/contexts/SocketContext.jsx` - React context for socket connection
+- `src/contexts/SocketContext.tsx` - React context for socket connection
 - Automatically reconnects on disconnect
 - Components subscribe to events via context
 
@@ -140,13 +157,13 @@ This is a monorepo with separate frontend and backend:
 - Server validates token matches cookie
 
 **Implementation**:
-- Token fetched on app init (`src/api/client.js:52`)
+- Token fetched on app init (`src/api/client.ts:52`)
 - Auto-refreshed on 403 CSRF errors
 - Applied to all state-changing requests (POST, PUT, DELETE)
 
 ### API Client Architecture
 
-**Location**: `src/api/client.js`
+**Location**: `src/api/client.ts`
 
 **Key Features**:
 - Centralized request function with automatic token refresh
@@ -165,27 +182,29 @@ This is a monorepo with separate frontend and backend:
 **Approach**: React Context API (no Redux/Zustand)
 
 **Contexts** (`src/contexts/`):
-- `AuthContext.jsx` - User authentication state, login/logout, role helpers
-- `SocketContext.jsx` - WebSocket connection, event subscriptions
+- `AuthContext.tsx` - User authentication state, login/logout, role helpers
+- `SocketContext.tsx` - WebSocket connection, event subscriptions
+- `ThemeContext.tsx` - Dark mode state with localStorage persistence
 
 **Data Fetching**:
 - Direct API calls in components (no global state cache)
 - `useState` + `useEffect` pattern
 - Real-time updates via Socket.IO events
+- Custom hooks: `usePeople`, `useDepartments`, `useSearch`, `usePasskey`
 
 ### Service Layer (Backend)
 
 **Pattern**: Service functions separated from route handlers
 
 **Structure**:
-- `server/src/routes/*.js` - Express routes (thin, handle HTTP concerns)
-- `server/src/services/*.service.js` - Business logic (pure functions, return data/errors)
+- `server/src/routes/*.ts` - Express routes (thin, handle HTTP concerns)
+- `server/src/services/*.service.ts` - Business logic (pure functions, return data/errors)
 - Routes call services, services interact with database
 
 **Example** (department creation):
-- Route: `server/src/routes/departments.js` - validates request, checks auth
-- Service: `server/src/services/department.service.js:createDepartment()` - inserts into DB
-- Audit: `server/src/services/audit.service.js:logAction()` - records change
+- Route: `server/src/routes/departments.ts` - validates request, checks auth
+- Service: `server/src/services/department.service.ts:createDepartment()` - inserts into DB
+- Audit: `server/src/services/audit.service.ts:logAction()` - records change
 - Socket: `emitToOrg()` - notifies connected clients
 
 ### Component Organization (Frontend)
@@ -193,53 +212,63 @@ This is a monorepo with separate frontend and backend:
 ```
 src/components/
 ├── admin/              # Organization management panels
-│   ├── AuditLog.jsx          # Audit trail viewer
-│   ├── DepartmentManager.jsx # Department CRUD with tree view
-│   ├── PersonManager.jsx     # People CRUD with filtering
-│   └── ShareSettings.jsx     # Public link & team members
+│   ├── AuditLog.tsx          # Audit trail viewer with filtering
+│   ├── DepartmentManager.tsx # Department CRUD with tree view
+│   ├── PersonManager.tsx     # People CRUD with filtering and starring
+│   ├── CustomFieldsManager.tsx # Custom field definitions
+│   └── ShareSettings.tsx     # Public link & team members
 ├── auth/               # Authentication flows
-│   ├── Login.jsx
-│   ├── Signup.jsx
-│   └── ChangePassword.jsx
+│   ├── LoginPage.tsx
+│   ├── SignupPage.tsx
+│   ├── ChangePasswordPage.tsx
+│   └── TwoFactorVerification.tsx  # 2FA code entry
+├── account/            # User account settings
+│   ├── SecuritySettingsPage.tsx   # Passkeys, 2FA, sessions
+│   ├── ProfileSettings.tsx        # User profile
+│   └── SessionsPage.tsx           # Active sessions management
 ├── superuser/          # System admin (superuser only)
-│   ├── AdminDashboard.jsx    # System overview
-│   ├── UserManagement.jsx    # User CRUD
-│   └── SystemAuditLog.jsx    # Cross-org audit logs
+│   ├── AdminDashboard.tsx    # System overview
+│   ├── UserManagement.tsx    # User CRUD
+│   └── SystemAuditLog.tsx    # Cross-org audit logs
 ├── ui/                 # Reusable UI components
-│   ├── Button.jsx
-│   ├── Modal.jsx
-│   └── Toast.jsx
-├── OrgMap.jsx          # Main org chart visualization (React Flow)
-├── PublicOrgMap.jsx    # Public view of org chart (no auth)
-├── SearchOverlay.jsx   # Full-text search with autocomplete
-└── OrganizationSelector.jsx  # Org switcher dashboard
+│   ├── Button.tsx
+│   ├── Modal.tsx
+│   ├── Toast.tsx
+│   └── DarkModeToggle.tsx
+├── OrgMap.tsx          # Main org chart visualization (React Flow)
+├── PublicOrgMap.tsx    # Public view of org chart (no auth)
+├── SearchOverlay.tsx   # Full-text search with autocomplete
+└── OrganizationSelector.tsx  # Org switcher dashboard
 ```
 
 **Key Components**:
-- **OrgMap.jsx**: Uses `reactflow` library for interactive canvas, handles zoom/pan, theming, export to PNG/PDF
-- **DepartmentNode.jsx**: Custom React Flow node component with expand/collapse
-- **SearchOverlay.jsx**: Connects to FTS5 search endpoint, fuzzy matching, autocomplete
+- **OrgMap.tsx**: Uses `reactflow` library for interactive canvas, handles zoom/pan, theming, export to PNG/PDF
+- **DepartmentNode.tsx**: Custom React Flow node component with expand/collapse, dark mode support
+- **SearchOverlay.tsx**: Connects to FTS5 search endpoint, fuzzy matching, autocomplete, starred filter
+- **AdminLayout.tsx**: Collapsible sidebar with icon-only mode, localStorage persistence
 
 ### Import/Export
 
 **CSV Format**:
 - Exports separate files for departments and people (zipped)
-- Includes all fields including IDs for re-import
-- Handled in `server/src/routes/import.js`
+- Includes all fields including IDs and custom field values for re-import
+- Handled in `server/src/routes/import.ts`
+- Maximum 10,000 items per import
 
 **GEDS XML**:
 - Government Electronic Directory Services format
-- French character support (accents, special chars)
-- Parser: `scripts/parse-geds-xml.js`
+- French character support (accents, special chars, Latin-1 encoding)
+- Parser: `scripts/parse-geds-xml.ts`
 - Converts hierarchical XML to flat department/people structure
+- Duplicate department prevention on re-import
 
 ### Error Monitoring
 
 **Technology**: Sentry (both frontend and backend)
 
 **Setup**:
-- Frontend: `src/sentry.js` - wraps app with ErrorBoundary, breadcrumbs for user actions
-- Backend: `server/src/sentry.js` - captures exceptions, request data, user context
+- Frontend: `src/sentry.ts` - wraps app with ErrorBoundary, breadcrumbs for user actions
+- Backend: `server/src/sentry.ts` - captures exceptions, request data, user context
 - Configured via `SENTRY_DSN` environment variable
 - Production only (checks `NODE_ENV`)
 
@@ -293,24 +322,24 @@ cd server && npm test -- <test-file-pattern>
 - Provide granular success/failure reporting
 - Maintain data integrity
 
-**Example**: `bulkDeletePeople()` in `server/src/services/bulk.service.js`
+**Example**: `bulkDeletePeople()` in `server/src/services/bulk.service.ts`
 
 ### Audit Logging
 
-**Automatic**: All CRUD operations must call `logAction()` from `audit.service.js`
+**Automatic**: All CRUD operations must call `logAction()` from `audit.service.ts`
 
 **Required Parameters**:
-- `organizationId` - Which org (for filtering/cleanup)
+- `organizationId` - Which org (for filtering/cleanup), nullable for system events
 - `userId` - Who made the change
 - `action` - 'created', 'updated', 'deleted'
-- `entityType` - 'department', 'person', 'member', etc.
+- `entityType` - 'department', 'person', 'member', 'custom_field', etc.
 - `entityId` - ID of affected entity
 - `snapshot` - Full JSON of entity state (for deleted items, preserves data)
 
 ## Development Tips
 
 - **Frontend Port**: 3000 (Vite default), proxied to backend via Vite config
-- **Backend Port**: 3001 (see `server/src/index.js:57`)
+- **Backend Port**: 3001 (see `server/src/index.ts:57`)
 - **Database Inspection**: Use any SQLite browser, or `sqlite3 server/database.db`
 - **Hot Reload**: Both frontend (Vite) and backend (`--watch` flag) support hot reload
 - **Debugging Socket**: Use browser console → Network tab → WS filter
@@ -319,10 +348,11 @@ cd server && npm test -- <test-file-pattern>
 
 ## Testing
 
-- **Frontend**: Vitest + React Testing Library
-- **Backend**: Vitest + Supertest (for API testing)
-- Tests are colocated with source files (e.g., `auth.service.test.js` next to `auth.service.js`)
-- Coverage configured in `vitest.config.js` (root) and `server/vitest.config.js`
+- **Frontend**: Vitest + React Testing Library (124+ tests)
+- **Backend**: Vitest + Supertest (373+ tests)
+- Tests are colocated with source files (e.g., `auth.service.test.ts` next to `auth.service.ts`)
+- Coverage configured in `vitest.config.ts` (root) and `server/vitest.config.ts`
+- E2E tests with Playwright for critical user flows
 
 ## Production Deployment
 
@@ -347,14 +377,17 @@ cd server && npm start
 
 **Persistent Storage**:
 - Attach disk at `/data` for SQLite database
-- Backup strategy: Automatic via cron (see `server/scripts/backup.js`)
+- Backup strategy: Automatic via cron (see `server/scripts/backup.ts`)
 
 ## Key Files to Understand
 
-- `server/src/db.js` - Database schema, migrations, FTS5 setup
-- `server/src/index.js` - Express app setup, middleware order, route mounting
-- `server/src/socket.js` - WebSocket initialization, room management
-- `src/api/client.js` - API client, token refresh, CSRF handling
-- `src/App.jsx` - Route definitions, AuthProvider, SocketProvider
-- `server/src/middleware/auth.js` - JWT verification, role checking
-- `server/src/services/member.service.js` - Organization permission checking
+- `server/src/db.ts` - Database schema, migrations, FTS5 setup
+- `server/src/index.ts` - Express app setup, middleware order, route mounting
+- `server/src/socket.ts` - WebSocket initialization, room management
+- `src/api/client.ts` - API client, token refresh, CSRF handling
+- `src/App.tsx` - Route definitions, AuthProvider, SocketProvider, ThemeProvider
+- `server/src/middleware/auth.ts` - JWT verification, role checking
+- `server/src/services/member.service.ts` - Organization permission checking
+- `server/src/services/custom-fields.service.ts` - Custom field CRUD and validation
+- `server/src/services/passkey.service.ts` - WebAuthn passkey management
+- `server/src/services/totp.service.ts` - Two-factor authentication

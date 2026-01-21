@@ -333,26 +333,37 @@ Pre-commit hooks (via Husky) automatically run linting and formatting, but manua
 
 Potential features to add:
 
-1. **CSV Upload**: Allow users to upload their own files
-2. **Export**: Generate PDF or print-friendly view
-3. **Dark Mode**: Toggle between light/dark themes
-4. **Sorting**: Sort people by name, title, etc.
-5. **Filtering**: Filter by department, title, etc.
-6. **Org Chart View**: Visual tree diagram
-7. **Edit Mode**: Add/edit/delete entries
-8. **Photos**: Support for profile pictures
-9. **Teams**: Group people into project teams
-10. **Analytics**: Department size visualizations
+1. **Profile Photos**: Support for user profile pictures
+2. **Teams/Groups**: Group people into project teams across departments
+3. **Analytics Dashboard**: Department size visualizations and org metrics
+4. **Social Authentication**: Sign in with Google/Apple OAuth
+5. **LDAP/AD Integration**: Import from existing directory services
+6. **SSO Support**: SAML integration for enterprise
+7. **Webhook Support**: External system notifications
+8. **List Virtualization**: `react-window` for ultra-large (>5000) lists
+9. **API Rate Limiting Dashboard**: Visual usage metrics
+10. **Offline Support**: Service workers for PWA capability
+
+**Already Implemented:**
+- ✅ CSV Import/Export (with ZIP bundling)
+- ✅ PDF/PNG Export (via React Flow)
+- ✅ Dark Mode (with system preference detection)
+- ✅ Sorting and Filtering (in all list views)
+- ✅ Org Chart View (React Flow visualization)
+- ✅ Edit Mode (full CRUD operations)
+- ✅ Custom Fields (organization-scoped)
 
 ## Contributing
 
 When adding features:
 
 1. Keep components small and focused
-2. Use TypeScript for type safety (optional migration)
-3. Follow existing code style
-4. Add PropTypes or TypeScript interfaces
-5. Update this documentation
+2. Use TypeScript for all new code (codebase is fully migrated)
+3. Follow existing code style (enforced by ESLint/Prettier)
+4. Add TypeScript interfaces for props and data types
+5. Write tests for new functionality
+6. Run linting before committing (`npm run lint:all`)
+7. Update documentation as needed
 
 ## License
 
