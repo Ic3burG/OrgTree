@@ -3,7 +3,7 @@
 export interface AnalyticsEvent {
   event_name: string;
   category: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
   session_id: string;
   user_id?: string;
   url?: string;
