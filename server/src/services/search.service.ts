@@ -22,6 +22,7 @@ interface SearchResult {
   phone?: string | null;
   department_id?: string;
   department_name?: string;
+  is_starred?: boolean;
   rank?: number;
 }
 
@@ -297,6 +298,7 @@ function searchPeople(
       p.email,
       p.phone,
       p.department_id,
+      p.is_starred,
       d.name as department_name,
       snippet(pf.people_fts, 0, '<mark>', '</mark>', '...', 32) as nameHighlight,
       snippet(pf.people_fts, 1, '<mark>', '</mark>', '...', 32) as titleHighlight,
@@ -321,6 +323,7 @@ function searchPeople(
       p.email,
       p.phone,
       p.department_id,
+      p.is_starred,
       d.name as department_name,
       snippet(cf.custom_fields_fts, 2, '<mark>', '</mark>', '...', 32) as customHighlight,
       bm25(cf.custom_fields_fts) as rank
@@ -343,6 +346,7 @@ function searchPeople(
     email: string | null;
     phone: string | null;
     department_id: string;
+    is_starred: number;
     department_name: string;
     nameHighlight: string | null;
     titleHighlight: string | null;
@@ -357,6 +361,7 @@ function searchPeople(
     email: string | null;
     phone: string | null;
     department_id: string;
+    is_starred: number;
     department_name: string;
     customHighlight: string | null;
     rank: number;
@@ -372,6 +377,7 @@ function searchPeople(
       email: string | null;
       phone: string | null;
       department_id: string;
+      is_starred: number;
       department_name: string;
       nameHighlight: string | null;
       titleHighlight: string | null;
@@ -423,6 +429,7 @@ function searchPeople(
       phone: row.phone,
       department_id: row.department_id,
       department_name: row.department_name,
+      is_starred: Boolean(row.is_starred),
       highlight: escapeHtml(
         row.nameHighlight ||
           row.titleHighlight ||

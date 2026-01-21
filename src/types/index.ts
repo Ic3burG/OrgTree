@@ -247,6 +247,7 @@ export interface SearchResult {
   phone?: string | null;
   department_id?: string;
   department_name?: string;
+  is_starred?: boolean;
   rank?: number;
 }
 

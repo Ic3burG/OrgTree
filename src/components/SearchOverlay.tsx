@@ -288,18 +288,23 @@ export default function SearchOverlay({
               {/* Info */}
               <div className="flex-grow min-w-0">
                 {/* Use highlight if available, otherwise plain name */}
-                {(result as unknown as { highlight?: string }).highlight ? (
-                  <div
-                    className="font-medium text-base lg:text-sm text-slate-900 dark:text-slate-100 truncate [&>mark]:bg-yellow-200 dark:[&>mark]:bg-yellow-900/50 [&>mark]:rounded"
-                    dangerouslySetInnerHTML={{
-                      __html: (result as unknown as { highlight: string }).highlight,
-                    }}
-                  />
-                ) : (
-                  <div className="font-medium text-base lg:text-sm text-slate-900 dark:text-slate-100 truncate">
-                    {result.name}
-                  </div>
-                )}
+                <div className="flex items-center gap-1.5">
+                  {(result as unknown as { highlight?: string }).highlight ? (
+                    <div
+                      className="font-medium text-base lg:text-sm text-slate-900 dark:text-slate-100 truncate [&>mark]:bg-yellow-200 dark:[&>mark]:bg-yellow-900/50 [&>mark]:rounded"
+                      dangerouslySetInnerHTML={{
+                        __html: (result as unknown as { highlight: string }).highlight,
+                      }}
+                    />
+                  ) : (
+                    <div className="font-medium text-base lg:text-sm text-slate-900 dark:text-slate-100 truncate">
+                      {result.name}
+                    </div>
+                  )}
+                  {result.type === 'person' && result.is_starred && (
+                    <Star size={12} className="text-amber-400 flex-shrink-0" fill="currentColor" />
+                  )}
+                </div>
                 <div className="text-sm lg:text-sm text-slate-600 dark:text-slate-400 truncate">
                   {result.type === 'department'
                     ? `${result.people_count || 0} people`
