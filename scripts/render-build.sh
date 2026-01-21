@@ -3,8 +3,8 @@ set -e # Exit on error
 
 echo "=== Starting Render Build Process ==="
 
-echo "Step 1: Installing root dependencies..."
-npm ci
+echo "Step 1: Installing root dependencies (including devDependencies for build)..."
+npm ci --include=dev
 
 echo "Step 2: Building frontend..."
 npm run build

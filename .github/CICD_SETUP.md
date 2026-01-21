@@ -161,13 +161,16 @@ For **main** branch (production):
 | Variable | Value |
 |----------|-------|
 | `NODE_ENV` | `production` |
+| `CI` | `true` (required - skips husky install) |
 | `JWT_SECRET` | `<unique-staging-secret>` (different from production!) |
-| `DATABASE_URL` | `file:/opt/render/project/src/data/staging.db` |
+| `DATABASE_URL` | `file:./database.db` (free tier) or `file:/opt/render/project/src/data/staging.db` (paid with disk) |
 | `FRONTEND_URL` | `https://orgtree-staging.onrender.com` |
 | `RP_ID` | `orgtree-staging.onrender.com` |
 | `ORIGIN` | `https://orgtree-staging.onrender.com` |
 
 6. Copy the Deploy Hook URL and add it as `RENDER_STAGING_DEPLOY_HOOK_URL` secret in GitHub
+
+**Note:** On free tier, use `DATABASE_URL=file:./database.db` since persistent disks aren't available.
 
 ### Cost
 
