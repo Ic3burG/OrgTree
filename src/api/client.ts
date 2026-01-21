@@ -19,6 +19,12 @@ import type {
   CustomFieldDefinition,
   AutocompleteResponse,
 } from '../types/index.js';
+import type {
+  OverviewMetrics,
+  UsageMetrics,
+  PerformanceMetrics,
+  AuditMetrics,
+} from '../types/metrics.js';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -767,6 +773,17 @@ const api = {
       method: 'POST',
       body: JSON.stringify({ fieldIds }),
     }),
+
+  // Metrics (superuser only)
+  getMetricsOverview: (): Promise<OverviewMetrics> =>
+    request<OverviewMetrics>('/admin/metrics/overview'),
+
+  getMetricsUsage: (): Promise<UsageMetrics> => request<UsageMetrics>('/admin/metrics/usage'),
+
+  getMetricsPerformance: (): Promise<PerformanceMetrics> =>
+    request<PerformanceMetrics>('/admin/metrics/performance'),
+
+  getMetricsAudit: (): Promise<AuditMetrics> => request<AuditMetrics>('/admin/metrics/audit'),
 };
 
 export default api;

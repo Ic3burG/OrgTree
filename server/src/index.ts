@@ -25,12 +25,15 @@ import backupRoutes from './routes/backup.js';
 import passkeyRoutes from './routes/passkey.js';
 import totpRoutes from './routes/totp.js';
 import customFieldsRoutes from './routes/custom-fields.js';
+import metricsRoutes from './routes/metrics.js';
 import { validateCsrf } from './middleware/csrf.js';
+import { metricsMiddleware } from './middleware/metrics.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
 import db from './db.js';
-import { initializeSocket } from './socket.js';
+import { initializeSocket, emitToAdminMetrics } from './socket.js';
 import { cleanupExpiredTokens } from './services/auth.service.js';
+import { getRealtimeSnapshot } from './services/metrics.service.js';
 import { setupGlobalErrorHandlers, Sentry } from './sentry.js';
 
 // Only load dotenv in development - Render sets env vars directly in production
@@ -121,6 +124,7 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser()); // Required for CSRF cookie validation
+app.use(metricsMiddleware); // Track API request timing
 
 // Initialize Socket.IO with the HTTP server
 initializeSocket(server, allowedOrigins);
@@ -228,6 +232,7 @@ app.use('/api', auditRoutes);
 app.use('/api', searchRoutes);
 app.use('/api', bulkRoutes);
 app.use('/api', backupRoutes);
+app.use('/api', metricsRoutes);
 
 // Serve index.html for all non-API routes (SPA support) in production
 if (process.env.NODE_ENV === 'production') {
@@ -261,4 +266,13 @@ server.listen(PORT, () => {
   cleanupExpiredTokens();
 
   logger.info('Token cleanup job scheduled', { intervalMs: TOKEN_CLEANUP_INTERVAL });
+
+  // Schedule real-time metrics emission - every 5 seconds
+  const METRICS_EMIT_INTERVAL = 5 * 1000; // 5 seconds
+  setInterval(() => {
+    const snapshot = getRealtimeSnapshot();
+    emitToAdminMetrics('metrics:update', snapshot);
+  }, METRICS_EMIT_INTERVAL);
+
+  logger.info('Metrics emission scheduled', { intervalMs: METRICS_EMIT_INTERVAL });
 });

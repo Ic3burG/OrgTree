@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Users, FileText, LogOut, ArrowLeft, Menu, X, Shield } from 'lucide-react';
+import { Users, FileText, LogOut, ArrowLeft, Menu, X, Shield, BarChart3 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import DarkModeToggle from '../ui/DarkModeToggle';
 
@@ -79,6 +79,21 @@ export default function SuperuserLayout() {
         >
           <FileText size={20} />
           <span className="font-medium">System Audit Logs</span>
+        </NavLink>
+
+        <NavLink
+          to="/admin/metrics"
+          onClick={closeSidebar}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
+              isActive
+                ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
+            }`
+          }
+        >
+          <BarChart3 size={20} />
+          <span className="font-medium">System Metrics</span>
         </NavLink>
       </nav>
 

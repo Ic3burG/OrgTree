@@ -23,6 +23,7 @@ import AuditLog from './components/admin/AuditLog';
 import SuperuserLayout from './components/superuser/SuperuserLayout';
 import UserManagement from './components/superuser/UserManagement';
 import SystemAuditLog from './components/superuser/SystemAuditLog';
+import MetricsDashboard from './components/superuser/MetricsDashboard';
 import AcceptInvitation from './components/AcceptInvitation';
 import { initCsrf } from './api/client';
 import AccountLayout from './components/account/AccountLayout';
@@ -98,6 +99,7 @@ function App() {
                     <Route index element={<Navigate to="/admin/users" replace />} />
                     <Route path="users" element={<UserManagement />} />
                     <Route path="audit" element={<SystemAuditLog />} />
+                    <Route path="metrics" element={<MetricsDashboard />} />
                   </Route>
 
                   {/* Admin routes */}

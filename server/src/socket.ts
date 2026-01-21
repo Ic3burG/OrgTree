@@ -102,6 +102,32 @@ export function initializeSocket(httpServer: HTTPServer, allowedOrigins: string[
       socket.emit('left:org', { orgId });
     });
 
+    // Join admin metrics room (superusers only)
+    socket.on('join:admin:metrics', () => {
+      // Only superusers can join the admin metrics room
+      if (socket.user.role !== 'superuser') {
+        socket.emit('error', { message: 'Access denied to admin metrics' });
+        return;
+      }
+
+      socket.join('admin:metrics');
+      logger.info('User joined admin metrics room', {
+        socketId: socket.id,
+        userId: socket.user.id,
+      });
+      socket.emit('joined:admin:metrics');
+    });
+
+    // Leave admin metrics room
+    socket.on('leave:admin:metrics', () => {
+      socket.leave('admin:metrics');
+      logger.info('User left admin metrics room', {
+        socketId: socket.id,
+        userId: socket.user.id,
+      });
+      socket.emit('left:admin:metrics');
+    });
+
     // Handle disconnection
     socket.on('disconnect', (reason: string) => {
       logger.info('Socket disconnected', {
@@ -142,4 +168,26 @@ export function emitToOrg(orgId: string, eventType: string, payload: unknown): v
   });
 }
 
-export default { initializeSocket, getIO, emitToOrg };
+/**
+ * Emit an event to the admin metrics room (superusers only)
+ */
+export function emitToAdminMetrics(eventType: string, payload: unknown): void {
+  if (!io) {
+    logger.warn('Socket.IO not initialized, skipping emit');
+    return;
+  }
+
+  io.to('admin:metrics').emit(eventType, payload);
+}
+
+/**
+ * Get the count of active Socket.IO connections
+ */
+export function getActiveConnectionCount(): number {
+  if (!io) {
+    return 0;
+  }
+  return io.sockets.sockets.size;
+}
+
+export default { initializeSocket, getIO, emitToOrg, emitToAdminMetrics, getActiveConnectionCount };
