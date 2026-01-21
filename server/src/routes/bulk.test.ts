@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
@@ -19,12 +18,12 @@ describe('Bulk Routes', () => {
   const mockUser = {
     id: 'user-1',
     email: 'test@example.com',
-    role: 'admin'
+    role: 'admin',
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Setup default auth mock
     vi.mocked(authenticateToken).mockImplementation((req, _res, next) => {
       // @ts-expect-error: mocking express request user
@@ -67,9 +66,9 @@ describe('Bulk Routes', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ success: true, moved: 2 });
       expect(bulkService.bulkMovePeople).toHaveBeenCalledWith(
-        mockOrgId, 
-        ['p1', 'p2'], 
-        'dept-2', 
+        mockOrgId,
+        ['p1', 'p2'],
+        'dept-2',
         mockUser
       );
     });
@@ -88,9 +87,9 @@ describe('Bulk Routes', () => {
     it('should call bulkEditPeople service with sanitized updates', async () => {
       vi.mocked(bulkService.bulkEditPeople).mockResolvedValue({ success: true, updated: 2 } as any);
 
-      const updates = { 
-        title: 'New Title', 
-        invalidField: 'Should be ignored' 
+      const updates = {
+        title: 'New Title',
+        invalidField: 'Should be ignored',
       };
 
       const response = await request(app)
@@ -99,7 +98,7 @@ describe('Bulk Routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ success: true, updated: 2 });
-      
+
       expect(bulkService.bulkEditPeople).toHaveBeenCalledWith(
         mockOrgId,
         ['p1', 'p2'],
@@ -111,9 +110,9 @@ describe('Bulk Routes', () => {
     it('should reject if no valid updates provided', async () => {
       const response = await request(app)
         .put(`/api/organizations/${mockOrgId}/people/bulk-edit`)
-        .send({ 
-          personIds: ['p1'], 
-          updates: { invalidField: 'value' } 
+        .send({
+          personIds: ['p1'],
+          updates: { invalidField: 'value' },
         });
 
       expect(response.status).toBe(400);
@@ -123,7 +122,10 @@ describe('Bulk Routes', () => {
 
   describe('POST /api/organizations/:orgId/departments/bulk-delete', () => {
     it('should call bulkDeleteDepartments service', async () => {
-      vi.mocked(bulkService.bulkDeleteDepartments).mockReturnValue({ success: true, count: 1 } as any);
+      vi.mocked(bulkService.bulkDeleteDepartments).mockReturnValue({
+        success: true,
+        count: 1,
+      } as any);
 
       const response = await request(app)
         .post(`/api/organizations/${mockOrgId}/departments/bulk-delete`)
@@ -136,13 +138,16 @@ describe('Bulk Routes', () => {
 
   describe('PUT /api/organizations/:orgId/departments/bulk-edit', () => {
     it('should call bulkEditDepartments service', async () => {
-      vi.mocked(bulkService.bulkEditDepartments).mockReturnValue({ success: true, updated: 1 } as any);
+      vi.mocked(bulkService.bulkEditDepartments).mockReturnValue({
+        success: true,
+        updated: 1,
+      } as any);
 
       const response = await request(app)
         .put(`/api/organizations/${mockOrgId}/departments/bulk-edit`)
-        .send({ 
+        .send({
           departmentIds: ['d1'],
-          updates: { description: 'Updated' } 
+          updates: { description: 'Updated' },
         });
 
       expect(response.status).toBe(200);

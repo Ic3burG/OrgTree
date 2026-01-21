@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
@@ -14,7 +13,7 @@ vi.mock('../services/audit.service.js');
 vi.mock('../db.js', () => ({
   default: {
     prepare: vi.fn(),
-    transaction: vi.fn((fn) => fn), // Simple pass-through for transaction
+    transaction: vi.fn(fn => fn), // Simple pass-through for transaction
   },
 }));
 
@@ -28,12 +27,12 @@ describe('Import Routes', () => {
     id: 'user-1',
     email: 'test@example.com',
     name: 'Test User',
-    role: 'admin'
+    role: 'admin',
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Setup default auth mock
     vi.mocked(authenticateToken).mockImplementation((req, res, next) => {
       // @ts-expect-error: mocking express request user
@@ -88,7 +87,7 @@ describe('Import Routes', () => {
     it('should successfull import departments and people', async () => {
       const importData = [
         { type: 'department', path: '/Engineering', name: 'Engineering' },
-        { type: 'person', path: '/Engineering/John', name: 'John Doe', email: 'john@example.com' }
+        { type: 'person', path: '/Engineering/John', name: 'John Doe', email: 'john@example.com' },
       ];
 
       // Mock DB for custom fields definition (empty for this test)
@@ -96,18 +95,19 @@ describe('Import Routes', () => {
         if (sql.includes('SELECT id, field_key')) {
           return { all: () => [] } as any; // No custom fields
         }
-        
+
         // Mock checks
         if (sql.includes('SELECT id FROM departments')) return { get: () => undefined } as any; // Not found
         if (sql.includes('SELECT p.id')) return { get: () => undefined } as any; // Email check
         if (sql.includes('SELECT id FROM people')) return { get: () => undefined } as any; // Name check
-        
+
         // Mock inserts
         if (sql.includes('INSERT INTO')) return { run: () => ({ changes: 1 }) } as any;
-        
+
         // Transaction control
-        if (sql === 'BEGIN TRANSACTION' || sql === 'COMMIT' || sql === 'ROLLBACK') return { run: () => {} } as any;
-        
+        if (sql === 'BEGIN TRANSACTION' || sql === 'COMMIT' || sql === 'ROLLBACK')
+          return { run: () => {} } as any;
+
         return { run: () => {}, get: () => {}, all: () => [] } as any;
       });
 
@@ -119,14 +119,14 @@ describe('Import Routes', () => {
       expect(response.body).toMatchObject({
         success: true,
         departmentsCreated: 1,
-        peopleCreated: 1
+        peopleCreated: 1,
       });
     });
 
     it('should handle duplicates correctly by reusing/skipping', async () => {
       const importData = [
         { type: 'department', path: '/HR', name: 'HR' }, // Exists
-        { type: 'person', path: '/HR/Jane', name: 'Jane Doe', email: 'jane@example.com' } // Exists
+        { type: 'person', path: '/HR/Jane', name: 'Jane Doe', email: 'jane@example.com' }, // Exists
       ];
 
       vi.mocked(db.prepare).mockImplementation((sql: string) => {
@@ -135,17 +135,18 @@ describe('Import Routes', () => {
 
         // Department exists check
         if (sql.includes('SELECT id FROM departments')) {
-             return { get: () => ({ id: 'existing-dept-id' }) } as any;
+          return { get: () => ({ id: 'existing-dept-id' }) } as any;
         }
 
         // Person email exists check
         if (sql.includes('SELECT p.id')) {
-            return { get: () => ({ id: 'existing-person-id' }) } as any;
+          return { get: () => ({ id: 'existing-person-id' }) } as any;
         }
 
         // Transaction control
-        if (sql === 'BEGIN TRANSACTION' || sql === 'COMMIT' || sql === 'ROLLBACK') return { run: () => {} } as any;
-        
+        if (sql === 'BEGIN TRANSACTION' || sql === 'COMMIT' || sql === 'ROLLBACK')
+          return { run: () => {} } as any;
+
         return { run: () => {}, get: () => {}, all: () => [] } as any;
       });
 
@@ -158,32 +159,34 @@ describe('Import Routes', () => {
         departmentsCreated: 0,
         departmentsReused: 1,
         peopleCreated: 0,
-        peopleSkipped: 1
+        peopleSkipped: 1,
       });
     });
 
     it('should populate custom fields during import', async () => {
       const importData = [
-         { type: 'person', path: '/Engineering/Dev', name: 'Dev', custom_twitter: '@dev' }
+        { type: 'person', path: '/Engineering/Dev', name: 'Dev', custom_twitter: '@dev' },
       ];
 
       // Mock DB preparations
       vi.mocked(db.prepare).mockImplementation((sql: string) => {
         if (sql.includes('SELECT id, field_key')) {
-          return { all: () => [{ id: 'field-1', field_key: 'custom_twitter', entity_type: 'person' }] } as any;
+          return {
+            all: () => [{ id: 'field-1', field_key: 'custom_twitter', entity_type: 'person' }],
+          } as any;
         }
-        
+
         // Simulating finding department and not finding person
-        if (sql.includes('requests')) return { get: () => undefined } as any; 
-        
+        if (sql.includes('requests')) return { get: () => undefined } as any;
+
         // We catch the INSERT INTO custom_field_values to verify it was called
         if (sql.includes('INSERT INTO custom_field_values')) {
-            return { run: vi.fn() } as any;
+          return { run: vi.fn() } as any;
         }
 
         return { run: () => {}, get: () => {}, all: () => [] } as any;
       });
-      
+
       const response = await request(app)
         .post(`/api/organizations/${mockOrgId}/import`)
         .send({ data: importData });
@@ -199,16 +202,18 @@ describe('Import Routes', () => {
       vi.mocked(db.prepare).mockImplementation((sql: string) => {
         if (sql.includes('BEGIN TRANSACTION')) return { run: () => {} } as any;
         if (sql.includes('ROLLBACK')) return { run: rollbackMock } as any;
-        
+
         // Trigger error specifically when inserting departments to simulate a mid-transaction failure
         if (sql.includes('INSERT INTO departments')) {
-          return { 
-            run: () => { throw new Error('Database Error'); } 
+          return {
+            run: () => {
+              throw new Error('Database Error');
+            },
           } as any;
         }
-        
+
         if (sql.includes('SELECT id, field_key')) return { all: () => [] } as any;
-         
+
         return { run: () => {}, get: () => {}, all: () => [] } as any;
       });
 

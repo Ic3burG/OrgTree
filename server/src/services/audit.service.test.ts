@@ -46,10 +46,8 @@ describe('Audit Service', () => {
       );
 
       expect(result).toHaveProperty('id');
-      expect(db.prepare).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO audit_logs')
-      );
-      
+      expect(db.prepare).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO audit_logs'));
+
       const mockRun = vi.mocked(db.prepare('sql').run);
       // Verify args passed to run (id, orgId, actorId, actorName, actionType, entityType, entityId, entityDataJson)
       // Since we don't capture the exact statement object for the specific call easily without more complex mocking,
@@ -64,7 +62,7 @@ describe('Audit Service', () => {
       });
 
       const result = auditService.createAuditLog('org-1', null, 'created', 'person', null, null);
-      
+
       expect(result).toBeNull();
       // Should log error but not throw
     });
@@ -107,7 +105,7 @@ describe('Audit Service', () => {
 
       // Check that SQL contains filter conditions
       // This implicitly tests logic by checking if params would be constructed (which depends on conditions)
-      // but verifying exact SQL string is fragile. 
+      // but verifying exact SQL string is fragile.
       // Instead, we can verify that db.prepare was called and we can infer conditions.
       const call = vi.mocked(db.prepare).mock.calls[0][0] as string;
       expect(call).toContain('action_type = ?');
@@ -130,7 +128,7 @@ describe('Audit Service', () => {
       } as any);
 
       const result = auditService.getAuditLogs('org-1', { limit: 50 });
-      
+
       expect(result.logs).toHaveLength(50);
       expect(result.hasMore).toBe(true);
     });
@@ -145,7 +143,7 @@ describe('Audit Service', () => {
           organizationName: 'Org 1',
           actionType: 'created',
           createdAt: mockNow.toISOString(),
-        }
+        },
       ];
 
       vi.mocked(db.prepare).mockReturnValue({
@@ -156,7 +154,7 @@ describe('Audit Service', () => {
 
       expect(result.logs).toHaveLength(1);
       expect(result.logs[0].organizationName).toBe('Org 1');
-      
+
       const call = vi.mocked(db.prepare).mock.calls[0][0] as string;
       expect(call).toContain('LEFT JOIN organizations o');
     });
@@ -172,9 +170,7 @@ describe('Audit Service', () => {
       const count = auditService.cleanupOldLogs();
 
       expect(count).toBe(100);
-      expect(db.prepare).toHaveBeenCalledWith(
-        expect.stringContaining("date('now', '-1 year')")
-      );
+      expect(db.prepare).toHaveBeenCalledWith(expect.stringContaining("date('now', '-1 year')"));
     });
 
     it('should handle database errors', () => {

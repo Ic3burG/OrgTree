@@ -52,7 +52,7 @@ describe('Socket Events Service', () => {
     it('should emit department updated event', () => {
       const dept = { id: 'd1', name: 'Dept 1 Updated' };
       socketEvents.emitDepartmentUpdated(mockOrgId, dept, mockActor);
-      
+
       expect(emitToOrg).toHaveBeenCalledWith(
         mockOrgId,
         'department:updated',
@@ -63,7 +63,7 @@ describe('Socket Events Service', () => {
     it('should emit department deleted event', () => {
       const dept = { id: 'd1' };
       socketEvents.emitDepartmentDeleted(mockOrgId, dept, mockActor);
-      
+
       expect(emitToOrg).toHaveBeenCalledWith(
         mockOrgId,
         'department:deleted',
@@ -76,7 +76,7 @@ describe('Socket Events Service', () => {
     it('should emit person created event', () => {
       const person = { id: 'p1', name: 'Person 1' };
       socketEvents.emitPersonCreated(mockOrgId, person, mockActor);
-      
+
       expect(emitToOrg).toHaveBeenCalledWith(
         mockOrgId,
         'person:created',
@@ -87,7 +87,7 @@ describe('Socket Events Service', () => {
     it('should emit person updated event', () => {
       const person = { id: 'p1', name: 'Person 1' };
       socketEvents.emitPersonUpdated(mockOrgId, person, mockActor);
-      
+
       expect(emitToOrg).toHaveBeenCalledWith(
         mockOrgId,
         'person:updated',
@@ -98,7 +98,7 @@ describe('Socket Events Service', () => {
     it('should emit person deleted event', () => {
       const person = { id: 'p1' };
       socketEvents.emitPersonDeleted(mockOrgId, person, mockActor);
-      
+
       expect(emitToOrg).toHaveBeenCalledWith(
         mockOrgId,
         'person:deleted',
@@ -111,7 +111,7 @@ describe('Socket Events Service', () => {
     it('should emit member added event', () => {
       const member = { id: 'm1', userId: 'u2' };
       socketEvents.emitMemberAdded(mockOrgId, member, mockActor);
-      
+
       expect(emitToOrg).toHaveBeenCalledWith(
         mockOrgId,
         'member:added',
@@ -122,7 +122,7 @@ describe('Socket Events Service', () => {
     it('should emit member updated event', () => {
       const member = { id: 'm1', role: 'admin' };
       socketEvents.emitMemberUpdated(mockOrgId, member, mockActor);
-      
+
       expect(emitToOrg).toHaveBeenCalledWith(
         mockOrgId,
         'member:updated',
@@ -133,7 +133,7 @@ describe('Socket Events Service', () => {
     it('should emit member removed event', () => {
       const member = { id: 'm1' };
       socketEvents.emitMemberRemoved(mockOrgId, member, mockActor);
-      
+
       expect(emitToOrg).toHaveBeenCalledWith(
         mockOrgId,
         'member:removed',
@@ -146,7 +146,7 @@ describe('Socket Events Service', () => {
     it('should emit org updated event', () => {
       const org = { id: 'o1', name: 'New Name' };
       socketEvents.emitOrgUpdated(mockOrgId, org, mockActor);
-      
+
       expect(emitToOrg).toHaveBeenCalledWith(
         mockOrgId,
         'org:updated',
@@ -157,7 +157,7 @@ describe('Socket Events Service', () => {
     it('should emit org settings event', () => {
       const settings = { theme: 'dark' };
       socketEvents.emitOrgSettings(mockOrgId, settings, mockActor);
-      
+
       expect(emitToOrg).toHaveBeenCalledWith(
         mockOrgId,
         'org:settings',
@@ -209,18 +209,18 @@ describe('Socket Events Service', () => {
   });
 
   it('should handle missing actor', () => {
-      const dept = { id: 'd1' };
-      socketEvents.emitDepartmentCreated(mockOrgId, dept, null as any);
+    const dept = { id: 'd1' };
+    socketEvents.emitDepartmentCreated(mockOrgId, dept, null as any);
 
-      expect(emitToOrg).toHaveBeenCalledWith(
-        mockOrgId,
-        'department:created',
-        expect.objectContaining({
-          meta: expect.objectContaining({
-            actorId: null,
-            actorName: 'System',
-          }),
-        })
-      );
+    expect(emitToOrg).toHaveBeenCalledWith(
+      mockOrgId,
+      'department:created',
+      expect.objectContaining({
+        meta: expect.objectContaining({
+          actorId: null,
+          actorName: 'System',
+        }),
+      })
+    );
   });
 });
