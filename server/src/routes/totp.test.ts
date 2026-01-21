@@ -53,7 +53,7 @@ describe('TOTP Routes', () => {
   describe('POST /api/auth/2fa/verify-login', () => {
     it('should verify login and return tokens', async () => {
       vi.mocked(totpService.verifyTotp).mockReturnValue(true);
-      
+
       // Mock db user lookup
       vi.mocked(db.prepare).mockReturnValue({
         get: vi.fn().mockReturnValue(mockUser),
@@ -94,7 +94,7 @@ describe('TOTP Routes', () => {
   describe('POST /api/auth/2fa/setup', () => {
     it('should initiate setup', async () => {
       const mockSetup = { secret: 'secret', qrCode: 'data:image...', backupCodes: ['code1'] };
-      
+
       // Mock db user lookup
       vi.mocked(db.prepare).mockReturnValue({
         get: vi.fn().mockReturnValue({ email: mockUser.email }),
@@ -102,9 +102,7 @@ describe('TOTP Routes', () => {
 
       vi.mocked(totpService.setupTotp).mockResolvedValue(mockSetup);
 
-      const response = await request(app)
-        .post('/api/auth/2fa/setup')
-        .expect(200);
+      const response = await request(app).post('/api/auth/2fa/setup').expect(200);
 
       expect(response.body).toEqual(mockSetup);
       expect(totpService.setupTotp).toHaveBeenCalledWith(mockUser.id, mockUser.email);
@@ -117,9 +115,7 @@ describe('TOTP Routes', () => {
         get: vi.fn().mockReturnValue({ totp_enabled: 1 }),
       } as any);
 
-      const response = await request(app)
-        .get('/api/auth/2fa/status')
-        .expect(200);
+      const response = await request(app).get('/api/auth/2fa/status').expect(200);
 
       expect(response.body).toEqual({ enabled: true });
     });
@@ -129,9 +125,7 @@ describe('TOTP Routes', () => {
         get: vi.fn().mockReturnValue({ totp_enabled: 0 }),
       } as any);
 
-      const response = await request(app)
-        .get('/api/auth/2fa/status')
-        .expect(200);
+      const response = await request(app).get('/api/auth/2fa/status').expect(200);
 
       expect(response.body).toEqual({ enabled: false });
     });
@@ -153,10 +147,7 @@ describe('TOTP Routes', () => {
     it('should reject invalid verification token', async () => {
       vi.mocked(totpService.verifyAndEnableTotp).mockReturnValue(false);
 
-      await request(app)
-        .post('/api/auth/2fa/verify')
-        .send({ token: 'wrong' })
-        .expect(400);
+      await request(app).post('/api/auth/2fa/verify').send({ token: 'wrong' }).expect(400);
     });
   });
 
@@ -167,12 +158,12 @@ describe('TOTP Routes', () => {
         run: mockRun,
       } as any);
 
-      await request(app)
-        .post('/api/auth/2fa/disable')
-        .expect(200);
+      await request(app).post('/api/auth/2fa/disable').expect(200);
 
       expect(mockRun).toHaveBeenCalledWith(mockUser.id);
-      expect(db.prepare).toHaveBeenCalledWith(expect.stringContaining('UPDATE users SET totp_enabled = 0'));
+      expect(db.prepare).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE users SET totp_enabled = 0')
+      );
     });
   });
 });

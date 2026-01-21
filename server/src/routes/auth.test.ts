@@ -569,10 +569,10 @@ describe('Auth Routes', () => {
         password_hash: 'hashed_old_password',
         must_change_password: 0,
       };
-      
+
       const getMock = vi.fn().mockReturnValue(mockUser);
       const runMock = vi.fn().mockReturnValue({ changes: 1 });
-      
+
       // We need to implement complex mocking for the chained db.prepare().get() / .run()
       vi.mocked(db.prepare).mockImplementation((sql: string) => {
         if (sql.includes('SELECT * FROM users')) {
@@ -674,7 +674,7 @@ describe('Auth Routes', () => {
         message: 'Password must be at least 12 characters',
       });
     });
-    
+
     it('should reject same password', async () => {
       const mockUser = {
         id: '1',
