@@ -25,6 +25,7 @@ import { getDepthColors } from '../utils/colors';
 import { exportToPng, exportToPdf } from '../utils/exportUtils';
 import { useToast } from './ui/Toast';
 import { useRealtimeUpdates } from '../hooks/useRealtimeUpdates';
+import { useAnalytics } from '../contexts/AnalyticsContext';
 
 import api from '../api/client';
 import { Department, Person, Organization, CustomFieldDefinition } from '../types/index';
@@ -162,6 +163,7 @@ export default function OrgMap(): React.JSX.Element {
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
   const toast = useToast();
   const { isDarkMode } = useTheme();
+  const { track } = useAnalytics();
 
   const [searchParams] = useSearchParams();
 
@@ -472,10 +474,14 @@ export default function OrgMap(): React.JSX.Element {
   }, [layoutDirection, edges, setNodes]);
 
   // Handle theme change
-  const handleThemeChange = useCallback((themeName: string): void => {
-    setCurrentTheme(themeName);
-    localStorage.setItem('orgTreeTheme', themeName);
-  }, []);
+  const handleThemeChange = useCallback(
+    (themeName: string): void => {
+      setCurrentTheme(themeName);
+      localStorage.setItem('orgTreeTheme', themeName);
+      track('theme_changed', { theme: themeName });
+    },
+    [track]
+  );
 
   // Handle export to PNG
   const handleExportPng = useCallback(async () => {
@@ -486,13 +492,14 @@ export default function OrgMap(): React.JSX.Element {
       const filename = `${orgName.toLowerCase().replace(/\s+/g, '-')}-org-chart.png`;
       await exportToPng(reactFlowWrapper.current, filename);
       toast.success('Chart exported as PNG successfully!');
+      track('export_chart', { format: 'png', org_name: orgName });
     } catch (err) {
       console.error('PNG export failed:', err);
       toast.error('Failed to export as PNG. Please try again.');
     } finally {
       setExporting(false);
     }
-  }, [orgName, toast]);
+  }, [orgName, toast, track]);
 
   // Handle export to PDF
   const handleExportPdf = useCallback(async () => {
@@ -503,13 +510,14 @@ export default function OrgMap(): React.JSX.Element {
       const filename = `${orgName.toLowerCase().replace(/\s+/g, '-')}-org-chart.pdf`;
       await exportToPdf(reactFlowWrapper.current, filename, orgName);
       toast.success('Chart exported as PDF successfully!');
+      track('export_chart', { format: 'pdf', org_name: orgName });
     } catch (err) {
       console.error('PDF export failed:', err);
       toast.error('Failed to export as PDF. Please try again.');
     } finally {
       setExporting(false);
     }
-  }, [orgName, toast]);
+  }, [orgName, toast, track]);
 
   // Handle search result selection
   const handleSearchSelect = useCallback(

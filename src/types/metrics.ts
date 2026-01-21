@@ -16,6 +16,7 @@ export interface OverviewMetrics {
   newOrgsToday: number;
   activeUsers24h: number;
   activeConnections: number;
+  totalEvents?: number;
 }
 
 // ============================================================================

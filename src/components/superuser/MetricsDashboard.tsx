@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Users, Building2, FolderTree, UserCircle, RefreshCw } from 'lucide-react';
+import { Users, Building2, FolderTree, UserCircle, RefreshCw, Activity } from 'lucide-react';
 import api from '../../api/client';
 import { useSocket } from '../../contexts/SocketContext';
 import type {
@@ -167,7 +167,7 @@ export default function MetricsDashboard() {
 
       {/* Overview Stats */}
       {overview && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <StatCard
             title="Total Users"
             value={overview.totalUsers}
@@ -197,6 +197,12 @@ export default function MetricsDashboard() {
             subtitle={`${overview.activeUsers24h} unique users`}
             icon={UserCircle}
             isLive={!!realtimeData}
+          />
+          <StatCard
+            title="Analytics Events"
+            value={overview.totalEvents || 0}
+            icon={Activity}
+            subtitle="Total interactions"
           />
         </div>
       )}

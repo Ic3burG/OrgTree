@@ -9,13 +9,11 @@
 
 export interface OverviewMetrics {
   totalUsers: number;
-  totalOrganizations: number;
+  activeUsers: number;
+  totalOrgs: number;
   totalDepartments: number;
   totalPeople: number;
-  newUsersToday: number;
-  newOrgsToday: number;
-  activeUsers24h: number;
-  activeConnections: number;
+  totalEvents?: number; // From analytics
 }
 
 // ============================================================================
