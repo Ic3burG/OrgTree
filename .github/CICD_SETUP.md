@@ -174,6 +174,15 @@ For **main** branch (production):
 - **Free tier:** $0/month (spins down after 15min inactivity)
 - **Starter tier:** $7/month (always-on, faster cold starts)
 
+### Free Tier Limitations
+
+On free tier, persistent disks are not available. This means:
+- Database resets on each deploy/restart
+- Data is ephemeral (acceptable for staging/testing)
+- If you need persistent data, upgrade to a paid tier
+
+For staging, ephemeral data is usually fine - you can seed test data on startup if needed.
+
 ## Workflow Status Badges
 
 Add these badges to your README.md:
