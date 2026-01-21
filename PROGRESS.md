@@ -231,7 +231,29 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Today's Progress (January 21, 2026 - Session 59)**:
+- **Today's Progress (January 21, 2026 - Session 60)**:
+  - 🧪 **TEST COVERAGE EXPANSION (PHASE 5 & 6)**
+    - **Frontend Refactoring & Testing**:
+      - Created `useDepartments` and `usePeople` custom hooks to decouple logic from UI.
+      - Refactored `DepartmentManager` and `PersonManager` to use these hooks.
+      - Added comprehensive unit tests for both hooks and integration tests for the manager components.
+      - **Result**: Frontend test count increased to 124 tests.
+    - **Backend Integration Tests**:
+      - Created integration tests for `backup`, `custom-fields`, `departments`, `organizations`, `people`, and `search` routes.
+      - Mocked `audit.service` in backup tests to resolve foreign key constraint failures.
+      - **Result**: Backend test count increased to ~373+ tests.
+    - **Quality Assurance**:
+      - Resolved `no-explicit-any` lint errors in hooks by refining types (used `Partial<T>`).
+      - Fixed `totp.service.test.ts` module resolution error.
+      - Applied Prettier formatting to 9 backend files to fix style warnings.
+  - 📁 **FILES MODIFIED**: ~15+ files (hooks, components, test files)
+  - ✅ **COMMITS PUSHED**: Multiple commits covering refactoring, tests, and lint fixes.
+  - 📊 **METIRCS**:
+    - Backend Tests: 373+ ✅
+    - Frontend Tests: 124 ✅
+    - Total Tests: ~500+ ✅
+
+- **Previous Progress (January 21, 2026 - Session 59)**:
   - ✨ **FEATURE**: Staging Environment Implementation
     - **Branch Strategy**: Created `develop` branch for staging deployments, `main` remains for production
     - **CI/CD Fix**: Rewrote CD workflow to use `workflow_run` trigger instead of direct push trigger. Fixed critical bug where `needs: []` (empty) allowed deployments even when CI failed.
@@ -2978,7 +3000,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>
-**Last Updated**: January 19, 2026 (Session 58 - Collapsible Admin Sidebar)
+**Last Updated**: January 21, 2026 (Session 60 - Test Coverage Expansion)
 
 **Today's Major Milestone**: 🎉
 
