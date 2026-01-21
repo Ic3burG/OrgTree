@@ -61,22 +61,31 @@ describe('Passkey Service', () => {
     vi.clearAllMocks();
     (db as DatabaseType).prepare('DELETE FROM passkeys').run();
     (db as DatabaseType).prepare('DELETE FROM users').run();
-    (db as DatabaseType).prepare('INSERT INTO users (id, email) VALUES (?, ?)').run(userId, userEmail);
-    
+    (db as DatabaseType)
+      .prepare('INSERT INTO users (id, email) VALUES (?, ?)')
+      .run(userId, userEmail);
+
     // Reset SimpleWebAuthn mocks defaults
-    vi.mocked(generateRegistrationOptions).mockResolvedValue({ challenge: 'mock-challenge' } as any);
-    vi.mocked(verifyRegistrationResponse).mockResolvedValue({ 
-      verified: true, 
-      registrationInfo: { 
-        credential: {
-          id: 'cred-id', 
-          publicKey: Buffer.from('pk'), 
-          counter: 0 
-        }
-      } 
+    vi.mocked(generateRegistrationOptions).mockResolvedValue({
+      challenge: 'mock-challenge',
     } as any);
-    vi.mocked(generateAuthenticationOptions).mockResolvedValue({ challenge: 'mock-challenge' } as any);
-    vi.mocked(verifyAuthenticationResponse).mockResolvedValue({ verified: true, authenticationInfo: { newCounter: 1 } } as any);
+    vi.mocked(verifyRegistrationResponse).mockResolvedValue({
+      verified: true,
+      registrationInfo: {
+        credential: {
+          id: 'cred-id',
+          publicKey: Buffer.from('pk'),
+          counter: 0,
+        },
+      },
+    } as any);
+    vi.mocked(generateAuthenticationOptions).mockResolvedValue({
+      challenge: 'mock-challenge',
+    } as any);
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue({
+      verified: true,
+      authenticationInfo: { newCounter: 1 },
+    } as any);
   });
 
   describe('generatePasskeyRegistrationOptions', () => {
@@ -84,11 +93,13 @@ describe('Passkey Service', () => {
       const options = await generatePasskeyRegistrationOptions(userId, userEmail);
 
       expect(options).toEqual({ challenge: 'mock-challenge' });
-      expect(generateRegistrationOptions).toHaveBeenCalledWith(expect.objectContaining({
-        rpName: 'OrgTree',
-        userID: Buffer.from(userId), // Expect actual Buffer instance
-        userName: userEmail,
-      }));
+      expect(generateRegistrationOptions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          rpName: 'OrgTree',
+          userID: Buffer.from(userId), // Expect actual Buffer instance
+          userName: userEmail,
+        })
+      );
 
       // Challenge is returned to be stored by controller, not stored by service
       // const user = (db as DatabaseType).prepare('SELECT current_challenge FROM users WHERE id = ?').get(userId) as any;
@@ -97,16 +108,24 @@ describe('Passkey Service', () => {
 
     it('should exclude existing credentials', async () => {
       // Insert existing passkey
-      (db as DatabaseType).prepare(`
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO passkeys (id, user_id, credential_id, public_key)
         VALUES (?, ?, ?, ?)
-      `).run('pk-1', userId, 'existing-cred-id', Buffer.from('pk'));
+      `
+        )
+        .run('pk-1', userId, 'existing-cred-id', Buffer.from('pk'));
 
       await generatePasskeyRegistrationOptions(userId, userEmail);
 
-      expect(generateRegistrationOptions).toHaveBeenCalledWith(expect.objectContaining({
-        excludeCredentials: expect.arrayContaining([expect.objectContaining({ id: 'existing-cred-id' })]),
-      }));
+      expect(generateRegistrationOptions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          excludeCredentials: expect.arrayContaining([
+            expect.objectContaining({ id: 'existing-cred-id' }),
+          ]),
+        })
+      );
     });
   });
 
@@ -118,13 +137,17 @@ describe('Passkey Service', () => {
       const result = await verifyPasskeyRegistration(userId, mockResponse, expectedChallenge);
 
       expect(result.verified).toBe(true);
-      expect(verifyRegistrationResponse).toHaveBeenCalledWith(expect.objectContaining({
-        response: mockResponse,
-        expectedChallenge,
-      }));
+      expect(verifyRegistrationResponse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          response: mockResponse,
+          expectedChallenge,
+        })
+      );
 
       // Check DB
-      const passkeys = (db as DatabaseType).prepare('SELECT * FROM passkeys WHERE user_id = ?').all(userId);
+      const passkeys = (db as DatabaseType)
+        .prepare('SELECT * FROM passkeys WHERE user_id = ?')
+        .all(userId);
       expect(passkeys).toHaveLength(1);
       expect(passkeys[0].credential_id).toBe('cred-id');
     });
@@ -142,85 +165,112 @@ describe('Passkey Service', () => {
 
   describe('generatePasskeyLoginOptions', () => {
     it('should generate login options allowing existing credentials', async () => {
-       // Insert existing passkey
-       (db as DatabaseType).prepare(`
+      // Insert existing passkey
+      (db as DatabaseType)
+        .prepare(
+          `
         INSERT INTO passkeys (id, user_id, credential_id, public_key)
         VALUES (?, ?, ?, ?)
-      `).run('pk-1', userId, 'existing-cred-id', Buffer.from('pk'));
+      `
+        )
+        .run('pk-1', userId, 'existing-cred-id', Buffer.from('pk'));
 
       const options = await generatePasskeyLoginOptions(userId);
 
       expect(options).toEqual({ challenge: 'mock-challenge' });
-      expect(generateAuthenticationOptions).toHaveBeenCalledWith(expect.objectContaining({
-        allowCredentials: expect.arrayContaining([expect.objectContaining({ id: 'existing-cred-id' })]),
-      }));
+      expect(generateAuthenticationOptions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          allowCredentials: expect.arrayContaining([
+            expect.objectContaining({ id: 'existing-cred-id' }),
+          ]),
+        })
+      );
     });
 
     it('should work without userId (empty allowCredentials)', async () => {
-        const options = await generatePasskeyLoginOptions(); // No userId
-        
-        // When no userId, allowCredentials might be undefined
-        expect(generateAuthenticationOptions).toHaveBeenCalled();
-        const callArgs = vi.mocked(generateAuthenticationOptions).mock.calls[0][0];
-        expect(callArgs?.allowCredentials).toBeUndefined();
+      const options = await generatePasskeyLoginOptions(); // No userId
+
+      // When no userId, allowCredentials might be undefined
+      expect(generateAuthenticationOptions).toHaveBeenCalled();
+      const callArgs = vi.mocked(generateAuthenticationOptions).mock.calls[0][0];
+      expect(callArgs?.allowCredentials).toBeUndefined();
     });
   });
 
   describe('verifyPasskeyLogin', () => {
     it('should verify login and update counter', async () => {
-        // Setup existing passkey
-        (db as DatabaseType).prepare(`
+      // Setup existing passkey
+      (db as DatabaseType)
+        .prepare(
+          `
             INSERT INTO passkeys (id, user_id, credential_id, public_key, counter)
             VALUES (?, ?, ?, ?, ?)
-        `).run('pk-1', userId, 'cred-id', Buffer.from('pk'), 0);
+        `
+        )
+        .run('pk-1', userId, 'cred-id', Buffer.from('pk'), 0);
 
-        const mockResponse = { id: 'cred-id', response: {} } as any;
-        
-        const result = await verifyPasskeyLogin(userId, mockResponse, 'challenge');
+      const mockResponse = { id: 'cred-id', response: {} } as any;
 
-        expect(result.verified).toBe(true);
-        expect(verifyAuthenticationResponse).toHaveBeenCalled();
+      const result = await verifyPasskeyLogin(userId, mockResponse, 'challenge');
 
-        // Check counter updated
-        const passkey = (db as DatabaseType).prepare('SELECT counter FROM passkeys WHERE id = ?').get('pk-1') as any;
-        expect(passkey.counter).toBe(1);
+      expect(result.verified).toBe(true);
+      expect(verifyAuthenticationResponse).toHaveBeenCalled();
+
+      // Check counter updated
+      const passkey = (db as DatabaseType)
+        .prepare('SELECT counter FROM passkeys WHERE id = ?')
+        .get('pk-1') as any;
+      expect(passkey.counter).toBe(1);
     });
 
     it('should throw if passkey not found', async () => {
-        const mockResponse = { id: 'unknown-cred-id', response: {} } as any;
-        
-        await expect(verifyPasskeyLogin(userId, mockResponse, 'challenge'))
-            .rejects.toThrow('Passkey not found');
+      const mockResponse = { id: 'unknown-cred-id', response: {} } as any;
+
+      await expect(verifyPasskeyLogin(userId, mockResponse, 'challenge')).rejects.toThrow(
+        'Passkey not found'
+      );
     });
   });
 
   describe('CRUD', () => {
-      it('should list user passkeys', async () => {
-           (db as DatabaseType).prepare(`
+    it('should list user passkeys', async () => {
+      (db as DatabaseType)
+        .prepare(
+          `
             INSERT INTO passkeys (id, user_id, credential_id, public_key)
             VALUES (?, ?, ?, ?)
-           `).run('pk-1', userId, 'cred-1', Buffer.from('pk'));
-           
-           (db as DatabaseType).prepare(`
+           `
+        )
+        .run('pk-1', userId, 'cred-1', Buffer.from('pk'));
+
+      (db as DatabaseType)
+        .prepare(
+          `
             INSERT INTO passkeys (id, user_id, credential_id, public_key)
             VALUES (?, ?, ?, ?)
-           `).run('pk-2', 'other-user', 'cred-2', Buffer.from('pk'));
+           `
+        )
+        .run('pk-2', 'other-user', 'cred-2', Buffer.from('pk'));
 
-           const result = await getUserPasskeys(userId);
-           expect(result).toHaveLength(1);
-           expect(result[0].id).toBe('pk-1');
-      });
+      const result = await getUserPasskeys(userId);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('pk-1');
+    });
 
-      it('should delete passkey', async () => {
-          (db as DatabaseType).prepare(`
+    it('should delete passkey', async () => {
+      (db as DatabaseType)
+        .prepare(
+          `
             INSERT INTO passkeys (id, user_id, credential_id, public_key)
             VALUES (?, ?, ?, ?)
-           `).run('pk-1', userId, 'cred-1', Buffer.from('pk'));
+           `
+        )
+        .run('pk-1', userId, 'cred-1', Buffer.from('pk'));
 
-           await deletePasskey('pk-1', userId);
+      await deletePasskey('pk-1', userId);
 
-           const result = await getUserPasskeys(userId);
-           expect(result).toHaveLength(0);
-      });
+      const result = await getUserPasskeys(userId);
+      expect(result).toHaveLength(0);
+    });
   });
 });

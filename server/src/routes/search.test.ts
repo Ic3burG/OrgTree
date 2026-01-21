@@ -19,7 +19,7 @@ vi.mock('../middleware/auth.js', () => ({
 
 // Mock Database (referenced in app initialization even if not used directly here)
 vi.mock('../db.js', async () => {
-    return { default: { prepare: vi.fn(() => ({ run: vi.fn(), get: vi.fn(), all: vi.fn() })) } };
+  return { default: { prepare: vi.fn(() => ({ run: vi.fn(), get: vi.fn(), all: vi.fn() })) } };
 });
 
 import { search, getAutocompleteSuggestions } from '../services/search.service.js';
@@ -44,25 +44,27 @@ describe('Search Routes', () => {
       };
       vi.mocked(search).mockReturnValue(mockResults as any);
 
-      const res = await request(app)
-        .get('/api/organizations/org-1/search?q=test')
-        .expect(200);
+      const res = await request(app).get('/api/organizations/org-1/search?q=test').expect(200);
 
       expect(res.body).toEqual(mockResults);
-      expect(search).toHaveBeenCalledWith('org-1', 'user-123', expect.objectContaining({
-        query: 'test',
-        type: 'all',
-        limit: 20,
-        offset: 0,
-      }));
+      expect(search).toHaveBeenCalledWith(
+        'org-1',
+        'user-123',
+        expect.objectContaining({
+          query: 'test',
+          type: 'all',
+          limit: 20,
+          offset: 0,
+        })
+      );
     });
 
     it('should validate required params', async () => {
       await request(app)
         .get('/api/organizations/org-1/search') // Missing q
         .expect(400)
-        .expect((res) => {
-             expect(res.body.message).toContain('required');
+        .expect(res => {
+          expect(res.body.message).toContain('required');
         });
     });
 
@@ -70,8 +72,8 @@ describe('Search Routes', () => {
       await request(app)
         .get('/api/organizations/org-1/search?q=test&type=invalid')
         .expect(400)
-        .expect((res) => {
-             expect(res.body.message).toContain('Invalid type');
+        .expect(res => {
+          expect(res.body.message).toContain('Invalid type');
         });
     });
 
@@ -82,34 +84,38 @@ describe('Search Routes', () => {
         .get('/api/organizations/org-1/search?q=test&limit=50&offset=10')
         .expect(200);
 
-      expect(search).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.objectContaining({
-        limit: 50,
-        offset: 10,
-      }));
+      expect(search).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          limit: 50,
+          offset: 10,
+        })
+      );
     });
 
     it('should handle starred filter', async () => {
-        vi.mocked(search).mockReturnValue({ results: [] } as any);
-  
-        await request(app)
-          .get('/api/organizations/org-1/search?q=test&starred=true')
-          .expect(200);
-  
-        expect(search).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.objectContaining({
+      vi.mocked(search).mockReturnValue({ results: [] } as any);
+
+      await request(app).get('/api/organizations/org-1/search?q=test&starred=true').expect(200);
+
+      expect(search).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
           starredOnly: true,
-        }));
-      });
+        })
+      );
+    });
 
     it('should handle service errors', async () => {
-        vi.mocked(search).mockImplementation(() => {
-            const err: any = new Error('Forbidden');
-            err.status = 403;
-            throw err;
-        });
+      vi.mocked(search).mockImplementation(() => {
+        const err: any = new Error('Forbidden');
+        err.status = 403;
+        throw err;
+      });
 
-        await request(app)
-            .get('/api/organizations/org-1/search?q=secret')
-            .expect(403);
+      await request(app).get('/api/organizations/org-1/search?q=secret').expect(403);
     });
   });
 
@@ -127,22 +133,27 @@ describe('Search Routes', () => {
     });
 
     it('should return empty list if q is empty', async () => {
-        const res = await request(app)
-            .get('/api/organizations/org-1/search/autocomplete?q=')
-            .expect(200);
-        
-        expect(res.body.suggestions).toEqual([]);
-        expect(getAutocompleteSuggestions).not.toHaveBeenCalled();
+      const res = await request(app)
+        .get('/api/organizations/org-1/search/autocomplete?q=')
+        .expect(200);
+
+      expect(res.body.suggestions).toEqual([]);
+      expect(getAutocompleteSuggestions).not.toHaveBeenCalled();
     });
 
     it('should respect limit param', async () => {
-        vi.mocked(getAutocompleteSuggestions).mockReturnValue({ suggestions: [] } as any);
+      vi.mocked(getAutocompleteSuggestions).mockReturnValue({ suggestions: [] } as any);
 
-        await request(app)
-            .get('/api/organizations/org-1/search/autocomplete?q=abc&limit=8')
-            .expect(200);
-        
-        expect(getAutocompleteSuggestions).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.anything(), 8);
+      await request(app)
+        .get('/api/organizations/org-1/search/autocomplete?q=abc&limit=8')
+        .expect(200);
+
+      expect(getAutocompleteSuggestions).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        8
+      );
     });
   });
 });

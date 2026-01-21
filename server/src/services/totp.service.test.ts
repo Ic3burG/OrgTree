@@ -26,12 +26,7 @@ vi.mock('../db.js', async () => {
 
 // Import after mocking
 import db from '../db.js';
-import {
-  setupTotp,
-  verifyAndEnableTotp,
-  verifyTotp,
-  generateTotpToken,
-} from './totp.service.js';
+import { setupTotp, verifyAndEnableTotp, verifyTotp, generateTotpToken } from './totp.service.js';
 
 describe('TOTP Service', () => {
   const testUserId = 'test-user-id';
@@ -68,7 +63,7 @@ describe('TOTP Service', () => {
       const result = await setupTotp(testUserId, testUserEmail);
 
       expect(result.backupCodes).toHaveLength(8);
-      result.backupCodes.forEach((code) => {
+      result.backupCodes.forEach(code => {
         expect(code).toMatch(/^[A-Z0-9]+$/);
         expect(code.length).toBe(8);
       });

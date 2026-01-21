@@ -32,12 +32,7 @@ describe('Departments Routes', () => {
 
     // Error handler
     app.use(
-      (
-        _err: Error,
-        _req: express.Request,
-        res: express.Response,
-        _next: express.NextFunction
-      ) => {
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         res.status(500).json({ message: _err.message });
       }
     );
