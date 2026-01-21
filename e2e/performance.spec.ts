@@ -1,7 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 
 const test = base.extend({
-  // Override page to not use the fixture's auto-login if it conflicts, 
+  // Override page to not use the fixture's auto-login if it conflicts,
   // but actually we just want a clean page.
 });
 
@@ -19,31 +19,39 @@ test.describe('Performance Benchmark', () => {
     await page.getByRole('button', { name: 'Sign In', exact: true }).click();
 
     // Wait for redirect (can be / for OrganizationSelector or /dashboard)
-    await page.waitForURL(url => url.pathname === '/' || url.pathname.includes('organizations') || url.pathname.includes('dashboard'), { timeout: 30000 });
+    await page.waitForURL(
+      url =>
+        url.pathname === '/' ||
+        url.pathname.includes('organizations') ||
+        url.pathname.includes('dashboard'),
+      { timeout: 30000 }
+    );
     console.log('Logged in, URL:', page.url());
-    
+
     // 2. Navigate to large org
     console.log('Navigating to Large Org...');
     const start = Date.now();
     await page.goto(`/org/${LARGE_ORG_ID}/people`);
-    
+
     // Wait for the "People" header
-    await expect(page.getByText('Manage people across all departments')).toBeVisible({ timeout: 60000 });
+    await expect(page.getByText('Manage people across all departments')).toBeVisible({
+      timeout: 60000,
+    });
     const shellLoaded = Date.now();
     console.log(`Shell loaded in ${shellLoaded - start}ms`);
 
     // Wait for loading spinner to disappear
     await expect(page.getByText('Loading people...'), { timeout: 120000 }).not.toBeVisible();
-    
+
     // Wait for at least one person to appear in the list
     // PersonItem has h3 with text-lg font-semibold inside the divide-y container
     const firstPerson = page.locator('.divide-y h3.text-lg.font-semibold').first();
     await expect(firstPerson).toBeVisible({ timeout: 120000 });
-    
+
     const fullyLoaded = Date.now();
     const loadTime = fullyLoaded - start;
     const renderTime = fullyLoaded - shellLoaded;
-    
+
     console.log(`----------------------------------------`);
     console.log(`BENCHMARK RESULTS for ${LARGE_ORG_ID}`);
     console.log(`Total load time: ${loadTime}ms`);

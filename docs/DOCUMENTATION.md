@@ -369,16 +369,16 @@ Custom fields are organization-specific and can be configured by Owners and Admi
 
 ### Supported Field Types
 
-| Type            | Description                                | Example                    |
-| --------------- | ------------------------------------------ | -------------------------- |
-| **Text**        | Free-form text input                       | Employee ID, Notes         |
-| **Number**      | Numeric values                             | Years of Experience        |
-| **Date**        | Date picker                                | Start Date, Certification  |
-| **Select**      | Single choice from predefined options      | Department Level           |
-| **Multi-select**| Multiple choices from predefined options   | Skills, Certifications     |
-| **URL**         | Web link with validation                   | LinkedIn Profile           |
-| **Email**       | Email address with validation              | Alternative Email          |
-| **Phone**       | Phone number                               | Mobile Number              |
+| Type             | Description                              | Example                   |
+| ---------------- | ---------------------------------------- | ------------------------- |
+| **Text**         | Free-form text input                     | Employee ID, Notes        |
+| **Number**       | Numeric values                           | Years of Experience       |
+| **Date**         | Date picker                              | Start Date, Certification |
+| **Select**       | Single choice from predefined options    | Department Level          |
+| **Multi-select** | Multiple choices from predefined options | Skills, Certifications    |
+| **URL**          | Web link with validation                 | LinkedIn Profile          |
+| **Email**        | Email address with validation            | Alternative Email         |
+| **Phone**        | Phone number                             | Mobile Number             |
 
 ### Creating Custom Fields
 
@@ -789,6 +789,7 @@ View and control all active sessions for your account.
 3. View all devices/browsers where you're logged in
 
 Each session shows:
+
 - Device type and browser
 - IP address (approximate location)
 - Last active time
@@ -1439,10 +1440,10 @@ If you encounter issues not covered here:
 
 ## Version History
 
-| Version | Date              | Changes                                                                 |
-| ------- | ----------------- | ----------------------------------------------------------------------- |
-| 1.1     | January 21, 2026  | Added Custom Fields, Star/Favorite, Passkeys, 2FA, Account Security    |
-| 1.0     | December 29, 2025 | Initial documentation                                                   |
+| Version | Date              | Changes                                                             |
+| ------- | ----------------- | ------------------------------------------------------------------- |
+| 1.1     | January 21, 2026  | Added Custom Fields, Star/Favorite, Passkeys, 2FA, Account Security |
+| 1.0     | December 29, 2025 | Initial documentation                                               |
 
 ---
 

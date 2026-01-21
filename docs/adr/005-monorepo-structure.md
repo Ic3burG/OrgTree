@@ -11,20 +11,20 @@ OrgTree consists of a React frontend and Node.js backend that are tightly couple
 
 ## Decision Drivers
 
-* **Developer experience**: Simple local setup without complex tooling
-* **Deployment simplicity**: Single build process for frontend + backend
-* **Code sharing**: Share TypeScript types and constants between frontend/backend
-* **Independent dependencies**: Frontend and backend have different npm packages
-* **Version control**: Track related changes in a single commit
-* **CI/CD**: Simple build and test pipeline
-* **Scalability**: Support future growth without major restructuring
+- **Developer experience**: Simple local setup without complex tooling
+- **Deployment simplicity**: Single build process for frontend + backend
+- **Code sharing**: Share TypeScript types and constants between frontend/backend
+- **Independent dependencies**: Frontend and backend have different npm packages
+- **Version control**: Track related changes in a single commit
+- **CI/CD**: Simple build and test pipeline
+- **Scalability**: Support future growth without major restructuring
 
 ## Considered Options
 
-* **Simple monorepo** (frontend at root, backend in `server/`)
-* Polyrepo (separate Git repositories for frontend and backend)
-* Full monorepo tooling (Nx, Turborepo, Lerna)
-* Backend-at-root, frontend in `client/`
+- **Simple monorepo** (frontend at root, backend in `server/`)
+- Polyrepo (separate Git repositories for frontend and backend)
+- Full monorepo tooling (Nx, Turborepo, Lerna)
+- Backend-at-root, frontend in `client/`
 
 ## Decision Outcome
 
@@ -59,6 +59,7 @@ OrgTree/
 ### Build and Deployment Process
 
 **Development**:
+
 ```bash
 # Terminal 1: Frontend dev server (port 3000)
 npm run dev
@@ -68,6 +69,7 @@ cd server && npm run dev
 ```
 
 **Production**:
+
 ```bash
 # Build frontend to dist/
 npm run build
@@ -78,97 +80,104 @@ cd server && npm start
 
 ### Positive Consequences
 
-* **Simple setup**: `npm install` + `cd server && npm install` (no workspace tools)
-* **Clear separation**: Frontend and backend have distinct `package.json` files
-* **Natural deployment**: Backend serves built frontend (single deployable unit)
-* **Independent scripts**: Can run frontend or backend tests separately
-* **Shared types**: Can export/import types between src/ and server/src/ (TypeScript path aliases)
-* **Single repository**: Related changes committed together (e.g., API contract changes)
-* **CI/CD simplicity**: Single GitHub Actions workflow for both
+- **Simple setup**: `npm install` + `cd server && npm install` (no workspace tools)
+- **Clear separation**: Frontend and backend have distinct `package.json` files
+- **Natural deployment**: Backend serves built frontend (single deployable unit)
+- **Independent scripts**: Can run frontend or backend tests separately
+- **Shared types**: Can export/import types between src/ and server/src/ (TypeScript path aliases)
+- **Single repository**: Related changes committed together (e.g., API contract changes)
+- **CI/CD simplicity**: Single GitHub Actions workflow for both
 
 ### Negative Consequences
 
-* **Duplicate dependencies**: Some packages (TypeScript, ESLint) installed in both root and server/
-* **Manual coordination**: Must remember to `npm install` in both locations
-* **No automatic workspace linking**: Cannot directly import from `../server/src` without build step
-* **Build ordering**: Must build frontend before starting production backend
+- **Duplicate dependencies**: Some packages (TypeScript, ESLint) installed in both root and server/
+- **Manual coordination**: Must remember to `npm install` in both locations
+- **No automatic workspace linking**: Cannot directly import from `../server/src` without build step
+- **Build ordering**: Must build frontend before starting production backend
 
 ## Pros and Cons of the Options
 
 ### Simple Monorepo (Chosen)
 
-* **Good**, because minimal tooling overhead (no Nx, Turborepo complexity)
-* **Good**, because natural for Express serving frontend (dist/ served by server)
-* **Good**, because separate package.json allows independent dependency versions
-* **Good**, because easy to understand for new developers
-* **Good**, because works well with existing deployment platforms (Render, Heroku)
-* **Bad**, because must manually run `npm install` in two places
-* **Bad**, because some duplicate dependencies (TypeScript, linting tools)
-* **Bad**, because no automatic task orchestration (must run dev servers separately)
+- **Good**, because minimal tooling overhead (no Nx, Turborepo complexity)
+- **Good**, because natural for Express serving frontend (dist/ served by server)
+- **Good**, because separate package.json allows independent dependency versions
+- **Good**, because easy to understand for new developers
+- **Good**, because works well with existing deployment platforms (Render, Heroku)
+- **Bad**, because must manually run `npm install` in two places
+- **Bad**, because some duplicate dependencies (TypeScript, linting tools)
+- **Bad**, because no automatic task orchestration (must run dev servers separately)
 
 ### Polyrepo (Separate Repositories)
 
-* **Good**, because complete independence (separate CI/CD, deployment)
-* **Good**, because clearer ownership boundaries
-* **Good**, because can use different languages/frameworks easily
-* **Bad**, because coordinating changes across repos is painful (sync issues)
-* **Bad**, because cannot commit frontend + backend changes atomically
-* **Bad**, because harder to share types and constants
-* **Bad**, because more complex deployment (two separate deploys to coordinate)
-* **Bad**, because duplicate documentation, tooling setup, CI/CD config
+- **Good**, because complete independence (separate CI/CD, deployment)
+- **Good**, because clearer ownership boundaries
+- **Good**, because can use different languages/frameworks easily
+- **Bad**, because coordinating changes across repos is painful (sync issues)
+- **Bad**, because cannot commit frontend + backend changes atomically
+- **Bad**, because harder to share types and constants
+- **Bad**, because more complex deployment (two separate deploys to coordinate)
+- **Bad**, because duplicate documentation, tooling setup, CI/CD config
 
 ### Full Monorepo Tooling (Nx, Turborepo, Lerna)
 
-* **Good**, because automatic workspace management
-* **Good**, because task orchestration and caching
-* **Good**, because can share code as internal packages
-* **Good**, because parallel builds and tests
-* **Bad**, because significant complexity for small project
-* **Bad**, because learning curve for new developers
-* **Bad**, because adds dependencies (Nx: 50+ packages)
-* **Bad**, because opinionated project structure
-* **Bad**, because overkill for 2-project monorepo
+- **Good**, because automatic workspace management
+- **Good**, because task orchestration and caching
+- **Good**, because can share code as internal packages
+- **Good**, because parallel builds and tests
+- **Bad**, because significant complexity for small project
+- **Bad**, because learning curve for new developers
+- **Bad**, because adds dependencies (Nx: 50+ packages)
+- **Bad**, because opinionated project structure
+- **Bad**, because overkill for 2-project monorepo
 
 ### Backend-at-Root, Frontend in `client/`
 
-* **Good**, because backend-first approach (API is core)
-* **Good**, because npm root commands run backend by default
-* **Bad**, because deployment is awkward (must build client, copy to backend)
-* **Bad**, because frontend feels like secondary citizen
-* **Bad**, because Vite config expects root-level setup
-* **Bad**, because GitHub shows backend files first (less welcoming for frontend devs)
+- **Good**, because backend-first approach (API is core)
+- **Good**, because npm root commands run backend by default
+- **Bad**, because deployment is awkward (must build client, copy to backend)
+- **Bad**, because frontend feels like secondary citizen
+- **Bad**, because Vite config expects root-level setup
+- **Bad**, because GitHub shows backend files first (less welcoming for frontend devs)
 
 ## Type Sharing Strategy
 
 **Current approach**: Copy types manually
+
 - Frontend defines types in `src/types/`
 - Backend defines types in `server/src/types/`
 - OpenAPI spec generates shared types via `src/sdk/api-types.ts`
 
 **Future improvement**: TypeScript project references
+
 ```json
 // server/tsconfig.json
 {
   "references": [{ "path": "../" }]
 }
 ```
+
 This would allow importing types directly:
+
 ```typescript
 import type { Department } from '../../src/types/models';
 ```
 
 **Alternative considered**: Extract shared types to `packages/types/`
+
 - **Rejected**: Adds complexity for minimal benefit (only ~10 shared types)
 
 ## Dependency Management
 
 **Duplicate dependencies** (intentional):
+
 - `typescript`: Different versions allowed (frontend: 5.7, backend: 5.6)
 - `eslint`: Different configs (frontend: React rules, backend: Node rules)
 - `prettier`: Shared config via root `.prettierrc`
 - `vitest`: Different test setups (frontend: jsdom, backend: node)
 
 **Shared via root**:
+
 - Husky git hooks (pre-commit linting)
 - Prettier configuration
 - Docker Compose setup
@@ -177,6 +186,7 @@ import type { Department } from '../../src/types/models';
 ## CI/CD Pipeline
 
 **GitHub Actions** (`.github/workflows/ci.yml`):
+
 ```yaml
 - name: Install dependencies
   run: |
@@ -202,6 +212,7 @@ Simple sequential execution (no workspace orchestration needed).
 ## Deployment Configuration
 
 **Render.com**:
+
 ```yaml
 # render.yaml
 services:
@@ -216,6 +227,7 @@ Single service deploys both frontend and backend.
 ## Migration Path
 
 If OrgTree grows to need full monorepo tooling:
+
 1. **Add Turborepo**: Minimal config, keeps existing structure
 2. **Convert to pnpm workspaces**: Reduce duplicate dependencies
 3. **Split into packages/**: Extract shared types, utilities, components
@@ -225,6 +237,7 @@ Migration would be incremental and non-breaking.
 ## Project Size Context
 
 **Current scale** (why simple monorepo is sufficient):
+
 - 2 projects (frontend, backend)
 - ~100 source files total
 - 2-5 active developers
@@ -232,6 +245,7 @@ Migration would be incremental and non-breaking.
 - Coordinated releases (frontend + backend versioned together)
 
 **When to migrate** to full monorepo tooling:
+
 - 5+ internal packages
 - 10+ active developers
 - Multiple deployment targets
@@ -240,8 +254,8 @@ Migration would be incremental and non-breaking.
 
 ## Links
 
-* [Monorepo vs Polyrepo](https://monorepo.tools/)
-* [Simple Monorepo with npm and TypeScript](https://earthly.dev/blog/setup-typescript-monorepo/)
-* Related: `package.json` (frontend scripts)
-* Related: `server/package.json` (backend scripts)
-* Related: `docker-compose.yml` (development environment)
+- [Monorepo vs Polyrepo](https://monorepo.tools/)
+- [Simple Monorepo with npm and TypeScript](https://earthly.dev/blog/setup-typescript-monorepo/)
+- Related: `package.json` (frontend scripts)
+- Related: `server/package.json` (backend scripts)
+- Related: `docker-compose.yml` (development environment)

@@ -177,8 +177,8 @@ People: 50
 Edit the configuration at the top of `parse-geds-xml.js`:
 
 ```javascript
-const INPUT_DIR = path.join(__dirname, 'xml-files');  // Change this
-const OUTPUT_FILE = path.join(__dirname, 'output', 'geds-import.csv');  // Change this
+const INPUT_DIR = path.join(__dirname, 'xml-files'); // Change this
+const OUTPUT_FILE = path.join(__dirname, 'output', 'geds-import.csv'); // Change this
 ```
 
 ### Modifying Path Generation
@@ -188,6 +188,7 @@ To customize how paths are generated, edit the `buildHierarchy()` function in th
 ### Handling Special Cases
 
 The script includes handling for:
+
 - Accented characters (é, ô, etc.)
 - Special characters in names
 - Empty/missing fields
@@ -197,6 +198,7 @@ The script includes handling for:
 ## Support
 
 For issues or questions:
+
 1. Check the validation output from the script
 2. Verify your XML files are properly formatted
 3. Review the generated CSV manually before importing

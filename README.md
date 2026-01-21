@@ -10,6 +10,7 @@ A modern, full-stack organizational directory and visualization platform. Build,
 ## Features
 
 ### Organization Management
+
 - **Multi-Organization Support**: Create and manage multiple organizations
 - **Department Hierarchy**: Unlimited nesting with parent-child relationships
 - **People Management**: Full employee directory with contact details
@@ -18,6 +19,7 @@ A modern, full-stack organizational directory and visualization platform. Build,
 - **Bulk Operations**: Select multiple items for move, edit, or delete
 
 ### Visualization
+
 - **Interactive Org Chart**: Pan, zoom, and navigate with React Flow
 - **Flexible Layouts**: Vertical (top-down) or horizontal (left-right) views
 - **Expandable Nodes**: Click departments to show/hide team members
@@ -27,18 +29,21 @@ A modern, full-stack organizational directory and visualization platform. Build,
 - **Collapsible Sidebar**: Maximize workspace with icon-only mode
 
 ### Collaboration
+
 - **Team Roles**: Owner, Admin, Editor, Viewer permissions
 - **Email Invitations**: Invite team members via email
 - **Real-Time Sync**: Changes appear instantly across all connected users
 - **Share Links**: Public read-only sharing with full navigation
 
 ### Security
+
 - **Passkey Authentication**: Passwordless login with WebAuthn/biometrics
 - **Two-Factor Authentication**: TOTP-based 2FA with backup codes
 - **Session Management**: View and revoke active sessions
 - **CSRF Protection**: Double-submit cookie pattern for state changes
 
 ### Data Management
+
 - **Import/Export**: CSV and GEDS XML format support
 - **Full-Text Search**: FTS5-powered search with autocomplete and fuzzy matching
 - **Audit Trail**: Track all changes with 1-year retention
@@ -47,6 +52,7 @@ A modern, full-stack organizational directory and visualization platform. Build,
 ## Tech Stack
 
 ### Frontend
+
 - **React 18** with TypeScript and hooks
 - **React Flow** for interactive canvas
 - **React Router** for navigation
@@ -56,6 +62,7 @@ A modern, full-stack organizational directory and visualization platform. Build,
 - **Vite** for build tooling
 
 ### Backend
+
 - **Node.js** with Express and TypeScript
 - **SQLite** with better-sqlite3
 - **FTS5** for full-text search
@@ -70,6 +77,7 @@ A modern, full-stack organizational directory and visualization platform. Build,
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js 20+ (Node 18 reached end-of-life)
 - npm 9+ or yarn
 
@@ -160,19 +168,19 @@ NODE_ENV=production
 
 ## API Overview
 
-| Endpoint | Description |
-|----------|-------------|
-| `POST /api/auth/*` | Authentication (register, login, logout, passkeys, 2FA) |
-| `GET/POST /api/organizations` | Organization CRUD |
-| `GET/POST /api/organizations/:id/departments` | Department management |
-| `GET/POST /api/organizations/:id/people` | People management |
-| `GET/POST /api/organizations/:id/custom-fields` | Custom field definitions |
-| `POST /api/organizations/:id/*/bulk-*` | Bulk operations |
-| `GET /api/organizations/:id/search` | Full-text search with autocomplete |
-| `GET /api/organizations/:id/audit-logs` | Audit trail |
-| `POST /api/organizations/:id/invitations` | Team invitations |
-| `GET /api/public/org/:token` | Public share access |
-| `GET /api/admin/*` | Superuser system administration |
+| Endpoint                                        | Description                                             |
+| ----------------------------------------------- | ------------------------------------------------------- |
+| `POST /api/auth/*`                              | Authentication (register, login, logout, passkeys, 2FA) |
+| `GET/POST /api/organizations`                   | Organization CRUD                                       |
+| `GET/POST /api/organizations/:id/departments`   | Department management                                   |
+| `GET/POST /api/organizations/:id/people`        | People management                                       |
+| `GET/POST /api/organizations/:id/custom-fields` | Custom field definitions                                |
+| `POST /api/organizations/:id/*/bulk-*`          | Bulk operations                                         |
+| `GET /api/organizations/:id/search`             | Full-text search with autocomplete                      |
+| `GET /api/organizations/:id/audit-logs`         | Audit trail                                             |
+| `POST /api/organizations/:id/invitations`       | Team invitations                                        |
+| `GET /api/public/org/:token`                    | Public share access                                     |
+| `GET /api/admin/*`                              | Superuser system administration                         |
 
 See [DOCUMENTATION.md](./docs/DOCUMENTATION.md) for complete API details and Swagger UI at `/api/docs`.
 
@@ -204,6 +212,7 @@ CMD ["node", "server/src/index.js"]
 ## Documentation
 
 For comprehensive documentation including:
+
 - User guides
 - Admin tutorials
 - Troubleshooting

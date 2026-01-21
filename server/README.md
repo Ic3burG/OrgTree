@@ -12,6 +12,7 @@ Express.js backend server with JWT authentication for the OrgTree application.
 ## Setup
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
@@ -22,6 +23,7 @@ npm install
    - `PORT`: Server port (default: 3001)
 
 3. Start the server:
+
 ```bash
 # Development mode (with auto-restart)
 npm run dev
@@ -40,6 +42,7 @@ The database will be automatically created at `server/database.db` on first run.
 Create a new user account.
 
 Request:
+
 ```json
 {
   "name": "John Doe",
@@ -49,6 +52,7 @@ Request:
 ```
 
 Response:
+
 ```json
 {
   "user": {
@@ -66,6 +70,7 @@ Response:
 Login with existing credentials.
 
 Request:
+
 ```json
 {
   "email": "john@example.com",
@@ -74,6 +79,7 @@ Request:
 ```
 
 Response:
+
 ```json
 {
   "user": {
@@ -90,11 +96,13 @@ Response:
 Get current user information (requires authentication).
 
 Headers:
+
 ```
 Authorization: Bearer <jwt-token>
 ```
 
 Response:
+
 ```json
 {
   "id": "uuid",
@@ -111,6 +119,7 @@ Response:
 Check if the server is running.
 
 Response:
+
 ```json
 {
   "status": "ok",
@@ -138,6 +147,7 @@ All errors return a JSON response with a `message` field:
 ```
 
 Common status codes:
+
 - `400`: Bad request (validation errors)
 - `401`: Unauthorized (invalid credentials or token)
 - `404`: Not found

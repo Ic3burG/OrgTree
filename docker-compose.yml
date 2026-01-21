@@ -10,8 +10,8 @@ services:
       context: .
       target: development
     ports:
-      - "5173:5173"  # Frontend (Vite)
-      - "3001:3001"  # Backend (Express)
+      - '5173:5173' # Frontend (Vite)
+      - '3001:3001' # Backend (Express)
     volumes:
       # Mount source code for hot reload
       - .:/app
@@ -30,7 +30,7 @@ services:
         cd server && npm run dev
       "
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/api/health"]
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:3001/api/health']
       interval: 30s
       timeout: 10s
       retries: 3

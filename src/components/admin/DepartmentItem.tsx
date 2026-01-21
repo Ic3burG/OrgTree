@@ -109,12 +109,18 @@ const DepartmentItem = memo(function DepartmentItem({
         <div className="flex-1 min-w-0">
           <span className="font-medium text-slate-800 dark:text-slate-100">{dept.name}</span>
           <span
-            className="ml-2 text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap relative cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+            className="ml-2 relative"
             onMouseEnter={() => setShowPeople(true)}
             onMouseLeave={() => setShowPeople(false)}
           >
-            <Users size={14} className="inline mr-1" />
-            {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
+            <Link
+              to={`/org/${dept.organization_id}/map?departmentId=${dept.id}`}
+              className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 hover:underline decoration-blue-600/30 underline-offset-2"
+              onClick={e => e.stopPropagation()}
+            >
+              <Users size={14} className="inline mr-1" />
+              {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
+            </Link>
             {showPeople && peopleCount > 0 && (
               <div
                 className="absolute left-0 bottom-full mb-2 bg-white dark:bg-slate-800 shadow-xl rounded-lg border border-slate-200 dark:border-slate-700 w-56 z-50 overflow-hidden"
@@ -130,6 +136,7 @@ const DepartmentItem = memo(function DepartmentItem({
                       key={person.id}
                       to={`/org/${dept.organization_id}/map?personId=${person.id}`}
                       className="block px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 rounded transition-colors"
+                      onClick={e => e.stopPropagation()}
                     >
                       {person.name}
                       {person.title && (

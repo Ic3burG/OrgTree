@@ -681,6 +681,39 @@ try {
   console.error('Migration error (is_starred column):', err);
 }
 
+// Migration: Add analytics_events table
+try {
+  const tables = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+    .all() as TableNameRow[];
+  const tableNames = tables.map(t => t.name);
+
+  if (!tableNames.includes('analytics_events')) {
+    db.exec(`
+      CREATE TABLE analytics_events (
+        id TEXT PRIMARY KEY,
+        event_name TEXT NOT NULL,
+        category TEXT NOT NULL,
+        properties TEXT, -- JSON string
+        session_id TEXT NOT NULL,
+        user_id TEXT,
+        url TEXT,
+        device_type TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+      );
+
+      CREATE INDEX idx_analytics_events_name ON analytics_events(event_name);
+      CREATE INDEX idx_analytics_events_created ON analytics_events(created_at);
+      CREATE INDEX idx_analytics_events_session ON analytics_events(session_id);
+      CREATE INDEX idx_analytics_events_category ON analytics_events(category);
+    `);
+    console.log('Migration: Created analytics_events table');
+  }
+} catch (err) {
+  console.error('Migration error (analytics_events table):', err);
+}
+
 console.log('Database initialized at:', dbPath);
 
 export default db;

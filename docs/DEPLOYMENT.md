@@ -5,6 +5,7 @@
 OrgTree is deployed as a single Node.js process that serves both the API and frontend static files. This guide will walk you through deploying OrgTree to production using Render.com.
 
 **Recommended Platform**: Render.com
+
 - Simple setup with free tier available for testing
 - Built-in HTTPS with auto-renewing SSL certificates
 - Native environment variable management
@@ -42,6 +43,7 @@ Save this 128-character string - you'll need it for environment variables.
 #### 1.1 Verify Critical Files
 
 Ensure these files exist in your repository:
+
 - `server/.env.example` - Environment variable template
 - `render.yaml` - Render configuration (includes automated build command)
 - `package.json` - Frontend build configuration
@@ -73,6 +75,7 @@ git push origin main
 Fill in the following settings:
 
 **Basic Settings**:
+
 - **Name**: `orgtree-app` (or your preferred name)
 - **Region**: Choose the region closest to your users
 - **Branch**: `main` (or your primary branch)
@@ -84,6 +87,7 @@ Fill in the following settings:
 **Note**: The build command installs all dependencies (including dev dependencies needed for Vite), builds the frontend, copies it to the server directory, then installs only production dependencies for the backend.
 
 **Instance Type**:
+
 - **For Production**: `Starter` ($7/month, always on)
 - **For Testing**: `Free` (spins down after 15 min inactivity)
 
@@ -91,14 +95,14 @@ Fill in the following settings:
 
 Click "Advanced" → "Add Environment Variable" and add the following:
 
-| Key | Value | Notes |
-|-----|-------|-------|
-| `NODE_ENV` | `production` | Required |
-| `JWT_SECRET` | `<your-128-char-secret>` | Use generated secret from Prerequisites |
-| `JWT_EXPIRES_IN` | `7d` | Token expiration time |
-| `DATABASE_URL` | `file:/opt/render/project/src/data/production.db` | Database path |
-| `PORT` | `3001` | Server port |
-| `FRONTEND_URL` | `https://orgtree-app.onrender.com` | Replace with your Render URL |
+| Key              | Value                                             | Notes                                   |
+| ---------------- | ------------------------------------------------- | --------------------------------------- |
+| `NODE_ENV`       | `production`                                      | Required                                |
+| `JWT_SECRET`     | `<your-128-char-secret>`                          | Use generated secret from Prerequisites |
+| `JWT_EXPIRES_IN` | `7d`                                              | Token expiration time                   |
+| `DATABASE_URL`   | `file:/opt/render/project/src/data/production.db` | Database path                           |
+| `PORT`           | `3001`                                            | Server port                             |
+| `FRONTEND_URL`   | `https://orgtree-app.onrender.com`                | Replace with your Render URL            |
 
 **Security Note**: Never commit JWT_SECRET to Git. Only set it via the Render dashboard.
 
@@ -115,6 +119,7 @@ SQLite requires a persistent disk to survive redeployments:
 #### 2.5 Deploy
 
 Click "Create Web Service" at the bottom. Render will:
+
 1. Clone your repository
 2. Install dependencies
 3. Start the server
@@ -151,6 +156,7 @@ curl http://localhost:3001/api/health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "ok",
@@ -167,6 +173,7 @@ Expected response:
 Create an admin user via API:
 
 **From your local machine:**
+
 ```bash
 curl -X POST https://orgtree-app.onrender.com/api/auth/signup \
   -H "Content-Type: application/json" \
@@ -174,6 +181,7 @@ curl -X POST https://orgtree-app.onrender.com/api/auth/signup \
 ```
 
 **From Render Shell:**
+
 ```bash
 curl -X POST http://localhost:3001/api/auth/signup \
   -H "Content-Type: application/json" \
@@ -181,6 +189,7 @@ curl -X POST http://localhost:3001/api/auth/signup \
 ```
 
 **Important**:
+
 - Change `admin@yourcompany.com` to your actual email
 - Use a strong password (minimum 6 characters)
 - The JSON must be on a single line to avoid parsing errors
@@ -194,6 +203,7 @@ curl -X POST http://localhost:3001/api/auth/signup \
 Visit: `https://orgtree-app.onrender.com`
 
 You should see the OrgTree login page with:
+
 - ✅ HTTPS lock icon (secure connection)
 - ✅ No CORS errors in browser console
 - ✅ Login/signup forms working
@@ -210,6 +220,7 @@ You should see the OrgTree login page with:
 #### 5.3 Check Logs
 
 In Render Dashboard → Logs tab:
+
 - ✅ Server startup message with production environment
 - ✅ No error messages
 - ✅ Structured JSON logs (not console.log)
@@ -232,6 +243,7 @@ To use your own domain (e.g., `orgtree.yourcompany.com`):
 6. Render automatically provisions SSL certificate
 
 **Update Environment Variables**:
+
 - `FRONTEND_URL` → `https://orgtree.yourcompany.com`
 
 ### Environment-Specific Settings
@@ -257,11 +269,13 @@ For staging vs. production:
 ### Health Checks
 
 Render automatically monitors `/api/health` endpoint:
+
 - Checks every 30 seconds
 - Restarts service if 3 consecutive failures
 - Zero-downtime deployments
 
 Manual health check:
+
 ```bash
 curl https://orgtree-app.onrender.com/api/health
 ```
@@ -271,6 +285,7 @@ curl https://orgtree-app.onrender.com/api/health
 **Real-time logs**: Render Dashboard → Logs tab
 
 **Structured logs** (JSON in production):
+
 ```json
 {
   "timestamp": "2025-01-17T10:30:00.000Z",
@@ -282,6 +297,7 @@ curl https://orgtree-app.onrender.com/api/health
 ```
 
 **Error logs**:
+
 ```json
 {
   "timestamp": "2025-01-17T10:30:05.000Z",
@@ -296,6 +312,7 @@ curl https://orgtree-app.onrender.com/api/health
 ### Performance Metrics
 
 Render Dashboard → Metrics tab shows:
+
 - CPU usage
 - Memory usage
 - Request count
@@ -374,15 +391,19 @@ Use [UptimeRobot](https://uptimerobot.com) (free tier):
 **Causes & Solutions**:
 
 1. **Missing environment variables**
+
    ```
    Error: FATAL: JWT_SECRET environment variable is required
    ```
+
    → Check all env vars are set in Render dashboard
 
 2. **Database connection failed**
+
    ```
    Error: FATAL: Missing database tables
    ```
+
    → Ensure persistent disk is mounted at correct path
    → Run migrations via Shell
 
@@ -410,6 +431,7 @@ Use [UptimeRobot](https://uptimerobot.com) (free tier):
 **This is normal**: Rate limiting is working correctly (5 attempts per 15 minutes)
 
 **Solution for testing**:
+
 - Wait 15 minutes, OR
 - Temporarily increase limit in `server/src/routes/auth.js` (not recommended for production)
 
@@ -418,10 +440,12 @@ Use [UptimeRobot](https://uptimerobot.com) (free tier):
 **Symptoms**: "database is locked" errors in logs
 
 **Causes**:
+
 - Multiple concurrent writes
 - Long-running transaction
 
 **Solutions**:
+
 1. **Increase timeout**: SQLite WAL mode (already enabled) helps
 2. **Reduce concurrency**: If > 50 concurrent users, migrate to PostgreSQL
 3. **Restart service**: Render Dashboard → Manual Deploy → Clear cache
@@ -431,6 +455,7 @@ Use [UptimeRobot](https://uptimerobot.com) (free tier):
 **Symptoms**: `/api/health` returns `"environment": "development"`
 
 **Solution**:
+
 1. Verify `NODE_ENV=production` is set in Render environment variables
 2. Check `npm start` script in `package.json` sets `NODE_ENV=production`
 3. Redeploy service
@@ -442,12 +467,14 @@ Use [UptimeRobot](https://uptimerobot.com) (free tier):
 ### When to Scale
 
 **Current Setup Handles**:
+
 - < 50 organizations
 - < 5,000 people
 - < 50 concurrent users
 - SQLite database (single server)
 
 **Upgrade When**:
+
 - \> 50 concurrent users → Migrate to PostgreSQL
 - \> 100 requests/second → Add caching (Redis)
 - \> 5,000 people → Consider database indexing
@@ -463,12 +490,14 @@ When you outgrow SQLite:
    - After trial: $7/month
 
 2. **Update database configuration**:
+
    ```javascript
    // Replace better-sqlite3 with pg
    npm install pg
    ```
 
 3. **Update DATABASE_URL**:
+
    ```
    postgresql://user:pass@host:5432/orgtree
    ```
@@ -549,6 +578,7 @@ If deployment fails or has bugs:
 ### Render Starter Tier: $7/month
 
 Includes:
+
 - 512 MB RAM (sufficient for small scale)
 - Shared CPU
 - 100 GB bandwidth/month

@@ -72,15 +72,16 @@ async function parseXMLFile(filePath) {
   // Extract hierarchy from orgStructure
   // IMPORTANT: xml2js converts <n> to "name" property!
   let departments = [];
-  
-  if (person.orgStructure && 
-      Array.isArray(person.orgStructure) && 
-      person.orgStructure.length > 0 &&
-      person.orgStructure[0].org &&
-      Array.isArray(person.orgStructure[0].org)) {
-    
+
+  if (
+    person.orgStructure &&
+    Array.isArray(person.orgStructure) &&
+    person.orgStructure.length > 0 &&
+    person.orgStructure[0].org &&
+    Array.isArray(person.orgStructure[0].org)
+  ) {
     const orgs = person.orgStructure[0].org;
-    
+
     // Skip first element (Canada)
     for (let i = 1; i < orgs.length; i++) {
       const org = orgs[i];
@@ -100,11 +101,11 @@ async function parseXMLFile(filePath) {
       slug: slugify(fullName),
       title,
       email,
-      phone
+      phone,
     },
     departments,
     deptAcronym,
-    orgAcronym
+    orgAcronym,
   };
 }
 
@@ -224,49 +225,50 @@ async function main() {
     const personPath = currentPath + '/' + data.person.slug;
     allPeople.push({
       path: personPath,
-      ...data.person
+      ...data.person,
     });
 
     console.log('');
   }
 
   // Sort departments by path depth and alphabetically
-  const sortedDepts = Array.from(allDepartments.entries())
-    .sort((a, b) => {
-      const depthA = a[0].split('/').length;
-      const depthB = b[0].split('/').length;
-      if (depthA !== depthB) return depthA - depthB;
-      return a[0].localeCompare(b[0]);
-    });
+  const sortedDepts = Array.from(allDepartments.entries()).sort((a, b) => {
+    const depthA = a[0].split('/').length;
+    const depthB = b[0].split('/').length;
+    if (depthA !== depthB) return depthA - depthB;
+    return a[0].localeCompare(b[0]);
+  });
 
   // Sort people by path
   allPeople.sort((a, b) => a.path.localeCompare(b.path));
 
   // Generate CSV
   const lines = ['Path,Type,Name,Title,Email,Phone,Description'];
-  
+
   // Add departments
   for (const [deptPath, deptName] of sortedDepts) {
     lines.push(`${deptPath},department,${escapeCSV(deptName)},,,,`);
   }
-  
+
   // Add people
   for (const person of allPeople) {
-    lines.push([
-      person.path,
-      'person',
-      escapeCSV(person.name),
-      escapeCSV(person.title),
-      escapeCSV(person.email),
-      escapeCSV(person.phone),
-      ''
-    ].join(','));
+    lines.push(
+      [
+        person.path,
+        'person',
+        escapeCSV(person.name),
+        escapeCSV(person.title),
+        escapeCSV(person.email),
+        escapeCSV(person.phone),
+        '',
+      ].join(',')
+    );
   }
 
   // Write CSV with UTF-8 BOM
   const BOM = '\ufeff';
   fs.writeFileSync(OUTPUT_FILE, BOM + lines.join('\n'), 'utf-8');
-  
+
   console.log('============================================================');
   console.log('Summary:');
   console.log(`  Departments: ${sortedDepts.length}`);

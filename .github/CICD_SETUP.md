@@ -37,16 +37,17 @@ The project uses two GitHub Actions workflows:
 
 ## Environments
 
-| Environment | Branch | URL |
-|-------------|--------|-----|
-| Staging | `develop` | https://orgtree-staging.onrender.com |
-| Production | `main` | https://orgtree-app.onrender.com |
+| Environment | Branch    | URL                                  |
+| ----------- | --------- | ------------------------------------ |
+| Staging     | `develop` | https://orgtree-staging.onrender.com |
+| Production  | `main`    | https://orgtree-app.onrender.com     |
 
 ## Workflows
 
 ### CI Workflow
 
 **Triggers:**
+
 - Push to `main` or `develop` branches
 - Pull requests targeting `main` or `develop`
 
@@ -78,16 +79,19 @@ The project uses two GitHub Actions workflows:
 ### CD Workflow
 
 **Triggers:**
+
 - Runs automatically when CI workflow completes successfully
 - Only deploys when CI passes (uses `workflow_run` trigger)
 
 **Jobs:**
 
 For **develop** branch (staging):
+
 1. **Deploy to Staging** - Triggers Render staging deployment
 2. **Verify Staging** - Health check with retry logic
 
 For **main** branch (production):
+
 1. **Deploy to Production** - Triggers Render production deployment
 2. **Verify Production** - Health check with retry logic
 
@@ -158,15 +162,15 @@ For **main** branch (production):
 4. Add persistent disk (1GB) at `/opt/render/project/src/data`
 5. Set environment variables:
 
-| Variable | Value |
-|----------|-------|
-| `NODE_ENV` | `production` |
-| `CI` | `true` (required - skips husky install) |
-| `JWT_SECRET` | `<unique-staging-secret>` (different from production!) |
+| Variable       | Value                                                                                               |
+| -------------- | --------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`     | `production`                                                                                        |
+| `CI`           | `true` (required - skips husky install)                                                             |
+| `JWT_SECRET`   | `<unique-staging-secret>` (different from production!)                                              |
 | `DATABASE_URL` | `file:./database.db` (free tier) or `file:/opt/render/project/src/data/staging.db` (paid with disk) |
-| `FRONTEND_URL` | `https://orgtree-staging.onrender.com` |
-| `RP_ID` | `orgtree-staging.onrender.com` |
-| `ORIGIN` | `https://orgtree-staging.onrender.com` |
+| `FRONTEND_URL` | `https://orgtree-staging.onrender.com`                                                              |
+| `RP_ID`        | `orgtree-staging.onrender.com`                                                                      |
+| `ORIGIN`       | `https://orgtree-staging.onrender.com`                                                              |
 
 6. Copy the Deploy Hook URL and add it as `RENDER_STAGING_DEPLOY_HOOK_URL` secret in GitHub
 
@@ -180,6 +184,7 @@ For **main** branch (production):
 ### Free Tier Limitations
 
 On free tier, persistent disks are not available. This means:
+
 - Database resets on each deploy/restart
 - Data is ephemeral (acceptable for staging/testing)
 - If you need persistent data, upgrade to a paid tier
@@ -268,6 +273,7 @@ To manually trigger a deployment:
 **Issue:** CI passes but CD workflow doesn't trigger
 
 **Solution:**
+
 1. Verify CI completed (not just individual jobs)
 2. Check that the branch is `main` or `develop`
 3. CD uses `workflow_run` trigger - it waits for full CI completion
@@ -277,6 +283,7 @@ To manually trigger a deployment:
 **Issue:** "Trigger Render deployment" step fails
 
 **Solution:**
+
 1. Verify the correct secret is set:
    - `RENDER_DEPLOY_HOOK_URL` for production
    - `RENDER_STAGING_DEPLOY_HOOK_URL` for staging
@@ -288,6 +295,7 @@ To manually trigger a deployment:
 **Issue:** "Health check returned HTTP 503"
 
 **Solution:**
+
 1. Wait a few minutes - Render may still be deploying
 2. Check Render logs for startup errors
 3. Verify environment variables are set correctly on Render
@@ -311,11 +319,13 @@ To manually trigger a deployment:
 ### Production (orgtree-app)
 
 **Required:**
+
 - `JWT_SECRET` - Secure random string
 - `NODE_ENV=production`
 - `DATABASE_URL` - Path to persistent disk
 
 **Optional:**
+
 - `SENTRY_DSN` - Error monitoring
 - `RESEND_API_KEY` - Email invitations
 - `FRONTEND_URL` - CORS configuration
@@ -323,6 +333,7 @@ To manually trigger a deployment:
 ### Staging (orgtree-staging)
 
 Same as production, but with:
+
 - **Different `JWT_SECRET`** - Security isolation
 - **Different database file** - Data isolation
 - **Staging-specific URLs** - `FRONTEND_URL`, `RP_ID`, `ORIGIN`

@@ -296,42 +296,68 @@ export default function OrgMap(): React.JSX.Element {
   // Handle auto-zoom from URL parameter (e.g. from department list)
   useEffect(() => {
     const personId = searchParams.get('personId');
-    if (personId && !isLoading && nodes.length > 0) {
-      // Find the node containing this person
-      let targetNodeId: string | undefined;
-      let targetPerson: Person | undefined;
+    const departmentId = searchParams.get('departmentId');
 
-      for (const node of nodes) {
-        const person = node.data.people.find(p => p.id === personId);
-        if (person) {
-          targetNodeId = node.id;
-          targetPerson = person;
-          break;
-        }
-      }
+    if (!isLoading && nodes.length > 0) {
+      if (personId) {
+        // Find the node containing this person
+        let targetNodeId: string | undefined;
+        let targetPerson: Person | undefined;
 
-      if (targetNodeId && targetPerson) {
-        // Use the same logic as search selection
-        const node = nodes.find(n => n.id === targetNodeId);
-
-        if (node && !node.data.isExpanded) {
-          handleToggleExpand(targetNodeId);
+        for (const node of nodes) {
+          const person = node.data.people.find(p => p.id === personId);
+          if (person) {
+            targetNodeId = node.id;
+            targetPerson = person;
+            break;
+          }
         }
 
-        setTimeout(() => {
-          // Use nodesRef.current to get the latest nodes after handleToggleExpand state update
-          const updatedNode = nodesRef.current.find(n => n.id === targetNodeId);
-          if (updatedNode && updatedNode.position) {
-            setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
+        if (targetNodeId && targetPerson) {
+          // Use the same logic as search selection
+          const node = nodes.find(n => n.id === targetNodeId);
+
+          if (node && !node.data.isExpanded) {
+            handleToggleExpand(targetNodeId);
+          }
+
+          setTimeout(() => {
+            // Use nodesRef.current to get the latest nodes after handleToggleExpand state update
+            const updatedNode = nodesRef.current.find(n => n.id === targetNodeId);
+            if (updatedNode && updatedNode.position) {
+              setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
+                zoom: 1.5,
+                duration: 800,
+              });
+              setHighlightedNodeId(targetNodeId);
+              setTimeout(() => setHighlightedNodeId(null), 3000);
+            }
+
+            setSelectedPerson(targetPerson as Person);
+          }, 300);
+        }
+      } else if (departmentId) {
+        // Handle department deep link
+        const targetNode = nodes.find(n => n.id === departmentId);
+
+        if (targetNode) {
+          // If node is hidden (inside a collapsed parent), we need to expand parents
+          // Ideally we'd traverse up and expand, but for now we just try to zoom to it if visible
+          // or if it's a top level node.
+
+          // Current logic mostly assumes flattened or manageable tree.
+          // If we want to ensure it's visible, we might need to expand upwards.
+          // For now, let's just zoom and highlight.
+
+          if (targetNode.position) {
+            setCenter(targetNode.position.x + 110, targetNode.position.y + 35, {
               zoom: 1.5,
               duration: 800,
             });
-            setHighlightedNodeId(targetNodeId);
+            setHighlightedNodeId(departmentId);
             setTimeout(() => setHighlightedNodeId(null), 3000);
           }
-
-          setSelectedPerson(targetPerson as Person);
-        }, 300);
+        }
       }
     }
   }, [isLoading, nodes, searchParams, handleToggleExpand, setCenter]);
