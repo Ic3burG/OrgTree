@@ -2,8 +2,8 @@
 
 > Complete User Guide and Administration Manual
 
-**Version**: 1.0
-**Last Updated**: January 9, 2026
+**Version**: 1.1
+**Last Updated**: January 21, 2026
 **Application URL**: <https://orgtree-app.onrender.com>
 
 ---
@@ -16,19 +16,21 @@
 4. [Organization Management](#organization-management)
 5. [Department Management](#department-management)
 6. [People Management](#people-management)
-7. [Org Chart Visualization](#org-chart-visualization)
-8. [Search Features](#search-features)
-9. [Dark Mode](#dark-mode)
-10. [Team Collaboration](#team-collaboration)
-11. [Sharing & Public Access](#sharing--public-access)
-12. [Bulk Operations](#bulk-operations)
-13. [Data Import & Export](#data-import--export)
-14. [Audit Trail](#audit-trail)
-15. [Administration Guide](#administration-guide)
-16. [Superuser Guide](#superuser-guide)
-17. [Troubleshooting](#troubleshooting)
-18. [Keyboard Shortcuts](#keyboard-shortcuts)
-19. [Glossary](#glossary)
+7. [Custom Fields](#custom-fields)
+8. [Org Chart Visualization](#org-chart-visualization)
+9. [Search Features](#search-features)
+10. [Dark Mode](#dark-mode)
+11. [Account Security](#account-security)
+12. [Team Collaboration](#team-collaboration)
+13. [Sharing & Public Access](#sharing--public-access)
+14. [Bulk Operations](#bulk-operations)
+15. [Data Import & Export](#data-import--export)
+16. [Audit Trail](#audit-trail)
+17. [Administration Guide](#administration-guide)
+18. [Superuser Guide](#superuser-guide)
+19. [Troubleshooting](#troubleshooting)
+20. [Keyboard Shortcuts](#keyboard-shortcuts)
+21. [Glossary](#glossary)
 
 ---
 
@@ -52,6 +54,8 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 | ------------------------------ | ----------------------------------------------------- |
 | **Multi-Organization Support** | Manage multiple organizations from one account        |
 | **Hierarchical Departments**   | Unlimited nesting of departments and sub-departments  |
+| **Custom Fields**              | Define custom attributes for people and departments   |
+| **Star/Favorite People**       | Mark key individuals for quick access                 |
 | **Interactive Org Chart**      | Zoom, pan, expand/collapse, and navigate visually     |
 | **Real-Time Collaboration**    | Changes sync instantly across all users               |
 | **Role-Based Permissions**     | Owner, Admin, Editor, and Viewer roles                |
@@ -60,6 +64,9 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 | **Audit Trail**                | Complete history of all changes with 1-year retention |
 | **Public Sharing**             | Share read-only links with anyone                     |
 | **Data Import/Export**         | CSV and GEDS XML support                              |
+| **Passkey Authentication**     | Passwordless login with WebAuthn/biometrics           |
+| **Two-Factor Authentication**  | TOTP-based 2FA with backup codes                      |
+| **Dark Mode**                  | System-aware dark theme with manual toggle            |
 
 ### System Requirements
 
@@ -335,6 +342,83 @@ To change a department's parent (re-organize hierarchy):
 2. Click the **trash icon** (🗑️)
 3. Confirm the deletion
 
+### Starring/Favoriting People
+
+Mark important people for quick access:
+
+1. Hover over the person's row
+2. Click the **star icon** (⭐)
+3. Starred people appear at the top of lists and in search results
+
+**Benefits of starring:**
+
+- Quick identification of key contacts
+- Starred filter toggle in People tab
+- Priority display in search results
+- Visual indicator in org chart view
+
+---
+
+## Custom Fields
+
+Custom fields allow you to define additional attributes for people and departments beyond the default fields.
+
+### Understanding Custom Fields
+
+Custom fields are organization-specific and can be configured by Owners and Admins. They support various field types for different kinds of data.
+
+### Supported Field Types
+
+| Type            | Description                                | Example                    |
+| --------------- | ------------------------------------------ | -------------------------- |
+| **Text**        | Free-form text input                       | Employee ID, Notes         |
+| **Number**      | Numeric values                             | Years of Experience        |
+| **Date**        | Date picker                                | Start Date, Certification  |
+| **Select**      | Single choice from predefined options      | Department Level           |
+| **Multi-select**| Multiple choices from predefined options   | Skills, Certifications     |
+| **URL**         | Web link with validation                   | LinkedIn Profile           |
+| **Email**       | Email address with validation              | Alternative Email          |
+| **Phone**       | Phone number                               | Mobile Number              |
+
+### Creating Custom Fields
+
+> **Requires**: Admin or Owner role
+
+1. Navigate to organization settings or the Admin panel
+2. Click **"Custom Fields"** tab
+3. Click **"+ Add Field"**
+4. Configure the field:
+   - **Name**: Display label for the field
+   - **Type**: Select from available types
+   - **Entity Type**: People or Departments
+   - **Required**: Whether the field must be filled
+   - **Searchable**: Include in full-text search
+   - **Options**: For select/multi-select types
+5. Click **"Create"**
+
+### Editing Custom Field Values
+
+1. Edit a person or department
+2. Custom fields appear below standard fields
+3. Fill in values according to field type
+4. Click **"Save"**
+
+### Custom Fields in Search
+
+Searchable custom fields are included in full-text search:
+
+- Text, URL, Email, and Phone fields can be searched
+- Select/Multi-select option labels are searchable
+- Search highlights custom field matches
+
+### Exporting Custom Fields
+
+Custom field values are included in CSV exports:
+
+- Each custom field becomes a column
+- Multi-select values are comma-separated
+- Dates are exported in ISO format
+
 ---
 
 ## Org Chart Visualization
@@ -597,6 +681,134 @@ For developers and advanced users:
 - **Implementation**: Tailwind CSS class-based dark mode
 
 ---
+
+## Account Security
+
+OrgTree provides multiple layers of account security to protect your data.
+
+### Accessing Security Settings
+
+1. Click your **profile/user icon** in the header
+2. Select **"Settings"** or **"Account"**
+3. Navigate to the **"Security"** tab
+
+### Password Management
+
+#### Changing Your Password
+
+1. Go to **Settings** → **Security**
+2. Click **"Change Password"**
+3. Enter your current password
+4. Enter and confirm your new password (minimum 6 characters)
+5. Click **"Update Password"**
+
+### Passkey Authentication
+
+Passkeys provide passwordless authentication using biometrics (fingerprint, face recognition) or security keys.
+
+#### What are Passkeys?
+
+- **Phishing-resistant**: Cannot be stolen by fake websites
+- **No passwords to remember**: Uses your device's built-in security
+- **Cross-device**: Sync across your Apple, Google, or Microsoft devices
+- **Fast login**: One-tap authentication
+
+#### Registering a Passkey
+
+1. Go to **Settings** → **Security**
+2. In the **Passkeys** section, click **"Add Passkey"**
+3. Follow your browser/device prompts:
+   - On iPhone/Mac: Use Face ID or Touch ID
+   - On Windows: Use Windows Hello
+   - On Android: Use fingerprint or face unlock
+   - External: Use a hardware security key
+4. Give your passkey a memorable name (e.g., "MacBook Pro")
+5. Click **"Save"**
+
+#### Logging in with a Passkey
+
+1. On the login page, click **"Sign in with Passkey"**
+2. Select your passkey from the browser prompt
+3. Authenticate with biometrics or security key
+4. You're logged in!
+
+#### Managing Passkeys
+
+- View all registered passkeys in **Settings** → **Security**
+- Delete passkeys you no longer use
+- You can have multiple passkeys for different devices
+
+### Two-Factor Authentication (2FA)
+
+Add an extra layer of security with time-based one-time passwords (TOTP).
+
+#### Setting Up 2FA
+
+1. Go to **Settings** → **Security**
+2. In the **Two-Factor Authentication** section, click **"Enable 2FA"**
+3. Scan the QR code with your authenticator app:
+   - Google Authenticator
+   - Authy
+   - 1Password
+   - Microsoft Authenticator
+4. Enter the 6-digit code from your app to verify
+5. **Save your backup codes** in a secure location
+
+> **Important**: Backup codes are shown only once. Store them safely - they're your only recovery option if you lose your authenticator device.
+
+#### Using 2FA
+
+When 2FA is enabled:
+
+1. Log in with email and password (or passkey)
+2. Enter the 6-digit code from your authenticator app
+3. Optionally check "Remember this device" for trusted devices
+
+#### Backup Codes
+
+- 8 single-use backup codes are generated when you enable 2FA
+- Each code can only be used once
+- Use a backup code if you can't access your authenticator
+- Regenerate codes if you run low or suspect compromise
+
+#### Disabling 2FA
+
+1. Go to **Settings** → **Security**
+2. Click **"Disable 2FA"**
+3. Enter your password to confirm
+4. 2FA is removed from your account
+
+### Session Management
+
+View and control all active sessions for your account.
+
+#### Viewing Active Sessions
+
+1. Go to **Settings** → **Security**
+2. Scroll to **"Active Sessions"**
+3. View all devices/browsers where you're logged in
+
+Each session shows:
+- Device type and browser
+- IP address (approximate location)
+- Last active time
+- Current session indicator
+
+#### Revoking Sessions
+
+If you see an unfamiliar session:
+
+1. Click **"Revoke"** next to the suspicious session
+2. That device is immediately logged out
+3. They'll need to log in again
+
+#### Signing Out Everywhere
+
+To log out of all devices except your current one:
+
+1. Click **"Sign out all other sessions"**
+2. Confirm the action
+3. All other sessions are terminated
 
 ---
 
@@ -1217,14 +1429,20 @@ If you encounter issues not covered here:
 | **Bulk Operation** | Action performed on multiple items at once                |
 | **Org Chart**      | Visual representation of organization hierarchy           |
 | **Real-time**      | Changes sync instantly without refresh                    |
+| **Custom Field**   | User-defined attribute for people or departments          |
+| **Starred**        | A person marked as favorite for quick access              |
+| **Passkey**        | Passwordless authentication using biometrics/security key |
+| **2FA/TOTP**       | Two-factor authentication using time-based codes          |
+| **Session**        | An active login from a device/browser                     |
 
 ---
 
 ## Version History
 
-| Version | Date              | Changes               |
-| ------- | ----------------- | --------------------- |
-| 1.0     | December 29, 2025 | Initial documentation |
+| Version | Date              | Changes                                                                 |
+| ------- | ----------------- | ----------------------------------------------------------------------- |
+| 1.1     | January 21, 2026  | Added Custom Fields, Star/Favorite, Passkeys, 2FA, Account Security    |
+| 1.0     | December 29, 2025 | Initial documentation                                                   |
 
 ---
 

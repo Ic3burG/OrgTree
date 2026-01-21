@@ -11,8 +11,10 @@ A modern, full-stack organizational directory and visualization platform. Build,
 
 ### Organization Management
 - **Multi-Organization Support**: Create and manage multiple organizations
-- **Department Hierarchy**: Unlimited nesting with drag-and-drop reorganization
+- **Department Hierarchy**: Unlimited nesting with parent-child relationships
 - **People Management**: Full employee directory with contact details
+- **Custom Fields**: Define custom attributes for people and departments
+- **Star/Favorite People**: Mark key individuals for quick access
 - **Bulk Operations**: Select multiple items for move, edit, or delete
 
 ### Visualization
@@ -21,23 +23,31 @@ A modern, full-stack organizational directory and visualization platform. Build,
 - **Expandable Nodes**: Click departments to show/hide team members
 - **Depth-Based Coloring**: Visual hierarchy with automatic color gradients
 - **Mini-Map**: Bird's-eye navigation for large organizations
+- **Dark Mode**: System-aware dark theme with manual toggle
+- **Collapsible Sidebar**: Maximize workspace with icon-only mode
 
 ### Collaboration
 - **Team Roles**: Owner, Admin, Editor, Viewer permissions
 - **Email Invitations**: Invite team members via email
 - **Real-Time Sync**: Changes appear instantly across all connected users
-- **Share Links**: Public or private sharing with optional passwords
+- **Share Links**: Public read-only sharing with full navigation
+
+### Security
+- **Passkey Authentication**: Passwordless login with WebAuthn/biometrics
+- **Two-Factor Authentication**: TOTP-based 2FA with backup codes
+- **Session Management**: View and revoke active sessions
+- **CSRF Protection**: Double-submit cookie pattern for state changes
 
 ### Data Management
-- **Import/Export**: JSON and CSV format support
-- **Full-Text Search**: Instant search across all organizations
+- **Import/Export**: CSV and GEDS XML format support
+- **Full-Text Search**: FTS5-powered search with autocomplete and fuzzy matching
 - **Audit Trail**: Track all changes with 1-year retention
-- **Automatic Backups**: Database persistence on Render
+- **Automatic Backups**: Database persistence with scheduled backups
 
 ## Tech Stack
 
 ### Frontend
-- **React 18** with hooks
+- **React 18** with TypeScript and hooks
 - **React Flow** for interactive canvas
 - **React Router** for navigation
 - **Tailwind CSS** for styling
@@ -46,13 +56,15 @@ A modern, full-stack organizational directory and visualization platform. Build,
 - **Vite** for build tooling
 
 ### Backend
-- **Node.js** with Express
+- **Node.js** with Express and TypeScript
 - **SQLite** with better-sqlite3
 - **FTS5** for full-text search
 - **Socket.IO** for WebSocket connections
 - **bcrypt** for password hashing
-- **jsonwebtoken** for authentication
+- **jsonwebtoken** for JWT authentication
+- **@simplewebauthn** for passkey/WebAuthn support
 - **Resend** for transactional emails
+- **Helmet.js** for security headers
 - **express-rate-limit** for API protection
 
 ## Quick Start
@@ -121,25 +133,27 @@ NODE_ENV=production
 
 ```
 /
-├── src/                    # Frontend source
+├── src/                    # Frontend source (TypeScript)
 │   ├── components/
-│   │   ├── admin/          # Admin panels (Person, Department managers)
-│   │   ├── auth/           # Login, Register, Password reset
-│   │   ├── layout/         # Layout components
-│   │   └── org-chart/      # Visualization components
-│   ├── contexts/           # React contexts (Auth, Socket)
-│   ├── hooks/              # Custom hooks
-│   ├── api/                # API client
-│   └── pages/              # Route pages
-├── server/                 # Backend source
+│   │   ├── admin/          # Admin panels (Person, Department, Audit)
+│   │   ├── auth/           # Login, Signup, 2FA, Password reset
+│   │   ├── account/        # Profile, Security, Sessions
+│   │   ├── superuser/      # System admin (User management)
+│   │   └── ui/             # Reusable UI components
+│   ├── contexts/           # React contexts (Auth, Socket, Theme)
+│   ├── hooks/              # Custom hooks (usePeople, useSearch, etc.)
+│   ├── api/                # API client with CSRF handling
+│   └── utils/              # Utilities (CSV, layout, colors)
+├── server/                 # Backend source (TypeScript)
 │   └── src/
-│       ├── routes/         # API routes
-│       ├── services/       # Business logic
-│       ├── middleware/     # Auth, rate limiting
-│       └── db.js           # Database setup
+│       ├── routes/         # API routes (32 route files)
+│       ├── services/       # Business logic (31 service files)
+│       ├── middleware/     # Auth, rate limiting, CSRF
+│       └── db.ts           # Database schema & migrations
 ├── docs/                   # Extended documentation
 │   ├── DOCUMENTATION.md    # Full user & admin guide
 │   ├── DEPLOYMENT.md       # Deployment instructions
+│   ├── adr/                # Architecture Decision Records
 │   └── ...
 └── PROGRESS.md             # Development progress
 ```
@@ -148,16 +162,19 @@ NODE_ENV=production
 
 | Endpoint | Description |
 |----------|-------------|
-| `POST /api/auth/*` | Authentication (register, login, logout) |
+| `POST /api/auth/*` | Authentication (register, login, logout, passkeys, 2FA) |
 | `GET/POST /api/organizations` | Organization CRUD |
 | `GET/POST /api/organizations/:id/departments` | Department management |
 | `GET/POST /api/organizations/:id/people` | People management |
+| `GET/POST /api/organizations/:id/custom-fields` | Custom field definitions |
 | `POST /api/organizations/:id/*/bulk-*` | Bulk operations |
+| `GET /api/organizations/:id/search` | Full-text search with autocomplete |
 | `GET /api/organizations/:id/audit-logs` | Audit trail |
 | `POST /api/organizations/:id/invitations` | Team invitations |
-| `GET /api/share/:token` | Public share access |
+| `GET /api/public/org/:token` | Public share access |
+| `GET /api/admin/*` | Superuser system administration |
 
-See [DOCUMENTATION.md](./docs/DOCUMENTATION.md) for complete API details.
+See [DOCUMENTATION.md](./docs/DOCUMENTATION.md) for complete API details and Swagger UI at `/api/docs`.
 
 ## Deployment
 
