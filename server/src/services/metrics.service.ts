@@ -56,9 +56,9 @@ export function getOverviewMetrics(): OverviewMetrics {
     ).count;
 
     const totalDepartments = (
-      db
-        .prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL')
-        .get() as { count: number }
+      db.prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL').get() as {
+        count: number;
+      }
     ).count;
 
     const totalPeople = (
@@ -132,9 +132,9 @@ export function getUsageMetrics(): UsageMetrics {
 
     // Content volume
     const departmentCount = (
-      db
-        .prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL')
-        .get() as { count: number }
+      db.prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL').get() as {
+        count: number;
+      }
     ).count;
 
     const peopleCount = (
