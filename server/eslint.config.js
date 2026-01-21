@@ -6,13 +6,7 @@ import prettierConfig from 'eslint-config-prettier';
 export default [
   // Ignore patterns
   {
-    ignores: [
-      'node_modules/**',
-      'coverage/**',
-      'dist/**',
-      'backups/**',
-      '*.db',
-    ],
+    ignores: ['node_modules/**', 'coverage/**', 'dist/**', 'backups/**', '*.db'],
   },
 
   // Base JavaScript config
@@ -48,10 +42,13 @@ export default [
     rules: {
       // TypeScript rules
       ...tsPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': ['warn', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
 
@@ -60,7 +57,7 @@ export default [
       'no-console': 'off', // Allow console in Node.js
       'prefer-const': 'error',
       'no-var': 'error',
-      'eqeqeq': ['error', 'always'],
+      eqeqeq: ['error', 'always'],
       'no-throw-literal': 'error',
     },
   },

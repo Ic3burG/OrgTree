@@ -117,9 +117,7 @@ function initializeTestDb(db: DatabaseType): void {
 
 // Test data generators
 export function generateId(): string {
-  return (
-    Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-  );
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
 interface UserOverrides {
@@ -157,10 +155,12 @@ export async function createTestUser(
     must_change_password: overrides.mustChangePassword || 0,
   };
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO users (id, name, email, password_hash, role, must_change_password)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).run(user.id, user.name, user.email, user.password_hash, user.role, user.must_change_password);
+  `
+  ).run(user.id, user.name, user.email, user.password_hash, user.role, user.must_change_password);
 
   return { ...user, password: overrides.password || 'testpass123' };
 }
@@ -195,10 +195,12 @@ export function createTestOrg(
     share_token: overrides.shareToken || null,
   };
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO organizations (id, name, created_by_id, is_public, share_token)
     VALUES (?, ?, ?, ?, ?)
-  `).run(org.id, org.name, org.created_by_id, org.is_public, org.share_token);
+  `
+  ).run(org.id, org.name, org.created_by_id, org.is_public, org.share_token);
 
   return org;
 }
@@ -236,10 +238,19 @@ export function createTestDepartment(
     sort_order: overrides.sortOrder || 0,
   };
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO departments (id, organization_id, parent_id, name, description, sort_order)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).run(dept.id, dept.organization_id, dept.parent_id, dept.name, dept.description, dept.sort_order);
+  `
+  ).run(
+    dept.id,
+    dept.organization_id,
+    dept.parent_id,
+    dept.name,
+    dept.description,
+    dept.sort_order
+  );
 
   return dept;
 }
@@ -280,10 +291,20 @@ export function createTestPerson(
     sort_order: overrides.sortOrder || 0,
   };
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO people (id, department_id, name, title, email, phone, sort_order)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(person.id, person.department_id, person.name, person.title, person.email, person.phone, person.sort_order);
+  `
+  ).run(
+    person.id,
+    person.department_id,
+    person.name,
+    person.title,
+    person.email,
+    person.phone,
+    person.sort_order
+  );
 
   return person;
 }
@@ -303,10 +324,12 @@ export function addOrgMember(
 ): OrgMember {
   const id = generateId();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO organization_members (id, organization_id, user_id, role)
     VALUES (?, ?, ?, ?)
-  `).run(id, orgId, userId, role);
+  `
+  ).run(id, orgId, userId, role);
 
   return { id, organization_id: orgId, user_id: userId, role };
 }

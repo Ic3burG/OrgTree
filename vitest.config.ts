@@ -12,18 +12,13 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.{js,jsx,ts,tsx}'],
-      exclude: [
-        'src/main.tsx',
-        'src/test/**',
-        'src/**/*.test.{js,jsx,ts,tsx}',
-        'node_modules/**'
-      ],
+      exclude: ['src/main.tsx', 'src/test/**', 'src/**/*.test.{js,jsx,ts,tsx}', 'node_modules/**'],
       thresholds: {
         statements: 5,
         branches: 2,
         functions: 5,
-        lines: 5
-      }
-    }
-  }
+        lines: 5,
+      },
+    },
+  },
 });

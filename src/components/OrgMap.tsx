@@ -25,6 +25,8 @@ import { getDepthColors } from '../utils/colors';
 import { exportToPng, exportToPdf } from '../utils/exportUtils';
 import { useToast } from './ui/Toast';
 import { useRealtimeUpdates } from '../hooks/useRealtimeUpdates';
+import { useAnalytics } from '../contexts/AnalyticsContext';
+
 import api from '../api/client';
 import { Department, Person, Organization, CustomFieldDefinition } from '../types/index';
 
@@ -161,6 +163,8 @@ export default function OrgMap(): React.JSX.Element {
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
   const toast = useToast();
   const { isDarkMode } = useTheme();
+  const { track } = useAnalytics();
+
   const [searchParams] = useSearchParams();
 
   // Use ref for fitView to avoid dependency issues in useCallback
@@ -296,42 +300,68 @@ export default function OrgMap(): React.JSX.Element {
   // Handle auto-zoom from URL parameter (e.g. from department list)
   useEffect(() => {
     const personId = searchParams.get('personId');
-    if (personId && !isLoading && nodes.length > 0) {
-      // Find the node containing this person
-      let targetNodeId: string | undefined;
-      let targetPerson: Person | undefined;
+    const departmentId = searchParams.get('departmentId');
 
-      for (const node of nodes) {
-        const person = node.data.people.find(p => p.id === personId);
-        if (person) {
-          targetNodeId = node.id;
-          targetPerson = person;
-          break;
-        }
-      }
+    if (!isLoading && nodes.length > 0) {
+      if (personId) {
+        // Find the node containing this person
+        let targetNodeId: string | undefined;
+        let targetPerson: Person | undefined;
 
-      if (targetNodeId && targetPerson) {
-        // Use the same logic as search selection
-        const node = nodes.find(n => n.id === targetNodeId);
-
-        if (node && !node.data.isExpanded) {
-          handleToggleExpand(targetNodeId);
+        for (const node of nodes) {
+          const person = node.data.people.find(p => p.id === personId);
+          if (person) {
+            targetNodeId = node.id;
+            targetPerson = person;
+            break;
+          }
         }
 
-        setTimeout(() => {
-          // Use nodesRef.current to get the latest nodes after handleToggleExpand state update
-          const updatedNode = nodesRef.current.find(n => n.id === targetNodeId);
-          if (updatedNode && updatedNode.position) {
-            setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
+        if (targetNodeId && targetPerson) {
+          // Use the same logic as search selection
+          const node = nodes.find(n => n.id === targetNodeId);
+
+          if (node && !node.data.isExpanded) {
+            handleToggleExpand(targetNodeId);
+          }
+
+          setTimeout(() => {
+            // Use nodesRef.current to get the latest nodes after handleToggleExpand state update
+            const updatedNode = nodesRef.current.find(n => n.id === targetNodeId);
+            if (updatedNode && updatedNode.position) {
+              setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
+                zoom: 1.5,
+                duration: 800,
+              });
+              setHighlightedNodeId(targetNodeId);
+              setTimeout(() => setHighlightedNodeId(null), 3000);
+            }
+
+            setSelectedPerson(targetPerson as Person);
+          }, 300);
+        }
+      } else if (departmentId) {
+        // Handle department deep link
+        const targetNode = nodes.find(n => n.id === departmentId);
+
+        if (targetNode) {
+          // If node is hidden (inside a collapsed parent), we need to expand parents
+          // Ideally we'd traverse up and expand, but for now we just try to zoom to it if visible
+          // or if it's a top level node.
+
+          // Current logic mostly assumes flattened or manageable tree.
+          // If we want to ensure it's visible, we might need to expand upwards.
+          // For now, let's just zoom and highlight.
+
+          if (targetNode.position) {
+            setCenter(targetNode.position.x + 110, targetNode.position.y + 35, {
               zoom: 1.5,
               duration: 800,
             });
-            setHighlightedNodeId(targetNodeId);
+            setHighlightedNodeId(departmentId);
             setTimeout(() => setHighlightedNodeId(null), 3000);
           }
-
-          setSelectedPerson(targetPerson as Person);
-        }, 300);
+        }
       }
     }
   }, [isLoading, nodes, searchParams, handleToggleExpand, setCenter]);
@@ -444,10 +474,14 @@ export default function OrgMap(): React.JSX.Element {
   }, [layoutDirection, edges, setNodes]);
 
   // Handle theme change
-  const handleThemeChange = useCallback((themeName: string): void => {
-    setCurrentTheme(themeName);
-    localStorage.setItem('orgTreeTheme', themeName);
-  }, []);
+  const handleThemeChange = useCallback(
+    (themeName: string): void => {
+      setCurrentTheme(themeName);
+      localStorage.setItem('orgTreeTheme', themeName);
+      track('theme_changed', { theme: themeName });
+    },
+    [track]
+  );
 
   // Handle export to PNG
   const handleExportPng = useCallback(async () => {
@@ -458,13 +492,14 @@ export default function OrgMap(): React.JSX.Element {
       const filename = `${orgName.toLowerCase().replace(/\s+/g, '-')}-org-chart.png`;
       await exportToPng(reactFlowWrapper.current, filename);
       toast.success('Chart exported as PNG successfully!');
+      track('export_chart', { format: 'png', org_name: orgName });
     } catch (err) {
       console.error('PNG export failed:', err);
       toast.error('Failed to export as PNG. Please try again.');
     } finally {
       setExporting(false);
     }
-  }, [orgName, toast]);
+  }, [orgName, toast, track]);
 
   // Handle export to PDF
   const handleExportPdf = useCallback(async () => {
@@ -475,13 +510,14 @@ export default function OrgMap(): React.JSX.Element {
       const filename = `${orgName.toLowerCase().replace(/\s+/g, '-')}-org-chart.pdf`;
       await exportToPdf(reactFlowWrapper.current, filename, orgName);
       toast.success('Chart exported as PDF successfully!');
+      track('export_chart', { format: 'pdf', org_name: orgName });
     } catch (err) {
       console.error('PDF export failed:', err);
       toast.error('Failed to export as PDF. Please try again.');
     } finally {
       setExporting(false);
     }
-  }, [orgName, toast]);
+  }, [orgName, toast, track]);
 
   // Handle search result selection
   const handleSearchSelect = useCallback(

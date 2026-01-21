@@ -231,7 +231,28 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Today's Progress (January 21, 2026 - Session 60)**:
+- **Today's Progress (January 21, 2026 - Session 61)**:
+  - ✅ **User Analytics Implementation** - Privacy-respecting tracking of feature usage and user journeys
+    - **Backend**: Added `analytics_events` table, service, and API endpoint with rate limiting
+    - **Frontend**: Created `AnalyticsContext` for session management and auto-page tracking
+    - **Instrumentation**: Added tracking for Search, Theme Toggle, and PNG/PDF Exports
+    - **Visualization**: Added "Analytics Events" count to Superuser Metrics Dashboard
+    - **Documentation**: Added ADR-008 explaining the architecture
+  - 📁 **FILES MODIFIED**:
+    - `server/src/db.ts` - Added table schema
+    - `server/src/routes/analytics.ts` - New API endpoint
+    - `server/src/services/analytics.service.ts` - New service
+    - `src/contexts/AnalyticsContext.tsx` - New frontend context
+    - `src/hooks/useSearch.ts` - Search tracking
+    - `src/components/OrgMap.tsx` - Export/Theme tracking
+    - `src/components/superuser/MetricsDashboard.tsx` - Dashboard update
+  - ✅ **COMMITS PUSHED**: Multiple commits covering full analytics implementation
+  - 📊 **METRICS**:
+    - New Table: `analytics_events`
+    - New API Route: `POST /api/analytics/events`
+    - Dashboard Metric: "Analytics Events"
+
+- **Previous Progress (January 21, 2026 - Session 60)**:
   - 🧪 **TEST COVERAGE EXPANSION (PHASE 5 & 6)**
     - **Frontend Refactoring & Testing**:
       - Created `useDepartments` and `usePeople` custom hooks to decouple logic from UI.
@@ -3036,7 +3057,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>
-**Last Updated**: January 21, 2026 (Session 60 - Test Coverage Expansion)
+**Last Updated**: January 21, 2026 (Session 61 - User Analytics)
 
 **Today's Major Milestone**: 🎉
 

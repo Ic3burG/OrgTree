@@ -60,6 +60,7 @@ cd server && npm install && cd ..
 ### Environment Configuration
 
 1. Copy the example environment file:
+
    ```bash
    cp server/.env.example server/.env
    ```
@@ -113,12 +114,12 @@ OrgTree/
 
 ### Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/api/client.ts` | API client with auth token handling |
-| `server/src/db.ts` | Database schema and migrations |
-| `server/src/index.ts` | Express app setup |
-| `vite.config.ts` | Frontend build configuration |
+| File                  | Purpose                             |
+| --------------------- | ----------------------------------- |
+| `src/api/client.ts`   | API client with auth token handling |
+| `server/src/db.ts`    | Database schema and migrations      |
+| `server/src/index.ts` | Express app setup                   |
+| `vite.config.ts`      | Frontend build configuration        |
 
 ---
 
@@ -282,6 +283,7 @@ npm run test:e2e:debug        # Run in debug mode
 ```
 
 E2E tests are located in the `e2e/` directory and cover:
+
 - **Authentication** (login, signup, logout)
 - **Organizations** (create, navigate, manage)
 - **Departments** (CRUD operations)
@@ -295,6 +297,7 @@ E2E tests are located in the `e2e/` directory and cover:
 ### Before Submitting
 
 1. **Ensure all checks pass locally:**
+
    ```bash
    npm run typecheck && cd server && npm run typecheck && cd ..
    npm run lint:all
@@ -340,16 +343,16 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Types
 
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `style` | Formatting, no code change |
+| Type       | Description                             |
+| ---------- | --------------------------------------- |
+| `feat`     | New feature                             |
+| `fix`      | Bug fix                                 |
+| `docs`     | Documentation only                      |
+| `style`    | Formatting, no code change              |
 | `refactor` | Code change that neither fixes nor adds |
-| `perf` | Performance improvement |
-| `test` | Adding or updating tests |
-| `chore` | Maintenance tasks |
+| `perf`     | Performance improvement                 |
+| `test`     | Adding or updating tests                |
+| `chore`    | Maintenance tasks                       |
 
 ### Examples
 

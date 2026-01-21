@@ -15,7 +15,7 @@ export const test = base.extend<{
   testUser: async ({}, use) => {
     await use(TEST_USER);
   },
-  
+
   authenticatedPage: async ({ page }, use) => {
     // First, create a test user
     await page.goto('/signup');
@@ -24,13 +24,13 @@ export const test = base.extend<{
     await page.getByLabel('Password', { exact: true }).fill(TEST_USER.password);
     await page.getByLabel('Confirm Password').fill(TEST_USER.password);
     await page.getByRole('button', { name: /sign up|create account/i }).click();
-    
+
     // Wait for redirect to dashboard or home
     await page.waitForURL(/\/(organizations|dashboard)?$/);
-    
+
     // Now the page is authenticated
     await use(page);
-    
+
     // Cleanup: logout (optional, tests should be isolated)
     // No explicit cleanup needed as each test gets fresh context
   },

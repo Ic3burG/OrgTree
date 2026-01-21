@@ -3,6 +3,7 @@
 ## The Problem
 
 You're getting this error:
+
 ```
 ERROR: No departments were extracted! Check XML structure.
 ```
@@ -38,12 +39,14 @@ Processing: your-file.xml
 ### Cause 1: Empty orgStructure
 
 **Symptom:**
+
 ```
 WARNING: No orgStructure found for John Doe
 Raw orgStructure: undefined
 ```
 
 **Solution:** Your XML files might use a different structure. Check if they have these fields:
+
 ```xml
 <department>Department Name</department>
 <organization>Organization Unit</organization>
@@ -54,6 +57,7 @@ The parser now has a **fallback** that will try to use these fields if `orgStruc
 ### Cause 2: All Departments are "Canada"
 
 **Symptom:**
+
 ```
 Skipping "Canada" (root org)
 WARNING: No departments found, skipping person
@@ -64,6 +68,7 @@ WARNING: No departments found, skipping person
 ### Cause 3: Different XML Structure
 
 **Symptom:**
+
 ```
 Debug - First org object: null
 ```
@@ -79,6 +84,7 @@ If the issue persists, please:
 3. Share the XML structure
 
 Example:
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <gedsPerson>
@@ -100,6 +106,7 @@ Example:
 If you need to proceed immediately, you can:
 
 1. **Option A:** Create a simpler CSV manually with just:
+
    ```csv
    Path,Type,Name,Title,Email,Phone,Description
    /DEPT,department,Department Name,,,,
@@ -111,11 +118,13 @@ If you need to proceed immediately, you can:
 ## Next Steps
 
 Run the parser again with the improvements:
+
 ```bash
 node scripts/parse-geds-xml.js
 ```
 
 The new version will:
+
 - Show detailed debug output
 - Try fallback extraction from `<department>` and `<organization>` fields
 - List which files have problems

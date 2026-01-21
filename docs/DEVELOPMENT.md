@@ -47,12 +47,14 @@ This project uses a **multi-package structure** with independent frontend and ba
 **When to Use Workspaces vs. Multi-Package:**
 
 Use NPM Workspaces when:
+
 - Dependencies should be hoisted to a single root `node_modules`
 - Cross-package references use `workspace:` protocol
 - All packages share a single lockfile
 - Packages need to reference each other during development
 
 Use Multi-Package (like OrgTree) when:
+
 - Frontend and backend are truly independent services
 - Each package has distinct dependency requirements
 - Packages deploy separately (frontend to CDN, backend to server)
@@ -133,7 +135,7 @@ Edit `src/utils/colors.js`:
 ```javascript
 export function getDepthColors(depth) {
   const backgrounds = [
-    'bg-blue-700',  // Change to your preferred color
+    'bg-blue-700', // Change to your preferred color
     'bg-blue-600',
     // ...
   ];
@@ -284,8 +286,11 @@ try {
 React's `exhaustive-deps` rule ensures effects re-run when their dependencies change. However, there are valid cases to disable it:
 
 **Case 1: Functions defined in component scope**
+
 ```typescript
-const fetchData = async () => { /* ... */ };
+const fetchData = async () => {
+  /* ... */
+};
 
 useEffect(() => {
   fetchData();
@@ -294,6 +299,7 @@ useEffect(() => {
 ```
 
 **Case 2: State being set within the effect**
+
 ```typescript
 useEffect(() => {
   const socket = io();
@@ -345,6 +351,7 @@ Potential features to add:
 10. **Offline Support**: Service workers for PWA capability
 
 **Already Implemented:**
+
 - ✅ CSV Import/Export (with ZIP bundling)
 - ✅ PDF/PNG Export (via React Flow)
 - ✅ Dark Mode (with system preference detection)
@@ -368,4 +375,3 @@ When adding features:
 ## License
 
 - **License**: GPL 3.0
-

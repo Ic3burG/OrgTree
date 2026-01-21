@@ -17,7 +17,7 @@ The OrgMap component (`src/components/OrgMap.tsx`) depends on specific field nam
 if (dept.parent_id) {
   edges.push({
     id: `e-${dept.parent_id}-${dept.id}`,
-    source: dept.parent_id,  // ← Requires parent_id in snake_case
+    source: dept.parent_id, // ← Requires parent_id in snake_case
     target: dept.id,
     type: 'smoothstep',
   });
@@ -31,15 +31,18 @@ if (dept.parent_id) {
 ## The Solution: ALWAYS Use snake_case
 
 ### Database Schema
+
 - SQLite columns use `snake_case` (e.g., `parent_id`, `organization_id`, `sort_order`)
 - This is the source of truth
 
 ### Backend Services
+
 - SQL queries MUST return column names without aliasing (snake_case)
 - TypeScript interfaces MUST use snake_case to match database schema
 - **DO NOT** use `AS` aliases to convert to camelCase
 
 ### Frontend Types
+
 - TypeScript interfaces use snake_case (see `src/types/index.ts`)
 - React components expect snake_case field names
 - Data flows from backend → frontend without transformation
@@ -52,7 +55,9 @@ if (dept.parent_id) {
 
 ```typescript
 // org.service.ts
-const departments = db.prepare(`
+const departments = db
+  .prepare(
+    `
   SELECT
     d.id,
     d.organization_id,    -- NO aliasing
@@ -65,14 +70,18 @@ const departments = db.prepare(`
   FROM departments d
   WHERE d.organization_id = ? AND d.deleted_at IS NULL
   ORDER BY d.sort_order ASC
-`).all(id) as Department[];
+`
+  )
+  .all(id) as Department[];
 ```
 
 ### ❌ WRONG Backend Query (WILL BREAK EDGES!)
 
 ```typescript
 // DON'T DO THIS!
-const departments = db.prepare(`
+const departments = db
+  .prepare(
+    `
   SELECT
     d.id,
     d.organization_id as organizationId,  -- ❌ WRONG!
@@ -85,7 +94,9 @@ const departments = db.prepare(`
   FROM departments d
   WHERE d.organization_id = ? AND d.deleted_at IS NULL
   ORDER BY d.sort_order ASC
-`).all(id) as Department[];
+`
+  )
+  .all(id) as Department[];
 ```
 
 ### ✅ CORRECT TypeScript Interface
@@ -94,13 +105,13 @@ const departments = db.prepare(`
 // Backend service interface
 interface Department {
   id: string;
-  organization_id: string;   // snake_case
-  parent_id: string | null;  // snake_case
+  organization_id: string; // snake_case
+  parent_id: string | null; // snake_case
   name: string;
   description: string | null;
-  sort_order: number;        // snake_case
-  created_at: string;        // snake_case
-  updated_at: string;        // snake_case
+  sort_order: number; // snake_case
+  created_at: string; // snake_case
+  updated_at: string; // snake_case
 }
 ```
 
@@ -110,13 +121,13 @@ interface Department {
 // DON'T DO THIS!
 interface Department {
   id: string;
-  organizationId: string;   // ❌ WRONG!
-  parentId: string | null;  // ❌ BREAKS EDGES!
+  organizationId: string; // ❌ WRONG!
+  parentId: string | null; // ❌ BREAKS EDGES!
   name: string;
   description: string | null;
-  sortOrder: number;        // ❌ WRONG!
-  createdAt: string;        // ❌ WRONG!
-  updatedAt: string;        // ❌ WRONG!
+  sortOrder: number; // ❌ WRONG!
+  createdAt: string; // ❌ WRONG!
+  updatedAt: string; // ❌ WRONG!
 }
 ```
 
@@ -125,6 +136,7 @@ interface Department {
 ## Affected Fields
 
 ### Department Fields
+
 - `organization_id` (NOT organizationId)
 - `parent_id` (NOT parentId) **← CRITICAL FOR EDGES**
 - `sort_order` (NOT sortOrder)
@@ -133,6 +145,7 @@ interface Department {
 - `deleted_at` (NOT deletedAt)
 
 ### Person Fields
+
 - `department_id` (NOT departmentId)
 - `sort_order` (NOT sortOrder)
 - `created_at` (NOT createdAt)
@@ -140,6 +153,7 @@ interface Department {
 - `deleted_at` (NOT deletedAt)
 
 ### Organization Fields
+
 - `created_by_id` (NOT createdById)
 - `created_at` (NOT createdAt)
 - `updated_at` (NOT updatedAt)
@@ -153,6 +167,7 @@ A validation test suite ensures compliance:
 **File:** `server/src/services/__field-naming-validation.test.ts`
 
 This test:
+
 - ✅ Verifies `parent_id` exists in snake_case (critical for edges)
 - ✅ Verifies `organization_id`, `sort_order`, timestamps are snake_case
 - ✅ Verifies camelCase variants DO NOT exist
@@ -171,6 +186,7 @@ This bug has occurred **multiple times** during development:
 3. **Session 46+ (Jan 11, 2026)**: Regression again, validation tests added
 
 Each time, the symptoms were:
+
 - Department nodes displayed correctly
 - **Connection lines between departments disappeared**
 - No errors in console (silent failure)
@@ -202,6 +218,7 @@ This is not a style preference. It's a **functional requirement** for the org ch
 **Last Updated:** January 11, 2026
 **Maintained By:** Development Team
 **Related Files:**
+
 - `src/components/OrgMap.tsx` (edge creation logic)
 - `src/types/index.ts` (frontend type definitions)
 - `server/src/services/org.service.ts` (backend queries)

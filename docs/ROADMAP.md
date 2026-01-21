@@ -69,7 +69,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 - [x] **Sentry Express Instrumentation** - Improve Sentry setup with `--import` flag for early initialization and automatic Express tracking ✅ **DONE** (January 8, 2026)
 - [x] **Application Metrics Dashboard** - Response times, error rates, active users ✅ **DONE** (January 21, 2026)
-- [ ] **User Analytics** - Track feature usage, user journeys (privacy-respecting)
+- [x] **User Analytics** - Track feature usage, user journeys (privacy-respecting) ✅ **DONE** (January 21, 2026)
 - [ ] **Log Aggregation** - Centralized logging with search (Loki, CloudWatch, etc.)
 - [ ] **Performance Budget** - Set and monitor bundle size, load time thresholds
 
@@ -163,6 +163,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 **Recently Completed** (January 2026):
 
+- ✅ **User Analytics** - Privacy-respecting tracking of feature usage and user journeys (January 21, 2026)
 - ✅ **Custom Fields System** - Organization-scoped custom fields with FTS5 search integration (January 15, 2026)
 - ✅ **Star/Favorite People** - Mark key individuals with starred filter in search (January 14, 2026)
 - ✅ **Collapsible Admin Sidebar** - Icon-only mode with localStorage persistence (January 13, 2026)

@@ -61,6 +61,7 @@ cd server && npm run backup:stats          # Show backup statistics
 ### Monorepo Structure
 
 This is a monorepo with separate frontend and backend:
+
 - **Frontend**: Root directory (React + Vite)
 - **Backend**: `server/` directory (Express + SQLite)
 - Each has its own `package.json` and `node_modules`
@@ -70,10 +71,12 @@ This is a monorepo with separate frontend and backend:
 
 **Technology**: SQLite with `better-sqlite3`
 **Location**:
+
 - Development: `server/database.db`
 - Production: Configured via `DATABASE_URL` env var (typically `/data/database.db` on Render)
 
 **Schema** (defined in `server/src/db.ts`):
+
 - `users` - User accounts with roles, 2FA settings, and passkey support
 - `organizations` - Organizations with sharing settings
 - `org_members` - Many-to-many relationship (users ↔ organizations) with roles (owner, admin, editor, viewer)
@@ -88,6 +91,7 @@ This is a monorepo with separate frontend and backend:
 - `departments_fts` / `people_fts` / `custom_fields_fts` - Full-text search tables
 
 **Key Features**:
+
 - Foreign key constraints enabled
 - Soft deletes via `deleted_at` timestamp
 - Full-text search (FTS5) with Porter stemming and diacritics support
@@ -97,23 +101,27 @@ This is a monorepo with separate frontend and backend:
 ### Authentication & Authorization
 
 **Token Strategy**: Dual-token system (access + refresh)
+
 - **Access Token**: Short-lived JWT (15 min), stored in localStorage, sent via Authorization header
 - **Refresh Token**: Long-lived (7 days), stored in httpOnly cookie, used to renew access token
 - Auto-refresh at 80% of token lifetime (see `src/api/client.ts:151`)
 
 **Passkey/WebAuthn Support**:
+
 - Passwordless authentication using biometrics or security keys
 - Implemented with `@simplewebauthn/server` and `@simplewebauthn/browser`
 - Routes: `/api/auth/passkey/register-options`, `/api/auth/passkey/verify-registration`, etc.
 - Multiple passkeys per user supported
 
 **Two-Factor Authentication (2FA)**:
+
 - TOTP-based (Time-based One-Time Password)
 - 8 backup codes generated on setup (single-use)
 - Routes: `/api/auth/totp/setup`, `/api/auth/totp/verify`, `/api/auth/totp/disable`
 - QR code generation for authenticator apps
 
 **Roles**:
+
 - **System-level** (users table): `user`, `admin`, `superuser`
   - `superuser`: Full system access, user management, cross-org audit logs
   - `admin`: Standard user with some privileges
@@ -123,6 +131,7 @@ This is a monorepo with separate frontend and backend:
   - Owner cannot be removed or demoted
 
 **Session Management**:
+
 - Multiple concurrent sessions supported per user
 - Each refresh token tracked in database with device info (IP, user agent)
 - Users can view active sessions and revoke them via Account Settings
@@ -132,12 +141,14 @@ This is a monorepo with separate frontend and backend:
 **Technology**: Socket.IO with JWT authentication
 
 **Architecture**:
+
 - Socket server initialized in `server/src/socket.ts`
 - Clients authenticate via `socket.handshake.auth.token`
 - Organization-based rooms: `org:{orgId}`
 - Users join rooms on organization view, leave when switching orgs
 
 **Event Flow** (example - department creation):
+
 1. Client calls REST API (`POST /api/organizations/:id/departments`)
 2. Server creates department, logs audit trail
 3. Server calls `emitToOrg(orgId, 'department:created', payload)` (see `server/src/services/socket-events.service.ts`)
@@ -145,6 +156,7 @@ This is a monorepo with separate frontend and backend:
 5. Frontend updates UI without page refresh
 
 **Frontend Integration**:
+
 - `src/contexts/SocketContext.tsx` - React context for socket connection
 - Automatically reconnects on disconnect
 - Components subscribe to events via context
@@ -152,11 +164,13 @@ This is a monorepo with separate frontend and backend:
 ### CSRF Protection
 
 **Mechanism**: Double-submit cookie pattern
+
 - Server sends CSRF token in httpOnly cookie AND response body
 - Client stores token, sends it back in `X-CSRF-Token` header
 - Server validates token matches cookie
 
 **Implementation**:
+
 - Token fetched on app init (`src/api/client.ts:52`)
 - Auto-refreshed on 403 CSRF errors
 - Applied to all state-changing requests (POST, PUT, DELETE)
@@ -166,6 +180,7 @@ This is a monorepo with separate frontend and backend:
 **Location**: `src/api/client.ts`
 
 **Key Features**:
+
 - Centralized request function with automatic token refresh
 - CSRF token management
 - Request retry logic (401 → refresh → retry, 403 CSRF → refetch token → retry)
@@ -173,6 +188,7 @@ This is a monorepo with separate frontend and backend:
 - ApiError class with status codes
 
 **Error Handling**:
+
 - 401 Unauthorized: Attempts token refresh, retries request, falls back to login redirect
 - 403 Forbidden (CSRF): Refetches CSRF token, retries once
 - Other errors: Throws ApiError with status and message
@@ -182,11 +198,13 @@ This is a monorepo with separate frontend and backend:
 **Approach**: React Context API (no Redux/Zustand)
 
 **Contexts** (`src/contexts/`):
+
 - `AuthContext.tsx` - User authentication state, login/logout, role helpers
 - `SocketContext.tsx` - WebSocket connection, event subscriptions
 - `ThemeContext.tsx` - Dark mode state with localStorage persistence
 
 **Data Fetching**:
+
 - Direct API calls in components (no global state cache)
 - `useState` + `useEffect` pattern
 - Real-time updates via Socket.IO events
@@ -197,11 +215,13 @@ This is a monorepo with separate frontend and backend:
 **Pattern**: Service functions separated from route handlers
 
 **Structure**:
+
 - `server/src/routes/*.ts` - Express routes (thin, handle HTTP concerns)
 - `server/src/services/*.service.ts` - Business logic (pure functions, return data/errors)
 - Routes call services, services interact with database
 
 **Example** (department creation):
+
 - Route: `server/src/routes/departments.ts` - validates request, checks auth
 - Service: `server/src/services/department.service.ts:createDepartment()` - inserts into DB
 - Audit: `server/src/services/audit.service.ts:logAction()` - records change
@@ -242,6 +262,7 @@ src/components/
 ```
 
 **Key Components**:
+
 - **OrgMap.tsx**: Uses `reactflow` library for interactive canvas, handles zoom/pan, theming, export to PNG/PDF
 - **DepartmentNode.tsx**: Custom React Flow node component with expand/collapse, dark mode support
 - **SearchOverlay.tsx**: Connects to FTS5 search endpoint, fuzzy matching, autocomplete, starred filter
@@ -250,12 +271,14 @@ src/components/
 ### Import/Export
 
 **CSV Format**:
+
 - Exports separate files for departments and people (zipped)
 - Includes all fields including IDs and custom field values for re-import
 - Handled in `server/src/routes/import.ts`
 - Maximum 10,000 items per import
 
 **GEDS XML**:
+
 - Government Electronic Directory Services format
 - French character support (accents, special chars, Latin-1 encoding)
 - Parser: `scripts/parse-geds-xml.ts`
@@ -267,6 +290,7 @@ src/components/
 **Technology**: Sentry (both frontend and backend)
 
 **Setup**:
+
 - Frontend: `src/sentry.ts` - wraps app with ErrorBoundary, breadcrumbs for user actions
 - Backend: `server/src/sentry.ts` - captures exceptions, request data, user context
 - Configured via `SENTRY_DSN` environment variable
@@ -275,6 +299,7 @@ src/components/
 ### Security Features
 
 **Implemented**:
+
 - Helmet.js for security headers (XSS, clickjacking, MIME sniffing protection)
 - CSRF protection (double-submit cookie)
 - Rate limiting on auth endpoints (`express-rate-limit`)
@@ -285,6 +310,7 @@ src/components/
 - Input validation on all endpoints
 
 **Environment Variables**:
+
 - `JWT_SECRET` - **REQUIRED**, app exits if missing or using default in production
 - Production check: Refuses to start with `change-this-in-production` secret
 
@@ -318,6 +344,7 @@ cd server && npm test -- <test-file-pattern>
 ### Bulk Operations
 
 **Pattern**: All bulk endpoints process items individually (not single query) to:
+
 - Generate separate audit logs per item
 - Provide granular success/failure reporting
 - Maintain data integrity
@@ -329,6 +356,7 @@ cd server && npm test -- <test-file-pattern>
 **Automatic**: All CRUD operations must call `logAction()` from `audit.service.ts`
 
 **Required Parameters**:
+
 - `organizationId` - Which org (for filtering/cleanup), nullable for system events
 - `userId` - Who made the change
 - `action` - 'created', 'updated', 'deleted'
@@ -359,16 +387,19 @@ cd server && npm test -- <test-file-pattern>
 **Platform**: Render (Web Service)
 
 **Build Command**:
+
 ```bash
 npm install && npm run build && cd server && npm install
 ```
 
 **Start Command**:
+
 ```bash
 cd server && npm start
 ```
 
 **Environment**:
+
 - `NODE_ENV=production`
 - `JWT_SECRET` - Must be set to secure random string
 - `DATABASE_URL` - Path to persistent disk (e.g., `file:/data/database.db`)
@@ -376,6 +407,7 @@ cd server && npm start
 - Optional: `SENTRY_DSN`, `RESEND_API_KEY` (for email invitations)
 
 **Persistent Storage**:
+
 - Attach disk at `/data` for SQLite database
 - Backup strategy: Automatic via cron (see `server/scripts/backup.ts`)
 

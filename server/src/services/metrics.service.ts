@@ -88,6 +88,10 @@ export function getOverviewMetrics(): OverviewMetrics {
         .get() as { count: number }
     ).count;
 
+    const totalEvents = (
+      db.prepare('SELECT COUNT(*) as count FROM analytics_events').get() as { count: number }
+    ).count;
+
     return {
       totalUsers,
       totalOrganizations,
@@ -97,6 +101,7 @@ export function getOverviewMetrics(): OverviewMetrics {
       newOrgsToday,
       activeUsers24h,
       activeConnections: getActiveConnectionCount(),
+      totalEvents,
     };
   });
 }

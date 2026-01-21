@@ -17,6 +17,7 @@ node scripts/parse-geds-xml.js
 ```
 
 You'll see output like:
+
 ```
 Starting GEDS XML parsing...
 Found 50 XML files
@@ -37,6 +38,7 @@ CSV written to scripts/output/geds-import.csv
 ## Example Output
 
 From this XML structure:
+
 ```
 Canada (skipped)
 └── Immigration, Refugees and Citizenship Canada
@@ -47,6 +49,7 @@ Canada (skipped)
 ```
 
 You get this CSV:
+
 ```csv
 Path,Type,Name,Title,Email,Phone,Description
 /IRCC,department,"Immigration, Refugees and Citizenship Canada",,,,
