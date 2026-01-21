@@ -178,7 +178,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 
 ## 📋 Future Development Roadmap
 
-For detailed technical debt items, feature plans, and priority recommendations, see **[ROADMAP.md](ROADMAP.md)**.
+For detailed technical debt items, feature plans, and priority recommendations, see **[ROADMAP.md](docs/ROADMAP.md)**.
 
 ### Current Focus
 
