@@ -4,6 +4,7 @@ import { Handle, Position, NodeProps } from 'reactflow';
 import { Folder, FolderOpen, ChevronDown, ChevronUp, Users, UserPlus } from 'lucide-react';
 import { getDepthColors } from '../utils/colors';
 import { OrgChartThemeContext } from '../contexts/OrgChartThemeContext';
+import { useTheme } from '../contexts/ThemeContext';
 import PersonRowCard from './PersonRowCard';
 import DepartmentTooltip from './DepartmentTooltip';
 import type { Person } from '../types/index.js';
@@ -47,6 +48,7 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
   const theme = dataTheme || contextTheme;
   const colors = getDepthColors(depth, theme);
   const peopleCount = people?.length || 0;
+  const { isDarkMode } = useTheme();
 
   // Hover state for tooltip (disabled on touch devices)
   const [isHovered, setIsHovered] = useState(false);
@@ -141,12 +143,12 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
       <div
         className={`
           rounded-lg shadow-lg transition-all duration-200 relative
+          ${isDarkMode ? 'bg-slate-800' : 'bg-white'}
           ${isHighlighted ? 'ring-4 ring-blue-400 ring-opacity-75' : ''}
           ${selected ? 'ring-2 ring-blue-500' : ''}
         `}
         style={{
           width: isExpanded ? '280px' : '220px',
-          backgroundColor: 'white',
         }}
       >
         {/* Top handle for incoming connections */}
@@ -205,7 +207,7 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
 
         {/* Expanded People List */}
         {isExpanded && peopleCount > 0 && (
-          <div className="bg-white rounded-b-lg border-t border-slate-200">
+          <div className="bg-white dark:bg-slate-800 rounded-b-lg border-t border-slate-200 dark:border-slate-700">
             <div className="max-h-96 overflow-y-auto touch-pan-y">
               {people.map((person, index) => (
                 <PersonRowCard

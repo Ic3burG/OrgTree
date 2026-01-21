@@ -725,6 +725,7 @@ export default function OrgMap(): React.JSX.Element {
             <MiniMap
               nodeColor={node => getDepthColors(node.data.depth, currentTheme).hex}
               maskColor={isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.1)'}
+              style={{ backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc' }}
               position="bottom-right"
             />
           </ReactFlow>
