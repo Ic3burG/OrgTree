@@ -134,8 +134,16 @@ describe('Custom Fields Service', () => {
     });
 
     it('should increment sort order for new fields', async () => {
-      const field1 = await createFieldDefinition(orgId, { entity_type: 'person', name: 'Field 1', field_type: 'text' }, userId);
-      const field2 = await createFieldDefinition(orgId, { entity_type: 'person', name: 'Field 2', field_type: 'text' }, userId);
+      const field1 = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'Field 1', field_type: 'text' },
+        userId
+      );
+      const field2 = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'Field 2', field_type: 'text' },
+        userId
+      );
 
       expect(field1.sort_order).toBe(0);
       expect(field2.sort_order).toBe(1);
@@ -144,8 +152,16 @@ describe('Custom Fields Service', () => {
 
   describe('getFieldDefinitions', () => {
     it('should return fields for specific entity type', async () => {
-      await createFieldDefinition(orgId, { entity_type: 'person', name: 'Person Field', field_type: 'text' }, userId);
-      await createFieldDefinition(orgId, { entity_type: 'department', name: 'Dept Field', field_type: 'text' }, userId);
+      await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'Person Field', field_type: 'text' },
+        userId
+      );
+      await createFieldDefinition(
+        orgId,
+        { entity_type: 'department', name: 'Dept Field', field_type: 'text' },
+        userId
+      );
 
       const personFields = await getFieldDefinitions(orgId, 'person', userId);
       expect(personFields).toHaveLength(1);
@@ -157,17 +173,29 @@ describe('Custom Fields Service', () => {
     });
 
     it('should return all fields when entityType is all', async () => {
-        await createFieldDefinition(orgId, { entity_type: 'person', name: 'Person Field', field_type: 'text' }, userId);
-        await createFieldDefinition(orgId, { entity_type: 'department', name: 'Dept Field', field_type: 'text' }, userId);
+      await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'Person Field', field_type: 'text' },
+        userId
+      );
+      await createFieldDefinition(
+        orgId,
+        { entity_type: 'department', name: 'Dept Field', field_type: 'text' },
+        userId
+      );
 
-        const allFields = await getFieldDefinitions(orgId, 'all', userId);
-        expect(allFields).toHaveLength(2);
+      const allFields = await getFieldDefinitions(orgId, 'all', userId);
+      expect(allFields).toHaveLength(2);
     });
   });
 
   describe('updateFieldDefinition', () => {
     it('should update field definition properties', async () => {
-      const field = await createFieldDefinition(orgId, { entity_type: 'person', name: 'Old Name', field_type: 'text' }, userId);
+      const field = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'Old Name', field_type: 'text' },
+        userId
+      );
 
       const updated = await updateFieldDefinition(
         field.id,
@@ -187,7 +215,11 @@ describe('Custom Fields Service', () => {
 
   describe('deleteFieldDefinition', () => {
     it('should delete field definition', async () => {
-      const field = await createFieldDefinition(orgId, { entity_type: 'person', name: 'To Delete', field_type: 'text' }, userId);
+      const field = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'To Delete', field_type: 'text' },
+        userId
+      );
 
       await deleteFieldDefinition(field.id, userId);
 
@@ -198,9 +230,21 @@ describe('Custom Fields Service', () => {
 
   describe('reorderFieldDefinitions', () => {
     it('should update sort order based on provided IDs', async () => {
-      const f1 = await createFieldDefinition(orgId, { entity_type: 'person', name: 'F1', field_type: 'text' }, userId);
-      const f2 = await createFieldDefinition(orgId, { entity_type: 'person', name: 'F2', field_type: 'text' }, userId);
-      const f3 = await createFieldDefinition(orgId, { entity_type: 'person', name: 'F3', field_type: 'text' }, userId);
+      const f1 = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'F1', field_type: 'text' },
+        userId
+      );
+      const f2 = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'F2', field_type: 'text' },
+        userId
+      );
+      const f3 = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'F3', field_type: 'text' },
+        userId
+      );
 
       // Current order: 0, 1, 2.  Reverse it: 2, 1, 0 IDs
       await reorderFieldDefinitions(orgId, 'person', [f3.id, f2.id, f1.id], userId);
@@ -220,7 +264,11 @@ describe('Custom Fields Service', () => {
     const entityId = 'person-1';
 
     it('should save valid text values', async () => {
-      const field = await createFieldDefinition(orgId, { entity_type: 'person', name: 'Bio', field_type: 'text' }, userId);
+      const field = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'Bio', field_type: 'text' },
+        userId
+      );
 
       await setEntityCustomFields(orgId, 'person', entityId, {
         [field.field_key]: 'Hello World',
@@ -231,7 +279,11 @@ describe('Custom Fields Service', () => {
     });
 
     it('should remove values set to null/empty', async () => {
-      const field = await createFieldDefinition(orgId, { entity_type: 'person', name: 'Bio', field_type: 'text' }, userId);
+      const field = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'Bio', field_type: 'text' },
+        userId
+      );
 
       await setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: 'Exists' });
       await setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: '' });
@@ -241,7 +293,11 @@ describe('Custom Fields Service', () => {
     });
 
     it('should throw validation error for invalid number', async () => {
-      const field = await createFieldDefinition(orgId, { entity_type: 'person', name: 'Age', field_type: 'number' }, userId);
+      const field = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'Age', field_type: 'number' },
+        userId
+      );
 
       await expect(
         setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: 'not a number' })
@@ -255,7 +311,7 @@ describe('Custom Fields Service', () => {
           entity_type: 'person',
           name: 'Status',
           field_type: 'select',
-          options: ['Active', 'Inactive']
+          options: ['Active', 'Inactive'],
         },
         userId
       );
@@ -269,16 +325,18 @@ describe('Custom Fields Service', () => {
       const field = await createFieldDefinition(
         orgId,
         {
-            entity_type: 'person',
-            name: 'Skills',
-            field_type: 'multiselect',
-            options: ['JS', 'TS', 'Py']
+          entity_type: 'person',
+          name: 'Skills',
+          field_type: 'multiselect',
+          options: ['JS', 'TS', 'Py'],
         },
         userId
       );
 
       const skills = ['JS', 'TS'];
-      await setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: JSON.stringify(skills) });
+      await setEntityCustomFields(orgId, 'person', entityId, {
+        [field.field_key]: JSON.stringify(skills),
+      });
 
       const values = getCustomHeaderFields('person', entityId);
       // It is stored as stringified JSON
@@ -286,38 +344,52 @@ describe('Custom Fields Service', () => {
     });
 
     it('should validate email format', async () => {
-        const field = await createFieldDefinition(orgId, { entity_type: 'person', name: 'Contact', field_type: 'email' }, userId);
+      const field = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'Contact', field_type: 'email' },
+        userId
+      );
 
-        await expect(
-            setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: 'bad-email' })
-        ).rejects.toThrow('Invalid email');
+      await expect(
+        setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: 'bad-email' })
+      ).rejects.toThrow('Invalid email');
 
-        await expect(
-            setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: 'good@example.com' })
-        ).resolves.not.toThrow();
+      await expect(
+        setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: 'good@example.com' })
+      ).resolves.not.toThrow();
     });
 
     it('should validate url format', async () => {
-        const field = await createFieldDefinition(orgId, { entity_type: 'person', name: 'Website', field_type: 'url' }, userId);
+      const field = await createFieldDefinition(
+        orgId,
+        { entity_type: 'person', name: 'Website', field_type: 'url' },
+        userId
+      );
 
-        await expect(
-            setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: 'ht tp://broken' })
-        ).rejects.toThrow('Invalid URL');
-         await expect(
-            setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: 'https://example.com' })
-        ).resolves.not.toThrow();
+      await expect(
+        setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: 'ht tp://broken' })
+      ).rejects.toThrow('Invalid URL');
+      await expect(
+        setEntityCustomFields(orgId, 'person', entityId, {
+          [field.field_key]: 'https://example.com',
+        })
+      ).resolves.not.toThrow();
     });
 
     it('should update FTS index with searchable fields', async () => {
       const field = await createFieldDefinition(
-          orgId,
-          { entity_type: 'person', name: 'Search Me', field_type: 'text', is_searchable: true },
-          userId
+        orgId,
+        { entity_type: 'person', name: 'Search Me', field_type: 'text', is_searchable: true },
+        userId
       );
 
-      await setEntityCustomFields(orgId, 'person', entityId, { [field.field_key]: 'FindThisValue' });
+      await setEntityCustomFields(orgId, 'person', entityId, {
+        [field.field_key]: 'FindThisValue',
+      });
 
-      const fts = (db as DatabaseType).prepare('SELECT * FROM custom_fields_fts WHERE entity_id = ?').get(entityId) as any;
+      const fts = (db as DatabaseType)
+        .prepare('SELECT * FROM custom_fields_fts WHERE entity_id = ?')
+        .get(entityId) as any;
       expect(fts).toBeDefined();
       expect(fts.field_values).toContain('FindThisValue');
     });

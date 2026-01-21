@@ -19,7 +19,7 @@ vi.mock('../db.js', () => ({
       get: vi.fn(),
       run: vi.fn(),
     })),
-    transaction: vi.fn((cb) => cb),
+    transaction: vi.fn(cb => cb),
   },
 }));
 
@@ -41,9 +41,11 @@ describe('Organizations Routes', () => {
     app.use(express.json());
     app.use('/api', organizationsRouter);
 
-    app.use((_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-      res.status(500).json({ message: _err.message });
-    });
+    app.use(
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+        res.status(500).json({ message: _err.message });
+      }
+    );
   });
 
   afterEach(() => {
@@ -102,92 +104,98 @@ describe('Organizations Routes', () => {
     });
 
     it('should update organization', async () => {
-        const updatedOrg = { id: '1', name: 'Updated Org' };
-        vi.mocked(orgService.updateOrganization).mockResolvedValue(updatedOrg as any);
+      const updatedOrg = { id: '1', name: 'Updated Org' };
+      vi.mocked(orgService.updateOrganization).mockResolvedValue(updatedOrg as any);
 
-        const token = createAuthToken();
-        const response = await request(app)
-          .put('/api/organizations/1')
-          .set('Authorization', `Bearer ${token}`)
-          .send({ name: 'Updated Org' })
-          .expect(200);
+      const token = createAuthToken();
+      const response = await request(app)
+        .put('/api/organizations/1')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Updated Org' })
+        .expect(200);
 
-        expect(orgService.updateOrganization).toHaveBeenCalledWith('1', 'Updated Org', 'user-1');
+      expect(orgService.updateOrganization).toHaveBeenCalledWith('1', 'Updated Org', 'user-1');
     });
 
     it('should delete organization', async () => {
-        const token = createAuthToken();
-        await request(app)
-          .delete('/api/organizations/1')
-          .set('Authorization', `Bearer ${token}`)
-          .expect(204);
+      const token = createAuthToken();
+      await request(app)
+        .delete('/api/organizations/1')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(204);
 
-        expect(orgService.deleteOrganization).toHaveBeenCalledWith('1', 'user-1');
+      expect(orgService.deleteOrganization).toHaveBeenCalledWith('1', 'user-1');
     });
   });
 
   describe('Sharing Endpoints', () => {
     it('should get sharing settings', async () => {
-        const mockOrg = { id: '1', name: 'Org 1', is_public: 1, share_token: 'abc' };
-        
-        // Mock DB response
-        const getMock = vi.fn().mockReturnValue(mockOrg);
-        vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
+      const mockOrg = { id: '1', name: 'Org 1', is_public: 1, share_token: 'abc' };
 
-        const token = createAuthToken();
-        const response = await request(app)
-            .get('/api/organizations/1/share')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-        
-        expect(response.body).toEqual({
-            isPublic: true,
-            shareToken: 'abc',
-            shareUrl: 'http://test-frontend/public/abc'
-        });
-        expect(requireOrgPermission).toHaveBeenCalledWith('1', 'user-1', 'viewer');
+      // Mock DB response
+      const getMock = vi.fn().mockReturnValue(mockOrg);
+      vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
+
+      const token = createAuthToken();
+      const response = await request(app)
+        .get('/api/organizations/1/share')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(response.body).toEqual({
+        isPublic: true,
+        shareToken: 'abc',
+        shareUrl: 'http://test-frontend/public/abc',
+      });
+      expect(requireOrgPermission).toHaveBeenCalledWith('1', 'user-1', 'viewer');
     });
 
     it('should toggle sharing (enable public)', async () => {
-        const mockOrg = { id: '1', share_token: 'existing-token' };
-        const getMock = vi.fn().mockReturnValue(mockOrg);
-        const runMock = vi.fn();
-        vi.mocked(db.prepare).mockImplementation(() => ({
+      const mockOrg = { id: '1', share_token: 'existing-token' };
+      const getMock = vi.fn().mockReturnValue(mockOrg);
+      const runMock = vi.fn();
+      vi.mocked(db.prepare).mockImplementation(
+        () =>
+          ({
             get: getMock,
             run: runMock,
-        } as any));
+          }) as any
+      );
 
-        const token = createAuthToken();
-        const response = await request(app)
-            .put('/api/organizations/1/share')
-            .set('Authorization', `Bearer ${token}`)
-            .send({ isPublic: true })
-            .expect(200);
+      const token = createAuthToken();
+      const response = await request(app)
+        .put('/api/organizations/1/share')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ isPublic: true })
+        .expect(200);
 
-        expect(requireOrgPermission).toHaveBeenCalledWith('1', 'user-1', 'admin');
-        expect(runMock).toHaveBeenCalledWith(1, 'existing-token', '1');
-        expect(response.body.isPublic).toBe(true);
+      expect(requireOrgPermission).toHaveBeenCalledWith('1', 'user-1', 'admin');
+      expect(runMock).toHaveBeenCalledWith(1, 'existing-token', '1');
+      expect(response.body.isPublic).toBe(true);
     });
 
     it('should regenerate share token', async () => {
-        const mockOrg = { id: '1', is_public: 1 };
-        const getMock = vi.fn().mockReturnValue(mockOrg);
-        const runMock = vi.fn();
-        vi.mocked(db.prepare).mockImplementation(() => ({
+      const mockOrg = { id: '1', is_public: 1 };
+      const getMock = vi.fn().mockReturnValue(mockOrg);
+      const runMock = vi.fn();
+      vi.mocked(db.prepare).mockImplementation(
+        () =>
+          ({
             get: getMock,
             run: runMock,
-        } as any));
+          }) as any
+      );
 
-        const token = createAuthToken();
-        const response = await request(app)
-            .post('/api/organizations/1/share/regenerate')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-        
-        expect(requireOrgPermission).toHaveBeenCalledWith('1', 'user-1', 'admin');
-        // New token should be generated (we can't strict equal check random hex here easily without stubbing crypto, but length check works)
-        expect(response.body.shareToken).toHaveLength(32); // 16 bytes hex = 32 chars
-        expect(runMock).toHaveBeenCalled();
+      const token = createAuthToken();
+      const response = await request(app)
+        .post('/api/organizations/1/share/regenerate')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(requireOrgPermission).toHaveBeenCalledWith('1', 'user-1', 'admin');
+      // New token should be generated (we can't strict equal check random hex here easily without stubbing crypto, but length check works)
+      expect(response.body.shareToken).toHaveLength(32); // 16 bytes hex = 32 chars
+      expect(runMock).toHaveBeenCalled();
     });
   });
 });

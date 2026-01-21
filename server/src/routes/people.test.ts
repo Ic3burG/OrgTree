@@ -33,9 +33,11 @@ describe('People Routes', () => {
     app.use(express.json());
     app.use('/api', peopleRouter);
 
-    app.use((_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-      res.status(500).json({ message: _err.message });
-    });
+    app.use(
+      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+        res.status(500).json({ message: _err.message });
+      }
+    );
   });
 
   afterEach(() => {
@@ -83,7 +85,7 @@ describe('People Routes', () => {
           name: 'New Person',
           title: 'Dev',
           email: 'dev@example.com',
-          is_starred: true
+          is_starred: true,
         })
         .expect(201);
 
@@ -96,7 +98,7 @@ describe('People Routes', () => {
           email: 'dev@example.com',
           phone: undefined,
           isStarred: true,
-          customFields: undefined
+          customFields: undefined,
         },
         'user-1'
       );
@@ -132,9 +134,9 @@ describe('People Routes', () => {
       const updatedPerson = { id: '1', name: 'Updated Person', department_id: 'dept-1' };
       vi.mocked(peopleService.updatePerson).mockResolvedValue(updatedPerson as any);
 
-       // Mock DB get for event emitting
-       const getMock = vi.fn().mockReturnValue({ organization_id: testOrgId });
-       vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
+      // Mock DB get for event emitting
+      const getMock = vi.fn().mockReturnValue({ organization_id: testOrgId });
+      vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
 
       const token = createAuthToken();
       const response = await request(app)
@@ -153,7 +155,7 @@ describe('People Routes', () => {
           phone: undefined,
           departmentId: undefined,
           isStarred: false,
-          customFields: undefined
+          customFields: undefined,
         },
         'user-1'
       );
@@ -164,10 +166,10 @@ describe('People Routes', () => {
     it('should delete person', async () => {
       // Mock DB get for audit trail/events
       const mockPerson = {
-          id: '1',
-          name: 'To Delete',
-          departmentId: 'dept-1',
-          organization_id: testOrgId
+        id: '1',
+        name: 'To Delete',
+        departmentId: 'dept-1',
+        organization_id: testOrgId,
       };
       const getMock = vi.fn().mockReturnValue(mockPerson);
       vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
@@ -189,9 +191,9 @@ describe('People Routes', () => {
       const movedPerson = { id: '1', department_id: 'dept-2' };
       vi.mocked(peopleService.movePerson).mockResolvedValue(movedPerson as any);
 
-       // Mock DB get for event emitting
-       const getMock = vi.fn().mockReturnValue({ organization_id: testOrgId });
-       vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
+      // Mock DB get for event emitting
+      const getMock = vi.fn().mockReturnValue({ organization_id: testOrgId });
+      vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
 
       const token = createAuthToken();
       const response = await request(app)
@@ -205,12 +207,12 @@ describe('People Routes', () => {
     });
 
     it('should require departmentId', async () => {
-        const token = createAuthToken();
-        await request(app)
-          .put('/api/people/1/move')
-          .set('Authorization', `Bearer ${token}`)
-          .send({})
-          .expect(400);
+      const token = createAuthToken();
+      await request(app)
+        .put('/api/people/1/move')
+        .set('Authorization', `Bearer ${token}`)
+        .send({})
+        .expect(400);
     });
   });
 });
