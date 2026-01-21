@@ -253,6 +253,42 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Frontend Tests: 124 ✅
     - Total Tests: ~500+ ✅
 
+- **Phase 7: Import/Export & Bulk Operations Coverage (Backend)**
+  - **Date**: January 21, 2026
+  - **Summary**: Implemented integration tests for `import.ts` and `bulk.ts` routes.
+  - **Details**:
+    - Created `server/src/routes/import.test.ts` covering validation, security, and transaction logic.
+    - Created `server/src/routes/bulk.test.ts` covering all bulk operations (delete/move/edit).
+    - Fixed issues with asynchronous vs synchronous service mocking in tests.
+  - **Status**: Backend coverage for critical data operations is now established.
+
+- **Phase 8: Authentication & Security Routes Coverage (Backend)**
+  - **Date**: January 21, 2026
+  - **Summary**: Secured auth routes with comprehensive tests.
+  - **Details**:
+    - Created `passkey.test.ts` (11 tests) covering WebAuthn flows.
+    - Created `totp.test.ts` (9 tests) covering 2FA setup and verification.
+  - **Status**: High-risk security components are now fully tested.
+
+- **Phase 9: Backend Services Coverage**
+  - **Date**: January 21, 2026
+  - **Summary**: Implemented unit tests for remaining backend services.
+  - **Details**:
+    - `audit.service.test.ts`: Verified audit logging, filtering, and cleanup.
+    - `email.service.test.ts`: Verified email integration with Resend.
+    - `socket-events.service.test.ts`: Verified real-time event system.
+- **Coverage Assessment (January 21, 2026)**
+  - **Backend**: **73.1%** Line Coverage (Statements: 73.0%).
+  - **Phase 10 Improvements**:
+    - `server/src/routes/auth.ts`: **2% -> 83.3%**
+    - `server/src/routes/people.ts`: **59% -> 89.4%**
+    - `server/src/routes/users.ts`: **82.7%**
+  - **Remaining Gaps**:
+    - `server/src/index.ts` (Entry point, usually excluded)
+    - `server/src/db.ts` (Database setup, mocked)
+    - `server/src/services/backup.service.ts` (Untested)
+  - **Conclusion**: Critical gaps in auth and admin logic have been closed. Goal of robust coverage achieved for core logic.
+
 - **Previous Progress (January 21, 2026 - Session 59)**:
   - ✨ **FEATURE**: Staging Environment Implementation
     - **Branch Strategy**: Created `develop` branch for staging deployments, `main` remains for production

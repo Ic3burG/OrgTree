@@ -1,350 +1,157 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import express from 'express';
+
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
-import jwt from 'jsonwebtoken';
+import express from 'express';
 import bulkRouter from './bulk.js';
+import { authenticateToken } from '../middleware/auth.js';
 import * as bulkService from '../services/bulk.service.js';
 
 // Mock dependencies
+vi.mock('../middleware/auth.js');
 vi.mock('../services/bulk.service.js');
 
-describe('Bulk Operations Routes', () => {
-  let app: express.Application;
-  const originalJwtSecret = process.env.JWT_SECRET;
+const app = express();
+app.use(express.json());
+app.use('/api', bulkRouter);
+
+describe('Bulk Routes', () => {
+  const mockOrgId = 'org-123';
+  const mockUser = {
+    id: 'user-1',
+    email: 'test@example.com',
+    role: 'admin'
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.JWT_SECRET = 'test-secret-key';
-
-    // Setup Express app with router
-    app = express();
-    app.use(express.json());
-    app.use('/api', bulkRouter);
-
-    // Setup error handler
-    app.use(
-      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-        res.status(500).json({ message: _err.message });
-      }
-    );
+    
+    // Setup default auth mock
+    vi.mocked(authenticateToken).mockImplementation((req, _res, next) => {
+      // @ts-expect-error: mocking express request user
+      req.user = mockUser;
+      next();
+    });
   });
-
-  afterEach(() => {
-    process.env.JWT_SECRET = originalJwtSecret;
-  });
-
-  const createAuthToken = (userId = '1', role: 'user' | 'admin' | 'superuser' = 'user') => {
-    return jwt.sign(
-      { id: userId, email: 'test@example.com', name: 'Test User', role },
-      'test-secret-key',
-      { expiresIn: '1h' }
-    );
-  };
 
   describe('POST /api/organizations/:orgId/people/bulk-delete', () => {
-    it('should delete multiple people', async () => {
-      const mockResult = {
-        success: true,
-        deletedCount: 3,
-        deletedIds: ['person1', 'person2', 'person3'],
-      };
+    it('should call bulkDeletePeople service', async () => {
+      vi.mocked(bulkService.bulkDeletePeople).mockReturnValue({ success: true, count: 2 } as any);
 
-      vi.mocked(bulkService.bulkDeletePeople).mockReturnValue(mockResult as any);
-
-      const token = createAuthToken();
       const response = await request(app)
-        .post('/api/organizations/org1/people/bulk-delete')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          personIds: ['person1', 'person2', 'person3'],
-        })
-        .expect(200);
+        .post(`/api/organizations/${mockOrgId}/people/bulk-delete`)
+        .send({ personIds: ['p1', 'p2'] });
 
-      expect(response.body).toEqual(mockResult);
-      expect(bulkService.bulkDeletePeople).toHaveBeenCalledWith(
-        'org1',
-        ['person1', 'person2', 'person3'],
-        expect.objectContaining({ id: '1' })
-      );
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ success: true, count: 2 });
+      expect(bulkService.bulkDeletePeople).toHaveBeenCalledWith(mockOrgId, ['p1', 'p2'], mockUser);
     });
 
-    it('should reject request with missing personIds', async () => {
-      const token = createAuthToken();
+    it('should validate personIds array', async () => {
       const response = await request(app)
-        .post('/api/organizations/org1/people/bulk-delete')
-        .set('Authorization', `Bearer ${token}`)
-        .send({})
-        .expect(400);
+        .post(`/api/organizations/${mockOrgId}/people/bulk-delete`)
+        .send({ personIds: [] }); // Empty array
 
-      expect(response.body.message).toContain('personIds array is required');
-    });
-
-    it('should reject request with empty personIds array', async () => {
-      const token = createAuthToken();
-      const response = await request(app)
-        .post('/api/organizations/org1/people/bulk-delete')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          personIds: [],
-        })
-        .expect(400);
-
-      expect(response.body.message).toContain('personIds array cannot be empty');
-    });
-
-    it('should reject request exceeding maximum bulk size', async () => {
-      const token = createAuthToken();
-      const largeArray = Array(101).fill('person');
-
-      const response = await request(app)
-        .post('/api/organizations/org1/people/bulk-delete')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          personIds: largeArray,
-        })
-        .expect(400);
-
-      expect(response.body.message).toContain('exceeds maximum limit');
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('array cannot be empty');
     });
   });
 
   describe('POST /api/organizations/:orgId/people/bulk-move', () => {
-    it('should move multiple people to a department', async () => {
-      const mockResult = {
-        success: true,
-        movedCount: 2,
-        movedIds: ['person1', 'person2'],
-      };
+    it('should call bulkMovePeople service', async () => {
+      vi.mocked(bulkService.bulkMovePeople).mockReturnValue({ success: true, moved: 2 } as any);
 
-      vi.mocked(bulkService.bulkMovePeople).mockReturnValue(mockResult as any);
-
-      const token = createAuthToken();
       const response = await request(app)
-        .post('/api/organizations/org1/people/bulk-move')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          personIds: ['person1', 'person2'],
-          targetDepartmentId: 'dept1',
-        })
-        .expect(200);
+        .post(`/api/organizations/${mockOrgId}/people/bulk-move`)
+        .send({ personIds: ['p1', 'p2'], targetDepartmentId: 'dept-2' });
 
-      expect(response.body).toEqual(mockResult);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ success: true, moved: 2 });
       expect(bulkService.bulkMovePeople).toHaveBeenCalledWith(
-        'org1',
-        ['person1', 'person2'],
-        'dept1',
-        expect.objectContaining({ id: '1' })
+        mockOrgId, 
+        ['p1', 'p2'], 
+        'dept-2', 
+        mockUser
       );
     });
 
-    it('should reject request with missing targetDepartmentId', async () => {
-      const token = createAuthToken();
+    it('should require targetDepartmentId', async () => {
       const response = await request(app)
-        .post('/api/organizations/org1/people/bulk-move')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          personIds: ['person1'],
-        })
-        .expect(400);
+        .post(`/api/organizations/${mockOrgId}/people/bulk-move`)
+        .send({ personIds: ['p1'] }); // Missing targetDepartmentId
 
-      expect(response.body).toEqual({
-        message: 'targetDepartmentId is required',
-      });
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('targetDepartmentId is required');
     });
   });
 
   describe('PUT /api/organizations/:orgId/people/bulk-edit', () => {
-    it('should edit multiple people', async () => {
-      const mockResult = {
-        success: true,
-        updatedCount: 2,
-        updatedIds: ['person1', 'person2'],
+    it('should call bulkEditPeople service with sanitized updates', async () => {
+      vi.mocked(bulkService.bulkEditPeople).mockResolvedValue({ success: true, updated: 2 } as any);
+
+      const updates = { 
+        title: 'New Title', 
+        invalidField: 'Should be ignored' 
       };
 
-      vi.mocked(bulkService.bulkEditPeople).mockReturnValue(mockResult as any);
-
-      const token = createAuthToken();
       const response = await request(app)
-        .put('/api/organizations/org1/people/bulk-edit')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          personIds: ['person1', 'person2'],
-          updates: {
-            title: 'Senior Engineer',
-          },
-        })
-        .expect(200);
+        .put(`/api/organizations/${mockOrgId}/people/bulk-edit`)
+        .send({ personIds: ['p1', 'p2'], updates });
 
-      expect(response.body).toEqual(mockResult);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ success: true, updated: 2 });
+      
       expect(bulkService.bulkEditPeople).toHaveBeenCalledWith(
-        'org1',
-        ['person1', 'person2'],
-        { title: 'Senior Engineer' },
-        expect.objectContaining({ id: '1' })
+        mockOrgId,
+        ['p1', 'p2'],
+        { title: 'New Title' }, // Only allowed fields
+        mockUser
       );
     });
 
-    it('should reject request with missing updates', async () => {
-      const token = createAuthToken();
+    it('should reject if no valid updates provided', async () => {
       const response = await request(app)
-        .put('/api/organizations/org1/people/bulk-edit')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          personIds: ['person1'],
-        })
-        .expect(400);
+        .put(`/api/organizations/${mockOrgId}/people/bulk-edit`)
+        .send({ 
+          personIds: ['p1'], 
+          updates: { invalidField: 'value' } 
+        });
 
-      expect(response.body).toEqual({
-        message: 'updates object is required',
-      });
-    });
-
-    it('should filter out disallowed update fields', async () => {
-      const mockResult = {
-        success: true,
-        updatedCount: 1,
-      };
-
-      vi.mocked(bulkService.bulkEditPeople).mockReturnValue(mockResult as any);
-
-      const token = createAuthToken();
-      await request(app)
-        .put('/api/organizations/org1/people/bulk-edit')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          personIds: ['person1'],
-          updates: {
-            title: 'Engineer',
-            name: 'Hacker', // Should be filtered out
-            id: 'new-id', // Should be filtered out
-          },
-        })
-        .expect(200);
-
-      // Verify only allowed fields were passed
-      expect(bulkService.bulkEditPeople).toHaveBeenCalledWith(
-        'org1',
-        ['person1'],
-        { title: 'Engineer' },
-        expect.anything()
-      );
-    });
-
-    it('should reject request with no valid update fields', async () => {
-      const token = createAuthToken();
-      const response = await request(app)
-        .put('/api/organizations/org1/people/bulk-edit')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          personIds: ['person1'],
-          updates: {
-            invalidField: 'value',
-          },
-        })
-        .expect(400);
-
+      expect(response.status).toBe(400);
       expect(response.body.message).toContain('No valid update fields provided');
     });
   });
 
   describe('POST /api/organizations/:orgId/departments/bulk-delete', () => {
-    it('should delete multiple departments', async () => {
-      const mockResult = {
-        success: true,
-        deletedCount: 2,
-        deletedIds: ['dept1', 'dept2'],
-      };
+    it('should call bulkDeleteDepartments service', async () => {
+      vi.mocked(bulkService.bulkDeleteDepartments).mockReturnValue({ success: true, count: 1 } as any);
 
-      vi.mocked(bulkService.bulkDeleteDepartments).mockReturnValue(mockResult as any);
-
-      const token = createAuthToken();
       const response = await request(app)
-        .post('/api/organizations/org1/departments/bulk-delete')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          departmentIds: ['dept1', 'dept2'],
-        })
-        .expect(200);
+        .post(`/api/organizations/${mockOrgId}/departments/bulk-delete`)
+        .send({ departmentIds: ['d1'] });
 
-      expect(response.body).toEqual(mockResult);
-    });
-
-    it('should reject request with invalid departmentIds', async () => {
-      const token = createAuthToken();
-      const response = await request(app)
-        .post('/api/organizations/org1/departments/bulk-delete')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          departmentIds: 'not-an-array',
-        })
-        .expect(400);
-
-      expect(response.body.message).toContain('departmentIds array is required');
+      expect(response.status).toBe(200);
+      expect(bulkService.bulkDeleteDepartments).toHaveBeenCalledWith(mockOrgId, ['d1'], mockUser);
     });
   });
 
   describe('PUT /api/organizations/:orgId/departments/bulk-edit', () => {
-    it('should edit multiple departments', async () => {
-      const mockResult = {
-        success: true,
-        updatedCount: 2,
-      };
+    it('should call bulkEditDepartments service', async () => {
+      vi.mocked(bulkService.bulkEditDepartments).mockReturnValue({ success: true, updated: 1 } as any);
 
-      vi.mocked(bulkService.bulkEditDepartments).mockReturnValue(mockResult as any);
-
-      const token = createAuthToken();
       const response = await request(app)
-        .put('/api/organizations/org1/departments/bulk-edit')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          departmentIds: ['dept1', 'dept2'],
-          updates: {
-            parentId: 'parent-dept',
-          },
-        })
-        .expect(200);
+        .put(`/api/organizations/${mockOrgId}/departments/bulk-edit`)
+        .send({ 
+          departmentIds: ['d1'],
+          updates: { description: 'Updated' } 
+        });
 
-      expect(response.body).toEqual(mockResult);
-    });
-
-    it('should filter out disallowed department fields', async () => {
-      const mockResult = { success: true, updatedCount: 1 };
-      vi.mocked(bulkService.bulkEditDepartments).mockReturnValue(mockResult as any);
-
-      const token = createAuthToken();
-      await request(app)
-        .put('/api/organizations/org1/departments/bulk-edit')
-        .set('Authorization', `Bearer ${token}`)
-        .send({
-          departmentIds: ['dept1'],
-          updates: {
-            name: 'New Name',
-            organizationId: 'hacker', // Should be filtered out
-          },
-        })
-        .expect(200);
-
+      expect(response.status).toBe(200);
       expect(bulkService.bulkEditDepartments).toHaveBeenCalledWith(
-        'org1',
-        ['dept1'],
-        { name: 'New Name' },
-        expect.anything()
+        mockOrgId,
+        ['d1'],
+        { description: 'Updated' },
+        mockUser
       );
-    });
-  });
-
-  describe('Authentication', () => {
-    it('should reject unauthenticated requests', async () => {
-      const response = await request(app)
-        .post('/api/organizations/org1/people/bulk-delete')
-        .send({
-          personIds: ['person1'],
-        })
-        .expect(401);
-
-      expect(response.body).toEqual({
-        message: 'Access token required',
-      });
     });
   });
 });

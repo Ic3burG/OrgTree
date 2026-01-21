@@ -160,6 +160,15 @@ describe('People Routes', () => {
         'user-1'
       );
     });
+
+    it('should reject update with empty name', async () => {
+      const token = createAuthToken();
+      await request(app)
+        .put('/api/people/1')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: '   ' })
+        .expect(400);
+    });
   });
 
   describe('DELETE /api/people/:personId', () => {

@@ -4,11 +4,16 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import authRouter from './auth.js';
 import * as authService from '../services/auth.service.js';
+import * as usersService from '../services/users.service.js';
+import db from '../db.js';
+import bcrypt from 'bcrypt';
 // import * as auditService from '../services/audit.service.js';
 
 // Mock dependencies
 vi.mock('../services/auth.service.js');
+vi.mock('../services/users.service.js');
 vi.mock('../services/audit.service.js');
+vi.mock('bcrypt');
 vi.mock('../db.js', () => ({
   default: {
     prepare: vi.fn(() => ({
@@ -501,6 +506,202 @@ describe('Auth Routes', () => {
 
       expect(response.body).toEqual({
         message: 'No current session found',
+      });
+    });
+  });
+
+  describe('PUT /api/auth/profile', () => {
+    it('should update user profile', async () => {
+      const mockUpdatedUser = {
+        id: '1',
+        name: 'Updated Name',
+        email: 'updated@example.com',
+      };
+
+      vi.mocked(usersService.updateUser).mockReturnValue(mockUpdatedUser as any);
+
+      const token = jwt.sign(
+        { id: '1', email: 'test@example.com', name: 'Test User', role: 'user' },
+        'test-secret-key',
+        { expiresIn: '1h' }
+      );
+
+      const response = await request(app)
+        .put('/api/auth/profile')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: 'Updated Name',
+          email: 'updated@example.com',
+        })
+        .expect(200);
+
+      expect(response.body).toEqual(mockUpdatedUser);
+      expect(usersService.updateUser).toHaveBeenCalledWith('1', {
+        name: 'Updated Name',
+        email: 'updated@example.com',
+      });
+    });
+
+    it('should reject update with no fields', async () => {
+      const token = jwt.sign(
+        { id: '1', email: 'test@example.com', name: 'Test User', role: 'user' },
+        'test-secret-key',
+        { expiresIn: '1h' }
+      );
+
+      const response = await request(app)
+        .put('/api/auth/profile')
+        .set('Authorization', `Bearer ${token}`)
+        .send({})
+        .expect(400);
+
+      expect(response.body).toEqual({
+        message: 'At least one field (name or email) is required',
+      });
+    });
+  });
+
+  describe('POST /api/auth/change-password', () => {
+    it('should change password successfully', async () => {
+      // Mock DB get user
+      const mockUser = {
+        id: '1',
+        password_hash: 'hashed_old_password',
+        must_change_password: 0,
+      };
+      
+      const getMock = vi.fn().mockReturnValue(mockUser);
+      const runMock = vi.fn().mockReturnValue({ changes: 1 });
+      
+      // We need to implement complex mocking for the chained db.prepare().get() / .run()
+      vi.mocked(db.prepare).mockImplementation((sql: string) => {
+        if (sql.includes('SELECT * FROM users')) {
+          return { get: getMock } as any;
+        }
+        if (sql.includes('UPDATE users')) {
+          return { run: runMock } as any;
+        }
+        return { get: vi.fn(), run: vi.fn() } as any;
+      });
+
+      vi.mocked(bcrypt.compare).mockResolvedValue(true as any);
+      vi.mocked(bcrypt.hash).mockResolvedValue('new_hashed_password' as any);
+      vi.mocked(authService.revokeAllUserTokens).mockReturnValue(1);
+      vi.mocked(authService.getUserById).mockResolvedValue({ id: '1', name: 'User' } as any);
+
+      const token = jwt.sign(
+        { id: '1', email: 'test@example.com', name: 'Test User', role: 'user' },
+        'test-secret-key',
+        { expiresIn: '1h' }
+      );
+
+      const response = await request(app)
+        .post('/api/auth/change-password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          oldPassword: 'OldPassword123!',
+          newPassword: 'NewPassword123!',
+        })
+        .expect(200);
+
+      expect(response.body).toEqual({
+        message: 'Password changed successfully. Please log in again.',
+        user: { id: '1', name: 'User' },
+        sessionsRevoked: 1,
+      });
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('OldPassword123!', 'hashed_old_password');
+      expect(bcrypt.hash).toHaveBeenCalledWith('NewPassword123!', 10);
+      expect(runMock).toHaveBeenCalled();
+    });
+
+    it('should fail with incorrect old password', async () => {
+      const mockUser = {
+        id: '1',
+        password_hash: 'hashed_old_password',
+        must_change_password: 0,
+      };
+      const getMock = vi.fn().mockReturnValue(mockUser);
+      vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
+      vi.mocked(bcrypt.compare).mockResolvedValue(false as any);
+
+      const token = jwt.sign(
+        { id: '1', email: 'test@example.com', name: 'Test User', role: 'user' },
+        'test-secret-key',
+        { expiresIn: '1h' }
+      );
+
+      const response = await request(app)
+        .post('/api/auth/change-password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          oldPassword: 'WrongPassword',
+          newPassword: 'NewPassword123!',
+        })
+        .expect(401);
+
+      expect(response.body).toEqual({
+        message: 'Current password is incorrect',
+      });
+    });
+
+    it('should reject weak new password', async () => {
+      const mockUser = {
+        id: '1',
+        password_hash: 'hashed_old_password',
+        must_change_password: 0,
+      };
+      const getMock = vi.fn().mockReturnValue(mockUser);
+      vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
+      vi.mocked(bcrypt.compare).mockResolvedValue(true as any);
+
+      const token = jwt.sign(
+        { id: '1', email: 'test@example.com', name: 'Test User', role: 'user' },
+        'test-secret-key',
+        { expiresIn: '1h' }
+      );
+
+      const response = await request(app)
+        .post('/api/auth/change-password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          oldPassword: 'OldPassword123!',
+          newPassword: 'short',
+        })
+        .expect(400);
+
+      expect(response.body).toEqual({
+        message: 'Password must be at least 12 characters',
+      });
+    });
+    
+    it('should reject same password', async () => {
+      const mockUser = {
+        id: '1',
+        password_hash: 'hashed_old_password',
+        must_change_password: 0,
+      };
+      const getMock = vi.fn().mockReturnValue(mockUser);
+      vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
+      vi.mocked(bcrypt.compare).mockResolvedValue(true as any);
+
+      const token = jwt.sign(
+        { id: '1', email: 'test@example.com', name: 'Test User', role: 'user' },
+        'test-secret-key',
+        { expiresIn: '1h' }
+      );
+
+      const response = await request(app)
+        .post('/api/auth/change-password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          oldPassword: 'SamePassword123!',
+          newPassword: 'SamePassword123!',
+        })
+        .expect(400);
+
+      expect(response.body).toEqual({
+        message: 'New password must be different from current password',
       });
     });
   });
