@@ -68,7 +68,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 ### Observability & Analytics
 
 - [x] **Sentry Express Instrumentation** - Improve Sentry setup with `--import` flag for early initialization and automatic Express tracking ✅ **DONE** (January 8, 2026)
-- [ ] **Application Metrics Dashboard** - Response times, error rates, active users
+- [x] **Application Metrics Dashboard** - Response times, error rates, active users ✅ **DONE** (January 21, 2026)
 - [ ] **User Analytics** - Track feature usage, user journeys (privacy-respecting)
 - [ ] **Log Aggregation** - Centralized logging with search (Loki, CloudWatch, etc.)
 - [ ] **Performance Budget** - Set and monitor bundle size, load time thresholds
