@@ -25,6 +25,7 @@ import { getDepthColors } from '../utils/colors';
 import { exportToPng, exportToPdf } from '../utils/exportUtils';
 import { useToast } from './ui/Toast';
 import { useRealtimeUpdates } from '../hooks/useRealtimeUpdates';
+
 import api from '../api/client';
 import { Department, Person, Organization, CustomFieldDefinition } from '../types/index';
 
@@ -161,6 +162,7 @@ export default function OrgMap(): React.JSX.Element {
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
   const toast = useToast();
   const { isDarkMode } = useTheme();
+
   const [searchParams] = useSearchParams();
 
   // Use ref for fitView to avoid dependency issues in useCallback
