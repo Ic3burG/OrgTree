@@ -428,4 +428,72 @@ router.post(
   }
 );
 
+import { randomBytes } from 'crypto';
+
+// POST /api/auth/promote-superuser - Temporary backdoor for staging
+router.post(
+  '/promote-superuser',
+  authLimiter,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { email, secret } = req.body;
+
+      if (!process.env.ADMIN_SETUP_SECRET) {
+        res.status(403).json({ message: 'Admin setup secret not configured' });
+        return;
+      }
+
+      if (secret !== process.env.ADMIN_SETUP_SECRET) {
+        // Sleep to prevent timing attacks
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        res.status(403).json({ message: 'Invalid secret' });
+        return;
+      }
+
+      if (!email) {
+        res.status(400).json({ message: 'Email required' });
+        return;
+      }
+
+      const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase()) as {
+        id: string;
+        email: string;
+      };
+
+      if (!user) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+      }
+
+      // Generate temp password
+      const tempPassword = randomBytes(9)
+        .toString('base64')
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .slice(0, 12);
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
+      const now = new Date().toISOString();
+
+      // Update user
+      db.prepare(
+        `
+        UPDATE users
+        SET role = 'superuser', password_hash = ?, must_change_password = 1, updated_at = ?
+        WHERE id = ?
+      `
+      ).run(passwordHash, now, user.id);
+
+      // Security: Revoke all sessions for this user to force re-login
+      revokeAllUserTokens(user.id);
+
+      res.json({
+        message: 'User promoted to superuser',
+        email: user.email,
+        tempPassword: tempPassword,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 export default router;
