@@ -34,19 +34,19 @@ export const UrlProcessor = {
  * GEDS Data Fetcher with scraping logic
  */
 export const GedsFetcher = {
+  /**
+   * Helper to fetch a URL via the backend proxy to avoid CORS
+   */
+  async fetchViaProxy(url: string): Promise<Response> {
+    const proxyUrl = `/api/geds/proxy?url=${encodeURIComponent(url)}`;
+    return await fetch(proxyUrl);
+  },
+
   async getXmlLinkFromPage(pageUrl: string): Promise<string> {
-    let fetchUrl = pageUrl;
-
-    // Use proxy for local development
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      if (fetchUrl.includes('geds-sage.gc.ca')) {
-        fetchUrl = fetchUrl.replace('https://geds-sage.gc.ca', '/api-geds');
-      }
-    }
-
     try {
-      const response = await fetch(fetchUrl);
-      if (!response.ok) throw new Error(`Failed to load page: ${response.status}`);
+      const response = await this.fetchViaProxy(pageUrl);
+      if (!response.ok) throw new Error(`Status ${response.status}`);
+
       const html = await response.text();
 
       // Parse HTML to find the XML export link
@@ -70,7 +70,17 @@ export const GedsFetcher = {
             const match = onclick.match(/['"]([^'"]+)['"]/);
             if (match) {
               // It's a relative URL, likely starting with ?pgid=...
-              xmlUrl = new URL(match[1]!, 'https://geds-sage.gc.ca/en/GEDS').href;
+              // Decode HTML entities (like &amp;) if present
+              const rawUrl = match[1]!.replace(/&amp;/g, '&');
+
+              // If it starts with ?, it's relative to the current page base
+              if (rawUrl.startsWith('?')) {
+                xmlUrl = `https://geds-sage.gc.ca/en/GEDS${rawUrl}`;
+              } else if (rawUrl.startsWith('http')) {
+                xmlUrl = rawUrl;
+              } else {
+                xmlUrl = new URL(rawUrl, 'https://geds-sage.gc.ca/en/GEDS').href;
+              }
             }
           }
         }
@@ -80,9 +90,23 @@ export const GedsFetcher = {
         // Fallback: look for any link with "XML" text
         const links = Array.from(doc.querySelectorAll('a'));
         const xmlLink = links.find(
-          a => a.innerText.toUpperCase().includes('XML') || a.href.toUpperCase().includes('XML')
+          a =>
+            (a.innerText || '').toUpperCase().includes('XML') ||
+            (a.getAttribute('href') || '').toUpperCase().includes('XML')
         );
-        if (xmlLink) xmlUrl = xmlLink.href;
+        if (xmlLink) {
+          const href = xmlLink.getAttribute('href') || '';
+          if (href.startsWith('http')) {
+            xmlUrl = href;
+          } else {
+            xmlUrl = new URL(href, 'https://geds-sage.gc.ca/en/GEDS').href;
+          }
+        }
+      }
+
+      // Final fallback: if pgid=015 (Person Information), change to pgid=026 (XML Export)
+      if (!xmlUrl && pageUrl.includes('pgid=015')) {
+        xmlUrl = pageUrl.replace('pgid=015', 'pgid=026');
       }
 
       if (!xmlUrl) throw new Error('Could not find XML download link on page.');
@@ -97,18 +121,14 @@ export const GedsFetcher = {
   },
 
   async fetchXml(url: string): Promise<string> {
-    // First step: Scrape the page to get the true XML URL
-    const realXmlUrl = await this.getXmlLinkFromPage(url);
-
-    // Second step: Download the actual XML file
-    let fetchUrl = realXmlUrl;
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      if (fetchUrl.includes('geds-sage.gc.ca')) {
-        fetchUrl = fetchUrl.replace('https://geds-sage.gc.ca', '/api-geds');
-      }
+    // First step: Scrape the page to get the true XML URL (unless it's already an XML export link)
+    let realXmlUrl = url;
+    if (!url.includes('pgid=026')) {
+      realXmlUrl = await this.getXmlLinkFromPage(url);
     }
 
-    const response = await fetch(fetchUrl);
+    // Second step: Download the actual XML file via proxy
+    const response = await this.fetchViaProxy(realXmlUrl);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.text();
   },

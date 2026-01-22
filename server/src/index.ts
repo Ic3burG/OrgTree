@@ -27,6 +27,7 @@ import totpRoutes from './routes/totp.js';
 import customFieldsRoutes from './routes/custom-fields.js';
 import metricsRoutes from './routes/metrics.js';
 import analyticsRoutes from './routes/analytics.js';
+import gedsRoutes from './routes/geds.js';
 import { validateCsrf } from './middleware/csrf.js';
 import { metricsMiddleware } from './middleware/metrics.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -218,6 +219,7 @@ app.use('/api/auth/passkey', passkeyRoutes);
 app.use('/api/auth/2fa', totpRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/geds', gedsRoutes);
 
 // Protected routes (require CSRF validation for state-changing operations)
 app.use('/api', validateCsrf); // Apply CSRF middleware to all routes below

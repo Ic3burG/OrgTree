@@ -244,6 +244,16 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `src/utils/xmlImport.test.ts` - XML parsing tests
   - ✅ **COMMITS PUSHED**: `e035713` - Fix 'deleted_at' error in custom fields and expand GEDS XML import
 
+  - ✅ **Resolve GEDS XML Download Failure**
+    - **Backend Proxy**: Implemented `GET /api/geds/proxy` to bypass CORS and network restrictions in production.
+    - **Frontend Downloader**: Updated `gedsDownloader.ts` to use the backend proxy for all GEDS data extractions.
+    - **Robustness**: Improved XML link detection by handling `onclick` handlers and providing a fallback for `pgid=015 -> pgid=026` URL conversion.
+  - 📁 **FILES MODIFIED**:
+    - `server/src/routes/geds.ts` - New GEDS proxy route
+    - `server/src/index.ts` - GEDS route registration
+    - `src/utils/gedsDownloader.ts` - Frontend downloader refactoring
+    - `server/eslint.config.js` - Added `fetch` to globals
+
   - ✅ **User Analytics Implementation** - Privacy-respecting tracking of feature usage and user journeys
     - **Backend**: Added `analytics_events` table, service, and API endpoint with rate limiting
     - **Frontend**: Created `AnalyticsContext` for session management and auto-page tracking
