@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import JSZip from 'jszip';
 import { Download, FileText, Trash2, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { UrlProcessor, GedsFetcher } from '../utils/gedsDownloader';
@@ -61,8 +61,9 @@ export default function GedsDownloader() {
     let successCount = 0;
     let errorCount = 0;
 
-    for (let i = 0; i < urlList.length; i++) {
-      const url = urlList[i];
+    let i = 0;
+    for (const url of urlList) {
+      if (!url) continue;
       const fileName = UrlProcessor.extractNameFromUrl(url);
 
       try {
@@ -92,6 +93,7 @@ export default function GedsDownloader() {
       const completed = i + 1;
       setStats(prev => ({ ...prev, success: successCount, error: errorCount }));
       setProgress(Math.round((completed / urlList.length) * 100));
+      i++;
 
       // Throttle to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, mode === 'zip' ? 100 : 500));
