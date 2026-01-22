@@ -471,21 +471,35 @@ export async function search(
 
   const isPublic = org.is_public === 1;
 
+  // Debug logging
+  console.log('[search] Permission check:', {
+    orgId,
+    userId: userId ? 'present' : 'none',
+    isPublic,
+    willCheckPermission: userId && !isPublic,
+  });
+
   // Check access permissions
   if (userId) {
     // Authenticated user: check membership for private orgs
     // For public orgs, allow access without membership check (avoids misleading audit logs)
     if (!isPublic) {
       // Private org - requires membership
+      console.log('[search] Checking viewer permission for private org');
       requireOrgPermission(orgId, userId, 'viewer');
+    } else {
+      console.log('[search] Skipping permission check for public org');
     }
     // Note: For public orgs, we still allow the user to search even if not a member
   } else {
     // Guest user: only allow access to public organizations
     if (!isPublic) {
+      console.log('[search] Blocking guest user from private org');
       const error = new Error('Insufficient permissions') as { status?: number };
       error.status = 403;
       throw error;
+    } else {
+      console.log('[search] Allowing guest user to search public org');
     }
   }
 
@@ -566,21 +580,35 @@ export async function getAutocompleteSuggestions(
 
   const isPublic = org.is_public === 1;
 
+  // Debug logging
+  console.log('[autocomplete] Permission check:', {
+    orgId,
+    userId: userId ? 'present' : 'none',
+    isPublic,
+    willCheckPermission: userId && !isPublic,
+  });
+
   // Check access permissions
   if (userId) {
     // Authenticated user: check membership for private orgs
     // For public orgs, allow access without membership check (avoids misleading audit logs)
     if (!isPublic) {
       // Private org - requires membership
+      console.log('[autocomplete] Checking viewer permission for private org');
       requireOrgPermission(orgId, userId, 'viewer');
+    } else {
+      console.log('[autocomplete] Skipping permission check for public org');
     }
     // Note: For public orgs, we still allow the user to search even if not a member
   } else {
     // Guest user: only allow access to public organizations
     if (!isPublic) {
+      console.log('[autocomplete] Blocking guest user from private org');
       const error = new Error('Insufficient permissions') as { status?: number };
       error.status = 403;
       throw error;
+    } else {
+      console.log('[autocomplete] Allowing guest user to search public org');
     }
   }
 
