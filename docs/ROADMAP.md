@@ -130,9 +130,15 @@ This document outlines the development roadmap for OrgTree, including technical 
 3. [x] **Custom Fields** - Allow configurable person/department attributes ✅ **DONE** (January 15, 2026)
 4. ~~**API Documentation** - Complete REST API documentation~~ ✅ **DONE** (December 30, 2025)
 5. ~~**Dark Mode** - Add dark theme support with user preference persistence~~ ✅ **DONE** (January 9, 2026)
-6. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
-7. **Bulk Invitations** - Send invitations to multiple emails at once
-8. **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
+6. **Inline Editing on Org Map** - Quick edit person details directly on person cards without opening full modal (see [docs/plans/inline-editing-org-map.md](plans/inline-editing-org-map.md))
+7. **Organizational Hierarchy Display** - Show complete reporting chain in person details with clickable breadcrumb navigation (see [docs/plans/organizational-hierarchy-display.md](plans/organizational-hierarchy-display.md)) 🔥 **HIGH PRIORITY**
+8. **Centered Vertical Layout** - Center the root department horizontally in vertical (TB) layout for better visual balance (see [docs/plans/centered-vertical-layout.md](plans/centered-vertical-layout.md))
+9. **Remove Logout Button from Org Map** - Clean up legacy logout button from toolbar (see [docs/plans/remove-logout-button-toolbar.md](plans/remove-logout-button-toolbar.md))
+10. **Persistent Org Map Settings** - Save theme, zoom, positions, and expanded state per-organization with reset button (see [docs/plans/persistent-org-map-settings.md](plans/persistent-org-map-settings.md))
+11. **Rainbow Color Theme** - Add vibrant rainbow color theme cycling through spectrum by depth (see [docs/plans/rainbow-color-theme.md](plans/rainbow-color-theme.md))
+12. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
+13. **Bulk Invitations** - Send invitations to multiple emails at once
+14. **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
 
 ### Medium-term Vision (Next quarter)
 
@@ -144,12 +150,14 @@ This document outlines the development roadmap for OrgTree, including technical 
 6. **SSO Support** - SAML integration for enterprise
 7. **Webhook Support** - External system notifications
 8. **Hierarchical Tree Selector Component** - Replace native selects with interactive, collapsible tree dropdowns for department selection (improved UX with search, expand/collapse, keyboard navigation)
-9. **Advanced Sidebar UI Enhancements**:
-   - Multi-level collapse (Icon-only → Minimized → Hidden)
-   - Resizable sidebar with drag handle for custom width
-   - Floating action button for quick access when fully hidden
-   - Workspace layout presets (save/load layout configurations)
-   - Sidebar pinning (auto-hide on route change unless pinned)
+9. **Department Hierarchy Highlighting** - Visual highlighting of ancestor departments on hover/click in Org Map (see [docs/plans/department-hierarchy-highlighting.md](plans/department-hierarchy-highlighting.md))
+10. **Advanced Sidebar UI Enhancements**:
+
+- Multi-level collapse (Icon-only → Minimized → Hidden)
+- Resizable sidebar with drag handle for custom width
+- Floating action button for quick access when fully hidden
+- Workspace layout presets (save/load layout configurations)
+- Sidebar pinning (auto-hide on route change unless pinned)
 
 ---
 

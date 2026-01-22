@@ -39,7 +39,12 @@ export const GedsFetcher = {
    */
   async fetchViaProxy(url: string): Promise<Response> {
     const proxyUrl = `/api/geds/proxy?url=${encodeURIComponent(url)}`;
-    return await fetch(proxyUrl);
+    const token = localStorage.getItem('token');
+    return await fetch(proxyUrl, {
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
   },
 
   async getXmlLinkFromPage(pageUrl: string): Promise<string> {

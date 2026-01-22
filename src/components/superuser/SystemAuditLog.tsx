@@ -28,6 +28,11 @@ export default function SystemAuditLog(): React.JSX.Element {
   const [orgFilter, setOrgFilter] = useState<string>('');
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
+  // Dynamic filter options
+  const [actionTypes, setActionTypes] = useState<string[]>([]);
+  const [entityTypes, setEntityTypes] = useState<string[]>([]);
+  const [filtersLoading, setFiltersLoading] = useState<boolean>(true);
+
   // Fetch audit logs
   const fetchLogs = useCallback(
     async (cursor: string | null = null, reset: boolean = false): Promise<void> => {
@@ -69,6 +74,23 @@ export default function SystemAuditLog(): React.JSX.Element {
     },
     [actionType, entityType, orgFilter]
   );
+
+  // Fetch filter options on mount
+  useEffect(() => {
+    const fetchFilterOptions = async (): Promise<void> => {
+      try {
+        const options = await api.getAuditFilterOptions();
+        setActionTypes(options.actionTypes);
+        setEntityTypes(options.entityTypes);
+      } catch (err) {
+        console.error('Failed to fetch filter options:', err);
+      } finally {
+        setFiltersLoading(false);
+      }
+    };
+
+    fetchFilterOptions();
+  }, []);
 
   // Initial load
   useEffect(() => {
@@ -169,15 +191,15 @@ export default function SystemAuditLog(): React.JSX.Element {
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                       setActionType(e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100"
+                    disabled={filtersLoading}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <option value="">All Actions</option>
-                    <option value="created">Created</option>
-                    <option value="updated">Updated</option>
-                    <option value="deleted">Deleted</option>
-                    <option value="added">Added</option>
-                    <option value="removed">Removed</option>
-                    <option value="settings">Settings</option>
+                    {actionTypes.map(type => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -191,13 +213,15 @@ export default function SystemAuditLog(): React.JSX.Element {
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                       setEntityType(e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100"
+                    disabled={filtersLoading}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <option value="">All Entities</option>
-                    <option value="department">Departments</option>
-                    <option value="person">People</option>
-                    <option value="member">Members</option>
-                    <option value="org">Organization</option>
+                    {entityTypes.map(type => (
+                      <option key={type} value={type}>
+                        {formatEntityType(type)}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

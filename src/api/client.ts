@@ -680,6 +680,12 @@ const api = {
     return request<PaginatedResponse<AuditLog>>(url);
   },
 
+  getAuditFilterOptions: (): Promise<{ actionTypes: string[]; entityTypes: string[] }> => {
+    return request<{ actionTypes: string[]; entityTypes: string[] }>(
+      '/admin/audit-logs/filter-options'
+    );
+  },
+
   // Search
   search: (orgId: string, params: Record<string, string> = {}): Promise<SearchResponse> => {
     const query = new URLSearchParams(params).toString();
