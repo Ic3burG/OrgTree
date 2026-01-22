@@ -39,7 +39,7 @@
     ]
   },
   "dependencies": {
-    "@sentry/react": "^10.34.0",
+    "@sentry/react": "^10.36.0",
     "@simplewebauthn/browser": "^13.2.2",
     "dagre": "^0.8.5",
     "html-to-image": "^1.11.13",
@@ -52,7 +52,7 @@
     "react-dom": "^19.2.3",
     "react-router-dom": "^7.9.6",
     "reactflow": "^11.11.4",
-    "recharts": "^3.6.0",
+    "recharts": "^3.7.0",
     "socket.io-client": "^4.8.3",
     "xml2js": "^0.6.2"
   },
@@ -61,15 +61,15 @@
     "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.1",
+    "@testing-library/react": "^16.3.2",
     "@types/dagre": "^0.7.53",
-    "@types/node": "^25.0.9",
+    "@types/node": "^25.0.10",
     "@types/papaparse": "^5.5.2",
     "@types/qrcode.react": "^3.0.0",
-    "@types/react": "^19.2.8",
+    "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "@types/xml2js": "^0.4.14",
-    "@typescript-eslint/eslint-plugin": "^8.53.0",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
     "@typescript-eslint/parser": "^8.52.0",
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^4.0.17",
@@ -78,19 +78,19 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "happy-dom": "^20.3.0",
+    "happy-dom": "^20.3.4",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "openapi-typescript": "^7.10.1",
     "postcss": "^8.4.32",
-    "prettier": "^3.8.0",
+    "prettier": "^3.8.1",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.0.16"
   },
   "optionalDependencies": {
-    "@rollup/rollup-darwin-arm64": "^4.55.1",
-    "@rollup/rollup-darwin-x64": "^4.55.1"
+    "@rollup/rollup-darwin-arm64": "^4.56.0",
+    "@rollup/rollup-darwin-x64": "^4.56.0"
   }
 }
