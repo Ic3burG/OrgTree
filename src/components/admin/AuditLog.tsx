@@ -240,7 +240,10 @@ export default function AuditLog(): React.JSX.Element {
                     {logs.map(log => (
                       <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-slate-700">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-slate-100">
-                          <div className="flex items-center gap-2">
+                          <div
+                            className="flex items-center gap-2"
+                            title={new Date(log.createdAt!).toLocaleString()}
+                          >
                             <Clock size={16} className="text-gray-400" />
                             {formatDate(log.createdAt!)}
                           </div>
@@ -280,7 +283,10 @@ export default function AuditLog(): React.JSX.Element {
                     className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4"
                   >
                     <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400">
+                      <div
+                        className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400"
+                        title={new Date(log.createdAt!).toLocaleString()}
+                      >
                         <Clock size={16} />
                         {formatDate(log.createdAt!)}
                       </div>

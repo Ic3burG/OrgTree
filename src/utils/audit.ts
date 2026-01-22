@@ -22,6 +22,9 @@ export function formatEntityType(entityType: string): string {
     member: 'Member',
     org: 'Organization',
     data_import: 'Data Import',
+    security: 'Security',
+    organization_access: 'Access Control',
+    authorization: 'Authorization',
   };
   return typeMap[entityType] || entityType;
 }
@@ -40,6 +43,10 @@ export function getActionColor(actionType: string): string {
     removed: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
     settings: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
     import: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+    permission_denied: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+    invalid_token: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+    rate_limit_exceeded: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+    csrf_validation_failed: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
   };
   return colorMap[actionType] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
 }
@@ -54,6 +61,15 @@ interface EntityData {
   departmentsReused?: number;
   peopleCreated?: number;
   peopleSkipped?: number;
+  reason?: string;
+  path?: string;
+  method?: string;
+  requiredRole?: string;
+  requiredRoles?: string[];
+  userRole?: string;
+  userLevel?: number;
+  requiredLevel?: number;
+  ipAddress?: string;
   [key: string]: unknown;
 }
 
@@ -114,6 +130,22 @@ export function formatEntityDetails(entityType: string, entityData: EntityData |
       return parts.length > 0 ? parts.join(', ') : 'No items imported';
     }
 
+    case 'security':
+    case 'authorization':
+    case 'organization_access': {
+      const parts: string[] = [];
+      if (entityData.reason) parts.push(`Reason: ${entityData.reason}`);
+      if (entityData.path) parts.push(`Path: ${entityData.path}`);
+      if (entityData.requiredRole)
+        parts.push(`Required: ${entityData.requiredRole} (${entityData.requiredLevel ?? '?'})`);
+      if (entityData.requiredRoles)
+        parts.push(`Required: ${entityData.requiredRoles.join(' or ')}`);
+      if (entityData.userRole)
+        parts.push(`User Role: ${entityData.userRole} (${entityData.userLevel ?? '?'})`);
+      if (entityData.ipAddress) parts.push(`IP: ${entityData.ipAddress}`);
+      return parts.join(' • ');
+    }
+
     default:
       return entityData.name || entityData.id || 'N/A';
   }
@@ -131,6 +163,16 @@ export function formatDate(dateString: string): string {
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
+
+  const fullDate = date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
 
   // Less than 1 minute
   if (diffMins < 1) {
@@ -152,13 +194,5 @@ export function formatDate(dateString: string): string {
     return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
   }
 
-  // Format as date and time
-  return date.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
+  return fullDate;
 }
