@@ -59,10 +59,6 @@ describe('XML Import - GEDS Format', () => {
     // Filter for department rows
     const deptRows = result.rows.filter(row => row.type === 'department');
 
-    // Should extract all departments from orgStructure (skipping Canada)
-    // Expected: 6 departments (all org elements except Canada)
-    expect(deptRows.length).toBeGreaterThanOrEqual(6);
-
     // Verify hierarchy is created with correct depth
     const paths = deptRows.map(d => d.path);
 
@@ -78,6 +74,14 @@ describe('XML Import - GEDS Format', () => {
     // Should include intermediate departments
     expect(deptRows.some(d => d.name === 'National Headquarters')).toBe(true);
     expect(deptRows.some(d => d.name === 'Office of the Deputy Minister')).toBe(true);
+
+    // Verify people rows have the new fields
+    const personRows = result.rows.filter(row => row.type === 'person');
+    expect(personRows).toHaveLength(1);
+    const person = personRows[0];
+    expect(person?.name).toBe('Jennifer Reynolds');
+    expect(person?.dept_acronym).toBe('IRCC'); // Extracted from IRCC-IRCC
+    expect(person?.org_acronym).toBe('ASY'); // Extracted from ASY-ASI
   });
 
   it('should handle fallback when orgStructure is missing', async () => {

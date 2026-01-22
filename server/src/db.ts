@@ -621,6 +621,7 @@ try {
         is_required BOOLEAN DEFAULT 0,
         is_searchable BOOLEAN DEFAULT 1,
         sort_order INTEGER DEFAULT 0,
+        deleted_at DATETIME,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
@@ -640,6 +641,7 @@ try {
         entity_type TEXT NOT NULL CHECK(entity_type IN ('person', 'department')),
         entity_id TEXT NOT NULL,
         value TEXT,
+        deleted_at DATETIME,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (field_definition_id) REFERENCES custom_field_definitions(id) ON DELETE CASCADE,
@@ -666,6 +668,29 @@ try {
   }
 } catch (err) {
   console.error('Migration error (custom fields tables):', err);
+}
+
+// Migration: Add deleted_at column to custom fields tables
+try {
+  const customFieldDefsTableInfo = db
+    .prepare('PRAGMA table_info(custom_field_definitions)')
+    .all() as TableInfoRow[];
+  const customFieldDefsColumnNames = customFieldDefsTableInfo.map(col => col.name);
+  if (!customFieldDefsColumnNames.includes('deleted_at')) {
+    db.exec('ALTER TABLE custom_field_definitions ADD COLUMN deleted_at DATETIME');
+    console.log('Migration: Added deleted_at column to custom_field_definitions table');
+  }
+
+  const customFieldValuesTableInfo = db
+    .prepare('PRAGMA table_info(custom_field_values)')
+    .all() as TableInfoRow[];
+  const customFieldValuesColumnNames = customFieldValuesTableInfo.map(col => col.name);
+  if (!customFieldValuesColumnNames.includes('deleted_at')) {
+    db.exec('ALTER TABLE custom_field_values ADD COLUMN deleted_at DATETIME');
+    console.log('Migration: Added deleted_at column to custom_field_values table');
+  }
+} catch (err) {
+  console.error('Migration error (custom fields soft delete columns):', err);
 }
 
 // Migration: Add is_starred column to people table for favorite/star feature

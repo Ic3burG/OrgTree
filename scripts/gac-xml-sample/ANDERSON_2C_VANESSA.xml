@@ -1,0 +1,37 @@
+<gedsPerson>
+	<fullName>Anderson\, Vanessa</fullName>
+	<firstName>Vanessa</firstName>
+	<lastName>Anderson</lastName>
+	<title>Executive Assistant to the Ambassador for Women, Peace and Security</title>
+	<workPhone>343-203-2419</workPhone>
+	<cellPhone />
+	<workFax />
+	<email />
+	<address>125 Sussex Drive</address>
+	<city>Ottawa</city>
+	<province>Ontario</province>
+	<country>Canada</country>
+	<postalCode>K1A 0G2</postalCode>
+	<building />
+	<floor />
+	<room />
+	<department>Global Affairs Canada</department>
+	<departmentAcronym>GAC-AMC</departmentAcronym>
+	<organization>Office of the Ambassador for Women, Peace and Security</organization>
+	<organizationAcronym>WPSA-WPSA</organizationAcronym>
+	<orgStructure>
+		<org>
+			<name>Canada</name>
+			<DN>Tz1HQyxDPUNB</DN>
+		</org>
+		<org>
+			<name>Global Affairs Canada</name>
+			<DN>T1U9R0FDLUFNQyxPPUdDLEM9Q0E=</DN>
+		</org>
+		<org>
+			<name>Office of the Ambassador for Women, Peace and Security</name>
+			<DN>T1U9V1BTQS1XUFNBLE9VPUdBQy1BTUMsTz1HQyxDPUNB</DN>
+		</org>
+	</orgStructure>
+	<imageURL>http://geds-sage.gc.ca/GEDS20/images/defaultphoto3.jpg</imageURL>
+</gedsPerson>

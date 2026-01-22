@@ -12,6 +12,16 @@ interface GedsPerson {
   organization: string;
   organizationAcronym: string | null;
   departments: string[];
+  // Additional fields for expansion
+  address: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  building: string;
+  floor: string;
+  room: string;
+  cellPhone: string;
+  workFax: string;
 }
 
 interface DeptPathInfo {
@@ -66,6 +76,17 @@ async function parseGedsXMLContent(content: string): Promise<GedsPerson | null> 
     const title = getElementText(root, 'title');
     const email = getElementText(root, 'email');
     const phone = getElementText(root, 'workPhone');
+    const cellPhone = getElementText(root, 'cellPhone');
+    const workFax = getElementText(root, 'workFax');
+
+    const address = getElementText(root, 'address');
+    const city = getElementText(root, 'city');
+    const province = getElementText(root, 'province');
+    const postalCode = getElementText(root, 'postalCode');
+
+    const building = getElementText(root, 'building');
+    const floor = getElementText(root, 'floor');
+    const room = getElementText(root, 'room');
 
     // Extract acronyms
     const deptAcronymRaw = getElementText(root, 'departmentAcronym');
@@ -120,6 +141,15 @@ async function parseGedsXMLContent(content: string): Promise<GedsPerson | null> 
       organization: getElementText(root, 'organization'),
       organizationAcronym: orgAcronym,
       departments,
+      address,
+      city,
+      province,
+      postalCode,
+      building,
+      floor,
+      room,
+      cellPhone,
+      workFax,
     };
   } catch (err) {
     console.error('Error parsing XML content', err);
@@ -245,6 +275,18 @@ export async function processXmlFiles(
       email: person.email,
       phone: person.phone,
       description: '',
+      // Map expanded fields to CSVRow keys (which will match custom field keys)
+      address: person.address,
+      city: person.city,
+      province: person.province,
+      postal_code: person.postalCode,
+      building: person.building,
+      floor: person.floor,
+      room: person.room,
+      cell_phone: person.cellPhone,
+      work_fax: person.workFax,
+      dept_acronym: person.departmentAcronym || '',
+      org_acronym: person.organizationAcronym || '',
     });
   }
 
