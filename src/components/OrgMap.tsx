@@ -301,7 +301,6 @@ export default function OrgMap(): React.JSX.Element {
   useEffect(() => {
     const personId = searchParams.get('personId');
     const departmentId = searchParams.get('departmentId');
-    console.log('[OrgMap] Params:', { personId, departmentId, nodesLen: nodes.length, isLoading });
 
     if (!isLoading && nodes.length > 0) {
       if (personId) {
@@ -344,7 +343,6 @@ export default function OrgMap(): React.JSX.Element {
       } else if (departmentId) {
         // Handle department deep link
         const targetNode = nodes.find(n => n.id === departmentId);
-        console.log('[OrgMap] Found target node:', targetNode);
 
         if (targetNode) {
           // If node is hidden (inside a collapsed parent), we need to expand parents
