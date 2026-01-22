@@ -97,6 +97,14 @@ vi.mock('../db.js', async () => {
       UNIQUE(field_definition_id, entity_id)
     );
 
+    CREATE VIRTUAL TABLE custom_fields_fts USING fts5(
+      entity_type,
+      entity_id UNINDEXED,
+      field_values,
+      content='',
+      tokenize='porter unicode61'
+    );
+
     -- FTS5 virtual tables for search
     CREATE VIRTUAL TABLE departments_fts USING fts5(
       name,
@@ -126,6 +134,7 @@ vi.mock('./member.service.js', () => ({
 // Mock escape utility
 vi.mock('../utils/escape.js', () => ({
   escapeHtml: (str: string) => {
+    if (!str) return '';
     return str
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -513,10 +522,10 @@ describe('SQL Injection Security Tests', () => {
       // Create a second org with secret data
       const secretOrgId = 'secret-org';
       (db as DatabaseType)
-        .prepare(`INSERT INTO organizations (id, name, created_by_id) VALUES (?, ?, ?) `)
+        .prepare(`INSERT INTO organizations (id, name, created_by_id) VALUES (?, ?, ?)`)
         .run(secretOrgId, 'Secret Org', userId);
       (db as DatabaseType)
-        .prepare(`INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?) `)
+        .prepare(`INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)`)
         .run('secret-dept', secretOrgId, 'SECRET_DATA_12345');
       (db as DatabaseType).exec(`INSERT INTO departments_fts(departments_fts) VALUES('rebuild');`);
 
