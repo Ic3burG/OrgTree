@@ -178,6 +178,9 @@ export default function OrgMap(): React.JSX.Element {
   const nodesRef = useRef(nodes);
   nodesRef.current = nodes;
 
+  // Track whether deep link has been processed to prevent re-running on every nodes update
+  const deepLinkProcessedRef = useRef(false);
+
   // Select person for detail panel
   const handleSelectPerson = useCallback((person: Person): void => {
     setSelectedPerson(person);
@@ -297,74 +300,81 @@ export default function OrgMap(): React.JSX.Element {
         if (showLoading) setIsLoading(false);
       }
     },
-    [orgId, layoutDirection, setNodes, setEdges, searchParams]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- searchParams is read but not reactive here
+    [orgId, layoutDirection, setNodes, setEdges]
   );
+
+  // Reset deep link processed flag when URL params change
+  useEffect(() => {
+    deepLinkProcessedRef.current = false;
+  }, [searchParams]);
 
   // Handle auto-zoom from URL parameter (e.g. from department list)
   useEffect(() => {
     const personId = searchParams.get('personId');
     const departmentId = searchParams.get('departmentId');
 
-    if (!isLoading && nodes.length > 0) {
-      if (personId) {
-        // Find the node containing this person
-        let targetNodeId: string | undefined;
-        let targetPerson: Person | undefined;
+    // Skip if no deep link, still loading, no nodes, or already processed
+    if (
+      (!personId && !departmentId) ||
+      isLoading ||
+      nodes.length === 0 ||
+      deepLinkProcessedRef.current
+    ) {
+      return;
+    }
 
-        for (const node of nodes) {
-          const person = node.data.people.find(p => p.id === personId);
-          if (person) {
-            targetNodeId = node.id;
-            targetPerson = person;
-            break;
-          }
+    // Mark as processed to prevent re-running
+    deepLinkProcessedRef.current = true;
+
+    if (personId) {
+      // Find the node containing this person
+      let targetNodeId: string | undefined;
+      let targetPerson: Person | undefined;
+
+      for (const node of nodes) {
+        const person = node.data.people.find(p => p.id === personId);
+        if (person) {
+          targetNodeId = node.id;
+          targetPerson = person;
+          break;
+        }
+      }
+
+      if (targetNodeId && targetPerson) {
+        const node = nodes.find(n => n.id === targetNodeId);
+
+        if (node && !node.data.isExpanded) {
+          handleToggleExpand(targetNodeId);
         }
 
-        if (targetNodeId && targetPerson) {
-          // Use the same logic as search selection
-          const node = nodes.find(n => n.id === targetNodeId);
-
-          if (node && !node.data.isExpanded) {
-            handleToggleExpand(targetNodeId);
-          }
-
-          setTimeout(() => {
-            // Use nodesRef.current to get the latest nodes after handleToggleExpand state update
-            const updatedNode = nodesRef.current.find(n => n.id === targetNodeId);
-            if (updatedNode && updatedNode.position) {
-              setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
-                zoom: 1.5,
-                duration: 800,
-              });
-              setHighlightedNodeId(targetNodeId);
-              setTimeout(() => setHighlightedNodeId(null), 3000);
-            }
-
-            setSelectedPerson(targetPerson as Person);
-          }, 300);
-        }
-      } else if (departmentId) {
-        // Handle department deep link
-        const targetNode = nodes.find(n => n.id === departmentId);
-
-        if (targetNode) {
-          // If node is hidden (inside a collapsed parent), we need to expand parents
-          // Ideally we'd traverse up and expand, but for now we just try to zoom to it if visible
-          // or if it's a top level node.
-
-          // Current logic mostly assumes flattened or manageable tree.
-          // If we want to ensure it's visible, we might need to expand upwards.
-          // For now, let's just zoom and highlight.
-
-          if (targetNode.position) {
-            setCenter(targetNode.position.x + 110, targetNode.position.y + 35, {
+        setTimeout(() => {
+          const updatedNode = nodesRef.current.find(n => n.id === targetNodeId);
+          if (updatedNode && updatedNode.position) {
+            setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
               zoom: 1.5,
               duration: 800,
             });
-            setHighlightedNodeId(departmentId);
+            setHighlightedNodeId(targetNodeId);
             setTimeout(() => setHighlightedNodeId(null), 3000);
           }
-        }
+
+          setSelectedPerson(targetPerson as Person);
+        }, 500); // Increased delay to ensure ReactFlow is ready
+      }
+    } else if (departmentId) {
+      const targetNode = nodes.find(n => n.id === departmentId);
+
+      if (targetNode?.position) {
+        // Use a longer delay to ensure ReactFlow viewport is ready
+        setTimeout(() => {
+          setCenter(targetNode.position.x + 110, targetNode.position.y + 35, {
+            zoom: 1.5,
+            duration: 800,
+          });
+          setHighlightedNodeId(departmentId);
+          setTimeout(() => setHighlightedNodeId(null), 3000);
+        }, 500); // Increased delay
       }
     }
   }, [isLoading, nodes, searchParams, handleToggleExpand, setCenter]);
