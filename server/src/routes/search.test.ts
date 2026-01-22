@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import type { Database as DatabaseType } from 'better-sqlite3';
 
 // Mock dependencies
 vi.mock('../services/search.service.js', () => ({
@@ -21,6 +20,11 @@ vi.mock('../middleware/auth.js', () => ({
 vi.mock('../db.js', async () => {
   return { default: { prepare: vi.fn(() => ({ run: vi.fn(), get: vi.fn(), all: vi.fn() })) } };
 });
+
+// Mock member service to allow org access
+vi.mock('../services/member.service.js', () => ({
+  requireOrgPermission: vi.fn(), // No-op, always allows access
+}));
 
 import { search, getAutocompleteSuggestions } from '../services/search.service.js';
 import searchRoutes from './search.js';
