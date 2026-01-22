@@ -231,7 +231,19 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Today's Progress (January 21, 2026 - Session 61)**:
+- **Today's Progress (January 22, 2026 - Session 63)**:
+  - ✅ **Fix 'deleted_at' error in custom fields and expand GEDS XML import**
+    - **Database**: Added `deleted_at` column to `custom_field_definitions` and `custom_field_values` tables.
+    - **Migrations**: Implemented programmatic `ALTER TABLE` migrations to ensure existing databases are updated.
+    - **GEDS XML Import**: Expanded parser to extract address, city, province, postal code, building, floor, room, cell phone, and work fax.
+    - **Field Mapping**: Automatically mapping extracted fields to snake_case keys for population into matching custom fields.
+    - **Testing**: Added unit tests for new field extraction and verified database migrations with a custom verification script.
+  - 📁 **FILES MODIFIED**:
+    - `server/src/db.ts` - Database schema and migrations
+    - `src/utils/xmlImport.ts` - GEDS XML parser expansion
+    - `src/utils/xmlImport.test.ts` - XML parsing tests
+  - ✅ **COMMITS PUSHED**: `e035713` - Fix 'deleted_at' error in custom fields and expand GEDS XML import
+
   - ✅ **User Analytics Implementation** - Privacy-respecting tracking of feature usage and user journeys
     - **Backend**: Added `analytics_events` table, service, and API endpoint with rate limiting
     - **Frontend**: Created `AnalyticsContext` for session management and auto-page tracking
