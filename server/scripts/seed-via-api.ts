@@ -25,7 +25,7 @@ async function request(path: string, method: string = 'GET', body?: Record<strin
   }
 
   // Node 18+ provides fetch as a global
-   
+
   const res = await fetch(`${API_URL}${path}`, {
     method,
     headers,

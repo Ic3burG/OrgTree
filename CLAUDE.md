@@ -43,6 +43,38 @@ cd server && npm run format    # Format with Prettier
 npm run lint:all               # Lint frontend and backend
 ```
 
+**CRITICAL: PRE-COMMIT LINTING REQUIREMENT**
+
+⚠️ **ALWAYS run linting checks BEFORE creating any git commit.** This is MANDATORY.
+
+Before staging files for commit, you MUST:
+1. Run `npm run lint:all` from the root directory
+2. Run `cd server && npm run format:check` to verify Prettier formatting
+3. Fix ALL linting and formatting errors before proceeding
+4. NEVER commit code with linting or formatting errors
+
+**Why this matters:**
+- Pre-commit hooks will auto-fix some issues, but may fail on others
+- CI/CD pipeline will fail if linting errors are present
+- Formatting errors prevent commits from being pushed
+- Prevention is faster than fixing after commit
+
+**Correct workflow:**
+```bash
+# 1. Make your changes
+# 2. ALWAYS lint before staging
+npm run lint:all
+cd server && npm run format:check
+
+# 3. Fix any errors
+npm run lint:fix
+cd server && npm run format
+
+# 4. NOW you can commit
+git add .
+git commit -m "your message"
+```
+
 ### Production
 
 ```bash
