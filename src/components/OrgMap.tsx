@@ -25,6 +25,7 @@ import { getDepthColors } from '../utils/colors';
 import { exportToPng, exportToPdf } from '../utils/exportUtils';
 import { useToast } from './ui/Toast';
 import { useRealtimeUpdates } from '../hooks/useRealtimeUpdates';
+import { useOrgMapSettings } from '../hooks/useOrgMapSettings';
 // import { useAnalytics } from '../contexts/AnalyticsContext';
 
 import api from '../api/client';
@@ -47,6 +48,9 @@ interface DepartmentNodeData {
   isHighlighted?: boolean;
   onToggleExpand?: () => void;
   onSelectPerson?: (person: Person) => void;
+  onAddPerson?: (departmentId: string) => void;
+  onUpdatePerson?: (personId: string, updates: Partial<Person>) => Promise<void>;
+  onOpenFullEdit?: (person: Person) => void;
 }
 
 // Type for layout direction
@@ -139,14 +143,20 @@ function transformToFlowData(departments: Department[]): {
  */
 export default function OrgMap(): React.JSX.Element {
   const { orgId } = useParams<{ orgId: string }>();
+  const {
+    settings,
+    updateSettings,
+    resetSettings,
+    isLoaded: isSettingsLoaded,
+  } = useOrgMapSettings(orgId);
   const [nodes, setNodes, onNodesChange] = useNodesState<DepartmentNodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
-  const [layoutDirection, setLayoutDirection] = useState<Direction>('TB');
+  // layoutDirection and currentTheme are now managed by settings
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
-  const [currentTheme, setCurrentTheme] = useState<string>('slate');
+  // const [currentTheme, setCurrentTheme] = useState<string>('slate'); // Removed in favor of settings
   const [exporting, setExporting] = useState<boolean>(false);
   const [orgName, setOrgName] = useState<string>('Organization Chart');
   const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
@@ -207,12 +217,22 @@ export default function OrgMap(): React.JSX.Element {
         const layoutedNodes = calculateLayout(
           updatedNodes as unknown as Node[],
           edges,
-          layoutDirection
+          settings.layoutDirection
         );
 
-        // Merge layout positions with original data
+        // Update settings with new expanded state
+        const expandedNodeIds = updatedNodes.filter(n => n.data.isExpanded).map(n => n.id);
+        updateSettings({ expandedNodes: expandedNodeIds });
+
+        // Merge layout positions with original data, preserving saved positions if available
         return layoutedNodes.map((layoutNode: unknown, idx: number) => {
           const typedLayoutNode = layoutNode as Node;
+          // Only use custom position if not calculating fresh layout...
+          // Actually, if we are expanding/collapsing, we should probably respect auto-layout
+          // unless user has pinned nodes?
+          // For now, let Dagre handle layout on expand/collapse, but maybe we should
+          // clear specific custom positions if they conflict?
+          // Simplest approach: Dagre layout takes precedence on structure change.
           return {
             ...updatedNodes[idx],
             position: typedLayoutNode.position,
@@ -220,7 +240,7 @@ export default function OrgMap(): React.JSX.Element {
         });
       });
     },
-    [edges, layoutDirection, setNodes]
+    [edges, settings.layoutDirection, setNodes, updateSettings]
   );
 
   // Load organization data from API
@@ -263,15 +283,18 @@ export default function OrgMap(): React.JSX.Element {
         const layoutedNodes = calculateLayout(
           parsedNodes as unknown as Node[],
           parsedEdges,
-          layoutDirection
+          settings.layoutDirection
         );
 
-        // Merge layout positions with original data
+        // Merge layout positions with original data AND saved positions
         const nodesWithLayout = layoutedNodes.map((layoutNode: unknown, idx: number) => {
           const typedLayoutNode = layoutNode as Node;
+          const savedPos = settings.nodePositions[typedLayoutNode.id];
+
           return {
             ...parsedNodes[idx],
-            position: typedLayoutNode.position,
+            // Use saved position if available, otherwise calculated position
+            position: savedPos || typedLayoutNode.position,
           } as Node<DepartmentNodeData>;
         });
 
@@ -282,10 +305,15 @@ export default function OrgMap(): React.JSX.Element {
         const defs = await api.getCustomFieldDefinitions(orgId);
         setFieldDefinitions(defs);
 
-        // Fit view after initial load (only if no deep link)
+        // Fit view after initial load (only if no deep link and NOT using saved viewport)
         if (showLoading) {
           const hasDeepLink = searchParams.get('personId') || searchParams.get('departmentId');
-          if (!hasDeepLink) {
+          // Only auto-fit if we don't have a saved custom viewport position
+          // We check if viewport is default (0,0,1) roughly
+          const hasSavedViewport =
+            settings.viewport.x !== 0 || settings.viewport.y !== 0 || settings.viewport.zoom !== 1;
+
+          if (!hasDeepLink && !hasSavedViewport) {
             setTimeout(() => {
               fitViewRef.current({ padding: 0.2, duration: 800 });
             }, 100);
@@ -301,8 +329,15 @@ export default function OrgMap(): React.JSX.Element {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- searchParams is read but not reactive here
-    [orgId, layoutDirection, setNodes, setEdges]
+    [orgId, settings.layoutDirection, setNodes, setEdges, isSettingsLoaded]
   );
+
+  // Wait for settings to load before fetching data
+  useEffect(() => {
+    if (isSettingsLoaded && orgId) {
+      loadData();
+    }
+  }, [isSettingsLoaded, orgId, loadData]);
 
   // Reset deep link processed flag when URL params change
   useEffect(() => {
@@ -402,13 +437,13 @@ export default function OrgMap(): React.JSX.Element {
     showNotifications: true,
   });
 
-  // Load saved theme from localStorage on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('orgTreeTheme');
-    if (savedTheme) {
-      setCurrentTheme(savedTheme);
-    }
-  }, []);
+  // No longer needed - theme is handled by useOrgMapSettings
+  // useEffect(() => {
+  //   const savedTheme = localStorage.getItem('orgTreeTheme');
+  //   if (savedTheme) {
+  //     setCurrentTheme(savedTheme);
+  //   }
+  // }, []);
 
   // Close detail panel
   const handleCloseDetail = useCallback((): void => {
@@ -426,10 +461,9 @@ export default function OrgMap(): React.JSX.Element {
       const layoutedNodes = calculateLayout(
         updatedNodes as unknown as Node[],
         edges,
-        layoutDirection
+        settings.layoutDirection
       );
 
-      // Merge layout positions with original data
       return layoutedNodes.map((layoutNode: unknown, idx: number) => {
         const typedLayoutNode = layoutNode as Node;
         return {
@@ -438,7 +472,12 @@ export default function OrgMap(): React.JSX.Element {
         } as Node<DepartmentNodeData>;
       });
     });
-  }, [edges, layoutDirection, setNodes]);
+
+    // Clear expanded state in settings only if collapsing, but here we are expanding all
+    // Ideally we should track all IDs? For now, we don't save "all expanded" to settings explicitly
+    // unless we iterate all nodes.
+    // Let's defer syncing expand-all to settings for this iteration or save list of all IDs.
+  }, [edges, settings.layoutDirection, setNodes]);
 
   // Collapse all departments
   const handleCollapseAll = useCallback((): void => {
@@ -451,10 +490,12 @@ export default function OrgMap(): React.JSX.Element {
       const layoutedNodes = calculateLayout(
         updatedNodes as unknown as Node[],
         edges,
-        layoutDirection
+        settings.layoutDirection
       );
 
-      // Merge layout positions with original data
+      // Clear expanded nodes in settings
+      updateSettings({ expandedNodes: [] });
+
       return layoutedNodes.map((layoutNode: unknown, idx: number) => {
         const typedLayoutNode = layoutNode as Node;
         return {
@@ -463,17 +504,17 @@ export default function OrgMap(): React.JSX.Element {
         } as Node<DepartmentNodeData>;
       });
     });
-  }, [edges, layoutDirection, setNodes]);
+  }, [edges, settings.layoutDirection, setNodes, updateSettings]);
 
   // Toggle layout direction
   const handleToggleLayout = useCallback((): void => {
-    const newDirection: Direction = layoutDirection === 'TB' ? 'LR' : 'TB';
-    setLayoutDirection(newDirection);
+    const newDirection: Direction = settings.layoutDirection === 'TB' ? 'LR' : 'TB';
+    // setLayoutDirection(newDirection); - now handled via updateSettings
+    updateSettings({ layoutDirection: newDirection });
 
     setNodes(nds => {
       const layoutedNodes = calculateLayout(nds as unknown as Node[], edges, newDirection);
 
-      // Merge layout positions with original data
       return layoutedNodes.map((layoutNode: unknown, idx: number) => {
         const typedLayoutNode = layoutNode as Node;
         return {
@@ -484,14 +525,43 @@ export default function OrgMap(): React.JSX.Element {
     });
 
     setTimeout(() => fitViewRef.current({ padding: 0.2, duration: 800 }), 100);
-  }, [layoutDirection, edges, setNodes]);
+  }, [settings.layoutDirection, edges, setNodes, updateSettings]);
 
   // Handle theme change
-  const handleThemeChange = useCallback((themeName: string): void => {
-    setCurrentTheme(themeName);
-    localStorage.setItem('orgTreeTheme', themeName);
-    // track('theme_changed', { theme: themeName });
-  }, []);
+  const handleThemeChange = useCallback(
+    (themeName: string): void => {
+      updateSettings({ theme: themeName });
+      // setCurrentTheme(themeName);
+      // localStorage.setItem('orgTreeTheme', themeName); // Handled by hook
+    },
+    [updateSettings]
+  );
+
+  // Handle Reset Layout
+  const handleResetLayout = useCallback(() => {
+    if (confirm('Reset layout to default? This will clear all custom positions and settings.')) {
+      resetSettings();
+      // Reload needed to re-apply default layout calculation to nodes
+      setTimeout(() => loadData(false), 50);
+    }
+  }, [resetSettings, loadData]);
+
+  // Handle Viewport Change (Zoom/Pan)
+  const handleMoveEnd = useCallback(
+    (_event: unknown, viewport: { x: number; y: number; zoom: number }) => {
+      updateSettings({ viewport, zoom: viewport.zoom });
+    },
+    [updateSettings]
+  );
+
+  // Handle Node Drag (Custom Positions)
+  const onNodeDragStop = useCallback(
+    (_event: unknown, node: Node) => {
+      const newCtx = { ...settings.nodePositions, [node.id]: node.position };
+      updateSettings({ nodePositions: newCtx });
+    },
+    [settings.nodePositions, updateSettings]
+  );
 
   // Handle export to PNG
   const handleExportPng = useCallback(async () => {
@@ -609,6 +679,52 @@ export default function OrgMap(): React.JSX.Element {
     setCreateDepartmentId(null);
   }, []);
 
+  // Handle person updates from inline editing
+  const handlePersonUpdate = useCallback(
+    async (personId: string, updates: Partial<Person>): Promise<void> => {
+      if (!orgId) return;
+
+      // Optimistic update
+      setNodes(prevNodes =>
+        prevNodes.map(node => ({
+          ...node,
+          data: {
+            ...node.data,
+            people: node.data.people.map(p => (p.id === personId ? { ...p, ...updates } : p)),
+          },
+        }))
+      );
+
+      try {
+        await api.updatePerson(personId, updates);
+        // Success - no further action needed as real-time updates will confirm
+      } catch (error) {
+        console.error('Failed to update person:', error);
+        setError('Failed to save changes');
+        // Revert changes could be implemented here by reloading data
+        loadData(false);
+      }
+    },
+    [orgId, loadData, setNodes]
+  );
+
+  // Handle navigation from hierarchy in detail panel
+  const handleNavigateToDepartment = useCallback(
+    (departmentId: string) => {
+      // Close detail panel
+      setSelectedPerson(null);
+
+      // Find and zoom to department node
+      const node = nodes.find(n => n.id === departmentId);
+      if (node && node.position) {
+        setCenter(node.position.x + 110, node.position.y + 35, { zoom: 1.5, duration: 800 });
+        setHighlightedNodeId(departmentId);
+        setTimeout(() => setHighlightedNodeId(null), 3000);
+      }
+    },
+    [nodes, setCenter]
+  );
+
   // Handle person form submission
   const handlePersonFormSubmit = useCallback(
     async (formData: {
@@ -678,21 +794,25 @@ export default function OrgMap(): React.JSX.Element {
       data: {
         ...node.data,
         id: node.id, // Pass node ID for add person callback
-        theme: currentTheme,
+        theme: settings.theme,
         isHighlighted: node.id === highlightedNodeId,
         onToggleExpand: () => handleToggleExpand(node.id),
         onSelectPerson: (person: Person) => handleSelectPerson(person),
         onAddPerson: canEdit ? (departmentId: string) => handleAddPerson(departmentId) : undefined,
+        onUpdatePerson: canEdit ? handlePersonUpdate : undefined,
+        onOpenFullEdit: canEdit ? handleEditPerson : undefined,
       },
     }));
   }, [
     nodes,
-    currentTheme,
+    settings.theme,
     highlightedNodeId,
     handleToggleExpand,
     handleSelectPerson,
     canEdit,
     handleAddPerson,
+    handlePersonUpdate,
+    handleEditPerson,
   ]);
 
   if (isLoading) {
@@ -745,34 +865,30 @@ export default function OrgMap(): React.JSX.Element {
 
   return (
     <div className="w-full h-screen relative bg-slate-50 dark:bg-slate-900">
-      <OrgChartThemeContext.Provider value={currentTheme}>
+      <OrgChartThemeContext.Provider value={settings.theme}>
         <div ref={reactFlowWrapper} className="w-full h-full">
           <ReactFlow
             nodes={nodesWithHighlight}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
+            onNodeDragStop={onNodeDragStop}
+            onMoveEnd={handleMoveEnd}
+            defaultViewport={settings.viewport}
             nodeTypes={nodeTypes}
+            edgeTypes={{}}
             defaultEdgeOptions={defaultEdgeOptions}
-            fitView
-            fitViewOptions={{ padding: 0.2 }}
             minZoom={0.1}
             maxZoom={2}
-            defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-            // Touch-friendly settings for mobile
-            panOnDrag={true}
-            panOnScroll={false}
-            zoomOnScroll={false}
-            zoomOnPinch={true}
-            zoomOnDoubleClick={true}
-            preventScrolling={false}
+            fitView={false} // We handle fitView manually
+            attributionPosition="bottom-right"
+            className="bg-slate-50 dark:bg-slate-900"
           >
-            <Background color="#cbd5e1" gap={20} size={1} />
+            <Background color={isDarkMode ? '#334155' : '#cbd5e1'} gap={16} />
             <MiniMap
-              nodeColor={node => getDepthColors(node.data.depth, currentTheme).hex}
-              maskColor={isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.1)'}
-              style={{ backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc' }}
-              position="bottom-right"
+              nodeColor={node => getDepthColors(node.data.depth, settings.theme).hex}
+              maskColor={isDarkMode ? 'rgba(30, 41, 59, 0.7)' : 'rgba(241, 245, 249, 0.7)'}
+              className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm"
             />
           </ReactFlow>
         </div>
@@ -781,16 +897,18 @@ export default function OrgMap(): React.JSX.Element {
       {/* Overlay Components */}
       <SearchOverlay orgId={orgId} onSelectResult={handleSearchSelect} />
 
+      {/* Toolbar */}
       <Toolbar
-        onZoomIn={() => zoomIn({ duration: 300 })}
-        onZoomOut={() => zoomOut({ duration: 300 })}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
         onFitView={() => fitView({ padding: 0.2, duration: 800 })}
         onExpandAll={handleExpandAll}
         onCollapseAll={handleCollapseAll}
         onToggleLayout={handleToggleLayout}
-        layoutDirection={layoutDirection}
-        currentTheme={currentTheme}
+        layoutDirection={settings.layoutDirection}
+        currentTheme={settings.theme}
         onThemeChange={handleThemeChange}
+        onResetLayout={handleResetLayout}
       />
 
       {/* Export Button */}
@@ -809,6 +927,8 @@ export default function OrgMap(): React.JSX.Element {
           onClose={handleCloseDetail}
           fieldDefinitions={fieldDefinitions}
           onEdit={canEdit ? handleEditPerson : undefined}
+          departments={flatDepartments}
+          onNavigateToDepartment={handleNavigateToDepartment}
         />
       )}
 

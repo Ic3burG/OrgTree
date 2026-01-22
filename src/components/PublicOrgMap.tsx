@@ -417,6 +417,7 @@ function PublicOrgMapContent(): React.JSX.Element {
         onZoomIn={() => zoomIn({ duration: 300 })}
         onZoomOut={() => zoomOut({ duration: 300 })}
         onFitView={() => fitView({ padding: 0.2, duration: 800 })}
+        onResetLayout={() => fitView({ padding: 0.2, duration: 800 })}
         onExpandAll={handleExpandAll}
         onCollapseAll={handleCollapseAll}
         onToggleLayout={handleToggleLayout}

@@ -1,13 +1,17 @@
 import React from 'react';
 import { X, Mail, Phone, Building, Info, Pencil, Star } from 'lucide-react';
 import { getInitials } from '../utils/helpers';
-import type { Person, CustomFieldDefinition } from '../types/index.js';
+import type { Person, CustomFieldDefinition, Department } from '../types/index.js';
+import OrganizationalHierarchy from './OrganizationalHierarchy';
+import { buildHierarchyChain } from '../utils/departmentHierarchy';
 
 interface DetailPanelProps {
   person: Person | null;
   onClose: () => void;
   fieldDefinitions?: CustomFieldDefinition[];
   onEdit?: (person: Person) => void;
+  departments?: Department[];
+  onNavigateToDepartment?: (departmentId: string) => void;
 }
 
 /**
@@ -20,6 +24,8 @@ export default function DetailPanel({
   onClose,
   fieldDefinitions = [],
   onEdit,
+  departments,
+  onNavigateToDepartment,
 }: DetailPanelProps): React.JSX.Element | null {
   if (!person) return null;
 
@@ -29,6 +35,9 @@ export default function DetailPanel({
   const personWithPath = person as Person & { path?: string };
   const pathSegments = personWithPath.path ? personWithPath.path.split('/').filter(Boolean) : [];
   const departmentPath = pathSegments.length > 1 ? pathSegments.slice(0, -1).join(' / ') : null;
+
+  // Build hierarchy if departments are available
+  const hierarchy = departments ? buildHierarchyChain(person.department_id, departments) : [];
 
   // Filter and pair custom field definitions with values
   const personFieldDefs = fieldDefinitions.filter(d => d.entity_type === 'person');
@@ -198,8 +207,21 @@ export default function DetailPanel({
             </div>
           )}
 
-          {/* Department Path */}
-          {departmentPath && (
+          {/* Department Path or Hierarchy */}
+          {hierarchy.length > 0 ? (
+            <div className="space-y-3 bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
+              <h4 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Building size={18} className="text-slate-500 dark:text-slate-400" />
+                Organizational Hierarchy
+              </h4>
+              <OrganizationalHierarchy
+                hierarchy={hierarchy}
+                currentDepartmentId={person.department_id}
+                onNavigate={onNavigateToDepartment}
+                showIcons={true}
+              />
+            </div>
+          ) : departmentPath ? (
             <div className="space-y-2 bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
               <h4 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Department</h4>
               <div className="flex items-start gap-3">
@@ -210,7 +232,7 @@ export default function DetailPanel({
                 <p className="text-slate-700 dark:text-slate-300">{departmentPath}</p>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </>

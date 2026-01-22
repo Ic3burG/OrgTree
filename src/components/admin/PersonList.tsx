@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, Plus, CheckSquare, Square } from 'lucide-react';
 import PersonItem, { type PersonWithDepartmentName } from './PersonItem';
-import type { CustomFieldDefinition } from '../../types/index.js';
+import type { CustomFieldDefinition, Department } from '../../types/index.js';
 
 interface PersonListProps {
   people: PersonWithDepartmentName[];
@@ -24,6 +24,7 @@ interface PersonListProps {
   onDelete: (person: PersonWithDepartmentName) => void;
   isRecentlyChanged: (id: string) => boolean;
   fieldDefinitions?: CustomFieldDefinition[];
+  departments?: Department[]; // NEW: Added for hierarchy display
 }
 
 export default function PersonList({
@@ -45,6 +46,7 @@ export default function PersonList({
   onDelete,
   isRecentlyChanged,
   fieldDefinitions = [],
+  departments = [],
 }: PersonListProps): React.JSX.Element {
   if (loading) {
     return (
@@ -125,6 +127,7 @@ export default function PersonList({
                 onDelete={onDelete}
                 isRecentlyChanged={isRecentlyChanged(person.id)}
                 fieldDefinitions={fieldDefinitions}
+                departments={departments}
               />
             ))}
           </div>

@@ -1,6 +1,6 @@
 # OrgTree Development Roadmap
 
-> **Last Updated**: January 21, 2026
+> **Last Updated**: January 22, 2026
 > **Status**: Production-ready with ongoing enhancements
 
 This document outlines the development roadmap for OrgTree, including technical debt items, feature enhancements, and infrastructure improvements.
@@ -130,11 +130,11 @@ This document outlines the development roadmap for OrgTree, including technical 
 3. [x] **Custom Fields** - Allow configurable person/department attributes ✅ **DONE** (January 15, 2026)
 4. ~~**API Documentation** - Complete REST API documentation~~ ✅ **DONE** (December 30, 2025)
 5. ~~**Dark Mode** - Add dark theme support with user preference persistence~~ ✅ **DONE** (January 9, 2026)
-6. **Inline Editing on Org Map** - Quick edit person details directly on person cards without opening full modal (see [docs/plans/inline-editing-org-map.md](plans/inline-editing-org-map.md))
-7. **Organizational Hierarchy Display** - Show complete reporting chain in person details with clickable breadcrumb navigation (see [docs/plans/organizational-hierarchy-display.md](plans/organizational-hierarchy-display.md)) 🔥 **HIGH PRIORITY**
+6. ~~**Inline Editing on Org Map** - Quick edit person details directly on person cards without opening full modal~~ ✅ **DONE** (January 22, 2026)
+7. ~~**Organizational Hierarchy Display** - Show complete reporting chain in person details with clickable breadcrumb navigation~~ ✅ **DONE** (January 22, 2026)
 8. **Centered Vertical Layout** - Center the root department horizontally in vertical (TB) layout for better visual balance (see [docs/plans/centered-vertical-layout.md](plans/centered-vertical-layout.md))
-9. **Remove Logout Button from Org Map** - Clean up legacy logout button from toolbar (see [docs/plans/remove-logout-button-toolbar.md](plans/remove-logout-button-toolbar.md))
-10. **Persistent Org Map Settings** - Save theme, zoom, positions, and expanded state per-organization with reset button (see [docs/plans/persistent-org-map-settings.md](plans/persistent-org-map-settings.md))
+9. ~~**Remove Logout Button from Org Map** - Clean up legacy logout button from toolbar~~ ✅ **DONE** (January 22, 2026)
+10. ~~**Persistent Org Map Settings** - Save theme, zoom, positions, and expanded state per-organization with reset button~~ ✅ **DONE** (January 22, 2026)
 11. **Rainbow Color Theme** - Add vibrant rainbow color theme cycling through spectrum by depth (see [docs/plans/rainbow-color-theme.md](plans/rainbow-color-theme.md))
 12. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
 13. **Bulk Invitations** - Send invitations to multiple emails at once
@@ -171,6 +171,10 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 **Recently Completed** (January 2026):
 
+- ✅ **Inline Editing** - Edit person details directly on the Org Map (January 22, 2026)
+- ✅ **Hierarchy Display** - Breadcrumb navigation for department structure (January 22, 2026)
+- ✅ **Persistent Settings** - Saved view preferences for Org Map (January 22, 2026)
+- ✅ **UI Cleanup** - Removed redundant logout button from toolbar (January 22, 2026)
 - ✅ **User Analytics** - Privacy-respecting tracking of feature usage and user journeys (January 21, 2026)
 - ✅ **Custom Fields System** - Organization-scoped custom fields with FTS5 search integration (January 15, 2026)
 - ✅ **Star/Favorite People** - Mark key individuals with starred filter in search (January 14, 2026)

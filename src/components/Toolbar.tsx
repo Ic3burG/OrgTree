@@ -7,12 +7,11 @@ import {
   ChevronUp,
   ArrowDown,
   ArrowRight,
-  LogOut,
   Palette,
   Moon,
   Sun,
+  RotateCcw,
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import ThemePicker from './ThemePicker';
 
@@ -26,6 +25,7 @@ interface ToolbarProps {
   layoutDirection: 'TB' | 'LR';
   currentTheme: string;
   onThemeChange: (theme: string) => void;
+  onResetLayout: () => void;
 }
 
 /**
@@ -43,8 +43,8 @@ export default function Toolbar({
   layoutDirection,
   currentTheme,
   onThemeChange,
+  onResetLayout,
 }: ToolbarProps): React.JSX.Element {
-  const { user, logout } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [isThemeOpen, setIsThemeOpen] = useState(false);
 
@@ -88,6 +88,15 @@ export default function Toolbar({
       <button onClick={onFitView} className={buttonClass} aria-label="Fit view">
         <Maximize2 size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
         <Tooltip>Fit to Screen</Tooltip>
+      </button>
+
+      {/* Divider */}
+      <div className="h-px bg-slate-300 dark:bg-slate-600 my-0.5" />
+
+      {/* Reset Layout */}
+      <button onClick={onResetLayout} className={buttonClass} aria-label="Reset layout">
+        <RotateCcw size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
+        <Tooltip>Reset Layout</Tooltip>
       </button>
 
       {/* Divider */}
@@ -178,20 +187,6 @@ export default function Toolbar({
           </>
         )}
       </div>
-
-      {/* Divider */}
-      <div className="h-px bg-slate-300 dark:bg-slate-600 my-0.5" />
-
-      {/* Logout Button */}
-      <button
-        onClick={logout}
-        className={buttonClass}
-        aria-label={`Logout (${user?.name})`}
-        title={`Logout (${user?.name})`}
-      >
-        <LogOut size={20} className="lg:w-5 lg:h-5 text-slate-700 dark:text-slate-200" />
-        <Tooltip>Logout {user?.name && `(${user.name})`}</Tooltip>
-      </button>
     </div>
   );
 }
