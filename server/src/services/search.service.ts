@@ -458,23 +458,31 @@ export async function search(
   userId: string | undefined,
   options: SearchOptions
 ): Promise<SearchResponse> {
+  // Check if organization exists and get its public status
+  const org = db.prepare('SELECT is_public FROM organizations WHERE id = ?').get(orgId) as
+    | { is_public: number }
+    | undefined;
+
+  if (!org) {
+    const error = new Error('Organization not found') as { status?: number };
+    error.status = 404;
+    throw error;
+  }
+
+  const isPublic = org.is_public === 1;
+
   // Check access permissions
   if (userId) {
-    // Authenticated: check if member, owner, or superuser
-    requireOrgPermission(orgId, userId, 'viewer');
-  } else {
-    // Guest: check if organization is public
-    const org = db.prepare('SELECT is_public FROM organizations WHERE id = ?').get(orgId) as
-      | { is_public: number }
-      | undefined;
-
-    if (!org) {
-      const error = new Error('Organization not found') as { status?: number };
-      error.status = 404;
-      throw error;
+    // Authenticated user: check membership for private orgs
+    // For public orgs, allow access without membership check (avoids misleading audit logs)
+    if (!isPublic) {
+      // Private org - requires membership
+      requireOrgPermission(orgId, userId, 'viewer');
     }
-
-    if (org.is_public !== 1) {
+    // Note: For public orgs, we still allow the user to search even if not a member
+  } else {
+    // Guest user: only allow access to public organizations
+    if (!isPublic) {
       const error = new Error('Insufficient permissions') as { status?: number };
       error.status = 403;
       throw error;
@@ -545,23 +553,31 @@ export async function getAutocompleteSuggestions(
   query: string,
   limit: number = 5
 ): Promise<AutocompleteResponse> {
+  // Check if organization exists and get its public status
+  const org = db.prepare('SELECT is_public FROM organizations WHERE id = ?').get(orgId) as
+    | { is_public: number }
+    | undefined;
+
+  if (!org) {
+    const error = new Error('Organization not found') as { status?: number };
+    error.status = 404;
+    throw error;
+  }
+
+  const isPublic = org.is_public === 1;
+
   // Check access permissions
   if (userId) {
-    // Authenticated: check if member, owner, or superuser
-    requireOrgPermission(orgId, userId, 'viewer');
-  } else {
-    // Guest: check if organization is public
-    const org = db.prepare('SELECT is_public FROM organizations WHERE id = ?').get(orgId) as
-      | { is_public: number }
-      | undefined;
-
-    if (!org) {
-      const error = new Error('Organization not found') as { status?: number };
-      error.status = 404;
-      throw error;
+    // Authenticated user: check membership for private orgs
+    // For public orgs, allow access without membership check (avoids misleading audit logs)
+    if (!isPublic) {
+      // Private org - requires membership
+      requireOrgPermission(orgId, userId, 'viewer');
     }
-
-    if (org.is_public !== 1) {
+    // Note: For public orgs, we still allow the user to search even if not a member
+  } else {
+    // Guest user: only allow access to public organizations
+    if (!isPublic) {
       const error = new Error('Insufficient permissions') as { status?: number };
       error.status = 403;
       throw error;

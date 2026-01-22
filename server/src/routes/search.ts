@@ -24,7 +24,7 @@ function optionalAuthenticate(req: Request, _res: Response, next: NextFunction) 
       (req as AuthRequest).user = decoded;
     }
     next();
-  } catch (err) {
+  } catch (_err) {
     // Ignore invalid tokens for optional auth, just proceed as guest
     next();
   }

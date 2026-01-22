@@ -1,7 +1,12 @@
 import express, { Response, NextFunction } from 'express';
 import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
 import { requireOrgPermission } from '../services/member.service.js';
-import { getAuditLogs, getAllAuditLogs, cleanupOldLogs } from '../services/audit.service.js';
+import {
+  getAuditLogs,
+  getAllAuditLogs,
+  cleanupOldLogs,
+  getAuditFilterOptions,
+} from '../services/audit.service.js';
 import type { AuthRequest } from '../types/index.js';
 
 const router = express.Router();
@@ -78,6 +83,24 @@ router.get(
       const result = getAllAuditLogs(filters);
 
       res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/**
+ * GET /api/admin/audit-logs/filter-options
+ * Get distinct action types and entity types for filter dropdowns
+ * Access: Superuser role
+ */
+router.get(
+  '/admin/audit-logs/filter-options',
+  requireSuperuser,
+  (_req: AuthRequest, res: Response, next: NextFunction): void => {
+    try {
+      const options = getAuditFilterOptions();
+      res.json(options);
     } catch (err) {
       next(err);
     }

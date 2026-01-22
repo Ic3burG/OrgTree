@@ -346,3 +346,51 @@ export function cleanupOldLogs(): number {
     return 0;
   }
 }
+
+interface AuditFilterOptions {
+  actionTypes: string[];
+  entityTypes: string[];
+}
+
+/**
+ * Get distinct action types and entity types from audit logs
+ * Used to populate filter dropdowns dynamically
+ */
+export function getAuditFilterOptions(): AuditFilterOptions {
+  try {
+    // Get distinct action types
+    const actionTypes = db
+      .prepare(
+        `
+      SELECT DISTINCT action_type
+      FROM audit_logs
+      WHERE action_type IS NOT NULL
+      ORDER BY action_type ASC
+    `
+      )
+      .all() as Array<{ action_type: string }>;
+
+    // Get distinct entity types
+    const entityTypes = db
+      .prepare(
+        `
+      SELECT DISTINCT entity_type
+      FROM audit_logs
+      WHERE entity_type IS NOT NULL
+      ORDER BY entity_type ASC
+    `
+      )
+      .all() as Array<{ entity_type: string }>;
+
+    return {
+      actionTypes: actionTypes.map(row => row.action_type),
+      entityTypes: entityTypes.map(row => row.entity_type),
+    };
+  } catch (err) {
+    console.error('Failed to get audit filter options:', err);
+    return {
+      actionTypes: [],
+      entityTypes: [],
+    };
+  }
+}
