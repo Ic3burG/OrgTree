@@ -7,6 +7,7 @@ import {
   CheckCircle,
   Smartphone,
   QrCode,
+  Lock,
 } from 'lucide-react';
 import { usePasskey } from '../../hooks/usePasskey';
 import { api } from '../../api/client';
@@ -16,6 +17,16 @@ export default function SecuritySettingsPage(): React.JSX.Element {
   const [passkeys, setPasskeys] = useState<Passkey[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Password Change State
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // 2FA State
   const [totpEnabled, setTotpEnabled] = useState(false);
   const [totpSetup, setTotpSetup] = useState<TotpSetup | null>(null);
   const [totpToken, setTotpToken] = useState('');
@@ -50,6 +61,36 @@ export default function SecuritySettingsPage(): React.JSX.Element {
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage(null);
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setMessage({ type: 'error', text: 'New passwords do not match' });
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 12) {
+      setMessage({ type: 'error', text: 'Password must be at least 12 characters' });
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      await api.changePassword(passwordForm.newPassword, passwordForm.currentPassword);
+      setMessage({ type: 'success', text: 'Password changed successfully' });
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      console.error('Change password error:', err);
+      setMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Failed to change password',
+      });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   const handleAddPasskey = async () => {
     setMessage(null);
@@ -157,6 +198,65 @@ export default function SecuritySettingsPage(): React.JSX.Element {
           <span>{message.text}</span>
         </div>
       )}
+
+      {/* Password Section */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-4">
+          <Lock size={20} />
+          Change Password
+        </h2>
+        <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              Current Password
+            </label>
+            <input
+              type="password"
+              value={passwordForm.currentPassword}
+              onChange={e => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              New Password
+            </label>
+            <input
+              type="password"
+              value={passwordForm.newPassword}
+              onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100"
+              required
+              minLength={12}
+            />
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Must be at least 12 characters long
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              Confirm New Password
+            </label>
+            <input
+              type="password"
+              value={passwordForm.confirmPassword}
+              onChange={e => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={passwordLoading}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {passwordLoading ? 'Updating...' : 'Update Password'}
+          </button>
+        </form>
+      </div>
+
+      <div className="border-t border-slate-200 dark:border-slate-700 my-8"></div>
 
       {/* Passkeys Section */}
       <div className="mb-8">
