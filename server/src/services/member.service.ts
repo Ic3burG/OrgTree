@@ -49,9 +49,21 @@ interface UserOrganization {
 /**
  * Check if user has access to organization and return their effective role
  * Owner always has 'owner' role (higher than admin)
+ * Superusers always have 'owner' access
  * Returns: { hasAccess: boolean, role: 'owner'|'admin'|'editor'|'viewer'|null, isOwner: boolean }
  */
 export function checkOrgAccess(orgId: string, userId: string): OrgAccessResult {
+  // Check if user is superuser (Global Role)
+  // This allows superusers to search/access any organization
+  const user = db.prepare('SELECT role FROM users WHERE id = ?').get(userId) as
+    | { role: string }
+    | undefined;
+
+  if (user?.role === 'superuser') {
+    // console.log('[checkOrgAccess] User is superuser:', { orgId, userId });
+    return { hasAccess: true, role: 'owner', isOwner: false };
+  }
+
   // Check if user is owner
   const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId) as
     | DatabaseOrgRecord
@@ -63,7 +75,7 @@ export function checkOrgAccess(orgId: string, userId: string): OrgAccessResult {
   }
 
   if (org.created_by_id === userId) {
-    console.log('[checkOrgAccess] User is owner:', { orgId, userId, role: 'owner' });
+    // console.log('[checkOrgAccess] User is owner:', { orgId, userId, role: 'owner' });
     return { hasAccess: true, role: 'owner', isOwner: true };
   }
 
@@ -78,15 +90,15 @@ export function checkOrgAccess(orgId: string, userId: string): OrgAccessResult {
     .get(orgId, userId) as DatabaseMemberRecord | undefined;
 
   if (!member) {
-    console.error('[checkOrgAccess] User is not owner and not in organization_members:', {
-      orgId,
-      userId,
-      ownerUserId: org.created_by_id,
-    });
+    // console.error('[checkOrgAccess] User is not owner and not in organization_members:', {
+    //   orgId,
+    //   userId,
+    //   ownerUserId: org.created_by_id,
+    // });
     return { hasAccess: false, role: null, isOwner: false };
   }
 
-  console.log('[checkOrgAccess] User is member:', { orgId, userId, role: member.role });
+  // console.log('[checkOrgAccess] User is member:', { orgId, userId, role: member.role });
   return { hasAccess: true, role: member.role, isOwner: false };
 }
 
@@ -114,6 +126,10 @@ export function requireOrgPermission(
 
   if (userLevel < requiredLevel) {
     // Security: Log permission denied - insufficient organization role
+    console.warn(
+      `[requireOrgPermission] Permission Denied: User ${userId} has role '${access.role}' (${userLevel}) but requires '${minRole}' (${requiredLevel}) for org ${orgId}`
+    );
+
     // Get user details for logging
     const user = db.prepare('SELECT id, name, email FROM users WHERE id = ?').get(userId) as
       | Pick<DatabaseUser, 'id' | 'name' | 'email'>
@@ -130,6 +146,8 @@ export function requireOrgPermission(
         organizationId: orgId,
         requiredRole: minRole,
         userRole: access.role,
+        userLevel,
+        requiredLevel,
         timestamp: new Date().toISOString(),
       }
     );
