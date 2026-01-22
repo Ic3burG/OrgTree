@@ -12,7 +12,7 @@ describe('buildHierarchyChain', () => {
       sort_order: 0,
       created_at: '',
       updated_at: '',
-      description: null,
+      description: '',
       deleted_at: null,
     },
     {
@@ -23,7 +23,7 @@ describe('buildHierarchyChain', () => {
       sort_order: 0,
       created_at: '',
       updated_at: '',
-      description: null,
+      description: '',
       deleted_at: null,
     },
     {
@@ -34,7 +34,7 @@ describe('buildHierarchyChain', () => {
       sort_order: 0,
       created_at: '',
       updated_at: '',
-      description: null,
+      description: '',
       deleted_at: null,
     },
     {
@@ -45,7 +45,7 @@ describe('buildHierarchyChain', () => {
       sort_order: 0,
       created_at: '',
       updated_at: '',
-      description: null,
+      description: '',
       deleted_at: null,
     },
   ];
@@ -73,7 +73,7 @@ describe('buildHierarchyChain', () => {
         sort_order: 0,
         created_at: '',
         updated_at: '',
-        description: null,
+        description: '',
         deleted_at: null,
       },
       {
@@ -84,7 +84,7 @@ describe('buildHierarchyChain', () => {
         sort_order: 0,
         created_at: '',
         updated_at: '',
-        description: null,
+        description: '',
         deleted_at: null,
       },
     ];
