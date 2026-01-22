@@ -120,6 +120,7 @@ vi.mock('../db.js', async () => {
 // Mock member service to allow access
 vi.mock('./member.service.js', () => ({
   requireOrgPermission: vi.fn(),
+  checkOrgAccess: vi.fn(),
 }));
 
 // Mock escape utility
@@ -135,6 +136,7 @@ vi.mock('../utils/escape.js', () => ({
 }));
 
 import db from '../db.js';
+import { checkOrgAccess } from './member.service.js';
 import { search, getAutocompleteSuggestions } from './search.service.js';
 import {
   getDepartments,
@@ -144,9 +146,9 @@ import {
 } from './department.service.js';
 import { getPeopleByDepartment, createPerson } from './people.service.js';
 
-// ============================================================================
+// ============================================================================ 
 // SQL Injection Test Payloads
-// ============================================================================
+// ============================================================================ 
 
 const SQL_INJECTION_PAYLOADS = [
   // Classic SQL injection
@@ -209,9 +211,9 @@ const FTS5_INJECTION_PAYLOADS = [
   '}}}',
 ];
 
-// ============================================================================
+// ============================================================================ 
 // Tests
-// ============================================================================
+// ============================================================================ 
 
 describe('SQL Injection Security Tests', () => {
   const orgId = 'org-123';
@@ -273,6 +275,9 @@ describe('SQL Injection Security Tests', () => {
       INSERT INTO departments_fts(departments_fts) VALUES('rebuild');
       INSERT INTO people_fts(people_fts) VALUES('rebuild');
     `);
+
+    // Mock permissions
+    vi.mocked(checkOrgAccess).mockReturnValue({ hasAccess: true, role: 'owner', isOwner: true });
   });
 
   describe('Search Service - SQL Injection Protection', () => {
@@ -508,10 +513,10 @@ describe('SQL Injection Security Tests', () => {
       // Create a second org with secret data
       const secretOrgId = 'secret-org';
       (db as DatabaseType)
-        .prepare(`INSERT INTO organizations (id, name, created_by_id) VALUES (?, ?, ?)`)
+        .prepare(`INSERT INTO organizations (id, name, created_by_id) VALUES (?, ?, ?) `)
         .run(secretOrgId, 'Secret Org', userId);
       (db as DatabaseType)
-        .prepare(`INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)`)
+        .prepare(`INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?) `)
         .run('secret-dept', secretOrgId, 'SECRET_DATA_12345');
       (db as DatabaseType).exec(`INSERT INTO departments_fts(departments_fts) VALUES('rebuild');`);
 
