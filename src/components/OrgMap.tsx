@@ -279,11 +279,14 @@ export default function OrgMap(): React.JSX.Element {
         const defs = await api.getCustomFieldDefinitions(orgId);
         setFieldDefinitions(defs);
 
-        // Fit view after initial load (only on first load)
+        // Fit view after initial load (only if no deep link)
         if (showLoading) {
-          setTimeout(() => {
-            fitViewRef.current({ padding: 0.2, duration: 800 });
-          }, 100);
+          const hasDeepLink = searchParams.get('personId') || searchParams.get('departmentId');
+          if (!hasDeepLink) {
+            setTimeout(() => {
+              fitViewRef.current({ padding: 0.2, duration: 800 });
+            }, 100);
+          }
         }
       } catch (err) {
         console.error('Error loading organization data:', err);
@@ -294,7 +297,7 @@ export default function OrgMap(): React.JSX.Element {
         if (showLoading) setIsLoading(false);
       }
     },
-    [orgId, layoutDirection, setNodes, setEdges]
+    [orgId, layoutDirection, setNodes, setEdges, searchParams]
   );
 
   // Handle auto-zoom from URL parameter (e.g. from department list)
