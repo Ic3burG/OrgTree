@@ -71,8 +71,8 @@ router.post(
     `);
 
       const insertFieldValue = db.prepare(`
-        INSERT INTO custom_field_values (id, organization_id, entity_type, entity_id, field_id, value, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+        INSERT INTO custom_field_values (id, field_definition_id, entity_type, entity_id, value, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))
       `);
 
       const updateFts = db.prepare(`
@@ -151,7 +151,7 @@ router.post(
             for (const field of deptFields) {
               const val = row[field.field_key];
               if (val !== undefined && val !== null && val !== '') {
-                insertFieldValue.run(generateId(), orgId, 'department', deptId, field.id, val);
+                insertFieldValue.run(generateId(), field.id, 'department', deptId, val);
                 ftsContent.push(String(val));
               }
             }
@@ -199,7 +199,7 @@ router.post(
               for (const field of personFields) {
                 const val = row[field.field_key];
                 if (val !== undefined && val !== null && val !== '') {
-                  insertFieldValue.run(generateId(), orgId, 'person', personId, field.id, val);
+                  insertFieldValue.run(generateId(), field.id, 'person', personId, val);
                   ftsContent.push(String(val));
                 }
               }
