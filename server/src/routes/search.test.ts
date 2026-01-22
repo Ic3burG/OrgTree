@@ -1,36 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
+import { search, getAutocompleteSuggestions } from '../services/search.service.js';
+import searchRoutes from './search.js';
 
-// Mock dependencies
+// Mock Search services
 vi.mock('../services/search.service.js', () => ({
   search: vi.fn(),
   getAutocompleteSuggestions: vi.fn(),
 }));
 
-// Mock Auth Middleware
-vi.mock('../middleware/auth.js', () => ({
-  authenticateToken: (req: any, res: any, next: any) => {
-    req.user = { id: 'user-123', email: 'test@example.com' };
-    next();
-  },
-}));
-
-// Mock Database (referenced in app initialization even if not used directly here)
-vi.mock('../db.js', async () => {
-  return { default: { prepare: vi.fn(() => ({ run: vi.fn(), get: vi.fn(), all: vi.fn() })) } };
-});
-
-// Mock member service to allow org access
-vi.mock('../services/member.service.js', () => ({
-  requireOrgPermission: vi.fn(), // No-op, always allows access
-}));
-
-import { search, getAutocompleteSuggestions } from '../services/search.service.js';
-import searchRoutes from './search.js';
-
+// Mock Auth Middleware / JWT logic for tests
+// We need to bypass JWT verification in the test app
 const app = express();
 app.use(express.json());
+app.use((req: any, _res, next) => {
+  // Simulate a logged-in user
+  req.user = { id: 'user-123', email: 'test@example.com' };
+  next();
+});
 app.use('/api', searchRoutes);
 
 describe('Search Routes', () => {
@@ -46,7 +34,7 @@ describe('Search Routes', () => {
         limit: 20,
         offset: 0,
       };
-      vi.mocked(search).mockReturnValue(mockResults as any);
+      vi.mocked(search).mockResolvedValue(mockResults as any);
 
       const res = await request(app).get('/api/organizations/org-1/search?q=test').expect(200);
 
@@ -82,7 +70,7 @@ describe('Search Routes', () => {
     });
 
     it('should handle pagination params', async () => {
-      vi.mocked(search).mockReturnValue({ results: [] } as any);
+      vi.mocked(search).mockResolvedValue({ results: [] } as any);
 
       await request(app)
         .get('/api/organizations/org-1/search?q=test&limit=50&offset=10')
@@ -99,7 +87,7 @@ describe('Search Routes', () => {
     });
 
     it('should handle starred filter', async () => {
-      vi.mocked(search).mockReturnValue({ results: [] } as any);
+      vi.mocked(search).mockResolvedValue({ results: [] } as any);
 
       await request(app).get('/api/organizations/org-1/search?q=test&starred=true').expect(200);
 
@@ -126,7 +114,7 @@ describe('Search Routes', () => {
   describe('GET /api/organizations/:orgId/search/autocomplete', () => {
     it('should return autocomplete suggestions', async () => {
       const mockSuggestions = { suggestions: [{ text: 'Suggestion 1', type: 'person', id: 'p1' }] };
-      vi.mocked(getAutocompleteSuggestions).mockReturnValue(mockSuggestions as any);
+      vi.mocked(getAutocompleteSuggestions).mockResolvedValue(mockSuggestions as any);
 
       const res = await request(app)
         .get('/api/organizations/org-1/search/autocomplete?q=sugg')
@@ -146,7 +134,7 @@ describe('Search Routes', () => {
     });
 
     it('should respect limit param', async () => {
-      vi.mocked(getAutocompleteSuggestions).mockReturnValue({ suggestions: [] } as any);
+      vi.mocked(getAutocompleteSuggestions).mockResolvedValue({ suggestions: [] } as any);
 
       await request(app)
         .get('/api/organizations/org-1/search/autocomplete?q=abc&limit=8')

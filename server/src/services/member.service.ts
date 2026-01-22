@@ -115,25 +115,38 @@ export function requireOrgPermission(
   const access = checkOrgAccess(orgId, userId);
 
   if (!access.hasAccess) {
+    // Security: Log access attempt to non-existent or inaccessible org
+    // console.warn(`[requireOrgPermission] Access Denied: User ${userId} has no access to org ${orgId}`);
     const error = new Error('Organization not found') as AppError;
     error.status = 404;
     throw error;
   }
 
-  const roleHierarchy: Record<string, number> = { viewer: 0, editor: 1, admin: 2, owner: 3 };
+  // System roles vs Org roles mapping
+  const roleHierarchy: Record<string, number> = {
+    viewer: 0,
+    editor: 1,
+    admin: 2,
+    owner: 3,
+    // Add defensive mapping for common issues
+    user: 0,
+    guest: -1,
+  };
+
   const userLevel = roleHierarchy[access.role as string] ?? 0;
   const requiredLevel = roleHierarchy[minRole] ?? 0;
 
   if (userLevel < requiredLevel) {
     // Security: Log permission denied - insufficient organization role
     console.warn(
-      `[requireOrgPermission] Permission Denied: User ${userId} has role '${access.role}' (${userLevel}) but requires '${minRole}' (${requiredLevel}) for org ${orgId}`
+      `[requireOrgPermission] Permission Denied: User ${userId} has effective role '${access.role}' (${userLevel}) but requires '${minRole}' (${requiredLevel}) for org ${orgId}`
     );
 
     // Get user details for logging
-    const user = db.prepare('SELECT id, name, email FROM users WHERE id = ?').get(userId) as
-      | Pick<DatabaseUser, 'id' | 'name' | 'email'>
+    const user = db.prepare('SELECT id, name, email, role FROM users WHERE id = ?').get(userId) as
+      | Pick<DatabaseUser, 'id' | 'name' | 'email' | 'role'>
       | undefined;
+
     createAuditLog(
       orgId, // Organization-specific security event
       user
@@ -146,6 +159,7 @@ export function requireOrgPermission(
         organizationId: orgId,
         requiredRole: minRole,
         userRole: access.role,
+        globalRole: user?.role, // Include global role for debugging
         userLevel,
         requiredLevel,
         timestamp: new Date().toISOString(),

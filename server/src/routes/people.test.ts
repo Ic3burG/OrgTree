@@ -183,7 +183,7 @@ describe('People Routes', () => {
       const getMock = vi.fn().mockReturnValue(mockPerson);
       vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
 
-      vi.mocked(peopleService.deletePerson).mockResolvedValue(undefined);
+      vi.mocked(peopleService.deletePerson).mockResolvedValue({ success: true });
 
       const token = createAuthToken();
       await request(app)

@@ -163,7 +163,7 @@ describe('Departments Routes', () => {
       const getMock = vi.fn().mockReturnValue(mockDept);
       vi.mocked(db.prepare).mockReturnValue({ get: getMock } as any);
 
-      vi.mocked(departmentService.deleteDepartment).mockResolvedValue(undefined);
+      vi.mocked(departmentService.deleteDepartment).mockResolvedValue({ success: true });
 
       const token = createAuthToken();
       await request(app)

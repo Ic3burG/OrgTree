@@ -61,6 +61,7 @@ vi.mock('../db.js', async () => {
       email TEXT,
       phone TEXT,
       sort_order INTEGER DEFAULT 0,
+      is_starred INTEGER DEFAULT 0,
       deleted_at DATETIME,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
@@ -87,14 +88,14 @@ vi.mock('../db.js', async () => {
     CREATE TABLE IF NOT EXISTS custom_field_values (
       id TEXT PRIMARY KEY,
       organization_id TEXT NOT NULL,
-      field_id TEXT NOT NULL,
+      field_definition_id TEXT NOT NULL,
       entity_id TEXT NOT NULL,
       entity_type TEXT NOT NULL,
       value TEXT NOT NULL,
       deleted_at DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(field_id, entity_id)
+      UNIQUE(field_definition_id, entity_id)
     );
 
     CREATE VIRTUAL TABLE custom_fields_fts USING fts5(
@@ -246,9 +247,9 @@ describe('Search Service', () => {
     vi.mocked(requireOrgPermission).mockClear();
   });
 
-  describe.skip('search()', () => {
-    it('should search departments by name', () => {
-      const result = search(String(orgId), String(userId), { query: 'Engineering' });
+  describe('search()', () => {
+    it('should search departments by name', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'Engineering' });
 
       expect(requireOrgPermission).toHaveBeenCalledWith(String(orgId), String(userId), 'viewer');
       expect(result.total).toBeGreaterThan(0);
@@ -258,15 +259,15 @@ describe('Search Service', () => {
       expect(result.results[0]!.highlight).toContain('mark');
     });
 
-    it('should search departments by description', () => {
-      const result = search(String(orgId), String(userId), { query: 'software' });
+    it('should search departments by description', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'software' });
 
       expect(result.total).toBeGreaterThan(0);
       expect(result.results.some(r => r.type === 'department')).toBe(true);
     });
 
-    it('should search people by name', () => {
-      const result = search(String(orgId), String(userId), { query: 'John' });
+    it('should search people by name', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'John' });
 
       expect(result.total).toBeGreaterThan(0);
       const personResults = result.results.filter(r => r.type === 'person');
@@ -274,16 +275,16 @@ describe('Search Service', () => {
       expect(personResults.some(p => p.name === 'John Doe')).toBe(true);
     });
 
-    it('should search people by title', () => {
-      const result = search(String(orgId), String(userId), { query: 'Engineer' });
+    it('should search people by title', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'Engineer' });
 
       expect(result.total).toBeGreaterThan(0);
       const personResults = result.results.filter(r => r.type === 'person');
       expect(personResults.length).toBeGreaterThan(0);
     });
 
-    it('should search people by email', () => {
-      const result = search(String(orgId), String(userId), { query: 'jane' });
+    it('should search people by email', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'jane' });
 
       expect(result.total).toBeGreaterThan(0);
       const personResults = result.results.filter(r => r.type === 'person');
@@ -292,8 +293,8 @@ describe('Search Service', () => {
       expect(janeResult).toBeDefined();
     });
 
-    it('should filter by type: departments only', () => {
-      const result = search(String(orgId), String(userId), {
+    it('should filter by type: departments only', async () => {
+      const result = await search(String(orgId), String(userId), {
         query: 'Department',
         type: 'departments',
       });
@@ -302,15 +303,15 @@ describe('Search Service', () => {
       expect(result.results.every(r => r.type === 'department')).toBe(true);
     });
 
-    it('should filter by type: people only', () => {
-      const result = search(String(orgId), String(userId), { query: 'Manager', type: 'people' });
+    it('should filter by type: people only', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'Manager', type: 'people' });
 
       expect(result.total).toBeGreaterThan(0);
       expect(result.results.every(r => r.type === 'person')).toBe(true);
     });
 
-    it('should return both departments and people for type: all', () => {
-      const result = search(String(orgId), String(userId), { query: 'Engineering', type: 'all' });
+    it('should return both departments and people for type: all', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'Engineering', type: 'all' });
 
       expect(result.total).toBeGreaterThan(0);
       // Should find both Engineering Department and people with Engineering title
@@ -319,21 +320,21 @@ describe('Search Service', () => {
       expect(hasDepartment || hasPerson).toBe(true);
     });
 
-    it('should support pagination with limit', () => {
-      const result = search(String(orgId), String(userId), { query: 'Department', limit: 2 });
+    it('should support pagination with limit', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'Department', limit: 2 });
 
       expect(result.results.length).toBeLessThanOrEqual(2);
       expect(result.pagination.limit).toBe(2);
       expect(result.pagination.offset).toBe(0);
     });
 
-    it('should support pagination with offset', () => {
-      const firstPage = search(String(orgId), String(userId), {
+    it('should support pagination with offset', async () => {
+      const firstPage = await search(String(orgId), String(userId), {
         query: 'Department',
         limit: 1,
         offset: 0,
       });
-      const secondPage = search(String(orgId), String(userId), {
+      const secondPage = await search(String(orgId), String(userId), {
         query: 'Department',
         limit: 1,
         offset: 1,
@@ -344,8 +345,8 @@ describe('Search Service', () => {
       }
     });
 
-    it('should calculate hasMore correctly', () => {
-      const result = search(String(orgId), String(userId), { query: 'Department', limit: 2 });
+    it('should calculate hasMore correctly', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'Department', limit: 2 });
 
       if (result.total > 2) {
         expect(result.pagination.hasMore).toBe(true);
@@ -354,46 +355,46 @@ describe('Search Service', () => {
       }
     });
 
-    it('should handle empty query', () => {
-      const result = search(String(orgId), String(userId), { query: '' });
+    it('should handle empty query', async () => {
+      const result = await search(String(orgId), String(userId), { query: '' });
 
       expect(result.total).toBe(0);
       expect(result.results).toEqual([]);
       expect(result.pagination.hasMore).toBe(false);
     });
 
-    it('should handle whitespace-only query', () => {
-      const result = search(String(orgId), String(userId), { query: '   ' });
+    it('should handle whitespace-only query', async () => {
+      const result = await search(String(orgId), String(userId), { query: '   ' });
 
       expect(result.total).toBe(0);
       expect(result.results).toEqual([]);
     });
 
-    it('should handle query with no matches', () => {
-      const result = search(String(orgId), String(userId), { query: 'NonExistentTerm12345' });
+    it('should handle query with no matches', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'NonExistentTerm12345' });
 
       expect(result.total).toBe(0);
       expect(result.results).toEqual([]);
     });
 
-    it('should handle special characters safely', () => {
+    it('should handle special characters safely', async () => {
       // These characters should be escaped and not cause FTS5 syntax errors
-      const result = search(String(orgId), String(userId), { query: '"*(){}[]^~\\:' });
+      const result = await search(String(orgId), String(userId), { query: '"*(){}[]^~\\:' });
 
       // Should not throw error, just return no results
       expect(result.total).toBe(0);
       expect(result.results).toEqual([]);
     });
 
-    it('should support prefix matching for partial words', () => {
-      const result = search(String(orgId), String(userId), { query: 'Eng' });
+    it('should support prefix matching for partial words', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'Eng' });
 
       // Should match "Engineering" with prefix search
       expect(result.total).toBeGreaterThan(0);
     });
 
-    it('should include people count for department results', () => {
-      const result = search(String(orgId), String(userId), {
+    it('should include people count for department results', async () => {
+      const result = await search(String(orgId), String(userId), {
         query: 'Engineering',
         type: 'departments',
       });
@@ -404,15 +405,15 @@ describe('Search Service', () => {
       expect(deptResult?.people_count).toBeGreaterThanOrEqual(0);
     });
 
-    it('should include department name for person results', () => {
-      const result = search(String(orgId), String(userId), { query: 'John', type: 'people' });
+    it('should include department name for person results', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'John', type: 'people' });
 
       const personResult = result.results.find(r => r.type === 'person');
       expect(personResult).toBeDefined();
       expect(personResult?.department_name).toBeDefined();
     });
 
-    it('should escape HTML in highlights', () => {
+    it('should escape HTML in highlights', async () => {
       // Insert department with HTML-like content
       (db as DatabaseType)
         .prepare(
@@ -424,7 +425,7 @@ describe('Search Service', () => {
       // Rebuild FTS5
       (db as DatabaseType).exec(`INSERT INTO departments_fts(departments_fts) VALUES('rebuild');`);
 
-      const result = search(String(orgId), String(userId), { query: 'script' });
+      const result = await search(String(orgId), String(userId), { query: 'script' });
 
       const deptResult = result.results.find(r => r.name.includes('script'));
       expect(deptResult).toBeDefined();
@@ -432,8 +433,8 @@ describe('Search Service', () => {
       expect(deptResult?.highlight).toContain('&lt;');
     });
 
-    it('should preserve <mark> tags in highlights', () => {
-      const result = search(String(orgId), String(userId), { query: 'Engineering' });
+    it('should preserve <mark> tags in highlights', async () => {
+      const result = await search(String(orgId), String(userId), { query: 'Engineering' });
 
       if (result.results.length > 0) {
         expect(result.results[0]!.highlight).toContain('<mark>');
@@ -443,54 +444,54 @@ describe('Search Service', () => {
   });
 
   describe('getAutocompleteSuggestions()', () => {
-    it('should return department suggestions', () => {
-      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Engineering');
+    it('should return department suggestions', async () => {
+      const result = await getAutocompleteSuggestions(String(orgId), String(userId), 'Engineering');
 
       expect(requireOrgPermission).toHaveBeenCalledWith(String(orgId), String(userId), 'viewer');
       expect(result.suggestions.length).toBeGreaterThan(0);
       expect(result.suggestions.some(s => s.type === 'department')).toBe(true);
     });
 
-    it('should return person suggestions', () => {
-      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'John');
+    it('should return person suggestions', async () => {
+      const result = await getAutocompleteSuggestions(String(orgId), String(userId), 'John');
 
       expect(result.suggestions.length).toBeGreaterThan(0);
       expect(result.suggestions.some(s => s.type === 'person')).toBe(true);
     });
 
-    it('should return mixed suggestions for common terms', () => {
-      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Engineering', 10);
+    it('should return mixed suggestions for common terms', async () => {
+      const result = await getAutocompleteSuggestions(String(orgId), String(userId), 'Engineering', 10);
 
       expect(result.suggestions.length).toBeGreaterThan(0);
       // Should have both departments and people with "Engineering"
     });
 
-    it('should respect limit parameter', () => {
-      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Department', 2);
+    it('should respect limit parameter', async () => {
+      const result = await getAutocompleteSuggestions(String(orgId), String(userId), 'Department', 2);
 
       expect(result.suggestions.length).toBeLessThanOrEqual(2);
     });
 
-    it('should use default limit of 5', () => {
-      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Department');
+    it('should use default limit of 5', async () => {
+      const result = await getAutocompleteSuggestions(String(orgId), String(userId), 'Department');
 
       expect(result.suggestions.length).toBeLessThanOrEqual(5);
     });
 
-    it('should handle empty query', () => {
-      const result = getAutocompleteSuggestions(String(orgId), String(userId), '');
+    it('should handle empty query', async () => {
+      const result = await getAutocompleteSuggestions(String(orgId), String(userId), '');
 
       expect(result.suggestions).toEqual([]);
     });
 
-    it('should handle whitespace-only query', () => {
-      const result = getAutocompleteSuggestions(String(orgId), String(userId), '   ');
+    it('should handle whitespace-only query', async () => {
+      const result = await getAutocompleteSuggestions(String(orgId), String(userId), '   ');
 
       expect(result.suggestions).toEqual([]);
     });
 
-    it('should handle query with no matches', () => {
-      const result = getAutocompleteSuggestions(
+    it('should handle query with no matches', async () => {
+      const result = await getAutocompleteSuggestions(
         String(orgId),
         String(userId),
         'NonExistentTerm12345'
@@ -499,15 +500,15 @@ describe('Search Service', () => {
       expect(result.suggestions.length).toBe(0);
     });
 
-    it('should support prefix matching', () => {
-      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Eng');
+    it('should support prefix matching', async () => {
+      const result = await getAutocompleteSuggestions(String(orgId), String(userId), 'Eng');
 
       // Should match "Engineering" with prefix search
       expect(result.suggestions.length).toBeGreaterThan(0);
     });
 
-    it('should return unique suggestions', () => {
-      const result = getAutocompleteSuggestions(String(orgId), String(userId), 'Department');
+    it('should return unique suggestions', async () => {
+      const result = await getAutocompleteSuggestions(String(orgId), String(userId), 'Department');
 
       const texts = result.suggestions.map(s => s.text);
       const uniqueTexts = [...new Set(texts)];

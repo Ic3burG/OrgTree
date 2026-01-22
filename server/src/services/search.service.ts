@@ -453,9 +453,33 @@ function searchPeople(
 /**
  * Main search function - searches both departments and people
  */
-export function search(orgId: string, userId: string, options: SearchOptions): SearchResponse {
-  // Verify user has access to this organization
-  requireOrgPermission(orgId, userId, 'viewer');
+export async function search(
+  orgId: string,
+  userId: string | undefined,
+  options: SearchOptions
+): Promise<SearchResponse> {
+  // Check access permissions
+  if (userId) {
+    // Authenticated: check if member, owner, or superuser
+    requireOrgPermission(orgId, userId, 'viewer');
+  } else {
+    // Guest: check if organization is public
+    const org = db.prepare('SELECT is_public FROM organizations WHERE id = ?').get(orgId) as
+      | { is_public: number }
+      | undefined;
+
+    if (!org) {
+      const error = new Error('Organization not found') as { status?: number };
+      error.status = 404;
+      throw error;
+    }
+
+    if (org.is_public !== 1) {
+      const error = new Error('Insufficient permissions') as { status?: number };
+      error.status = 403;
+      throw error;
+    }
+  }
 
   const { query, type = 'all', limit = 20, offset = 0, starredOnly = false } = options;
 
@@ -515,14 +539,34 @@ export function search(orgId: string, userId: string, options: SearchOptions): S
 /**
  * Get autocomplete suggestions for search
  */
-export function getAutocompleteSuggestions(
+export async function getAutocompleteSuggestions(
   orgId: string,
-  userId: string,
+  userId: string | undefined,
   query: string,
   limit: number = 5
-): AutocompleteResponse {
-  // Verify user has access to this organization
-  requireOrgPermission(orgId, userId, 'viewer');
+): Promise<AutocompleteResponse> {
+  // Check access permissions
+  if (userId) {
+    // Authenticated: check if member, owner, or superuser
+    requireOrgPermission(orgId, userId, 'viewer');
+  } else {
+    // Guest: check if organization is public
+    const org = db.prepare('SELECT is_public FROM organizations WHERE id = ?').get(orgId) as
+      | { is_public: number }
+      | undefined;
+
+    if (!org) {
+      const error = new Error('Organization not found') as { status?: number };
+      error.status = 404;
+      throw error;
+    }
+
+    if (org.is_public !== 1) {
+      const error = new Error('Insufficient permissions') as { status?: number };
+      error.status = 403;
+      throw error;
+    }
+  }
 
   const ftsQuery = buildFtsQuery(query);
   if (!ftsQuery) {

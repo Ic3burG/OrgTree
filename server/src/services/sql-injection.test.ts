@@ -278,9 +278,9 @@ describe('SQL Injection Security Tests', () => {
   describe('Search Service - SQL Injection Protection', () => {
     describe('search() with classic SQL injection payloads', () => {
       SQL_INJECTION_PAYLOADS.forEach(payload => {
-        it(`should safely handle payload: ${payload.substring(0, 40)}...`, () => {
+        it(`should safely handle payload: ${payload.substring(0, 40)}...`, async () => {
           // Should not throw and should not return unauthorized data
-          const result = search(orgId, userId, { query: payload });
+          const result = await search(orgId, userId, { query: payload });
 
           // Verify the function executed safely
           expect(result).toBeDefined();
@@ -300,20 +300,18 @@ describe('SQL Injection Security Tests', () => {
 
     describe('search() with FTS5 injection payloads', () => {
       FTS5_INJECTION_PAYLOADS.forEach(payload => {
-        it(`should safely handle FTS5 payload: ${payload}`, () => {
+        it(`should safely handle FTS5 payload: ${payload}`, async () => {
           // Should not throw - the escapeFtsQuery function should sanitize
-          expect(() => {
-            const result = search(orgId, userId, { query: payload });
-            expect(result).toBeDefined();
-          }).not.toThrow();
+          const result = await search(orgId, userId, { query: payload });
+          expect(result).toBeDefined();
         });
       });
     });
 
     describe('getAutocompleteSuggestions() with injection payloads', () => {
       SQL_INJECTION_PAYLOADS.slice(0, 5).forEach(payload => {
-        it(`should safely handle autocomplete payload: ${payload.substring(0, 30)}...`, () => {
-          const result = getAutocompleteSuggestions(orgId, userId, payload);
+        it(`should safely handle autocomplete payload: ${payload.substring(0, 30)}...`, async () => {
+          const result = await getAutocompleteSuggestions(orgId, userId, payload);
 
           expect(result).toBeDefined();
           expect(Array.isArray(result.suggestions)).toBe(true);
@@ -469,44 +467,44 @@ describe('SQL Injection Security Tests', () => {
   });
 
   describe('Edge Cases & Boundary Tests', () => {
-    it('should handle extremely long SQL injection payloads', () => {
+    it('should handle extremely long SQL injection payloads', async () => {
       const longPayload = "' OR '1'='1".repeat(1000);
 
-      const result = search(orgId, userId, { query: longPayload });
+      const result = await search(orgId, userId, { query: longPayload });
       expect(result).toBeDefined();
     });
 
-    it('should handle null byte injection', () => {
+    it('should handle null byte injection', async () => {
       const payload = "test\x00' OR '1'='1";
 
-      const result = search(orgId, userId, { query: payload });
+      const result = await search(orgId, userId, { query: payload });
       expect(result).toBeDefined();
     });
 
-    it('should handle unicode injection attempts', () => {
+    it('should handle unicode injection attempts', async () => {
       const payload = 'test\u0027 OR 1=1 --';
 
-      const result = search(orgId, userId, { query: payload });
+      const result = await search(orgId, userId, { query: payload });
       expect(result).toBeDefined();
     });
 
-    it('should handle multi-line injection attempts', () => {
+    it('should handle multi-line injection attempts', async () => {
       const payload = "test\n'; DROP TABLE users; --\n";
 
-      const result = search(orgId, userId, { query: payload });
+      const result = await search(orgId, userId, { query: payload });
       expect(result).toBeDefined();
     });
 
-    it('should handle tab character injection', () => {
+    it('should handle tab character injection', async () => {
       const payload = "test\t' OR '1'='1";
 
-      const result = search(orgId, userId, { query: payload });
+      const result = await search(orgId, userId, { query: payload });
       expect(result).toBeDefined();
     });
   });
 
   describe('Data Integrity Verification', () => {
-    it('should not leak data across organizations via injection', () => {
+    it('should not leak data across organizations via injection', async () => {
       // Create a second org with secret data
       const secretOrgId = 'secret-org';
       (db as DatabaseType)
@@ -519,17 +517,17 @@ describe('SQL Injection Security Tests', () => {
 
       // Attempt to access secret data via injection
       const injectionPayload = "' OR organization_id='secret-org' --";
-      const result = search(orgId, userId, { query: injectionPayload });
+      const result = await search(orgId, userId, { query: injectionPayload });
 
       // Should not contain secret data
       const hasSecretData = result.results.some(r => r.name?.includes('SECRET_DATA'));
       expect(hasSecretData).toBe(false);
     });
 
-    it('should prevent UNION-based data extraction', () => {
+    it('should prevent UNION-based data extraction', async () => {
       const payload = "' UNION SELECT id, password_hash, email FROM users --";
 
-      const result = search(orgId, userId, { query: payload });
+      const result = await search(orgId, userId, { query: payload });
 
       // Should not contain password hashes
       const hasPasswordData = result.results.some(
