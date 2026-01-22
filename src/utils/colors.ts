@@ -119,8 +119,9 @@ export function getDepthColors(depth: number, themeName: string = 'slate'): Colo
   if (!theme) {
     throw new Error(`Theme not found: ${themeName}`);
   }
-  const index = Math.min(depth, theme.colors.length - 1);
-  return theme.colors[index] as ColorConfig;
+  const safeDepth = Math.max(0, depth || 0);
+  const index = Math.min(safeDepth, theme.colors.length - 1);
+  return (theme.colors[index] || theme.colors[0]) as ColorConfig;
 }
 
 /**
