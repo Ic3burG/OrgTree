@@ -97,6 +97,14 @@ vi.mock('../db.js', async () => {
       UNIQUE(field_definition_id, entity_id)
     );
 
+    CREATE VIRTUAL TABLE custom_fields_fts USING fts5(
+      entity_type,
+      entity_id UNINDEXED,
+      field_values,
+      content='',
+      tokenize='porter unicode61'
+    );
+
     -- FTS5 virtual tables for search
     CREATE VIRTUAL TABLE departments_fts USING fts5(
       name,
@@ -120,11 +128,13 @@ vi.mock('../db.js', async () => {
 // Mock member service to allow access
 vi.mock('./member.service.js', () => ({
   requireOrgPermission: vi.fn(),
+  checkOrgAccess: vi.fn(),
 }));
 
 // Mock escape utility
 vi.mock('../utils/escape.js', () => ({
   escapeHtml: (str: string) => {
+    if (!str) return '';
     return str
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -135,6 +145,7 @@ vi.mock('../utils/escape.js', () => ({
 }));
 
 import db from '../db.js';
+import { checkOrgAccess } from './member.service.js';
 import { search, getAutocompleteSuggestions } from './search.service.js';
 import {
   getDepartments,
@@ -273,6 +284,9 @@ describe('SQL Injection Security Tests', () => {
       INSERT INTO departments_fts(departments_fts) VALUES('rebuild');
       INSERT INTO people_fts(people_fts) VALUES('rebuild');
     `);
+
+    // Mock permissions
+    vi.mocked(checkOrgAccess).mockReturnValue({ hasAccess: true, role: 'owner', isOwner: true });
   });
 
   describe('Search Service - SQL Injection Protection', () => {

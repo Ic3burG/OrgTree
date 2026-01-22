@@ -1,6 +1,8 @@
 import React, { memo } from 'react';
 import { Mail, Phone, Edit, Trash2, CheckSquare, Square, Star } from 'lucide-react';
-import type { Person, CustomFieldDefinition } from '../../types/index.js';
+import type { Person, CustomFieldDefinition, Department } from '../../types/index.js';
+import OrganizationalHierarchy from '../OrganizationalHierarchy';
+import { buildHierarchyChain } from '../../utils/departmentHierarchy';
 
 export interface PersonWithDepartmentName extends Person {
   departmentName?: string;
@@ -15,6 +17,7 @@ interface PersonItemProps {
   onDelete: (person: PersonWithDepartmentName) => void;
   isRecentlyChanged: boolean;
   fieldDefinitions?: CustomFieldDefinition[];
+  departments?: Department[];
 }
 
 const PersonItem = memo(function PersonItem({
@@ -26,7 +29,12 @@ const PersonItem = memo(function PersonItem({
   onDelete,
   isRecentlyChanged,
   fieldDefinitions = [],
+  departments = [],
 }: PersonItemProps): React.JSX.Element {
+  // Build hierarchy chain if departments are available
+  const hierarchy =
+    departments.length > 0 ? buildHierarchyChain(person.department_id, departments) : [];
+
   // Filter out empty custom fields and map to their definitions
   const activeCustomFields = fieldDefinitions
     .filter(def => person.custom_fields && person.custom_fields[def.field_key])
@@ -60,7 +68,7 @@ const PersonItem = memo(function PersonItem({
           </div>
         )}
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 relative">
           <div className="flex items-center gap-3 mb-2">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 truncate flex items-center gap-2">
               {person.name}
@@ -72,6 +80,24 @@ const PersonItem = memo(function PersonItem({
               <span className="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded whitespace-nowrap">
                 {person.departmentName}
               </span>
+            )}
+
+            {/* Show hierarchy tooltip/indicator if hierarchy is available */}
+            {hierarchy.length > 1 && (
+              <div
+                className="hidden group-hover:block absolute left-0 bottom-full mb-2 z-10 w-max max-w-lg bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-3"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
+                  Reporting Chain
+                </div>
+                <OrganizationalHierarchy
+                  hierarchy={hierarchy}
+                  currentDepartmentId={person.department_id}
+                  compact={true}
+                  showIcons={true}
+                />
+              </div>
             )}
           </div>
 

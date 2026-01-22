@@ -128,7 +128,7 @@ vi.mock('../db.js', async () => {
 
 // Mock member service
 vi.mock('./member.service.js', () => ({
-  requireOrgPermission: vi.fn(),
+  checkOrgAccess: vi.fn(),
 }));
 
 // Mock escape utility
@@ -147,7 +147,7 @@ vi.mock('../utils/escape.js', () => ({
 }));
 
 import db from '../db.js';
-import { requireOrgPermission } from './member.service.js';
+import { checkOrgAccess } from './member.service.js';
 import { search, getAutocompleteSuggestions } from './search.service.js';
 
 describe('Search Service', () => {
@@ -244,14 +244,15 @@ describe('Search Service', () => {
     `);
 
     // Reset mock
-    vi.mocked(requireOrgPermission).mockClear();
+    vi.mocked(checkOrgAccess).mockClear();
+    vi.mocked(checkOrgAccess).mockReturnValue({ hasAccess: true, role: 'viewer', isOwner: false });
   });
 
   describe('search()', () => {
     it('should search departments by name', async () => {
       const result = await search(String(orgId), String(userId), { query: 'Engineering' });
 
-      expect(requireOrgPermission).toHaveBeenCalledWith(String(orgId), String(userId), 'viewer');
+      expect(checkOrgAccess).toHaveBeenCalledWith(String(orgId), String(userId));
       expect(result.total).toBeGreaterThan(0);
       const deptResults = result.results.filter(r => r.type === 'department');
       expect(deptResults.length).toBeGreaterThan(0);
@@ -453,7 +454,7 @@ describe('Search Service', () => {
     it('should return department suggestions', async () => {
       const result = await getAutocompleteSuggestions(String(orgId), String(userId), 'Engineering');
 
-      expect(requireOrgPermission).toHaveBeenCalledWith(String(orgId), String(userId), 'viewer');
+      expect(checkOrgAccess).toHaveBeenCalledWith(String(orgId), String(userId));
       expect(result.suggestions.length).toBeGreaterThan(0);
       expect(result.suggestions.some(s => s.type === 'department')).toBe(true);
     });

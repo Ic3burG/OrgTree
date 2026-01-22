@@ -390,6 +390,7 @@ export default function PersonManager(): React.JSX.Element {
         onDelete={handleDeleteClick}
         isRecentlyChanged={isRecentlyChanged}
         fieldDefinitions={fieldDefinitions}
+        departments={departments}
       />
 
       {/* Person Form Modal */}
