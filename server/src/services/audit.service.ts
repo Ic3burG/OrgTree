@@ -152,18 +152,27 @@ export function getAuditLogs(orgId: string, options: GetAuditLogsOptions = {}): 
     logs.pop(); // Remove the extra record
   }
 
-  // Parse entity_data JSON strings
-  const parsedLogs: ParsedAuditLog[] = logs.map(log => ({
-    id: log.id,
-    organizationId: log.organizationId,
-    actorId: log.actorId,
-    actorName: log.actorName,
-    actionType: log.actionType,
-    entityType: log.entityType,
-    entityId: log.entityId,
-    entityData: log.entityData ? JSON.parse(log.entityData) : null,
-    createdAt: log.createdAt,
-  }));
+  // Parse entity_data JSON strings and convert timestamps to ISO format
+  const parsedLogs: ParsedAuditLog[] = logs.map(log => {
+    // SQLite returns timestamps as 'YYYY-MM-DD HH:MM:SS' (UTC without timezone)
+    // Convert to ISO format with 'Z' suffix to indicate UTC for proper JavaScript Date parsing
+    let createdAt = log.createdAt;
+    if (createdAt && !createdAt.includes('T')) {
+      createdAt = `${createdAt.replace(' ', 'T')}Z`;
+    }
+
+    return {
+      id: log.id,
+      organizationId: log.organizationId,
+      actorId: log.actorId,
+      actorName: log.actorName,
+      actionType: log.actionType,
+      entityType: log.entityType,
+      entityId: log.entityId,
+      entityData: log.entityData ? JSON.parse(log.entityData) : null,
+      createdAt,
+    };
+  });
 
   // Generate next cursor from last record
   const nextCursor: string | null =
@@ -277,19 +286,28 @@ export function getAllAuditLogs(options: GetAllAuditLogsOptions = {}): AllAuditL
     logs.pop(); // Remove the extra record
   }
 
-  // Parse entity_data JSON strings
-  const parsedLogs: ParsedAllAuditLog[] = logs.map(log => ({
-    id: log.id,
-    organizationId: log.organizationId,
-    organizationName: log.organizationName,
-    actorId: log.actorId,
-    actorName: log.actorName,
-    actionType: log.actionType,
-    entityType: log.entityType,
-    entityId: log.entityId,
-    entityData: log.entityData ? JSON.parse(log.entityData) : null,
-    createdAt: log.createdAt,
-  }));
+  // Parse entity_data JSON strings and convert timestamps to ISO format
+  const parsedLogs: ParsedAllAuditLog[] = logs.map(log => {
+    // SQLite returns timestamps as 'YYYY-MM-DD HH:MM:SS' (UTC without timezone)
+    // Convert to ISO format with 'Z' suffix to indicate UTC for proper JavaScript Date parsing
+    let createdAt = log.createdAt;
+    if (createdAt && !createdAt.includes('T')) {
+      createdAt = `${createdAt.replace(' ', 'T')}Z`;
+    }
+
+    return {
+      id: log.id,
+      organizationId: log.organizationId,
+      organizationName: log.organizationName,
+      actorId: log.actorId,
+      actorName: log.actorName,
+      actionType: log.actionType,
+      entityType: log.entityType,
+      entityId: log.entityId,
+      entityData: log.entityData ? JSON.parse(log.entityData) : null,
+      createdAt,
+    };
+  });
 
   // Generate next cursor from last record
   const nextCursor: string | null =

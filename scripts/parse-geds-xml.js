@@ -50,10 +50,55 @@ function getText(field) {
   return '';
 }
 
+// Detect and read XML file with proper encoding
+function readXMLFile(filePath) {
+  // First, try to detect encoding from XML declaration
+  const firstBytes = fs.readFileSync(filePath, { encoding: 'utf-8', flag: 'r' }).substring(0, 200);
+  const encodingMatch = firstBytes.match(/encoding=["']([^"']+)["']/i);
+
+  if (encodingMatch) {
+    const declaredEncoding = encodingMatch[1].toLowerCase();
+    console.log(`  Detected encoding from XML declaration: ${declaredEncoding}`);
+
+    // Map common encoding names to Node.js encoding names
+    const encodingMap = {
+      'utf-8': 'utf-8',
+      'utf8': 'utf-8',
+      'iso-8859-1': 'latin1',
+      'latin1': 'latin1',
+      'windows-1252': 'latin1', // Close enough for most cases
+      'cp1252': 'latin1',
+    };
+
+    const nodeEncoding = encodingMap[declaredEncoding] || 'utf-8';
+    return fs.readFileSync(filePath, nodeEncoding);
+  }
+
+  // Try UTF-8 first (most common modern encoding)
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    // Check if content has replacement characters, which might indicate wrong encoding
+    if (!content.includes('�')) {
+      return content;
+    }
+    console.log(`  UTF-8 read found replacement characters, trying latin1...`);
+  } catch (err) {
+    console.log(`  UTF-8 read failed, trying latin1...`);
+  }
+
+  // Fall back to latin1 (ISO-8859-1) for French characters
+  return fs.readFileSync(filePath, 'latin1');
+}
+
 // Parse a single XML file
 async function parseXMLFile(filePath) {
-  // Read as latin1 (ISO-8859-1) since GEDS XML files use this encoding for French characters
-  const xmlContent = fs.readFileSync(filePath, 'latin1');
+  const xmlContent = readXMLFile(filePath);
+
+  // Warn if replacement characters are still present (indicates corrupted source file)
+  if (xmlContent.includes('�')) {
+    console.log(`  ⚠️  WARNING: File contains replacement characters (�) - source file may be corrupted`);
+  }
+
   const result = await parseXML(xmlContent);
   const person = result.gedsPerson;
 

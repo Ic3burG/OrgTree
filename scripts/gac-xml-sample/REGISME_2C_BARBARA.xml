@@ -1,0 +1,41 @@
+<gedsPerson>
+	<fullName>R�gism�\, Barbara</fullName>
+	<firstName>Barbara</firstName>
+	<lastName>R�gism�</lastName>
+	<title>Coordonateur Administratif</title>
+	<workPhone>819-635-2941</workPhone>
+	<cellPhone />
+	<workFax />
+	<email />
+	<address>111 Sussex Drive</address>
+	<city>Ottawa</city>
+	<province>Ontario</province>
+	<country>Canada</country>
+	<postalCode>K1N 1J1</postalCode>
+	<building />
+	<floor />
+	<room />
+	<department>Global Affairs Canada</department>
+	<departmentAcronym>GAC-AMC</departmentAcronym>
+	<organization>Humanitarian Assistance Bureau</organization>
+	<organizationAcronym>YHD-YHD</organizationAcronym>
+	<orgStructure>
+		<org>
+			<name>Canada</name>
+			<DN>Tz1HQyxDPUNB</DN>
+		</org>
+		<org>
+			<name>Global Affairs Canada</name>
+			<DN>T1U9R0FDLUFNQyxPPUdDLEM9Q0E=</DN>
+		</org>
+		<org>
+			<name>International Assistance Partnerships and Programming Branch</name>
+			<DN>T1U9WUZNLVlGTSxPVT1HQUMtQU1DLE89R0MsQz1DQQ==</DN>
+		</org>
+		<org>
+			<name>Humanitarian Assistance Bureau</name>
+			<DN>T1U9WUhELVlIRCxPVT1ZRk0tWUZNLE9VPUdBQy1BTUMsTz1HQyxDPUNB</DN>
+		</org>
+	</orgStructure>
+	<imageURL>http://geds-sage.gc.ca/GEDS20/images/defaultphoto3.jpg</imageURL>
+</gedsPerson>

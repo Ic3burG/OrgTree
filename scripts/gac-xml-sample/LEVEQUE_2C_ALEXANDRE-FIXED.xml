@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gedsPerson>
+	<fullName>Lévêque\, Alexandre</fullName>
+	<firstName>Alexandre</firstName>
+	<lastName>Lévêque</lastName>
+	<title>Assistant Deputy Minister</title>
+	<workPhone>343-203-3445</workPhone>
+	<cellPhone />
+	<workFax />
+	<email />
+	<address>125 Sussex Drive</address>
+	<city>Ottawa</city>
+	<province>Ontario</province>
+	<country>Canada</country>
+	<postalCode>K1A 0G2</postalCode>
+	<building />
+	<floor />
+	<room />
+	<department>Global Affairs Canada</department>
+	<departmentAcronym>GAC-AMC</departmentAcronym>
+	<organization>Europe, Middle East and Arctic Branch</organization>
+	<organizationAcronym>EGM-EGM</organizationAcronym>
+	<orgStructure>
+		<org>
+			<name>Canada</name>
+			<DN>Tz1HQyxDPUNB</DN>
+		</org>
+		<org>
+			<name>Global Affairs Canada</name>
+			<DN>T1U9R0FDLUFNQyxPPUdDLEM9Q0E=</DN>
+		</org>
+		<org>
+			<name>Europe, Middle East and Arctic Branch</name>
+			<DN>T1U9RUdNLUVHTSxPVT1HQUMtQU1DLE89R0MsQz1DQQ==</DN>
+		</org>
+	</orgStructure>
+	<imageURL>http://geds-sage.gc.ca/GEDS20/images/defaultphoto3.jpg</imageURL>
+</gedsPerson>
