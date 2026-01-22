@@ -10,6 +10,11 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
       },
+      '/api-geds': {
+        target: 'https://geds-sage.gc.ca',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api-geds/, ''),
+      },
     },
   },
   build: {

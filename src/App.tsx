@@ -28,6 +28,7 @@ import AcceptInvitation from './components/AcceptInvitation';
 import { initCsrf } from './api/client';
 import AccountLayout from './components/account/AccountLayout';
 import ProfileSettings from './components/account/ProfileSettings';
+import GedsDownloader from './components/GedsDownloader';
 
 /**
  * App - Root component
@@ -123,6 +124,7 @@ function App() {
                       }
                     />
                     <Route path="audit" element={<AuditLog />} />
+                    <Route path="geds" element={<GedsDownloader />} />
                   </Route>
 
                   {/* Catch all - redirect to home */}
