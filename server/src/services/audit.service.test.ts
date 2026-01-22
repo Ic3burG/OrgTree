@@ -48,12 +48,7 @@ describe('Audit Service', () => {
       expect(result).toHaveProperty('id');
       expect(db.prepare).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO audit_logs'));
 
-      const mockRun = vi.mocked(db.prepare('sql').run);
-      // Verify args passed to run (id, orgId, actorId, actorName, actionType, entityType, entityId, entityDataJson)
-      // Since we don't capture the exact statement object for the specific call easily without more complex mocking,
-      // generally checking db.prepare was called is a good start, but let's be more specific if possible.
-      // Ideally we'd capture the mock returned by nested call. Use:
-      // expect(vi.mocked(db.prepare)().run).toHaveBeenCalledWith(...) // This is tricky if prepare called multiple times.
+      // db.prepare was called, and we verified the SQL contains INSERT INTO audit_logs above.
     });
 
     it('should handle errors gracefully', () => {
@@ -91,7 +86,7 @@ describe('Audit Service', () => {
       const result = auditService.getAuditLogs('org-1');
 
       expect(result.logs).toHaveLength(1);
-      expect(result.logs[0].entityData).toEqual({ name: 'Test' });
+      expect(result.logs[0]!.entityData).toEqual({ name: 'Test' });
       expect(result.hasMore).toBe(false);
       expect(db.prepare).toHaveBeenCalledWith(expect.stringContaining('WHERE organization_id = ?'));
     });
@@ -107,7 +102,7 @@ describe('Audit Service', () => {
       // This implicitly tests logic by checking if params would be constructed (which depends on conditions)
       // but verifying exact SQL string is fragile.
       // Instead, we can verify that db.prepare was called and we can infer conditions.
-      const call = vi.mocked(db.prepare).mock.calls[0][0] as string;
+      const call = vi.mocked(db.prepare).mock.calls[0]![0] as string;
       expect(call).toContain('action_type = ?');
       expect(call).toContain('entity_type = ?');
       expect(call).toContain('created_at >= ?');
@@ -117,7 +112,7 @@ describe('Audit Service', () => {
       const cursor = '2024-01-01:123';
       auditService.getAuditLogs('org-1', { cursor });
 
-      const call = vi.mocked(db.prepare).mock.calls[0][0] as string;
+      const call = vi.mocked(db.prepare).mock.calls[0]![0] as string;
       expect(call).toContain('(created_at < ? OR (created_at = ? AND id < ?))');
     });
 
@@ -153,9 +148,9 @@ describe('Audit Service', () => {
       const result = auditService.getAllAuditLogs({ orgId: 'org-1' });
 
       expect(result.logs).toHaveLength(1);
-      expect(result.logs[0].organizationName).toBe('Org 1');
+      expect(result.logs[0]!.organizationName).toBe('Org 1');
 
-      const call = vi.mocked(db.prepare).mock.calls[0][0] as string;
+      const call = vi.mocked(db.prepare).mock.calls[0]![0] as string;
       expect(call).toContain('LEFT JOIN organizations o');
     });
   });
