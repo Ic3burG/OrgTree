@@ -304,14 +304,20 @@ describe('Search Service', () => {
     });
 
     it('should filter by type: people only', async () => {
-      const result = await search(String(orgId), String(userId), { query: 'Manager', type: 'people' });
+      const result = await search(String(orgId), String(userId), {
+        query: 'Manager',
+        type: 'people',
+      });
 
       expect(result.total).toBeGreaterThan(0);
       expect(result.results.every(r => r.type === 'person')).toBe(true);
     });
 
     it('should return both departments and people for type: all', async () => {
-      const result = await search(String(orgId), String(userId), { query: 'Engineering', type: 'all' });
+      const result = await search(String(orgId), String(userId), {
+        query: 'Engineering',
+        type: 'all',
+      });
 
       expect(result.total).toBeGreaterThan(0);
       // Should find both Engineering Department and people with Engineering title
@@ -460,14 +466,24 @@ describe('Search Service', () => {
     });
 
     it('should return mixed suggestions for common terms', async () => {
-      const result = await getAutocompleteSuggestions(String(orgId), String(userId), 'Engineering', 10);
+      const result = await getAutocompleteSuggestions(
+        String(orgId),
+        String(userId),
+        'Engineering',
+        10
+      );
 
       expect(result.suggestions.length).toBeGreaterThan(0);
       // Should have both departments and people with "Engineering"
     });
 
     it('should respect limit parameter', async () => {
-      const result = await getAutocompleteSuggestions(String(orgId), String(userId), 'Department', 2);
+      const result = await getAutocompleteSuggestions(
+        String(orgId),
+        String(userId),
+        'Department',
+        2
+      );
 
       expect(result.suggestions.length).toBeLessThanOrEqual(2);
     });
