@@ -1,5 +1,5 @@
 import db from '../db.js';
-import { requireOrgPermission } from './member.service.js';
+import { checkOrgAccess } from './member.service.js';
 import { escapeHtml } from '../utils/escape.js';
 
 // ============================================================================
@@ -486,7 +486,25 @@ export async function search(
     if (!isPublic) {
       // Private org - requires membership
       console.log('[search] Checking viewer permission for private org');
-      requireOrgPermission(orgId, userId, 'viewer');
+      // Use checkOrgAccess directly to ensure we are checking for 'viewer'
+      const access = checkOrgAccess(orgId, userId);
+      if (!access.hasAccess) {
+        console.warn(`[search] Access Denied: User ${userId} has no access to org ${orgId}`);
+        const error = new Error('Organization not found') as { status?: number };
+        error.status = 404;
+        throw error;
+      }
+      
+      // Explicitly check for viewer role (level 0)
+      // roleHierarchy: viewer=0, editor=1, admin=2, owner=3
+      // We accept any valid role (all are >= viewer)
+      if (!access.role) {
+         console.warn(`[search] Permission Denied: User ${userId} has no role in org ${orgId}`);
+         const error = new Error('Insufficient permissions') as { status?: number };
+         error.status = 403;
+         throw error;
+      }
+      console.log(`[search] Permission granted for user ${userId} with role ${access.role}`);
     } else {
       console.log('[search] Skipping permission check for public org');
     }
@@ -595,7 +613,21 @@ export async function getAutocompleteSuggestions(
     if (!isPublic) {
       // Private org - requires membership
       console.log('[autocomplete] Checking viewer permission for private org');
-      requireOrgPermission(orgId, userId, 'viewer');
+      // Use checkOrgAccess directly to ensure we are checking for 'viewer'
+      const access = checkOrgAccess(orgId, userId);
+      if (!access.hasAccess) {
+        console.warn(`[autocomplete] Access Denied: User ${userId} has no access to org ${orgId}`);
+        const error = new Error('Organization not found') as { status?: number };
+        error.status = 404;
+        throw error;
+      }
+      
+      if (!access.role) {
+         console.warn(`[autocomplete] Permission Denied: User ${userId} has no role in org ${orgId}`);
+         const error = new Error('Insufficient permissions') as { status?: number };
+         error.status = 403;
+         throw error;
+      }
     } else {
       console.log('[autocomplete] Skipping permission check for public org');
     }
