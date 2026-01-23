@@ -28,6 +28,7 @@ import customFieldsRoutes from './routes/custom-fields.js';
 import metricsRoutes from './routes/metrics.js';
 import analyticsRoutes from './routes/analytics.js';
 import gedsRoutes from './routes/geds.js';
+import ftsMaintenanceRoutes from './routes/fts-maintenance.js';
 import { validateCsrf } from './middleware/csrf.js';
 import { metricsMiddleware } from './middleware/metrics.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -237,6 +238,7 @@ app.use('/api', searchRoutes);
 app.use('/api', bulkRoutes);
 app.use('/api', backupRoutes);
 app.use('/api', metricsRoutes);
+app.use('/api/fts-maintenance', ftsMaintenanceRoutes);
 
 // Serve index.html for all non-API routes (SPA support) in production
 if (process.env.NODE_ENV === 'production') {

@@ -103,24 +103,69 @@ vi.mock('../db.js', async () => {
       entity_id UNINDEXED,
       field_values,
       content='',
-      tokenize='porter unicode61'
+      tokenize='porter unicode61 remove_diacritics 2'
     );
 
-    -- FTS5 virtual tables for search
+    -- FTS5 virtual tables for search (matches production schema)
     CREATE VIRTUAL TABLE departments_fts USING fts5(
       name,
       description,
-      content=departments,
-      tokenize='porter unicode61'
+      content='departments',
+      content_rowid='rowid',
+      tokenize='porter unicode61 remove_diacritics 2'
     );
 
     CREATE VIRTUAL TABLE people_fts USING fts5(
       name,
       title,
       email,
-      content=people,
-      tokenize='porter unicode61'
+      phone,
+      content='people',
+      content_rowid='rowid',
+      tokenize='porter unicode61 remove_diacritics 2'
     );
+
+    -- Triggers for departments_fts (with soft-delete handling)
+    CREATE TRIGGER departments_fts_insert AFTER INSERT ON departments
+    WHEN NEW.deleted_at IS NULL
+    BEGIN
+      INSERT INTO departments_fts(rowid, name, description)
+      VALUES (NEW.rowid, NEW.name, NEW.description);
+    END;
+
+    CREATE TRIGGER departments_fts_delete AFTER DELETE ON departments BEGIN
+      INSERT INTO departments_fts(departments_fts, rowid, name, description)
+      VALUES ('delete', OLD.rowid, OLD.name, OLD.description);
+    END;
+
+    CREATE TRIGGER departments_fts_update AFTER UPDATE ON departments BEGIN
+      INSERT INTO departments_fts(departments_fts, rowid, name, description)
+      VALUES ('delete', OLD.rowid, OLD.name, OLD.description);
+      INSERT INTO departments_fts(rowid, name, description)
+      SELECT NEW.rowid, NEW.name, NEW.description
+      WHERE NEW.deleted_at IS NULL;
+    END;
+
+    -- Triggers for people_fts (with soft-delete handling)
+    CREATE TRIGGER people_fts_insert AFTER INSERT ON people
+    WHEN NEW.deleted_at IS NULL
+    BEGIN
+      INSERT INTO people_fts(rowid, name, title, email, phone)
+      VALUES (NEW.rowid, NEW.name, NEW.title, NEW.email, NEW.phone);
+    END;
+
+    CREATE TRIGGER people_fts_delete AFTER DELETE ON people BEGIN
+      INSERT INTO people_fts(people_fts, rowid, name, title, email, phone)
+      VALUES ('delete', OLD.rowid, OLD.name, OLD.title, OLD.email, OLD.phone);
+    END;
+
+    CREATE TRIGGER people_fts_update AFTER UPDATE ON people BEGIN
+      INSERT INTO people_fts(people_fts, rowid, name, title, email, phone)
+      VALUES ('delete', OLD.rowid, OLD.name, OLD.title, OLD.email, OLD.phone);
+      INSERT INTO people_fts(rowid, name, title, email, phone)
+      SELECT NEW.rowid, NEW.name, NEW.title, NEW.email, NEW.phone
+      WHERE NEW.deleted_at IS NULL;
+    END;
   `);
 
   return { default: db };
