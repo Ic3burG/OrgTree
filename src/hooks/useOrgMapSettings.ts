@@ -5,7 +5,8 @@ export interface OrgMapSettings {
   theme: string;
   zoom: number;
   viewport: Viewport;
-  nodePositions: Record<string, { x: number; y: number }>;
+  nodePositionsTB: Record<string, { x: number; y: number }>;
+  nodePositionsLR: Record<string, { x: number; y: number }>;
   expandedNodes: string[];
   layoutDirection: 'TB' | 'LR';
 }
@@ -14,10 +15,17 @@ const DEFAULT_SETTINGS: OrgMapSettings = {
   theme: 'slate',
   zoom: 1,
   viewport: { x: 0, y: 0, zoom: 1 },
-  nodePositions: {},
+  nodePositionsTB: {},
+  nodePositionsLR: {},
   expandedNodes: [],
   layoutDirection: 'TB',
 };
+
+// Legacy interface for migration
+interface LegacySettings {
+  nodePositions?: Record<string, { x: number; y: number }>;
+  [key: string]: unknown;
+}
 
 export function useOrgMapSettings(orgId: string | undefined) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -31,7 +39,22 @@ export function useOrgMapSettings(orgId: string | undefined) {
 
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        const parsed = JSON.parse(saved) as LegacySettings;
+
+        // Migrate legacy flat nodePositions if present
+        if (parsed.nodePositions && !parsed.nodePositionsTB && !parsed.nodePositionsLR) {
+          // Assume legacy positions belong to the saved layout direction (or TB if missing)
+          const direction = (parsed.layoutDirection as 'TB' | 'LR') || 'TB';
+          return {
+            ...DEFAULT_SETTINGS,
+            ...parsed,
+            nodePositionsTB: direction === 'TB' ? parsed.nodePositions : {},
+            nodePositionsLR: direction === 'LR' ? parsed.nodePositions : {},
+            // Remove legacy field from state
+            nodePositions: undefined,
+          };
+        }
+
         return { ...DEFAULT_SETTINGS, ...parsed };
       } catch (e) {
         console.error('Failed to parse saved org map settings', e);
@@ -57,7 +80,20 @@ export function useOrgMapSettings(orgId: string | undefined) {
 
     if (saved) {
       try {
-        setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(saved) });
+        const parsed = JSON.parse(saved) as LegacySettings;
+
+        // Same migration logic for effect
+        if (parsed.nodePositions && !parsed.nodePositionsTB && !parsed.nodePositionsLR) {
+          const direction = (parsed.layoutDirection as 'TB' | 'LR') || 'TB';
+          setSettings({
+            ...DEFAULT_SETTINGS,
+            ...parsed,
+            nodePositionsTB: direction === 'TB' ? parsed.nodePositions : {},
+            nodePositionsLR: direction === 'LR' ? parsed.nodePositions : {},
+          });
+        } else {
+          setSettings({ ...DEFAULT_SETTINGS, ...parsed });
+        }
       } catch {
         setSettings(DEFAULT_SETTINGS);
       }

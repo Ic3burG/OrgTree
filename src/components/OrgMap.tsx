@@ -154,6 +154,7 @@ export default function OrgMap(): React.JSX.Element {
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   // layoutDirection and currentTheme are now managed by settings
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isMapReady, setIsMapReady] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
   // const [currentTheme, setCurrentTheme] = useState<string>('slate'); // Removed in favor of settings
@@ -289,7 +290,10 @@ export default function OrgMap(): React.JSX.Element {
         // Merge layout positions with original data AND saved positions
         const nodesWithLayout = layoutedNodes.map((layoutNode: unknown, idx: number) => {
           const typedLayoutNode = layoutNode as Node;
-          const savedPos = settings.nodePositions[typedLayoutNode.id];
+          // Use direction-specific positions
+          const currentPositions =
+            settings.layoutDirection === 'LR' ? settings.nodePositionsLR : settings.nodePositionsTB;
+          const savedPos = currentPositions[typedLayoutNode.id];
 
           return {
             ...parsedNodes[idx],
@@ -549,18 +553,36 @@ export default function OrgMap(): React.JSX.Element {
   // Handle Viewport Change (Zoom/Pan)
   const handleMoveEnd = useCallback(
     (_event: unknown, viewport: { x: number; y: number; zoom: number }) => {
+      if (isLoading || !isMapReady) return;
       updateSettings({ viewport, zoom: viewport.zoom });
     },
-    [updateSettings]
+    [updateSettings, isLoading, isMapReady]
   );
 
   // Handle Node Drag (Custom Positions)
+  // Handle Node Drag (Custom Positions)
   const onNodeDragStop = useCallback(
     (_event: unknown, node: Node) => {
-      const newCtx = { ...settings.nodePositions, [node.id]: node.position };
-      updateSettings({ nodePositions: newCtx });
+      if (isLoading || !isMapReady) return;
+
+      const isLR = settings.layoutDirection === 'LR';
+      const currentPositions = isLR ? settings.nodePositionsLR : settings.nodePositionsTB;
+      const newCtx = { ...currentPositions, [node.id]: node.position };
+
+      if (isLR) {
+        updateSettings({ nodePositionsLR: newCtx });
+      } else {
+        updateSettings({ nodePositionsTB: newCtx });
+      }
     },
-    [settings.nodePositions, updateSettings]
+    [
+      settings.nodePositionsTB,
+      settings.nodePositionsLR,
+      settings.layoutDirection,
+      updateSettings,
+      isLoading,
+      isMapReady,
+    ]
   );
 
   // Handle export to PNG
@@ -887,6 +909,7 @@ export default function OrgMap(): React.JSX.Element {
             onEdgesChange={onEdgesChange}
             onNodeDragStop={onNodeDragStop}
             onMoveEnd={handleMoveEnd}
+            onInit={() => setIsMapReady(true)}
             defaultViewport={settings.viewport}
             nodeTypes={nodeTypes}
             edgeTypes={{}}
