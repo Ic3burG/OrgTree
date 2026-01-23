@@ -150,7 +150,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 6. **SSO Support** - SAML integration for enterprise
 7. **Webhook Support** - External system notifications
 8. **Hierarchical Tree Selector Component** - Replace native selects with interactive, collapsible tree dropdowns for department selection (improved UX with search, expand/collapse, keyboard navigation)
-9. **Department Hierarchy Highlighting** - Visual highlighting of ancestor departments on hover/click in Org Map (see [docs/plans/department-hierarchy-highlighting.md](plans/department-hierarchy-highlighting.md))
+9. ~~**Department Hierarchy Highlighting** - Visual highlighting of ancestor departments on hover/click in Org Map~~ ✅ **DONE** (January 22, 2026)
 10. **Advanced Sidebar UI Enhancements**:
 
 - Multi-level collapse (Icon-only → Minimized → Hidden)
@@ -170,6 +170,8 @@ This document outlines the development roadmap for OrgTree, including technical 
 - User experience refinements
 
 **Recently Completed** (January 2026):
+
+- ✅ **Department Hierarchy Highlighting** - Visual highlighting of ancestor departments on hover/click in Org Map (January 22, 2026)
 
 - ✅ **Inline Editing** - Edit person details directly on the Org Map (January 22, 2026)
 - ✅ **Hierarchy Display** - Breadcrumb navigation for department structure (January 22, 2026)
