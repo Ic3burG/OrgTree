@@ -280,6 +280,16 @@ export default function OrgMap(): React.JSX.Element {
         // Transform API data to React Flow format
         const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(org.departments);
 
+        // Apply saved expanded state to nodes
+        if (settings.expandedNodes && settings.expandedNodes.length > 0) {
+          const expandedSet = new Set(settings.expandedNodes);
+          parsedNodes.forEach(node => {
+            if (expandedSet.has(node.id)) {
+              node.data.isExpanded = true;
+            }
+          });
+        }
+
         // Apply initial layout
         const layoutedNodes = calculateLayout(
           parsedNodes as unknown as Node[],
