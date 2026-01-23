@@ -38,6 +38,7 @@ interface OrganizationWithDepartments extends Organization {
 
 // Node data structure for React Flow
 interface DepartmentNodeData {
+  id: string; // Added for internal reference
   name: string;
   path: string;
   depth: number;
@@ -51,6 +52,8 @@ interface DepartmentNodeData {
   onAddPerson?: (departmentId: string) => void;
   onUpdatePerson?: (personId: string, updates: Partial<Person>) => Promise<void>;
   onOpenFullEdit?: (person: Person) => void;
+  onHover?: (isHovering: boolean) => void;
+  onSelect?: () => void;
 }
 
 // Type for layout direction
@@ -60,6 +63,32 @@ type Direction = 'TB' | 'LR';
 const nodeTypes: NodeTypes = {
   department: DepartmentNodeComponent,
 };
+
+// Build a map of department ID to ancestor IDs (including self)
+export function buildAncestorMap(departments: Department[]): Map<string, string[]> {
+  const deptMap = new Map(departments.map(d => [d.id, d]));
+  const ancestorMap = new Map<string, string[]>();
+
+  function getAncestors(deptId: string, visited = new Set<string>()): string[] {
+    if (visited.has(deptId)) return [];
+    visited.add(deptId);
+
+    const dept = deptMap.get(deptId);
+    if (!dept) return [];
+
+    const ancestors = [deptId];
+    if (dept.parent_id) {
+      ancestors.push(...getAncestors(dept.parent_id, visited));
+    }
+    return ancestors;
+  }
+
+  departments.forEach(dept => {
+    ancestorMap.set(dept.id, getAncestors(dept.id));
+  });
+
+  return ancestorMap;
+}
 
 // Default edge styling
 const defaultEdgeOptions = {
@@ -77,7 +106,11 @@ const defaultEdgeOptions = {
 /**
  * Transform API data to React Flow format
  */
-function transformToFlowData(departments: Department[]): {
+function transformToFlowData(
+  departments: Department[],
+  onHover: (id: string | null, isHovering: boolean) => void,
+  onSelect: (id: string) => void
+): {
   nodes: Node<DepartmentNodeData>[];
   edges: Edge[];
 } {
@@ -93,7 +126,6 @@ function transformToFlowData(departments: Department[]): {
   ): number => {
     if (!dept.parent_id) return depth;
 
-    // Check for circular reference
     if (visited.has(dept.id)) {
       console.warn(`Circular reference detected for department: ${dept.name} (${dept.id})`);
       return depth;
@@ -104,7 +136,6 @@ function transformToFlowData(departments: Department[]): {
     return parent ? getDepth(parent, deptMap, depth + 1, visited) : depth;
   };
 
-  // Create a map for quick lookups
   const deptMap = new Map(departments.map(d => [d.id, d]));
 
   departments.forEach(dept => {
@@ -113,18 +144,21 @@ function transformToFlowData(departments: Department[]): {
     nodes.push({
       id: dept.id,
       type: 'department',
-      position: { x: 0, y: 0 }, // Will be set by layout engine
+      position: { x: 0, y: 0 },
       data: {
+        id: dept.id, // Add ID to data for component use
         name: dept.name,
-        path: dept.id, // Using ID as path
+        path: dept.id,
         depth,
         description: dept.description || '',
         people: dept.people || [],
         isExpanded: false,
+        isHighlighted: false,
+        onHover: (isHovering: boolean) => onHover(dept.id, isHovering),
+        onSelect: () => onSelect(dept.id),
       },
     });
 
-    // Create edge to parent
     if (dept.parent_id) {
       edges.push({
         id: `e-${dept.parent_id}-${dept.id}`,
@@ -157,6 +191,11 @@ export default function OrgMap(): React.JSX.Element {
   const [isMapReady, setIsMapReady] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
+
+  // Hierarchy highlighting state
+  const [hoveredDepartmentId, setHoveredDepartmentId] = useState<string | null>(null);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | null>(null);
+
   // const [currentTheme, setCurrentTheme] = useState<string>('slate'); // Removed in favor of settings
   const [exporting, setExporting] = useState<boolean>(false);
   const [orgName, setOrgName] = useState<string>('Organization Chart');
@@ -169,6 +208,74 @@ export default function OrgMap(): React.JSX.Element {
   const [isFormSubmitting, setIsFormSubmitting] = useState<boolean>(false);
   const [flatDepartments, setFlatDepartments] = useState<Department[]>([]);
   const [canEdit, setCanEdit] = useState<boolean>(false);
+
+  // Memoize ancestor map
+  const ancestorMap = useMemo(() => {
+    return buildAncestorMap(flatDepartments);
+  }, [flatDepartments]);
+
+  const handleNodeHover = useCallback((id: string | null, isHovering: boolean) => {
+    setHoveredDepartmentId(isHovering ? id : null);
+  }, []);
+
+  const handleNodeSelect = useCallback((id: string) => {
+    setSelectedDepartmentId(prev => (prev === id ? null : id));
+  }, []);
+
+  // Effect to update highlighting
+  useEffect(() => {
+    const activeId = hoveredDepartmentId || selectedDepartmentId;
+
+    if (!activeId) {
+      // Clear highlighting
+      setNodes(nds =>
+        nds.map(n =>
+          n.data.isHighlighted ? { ...n, data: { ...n.data, isHighlighted: false } } : n
+        )
+      );
+      setEdges(eds =>
+        eds.map(e => ({
+          ...e,
+          style: { stroke: '#94a3b8', strokeWidth: 2, transition: 'all 200ms ease-in-out' },
+          zIndex: 0,
+          animated: false,
+        }))
+      );
+      return;
+    }
+
+    const ancestors = ancestorMap.get(activeId) || [];
+    const highlightedIds = new Set([activeId, ...ancestors]);
+
+    // Update Nodes
+    setNodes(nds =>
+      nds.map(n => {
+        const shouldHighlight = highlightedIds.has(n.id);
+        if (n.data.isHighlighted !== shouldHighlight) {
+          return { ...n, data: { ...n.data, isHighlighted: shouldHighlight } };
+        }
+        return n;
+      })
+    );
+
+    // Update Edges
+    // Edge ID format: e-{source}-{target}
+    setEdges(eds =>
+      eds.map(e => {
+        const isHighlighted = highlightedIds.has(e.target) && highlightedIds.has(e.source);
+        return {
+          ...e,
+          style: {
+            stroke: isHighlighted ? '#3b82f6' : '#94a3b8',
+            strokeWidth: isHighlighted ? 4 : 2,
+            transition: 'all 200ms ease-in-out',
+            opacity: isHighlighted ? 1 : 0.3, // Dim non-highlighted edges
+          },
+          zIndex: isHighlighted ? 1000 : 0,
+        };
+      })
+    );
+  }, [hoveredDepartmentId, selectedDepartmentId, ancestorMap, setNodes, setEdges]);
 
   const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
@@ -278,7 +385,11 @@ export default function OrgMap(): React.JSX.Element {
         }
 
         // Transform API data to React Flow format
-        const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(org.departments);
+        const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(
+          org.departments,
+          handleNodeHover,
+          handleNodeSelect
+        );
 
         // Apply saved expanded state to nodes
         if (settings.expandedNodes && settings.expandedNodes.length > 0) {
