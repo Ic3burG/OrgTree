@@ -8,7 +8,7 @@ describe('buildAncestorMap', () => {
       { id: '1', name: 'Root', parent_id: null, people: [] },
       { id: '2', name: 'Child', parent_id: '1', people: [] },
       { id: '3', name: 'Grandchild', parent_id: '2', people: [] },
-    ] as Department[];
+    ] as unknown as Department[];
 
     const ancestorMap = buildAncestorMap(departments);
 
@@ -23,7 +23,7 @@ describe('buildAncestorMap', () => {
       { id: 'B', name: 'Child A', parent_id: 'A' },
       { id: 'X', name: 'Root X', parent_id: null },
       { id: 'Y', name: 'Child X', parent_id: 'X' },
-    ] as Department[];
+    ] as unknown as Department[];
 
     const ancestorMap = buildAncestorMap(departments);
 
@@ -37,7 +37,7 @@ describe('buildAncestorMap', () => {
     const departments: Department[] = [
       { id: '1', name: 'A', parent_id: '2' },
       { id: '2', name: 'B', parent_id: '1' },
-    ] as Department[];
+    ] as unknown as Department[];
 
     const ancestorMap = buildAncestorMap(departments);
 
