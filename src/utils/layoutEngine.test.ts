@@ -88,5 +88,64 @@ describe('layoutEngine', () => {
       expect(layoutNodes[0].position?.x).toBeDefined();
       expect(layoutNodes[0].position?.y).toBeDefined();
     });
+
+    it('should center root node in vertical layout', () => {
+      const nodes = [
+        { id: '1', data: { name: 'Root' }, position: { x: 0, y: 0 } },
+        { id: '2', data: { name: 'Child 1' }, position: { x: 0, y: 0 } },
+        { id: '3', data: { name: 'Child 2' }, position: { x: 0, y: 0 } },
+      ];
+      const edges = [
+        { id: 'e1-2', source: '1', target: '2' },
+        { id: 'e1-3', source: '1', target: '3' },
+      ];
+
+      const layouted = calculateLayout(nodes, edges, 'TB');
+
+      // Root should be centered between its children
+      const root = layouted.find(n => n.id === '1');
+      const child1 = layouted.find(n => n.id === '2');
+      const child2 = layouted.find(n => n.id === '3');
+
+      expect(root).toBeDefined();
+      expect(child1).toBeDefined();
+      expect(child2).toBeDefined();
+
+      if (!root?.position || !child1?.position || !child2?.position) return;
+
+      // Root x position should be between child1 and child2
+      const rootX = root.position.x;
+      const child1X = child1.position.x;
+      const child2X = child2.position.x;
+
+      expect(rootX).toBeGreaterThan(Math.min(child1X, child2X));
+      expect(rootX).toBeLessThan(Math.max(child1X, child2X));
+    });
+
+    it('should maintain proper alignment in horizontal layout', () => {
+      const nodes = [
+        { id: '1', data: { name: 'Root' }, position: { x: 0, y: 0 } },
+        { id: '2', data: { name: 'Child 1' }, position: { x: 0, y: 0 } },
+        { id: '3', data: { name: 'Child 2' }, position: { x: 0, y: 0 } },
+      ];
+      const edges = [
+        { id: 'e1-2', source: '1', target: '2' },
+        { id: 'e1-3', source: '1', target: '3' },
+      ];
+
+      const layouted = calculateLayout(nodes, edges, 'LR');
+
+      // In horizontal layout, nodes should still be properly positioned
+      const root = layouted.find(n => n.id === '1');
+      const child1 = layouted.find(n => n.id === '2');
+
+      expect(root).toBeDefined();
+      expect(child1).toBeDefined();
+
+      if (!root?.position || !child1?.position) return;
+
+      // Root should be to the left of children in LR layout
+      expect(root.position.x).toBeLessThan(child1.position.x);
+    });
   });
 });
