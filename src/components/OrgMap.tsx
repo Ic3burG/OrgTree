@@ -708,6 +708,19 @@ export default function OrgMap(): React.JSX.Element {
     [orgId, loadData, setNodes]
   );
 
+  // Wrap handlePersonUpdate to also update selectedPerson if needed
+  const handlePersonUpdateWithSelection = useCallback(
+    async (personId: string, updates: Partial<Person>): Promise<void> => {
+      // If the updated person is currently selected in DetailPanel, update that state too
+      if (selectedPerson && selectedPerson.id === personId) {
+        setSelectedPerson(prev => (prev ? { ...prev, ...updates } : null));
+      }
+
+      await handlePersonUpdate(personId, updates);
+    },
+    [handlePersonUpdate, selectedPerson]
+  );
+
   // Handle navigation from hierarchy in detail panel
   const handleNavigateToDepartment = useCallback(
     (departmentId: string) => {
@@ -926,7 +939,8 @@ export default function OrgMap(): React.JSX.Element {
           person={selectedPerson}
           onClose={handleCloseDetail}
           fieldDefinitions={fieldDefinitions}
-          onEdit={canEdit ? handleEditPerson : undefined}
+          onEdit={handleEditPerson}
+          onUpdate={handlePersonUpdateWithSelection}
           departments={flatDepartments}
           onNavigateToDepartment={handleNavigateToDepartment}
         />

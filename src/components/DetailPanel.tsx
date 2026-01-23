@@ -3,6 +3,7 @@ import { X, Mail, Phone, Building, Info, Pencil, Star } from 'lucide-react';
 import { getInitials } from '../utils/helpers';
 import type { Person, CustomFieldDefinition, Department } from '../types/index.js';
 import OrganizationalHierarchy from './OrganizationalHierarchy';
+import InlineEdit from './ui/InlineEdit';
 import { buildHierarchyChain } from '../utils/departmentHierarchy';
 
 interface DetailPanelProps {
@@ -10,6 +11,7 @@ interface DetailPanelProps {
   onClose: () => void;
   fieldDefinitions?: CustomFieldDefinition[];
   onEdit?: (person: Person) => void;
+  onUpdate?: (personId: string, updates: Partial<Person>) => Promise<void>;
   departments?: Department[];
   onNavigateToDepartment?: (departmentId: string) => void;
 }
@@ -24,6 +26,7 @@ export default function DetailPanel({
   onClose,
   fieldDefinitions = [],
   onEdit,
+  onUpdate,
   departments,
   onNavigateToDepartment,
 }: DetailPanelProps): React.JSX.Element | null {
@@ -100,30 +103,69 @@ export default function DetailPanel({
           <div className="flex flex-col items-center text-center">
             <div className="relative">
               <div
-                className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
-                flex items-center justify-center text-white font-bold text-2xl lg:text-3xl shadow-lg mb-4"
+                className={`w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
+                flex items-center justify-center text-white font-bold text-2xl lg:text-3xl shadow-lg mb-4 ${
+                  onUpdate ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''
+                }`}
+                onClick={() => {
+                  if (onUpdate) {
+                    onUpdate(person.id, { is_starred: !person.is_starred });
+                  }
+                }}
+                title={onUpdate ? (person.is_starred ? 'Remove star' : 'Star contact') : undefined}
               >
                 {initials}
               </div>
-              {person.is_starred && (
-                <div className="absolute -top-1 -right-1 bg-amber-400 rounded-full p-1.5 shadow-lg">
-                  <Star size={14} className="text-white" fill="currentColor" />
-                </div>
+              <div
+                className={`absolute -top-1 -right-1 rounded-full p-1.5 shadow-lg cursor-pointer transition-colors ${
+                  person.is_starred
+                    ? 'bg-amber-400 hover:bg-amber-500'
+                    : 'bg-slate-200 dark:bg-slate-600 hover:bg-amber-200'
+                } ${!person.is_starred && !onUpdate ? 'hidden' : ''}`}
+                onClick={e => {
+                  e.stopPropagation();
+                  if (onUpdate) {
+                    onUpdate(person.id, { is_starred: !person.is_starred });
+                  }
+                }}
+              >
+                <Star
+                  size={14}
+                  className={
+                    person.is_starred ? 'text-white' : 'text-slate-400 dark:text-slate-300'
+                  }
+                  fill={person.is_starred ? 'currentColor' : 'none'}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-full">
+              {onUpdate ? (
+                <InlineEdit
+                  value={person.name}
+                  onSave={async val => onUpdate(person.id, { name: val })}
+                  label="Name"
+                  className="font-bold text-xl lg:text-2xl text-slate-900 dark:text-slate-100 justify-center text-center"
+                />
+              ) : (
+                <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  {person.name}
+                </h3>
+              )}
+
+              {onUpdate ? (
+                <InlineEdit
+                  value={person.title || ''}
+                  onSave={async val => onUpdate(person.id, { title: val })}
+                  label="Title"
+                  placeholder="Add job title"
+                  className="text-base lg:text-lg text-slate-600 dark:text-slate-400 justify-center text-center"
+                />
+              ) : (
+                <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 mt-1">
+                  {person.title}
+                </p>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100">
-                {person.name}
-              </h3>
-              {person.is_starred && (
-                <span className="text-xs bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full font-medium">
-                  Starred
-                </span>
-              )}
-            </div>
-            <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 mt-1">
-              {person.title}
-            </p>
           </div>
 
           {/* Contact Information */}
@@ -140,12 +182,23 @@ export default function DetailPanel({
                 />
                 <div className="flex-grow">
                   <p className="text-xs text-slate-500 dark:text-slate-400 uppercase mb-1">Email</p>
-                  <a
-                    href={`mailto:${person.email}`}
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline break-all touch-manipulation"
-                  >
-                    {person.email}
-                  </a>
+                  {onUpdate ? (
+                    <InlineEdit
+                      value={person.email || ''}
+                      onSave={async val => onUpdate(person.id, { email: val })}
+                      label="Email"
+                      type="email"
+                      placeholder="Add email address"
+                      className="text-blue-600 dark:text-blue-400"
+                    />
+                  ) : (
+                    <a
+                      href={`mailto:${person.email}`}
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline break-all touch-manipulation"
+                    >
+                      {person.email}
+                    </a>
+                  )}
                 </div>
               </div>
             )}
@@ -158,12 +211,23 @@ export default function DetailPanel({
                 />
                 <div className="flex-grow">
                   <p className="text-xs text-slate-500 dark:text-slate-400 uppercase mb-1">Phone</p>
-                  <a
-                    href={`tel:${person.phone}`}
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline touch-manipulation"
-                  >
-                    {person.phone}
-                  </a>
+                  {onUpdate ? (
+                    <InlineEdit
+                      value={person.phone || ''}
+                      onSave={async val => onUpdate(person.id, { phone: val })}
+                      label="Phone"
+                      type="tel"
+                      placeholder="Add phone number"
+                      className="text-blue-600 dark:text-blue-400"
+                    />
+                  ) : (
+                    <a
+                      href={`tel:${person.phone}`}
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline touch-manipulation"
+                    >
+                      {person.phone}
+                    </a>
+                  )}
                 </div>
               </div>
             )}
@@ -186,8 +250,19 @@ export default function DetailPanel({
                       <p className="text-xs text-slate-500 dark:text-slate-400 uppercase mb-1">
                         {def.name}
                       </p>
-                      <div className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap break-words">
-                        {def.field_type === 'url' ? (
+                      <div className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap break-words min-h-[1.5rem]">
+                        {onUpdate ? (
+                          <InlineEdit
+                            value={value || ''}
+                            onSave={async val => {
+                              const newCustomFields = { ...person.custom_fields, [def.id]: val };
+                              await onUpdate(person.id, { custom_fields: newCustomFields });
+                            }}
+                            label={def.name}
+                            type={def.field_type === 'text' ? 'textarea' : 'text'}
+                            placeholder={`Add ${def.name}`}
+                          />
+                        ) : def.field_type === 'url' ? (
                           <a
                             href={value?.startsWith('http') ? value : `https://${value}`}
                             target="_blank"

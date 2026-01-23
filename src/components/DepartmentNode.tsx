@@ -5,8 +5,8 @@ import { Folder, FolderOpen, ChevronDown, ChevronUp, Users, UserPlus } from 'luc
 import { getDepthColors } from '../utils/colors';
 import { OrgChartThemeContext } from '../contexts/OrgChartThemeContext';
 import { useTheme } from '../contexts/ThemeContext';
-// import PersonRowCard from './PersonRowCard'; // Replaced by EditablePersonCard
-import EditablePersonCard from './EditablePersonCard';
+import PersonRowCard from './PersonRowCard';
+// import EditablePersonCard from './EditablePersonCard';
 import DepartmentTooltip from './DepartmentTooltip';
 import type { Person } from '../types/index.js';
 
@@ -43,8 +43,6 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
     onToggleExpand,
     onSelectPerson,
     onAddPerson,
-    onUpdatePerson,
-    onOpenFullEdit,
     isHighlighted,
     theme: dataTheme,
   } = data;
@@ -62,9 +60,6 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
-
-  // Editing state
-  const [editingPersonId, setEditingPersonId] = useState<string | null>(null);
 
   // Detect touch device
   useEffect(() => {
@@ -218,16 +213,11 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
           <div className="bg-white dark:bg-slate-800 rounded-b-lg border-t border-slate-200 dark:border-slate-700">
             <div className="max-h-96 overflow-y-auto touch-pan-y">
               {people.map((person, index) => (
-                <EditablePersonCard
+                <PersonRowCard
                   key={person.id}
                   person={person}
                   onSelect={onSelectPerson}
-                  onUpdate={onUpdatePerson}
-                  onOpenFullEdit={onOpenFullEdit}
                   isLast={index === people.length - 1}
-                  isEditing={editingPersonId === person.id}
-                  onEditStart={id => setEditingPersonId(id)}
-                  onEditEnd={() => setEditingPersonId(null)}
                 />
               ))}
             </div>
