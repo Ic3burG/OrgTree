@@ -1,9 +1,21 @@
 # Search System Rebuild Plan
 
 > **Priority**: CRITICAL - HIGH
-> **Status**: Proposed
+> **Status**: Phase 1 Complete ✅ | In Progress
 > **Date Created**: January 23, 2026
 > **Last Updated**: January 23, 2026
+
+---
+
+## Progress Tracking
+
+| Phase | Status | Completed | Notes |
+|-------|--------|-----------|-------|
+| **Phase 1: Foundation Repair** | ✅ Complete | 2026-01-23 | Fixed soft-delete triggers, populated custom_fields_fts, added FTS maintenance service & API, aligned test schema. See commit `a825cfe` |
+| **Phase 2: Error Handling** | ⏳ Pending | - | Error propagation, query validation, fallback search |
+| **Phase 3: Test Infrastructure** | ⏳ Pending | - | Trigger tests, custom fields tests, integrity tests |
+| **Phase 4: Performance & Monitoring** | ⏳ Pending | - | Performance logging, scheduled maintenance |
+| **Phase 5: Frontend Resilience** | ⏳ Pending | - | Retry logic, degraded mode UI, offline cache |
 
 ---
 
@@ -169,19 +181,27 @@ There's no mechanism to:
 
 ## 3. Rebuild Plan
 
-### Phase 1: Foundation Repair (Critical - Week 1)
+### Phase 1: Foundation Repair (Critical - Week 1) ✅ COMPLETE
 
-#### 1.1 Fix FTS Population on Migration
+#### 1.1 Fix FTS Population on Migration ✅
 Add population queries for all FTS tables after creation.
+- **Status**: Complete
+- **Implementation**: Migration in `server/src/db.ts` now populates `custom_fields_fts` on startup if empty
 
-#### 1.2 Fix Soft Delete Handling in Triggers
+#### 1.2 Fix Soft Delete Handling in Triggers ✅
 Replace UPDATE trigger with conditional logic that excludes soft-deleted items.
+- **Status**: Complete
+- **Implementation**: Updated triggers with `WHEN NEW.deleted_at IS NULL` and conditional re-insertion in UPDATE triggers
 
-#### 1.3 Create FTS Rebuild Utility
+#### 1.3 Create FTS Rebuild Utility ✅
 Implement a service function to fully rebuild FTS indexes on demand.
+- **Status**: Complete
+- **Implementation**: `server/src/services/fts-maintenance.service.ts` with rebuild functions for all FTS tables
 
-#### 1.4 Add FTS Integrity Check
+#### 1.4 Add FTS Integrity Check ✅
 Create a verification function that compares main table counts with FTS counts.
+- **Status**: Complete
+- **Implementation**: `checkFtsIntegrity()` function returns health status for all 3 FTS tables via API endpoint
 
 ---
 
