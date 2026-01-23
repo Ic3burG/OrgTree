@@ -1,6 +1,6 @@
 # OrgTree Development Roadmap
 
-> **Last Updated**: January 22, 2026
+> **Last Updated**: January 23, 2026
 > **Status**: Production-ready with ongoing enhancements
 
 This document outlines the development roadmap for OrgTree, including technical debt items, feature enhancements, and infrastructure improvements.
@@ -17,6 +17,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [x] **ESLint/Prettier Setup** - Enforce code style consistency across the team ✅ **DONE** (January 4, 2026)
 - [x] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces ✅ **DONE** (January 11, 2026)
 - [ ] **Storybook Integration** - Document UI components with interactive examples
+- [ ] **🚨 Search System Rebuild** - Fix FTS5 index sync, soft-delete triggers, error handling, test schema alignment (see [docs/plans/search-rebuild.md](plans/search-rebuild.md)) 🔴 **CRITICAL**
 
 ### Performance Optimization
 
@@ -91,8 +92,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 2. ~~**Monitoring & Alerting** - Sentry for error tracking and uptime monitoring~~ ✅ **DONE**
 3. ~~**Git Hooks** - Prevent bugs from being committed~~ ✅ **DONE**
 4. ~~**Address Medium Security Items** - Complete remaining SECURITY_AUDIT.md items~~ ✅ **DONE**
-
-🎉 **All High Priority Items Complete!**
+5. **🚨 Search System Rebuild** - CRITICAL FIX: Rebuild FTS5 search from the ground up to fix sync issues, improve error handling, and add monitoring (see [docs/plans/search-rebuild.md](plans/search-rebuild.md)) 🔴 **CRITICAL**
 
 ### Medium Priority (Next month)
 
@@ -165,6 +165,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 **Active Work**:
 
+- 🚨 **CRITICAL: Search System Rebuild** - Fixing FTS5 sync issues, soft-delete handling, error propagation, and test coverage gaps (see [docs/plans/search-rebuild.md](plans/search-rebuild.md))
 - Increasing test coverage (currently 497+ tests across frontend and backend)
 - Performance optimization for large organizations
 - User experience refinements
