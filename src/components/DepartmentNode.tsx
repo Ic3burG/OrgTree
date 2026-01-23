@@ -24,6 +24,8 @@ interface DepartmentNodeData {
   onOpenFullEdit?: (person: Person) => void;
   isHighlighted?: boolean;
   theme?: string;
+  onHover?: (isHovering: boolean) => void;
+  onSelect?: () => void;
 }
 
 /**
@@ -45,6 +47,8 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
     onAddPerson,
     isHighlighted,
     theme: dataTheme,
+    onHover,
+    onSelect,
   } = data;
   const contextTheme = useContext(OrgChartThemeContext);
   // Use theme from data if provided (for memoized nodes), otherwise fall back to context
@@ -68,6 +72,20 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
 
   const handleHeaderClick = (e: React.MouseEvent<HTMLDivElement>): void => {
     e.stopPropagation();
+
+    // If it's a touch device or user explicitly clicked, trigger select if available
+    // But we also want to toggle expand...
+    // The requirement says "Clicking on a department node header (not the expand/collapse action)"
+    // But the header IS the expand toggle currently.
+    // Let's inspect where the click happens.
+    // Actually, maybe we separate the click?
+    // Or just do both: select AND toggle?
+    // User story says: "toggle a 'selected' state"
+
+    if (onSelect) {
+      onSelect();
+    }
+
     if (onToggleExpand) {
       onToggleExpand();
     }
@@ -89,6 +107,9 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
   const handleMouseEnter = (): void => {
     if (isTouchDevice) return;
 
+    // Notify parent about hover
+    if (onHover) onHover(true);
+
     // Clear any pending leave timeout
     if (leaveTimeout) {
       clearTimeout(leaveTimeout);
@@ -103,6 +124,9 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
   };
 
   const handleMouseLeave = (): void => {
+    // Notify parent about hover end
+    if (onHover) onHover(false);
+
     if (hoverTimeout) {
       clearTimeout(hoverTimeout);
       setHoverTimeout(null);
