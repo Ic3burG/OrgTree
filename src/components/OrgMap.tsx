@@ -391,6 +391,16 @@ export default function OrgMap(): React.JSX.Element {
           handleNodeSelect
         );
 
+        // Apply saved expanded state to nodes
+        if (settings.expandedNodes && settings.expandedNodes.length > 0) {
+          const expandedSet = new Set(settings.expandedNodes);
+          parsedNodes.forEach(node => {
+            if (expandedSet.has(node.id)) {
+              node.data.isExpanded = true;
+            }
+          });
+        }
+
         // Apply initial layout
         const layoutedNodes = calculateLayout(
           parsedNodes as unknown as Node[],
