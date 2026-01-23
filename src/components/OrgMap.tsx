@@ -300,7 +300,10 @@ export default function OrgMap(): React.JSX.Element {
         // Merge layout positions with original data AND saved positions
         const nodesWithLayout = layoutedNodes.map((layoutNode: unknown, idx: number) => {
           const typedLayoutNode = layoutNode as Node;
-          const savedPos = settings.nodePositions[typedLayoutNode.id];
+          // Use direction-specific positions
+          const currentPositions =
+            settings.layoutDirection === 'LR' ? settings.nodePositionsLR : settings.nodePositionsTB;
+          const savedPos = currentPositions[typedLayoutNode.id];
 
           return {
             ...parsedNodes[idx],
@@ -560,8 +563,6 @@ export default function OrgMap(): React.JSX.Element {
   // Handle Viewport Change (Zoom/Pan)
   const handleMoveEnd = useCallback(
     (_event: unknown, viewport: { x: number; y: number; zoom: number }) => {
-      // Prevent saving viewport updates before map is fully ready/interacted
-      // or if actively loading
       if (isLoading || !isMapReady) return;
       updateSettings({ viewport, zoom: viewport.zoom });
     },
@@ -569,13 +570,29 @@ export default function OrgMap(): React.JSX.Element {
   );
 
   // Handle Node Drag (Custom Positions)
+  // Handle Node Drag (Custom Positions)
   const onNodeDragStop = useCallback(
     (_event: unknown, node: Node) => {
       if (isLoading || !isMapReady) return;
-      const newCtx = { ...settings.nodePositions, [node.id]: node.position };
-      updateSettings({ nodePositions: newCtx });
+
+      const isLR = settings.layoutDirection === 'LR';
+      const currentPositions = isLR ? settings.nodePositionsLR : settings.nodePositionsTB;
+      const newCtx = { ...currentPositions, [node.id]: node.position };
+
+      if (isLR) {
+        updateSettings({ nodePositionsLR: newCtx });
+      } else {
+        updateSettings({ nodePositionsTB: newCtx });
+      }
     },
-    [settings.nodePositions, updateSettings, isLoading, isMapReady]
+    [
+      settings.nodePositionsTB,
+      settings.nodePositionsLR,
+      settings.layoutDirection,
+      updateSettings,
+      isLoading,
+      isMapReady,
+    ]
   );
 
   // Handle export to PNG
