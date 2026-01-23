@@ -47,7 +47,7 @@ export function calculateLayout(
     ranksep: 120, // vertical spacing between hierarchy levels
     marginx: 40,
     marginy: 40,
-    align: 'UL', // alignment: UL (up-left), UR, DL, DR
+    // No align property - uses default centering for balanced layout
     ranker: 'tight-tree', // better for tree-like structures
   });
 
