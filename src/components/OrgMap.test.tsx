@@ -5,9 +5,9 @@ import { Department } from '../types';
 describe('buildAncestorMap', () => {
   it('should build correct ancestor chains for a simple hierarchy', () => {
     const departments: Department[] = [
-      { id: '1', name: 'Root', parent_id: null, depth: 0, people: [] },
-      { id: '2', name: 'Child', parent_id: '1', depth: 1, people: [] },
-      { id: '3', name: 'Grandchild', parent_id: '2', depth: 2, people: [] },
+      { id: '1', name: 'Root', parent_id: null, people: [] },
+      { id: '2', name: 'Child', parent_id: '1', people: [] },
+      { id: '3', name: 'Grandchild', parent_id: '2', people: [] },
     ] as Department[];
 
     const ancestorMap = buildAncestorMap(departments);
@@ -19,10 +19,10 @@ describe('buildAncestorMap', () => {
 
   it('should handle disjoint trees', () => {
     const departments: Department[] = [
-      { id: 'A', name: 'Root A', parent_id: null, depth: 0 },
-      { id: 'B', name: 'Child A', parent_id: 'A', depth: 1 },
-      { id: 'X', name: 'Root X', parent_id: null, depth: 0 },
-      { id: 'Y', name: 'Child X', parent_id: 'X', depth: 1 },
+      { id: 'A', name: 'Root A', parent_id: null },
+      { id: 'B', name: 'Child A', parent_id: 'A' },
+      { id: 'X', name: 'Root X', parent_id: null },
+      { id: 'Y', name: 'Child X', parent_id: 'X' },
     ] as Department[];
 
     const ancestorMap = buildAncestorMap(departments);
@@ -35,8 +35,8 @@ describe('buildAncestorMap', () => {
     // Note: getDepth handles cycle detection warning, buildAncestorMap recursively calls getAncestors
     // We explicitly laid out protection in getAncestors with visited Set
     const departments: Department[] = [
-      { id: '1', name: 'A', parent_id: '2', depth: 0 },
-      { id: '2', name: 'B', parent_id: '1', depth: 0 },
+      { id: '1', name: 'A', parent_id: '2' },
+      { id: '2', name: 'B', parent_id: '1' },
     ] as Department[];
 
     const ancestorMap = buildAncestorMap(departments);
