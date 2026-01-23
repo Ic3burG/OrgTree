@@ -154,6 +154,7 @@ export default function OrgMap(): React.JSX.Element {
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   // layoutDirection and currentTheme are now managed by settings
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isMapReady, setIsMapReady] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
   // const [currentTheme, setCurrentTheme] = useState<string>('slate'); // Removed in favor of settings
@@ -549,18 +550,22 @@ export default function OrgMap(): React.JSX.Element {
   // Handle Viewport Change (Zoom/Pan)
   const handleMoveEnd = useCallback(
     (_event: unknown, viewport: { x: number; y: number; zoom: number }) => {
+      // Prevent saving viewport updates before map is fully ready/interacted
+      // or if actively loading
+      if (isLoading || !isMapReady) return;
       updateSettings({ viewport, zoom: viewport.zoom });
     },
-    [updateSettings]
+    [updateSettings, isLoading, isMapReady]
   );
 
   // Handle Node Drag (Custom Positions)
   const onNodeDragStop = useCallback(
     (_event: unknown, node: Node) => {
+      if (isLoading || !isMapReady) return;
       const newCtx = { ...settings.nodePositions, [node.id]: node.position };
       updateSettings({ nodePositions: newCtx });
     },
-    [settings.nodePositions, updateSettings]
+    [settings.nodePositions, updateSettings, isLoading, isMapReady]
   );
 
   // Handle export to PNG
@@ -874,6 +879,7 @@ export default function OrgMap(): React.JSX.Element {
             onEdgesChange={onEdgesChange}
             onNodeDragStop={onNodeDragStop}
             onMoveEnd={handleMoveEnd}
+            onInit={() => setIsMapReady(true)}
             defaultViewport={settings.viewport}
             nodeTypes={nodeTypes}
             edgeTypes={{}}
