@@ -44,6 +44,8 @@ export interface SearchResponse {
     offset: number;
   };
   suggestions?: string[];
+  warnings?: string[];
+  usedFallback?: boolean;
 }
 
 export interface AutocompleteSuggestion {
@@ -68,6 +70,51 @@ interface PersonSuggestionRow {
   name: string;
   title: string | null;
   department_id: string;
+}
+
+/**
+ * Validate FTS query for common issues that cause syntax errors
+ */
+function validateFtsQuery(query: string): { valid: boolean; error?: string } {
+  if (!query || query.trim().length === 0) {
+    return { valid: true };
+  }
+
+  const trimmed = query.trim();
+
+  // Check for unbalanced quotes
+  const singleQuotes = (trimmed.match(/'/g) || []).length;
+  const doubleQuotes = (trimmed.match(/"/g) || []).length;
+  if (singleQuotes % 2 !== 0) {
+    return { valid: false, error: 'Unbalanced single quotes in search query' };
+  }
+  if (doubleQuotes % 2 !== 0) {
+    return { valid: false, error: 'Unbalanced double quotes in search query' };
+  }
+
+  // Check for excessive wildcards (more than 50% of characters)
+  const wildcardCount = (trimmed.match(/\*/g) || []).length;
+  if (wildcardCount > trimmed.length * 0.5) {
+    return { valid: false, error: 'Too many wildcards in search query' };
+  }
+
+  // Check for invalid FTS5 operators (NOT, AND, OR must be uppercase in FTS5)
+  const hasInvalidOperator = /\b(not|and|or)\b/.test(trimmed);
+  if (hasInvalidOperator) {
+    return {
+      valid: false,
+      error: 'FTS5 operators must be uppercase (use AND, OR, NOT instead of and, or, not)',
+    };
+  }
+
+  // Check for certain special characters that can cause issues
+  // eslint-disable-next-line no-control-regex
+  const dangerousChars = /[\x00-\x08\x0B\x0C\x0E-\x1F]/;
+  if (dangerousChars.test(trimmed)) {
+    return { valid: false, error: 'Search query contains invalid control characters' };
+  }
+
+  return { valid: true };
 }
 
 /**
@@ -451,6 +498,138 @@ function searchPeople(
 }
 
 /**
+ * Fallback search for departments using LIKE queries (when FTS fails)
+ */
+function fallbackSearchDepartments(
+  orgId: string,
+  query: string,
+  limit: number,
+  offset: number
+): { total: number; results: SearchResult[] } {
+  const likePattern = `%${query.trim().replace(/[%_]/g, '\\$&')}%`;
+
+  const sql = `
+    SELECT
+      d.id,
+      d.name,
+      d.description,
+      d.parent_id,
+      (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as people_count
+    FROM departments d
+    WHERE d.organization_id = ?
+      AND d.deleted_at IS NULL
+      AND (
+        d.name LIKE ? ESCAPE '\\'
+        OR d.description LIKE ? ESCAPE '\\'
+      )
+    ORDER BY d.name
+  `;
+
+  const rows = db.prepare(sql).all(orgId, likePattern, likePattern) as Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    parent_id: string | null;
+    people_count: number;
+  }>;
+
+  const total = rows.length;
+  const paginatedRows = rows.slice(offset, offset + limit);
+
+  const results = paginatedRows.map(
+    (row): SearchResult => ({
+      type: 'department',
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      parent_id: row.parent_id,
+      highlight: row.name,
+      people_count: row.people_count,
+    })
+  );
+
+  return {
+    total,
+    results: attachCustomFields(orgId, results),
+  };
+}
+
+/**
+ * Fallback search for people using LIKE queries (when FTS fails)
+ */
+function fallbackSearchPeople(
+  orgId: string,
+  query: string,
+  limit: number,
+  offset: number,
+  starredOnly: boolean = false
+): { total: number; results: SearchResult[] } {
+  const likePattern = `%${query.trim().replace(/[%_]/g, '\\$&')}%`;
+  const starredClause = starredOnly ? 'AND p.is_starred = 1' : '';
+
+  const sql = `
+    SELECT
+      p.id,
+      p.name,
+      p.title,
+      p.email,
+      p.phone,
+      p.department_id,
+      p.is_starred,
+      d.name as department_name
+    FROM people p
+    JOIN departments d ON p.department_id = d.id
+    WHERE d.organization_id = ?
+      AND p.deleted_at IS NULL
+      AND d.deleted_at IS NULL
+      ${starredClause}
+      AND (
+        p.name LIKE ? ESCAPE '\\'
+        OR p.title LIKE ? ESCAPE '\\'
+        OR p.email LIKE ? ESCAPE '\\'
+        OR p.phone LIKE ? ESCAPE '\\'
+      )
+    ORDER BY p.name
+  `;
+
+  const rows = db
+    .prepare(sql)
+    .all(orgId, likePattern, likePattern, likePattern, likePattern) as Array<{
+    id: string;
+    name: string;
+    title: string | null;
+    email: string | null;
+    phone: string | null;
+    department_id: string;
+    is_starred: number;
+    department_name: string;
+  }>;
+
+  const total = rows.length;
+  const paginatedRows = rows.slice(offset, offset + limit);
+
+  const results = paginatedRows.map(
+    (row): SearchResult => ({
+      type: 'person',
+      id: row.id,
+      name: row.name,
+      title: row.title,
+      email: row.email,
+      phone: row.phone,
+      department_id: row.department_id,
+      department_name: row.department_name,
+      is_starred: Boolean(row.is_starred),
+      highlight: row.name,
+    })
+  );
+
+  return {
+    total,
+    results: attachCustomFields(orgId, results),
+  };
+}
+
+/**
  * Main search function - searches both departments and people
  */
 export async function search(
@@ -523,6 +702,20 @@ export async function search(
 
   const { query, type = 'all', limit = 20, offset = 0, starredOnly = false } = options;
 
+  // Validate query before processing
+  const validation = validateFtsQuery(query);
+  if (!validation.valid) {
+    console.warn('Invalid FTS query:', validation.error);
+    // Return empty results with warning instead of throwing error
+    return {
+      query,
+      total: 0,
+      results: [],
+      pagination: { limit, offset, hasMore: false },
+      warnings: [validation.error || 'Invalid search query'],
+    };
+  }
+
   // Build FTS query with prefix matching
   const ftsQuery = buildFtsQuery(query);
   if (!ftsQuery) {
@@ -537,6 +730,8 @@ export async function search(
   const results: SearchResult[] = [];
   let totalDepts = 0;
   let totalPeople = 0;
+  const warnings: string[] = [];
+  let usedFallback = false;
 
   // Search departments if requested
   if (type === 'all' || type === 'departments') {
@@ -545,7 +740,18 @@ export async function search(
       results.push(...deptResults.results);
       totalDepts = deptResults.total;
     } catch (err: unknown) {
-      console.error('Department search error:', err);
+      console.error('Department FTS search error, trying fallback:', err);
+      // Try fallback search
+      try {
+        const fallbackResults = fallbackSearchDepartments(orgId, query, limit, offset);
+        results.push(...fallbackResults.results);
+        totalDepts = fallbackResults.total;
+        usedFallback = true;
+        warnings.push('Department search using basic matching (full-text search unavailable)');
+      } catch (fallbackErr: unknown) {
+        console.error('Department fallback search also failed:', fallbackErr);
+        warnings.push('Department search failed - some results may be missing');
+      }
     }
   }
 
@@ -558,7 +764,25 @@ export async function search(
       results.push(...peopleResults.results);
       totalPeople = peopleResults.total;
     } catch (err: unknown) {
-      console.error('People search error:', err);
+      console.error('People FTS search error, trying fallback:', err);
+      // Try fallback search
+      try {
+        const peopleLimit = type === 'all' ? Math.max(1, limit - results.length) : limit;
+        const fallbackResults = fallbackSearchPeople(
+          orgId,
+          query,
+          peopleLimit,
+          offset,
+          starredOnly
+        );
+        results.push(...fallbackResults.results);
+        totalPeople = fallbackResults.total;
+        usedFallback = true;
+        warnings.push('People search using basic matching (full-text search unavailable)');
+      } catch (fallbackErr: unknown) {
+        console.error('People fallback search also failed:', fallbackErr);
+        warnings.push('People search failed - some results may be missing');
+      }
     }
   }
 
@@ -573,6 +797,8 @@ export async function search(
       offset,
       hasMore: total > offset + limit,
     },
+    ...(warnings.length > 0 && { warnings }),
+    ...(usedFallback && { usedFallback }),
   };
 }
 
