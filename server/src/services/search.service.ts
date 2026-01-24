@@ -46,6 +46,10 @@ export interface SearchResponse {
   suggestions?: string[];
   warnings?: string[];
   usedFallback?: boolean;
+  performance?: {
+    queryTimeMs: number;
+    slowQuery?: boolean;
+  };
 }
 
 export interface AutocompleteSuggestion {
@@ -637,6 +641,9 @@ export async function search(
   userId: string | undefined,
   options: SearchOptions
 ): Promise<SearchResponse> {
+  // Start performance tracking
+  const startTime = Date.now();
+
   // Check if organization exists and get its public status
   const org = db.prepare('SELECT is_public FROM organizations WHERE id = ?').get(orgId) as
     | { is_public: number }
@@ -788,6 +795,39 @@ export async function search(
 
   const total = totalDepts + totalPeople;
 
+  // Calculate query execution time
+  const queryTimeMs = Date.now() - startTime;
+  const slowQueryThreshold = 100; // ms
+  const isSlowQuery = queryTimeMs > slowQueryThreshold;
+
+  // Log performance metrics
+  if (isSlowQuery) {
+    console.warn(`[search] Slow query detected (${queryTimeMs}ms):`, {
+      query,
+      orgId,
+      type: options.type,
+      total,
+      usedFallback,
+    });
+  }
+
+  // Log zero-result searches for analysis
+  if (total === 0 && query.trim().length > 0) {
+    console.log(`[search] Zero results for query:`, {
+      query,
+      orgId,
+      type: options.type,
+      queryTimeMs,
+    });
+  }
+
+  // Log general search metrics
+  console.log(`[search] Query completed in ${queryTimeMs}ms:`, {
+    query: query.substring(0, 50),
+    total,
+    resultCount: results.length,
+  });
+
   return {
     query,
     total,
@@ -799,6 +839,10 @@ export async function search(
     },
     ...(warnings.length > 0 && { warnings }),
     ...(usedFallback && { usedFallback }),
+    performance: {
+      queryTimeMs,
+      ...(isSlowQuery && { slowQuery: true }),
+    },
   };
 }
 
@@ -811,6 +855,9 @@ export async function getAutocompleteSuggestions(
   query: string,
   limit: number = 5
 ): Promise<AutocompleteResponse> {
+  // Start performance tracking
+  const startTime = Date.now();
+
   // Check if organization exists and get its public status
   const org = db.prepare('SELECT is_public FROM organizations WHERE id = ?').get(orgId) as
     | { is_public: number }
@@ -937,6 +984,13 @@ export async function getAutocompleteSuggestions(
   } catch (err: unknown) {
     console.error('People autocomplete error:', err);
   }
+
+  // Log autocomplete performance
+  const queryTimeMs = Date.now() - startTime;
+  console.log(`[autocomplete] Query completed in ${queryTimeMs}ms:`, {
+    query: query.substring(0, 30),
+    suggestionCount: suggestions.length,
+  });
 
   return { suggestions: suggestions.slice(0, limit) };
 }

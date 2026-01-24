@@ -1,9 +1,9 @@
 # Search System Rebuild Plan
 
 > **Priority**: CRITICAL - HIGH
-> **Status**: Phase 3 Complete ✅ | In Progress
+> **Status**: Phase 4 Complete ✅ | In Progress
 > **Date Created**: January 23, 2026
-> **Last Updated**: January 23, 2026
+> **Last Updated**: January 24, 2026
 
 ---
 
@@ -14,7 +14,7 @@
 | **Phase 1: Foundation Repair** | ✅ Complete | 2026-01-23 | Fixed soft-delete triggers, populated custom_fields_fts, added FTS maintenance service & API, aligned test schema. See commit `a825cfe` |
 | **Phase 2: Error Handling** | ✅ Complete | 2026-01-23 | Added FTS query validation, error propagation with warnings, fallback search using LIKE queries. All 572 tests passing. |
 | **Phase 3: Test Infrastructure** | ✅ Complete | 2026-01-23 | Created shared test schema helper, added 27 new tests (14 passing, 13 with known issues). Trigger integration tests (7/14), custom fields FTS tests (2/8), bulk operation integrity tests (5/5). Known issues: WHEN clause soft-delete handling, content='' FTS complexity. Total: 586 tests passing. |
-| **Phase 4: Performance & Monitoring** | ⏳ Pending | - | Performance logging, scheduled maintenance |
+| **Phase 4: Performance & Monitoring** | ✅ Complete | 2026-01-24 | Added search performance logging, enhanced health endpoint with FTS statistics, implemented scheduled FTS maintenance (nightly at 2 AM, weekly rebuild on Sundays at 3 AM). Installed node-cron for scheduling. |
 | **Phase 5: Frontend Resilience** | ⏳ Pending | - | Retry logic, degraded mode UI, offline cache |
 
 ---

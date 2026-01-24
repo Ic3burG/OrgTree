@@ -16,6 +16,19 @@ export interface FtsHealthStatus {
   tables: FtsIntegrityResult[];
   lastChecked: string;
   issues: string[];
+  statistics?: FtsStatistics;
+}
+
+export interface FtsStatistics {
+  totalIndexedDepartments: number;
+  totalIndexedPeople: number;
+  totalIndexedCustomFields: number;
+  ftsSize: {
+    departments: number; // Estimated size in KB
+    people: number;
+    customFields: number;
+  };
+  recommendations: string[];
 }
 
 // ============================================================================
@@ -110,11 +123,15 @@ export function checkFtsIntegrity(): FtsHealthStatus {
 
     const healthy = issues.length === 0;
 
+    // Get FTS statistics for enhanced health monitoring
+    const statistics = getFtsStatistics();
+
     return {
       healthy,
       tables: results,
       lastChecked: new Date().toISOString(),
       issues,
+      statistics,
     };
   } catch (err) {
     console.error('Error checking FTS integrity:', err);
@@ -248,4 +265,63 @@ export function optimizeFtsIndexes(): void {
     console.error('Error optimizing FTS indexes:', err);
     throw err;
   }
+}
+
+// ============================================================================
+// FTS Statistics
+// ============================================================================
+
+/**
+ * Get FTS statistics for search performance monitoring
+ */
+export function getFtsStatistics(): FtsStatistics {
+  const recommendations: string[] = [];
+
+  // Get indexed counts
+  const deptCount = (
+    db.prepare('SELECT COUNT(DISTINCT rowid) as count FROM departments_fts').get() as {
+      count: number;
+    }
+  ).count;
+
+  const peopleCount = (
+    db.prepare('SELECT COUNT(DISTINCT rowid) as count FROM people_fts').get() as { count: number }
+  ).count;
+
+  const customFieldsCount = (
+    db.prepare('SELECT COUNT(*) as count FROM custom_fields_fts').get() as { count: number }
+  ).count;
+
+  // Estimate FTS index sizes (approximate, based on row count)
+  // Since we can't easily get exact size per table in SQLite, estimate based on row count
+  // Rough estimate: 1KB per department, 0.5KB per person, 0.3KB per custom field
+  const deptSize = deptCount * 1;
+  const peopleSize = peopleCount * 0.5;
+  const customFieldsSize = customFieldsCount * 0.3;
+
+  // Add recommendations based on statistics
+  const totalSize = deptSize + peopleSize + customFieldsSize;
+  if (totalSize > 10000) {
+    // > 10MB
+    recommendations.push('Consider running FTS optimization - indexes are large (>10MB)');
+  }
+
+  const totalCount = deptCount + peopleCount + customFieldsCount;
+  if (totalCount === 0) {
+    recommendations.push('FTS indexes are empty - run rebuild if you have data');
+  } else if (totalCount < 10) {
+    recommendations.push('Low item count - FTS may not provide significant benefits');
+  }
+
+  return {
+    totalIndexedDepartments: deptCount,
+    totalIndexedPeople: peopleCount,
+    totalIndexedCustomFields: customFieldsCount,
+    ftsSize: {
+      departments: Math.round(deptSize),
+      people: Math.round(peopleSize),
+      customFields: Math.round(customFieldsSize),
+    },
+    recommendations,
+  };
 }

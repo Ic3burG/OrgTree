@@ -28,6 +28,7 @@ import customFieldsRoutes from './routes/custom-fields.js';
 import metricsRoutes from './routes/metrics.js';
 import analyticsRoutes from './routes/analytics.js';
 import gedsRoutes from './routes/geds.js';
+import { scheduleFtsMaintenance } from './services/fts-scheduler.service.js';
 import ftsMaintenanceRoutes from './routes/fts-maintenance.js';
 import { validateCsrf } from './middleware/csrf.js';
 import { metricsMiddleware } from './middleware/metrics.js';
@@ -267,6 +268,9 @@ server.listen(PORT, () => {
   setInterval(() => {
     cleanupExpiredTokens();
   }, TOKEN_CLEANUP_INTERVAL);
+
+  // Schedule FTS maintenance (nightly integrity checks and optimization)
+  scheduleFtsMaintenance();
 
   // Run initial cleanup on startup
   cleanupExpiredTokens();
