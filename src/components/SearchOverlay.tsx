@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Users, Loader2, Filter, Star } from 'lucide-react';
+import { Search, X, Users, Loader2, Filter, Star, AlertTriangle, AlertCircle } from 'lucide-react';
 import { useSearch } from '../hooks/useSearch';
 import { SearchResult } from '../types/index';
 import { getInitials } from '../utils/helpers';
@@ -55,6 +55,9 @@ export default function SearchOverlay({
     loading,
     total,
     clearSearch,
+    retryCount,
+    warnings,
+    usedFallback,
   } = useSearch(orgId, { debounceMs: 300, minQueryLength: 1 });
 
   // Open dropdown when we have results
@@ -203,6 +206,59 @@ export default function SearchOverlay({
           >
             Clear
           </button>
+        </div>
+      )}
+
+      {/* Degraded Mode Indicators */}
+      {(usedFallback || warnings.length > 0 || retryCount > 0) && (
+        <div className="mt-2 space-y-1">
+          {/* Fallback mode indicator */}
+          {usedFallback && (
+            <div className="flex items-start gap-2 px-3 py-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <AlertTriangle
+                size={16}
+                className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-amber-900 dark:text-amber-200">
+                  Using fallback search
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                  Full-text search unavailable. Results may be less accurate.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Warnings */}
+          {warnings.length > 0 && (
+            <div className="flex items-start gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <AlertCircle
+                size={16}
+                className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-blue-900 dark:text-blue-200">
+                  Search notice
+                </p>
+                {warnings.map((warning, idx) => (
+                  <p key={idx} className="text-xs text-blue-700 dark:text-blue-300 mt-0.5">
+                    {warning}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Retry indicator */}
+          {retryCount > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-lg">
+              <Loader2 size={14} className="text-slate-500 dark:text-slate-400 animate-spin" />
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                Retry attempt {retryCount} of 3...
+              </p>
+            </div>
+          )}
         </div>
       )}
 
