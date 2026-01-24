@@ -382,6 +382,191 @@ try {
   console.error('Migration error (FTS5 tables):', err);
 }
 
+// Migration: Fix FTS triggers to handle soft deletes properly
+try {
+  // Check if we need to update triggers by looking at their SQL
+  const triggerCheck = db
+    .prepare("SELECT sql FROM sqlite_master WHERE type='trigger' AND name='departments_fts_update'")
+    .get() as { sql: string } | undefined;
+
+  // If trigger doesn't mention 'deleted_at', it needs to be updated
+  if (triggerCheck && !triggerCheck.sql.includes('deleted_at')) {
+    console.log('Migration: Updating FTS triggers to handle soft deletes...');
+
+    // Drop and recreate departments triggers with soft-delete handling
+    const execSql = db.exec.bind(db);
+    execSql(`
+      -- Drop existing triggers (including old single-trigger pattern)
+      DROP TRIGGER IF EXISTS departments_fts_insert;
+      DROP TRIGGER IF EXISTS departments_fts_delete;
+      DROP TRIGGER IF EXISTS departments_fts_update;
+      DROP TRIGGER IF EXISTS departments_fts_update_delete;
+      DROP TRIGGER IF EXISTS departments_fts_update_undelete;
+      DROP TRIGGER IF EXISTS departments_fts_update_normal;
+
+      -- INSERT: Add to FTS only if not soft-deleted
+      CREATE TRIGGER departments_fts_insert AFTER INSERT ON departments
+      WHEN NEW.deleted_at IS NULL
+      BEGIN
+        INSERT INTO departments_fts(rowid, name, description)
+        VALUES (NEW.rowid, NEW.name, NEW.description);
+      END;
+
+      -- DELETE: Remove from FTS
+      CREATE TRIGGER departments_fts_delete AFTER DELETE ON departments BEGIN
+        INSERT INTO departments_fts(departments_fts, rowid, name, description)
+        VALUES ('delete', OLD.rowid, OLD.name, OLD.description);
+      END;
+
+      -- UPDATE: Split into multiple triggers to avoid database corruption
+      -- Trigger for soft-deleting (NULL -> NOT NULL)
+      CREATE TRIGGER departments_fts_update_delete AFTER UPDATE ON departments
+      WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+      BEGIN
+        INSERT INTO departments_fts(departments_fts, rowid, name, description)
+        VALUES ('delete', OLD.rowid, OLD.name, OLD.description);
+      END;
+
+      -- Trigger for un-deleting (NOT NULL -> NULL)
+      CREATE TRIGGER departments_fts_update_undelete AFTER UPDATE ON departments
+      WHEN OLD.deleted_at IS NOT NULL AND NEW.deleted_at IS NULL
+      BEGIN
+        INSERT INTO departments_fts(rowid, name, description)
+        VALUES (NEW.rowid, NEW.name, NEW.description);
+      END;
+
+      -- Trigger for normal updates (NULL -> NULL)
+      CREATE TRIGGER departments_fts_update_normal AFTER UPDATE ON departments
+      WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NULL
+      BEGIN
+        INSERT INTO departments_fts(departments_fts, rowid, name, description)
+        VALUES ('delete', OLD.rowid, OLD.name, OLD.description);
+        INSERT INTO departments_fts(rowid, name, description)
+        VALUES (NEW.rowid, NEW.name, NEW.description);
+      END;
+    `);
+
+    // Drop and recreate people triggers with soft-delete handling
+    execSql(`
+      DROP TRIGGER IF EXISTS people_fts_insert;
+      DROP TRIGGER IF EXISTS people_fts_delete;
+      DROP TRIGGER IF EXISTS people_fts_update;
+      DROP TRIGGER IF EXISTS people_fts_update_delete;
+      DROP TRIGGER IF EXISTS people_fts_update_undelete;
+      DROP TRIGGER IF EXISTS people_fts_update_normal;
+
+      CREATE TRIGGER people_fts_insert AFTER INSERT ON people
+      WHEN NEW.deleted_at IS NULL
+      BEGIN
+        INSERT INTO people_fts(rowid, name, title, email, phone)
+        VALUES (NEW.rowid, NEW.name, NEW.title, NEW.email, NEW.phone);
+      END;
+
+      CREATE TRIGGER people_fts_delete AFTER DELETE ON people BEGIN
+        INSERT INTO people_fts(people_fts, rowid, name, title, email, phone)
+        VALUES ('delete', OLD.rowid, OLD.name, OLD.title, OLD.email, OLD.phone);
+      END;
+
+      -- UPDATE: Split into multiple triggers to avoid database corruption
+      -- Trigger for soft-deleting (NULL -> NOT NULL)
+      CREATE TRIGGER people_fts_update_delete AFTER UPDATE ON people
+      WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+      BEGIN
+        INSERT INTO people_fts(people_fts, rowid, name, title, email, phone)
+        VALUES ('delete', OLD.rowid, OLD.name, OLD.title, OLD.email, OLD.phone);
+      END;
+
+      -- Trigger for un-deleting (NOT NULL -> NULL)
+      CREATE TRIGGER people_fts_update_undelete AFTER UPDATE ON people
+      WHEN OLD.deleted_at IS NOT NULL AND NEW.deleted_at IS NULL
+      BEGIN
+        INSERT INTO people_fts(rowid, name, title, email, phone)
+        VALUES (NEW.rowid, NEW.name, NEW.title, NEW.email, NEW.phone);
+      END;
+
+      -- Trigger for normal updates (NULL -> NULL)
+      CREATE TRIGGER people_fts_update_normal AFTER UPDATE ON people
+      WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NULL
+      BEGIN
+        INSERT INTO people_fts(people_fts, rowid, name, title, email, phone)
+        VALUES ('delete', OLD.rowid, OLD.name, OLD.title, OLD.email, OLD.phone);
+        INSERT INTO people_fts(rowid, name, title, email, phone)
+        VALUES (NEW.rowid, NEW.name, NEW.title, NEW.email, NEW.phone);
+      END;
+    `);
+
+    // Rebuild FTS indexes to remove any soft-deleted items
+    execSql(`
+      -- Clear and rebuild departments_fts
+      INSERT INTO departments_fts(departments_fts) VALUES('delete-all');
+      INSERT INTO departments_fts(rowid, name, description)
+      SELECT rowid, name, description FROM departments WHERE deleted_at IS NULL;
+
+      -- Clear and rebuild people_fts
+      INSERT INTO people_fts(people_fts) VALUES('delete-all');
+      INSERT INTO people_fts(rowid, name, title, email, phone)
+      SELECT rowid, name, title, email, phone FROM people WHERE deleted_at IS NULL;
+    `);
+
+    console.log('Migration: FTS triggers updated successfully');
+  }
+} catch (err) {
+  console.error('Migration error (FTS trigger updates):', err);
+}
+
+// Migration: Populate custom_fields_fts on initial creation
+try {
+  // Check if custom_fields_fts exists and is empty
+  const ftsExists = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='custom_fields_fts'")
+    .get() as { name: string } | undefined;
+
+  if (ftsExists) {
+    const ftsCount = db.prepare('SELECT COUNT(*) as count FROM custom_fields_fts').get() as {
+      count: number;
+    };
+
+    // If FTS table is empty but we have custom field values, populate it
+    if (ftsCount.count === 0) {
+      const valuesCount = db
+        .prepare(
+          `SELECT COUNT(DISTINCT v.entity_id || ':' || v.entity_type) as count
+           FROM custom_field_values v
+           JOIN custom_field_definitions d ON v.field_definition_id = d.id
+           WHERE d.is_searchable = 1
+             AND d.deleted_at IS NULL
+             AND v.deleted_at IS NULL`
+        )
+        .get() as { count: number };
+
+      if (valuesCount.count > 0) {
+        console.log(
+          `Migration: Populating custom_fields_fts with ${valuesCount.count} searchable entities...`
+        );
+
+        const runSql = db.exec.bind(db);
+        runSql(`
+          INSERT INTO custom_fields_fts (entity_id, entity_type, field_values)
+          SELECT
+            v.entity_id,
+            v.entity_type,
+            GROUP_CONCAT(v.value, ' ')
+          FROM custom_field_values v
+          JOIN custom_field_definitions d ON v.field_definition_id = d.id
+          WHERE d.is_searchable = 1
+            AND d.deleted_at IS NULL
+            AND v.deleted_at IS NULL
+          GROUP BY v.entity_id, v.entity_type
+        `);
+
+        console.log('Migration: custom_fields_fts populated successfully');
+      }
+    }
+  }
+} catch (err) {
+  console.error('Migration error (custom_fields_fts population):', err);
+}
+
 // Migration: Add refresh_tokens table for secure token management
 try {
   const tables = db
