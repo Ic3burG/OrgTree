@@ -58,6 +58,7 @@ export default function SearchOverlay({
     retryCount,
     warnings,
     usedFallback,
+    fromCache,
   } = useSearch(orgId, { debounceMs: 300, minQueryLength: 1 });
 
   // Open dropdown when we have results
@@ -311,9 +312,30 @@ export default function SearchOverlay({
         <div className="mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 max-h-[60vh] lg:max-h-96 overflow-y-auto">
           {/* Results count header */}
           {total > 0 && (
-            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 text-xs text-slate-500 dark:text-slate-400">
-              {total} result{total !== 1 ? 's' : ''} found
-              {type !== 'all' && typeLabels[type] && ` in ${typeLabels[type].toLowerCase()}`}
+            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
+              <span>
+                {total} result{total !== 1 ? 's' : ''} found
+                {type !== 'all' && typeLabels[type] && ` in ${typeLabels[type].toLowerCase()}`}
+              </span>
+              {fromCache && (
+                <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                  </svg>
+                  Cached
+                </span>
+              )}
             </div>
           )}
 

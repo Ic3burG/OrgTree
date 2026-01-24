@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import api from '../api/client';
 import { SearchResult } from '../types';
+import { getCachedSearch, cacheSearch, isIndexedDBAvailable } from '../services/searchCache';
 
 type SearchType = 'all' | 'departments' | 'people';
 
@@ -30,6 +31,7 @@ interface UseSearchReturn {
   retryCount: number;
   warnings: string[];
   usedFallback: boolean;
+  fromCache: boolean;
   setQuery: (query: string) => void;
   setType: (type: SearchType) => void;
   setStarredOnly: (starred: boolean) => void;
@@ -65,6 +67,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
   const [retryCount, setRetryCount] = useState<number>(0);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [usedFallback, setUsedFallback] = useState<boolean>(false);
+  const [fromCache, setFromCache] = useState<boolean>(false);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortController = useRef<AbortController | null>(null);
@@ -120,6 +123,27 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
       setLoading(true);
       setError(null);
       setRetryCount(0);
+      setFromCache(false);
+
+      // Check cache first (only for first page)
+      if (searchOffset === 0 && isIndexedDBAvailable()) {
+        try {
+          const cached = await getCachedSearch(orgId, searchQuery, searchType, starredOnly);
+          if (cached) {
+            setResults(cached.results);
+            setTotal(cached.total);
+            setHasMore(false); // Cached results are always first page only
+            setWarnings(cached.warnings || []);
+            setUsedFallback(cached.usedFallback || false);
+            setFromCache(true);
+            setLoading(false);
+            return;
+          }
+        } catch (cacheErr) {
+          // Cache read failed, continue with API call
+          console.warn('[useSearch] Cache read failed:', cacheErr);
+        }
+      }
 
       const maxRetries = 3;
       let lastError: Error | null = null;
@@ -143,6 +167,22 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
           setWarnings(data.warnings || []);
           setUsedFallback(data.usedFallback || false);
           setRetryCount(attempt);
+
+          // Cache successful first-page results
+          if (searchOffset === 0 && isIndexedDBAvailable()) {
+            cacheSearch(
+              orgId,
+              searchQuery,
+              searchType,
+              starredOnly,
+              newResults,
+              newTotal,
+              data.warnings,
+              data.usedFallback
+            ).catch(err => {
+              console.warn('[useSearch] Failed to cache results:', err);
+            });
+          }
 
           // Track search event (only for first page to avoid duplicates on pagination)
           // if (searchOffset === 0) {
@@ -290,6 +330,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
     retryCount,
     warnings,
     usedFallback,
+    fromCache,
 
     // Actions
     setQuery,
