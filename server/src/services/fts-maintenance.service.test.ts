@@ -93,8 +93,8 @@ describe('FTS Maintenance Service', () => {
     testDb.exec('DELETE FROM people');
     testDb.exec('DELETE FROM custom_field_definitions');
     testDb.exec('DELETE FROM custom_field_values');
-    testDb.exec("DELETE FROM departments_fts WHERE rowid IN (SELECT rowid FROM departments_fts)");
-    testDb.exec("DELETE FROM people_fts WHERE rowid IN (SELECT rowid FROM people_fts)");
+    testDb.exec('DELETE FROM departments_fts WHERE rowid IN (SELECT rowid FROM departments_fts)');
+    testDb.exec('DELETE FROM people_fts WHERE rowid IN (SELECT rowid FROM people_fts)');
     testDb.exec('DELETE FROM custom_fields_fts');
   });
 
