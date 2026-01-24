@@ -27,6 +27,9 @@ interface UseSearchReturn {
   error: string | null;
   total: number;
   hasMore: boolean;
+  retryCount: number;
+  warnings: string[];
+  usedFallback: boolean;
   setQuery: (query: string) => void;
   setType: (type: SearchType) => void;
   setStarredOnly: (starred: boolean) => void;
@@ -59,12 +62,38 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
   const [total, setTotal] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(false);
   const [starredOnly, setStarredOnly] = useState<boolean>(defaultStarredOnly);
+  const [retryCount, setRetryCount] = useState<number>(0);
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [usedFallback, setUsedFallback] = useState<boolean>(false);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortController = useRef<AbortController | null>(null);
 
   /**
-   * Execute search API call
+   * Determine if an error is retryable (network/server errors, not validation errors)
+   */
+  const isRetryableError = useCallback((err: unknown): boolean => {
+    // Don't retry AbortError or validation errors (400-level)
+    if ((err as Error).name === 'AbortError') return false;
+
+    // Check if it's an API error with status code
+    const apiError = err as { status?: number };
+    if (apiError.status) {
+      // Don't retry client errors (400-499), but do retry server errors (500+) and network errors
+      return apiError.status >= 500;
+    }
+
+    // Retry network errors, timeouts, and other unexpected errors
+    return true;
+  }, []);
+
+  /**
+   * Sleep for exponential backoff
+   */
+  const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+
+  /**
+   * Execute search API call with automatic retry logic
    */
   const executeSearch = useCallback(
     async (
@@ -76,6 +105,9 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
         setResults([]);
         setTotal(0);
         setHasMore(false);
+        setRetryCount(0);
+        setWarnings([]);
+        setUsedFallback(false);
         return;
       }
 
@@ -87,45 +119,87 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
 
       setLoading(true);
       setError(null);
+      setRetryCount(0);
 
-      try {
-        const data = await api.search(orgId, {
-          q: searchQuery,
-          type: searchType,
-          limit: limit.toString(),
-          offset: searchOffset.toString(),
-          ...(starredOnly && { starred: 'true' }),
-        });
+      const maxRetries = 3;
+      let lastError: Error | null = null;
 
-        const newResults = data.results || [];
-        const newTotal = data.total || 0;
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          const data = await api.search(orgId, {
+            q: searchQuery,
+            type: searchType,
+            limit: limit.toString(),
+            offset: searchOffset.toString(),
+            ...(starredOnly && { starred: 'true' }),
+          });
 
-        setResults(newResults);
-        setTotal(newTotal);
-        setHasMore(data.pagination?.hasMore || false);
+          const newResults = data.results || [];
+          const newTotal = data.total || 0;
 
-        // Track search event (only for first page to avoid duplicates on pagination)
-        // if (searchOffset === 0) {
-        //   track('search_performed', {
-        //     query_length: searchQuery.length,
-        //     type: searchType,
-        //     results_count: newTotal,
-        //     has_results: newTotal > 0,
-        //     starred_only: starredOnly
-        //   });
-        // }
-      } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          setError((err as Error).message || 'Search failed');
-          setResults([]);
-          setTotal(0);
-          setHasMore(false);
+          setResults(newResults);
+          setTotal(newTotal);
+          setHasMore(data.pagination?.hasMore || false);
+          setWarnings(data.warnings || []);
+          setUsedFallback(data.usedFallback || false);
+          setRetryCount(attempt);
+
+          // Track search event (only for first page to avoid duplicates on pagination)
+          // if (searchOffset === 0) {
+          //   track('search_performed', {
+          //     query_length: searchQuery.length,
+          //     type: searchType,
+          //     results_count: newTotal,
+          //     has_results: newTotal > 0,
+          //     starred_only: starredOnly
+          //   });
+          // }
+
+          // Success - exit retry loop
+          setLoading(false);
+          return;
+        } catch (err) {
+          lastError = err as Error;
+
+          // Don't retry AbortError
+          if (lastError.name === 'AbortError') {
+            setLoading(false);
+            return;
+          }
+
+          // Check if error is retryable
+          if (!isRetryableError(err)) {
+            // Non-retryable error - fail immediately
+            setError(lastError.message || 'Search failed');
+            setResults([]);
+            setTotal(0);
+            setHasMore(false);
+            setRetryCount(attempt);
+            setLoading(false);
+            return;
+          }
+
+          // Retryable error - apply exponential backoff
+          setRetryCount(attempt + 1);
+
+          if (attempt < maxRetries - 1) {
+            // Exponential backoff: 1s, 2s, 4s
+            const delayMs = Math.pow(2, attempt) * 1000;
+            await sleep(delayMs);
+          }
         }
-      } finally {
-        setLoading(false);
       }
+
+      // All retries exhausted
+      if (lastError) {
+        setError(lastError.message || 'Search failed after retries');
+        setResults([]);
+        setTotal(0);
+        setHasMore(false);
+      }
+      setLoading(false);
     },
-    [orgId, minQueryLength, limit, starredOnly]
+    [orgId, minQueryLength, limit, starredOnly, isRetryableError]
   );
 
   /**
@@ -213,6 +287,9 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
     error,
     total,
     hasMore,
+    retryCount,
+    warnings,
+    usedFallback,
 
     // Actions
     setQuery,

@@ -15,7 +15,7 @@
 | **Phase 2: Error Handling** | ✅ Complete | 2026-01-23 | Added FTS query validation, error propagation with warnings, fallback search using LIKE queries. All 572 tests passing. |
 | **Phase 3: Test Infrastructure** | ✅ Complete | 2026-01-23 | Created shared test schema helper, added 27 new tests (14 passing, 13 with known issues). Trigger integration tests (7/14), custom fields FTS tests (2/8), bulk operation integrity tests (5/5). Known issues: WHEN clause soft-delete handling, content='' FTS complexity. Total: 586 tests passing. |
 | **Phase 4: Performance & Monitoring** | ✅ Complete | 2026-01-24 | Added search performance logging, enhanced health endpoint with FTS statistics, implemented scheduled FTS maintenance (nightly at 2 AM, weekly rebuild on Sundays at 3 AM). Installed node-cron for scheduling. |
-| **Phase 5: Frontend Resilience** | ⏳ Pending | - | Retry logic, degraded mode UI, offline cache |
+| **Phase 5: Frontend Resilience** | 🔄 In Progress | 2026-01-24 | Task 1 complete: Added retry logic with exponential backoff (max 3 attempts, 1s/2s/4s delays), retryCount tracking, warnings extraction. Tasks 2-3 pending. |
 
 ---
 

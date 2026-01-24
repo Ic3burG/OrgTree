@@ -89,7 +89,10 @@ describe('useSearch', () => {
   });
 
   it('handles search error', async () => {
-    vi.mocked(api.search).mockRejectedValue(new Error('API Failure'));
+    // Use a 400-level error (client error) which is non-retryable
+    const error = new Error('API Failure');
+    (error as Error & { status?: number }).status = 400;
+    vi.mocked(api.search).mockRejectedValue(error);
 
     const { result } = renderHook(() => useSearch(mockOrgId));
 
