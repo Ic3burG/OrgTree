@@ -235,17 +235,36 @@ export function createFtsTriggers(db: DatabaseType): void {
       VALUES ('delete', OLD.rowid, OLD.name, OLD.description);
     END;
 
-    -- UPDATE: Handle soft-delete and regular updates
+    -- UPDATE: Split into multiple triggers to avoid corruption
     DROP TRIGGER IF EXISTS departments_fts_update;
-    CREATE TRIGGER departments_fts_update AFTER UPDATE ON departments BEGIN
-      -- Remove old entry
+    DROP TRIGGER IF EXISTS departments_fts_update_delete;
+    DROP TRIGGER IF EXISTS departments_fts_update_undelete;
+    DROP TRIGGER IF EXISTS departments_fts_update_normal;
+
+    -- Trigger for soft-deleting (NULL -> NOT NULL)
+    CREATE TRIGGER departments_fts_update_delete AFTER UPDATE ON departments
+    WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+    BEGIN
       INSERT INTO departments_fts(departments_fts, rowid, name, description)
       VALUES ('delete', OLD.rowid, OLD.name, OLD.description);
+    END;
 
-      -- Re-add only if not soft-deleted
+    -- Trigger for un-deleting (NOT NULL -> NULL)
+    CREATE TRIGGER departments_fts_update_undelete AFTER UPDATE ON departments
+    WHEN OLD.deleted_at IS NOT NULL AND NEW.deleted_at IS NULL
+    BEGIN
       INSERT INTO departments_fts(rowid, name, description)
-      SELECT NEW.rowid, NEW.name, NEW.description
-      WHERE NEW.deleted_at IS NULL;
+      VALUES (NEW.rowid, NEW.name, NEW.description);
+    END;
+
+    -- Trigger for normal updates (NULL -> NULL)
+    CREATE TRIGGER departments_fts_update_normal AFTER UPDATE ON departments
+    WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NULL
+    BEGIN
+      INSERT INTO departments_fts(departments_fts, rowid, name, description)
+      VALUES ('delete', OLD.rowid, OLD.name, OLD.description);
+      INSERT INTO departments_fts(rowid, name, description)
+      VALUES (NEW.rowid, NEW.name, NEW.description);
     END;
 
     -- ========================================
@@ -268,17 +287,36 @@ export function createFtsTriggers(db: DatabaseType): void {
       VALUES ('delete', OLD.rowid, OLD.name, OLD.title, OLD.email, OLD.phone);
     END;
 
-    -- UPDATE: Handle soft-delete and regular updates
+    -- UPDATE: Split into multiple triggers to avoid corruption
     DROP TRIGGER IF EXISTS people_fts_update;
-    CREATE TRIGGER people_fts_update AFTER UPDATE ON people BEGIN
-      -- Remove old entry
+    DROP TRIGGER IF EXISTS people_fts_update_delete;
+    DROP TRIGGER IF EXISTS people_fts_update_undelete;
+    DROP TRIGGER IF EXISTS people_fts_update_normal;
+
+    -- Trigger for soft-deleting (NULL -> NOT NULL)
+    CREATE TRIGGER people_fts_update_delete AFTER UPDATE ON people
+    WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+    BEGIN
       INSERT INTO people_fts(people_fts, rowid, name, title, email, phone)
       VALUES ('delete', OLD.rowid, OLD.name, OLD.title, OLD.email, OLD.phone);
+    END;
 
-      -- Re-add only if not soft-deleted
+    -- Trigger for un-deleting (NOT NULL -> NULL)
+    CREATE TRIGGER people_fts_update_undelete AFTER UPDATE ON people
+    WHEN OLD.deleted_at IS NOT NULL AND NEW.deleted_at IS NULL
+    BEGIN
       INSERT INTO people_fts(rowid, name, title, email, phone)
-      SELECT NEW.rowid, NEW.name, NEW.title, NEW.email, NEW.phone
-      WHERE NEW.deleted_at IS NULL;
+      VALUES (NEW.rowid, NEW.name, NEW.title, NEW.email, NEW.phone);
+    END;
+
+    -- Trigger for normal updates (NULL -> NULL)
+    CREATE TRIGGER people_fts_update_normal AFTER UPDATE ON people
+    WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NULL
+    BEGIN
+      INSERT INTO people_fts(people_fts, rowid, name, title, email, phone)
+      VALUES ('delete', OLD.rowid, OLD.name, OLD.title, OLD.email, OLD.phone);
+      INSERT INTO people_fts(rowid, name, title, email, phone)
+      VALUES (NEW.rowid, NEW.name, NEW.title, NEW.email, NEW.phone);
     END;
   `);
 }

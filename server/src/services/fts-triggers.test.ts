@@ -81,17 +81,14 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           'INSERT INTO departments (id, organization_id, name, description, deleted_at) VALUES (?, ?, ?, ?, ?)'
         ).run(deptId, orgId, 'Engineering', 'Tech team', new Date().toISOString());
 
-        // Get rowid
-        const dept = db.prepare('SELECT rowid FROM departments WHERE id = ?').get(deptId) as {
-          rowid: number;
-        };
-
-        // Verify FTS entry was NOT created
+        // Verify FTS entry was NOT created by searching for the name
+        // NOTE: Can't use WHERE rowid = ? with content='departments' as it fetches from content table
         const ftsResult = db
-          .prepare('SELECT rowid FROM departments_fts WHERE rowid = ?')
-          .get(dept.rowid);
+          .prepare("SELECT rowid FROM departments_fts WHERE departments_fts MATCH 'Engineering'")
+          .all();
 
-        expect(ftsResult).toBeUndefined();
+        // Should find no results since the department is soft-deleted
+        expect(ftsResult).toHaveLength(0);
       });
     });
 
@@ -126,16 +123,11 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
       });
 
       it('should remove FTS entry when department is soft-deleted', () => {
-        // Get rowid before soft delete
-        const deptBefore = db.prepare('SELECT rowid FROM departments WHERE id = ?').get(deptId) as {
-          rowid: number;
-        };
-
-        // Verify FTS entry exists
+        // Verify FTS entry exists before soft delete using MATCH
         const ftsBefore = db
-          .prepare('SELECT rowid FROM departments_fts WHERE rowid = ?')
-          .get(deptBefore.rowid);
-        expect(ftsBefore).toBeDefined();
+          .prepare("SELECT rowid FROM departments_fts WHERE departments_fts MATCH 'Engineering'")
+          .all();
+        expect(ftsBefore).toHaveLength(1);
 
         // Soft delete department
         db.prepare('UPDATE departments SET deleted_at = ? WHERE id = ?').run(
@@ -143,12 +135,12 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           deptId
         );
 
-        // Verify FTS entry was removed
+        // Verify FTS entry was removed using MATCH
         const ftsAfter = db
-          .prepare('SELECT rowid FROM departments_fts WHERE rowid = ?')
-          .get(deptBefore.rowid);
+          .prepare("SELECT rowid FROM departments_fts WHERE departments_fts MATCH 'Engineering'")
+          .all();
 
-        expect(ftsAfter).toBeUndefined();
+        expect(ftsAfter).toHaveLength(0);
       });
 
       it('should re-add FTS entry when department is un-deleted', () => {
@@ -158,27 +150,22 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           deptId
         );
 
-        // Get rowid
-        const dept = db.prepare('SELECT rowid FROM departments WHERE id = ?').get(deptId) as {
-          rowid: number;
-        };
-
-        // Verify FTS entry was removed
+        // Verify FTS entry was removed using MATCH
         const ftsDeleted = db
-          .prepare('SELECT rowid FROM departments_fts WHERE rowid = ?')
-          .get(dept.rowid);
-        expect(ftsDeleted).toBeUndefined();
+          .prepare("SELECT rowid FROM departments_fts WHERE departments_fts MATCH 'Engineering'")
+          .all();
+        expect(ftsDeleted).toHaveLength(0);
 
         // Un-delete department
         db.prepare('UPDATE departments SET deleted_at = NULL WHERE id = ?').run(deptId);
 
-        // Verify FTS entry was re-added
+        // Verify FTS entry was re-added using MATCH
         const ftsRestored = db
-          .prepare('SELECT name FROM departments_fts WHERE rowid = ?')
-          .get(dept.rowid) as { name: string } | undefined;
+          .prepare("SELECT rowid FROM departments_fts WHERE departments_fts MATCH 'Engineering'")
+          .all();
 
-        expect(ftsRestored).toBeDefined();
-        expect(ftsRestored?.name).toBe('Engineering');
+        expect(ftsRestored).toHaveLength(1);
+        expect(ftsRestored[0]).toBeDefined();
       });
     });
 
@@ -255,17 +242,14 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           'INSERT INTO people (id, organization_id, department_id, name, title, deleted_at) VALUES (?, ?, ?, ?, ?, ?)'
         ).run(personId, orgId, deptId, 'John Doe', 'Engineer', new Date().toISOString());
 
-        // Get rowid
-        const person = db.prepare('SELECT rowid FROM people WHERE id = ?').get(personId) as {
-          rowid: number;
-        };
-
-        // Verify FTS entry was NOT created
+        // Verify FTS entry was NOT created by searching for the name
+        // NOTE: Can't use WHERE rowid = ? with content='people' as it fetches from content table
         const ftsResult = db
-          .prepare('SELECT rowid FROM people_fts WHERE rowid = ?')
-          .get(person.rowid);
+          .prepare("SELECT rowid FROM people_fts WHERE people_fts MATCH 'John'")
+          .all();
 
-        expect(ftsResult).toBeUndefined();
+        // Should find no results since the person is soft-deleted
+        expect(ftsResult).toHaveLength(0);
       });
     });
 
@@ -300,16 +284,11 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
       });
 
       it('should remove FTS entry when person is soft-deleted', () => {
-        // Get rowid before soft delete
-        const personBefore = db.prepare('SELECT rowid FROM people WHERE id = ?').get(personId) as {
-          rowid: number;
-        };
-
-        // Verify FTS entry exists
+        // Verify FTS entry exists before soft delete using MATCH
         const ftsBefore = db
-          .prepare('SELECT rowid FROM people_fts WHERE rowid = ?')
-          .get(personBefore.rowid);
-        expect(ftsBefore).toBeDefined();
+          .prepare("SELECT rowid FROM people_fts WHERE people_fts MATCH 'John'")
+          .all();
+        expect(ftsBefore).toHaveLength(1);
 
         // Soft delete person
         db.prepare('UPDATE people SET deleted_at = ? WHERE id = ?').run(
@@ -317,12 +296,12 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           personId
         );
 
-        // Verify FTS entry was removed
+        // Verify FTS entry was removed using MATCH
         const ftsAfter = db
-          .prepare('SELECT rowid FROM people_fts WHERE rowid = ?')
-          .get(personBefore.rowid);
+          .prepare("SELECT rowid FROM people_fts WHERE people_fts MATCH 'John'")
+          .all();
 
-        expect(ftsAfter).toBeUndefined();
+        expect(ftsAfter).toHaveLength(0);
       });
 
       it('should re-add FTS entry when person is un-deleted', () => {
@@ -332,27 +311,22 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           personId
         );
 
-        // Get rowid
-        const person = db.prepare('SELECT rowid FROM people WHERE id = ?').get(personId) as {
-          rowid: number;
-        };
-
-        // Verify FTS entry was removed
+        // Verify FTS entry was removed using MATCH
         const ftsDeleted = db
-          .prepare('SELECT rowid FROM people_fts WHERE rowid = ?')
-          .get(person.rowid);
-        expect(ftsDeleted).toBeUndefined();
+          .prepare("SELECT rowid FROM people_fts WHERE people_fts MATCH 'John'")
+          .all();
+        expect(ftsDeleted).toHaveLength(0);
 
         // Un-delete person
         db.prepare('UPDATE people SET deleted_at = NULL WHERE id = ?').run(personId);
 
-        // Verify FTS entry was re-added
+        // Verify FTS entry was re-added using MATCH
         const ftsRestored = db
-          .prepare('SELECT name FROM people_fts WHERE rowid = ?')
-          .get(person.rowid) as { name: string } | undefined;
+          .prepare("SELECT rowid FROM people_fts WHERE people_fts MATCH 'John'")
+          .all();
 
-        expect(ftsRestored).toBeDefined();
-        expect(ftsRestored?.name).toBe('John Doe');
+        expect(ftsRestored).toHaveLength(1);
+        expect(ftsRestored[0]).toBeDefined();
       });
     });
 
@@ -400,10 +374,12 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
       }
 
       // Verify FTS has only 3 entries (non-deleted)
-      const ftsCount = db.prepare('SELECT COUNT(*) as count FROM departments_fts').get() as {
-        count: number;
-      };
-      expect(ftsCount.count).toBe(3);
+      // NOTE: COUNT(*) with content='departments' returns content table count, not index count
+      // So we search for "Dept" (which all departments match) to get actual indexed count
+      const ftsResults = db
+        .prepare("SELECT rowid FROM departments_fts WHERE departments_fts MATCH 'Dept'")
+        .all();
+      expect(ftsResults).toHaveLength(3);
 
       // Soft delete one more
       db.prepare('UPDATE departments SET deleted_at = ? WHERE id = ?').run(
@@ -412,21 +388,19 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
       );
 
       // Verify FTS now has 2 entries
-      const ftsCountAfterDelete = db
-        .prepare('SELECT COUNT(*) as count FROM departments_fts')
-        .get() as {
-        count: number;
-      };
-      expect(ftsCountAfterDelete.count).toBe(2);
+      const ftsResultsAfterDelete = db
+        .prepare("SELECT rowid FROM departments_fts WHERE departments_fts MATCH 'Dept'")
+        .all();
+      expect(ftsResultsAfterDelete).toHaveLength(2);
 
       // Un-delete one
       db.prepare('UPDATE departments SET deleted_at = NULL WHERE id = ?').run('dept4');
 
       // Verify FTS now has 3 entries again
-      const ftsCountAfterRestore = db
-        .prepare('SELECT COUNT(*) as count FROM departments_fts')
-        .get() as { count: number };
-      expect(ftsCountAfterRestore.count).toBe(3);
+      const ftsResultsAfterRestore = db
+        .prepare("SELECT rowid FROM departments_fts WHERE departments_fts MATCH 'Dept'")
+        .all();
+      expect(ftsResultsAfterRestore).toHaveLength(3);
     });
 
     it('should handle rapid updates without losing sync', () => {

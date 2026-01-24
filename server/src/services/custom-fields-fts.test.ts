@@ -79,13 +79,14 @@ describe('Custom Fields FTS Tests (Phase 3.3)', () => {
         'INSERT INTO custom_fields_fts (entity_type, entity_id, field_values) VALUES (?, ?, ?)'
       ).run('person', personId, 'San Francisco');
 
-      // Verify FTS entry
+      // Verify FTS entry exists by searching
+      // NOTE: custom_fields_fts has content='', so it's contentless - we can only verify searchability
       const ftsResult = db
-        .prepare('SELECT * FROM custom_fields_fts WHERE entity_id = ? AND entity_type = ?')
-        .get(personId, 'person') as { field_values: string } | undefined;
+        .prepare("SELECT rowid FROM custom_fields_fts WHERE custom_fields_fts MATCH 'Francisco'")
+        .all();
 
-      expect(ftsResult).toBeDefined();
-      expect(ftsResult?.field_values).toBe('San Francisco');
+      // Should find exactly one match (the indexed value)
+      expect(ftsResult).toHaveLength(1);
     });
 
     it('should NOT index non-searchable custom field values', () => {
@@ -146,13 +147,16 @@ describe('Custom Fields FTS Tests (Phase 3.3)', () => {
         'INSERT INTO custom_fields_fts (entity_type, entity_id, field_values) VALUES (?, ?, ?)'
       ).run('person', personId, values.concatenated);
 
-      // Verify FTS entry contains both values
-      const ftsResult = db
-        .prepare('SELECT * FROM custom_fields_fts WHERE entity_id = ?')
-        .get(personId) as { field_values: string };
+      // Verify both values are searchable (contentless FTS only supports search, not retrieval)
+      const searchSanFrancisco = db
+        .prepare("SELECT rowid FROM custom_fields_fts WHERE custom_fields_fts MATCH 'Francisco'")
+        .all();
+      expect(searchSanFrancisco).toHaveLength(1);
 
-      expect(ftsResult.field_values).toContain('San Francisco');
-      expect(ftsResult.field_values).toContain('React TypeScript');
+      const searchReact = db
+        .prepare("SELECT rowid FROM custom_fields_fts WHERE custom_fields_fts MATCH 'React'")
+        .all();
+      expect(searchReact).toHaveLength(1);
     });
 
     it('should only index searchable fields when mixing searchable and non-searchable', () => {
@@ -190,14 +194,17 @@ describe('Custom Fields FTS Tests (Phase 3.3)', () => {
         'INSERT INTO custom_fields_fts (entity_type, entity_id, field_values) VALUES (?, ?, ?)'
       ).run('person', personId, values.concatenated);
 
-      const ftsResult = db
-        .prepare('SELECT * FROM custom_fields_fts WHERE entity_id = ?')
-        .get(personId) as { field_values: string };
+      // Verify searchable value is findable
+      const searchableResult = db
+        .prepare("SELECT rowid FROM custom_fields_fts WHERE custom_fields_fts MATCH 'Francisco'")
+        .all();
+      expect(searchableResult).toHaveLength(1);
 
-      // Should contain searchable value
-      expect(ftsResult.field_values).toContain('San Francisco');
-      // Should NOT contain non-searchable value
-      expect(ftsResult.field_values).not.toContain('Secret data');
+      // Verify non-searchable value is NOT findable
+      const nonsearchableResult = db
+        .prepare("SELECT rowid FROM custom_fields_fts WHERE custom_fields_fts MATCH 'Secret'")
+        .all();
+      expect(nonsearchableResult).toHaveLength(0);
     });
   });
 
@@ -224,10 +231,8 @@ describe('Custom Fields FTS Tests (Phase 3.3)', () => {
       db.prepare('UPDATE custom_field_values SET value = ? WHERE id = ?').run('New York', 'val1');
 
       // Re-sync FTS (simulating service layer)
-      db.prepare('DELETE FROM custom_fields_fts WHERE entity_id = ? AND entity_type = ?').run(
-        personId,
-        'person'
-      );
+      // NOTE: For contentless FTS (content=''), must use 'delete-all' since individual deletes don't work
+      db.prepare("INSERT INTO custom_fields_fts(custom_fields_fts) VALUES('delete-all')").run();
 
       const newValues = db
         .prepare(
@@ -244,13 +249,17 @@ describe('Custom Fields FTS Tests (Phase 3.3)', () => {
         'INSERT INTO custom_fields_fts (entity_type, entity_id, field_values) VALUES (?, ?, ?)'
       ).run('person', personId, newValues.concatenated);
 
-      // Verify FTS updated
-      const ftsResult = db
-        .prepare('SELECT * FROM custom_fields_fts WHERE entity_id = ?')
-        .get(personId) as { field_values: string };
+      // Verify FTS updated - new value is searchable
+      const newValueResult = db
+        .prepare("SELECT rowid FROM custom_fields_fts WHERE custom_fields_fts MATCH 'York'")
+        .all();
+      expect(newValueResult).toHaveLength(1);
 
-      expect(ftsResult.field_values).toBe('New York');
-      expect(ftsResult.field_values).not.toContain('San Francisco');
+      // Verify old value is no longer searchable
+      const oldValueResult = db
+        .prepare("SELECT rowid FROM custom_fields_fts WHERE custom_fields_fts MATCH 'Francisco'")
+        .all();
+      expect(oldValueResult).toHaveLength(0);
     });
 
     it('should remove FTS entry when all custom fields are deleted', () => {
@@ -320,11 +329,11 @@ describe('Custom Fields FTS Tests (Phase 3.3)', () => {
         'INSERT INTO custom_field_values (id, field_definition_id, entity_id, entity_type, value) VALUES (?, ?, ?, ?, ?)'
       ).run('val1', 'field1', personId, 'person', 'San Francisco');
 
-      // No FTS entry should exist yet
-      let ftsResult = db
-        .prepare('SELECT * FROM custom_fields_fts WHERE entity_id = ?')
-        .get(personId);
-      expect(ftsResult).toBeUndefined();
+      // No FTS entry should exist yet - verify by searching
+      const initialResult = db
+        .prepare("SELECT rowid FROM custom_fields_fts WHERE custom_fields_fts MATCH 'Francisco'")
+        .all();
+      expect(initialResult).toHaveLength(0);
 
       // Change field to searchable
       db.prepare('UPDATE custom_field_definitions SET is_searchable = 1 WHERE id = ?').run(
@@ -349,13 +358,12 @@ describe('Custom Fields FTS Tests (Phase 3.3)', () => {
         ).run('person', personId, values.concatenated);
       }
 
-      // Now FTS should have the value
-      ftsResult = db
-        .prepare('SELECT * FROM custom_fields_fts WHERE entity_id = ?')
-        .get(personId) as { field_values: string } | undefined;
+      // Now FTS should have the value - verify by searching
+      const ftsSearchResult = db
+        .prepare("SELECT rowid FROM custom_fields_fts WHERE custom_fields_fts MATCH 'Francisco'")
+        .all();
 
-      expect(ftsResult).toBeDefined();
-      expect(ftsResult?.field_values).toBe('San Francisco');
+      expect(ftsSearchResult).toHaveLength(1);
     });
 
     it('should rebuild FTS when is_searchable changes from 1 to 0', () => {
@@ -373,10 +381,10 @@ describe('Custom Fields FTS Tests (Phase 3.3)', () => {
         'INSERT INTO custom_fields_fts (entity_type, entity_id, field_values) VALUES (?, ?, ?)'
       ).run('person', personId, 'San Francisco');
 
-      let ftsResult = db
-        .prepare('SELECT * FROM custom_fields_fts WHERE entity_id = ?')
-        .get(personId);
-      expect(ftsResult).toBeDefined();
+      const initialSearch = db
+        .prepare("SELECT rowid FROM custom_fields_fts WHERE custom_fields_fts MATCH 'Francisco'")
+        .all();
+      expect(initialSearch).toHaveLength(1);
 
       // Change field to non-searchable
       db.prepare('UPDATE custom_field_definitions SET is_searchable = 0 WHERE id = ?').run(
@@ -384,10 +392,8 @@ describe('Custom Fields FTS Tests (Phase 3.3)', () => {
       );
 
       // Rebuild FTS for this entity
-      db.prepare('DELETE FROM custom_fields_fts WHERE entity_id = ? AND entity_type = ?').run(
-        personId,
-        'person'
-      );
+      // NOTE: For contentless FTS (content=''), must use 'delete-all' since individual deletes don't work
+      db.prepare("INSERT INTO custom_fields_fts(custom_fields_fts) VALUES('delete-all')").run();
 
       const values = db
         .prepare(
@@ -406,10 +412,12 @@ describe('Custom Fields FTS Tests (Phase 3.3)', () => {
         ).run('person', personId, values.concatenated);
       }
 
-      // FTS should no longer have the value
-      ftsResult = db.prepare('SELECT * FROM custom_fields_fts WHERE entity_id = ?').get(personId);
+      // FTS should no longer have the value - verify by searching
+      const ftsAfter = db
+        .prepare("SELECT rowid FROM custom_fields_fts WHERE custom_fields_fts MATCH 'Francisco'")
+        .all();
 
-      expect(ftsResult).toBeUndefined();
+      expect(ftsAfter).toHaveLength(0);
     });
   });
 });
