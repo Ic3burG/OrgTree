@@ -261,6 +261,12 @@ export interface SearchResponse {
     offset: number;
   };
   suggestions?: string[];
+  warnings?: string[];
+  usedFallback?: boolean;
+  performance?: {
+    queryTimeMs: number;
+    slowQuery?: boolean;
+  };
 }
 
 export interface AutocompleteSuggestion {
