@@ -231,7 +231,49 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Today's Progress (January 22, 2026 - Session 63)**:
+- **Today's Progress (January 24, 2026 - Phase 5: Frontend Resilience)**:
+  - ✅ **Search System Rebuild - Phase 5 Complete** - Frontend resilience implementation
+    - **Task 1 - Retry Logic**: Implemented automatic retry with exponential backoff (max 3 attempts, 1s/2s/4s delays)
+      - Smart error classification (only retry server/network errors, not client validation errors)
+      - Retry count tracking exposed to UI via `retryCount` state
+      - Helper functions: `isRetryableError()` and `sleep()` for backoff
+    - **Task 2 - Degraded Mode UI**: Added visual feedback for search health status
+      - Amber warning banner when `usedFallback=true` (full-text search unavailable)
+      - Blue info banners for search warnings from backend
+      - Slate retry status indicator showing "Retry attempt X of 3..." with spinner
+      - All indicators support dark mode
+    - **Task 3 - Offline Cache**: Implemented IndexedDB caching for search results
+      - Database: `OrgTreeSearchCache` with 5-minute TTL per entry
+      - Max 50 entries with LRU eviction (oldest first)
+      - Cache key: `orgId:query:type:starredOnly` (normalized)
+      - Only caches first-page results for optimal hit rate
+      - Green "Cached" badge in SearchOverlay results header
+      - Graceful degradation - all cache operations fail silently
+  - 📁 **FILES CREATED**:
+    - `src/services/searchCache.ts` - IndexedDB cache service (290 lines)
+  - 📁 **FILES MODIFIED**:
+    - `src/hooks/useSearch.ts` - Added retry logic, cache integration, new state tracking
+    - `src/components/SearchOverlay.tsx` - Added degraded mode indicators and cache badge
+    - `docs/plans/search-rebuild.md` - Updated progress tracking
+    - `PROGRESS.md` - This file
+  - ✅ **COMMITS PUSHED**:
+    - `35203bd` - feat(search): add retry logic with exponential backoff to useSearch hook
+    - `33aec53` - feat(search): add degraded mode UI indicators to SearchOverlay
+    - `2c4634e` - feat(search): implement IndexedDB offline cache for search results
+  - 📊 **METRICS**:
+    - 3 new commits pushed to develop branch
+    - 1 new service file created (searchCache.ts)
+    - All 158 frontend tests passing
+    - Zero linting errors
+    - **Phase 5 Status**: ✅ COMPLETE
+  - 🎯 **SEARCH REBUILD PHASES STATUS**:
+    - ✅ Phase 1: Foundation Repair (triggers, FTS population, rebuild utility)
+    - ✅ Phase 2: Error Handling (validation, fallback search, error propagation)
+    - ✅ Phase 3: Test Infrastructure (aligned schema, trigger tests, integrity tests)
+    - ✅ Phase 4: Performance & Monitoring (logging, health endpoint, scheduled maintenance)
+    - ✅ Phase 5: Frontend Resilience (retry logic, degraded UI, offline cache)
+
+- **Previous Progress (January 22, 2026 - Session 63)**:
   - ✅ **Fix 'deleted_at' error in custom fields and expand GEDS XML import**
     - **Database**: Added `deleted_at` column to `custom_field_definitions` and `custom_field_values` tables.
     - **Migrations**: Implemented programmatic `ALTER TABLE` migrations to ensure existing databases are updated.
@@ -3079,7 +3121,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>
-**Last Updated**: January 21, 2026 (Session 61 - User Analytics)
+**Last Updated**: January 24, 2026 (Phase 5: Frontend Resilience - Search System Rebuild Complete)
 
 **Today's Major Milestone**: 🎉
 
