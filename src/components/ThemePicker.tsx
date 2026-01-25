@@ -31,7 +31,14 @@ export default function ThemePicker({
                   : 'hover:scale-110'
               }
             `}
-            style={{ backgroundColor: theme.swatch }}
+            style={
+              theme.id === 'rainbow'
+                ? {
+                    background:
+                      'conic-gradient(from 0deg, #ef4444 0deg, #fb923c 51deg, #fbbf24 102deg, #84cc16 153deg, #06b6d4 204deg, #3b82f6 255deg, #a855f7 306deg, #ef4444 360deg)',
+                  }
+                : { backgroundColor: theme.swatch }
+            }
             title={theme.name}
             aria-label={`${theme.name} theme`}
           />
