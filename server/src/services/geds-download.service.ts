@@ -1,4 +1,4 @@
-import https from 'https';
+import https, { IncomingMessage } from 'https';
 import fs from 'fs';
 import { pipeline } from 'stream/promises';
 
@@ -52,7 +52,7 @@ export function validateGedsUrl(url: string): boolean {
   let parsedUrl: URL;
   try {
     parsedUrl = new URL(url);
-  } catch (error) {
+  } catch {
     throw new InvalidUrlError('Invalid URL format');
   }
 
@@ -63,14 +63,10 @@ export function validateGedsUrl(url: string): boolean {
 
   // Check if hostname ends with allowed domain
   const hostname = parsedUrl.hostname.toLowerCase();
-  const isAllowedDomain = ALLOWED_DOMAINS.some((domain) =>
-    hostname.endsWith(domain)
-  );
+  const isAllowedDomain = ALLOWED_DOMAINS.some(domain => hostname.endsWith(domain));
 
   if (!isAllowedDomain) {
-    throw new InvalidUrlError(
-      `URL must be from an allowed domain: ${ALLOWED_DOMAINS.join(', ')}`
-    );
+    throw new InvalidUrlError(`URL must be from an allowed domain: ${ALLOWED_DOMAINS.join(', ')}`);
   }
 
   return true;
@@ -86,15 +82,12 @@ export function validateGedsUrl(url: string): boolean {
  * @throws FileSizeLimitError if file exceeds size limit
  * @throws NetworkError if download fails
  */
-export async function downloadGedsXml(
-  url: string,
-  destPath: string
-): Promise<void> {
+export async function downloadGedsXml(url: string, destPath: string): Promise<void> {
   // Validate URL first
   validateGedsUrl(url);
 
   return new Promise((resolve, reject) => {
-    const request = https.get(url, (response) => {
+    const request = https.get(url, response => {
       // Check for redirects or errors
       if (
         response.statusCode === 301 ||
@@ -107,10 +100,10 @@ export async function downloadGedsXml(
         }
         // Follow redirect (only one level to prevent redirect loops)
         https
-          .get(redirectUrl, (redirectResponse) => {
+          .get(redirectUrl, redirectResponse => {
             handleResponse(redirectResponse, destPath, resolve, reject);
           })
-          .on('error', (error) => {
+          .on('error', error => {
             reject(new NetworkError(`Redirect failed: ${error.message}`));
           });
         return;
@@ -123,14 +116,12 @@ export async function downloadGedsXml(
     request.setTimeout(DOWNLOAD_TIMEOUT_MS, () => {
       request.destroy();
       reject(
-        new DownloadTimeoutError(
-          `Download timed out after ${DOWNLOAD_TIMEOUT_MS / 1000} seconds`
-        )
+        new DownloadTimeoutError(`Download timed out after ${DOWNLOAD_TIMEOUT_MS / 1000} seconds`)
       );
     });
 
     // Handle request errors
-    request.on('error', (error) => {
+    request.on('error', error => {
       reject(new NetworkError(`Download failed: ${error.message}`));
     });
   });
@@ -140,18 +131,14 @@ export async function downloadGedsXml(
  * Handles the HTTP response and streams to file
  */
 function handleResponse(
-  response: any,
+  response: IncomingMessage,
   destPath: string,
   resolve: () => void,
   reject: (error: Error) => void
 ): void {
   // Check status code
   if (response.statusCode !== 200) {
-    reject(
-      new NetworkError(
-        `HTTP ${response.statusCode}: ${response.statusMessage}`
-      )
-    );
+    reject(new NetworkError(`HTTP ${response.statusCode}: ${response.statusMessage}`));
     return;
   }
 
@@ -189,7 +176,7 @@ function handleResponse(
   // Pipe response to file
   pipeline(response, fileStream)
     .then(() => resolve())
-    .catch((error) => {
+    .catch(error => {
       // Clean up partial file
       fs.unlink(destPath, () => {});
       reject(new NetworkError(`Download failed: ${error.message}`));
@@ -205,7 +192,7 @@ function handleResponse(
 export async function cleanupTempFile(filePath: string): Promise<void> {
   try {
     await fs.promises.unlink(filePath);
-  } catch (error) {
+  } catch {
     // Silently ignore errors (file might already be deleted)
     // This is intentional - cleanup should never throw
   }

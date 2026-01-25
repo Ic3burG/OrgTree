@@ -1,6 +1,6 @@
 # GEDS URL Import Plan
 
-**Status**: 📋 Planned
+**Status**: ✅ Implemented (Phase 1 & 2 Complete, Phase 3 In Progress)
 
 ## Goal
 
@@ -346,30 +346,30 @@ export async function importGedsUrls(
 
 ## Implementation Phases
 
-### Phase 1: Backend Foundation
-- [ ] Create `geds-download.service.ts` with URL validation and download
-- [ ] Create `geds-parser.service.ts` by extracting from script
-- [ ] Refactor `scripts/parse-geds-xml.ts` to use parser service
-- [ ] Write unit tests for download and parser services
-- [ ] Create `geds-import.ts` route with import logic
-- [ ] Write integration tests for import endpoint
-- [ ] Mount route in `server/src/index.ts`
+### Phase 1: Backend Foundation ✅ COMPLETE
+- [x] Create `geds-download.service.ts` with URL validation and download
+- [x] Create `geds-parser.service.ts` by extracting from script
+- [x] Refactor `scripts/parse-geds-xml.ts` to use parser service
+- [x] Write unit tests for download and parser services (14 tests)
+- [x] Create `geds-import.ts` route with import logic
+- [x] Write integration tests for import endpoint (17 tests)
+- [x] Mount route in `server/src/index.ts`
 
-### Phase 2: Frontend UI
-- [ ] Create `GedsUrlImporter.tsx` component
-- [ ] Create `src/api/geds.ts` API client
-- [ ] Write component tests
-- [ ] Integrate into `DepartmentManager.tsx`
-- [ ] Add progress modal with real-time updates
-- [ ] Add error handling and user feedback
+### Phase 2: Frontend UI ✅ COMPLETE
+- [x] Create `GedsUrlImporter.tsx` component
+- [x] Create `src/api/geds.ts` API client
+- [x] Write component tests (8 tests)
+- [x] Integrate into `ImportModal.tsx` (added as third tab)
+- [x] Add progress modal with real-time updates
+- [x] Add error handling and user feedback
 
-### Phase 3: Polish & Verification
-- [ ] Manual testing (all scenarios above)
-- [ ] Add helpful error messages
-- [ ] Add inline help text with example URLs
-- [ ] Update audit log to include source URL
-- [ ] Add Socket.IO real-time progress updates (optional enhancement)
-- [ ] Performance testing (10 URLs with large files)
+### Phase 3: Polish & Verification 🔄 IN PROGRESS
+- [ ] Manual testing (all scenarios above) - **READY FOR USER TESTING**
+- [x] Add helpful error messages - **COMPLETE** (detailed errors from backend, UI validation)
+- [x] Add inline help text with example URLs - **COMPLETE** (textarea placeholder)
+- [x] Update audit log to include source URL - **COMPLETE** (URL in entityId and snapshot)
+- [ ] Add Socket.IO real-time progress updates - **OPTIONAL** (deferred for future)
+- [ ] Performance testing (10 URLs with large files) - **READY FOR USER TESTING**
 
 ## Future Enhancements (Out of Scope)
 
