@@ -12,6 +12,7 @@ import { parseCSV, validateCSVData } from '../../utils/csvImport';
 import { processXmlFiles } from '../../utils/xmlImport';
 import type { CSVRow, CSVImportResult } from '../../utils/csvImport';
 import api from '../../api/client';
+import GedsUrlImporter from './GedsUrlImporter';
 
 interface ImportModalProps {
   isOpen: boolean;
@@ -26,7 +27,7 @@ interface PreviewData {
   people: number;
 }
 
-type ImportType = 'csv' | 'xml';
+type ImportType = 'csv' | 'xml' | 'urls';
 
 export default function ImportModal({
   isOpen,
@@ -290,7 +291,7 @@ export default function ImportModal({
                   }}
                   disabled={loading}
                 >
-                  CSV Import
+                  CSV File
                 </button>
                 <button
                   className={`flex-1 py-1 px-3 text-sm font-medium rounded-md transition-colors ${
@@ -309,110 +310,148 @@ export default function ImportModal({
                 >
                   GEDS XML
                 </button>
+                <button
+                  className={`flex-1 py-1 px-3 text-sm font-medium rounded-md transition-colors ${
+                    importType === 'urls'
+                      ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                  onClick={() => {
+                    setImportType('urls');
+                    setFiles([]);
+                    setPreview(null);
+                    setErrors([]);
+                    setWarnings([]);
+                  }}
+                  disabled={loading}
+                >
+                  GEDS URLs
+                </button>
               </div>
 
-              {/* File upload area */}
-              <div
-                onClick={() => !loading && fileInputRef.current?.click()}
-                className={`border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 transition-colors ${
-                  loading ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept={importType === 'csv' ? '.csv' : '.xml'}
-                  multiple={importType === 'xml'}
-                  onChange={handleFileChange}
-                  disabled={loading}
-                  className="hidden"
+              {/* GEDS URL Importer */}
+              {importType === 'urls' ? (
+                <GedsUrlImporter
+                  organizationId={orgId}
+                  onImportComplete={() => {
+                    onSuccess();
+                    handleClose();
+                  }}
                 />
+              ) : (
+                <>
+                  {/* File upload area */}
+                  <div
+                    onClick={() => !loading && fileInputRef.current?.click()}
+                    className={`border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 transition-colors ${
+                      loading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={importType === 'csv' ? '.csv' : '.xml'}
+                      multiple={importType === 'xml'}
+                      onChange={handleFileChange}
+                      disabled={loading}
+                      className="hidden"
+                    />
 
-                {importType === 'csv' ? (
-                  <Upload className="mx-auto text-slate-400 dark:text-slate-500 mb-2" size={32} />
-                ) : (
-                  <FileCode className="mx-auto text-slate-400 dark:text-slate-500 mb-2" size={32} />
-                )}
-
-                <p className="text-slate-600 dark:text-slate-300 font-medium">
-                  {files.length > 0
-                    ? `${files.length} file${files.length > 1 ? 's' : ''} selected`
-                    : `Click to select ${importType === 'csv' ? 'a CSV file' : 'XML files'}`}
-                </p>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  {importType === 'csv'
-                    ? 'Format: Path, Type, Name, Title, Email, Phone...'
-                    : 'Select multiple .xml files to process them together'}
-                </p>
-              </div>
-
-              {/* Errors */}
-              {errors.length > 0 && (
-                <div className="mt-4 p-4 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-800">
-                  <div className="flex items-center gap-2 text-red-700 dark:text-red-400 font-medium mb-2">
-                    <AlertCircle size={20} />
-                    Validation Errors
-                  </div>
-                  <ul className="text-sm text-red-600 dark:text-red-400 list-disc list-inside space-y-1">
-                    {errors.slice(0, 10).map((error, i) => (
-                      <li key={i}>{error}</li>
-                    ))}
-                    {errors.length > 10 && (
-                      <li className="font-medium">...and {errors.length - 10} more error(s)</li>
+                    {importType === 'csv' ? (
+                      <Upload
+                        className="mx-auto text-slate-400 dark:text-slate-500 mb-2"
+                        size={32}
+                      />
+                    ) : (
+                      <FileCode
+                        className="mx-auto text-slate-400 dark:text-slate-500 mb-2"
+                        size={32}
+                      />
                     )}
-                  </ul>
-                </div>
-              )}
 
-              {/* Warnings */}
-              {warnings.length > 0 && (
-                <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
-                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-medium mb-2">
-                    <AlertTriangle size={20} />
-                    Warnings
+                    <p className="text-slate-600 dark:text-slate-300 font-medium">
+                      {files.length > 0
+                        ? `${files.length} file${files.length > 1 ? 's' : ''} selected`
+                        : `Click to select ${importType === 'csv' ? 'a CSV file' : 'XML files'}`}
+                    </p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                      {importType === 'csv'
+                        ? 'Format: Path, Type, Name, Title, Email, Phone...'
+                        : 'Select multiple .xml files to process them together'}
+                    </p>
                   </div>
-                  <ul className="text-sm text-amber-700 dark:text-amber-400 list-disc list-inside space-y-1">
-                    {warnings.slice(0, 10).map((warning, i) => (
-                      <li key={i}>{warning}</li>
-                    ))}
-                    {warnings.length > 10 && (
-                      <li className="font-medium">...and {warnings.length - 10} more warning(s)</li>
-                    )}
-                  </ul>
-                </div>
-              )}
 
-              {/* Preview */}
-              {preview && (
-                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-medium mb-2">
-                    <FileText size={20} />
-                    Preview
+                  {/* Errors */}
+                  {errors.length > 0 && (
+                    <div className="mt-4 p-4 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-800">
+                      <div className="flex items-center gap-2 text-red-700 dark:text-red-400 font-medium mb-2">
+                        <AlertCircle size={20} />
+                        Validation Errors
+                      </div>
+                      <ul className="text-sm text-red-600 dark:text-red-400 list-disc list-inside space-y-1">
+                        {errors.slice(0, 10).map((error, i) => (
+                          <li key={i}>{error}</li>
+                        ))}
+                        {errors.length > 10 && (
+                          <li className="font-medium">...and {errors.length - 10} more error(s)</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Warnings */}
+                  {warnings.length > 0 && (
+                    <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-medium mb-2">
+                        <AlertTriangle size={20} />
+                        Warnings
+                      </div>
+                      <ul className="text-sm text-amber-700 dark:text-amber-400 list-disc list-inside space-y-1">
+                        {warnings.slice(0, 10).map((warning, i) => (
+                          <li key={i}>{warning}</li>
+                        ))}
+                        {warnings.length > 10 && (
+                          <li className="font-medium">
+                            ...and {warnings.length - 10} more warning(s)
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Preview */}
+                  {preview && (
+                    <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-medium mb-2">
+                        <FileText size={20} />
+                        Preview
+                      </div>
+                      <p className="text-sm text-blue-600 dark:text-blue-400">
+                        Ready to import: {preview.departments} department(s) and {preview.people}{' '}
+                        person(s)
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="mt-6 flex justify-end gap-3">
+                    <button
+                      onClick={handleClose}
+                      disabled={loading}
+                      className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleImport}
+                      disabled={!preview || loading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    >
+                      {loading ? 'Importing...' : 'Import'}
+                    </button>
                   </div>
-                  <p className="text-sm text-blue-600 dark:text-blue-400">
-                    Ready to import: {preview.departments} department(s) and {preview.people}{' '}
-                    person(s)
-                  </p>
-                </div>
+                </>
               )}
-
-              {/* Actions */}
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  onClick={handleClose}
-                  disabled={loading}
-                  className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleImport}
-                  disabled={!preview || loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
-                  {loading ? 'Importing...' : 'Import'}
-                </button>
-              </div>
             </>
           )}
         </div>
