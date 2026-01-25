@@ -46,7 +46,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [ ] **APM (Application Performance Monitoring)** - New Relic, DataDog, or similar
 - [x] **CI/CD Pipeline** - GitHub Actions for automated testing and deployment ✅ **DONE** (January 5, 2026)
 - [x] **Staging Environment** - Separate staging server for pre-production testing ✅ **DONE** (January 21, 2026)
-- [ ] **Database Migration Rollback** - Strategy and scripts for safe rollbacks
+- [ ] **Database Migration Rollback** - Strategy and scripts for safe rollbacks (see [docs/plans/database-migration-rollback.md](plans/database-migration-rollback.md))
 - [x] **Health Check Enhancement** - Add memory usage, disk space, connection pool metrics ✅ **DONE** (January 8, 2026)
 
 ### Scalability & Architecture
@@ -163,10 +163,10 @@ This document outlines the development roadmap for OrgTree, including technical 
 - Sidebar pinning (auto-hide on route change unless pinned)
 
 1. **Search Enhancements**:
-    1. **Typo Tolerance** - Trigram-based fuzzy matching
-    1. **Search Analytics** - Track zero-result searches to identify gaps
-    1. **Saved Searches** - Allow users to save frequently-used queries
-    1. **Search Suggestions** - "Did you mean?" suggestions for misspellings
+   1. **Typo Tolerance** - Trigram-based fuzzy matching
+   1. **Search Analytics** - Track zero-result searches to identify gaps
+   1. **Saved Searches** - Allow users to save frequently-used queries
+   1. **Search Suggestions** - "Did you mean?" suggestions for misspellings
 
 ---
 
