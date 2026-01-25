@@ -86,8 +86,9 @@ const adminOperationsLimiter = rateLimit({
 });
 
 // All user management routes require authentication and superuser role
-router.use(authenticateToken);
-router.use(requireSuperuser);
+// Restrict middleware to /users path to prevent blocking other routes mounted at /api
+router.use('/users', authenticateToken);
+router.use('/users', requireSuperuser);
 
 // POST /api/users - Create new user
 router.post(
