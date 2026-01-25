@@ -38,11 +38,11 @@ describe('Colors Utility', () => {
       expect(blue.hex).not.toBe(emerald.hex);
     });
 
-    it('should fallback to slate for invalid theme', () => {
+    it('should fallback to blue for invalid theme', () => {
       const invalid = getDepthColors(0, 'invalid-theme');
-      const slate = getDepthColors(0, 'slate');
+      const blue = getDepthColors(0, 'blue');
 
-      expect(invalid.hex).toBe(slate.hex);
+      expect(invalid.hex).toBe(blue.hex);
     });
 
     it('should return white text for dark colors', () => {

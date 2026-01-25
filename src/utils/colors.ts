@@ -23,17 +23,6 @@ interface ThemeList {
 }
 
 const themes: Record<string, Theme> = {
-  slate: {
-    name: 'Slate',
-    colors: [
-      { bg: 'bg-slate-700', hex: '#334155', text: 'text-white', hover: 'hover:bg-slate-600' },
-      { bg: 'bg-slate-600', hex: '#475569', text: 'text-white', hover: 'hover:bg-slate-500' },
-      { bg: 'bg-slate-500', hex: '#64748b', text: 'text-white', hover: 'hover:bg-slate-400' },
-      { bg: 'bg-slate-400', hex: '#94a3b8', text: 'text-slate-900', hover: 'hover:bg-slate-300' },
-      { bg: 'bg-slate-300', hex: '#cbd5e1', text: 'text-slate-900', hover: 'hover:bg-slate-200' },
-    ],
-    swatch: '#475569',
-  },
   blue: {
     name: 'Blue',
     colors: [
@@ -109,6 +98,17 @@ const themes: Record<string, Theme> = {
     ],
     swatch: '#e11d48',
   },
+  slate: {
+    name: 'Slate',
+    colors: [
+      { bg: 'bg-slate-700', hex: '#334155', text: 'text-white', hover: 'hover:bg-slate-600' },
+      { bg: 'bg-slate-600', hex: '#475569', text: 'text-white', hover: 'hover:bg-slate-500' },
+      { bg: 'bg-slate-500', hex: '#64748b', text: 'text-white', hover: 'hover:bg-slate-400' },
+      { bg: 'bg-slate-400', hex: '#94a3b8', text: 'text-slate-900', hover: 'hover:bg-slate-300' },
+      { bg: 'bg-slate-300', hex: '#cbd5e1', text: 'text-slate-900', hover: 'hover:bg-slate-200' },
+    ],
+    swatch: '#475569',
+  },
   rainbow: {
     name: 'Rainbow',
     colors: [
@@ -139,8 +139,8 @@ const themes: Record<string, Theme> = {
 /**
  * Get depth-based colors for a specific theme
  */
-export function getDepthColors(depth: number, themeName: string = 'slate'): ColorConfig {
-  const theme = themes[themeName] || themes['slate'];
+export function getDepthColors(depth: number, themeName: string = 'blue'): ColorConfig {
+  const theme = themes[themeName] || themes['blue'];
   if (!theme) {
     throw new Error(`Theme not found: ${themeName}`);
   }

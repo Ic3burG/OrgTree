@@ -33,7 +33,7 @@ describe('useOrgMapSettings', () => {
 
   it('should load default settings', () => {
     const { result } = renderHook(() => useOrgMapSettings('org-1'));
-    expect(result.current.settings.theme).toBe('slate');
+    expect(result.current.settings.theme).toBe('blue');
     expect(result.current.settings.layoutDirection).toBe('TB');
     expect(result.current.settings.zoom).toBe(1);
   });
@@ -42,7 +42,7 @@ describe('useOrgMapSettings', () => {
     const { result } = renderHook(() => useOrgMapSettings('org-1'));
 
     act(() => {
-      result.current.updateSettings({ theme: 'blue' });
+      result.current.updateSettings({ theme: 'emerald' });
     });
 
     await waitFor(() => {
@@ -50,7 +50,7 @@ describe('useOrgMapSettings', () => {
       expect(saved).not.toBeNull();
       if (saved) {
         const parsed = JSON.parse(saved);
-        expect(parsed.theme).toBe('blue');
+        expect(parsed.theme).toBe('emerald');
       }
     });
   });
@@ -92,14 +92,14 @@ describe('useOrgMapSettings', () => {
       result.current.resetSettings();
     });
 
-    expect(result.current.settings.theme).toBe('slate');
+    expect(result.current.settings.theme).toBe('blue');
     expect(result.current.settings.zoom).toBe(1);
     expect(window.localStorage.getItem('orgMap_org-1_settings')).toBeNull();
   });
 
   it('should handle undefined orgId', () => {
     const { result } = renderHook(() => useOrgMapSettings(undefined));
-    expect(result.current.settings.theme).toBe('slate');
+    expect(result.current.settings.theme).toBe('blue');
 
     act(() => {
       result.current.updateSettings({ theme: 'red' });

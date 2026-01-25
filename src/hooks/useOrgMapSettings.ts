@@ -12,7 +12,7 @@ export interface OrgMapSettings {
 }
 
 const DEFAULT_SETTINGS: OrgMapSettings = {
-  theme: 'slate',
+  theme: 'blue',
   zoom: 1,
   viewport: { x: 0, y: 0, zoom: 1 },
   nodePositionsTB: {},
@@ -102,7 +102,7 @@ export function useOrgMapSettings(orgId: string | undefined) {
       const legacyTheme = localStorage.getItem('orgTreeTheme');
       setSettings(prev => ({
         ...DEFAULT_SETTINGS,
-        theme: legacyTheme || prev.theme || 'slate',
+        theme: legacyTheme || prev.theme || 'blue',
       }));
     }
     setIsLoaded(true);
