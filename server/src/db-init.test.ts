@@ -13,8 +13,8 @@ describe('Database Initialization', () => {
     db.close();
   });
 
-  it('should create all required tables', () => {
-    initializeDatabase(db);
+  it('should create all required tables', async () => {
+    await initializeDatabase(db);
 
     const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as {
       name: string;
@@ -34,6 +34,7 @@ describe('Database Initialization', () => {
       'refresh_tokens',
       'invitations',
       'organization_members',
+      '_migrations',
     ];
 
     requiredTables.forEach(table => {
@@ -41,8 +42,8 @@ describe('Database Initialization', () => {
     });
   });
 
-  it('should create FTS virtual tables', () => {
-    initializeDatabase(db);
+  it('should create FTS virtual tables', async () => {
+    await initializeDatabase(db);
 
     const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as {
       name: string;
@@ -54,14 +55,14 @@ describe('Database Initialization', () => {
     expect(tableNames).toContain('custom_fields_fts');
   });
 
-  it('should be idempotent (can be run multiple times)', () => {
-    initializeDatabase(db);
+  it('should be idempotent (can be run multiple times)', async () => {
+    await initializeDatabase(db);
     // Run it again - should log "Migration: ..." but not throw errors
-    expect(() => initializeDatabase(db)).not.toThrow();
+    await expect(initializeDatabase(db)).resolves.not.toThrow();
   });
 
-  it('should verify schema of specific tables', () => {
-    initializeDatabase(db);
+  it('should verify schema of specific tables', async () => {
+    await initializeDatabase(db);
 
     const orgColumns = db.prepare('PRAGMA table_info(organizations)').all() as { name: string }[];
     const orgColNames = orgColumns.map(c => c.name);
@@ -77,16 +78,8 @@ describe('Database Initialization', () => {
     expect(userColNames).toContain('must_change_password');
   });
 
-  it('should set WAL mode and other pragmas', () => {
-    initializeDatabase(db);
-
-    // Check WAL mode (might be 'memory' for in-memory DB or 'wal')
-    // In-memory DBs often ignore some journal modes or behave differently
-    const journalMode = db.pragma('journal_mode', { simple: true });
-    // Note: better-sqlite3 :memory: DBs default to 'memory' journal mode usually
-    // But we explicitly set it to WAL. Let's see if it sticks.
-    // Actually, for :memory: databases, WAL might not be applicable or stays 'memory'.
-    // We can check foreign_keys though.
+  it('should set WAL mode and other pragmas', async () => {
+    await initializeDatabase(db);
 
     const foreignKeys = db.pragma('foreign_keys', { simple: true });
     expect(foreignKeys).toBe(1);

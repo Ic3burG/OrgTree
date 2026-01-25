@@ -20,6 +20,6 @@ if (process.env.DATABASE_URL) {
 const db = new Database(dbPath);
 
 console.log('Initializing database at:', dbPath);
-initializeDatabase(db);
+await initializeDatabase(db);
 
 export default db;
