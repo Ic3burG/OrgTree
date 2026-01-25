@@ -126,17 +126,21 @@ for (const member of members) {
   console.log(`User: ${member.email}`);
 
   // Simulate checkOrgAccess logic
-  let access = { hasAccess: false, role: null, isOwner: false };
+  let access: {
+    hasAccess: boolean;
+    role: 'owner' | 'admin' | 'editor' | 'viewer' | null;
+    isOwner: boolean;
+  } = { hasAccess: false, role: null, isOwner: false };
   let reason = '';
 
   // Check 1: Superuser bypass
   if (member.system_role === 'superuser') {
-    access = { hasAccess: true, role: 'owner' as any, isOwner: false };
+    access = { hasAccess: true, role: 'owner', isOwner: false };
     reason = 'Superuser bypass (line 61-64)';
   }
   // Check 2: Creator bypass
   else if (member.user_id === org.created_by_id) {
-    access = { hasAccess: true, role: 'owner' as any, isOwner: true };
+    access = { hasAccess: true, role: 'owner', isOwner: true };
     reason = 'Creator bypass (line 76-79)';
   }
   // Check 3: Check organization_members table
@@ -146,7 +150,11 @@ for (const member of members) {
       .get(orgId, member.user_id) as { role: string } | undefined;
 
     if (memberRecord) {
-      access = { hasAccess: true, role: memberRecord.role as any, isOwner: false };
+      access = {
+        hasAccess: true,
+        role: memberRecord.role as 'owner' | 'admin' | 'editor' | 'viewer',
+        isOwner: false,
+      };
       reason = `Found in organization_members with role '${memberRecord.role}' (line 82-98)`;
     } else {
       access = { hasAccess: false, role: null, isOwner: false };
