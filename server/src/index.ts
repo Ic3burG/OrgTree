@@ -31,6 +31,7 @@ import gedsRoutes from './routes/geds.js';
 import { scheduleFtsMaintenance } from './services/fts-scheduler.service.js';
 import ftsMaintenanceRoutes from './routes/fts-maintenance.js';
 import versionRoutes from './routes/version.js';
+import orgMembershipCheckRoutes from './routes/org-membership-check.js';
 import { validateCsrf } from './middleware/csrf.js';
 import { metricsMiddleware } from './middleware/metrics.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -218,6 +219,9 @@ app.use('/api', csrfRoutes);
 
 // Version endpoint (no authentication required)
 app.use('/api', versionRoutes);
+
+// Debug endpoints (authentication required, no CSRF for GET)
+app.use('/api', orgMembershipCheckRoutes);
 
 // Public routes (no authentication or CSRF required)
 app.use('/api/auth', authRoutes);
