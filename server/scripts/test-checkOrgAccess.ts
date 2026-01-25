@@ -9,7 +9,16 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = process.env.DATABASE_URL || path.join(__dirname, '../database.db');
+// Handle DATABASE_URL the same way as db.ts
+let dbPath: string;
+if (process.env.DATABASE_URL) {
+  // Remove 'file:' prefix if present (used in production)
+  dbPath = process.env.DATABASE_URL.replace(/^file:/, '');
+} else {
+  // Development fallback
+  dbPath = path.join(__dirname, '../database.db');
+}
+
 const db = new Database(dbPath);
 
 // CONFIGURATION: Change these to test different users
