@@ -55,6 +55,6 @@ When an administrator attempts to share an organization or add a member, existin
 
 ### Manual Verification
 
-1.  **Discovery**: Type a known user's email in "Add Member" and verify they appear.
-2.  **Opt-out**: Disable discoverability in Security settings and verify the user no longer appears in searches by other users.
-3.  **Default State**: Create a new user and verify they are discoverable by default.
+1. **Discovery**: Type a known user's email in "Add Member" and verify they appear.
+2. **Opt-out**: Disable discoverability in Security settings and verify the user no longer appears in searches by other users.
+3. **Default State**: Create a new user and verify they are discoverable by default.

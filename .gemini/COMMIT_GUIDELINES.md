@@ -9,6 +9,7 @@
 **Every commit message must accurately and completely describe ALL changes included in that commit.**
 
 Never:
+
 - ❌ Use misleading commit messages that omit major changes
 - ❌ Combine unrelated changes in a single commit
 - ❌ Write vague messages like "fix bugs" or "update code"
@@ -18,7 +19,7 @@ Never:
 
 ### Structure
 
-```
+```text
 <type>(<scope>): <subject>
 
 <body>
@@ -43,6 +44,7 @@ Must be one of:
 ### Scope (Optional but Recommended)
 
 The scope indicates what part of the codebase is affected:
+
 - `colors`: Color system and themes
 - `auth`: Authentication
 - `api`: API changes
@@ -69,6 +71,7 @@ The body MUST:
 5. **Reference related issues** if applicable
 
 Format:
+
 - Wrap at 72 characters
 - Use bullet points for multiple changes
 - Separate paragraphs with blank lines
@@ -84,7 +87,7 @@ Format:
 
 ### ✅ GOOD: Complete and Accurate
 
-```
+```text
 feat(colors): add rainbow color theme with gradient swatch
 
 Implemented a vibrant rainbow color theme for the Org Map with the
@@ -108,7 +111,7 @@ All 162 tests passing. Code formatted with Prettier and passes ESLint.
 
 ### ❌ BAD: Misleading and Incomplete
 
-```
+```text
 debug: add version endpoint to verify deployment
 
 Adds /api/version endpoint to check which code version is running.
@@ -119,7 +122,7 @@ This helps diagnose deployment sync issues.
 
 ### ✅ GOOD: Bug Fix with Details
 
-```
+```text
 fix(search): prevent SQL injection in search queries
 
 Fixed critical security vulnerability where user input was not properly
@@ -136,7 +139,7 @@ Security Impact: HIGH - prevents potential data exposure
 
 ### ❌ BAD: Vague and Unhelpful
 
-```
+```text
 fix: fix search bugs
 ```
 
@@ -146,7 +149,7 @@ fix: fix search bugs
 
 If a commit contains multiple related changes, **ALL must be listed**:
 
-```
+```text
 feat(ui): improve theme picker usability
 
 Multiple improvements to the theme picker component:
@@ -192,6 +195,7 @@ When working with AI assistants (Claude, ChatGPT, etc.):
 4. **Ensure AI lists everything** changed in the commit body
 
 AI assistants MUST:
+
 - Review all file changes before writing commit message
 - List every significant change made
 - Never use generic messages
@@ -201,6 +205,7 @@ AI assistants MUST:
 ## Enforcement
 
 Commits that violate these guidelines:
+
 - Will be rejected in code review
 - Must be amended or rewritten
 - May require rebasing to fix commit history
