@@ -32,6 +32,7 @@ import { scheduleFtsMaintenance } from './services/fts-scheduler.service.js';
 import ftsMaintenanceRoutes from './routes/fts-maintenance.js';
 import versionRoutes from './routes/version.js';
 import orgMembershipCheckRoutes from './routes/org-membership-check.js';
+import fixOrgOwnersRoutes from './routes/fix-org-owners.js';
 import { validateCsrf } from './middleware/csrf.js';
 import { metricsMiddleware } from './middleware/metrics.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -248,6 +249,7 @@ app.use('/api', bulkRoutes);
 app.use('/api', backupRoutes);
 app.use('/api', metricsRoutes);
 app.use('/api/fts-maintenance', ftsMaintenanceRoutes);
+app.use('/api', fixOrgOwnersRoutes);
 
 // Serve index.html for all non-API routes (SPA support) in production
 if (process.env.NODE_ENV === 'production') {

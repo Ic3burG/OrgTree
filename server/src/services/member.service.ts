@@ -481,7 +481,7 @@ export function getUserOrganizations(userId: string): UserOrganization[] {
     )
     .all(userId) as OrgQueryResult[];
 
-  // Get member organizations
+  // Get member organizations (exclude owned to avoid duplicates)
   const memberOrgs = db
     .prepare(
       `
@@ -495,10 +495,10 @@ export function getUserOrganizations(userId: string): UserOrganization[] {
       (SELECT COUNT(*) FROM departments WHERE organization_id = o.id) as departmentCount
     FROM organizations o
     JOIN organization_members om ON o.id = om.organization_id
-    WHERE om.user_id = ?
+    WHERE om.user_id = ? AND o.created_by_id != ?
   `
     )
-    .all(userId) as OrgQueryResult[];
+    .all(userId, userId) as OrgQueryResult[];
 
   // Combine and sort by created date
   const allOrgs = [...ownedOrgs, ...memberOrgs].sort(

@@ -177,14 +177,25 @@ export async function createOrganization(
   userId: string
 ): Promise<OrganizationResult> {
   const orgId = randomUUID();
+  const memberId = randomUUID();
   const now = new Date().toISOString();
 
+  // Insert organization
   db.prepare(
     `
     INSERT INTO organizations (id, name, created_by_id, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?)
   `
   ).run(orgId, name, userId, now, now);
+
+  // CRITICAL: Add creator as owner in organization_members table
+  // Without this, the creator cannot access their own organization!
+  db.prepare(
+    `
+    INSERT INTO organization_members (id, organization_id, user_id, role, added_by_id, created_at)
+    VALUES (?, ?, ?, 'owner', ?, ?)
+  `
+  ).run(memberId, orgId, userId, userId, now);
 
   return db
     .prepare(

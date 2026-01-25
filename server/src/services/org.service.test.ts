@@ -49,9 +49,11 @@ vi.mock('../db.js', async () => {
       organization_id TEXT NOT NULL,
       user_id TEXT NOT NULL,
       role TEXT NOT NULL DEFAULT 'viewer',
+      added_by_id TEXT NOT NULL,
       created_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (added_by_id) REFERENCES users(id),
       UNIQUE(organization_id, user_id)
     );
 
@@ -219,11 +221,11 @@ describe('Organization Service', () => {
       (db as DatabaseType)
         .prepare(
           `
-        INSERT INTO organization_members (id, organization_id, user_id, role)
-        VALUES ('member-id', ?, ?, 'viewer')
+        INSERT INTO organization_members (id, organization_id, user_id, role, added_by_id)
+        VALUES ('member-id', ?, ?, 'viewer', ?)
       `
         )
-        .run(org.id, testUser.id);
+        .run(org.id, testUser.id, otherUser.id);
 
       const orgs: Organization[] = await getOrganizations(testUser.id);
 
@@ -366,11 +368,11 @@ describe('Organization Service', () => {
       (db as DatabaseType)
         .prepare(
           `
-        INSERT INTO organization_members (id, organization_id, user_id, role)
-        VALUES ('member-id', ?, ?, 'admin')
+        INSERT INTO organization_members (id, organization_id, user_id, role, added_by_id)
+        VALUES ('member-id', ?, ?, 'admin', ?)
       `
         )
-        .run(org.id, testUser.id);
+        .run(org.id, testUser.id, otherUser.id);
 
       await expect(deleteOrganization(org.id, testUser.id)).rejects.toThrow();
     });
