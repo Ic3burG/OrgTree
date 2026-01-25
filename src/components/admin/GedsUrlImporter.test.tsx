@@ -1,11 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import GedsUrlImporter from './GedsUrlImporter';
-import * as gedsApi from '../../api/geds';
+import { api } from '../../api/client';
 import * as Toast from '../ui/Toast';
 
 // Mock the API and Toast
-vi.mock('../../api/geds');
+vi.mock('../../api/client', () => ({
+  api: {
+    importGedsUrls: vi.fn(),
+  },
+}));
 vi.mock('../ui/Toast');
 
 describe('GedsUrlImporter', () => {
@@ -94,7 +98,7 @@ https://canada.ca/some/path`,
       ],
     };
 
-    vi.mocked(gedsApi.importGedsUrls).mockResolvedValue(mockResponse);
+    vi.mocked(api.importGedsUrls).mockResolvedValue(mockResponse);
 
     render(<GedsUrlImporter organizationId={orgId} onImportComplete={mockOnImportComplete} />);
 
@@ -107,7 +111,7 @@ https://canada.ca/some/path`,
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(gedsApi.importGedsUrls).toHaveBeenCalledWith(orgId, [
+      expect(api.importGedsUrls).toHaveBeenCalledWith(orgId, [
         'https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=test',
       ]);
     });
@@ -119,7 +123,7 @@ https://canada.ca/some/path`,
   });
 
   it('should handle import errors gracefully', async () => {
-    vi.mocked(gedsApi.importGedsUrls).mockRejectedValue(new Error('Network error'));
+    vi.mocked(api.importGedsUrls).mockRejectedValue(new Error('Network error'));
 
     render(<GedsUrlImporter organizationId={orgId} onImportComplete={mockOnImportComplete} />);
 
@@ -156,7 +160,7 @@ https://canada.ca/some/path`,
       ],
     };
 
-    vi.mocked(gedsApi.importGedsUrls).mockResolvedValue(mockResponse);
+    vi.mocked(api.importGedsUrls).mockResolvedValue(mockResponse);
 
     render(<GedsUrlImporter organizationId={orgId} onImportComplete={mockOnImportComplete} />);
 

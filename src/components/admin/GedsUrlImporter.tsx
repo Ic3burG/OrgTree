@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import { importGedsUrls, GedsImportResult } from '../../api/geds';
+import { api } from '../../api/client';
+import type { GedsImportResult } from '../../types';
 import { useToast } from '../ui/Toast';
 
 interface GedsUrlImporterProps {
@@ -61,7 +62,7 @@ export default function GedsUrlImporter({
     setResults([]);
 
     try {
-      const response = await importGedsUrls(organizationId, validUrls);
+      const response = await api.importGedsUrls(organizationId, validUrls);
       setResults(response.results);
       setStatus('complete');
 

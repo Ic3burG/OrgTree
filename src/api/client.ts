@@ -13,6 +13,7 @@ import type {
   BulkOperationResult,
   Session,
   CSVImportResult,
+  GedsImportResponse,
   PaginatedResponse,
   Passkey,
   TotpSetup,
@@ -464,6 +465,12 @@ const api = {
     request<CSVImportResult>(`/organizations/${orgId}/import`, {
       method: 'POST',
       body: JSON.stringify({ data }),
+    }),
+
+  importGedsUrls: (orgId: string, urls: string[]): Promise<GedsImportResponse> =>
+    request<GedsImportResponse>(`/organizations/${orgId}/import/geds-urls`, {
+      method: 'POST',
+      body: JSON.stringify({ urls }),
     }),
 
   // Organization sharing

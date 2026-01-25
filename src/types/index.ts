@@ -335,6 +335,21 @@ export interface CSVImportResult {
   errors: string[];
 }
 
+export interface GedsImportResult {
+  url: string;
+  status: 'success' | 'failed';
+  message: string;
+  stats?: {
+    departments: number;
+    people: number;
+  };
+  error?: string;
+}
+
+export interface GedsImportResponse {
+  results: GedsImportResult[];
+}
+
 // React Flow types (for org chart visualization)
 export interface DepartmentNodeData {
   department: Department;
