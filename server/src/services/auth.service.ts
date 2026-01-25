@@ -41,15 +41,15 @@ export async function createUser(
 
   db.prepare(
     `
-    INSERT INTO users (id, name, email, password_hash, role, created_at, updated_at)
-    VALUES (?, ?, ?, ?, 'user', ?, ?)
+    INSERT INTO users (id, name, email, password_hash, role, is_discoverable, created_at, updated_at)
+    VALUES (?, ?, ?, ?, 'user', 1, ?, ?)
   `
   ).run(userId, name, email, passwordHash, now, now);
 
   const user = db
     .prepare(
       `
-    SELECT id, name, email, role, created_at
+    SELECT id, name, email, role, is_discoverable, created_at
     FROM users WHERE id = ?
   `
     )
@@ -156,7 +156,7 @@ export async function getUserById(id: string): Promise<DatabaseUser> {
   const user = db
     .prepare(
       `
-    SELECT id, name, email, role, must_change_password, created_at
+    SELECT id, name, email, role, must_change_password, is_discoverable, created_at
     FROM users WHERE id = ?
   `
     )

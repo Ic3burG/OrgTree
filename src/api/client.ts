@@ -388,11 +388,13 @@ const api = {
 
   getMe: (): Promise<User> => request<User>('/auth/me'),
 
-  updateProfile: (data: Partial<Pick<User, 'name' | 'email'>>): Promise<User> =>
+  updateProfile: (data: Partial<Pick<User, 'name' | 'email' | 'is_discoverable'>>): Promise<User> =>
     request<User>('/auth/profile', {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
+
+  searchUsers: (q: string): Promise<User[]> => request<User[]>(`/users/search?q=${q}`),
 
   // Session management
   getSessions: (): Promise<Session[]> => request<Session[]>('/auth/sessions'),
@@ -594,7 +596,10 @@ const api = {
   getUserOrganizations: (userId: string): Promise<Organization[]> =>
     request<Organization[]>(`/users/${userId}/organizations`),
 
-  updateUser: (userId: string, data: Partial<Pick<User, 'name' | 'email'>>): Promise<User> =>
+  updateUser: (
+    userId: string,
+    data: Partial<Pick<User, 'name' | 'email' | 'is_discoverable'>>
+  ): Promise<User> =>
     request<User>(`/users/${userId}`, {
       method: 'PUT',
       body: JSON.stringify(data),

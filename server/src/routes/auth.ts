@@ -159,16 +159,18 @@ router.put(
   authenticateToken,
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { name, email } = req.body;
+      const { name, email, is_discoverable } = req.body;
 
-      if (!name && !email) {
-        res.status(400).json({ message: 'At least one field (name or email) is required' });
+      if (name === undefined && email === undefined && is_discoverable === undefined) {
+        res
+          .status(400)
+          .json({ message: 'At least one field (name, email, or is_discoverable) is required' });
         return;
       }
 
       // Check for superuser route to reuse updateUser or import it
       const { updateUser: updateUserService } = await import('../services/users.service.js');
-      const updatedUser = updateUserService(req.user!.id, { name, email });
+      const updatedUser = updateUserService(req.user!.id, { name, email, is_discoverable });
 
       res.json(updatedUser);
     } catch (err) {

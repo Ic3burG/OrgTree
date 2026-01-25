@@ -37,6 +37,7 @@ export interface DatabaseUser {
   totp_secret?: string | null;
   totp_enabled?: number; // SQLite boolean (0 or 1)
   must_change_password?: number; // SQLite boolean (0 or 1)
+  is_discoverable?: number; // SQLite boolean (0 or 1)
   created_at: string;
   updated_at: string;
 }
