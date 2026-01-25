@@ -108,7 +108,7 @@ describe('Organizations Routes', () => {
       vi.mocked(orgService.updateOrganization).mockResolvedValue(updatedOrg as any);
 
       const token = createAuthToken();
-      const response = await request(app)
+      await request(app)
         .put('/api/organizations/1')
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'Updated Org' })

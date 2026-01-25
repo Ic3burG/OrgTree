@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import db from '../db.js';
 import logger from '../utils/logger.js';
-import { AnalyticsEvent, AnalyticsSummary, DatabaseAnalyticsEvent } from '../types/analytics.js';
+import { AnalyticsEvent, AnalyticsSummary } from '../types/analytics.js';
 
 /**
  * Track a single analytics event

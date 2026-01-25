@@ -17,8 +17,6 @@ const WINDOW_MS = 60 * 1000; // 1 minute window for rate calculations
 // ============================================================================
 
 const timings: RequestTiming[] = [];
-let errorCount = 0;
-let requestCount = 0;
 
 // ============================================================================
 // Collection Functions
@@ -30,12 +28,6 @@ let requestCount = 0;
 export function recordRequestTiming(timing: RequestTiming): void {
   // Add to array
   timings.push(timing);
-  requestCount++;
-
-  // Track errors (4xx and 5xx status codes)
-  if (timing.statusCode >= 400) {
-    errorCount++;
-  }
 
   // Prune old samples to prevent memory growth
   pruneOldSamples();
@@ -49,20 +41,12 @@ function pruneOldSamples(): void {
 
   // Remove samples older than window
   while (timings.length > 0 && timings[0]!.timestamp < cutoff) {
-    const removed = timings.shift()!;
-    requestCount--;
-    if (removed.statusCode >= 400) {
-      errorCount--;
-    }
+    timings.shift();
   }
 
   // Hard limit to prevent memory issues
   while (timings.length > MAX_SAMPLES) {
-    const removed = timings.shift()!;
-    requestCount--;
-    if (removed.statusCode >= 400) {
-      errorCount--;
-    }
+    timings.shift();
   }
 }
 
@@ -128,6 +112,4 @@ export function getRecentTimings(limit = 100): RequestTiming[] {
  */
 export function resetMetrics(): void {
   timings.length = 0;
-  errorCount = 0;
-  requestCount = 0;
 }

@@ -43,36 +43,46 @@ cd server && npm run format    # Format with Prettier
 npm run lint:all               # Lint frontend and backend
 ```
 
-**CRITICAL: PRE-COMMIT LINTING REQUIREMENT**
+### CRITICAL: PRE-COMMIT & PUSH REQUIREMENTS
 
 ⚠️ **ALWAYS run linting checks BEFORE creating any git commit.** This is MANDATORY.
 
 Before staging files for commit, you MUST:
+
 1. Run `npm run lint:all` from the root directory
 2. Run `cd server && npm run format:check` to verify Prettier formatting
 3. Fix ALL linting and formatting errors before proceeding
 4. NEVER commit code with linting or formatting errors
 
+**Commit & Push Policy:**
+
+- Use **detailed, descriptive commit messages** for all git commits. Follow the conventions in [.gemini/COMMIT_GUIDELINES.md](file:///.gemini/COMMIT_GUIDELINES.md).
+- **Commit locally AND push to remote immediately** upon completion of a task.
+
 **Why this matters:**
-- Pre-commit hooks will auto-fix some issues, but may fail on others
-- CI/CD pipeline will fail if linting errors are present
-- Formatting errors prevent commits from being pushed
-- Prevention is faster than fixing after commit
+
+- CI/CD pipeline will fail if linting errors are present.
+- Detailed logs are essential for project history and collaboration.
+- Immediate pushing prevents divergent branch states and ensures work is backed up.
 
 **Correct workflow:**
+
 ```bash
 # 1. Make your changes
-# 2. ALWAYS lint before staging
+# 2. ALWAYS lint & format check before staging
 npm run lint:all
 cd server && npm run format:check
 
-# 3. Fix any errors
+# 3. Fix any errors if needed
 npm run lint:fix
 cd server && npm run format
 
-# 4. NOW you can commit
+# 4. NOW you can commit with a descriptive message
 git add .
-git commit -m "your message"
+git commit -m "feat(component): detailed description of changes"
+
+# 5. Push immediately
+git push
 ```
 
 ### Production
@@ -261,7 +271,7 @@ This is a monorepo with separate frontend and backend:
 
 ### Component Organization (Frontend)
 
-```
+```text
 src/components/
 ├── admin/              # Organization management panels
 │   ├── AuditLog.tsx          # Audit trail viewer with filtering
