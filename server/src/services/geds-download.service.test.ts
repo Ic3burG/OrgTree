@@ -2,11 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
-import {
-  validateGedsUrl,
-  cleanupTempFile,
-  InvalidUrlError,
-} from './geds-download.service.js';
+import { validateGedsUrl, cleanupTempFile, InvalidUrlError } from './geds-download.service.js';
 
 describe('GEDS Download Service', () => {
   describe('validateGedsUrl', () => {

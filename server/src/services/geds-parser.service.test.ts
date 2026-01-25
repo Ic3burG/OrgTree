@@ -229,9 +229,9 @@ describe('GEDS Parser Service', () => {
 
       // Verify sorting (paths should be in order)
       for (let i = 1; i < result.people.length; i++) {
-        expect(result.people[i].path.localeCompare(result.people[i - 1].path)).toBeGreaterThanOrEqual(
-          0
-        );
+        expect(
+          result.people[i].path.localeCompare(result.people[i - 1].path)
+        ).toBeGreaterThanOrEqual(0);
       }
     });
 
