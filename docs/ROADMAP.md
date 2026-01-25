@@ -139,6 +139,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 12. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
 13. **Bulk Invitations** - Send invitations to multiple emails at once
 14. **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
+15. **User Discovery & Privacy Controls** - Autocomplete existing users when sharing organizations, with a privacy opt-out in security settings (see [docs/plans/user-discovery-privacy.md](plans/user-discovery-privacy.md))
 
 ### Medium-term Vision (Next quarter)
 
