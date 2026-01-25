@@ -1,6 +1,6 @@
 # OrgTree Development Roadmap
 
-> **Last Updated**: January 23, 2026
+> **Last Updated**: January 25, 2026
 > **Status**: Production-ready with ongoing enhancements
 
 This document outlines the development roadmap for OrgTree, including technical debt items, feature enhancements, and infrastructure improvements.
@@ -132,16 +132,16 @@ This document outlines the development roadmap for OrgTree, including technical 
 5. ~~**Dark Mode** - Add dark theme support with user preference persistence~~ ✅ **DONE** (January 9, 2026)
 6. ~~**Inline Editing on Org Map** - Quick edit person details directly on person cards without opening full modal~~ ✅ **DONE** (January 22, 2026)
 7. ~~**Organizational Hierarchy Display** - Show complete reporting chain in person details with clickable breadcrumb navigation~~ ✅ **DONE** (January 22, 2026)
-8. **Centered Vertical Layout** - Center the root department horizontally in vertical (TB) layout for better visual balance (see [docs/plans/centered-vertical-layout.md](plans/centered-vertical-layout.md))
+8. ~~**Centered Vertical Layout** - Center the root department horizontally in vertical (TB) layout for better visual balance~~ ✅ **DONE** (January 22, 2026)
 9. ~~**Remove Logout Button from Org Map** - Clean up legacy logout button from toolbar~~ ✅ **DONE** (January 22, 2026)
 10. ~~**Persistent Org Map Settings** - Save theme, zoom, positions, and expanded state per-organization with reset button~~ ✅ **DONE** (January 22, 2026)
-11. **Rainbow Color Theme** - Add vibrant rainbow color theme cycling through spectrum by depth (see [docs/plans/rainbow-color-theme.md](plans/rainbow-color-theme.md))
+11. ~~**Rainbow Color Theme** - Add vibrant rainbow color theme cycling through spectrum by depth~~ ✅ **DONE** (January 22, 2026)
 12. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
 13. **Bulk Invitations** - Send invitations to multiple emails at once
 14. **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
-15. **User Discovery & Privacy Controls** - Autocomplete existing users when sharing organizations, with a privacy opt-out in security settings (see [docs/plans/user-discovery-privacy.md](plans/user-discovery-privacy.md))
+15. **GEDS URL Import** - Automated download, parse, and import from GEDS download URLs (see [docs/plans/geds-url-import.md](plans/geds-url-import.md))
 
-- [ ] **User Discovery & Privacy Controls** - Autocomplete existing users when sharing organizations, with a privacy opt-out in security settings (see [docs/plans/user-discovery-privacy.md](plans/user-discovery-privacy.md))
+16. ~~**User Discovery & Privacy Controls** - Autocomplete existing users when sharing organizations, with a privacy opt-out in security settings~~ ✅ **DONE** (January 25, 2026)
 
 ### Medium-term Vision (Next quarter)
 
@@ -162,11 +162,11 @@ This document outlines the development roadmap for OrgTree, including technical 
 - Workspace layout presets (save/load layout configurations)
 - Sidebar pinning (auto-hide on route change unless pinned)
 
-11. **Search Enhancements**:
-    - **Typo Tolerance** - Trigram-based fuzzy matching
-    - **Search Analytics** - Track zero-result searches to identify gaps
-    - **Saved Searches** - Allow users to save frequently-used queries
-    - **Search Suggestions** - "Did you mean?" suggestions for misspellings
+1. **Search Enhancements**:
+    1. **Typo Tolerance** - Trigram-based fuzzy matching
+    1. **Search Analytics** - Track zero-result searches to identify gaps
+    1. **Saved Searches** - Allow users to save frequently-used queries
+    1. **Search Suggestions** - "Did you mean?" suggestions for misspellings
 
 ---
 
@@ -181,7 +181,10 @@ This document outlines the development roadmap for OrgTree, including technical 
 **Recently Completed** (January 2026):
 
 - ✅ **Search System Rebuild** - Fixed FTS5 sync, soft-deletes, error handling, and added frontend resilience (January 24, 2026)
+- ✅ **User Discovery & Privacy Controls** - Implemented discoverable user search with opt-out settings and autocomplete (January 25, 2026)
 - ✅ **Department Hierarchy Highlighting** - Visual highlighting of ancestor departments on hover/click in Org Map (January 22, 2026)
+- ✅ **Centered Vertical Layout** - Balanced organizational structure (January 22, 2026)
+- ✅ **Rainbow Color Theme** - Vibrant depth-based coloring (January 22, 2026)
 
 - ✅ **Inline Editing** - Edit person details directly on the Org Map (January 22, 2026)
 - ✅ **Hierarchy Display** - Breadcrumb navigation for department structure (January 22, 2026)
