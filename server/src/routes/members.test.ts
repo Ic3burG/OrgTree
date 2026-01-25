@@ -9,6 +9,9 @@ import * as socketEvents from '../services/socket-events.service.js';
 // Mock dependencies
 vi.mock('../services/member.service.js');
 vi.mock('../services/socket-events.service.js');
+vi.mock('../services/audit.service.js', () => ({
+  createAuditLog: vi.fn(),
+}));
 vi.mock('../db.js', () => ({
   default: {
     prepare: vi.fn(() => ({

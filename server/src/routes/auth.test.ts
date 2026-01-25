@@ -12,7 +12,10 @@ import bcrypt from 'bcrypt';
 // Mock dependencies
 vi.mock('../services/auth.service.js');
 vi.mock('../services/users.service.js');
-vi.mock('../services/audit.service.js');
+vi.mock('../services/audit.service.js', () => ({
+  createAuditLog: vi.fn(),
+  cleanupOldLogs: vi.fn(),
+}));
 vi.mock('bcrypt');
 vi.mock('../db.js', () => ({
   default: {
