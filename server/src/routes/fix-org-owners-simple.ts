@@ -43,9 +43,7 @@ router.get(
       // Check each organization
       for (const org of orgs) {
         const membership = db
-          .prepare(
-            'SELECT * FROM organization_members WHERE organization_id = ? AND user_id = ?'
-          )
+          .prepare('SELECT * FROM organization_members WHERE organization_id = ? AND user_id = ?')
           .get(org.id, org.created_by_id);
 
         if (!membership) {
@@ -96,7 +94,9 @@ router.get(
         }
       }
 
-      console.log(`[fix-org-owners] Migration complete. Fixed: ${fixed.length}, Errors: ${errors.length}`);
+      console.log(
+        `[fix-org-owners] Migration complete. Fixed: ${fixed.length}, Errors: ${errors.length}`
+      );
 
       res.json({
         success: true,
