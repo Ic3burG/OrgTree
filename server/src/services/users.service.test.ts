@@ -207,11 +207,17 @@ describe('Users Service', () => {
         if (query.includes('SELECT id FROM users WHERE email = ? AND id != ?')) {
           return { get: vi.fn().mockReturnValue(undefined) } as unknown as any;
         }
-        if (query.includes('UPDATE users\n    SET name = ?, email = ?, updated_at = ?')) {
+        if (
+          query.includes(
+            'UPDATE users\n    SET name = ?, email = ?, is_discoverable = ?, updated_at = ?'
+          )
+        ) {
           return { run: vi.fn() } as unknown as any;
         }
         if (
-          query.includes('SELECT id, name, email, role, created_at as createdAt\n    FROM users')
+          query.includes(
+            'SELECT id, name, email, role, created_at as createdAt, is_discoverable\n    FROM users'
+          )
         ) {
           return { get: vi.fn().mockReturnValue(updatedUser) } as unknown as any;
         }

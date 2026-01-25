@@ -31,6 +31,7 @@ vi.mock('../db.js', async () => {
       password_hash TEXT NOT NULL,
       role TEXT DEFAULT 'user',
       must_change_password INTEGER DEFAULT 0,
+      is_discoverable INTEGER DEFAULT 1,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
