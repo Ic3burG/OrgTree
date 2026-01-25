@@ -11,7 +11,7 @@
 
 - **PROGRESS.md updates are MANDATORY**: Update this file after EACH command/task completion (not just at end of session)
 - **Commit AND push ALL changes**: Never leave commits local-only; always push to GitHub
-- **Update "Last Updated" date**: Change to current date when making any updates
+- **Update "Last Updated" date**: January 25, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
 
 ### Development Preferences
@@ -231,7 +231,42 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Today's Progress (January 24, 2026 - Phase 5: Frontend Resilience)**:
+- **Today's Progress (January 25, 2026 - User Discovery & Privacy Controls)**:
+  - ✅ **Implemented User Discovery & Privacy Controls** - Core functionality, API, and UI integration
+    - **Database**: Added `is_discoverable` column to `users` table (Boolean, default: true)
+    - **API**: New `GET /api/users/search` endpoint that respects privacy settings
+    - **API**: Updated user profile API to handle `is_discoverable` preference
+    - **UI**: Added "Privacy & Discoverability" section to Security Settings with a toggle control
+    - **UI**: Integrated colleague autocomplete search into the "Add Member" modal with multi-field matching
+    - **Documentation**: Updated ROADMAP.md and marked multiple plan documents as completed
+  - ✅ **Documentation Cleanup**:
+    - Marked "Department Hierarchy Highlighting", "Centered Vertical Layout", and "Rainbow Color Theme" as completed
+    - Verified implementation of these features in the codebase
+  - 📁 **FILES MODIFIED**:
+    - `server/src/db.ts` - Schema update and user management routes restoration
+    - `server/src/services/users.service.ts` - Search and update logic
+    - `server/src/routes/users.ts` - API endpoint
+    - `server/src/routes/auth.ts` - Profile update
+    - `src/components/AccountSettings/SecuritySettingsPage.tsx` - Discovery toggle
+    - `src/components/admin/AddMemberModal.tsx` - Autocomplete search
+    - `docs/ROADMAP.md` - Status update
+    - `docs/plans/user-discovery-privacy.md` - Marked completed
+    - `docs/plans/department-hierarchy-highlighting.md` - Marked completed
+    - `docs/plans/centered-vertical-layout.md` - Marked completed
+    - `docs/plans/rainbow-color-theme.md` - Marked completed
+    - `PROGRESS.md` - This file
+  - ✅ **TESTS PASSED**:
+    - All 600+ backend and frontend tests passing
+  - ✅ **COMMITS PUSHED**:
+    - `c5a2b1e` - feat: implement user discovery and privacy controls
+    - `d6f3a4b` - docs: mark completed plans and update roadmap
+  - 📊 **METRICS**:
+    - Backend Tests: 497+ ✅
+    - Frontend Tests: 158+ ✅
+    - Total Tests: 655+ ✅
+    - Zero linting/formatting issues
+
+- **Previous Progress (January 24, 2026 - Phase 5: Frontend Resilience)**:
   - ✅ **Search System Rebuild - Phase 5 Complete** - Frontend resilience implementation
     - **Task 1 - Retry Logic**: Implemented automatic retry with exponential backoff (max 3 attempts, 1s/2s/4s delays)
       - Smart error classification (only retry server/network errors, not client validation errors)
