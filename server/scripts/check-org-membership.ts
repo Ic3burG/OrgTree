@@ -15,10 +15,36 @@ const db = new Database(dbPath);
 
 const orgId = '7614b3e4-ed69-489b-a76c-628d999a7a44';
 
+interface OrgResult {
+  id: string;
+  name: string;
+  created_by_id: string;
+  is_public: number;
+  created_at: string;
+}
+
+interface UserResult {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+}
+
+interface MemberResult {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  role: string;
+  created_at: string;
+  email: string;
+  name: string;
+  system_role: string;
+}
+
 console.log('\n=== Organization Details ===');
 const org = db
   .prepare('SELECT id, name, created_by_id, is_public, created_at FROM organizations WHERE id = ?')
-  .get(orgId) as any;
+  .get(orgId) as OrgResult | undefined;
 
 if (!org) {
   console.log('❌ Organization not found!');
@@ -30,7 +56,7 @@ console.log('Organization:', org);
 console.log('\n=== Organization Creator ===');
 const creator = db
   .prepare('SELECT id, email, name, role FROM users WHERE id = ?')
-  .get(org.created_by_id) as any;
+  .get(org.created_by_id) as UserResult | undefined;
 
 console.log('Creator:', creator);
 
@@ -44,36 +70,36 @@ const members = db
   WHERE om.organization_id = ?
 `
   )
-  .all(orgId) as any[];
+  .all(orgId) as MemberResult[];
 
 if (members.length === 0) {
   console.log('❌ NO MEMBERS FOUND in organization_members table!');
   console.log('   This is the problem - the creator was never added as a member.');
 } else {
   console.log(`Found ${members.length} member(s):`);
-  members.forEach((m) => {
+  members.forEach(m => {
     console.log(`  - ${m.email} (${m.name}) - Role: ${m.role}, System: ${m.system_role}`);
   });
 }
 
 console.log('\n=== Diagnosis ===');
-const creatorIsMember = members.some((m) => m.user_id === org.created_by_id);
+const creatorIsMember = members.some(m => m.user_id === org.created_by_id);
 
 if (!creatorIsMember) {
   console.log('❌ ISSUE FOUND: Organization creator is NOT in organization_members table!');
-  console.log(`   Creator: ${creator.email} (ID: ${creator.id})`);
+  console.log(`   Creator: ${creator?.email} (ID: ${creator?.id})`);
   console.log(`   This user needs to be added with role "owner"`);
   console.log('\n   Fix: Run the migration script to add missing owners.');
 } else {
   console.log('✅ Creator is properly registered as a member');
-  const creatorMembership = members.find((m) => m.user_id === org.created_by_id);
+  const creatorMembership = members.find(m => m.user_id === org.created_by_id);
   console.log(`   Role: ${creatorMembership?.role}`);
 }
 
 console.log('\n=== All Users in System ===');
-const allUsers = db.prepare('SELECT id, email, name, role FROM users').all() as any[];
+const allUsers = db.prepare('SELECT id, email, name, role FROM users').all() as UserResult[];
 console.log(`Total users: ${allUsers.length}`);
-allUsers.forEach((u) => {
+allUsers.forEach(u => {
   console.log(`  - ${u.email} (${u.name}) - System role: ${u.role}`);
 });
 
