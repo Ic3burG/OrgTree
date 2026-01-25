@@ -649,6 +649,8 @@ export async function search(
     | { is_public: number }
     | undefined;
 
+  console.error('[Search Debug] Org lookup:', { orgId, result: org });
+
   if (!org) {
     const error = new Error('Organization not found') as { status?: number };
     error.status = 404;
@@ -671,9 +673,11 @@ export async function search(
     // For public orgs, allow access without membership check (avoids misleading audit logs)
     if (!isPublic) {
       // Private org - requires membership
-      console.log('[search] Checking viewer permission for private org');
+      console.error('[Search Debug] Checking private org access for:', userId);
       // Use checkOrgAccess directly to ensure we are checking for 'viewer'
       const access = checkOrgAccess(orgId, userId);
+      console.error('[Search Debug] Access result:', access);
+
       if (!access.hasAccess) {
         console.warn(`[search] Access Denied: User ${userId} has no access to org ${orgId}`);
         const error = new Error('Organization not found') as { status?: number };
@@ -690,14 +694,15 @@ export async function search(
         error.status = 403;
         throw error;
       }
-      console.log(`[search] Permission granted for user ${userId} with role ${access.role}`);
     } else {
+      console.error('[Search Debug] Public org - skipping checks');
       console.log('[search] Skipping permission check for public org');
     }
     // Note: For public orgs, we still allow the user to search even if not a member
   } else {
     // Guest user: only allow access to public organizations
     if (!isPublic) {
+      console.error('[Search Debug] Blocking guest user from private org');
       console.log('[search] Blocking guest user from private org');
       const error = new Error('Insufficient permissions') as { status?: number };
       error.status = 403;

@@ -22,10 +22,12 @@ function optionalAuthenticate(req: Request, _res: Response, next: NextFunction) 
     if (secret) {
       const decoded = jwt.verify(token, secret) as unknown as JWTPayload;
       (req as AuthRequest).user = decoded;
+      console.error('[Search Debug] Auth success:', decoded.id);
     }
     next();
-  } catch {
+  } catch (err) {
     // Ignore invalid tokens for optional auth, just proceed as guest
+    console.error('[Search Debug] Auth failed:', (err as Error).message);
     next();
   }
 }
