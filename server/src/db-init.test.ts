@@ -16,7 +16,9 @@ describe('Database Initialization', () => {
   it('should create all required tables', () => {
     initializeDatabase(db);
 
-    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as { name: string }[];
+    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as {
+      name: string;
+    }[];
     const tableNames = tables.map(t => t.name);
 
     const requiredTables = [
@@ -41,8 +43,10 @@ describe('Database Initialization', () => {
 
   it('should create FTS virtual tables', () => {
     initializeDatabase(db);
-    
-    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as { name: string }[];
+
+    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as {
+      name: string;
+    }[];
     const tableNames = tables.map(t => t.name);
 
     expect(tableNames).toContain('departments_fts');
@@ -59,15 +63,15 @@ describe('Database Initialization', () => {
   it('should verify schema of specific tables', () => {
     initializeDatabase(db);
 
-    const orgColumns = db.prepare("PRAGMA table_info(organizations)").all() as { name: string }[];
+    const orgColumns = db.prepare('PRAGMA table_info(organizations)').all() as { name: string }[];
     const orgColNames = orgColumns.map(c => c.name);
-    
+
     expect(orgColNames).toContain('is_public');
     expect(orgColNames).toContain('share_token');
 
-    const userColumns = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
+    const userColumns = db.prepare('PRAGMA table_info(users)').all() as { name: string }[];
     const userColNames = userColumns.map(c => c.name);
-    
+
     expect(userColNames).toContain('totp_secret');
     expect(userColNames).toContain('is_discoverable');
     expect(userColNames).toContain('must_change_password');
@@ -75,7 +79,7 @@ describe('Database Initialization', () => {
 
   it('should set WAL mode and other pragmas', () => {
     initializeDatabase(db);
-    
+
     // Check WAL mode (might be 'memory' for in-memory DB or 'wal')
     // In-memory DBs often ignore some journal modes or behave differently
     const journalMode = db.pragma('journal_mode', { simple: true });
@@ -83,7 +87,7 @@ describe('Database Initialization', () => {
     // But we explicitly set it to WAL. Let's see if it sticks.
     // Actually, for :memory: databases, WAL might not be applicable or stays 'memory'.
     // We can check foreign_keys though.
-    
+
     const foreignKeys = db.pragma('foreign_keys', { simple: true });
     expect(foreignKeys).toBe(1);
   });

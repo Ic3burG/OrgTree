@@ -375,7 +375,9 @@ export function initializeDatabase(db: Database) {
   try {
     // Check if we need to update triggers by looking at their SQL
     const triggerCheck = db
-      .prepare("SELECT sql FROM sqlite_master WHERE type='trigger' AND name='departments_fts_update'")
+      .prepare(
+        "SELECT sql FROM sqlite_master WHERE type='trigger' AND name='departments_fts_update'"
+      )
       .get() as { sql: string } | undefined;
 
     // If trigger doesn't mention 'deleted_at', it needs to be updated
@@ -646,7 +648,9 @@ export function initializeDatabase(db: Database) {
 
   // Migration: Add deleted_at column for soft deletes
   try {
-    const departmentsTableInfo = db.prepare('PRAGMA table_info(departments)').all() as TableInfoRow[];
+    const departmentsTableInfo = db
+      .prepare('PRAGMA table_info(departments)')
+      .all() as TableInfoRow[];
     const departmentsColumnNames = departmentsTableInfo.map(col => col.name);
     if (!departmentsColumnNames.includes('deleted_at')) {
       db.exec('ALTER TABLE departments ADD COLUMN deleted_at DATETIME');

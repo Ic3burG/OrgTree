@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import fs from 'fs';
 import path from 'path';
-import { createBackup, listBackups, cleanupOldBackups, getBackupStats, restoreFromBackup } from './backup.service.js';
+import {
+  createBackup,
+  listBackups,
+  cleanupOldBackups,
+  getBackupStats,
+  restoreFromBackup,
+} from './backup.service.js';
 import db from '../db.js';
 
 // Mock dependencies
@@ -94,7 +100,9 @@ describe('Backup Service', () => {
 
       await createBackup();
 
-      expect(fs.mkdirSync).toHaveBeenCalledWith(expect.stringContaining('backups'), { recursive: true });
+      expect(fs.mkdirSync).toHaveBeenCalledWith(expect.stringContaining('backups'), {
+        recursive: true,
+      });
     });
 
     it('should accept a custom path', async () => {
@@ -113,7 +121,7 @@ describe('Backup Service', () => {
       const otherFile = 'readme.txt';
 
       (fs.readdirSync as Mock).mockReturnValue([file1, file2, otherFile]);
-      
+
       // Mock stats for sorting
       (fs.statSync as Mock).mockImplementation((filePath: string) => ({
         size: 1024,
@@ -153,7 +161,7 @@ describe('Backup Service', () => {
     it('should delete oldest backups if limit exceeded', () => {
       const files = ['orgtree-backup-new.db', 'orgtree-backup-medium.db', 'orgtree-backup-old.db'];
       (fs.readdirSync as Mock).mockReturnValue(files);
-      
+
       (fs.statSync as Mock).mockImplementation((p: string) => {
         const name = path.basename(p);
         let date = new Date();
@@ -173,21 +181,24 @@ describe('Backup Service', () => {
     });
 
     it('should handle deletion errors gracefully', () => {
-       const files = ['orgtree-backup-new.db', 'orgtree-backup-old.db'];
-       (fs.readdirSync as Mock).mockReturnValue(files);
-       (fs.statSync as Mock).mockImplementation((p) => {
-           return { size: 100, mtime: p.includes('old') ? new Date('2020-01-01') : new Date('2022-01-01') };
-       });
+      const files = ['orgtree-backup-new.db', 'orgtree-backup-old.db'];
+      (fs.readdirSync as Mock).mockReturnValue(files);
+      (fs.statSync as Mock).mockImplementation(p => {
+        return {
+          size: 100,
+          mtime: p.includes('old') ? new Date('2020-01-01') : new Date('2022-01-01'),
+        };
+      });
 
-       (fs.unlinkSync as Mock).mockImplementation(() => {
-           throw new Error('Permission denied');
-       });
+      (fs.unlinkSync as Mock).mockImplementation(() => {
+        throw new Error('Permission denied');
+      });
 
-       const result = cleanupOldBackups(1);
+      const result = cleanupOldBackups(1);
 
-       // Should catch error and continue
-       expect(result.deleted).toBe(0); // Failed to delete 1
-       expect(result.deletedFiles).toHaveLength(0); // Actually didn't push to deleted array
+      // Should catch error and continue
+      expect(result.deleted).toBe(0); // Failed to delete 1
+      expect(result.deletedFiles).toHaveLength(0); // Actually didn't push to deleted array
     });
   });
 
@@ -215,7 +226,7 @@ describe('Backup Service', () => {
   describe('restoreFromBackup', () => {
     it('should restore successfully', async () => {
       const result = await restoreFromBackup('/path/to/backup.db');
-      
+
       expect(result.success).toBe(true);
       expect(fs.copyFileSync).toHaveBeenCalledWith('/path/to/backup.db', '/mock/current/db.sqlite');
       expect(db.close).toHaveBeenCalled();
@@ -223,9 +234,9 @@ describe('Backup Service', () => {
 
     it('should fail if backup file does not exist', async () => {
       (fs.existsSync as Mock).mockReturnValue(false);
-      
+
       const result = await restoreFromBackup('/missing.db');
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toContain('not found');
       expect(db.close).not.toHaveBeenCalled();
