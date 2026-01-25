@@ -33,6 +33,7 @@ import ftsMaintenanceRoutes from './routes/fts-maintenance.js';
 import versionRoutes from './routes/version.js';
 import orgMembershipCheckRoutes from './routes/org-membership-check.js';
 import fixOrgOwnersRoutes from './routes/fix-org-owners.js';
+import fixOrgOwnersSimpleRoutes from './routes/fix-org-owners-simple.js';
 import { validateCsrf } from './middleware/csrf.js';
 import { metricsMiddleware } from './middleware/metrics.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -223,6 +224,9 @@ app.use('/api', versionRoutes);
 
 // Debug endpoints (authentication required, no CSRF for GET)
 app.use('/api', orgMembershipCheckRoutes);
+
+// Migration endpoints (GET version without CSRF for easy testing)
+app.use('/api', fixOrgOwnersSimpleRoutes);
 
 // Public routes (no authentication or CSRF required)
 app.use('/api/auth', authRoutes);
