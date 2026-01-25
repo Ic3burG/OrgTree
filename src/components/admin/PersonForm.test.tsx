@@ -1,10 +1,9 @@
 /* eslint-disable */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import PersonForm from './PersonForm';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import api from '../../api/client';
-import React from 'react';
 
 // Mock API
 vi.mock('../../api/client', () => ({
@@ -45,6 +44,7 @@ vi.mock('../../utils/departmentUtils', () => ({
 const mockDepartments = [
   { id: 'dept-1', name: 'Engineering', parent_id: null, depth: 0 },
   { id: 'dept-2', name: 'Sales', parent_id: null, depth: 0 },
+  { id: 'dept-3', name: 'Marketing', parent_id: null, depth: 0 },
 ];
 
 const mockCustomFields = [
@@ -67,7 +67,7 @@ describe('PersonForm', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (api.getCustomFieldDefinitions as any).mockResolvedValue(mockCustomFields);
+    (api.getCustomFieldDefinitions as Mock).mockResolvedValue(mockCustomFields);
   });
 
   const renderComponent = (props: any = {}) => {

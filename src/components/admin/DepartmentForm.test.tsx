@@ -1,9 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import DepartmentForm from './DepartmentForm';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import api from '../../api/client';
-import React from 'react';
 import * as departmentUtils from '../../utils/departmentUtils';
 
 // Mock API
@@ -18,11 +17,12 @@ vi.mock('../../api/client', () => ({
 
 // Mock child components
 vi.mock('../ui/CustomFieldInput', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   default: ({ value, onChange, definition }: any) => (
     <input
       data-testid={`custom-field-${definition.field_key}`}
       value={value || ''}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={e => onChange(e.target.value)}
       placeholder={definition.name}
     />
   ),
@@ -38,7 +38,7 @@ vi.mock('./DeleteConfirmModal', () => ({
 
 // Spy on department utils to verify filtering
 vi.spyOn(departmentUtils, 'getHierarchicalDepartments');
-vi.spyOn(departmentUtils, 'getIndentedName').mockImplementation((name) => name);
+vi.spyOn(departmentUtils, 'getIndentedName').mockImplementation(name => name);
 
 const mockDepartments = [
   { id: 'dept-1', name: 'Engineering', parent_id: null, depth: 0 },
@@ -69,6 +69,7 @@ describe('DepartmentForm', () => {
     (api.getCustomFieldDefinitions as Mock).mockResolvedValue(mockCustomFields);
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderComponent = (props: any = {}) => {
     return render(
       <MemoryRouter initialEntries={['/org/org-1/departments']}>
@@ -111,17 +112,17 @@ describe('DepartmentForm', () => {
 
   it('filters out current department from parent options when editing', async () => {
     const editingDepartment = mockDepartments[0]; // Engineering (dept-1)
-    
+
     renderComponent({ department: editingDepartment });
 
     expect(screen.getByRole('heading', { name: 'Edit Department' })).toBeDefined();
-    expect((screen.getByLabelText(/Department Name/i) as HTMLInputElement).value).toBe('Engineering');
+    expect((screen.getByLabelText(/Department Name/i) as HTMLInputElement).value).toBe(
+      'Engineering'
+    );
 
     // Verify dept-1 is NOT in the list passed to getHierarchicalDepartments
     expect(departmentUtils.getHierarchicalDepartments).toHaveBeenCalledWith(
-      expect.not.arrayContaining([
-        expect.objectContaining({ id: 'dept-1' }),
-      ])
+      expect.not.arrayContaining([expect.objectContaining({ id: 'dept-1' })])
     );
 
     // Verify others are present
@@ -138,7 +139,9 @@ describe('DepartmentForm', () => {
 
     fireEvent.change(screen.getByLabelText(/Department Name/i), { target: { value: 'New Dept' } });
     fireEvent.change(screen.getByLabelText(/Parent Department/i), { target: { value: 'dept-2' } });
-    fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Test Description' } });
+    fireEvent.change(screen.getByLabelText(/Description/i), {
+      target: { value: 'Test Description' },
+    });
 
     const submitBtn = screen.getByRole('button', { name: 'Add Department' });
     fireEvent.click(submitBtn);
@@ -154,16 +157,20 @@ describe('DepartmentForm', () => {
   it('converts empty parentId string to null on submit', async () => {
     renderComponent();
 
-    fireEvent.change(screen.getByLabelText(/Department Name/i), { target: { value: 'Top Level Dept' } });
+    fireEvent.change(screen.getByLabelText(/Department Name/i), {
+      target: { value: 'Top Level Dept' },
+    });
     // Parent ID stays default (empty string)
 
     const submitBtn = screen.getByRole('button', { name: 'Add Department' });
     fireEvent.click(submitBtn);
 
-    expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({
-      name: 'Top Level Dept',
-      parentId: null, // Should be null, not ""
-    }));
+    expect(mockOnSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Top Level Dept',
+        parentId: null, // Should be null, not ""
+      })
+    );
   });
 
   it('handles custom fields', async () => {
@@ -174,16 +181,20 @@ describe('DepartmentForm', () => {
     });
 
     fireEvent.change(screen.getByLabelText(/Department Name/i), { target: { value: 'Finance' } });
-    fireEvent.change(screen.getByTestId('custom-field-cost_center'), { target: { value: 'CC-123' } });
+    fireEvent.change(screen.getByTestId('custom-field-cost_center'), {
+      target: { value: 'CC-123' },
+    });
 
     const submitBtn = screen.getByRole('button', { name: 'Add Department' });
     fireEvent.click(submitBtn);
 
-    expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({
-      name: 'Finance',
-      customFields: {
-        cost_center: 'CC-123',
-      },
-    }));
+    expect(mockOnSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Finance',
+        customFields: {
+          cost_center: 'CC-123',
+        },
+      })
+    );
   });
 });
