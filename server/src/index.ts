@@ -134,14 +134,6 @@ app.use(express.json());
 app.use(cookieParser()); // Required for CSRF cookie validation
 app.use(metricsMiddleware); // Track API request timing
 
-// DEBUG: Log all API requests
-app.use((req, res, next) => {
-  if (req.path.includes('/search')) {
-    console.error(`[Global Debug] Request: ${req.method} ${req.path}`);
-  }
-  next();
-});
-
 // Initialize Socket.IO with the HTTP server
 initializeSocket(server, allowedOrigins);
 
