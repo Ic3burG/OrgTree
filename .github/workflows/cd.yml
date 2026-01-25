@@ -15,6 +15,21 @@ jobs:
       github.event.workflow_run.head_branch == 'develop'
 
     steps:
+      - name: Create pre-deployment backup
+        run: |
+          echo "Creating pre-deployment backup for staging..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "https://orgtree-staging.onrender.com/api/admin/backup" \
+            -H "Authorization: Bearer ${{ secrets.BACKUP_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"type": "pre-deployment"}')
+
+          if [ $response -eq 200 ]; then
+            echo "✅ Pre-deployment backup created successfully"
+          else
+            echo "❌ Failed to create pre-deployment backup (HTTP $response)"
+            exit 1
+          fi
+
       - name: Trigger Render staging deployment
         run: curl -X POST "${{ secrets.RENDER_STAGING_DEPLOY_HOOK_URL }}"
 
@@ -89,6 +104,21 @@ jobs:
       github.event.workflow_run.head_branch == 'main'
 
     steps:
+      - name: Create pre-deployment backup
+        run: |
+          echo "Creating pre-deployment backup for production..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "https://orgtree-app.onrender.com/api/admin/backup" \
+            -H "Authorization: Bearer ${{ secrets.BACKUP_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"type": "pre-deployment"}')
+
+          if [ $response -eq 200 ]; then
+            echo "✅ Pre-deployment backup created successfully"
+          else
+            echo "❌ Failed to create pre-deployment backup (HTTP $response)"
+            exit 1
+          fi
+
       - name: Trigger Render production deployment
         run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
 

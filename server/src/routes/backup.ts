@@ -1,4 +1,4 @@
-import express, { Response } from 'express';
+import express, { Response, NextFunction } from 'express';
 import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
 import {
   createBackup,
@@ -12,13 +12,37 @@ import type { AuthRequest } from '../types/index.js';
 const router = express.Router();
 
 /**
+ * Authentication middleware for backup requests.
+ * Supports both standard JWT authentication and a fixed API token for server-to-server automation (CI/CD).
+ */
+const authenticateBackupRequest = (req: AuthRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  // Check for fixed API token (if configured)
+  if (token && process.env.BACKUP_API_TOKEN && token === process.env.BACKUP_API_TOKEN) {
+    // Inject a system superuser for authorized backup operations
+    req.user = {
+      id: 'system-backup',
+      email: 'system@backup.internal',
+      role: 'superuser',
+      name: 'Backup System Automation',
+    };
+    return next();
+  }
+
+  // Fallback to standard token authentication
+  return authenticateToken(req, res, next);
+};
+
+/**
  * GET /api/admin/backups
  * List all available backups
  * Requires: Superuser
  */
 router.get(
   '/admin/backups',
-  authenticateToken,
+  authenticateBackupRequest,
   requireSuperuser,
   (_req: AuthRequest, res: Response): void => {
     try {
@@ -39,50 +63,60 @@ router.get(
 );
 
 /**
- * POST /api/admin/backups
- * Create a new backup
+ * POST /api/admin/backups or /api/admin/backup
+ * Create a new backup. Supports 'type' parameter in body for specialized backups.
  * Requires: Superuser
  */
-router.post(
-  '/admin/backups',
-  authenticateToken,
-  requireSuperuser,
-  async (req: AuthRequest, res: Response): Promise<void> => {
-    try {
-      logger.info('Manual backup triggered', {
-        userId: req.user!.id,
-        userEmail: req.user!.email,
-      });
+const handlePostBackup = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { type } = req.body;
 
-      const result = await createBackup();
+    logger.info('Backup triggered', {
+      userId: req.user!.id,
+      userEmail: req.user!.email,
+      type: type || 'manual',
+    });
 
-      if (result.success) {
-        // Optionally cleanup old backups
-        const cleanup = cleanupOldBackups();
-
-        res.json({
-          message: 'Backup created successfully',
-          backup: {
-            path: result.path,
-            sizeMB: result.sizeMB,
-            timestamp: result.timestamp,
-          },
-          cleanup: {
-            kept: cleanup.kept,
-            deleted: cleanup.deleted,
-          },
-        });
-      } else {
-        res.status(500).json({ message: result.error });
-      }
-    } catch (error: unknown) {
-      logger.error('Failed to create backup', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-      res.status(500).json({ message: 'Failed to create backup' });
+    let result;
+    if (type === 'pre-migration' || type === 'pre-deployment') {
+      const { createPreMigrationBackup } = await import('../services/migration-backup.service.js');
+      result = await createPreMigrationBackup();
+    } else {
+      result = await createBackup();
     }
+
+    if (result.success) {
+      // Logic for automatic cleanup
+      // For pre-migration backups, we might want different retention later,
+      // but for now we follow the same policy or specific ones if needed.
+      const cleanup = cleanupOldBackups();
+
+      res.json({
+        message: 'Backup created successfully',
+        backup: {
+          path: result.path,
+          sizeMB: result.sizeMB,
+          timestamp: result.timestamp,
+          type: type || 'manual',
+        },
+        cleanup: {
+          kept: cleanup.kept,
+          deleted: cleanup.deleted,
+        },
+      });
+    } else {
+      res.status(500).json({ message: result.error });
+    }
+  } catch (error: unknown) {
+    logger.error('Failed to create backup', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    res.status(500).json({ message: 'Failed to create backup' });
   }
-);
+};
+
+router.post('/admin/backups', authenticateBackupRequest, requireSuperuser, handlePostBackup);
+router.post('/admin/backup', authenticateBackupRequest, requireSuperuser, handlePostBackup);
 
 /**
  * DELETE /api/admin/backups/cleanup
@@ -91,7 +125,7 @@ router.post(
  */
 router.delete(
   '/admin/backups/cleanup',
-  authenticateToken,
+  authenticateBackupRequest,
   requireSuperuser,
   (req: AuthRequest, res: Response): void => {
     try {
@@ -131,7 +165,7 @@ router.delete(
  */
 router.get(
   '/admin/backups/stats',
-  authenticateToken,
+  authenticateBackupRequest,
   requireSuperuser,
   (_req: AuthRequest, res: Response): void => {
     try {

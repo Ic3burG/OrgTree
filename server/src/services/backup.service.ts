@@ -95,7 +95,9 @@ export function listBackups(): BackupFile[] {
 
   const files = fs
     .readdirSync(BACKUP_DIR)
-    .filter(f => f.startsWith('orgtree-backup-') && f.endsWith('.db'))
+    .filter(
+      f => (f.startsWith('orgtree-backup-') || f.startsWith('pre-migration-')) && f.endsWith('.db')
+    )
     .map(filename => {
       const filePath = path.join(BACKUP_DIR, filename);
       const stats = fs.statSync(filePath);
