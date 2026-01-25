@@ -188,7 +188,7 @@ describe('Passkey Service', () => {
     });
 
     it('should work without userId (empty allowCredentials)', async () => {
-      const options = await generatePasskeyLoginOptions(); // No userId
+      await generatePasskeyLoginOptions(); // No userId
 
       // When no userId, allowCredentials might be undefined
       expect(generateAuthenticationOptions).toHaveBeenCalled();

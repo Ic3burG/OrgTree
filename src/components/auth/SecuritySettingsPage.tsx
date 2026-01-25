@@ -8,15 +8,23 @@ import {
   Smartphone,
   QrCode,
   Lock,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { usePasskey } from '../../hooks/usePasskey';
 import { api } from '../../api/client';
+import { useAuth } from '../../contexts/AuthContext';
 import type { Passkey, TotpSetup } from '../../types';
 
 export default function SecuritySettingsPage(): React.JSX.Element {
   const [passkeys, setPasskeys] = useState<Passkey[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { user, setUser } = useAuth();
+
+  // Discovery State
+  const [isDiscoverable, setIsDiscoverable] = useState(user?.is_discoverable ?? true);
+  const [discoveryLoading, setDiscoveryLoading] = useState(false);
 
   // Password Change State
   const [passwordForm, setPasswordForm] = useState({
@@ -140,6 +148,23 @@ export default function SecuritySettingsPage(): React.JSX.Element {
     }
   };
 
+  const handleToggleDiscovery = async () => {
+    setMessage(null);
+    setDiscoveryLoading(true);
+
+    try {
+      const updatedUser = await api.updateProfile({ is_discoverable: !isDiscoverable });
+      setIsDiscoverable(updatedUser.is_discoverable ?? false);
+      setUser(updatedUser);
+      setMessage({ type: 'success', text: 'Privacy settings updated successfully' });
+    } catch (err) {
+      console.error('Update discovery error:', err);
+      setMessage({ type: 'error', text: 'Failed to update privacy settings' });
+    } finally {
+      setDiscoveryLoading(false);
+    }
+  };
+
   const handleVerify2FA = async () => {
     setMessage(null);
 
@@ -254,6 +279,42 @@ export default function SecuritySettingsPage(): React.JSX.Element {
             {passwordLoading ? 'Updating...' : 'Update Password'}
           </button>
         </form>
+      </div>
+
+      <div className="border-t border-slate-200 dark:border-slate-700 my-8"></div>
+
+      {/* Privacy & Discoverability Section */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-4">
+          {isDiscoverable ? <Eye size={20} /> : <EyeOff size={20} />}
+          Privacy & Discoverability
+        </h2>
+        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between">
+            <div className="max-w-md">
+              <p className="font-medium text-slate-800 dark:text-slate-100 mb-1">
+                Discoverable by email
+              </p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                When this is enabled, other users can find you by your email address when they want
+                to share organizations with you or add you to a team.
+              </p>
+            </div>
+            <button
+              onClick={handleToggleDiscovery}
+              disabled={discoveryLoading}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                isDiscoverable ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+              } ${discoveryLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isDiscoverable ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="border-t border-slate-200 dark:border-slate-700 my-8"></div>

@@ -9,6 +9,7 @@ export interface User {
   email: string;
   name: string;
   role: 'user' | 'admin' | 'superuser';
+  is_discoverable?: boolean;
   created_at: string;
   updated_at?: string;
 }

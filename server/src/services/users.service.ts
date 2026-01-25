@@ -223,10 +223,10 @@ export function getUserById(userId: string): UserWithDetails {
 
 export function updateUser(
   userId: string,
-  { name, email }: { name?: string; email?: string }
+  { name, email, is_discoverable }: { name?: string; email?: string; is_discoverable?: boolean }
 ): UpdatedUser {
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as
-    | DatabaseUser
+    | (DatabaseUser & { is_discoverable: number })
     | undefined;
   if (!user) {
     const error = new Error('User not found') as AppError;
@@ -250,19 +250,45 @@ export function updateUser(
   db.prepare(
     `
     UPDATE users
-    SET name = ?, email = ?, updated_at = ?
+    SET name = ?, email = ?, is_discoverable = ?, updated_at = ?
     WHERE id = ?
   `
-  ).run(name || user.name, email || user.email, now, userId);
+  ).run(
+    name !== undefined ? name : user.name,
+    email !== undefined ? email : user.email,
+    is_discoverable !== undefined ? (is_discoverable ? 1 : 0) : user.is_discoverable,
+    now,
+    userId
+  );
+
+  return db
+    .prepare(
+      `
+    SELECT id, name, email, role, created_at as createdAt, is_discoverable
+    FROM users WHERE id = ?
+  `
+    )
+    .get(userId) as UpdatedUser;
+}
+
+export function searchUsers(query: string, limit: number = 5): UpdatedUser[] {
+  if (!query || query.trim().length < 2) {
+    return [];
+  }
+
+  const searchTerm = `%${query.trim()}%`;
 
   return db
     .prepare(
       `
     SELECT id, name, email, role, created_at as createdAt
-    FROM users WHERE id = ?
+    FROM users
+    WHERE is_discoverable = 1
+      AND (name LIKE ? OR email LIKE ?)
+    LIMIT ?
   `
     )
-    .get(userId) as UpdatedUser;
+    .all(searchTerm, searchTerm, limit) as UpdatedUser[];
 }
 
 export function updateUserRole(

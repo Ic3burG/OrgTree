@@ -12,7 +12,10 @@ import bcrypt from 'bcrypt';
 // Mock dependencies
 vi.mock('../services/auth.service.js');
 vi.mock('../services/users.service.js');
-vi.mock('../services/audit.service.js');
+vi.mock('../services/audit.service.js', () => ({
+  createAuditLog: vi.fn(),
+  cleanupOldLogs: vi.fn(),
+}));
 vi.mock('bcrypt');
 vi.mock('../db.js', () => ({
   default: {
@@ -556,7 +559,7 @@ describe('Auth Routes', () => {
         .expect(400);
 
       expect(response.body).toEqual({
-        message: 'At least one field (name or email) is required',
+        message: 'At least one field (name, email, or is_discoverable) is required',
       });
     });
   });

@@ -671,9 +671,9 @@ export async function search(
     // For public orgs, allow access without membership check (avoids misleading audit logs)
     if (!isPublic) {
       // Private org - requires membership
-      console.log('[search] Checking viewer permission for private org');
       // Use checkOrgAccess directly to ensure we are checking for 'viewer'
       const access = checkOrgAccess(orgId, userId);
+
       if (!access.hasAccess) {
         console.warn(`[search] Access Denied: User ${userId} has no access to org ${orgId}`);
         const error = new Error('Organization not found') as { status?: number };
@@ -690,7 +690,6 @@ export async function search(
         error.status = 403;
         throw error;
       }
-      console.log(`[search] Permission granted for user ${userId} with role ${access.role}`);
     } else {
       console.log('[search] Skipping permission check for public org');
     }

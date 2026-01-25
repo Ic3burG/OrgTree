@@ -9,6 +9,7 @@ import {
   resetUserPassword,
   deleteUser,
   createAdminUser,
+  searchUsers,
 } from '../services/users.service.js';
 import { createAuditLog } from '../services/audit.service.js';
 import type { AuthRequest } from '../types/index.js';
@@ -85,9 +86,31 @@ const adminOperationsLimiter = rateLimit({
   },
 });
 
-// All user management routes require authentication and superuser role
-router.use(authenticateToken);
-router.use(requireSuperuser);
+// Search route - requires authentication but NOT superuser role
+router.get(
+  '/users/search',
+  authenticateToken,
+  (req: AuthRequest, res: Response, next: NextFunction): void => {
+    try {
+      const { q } = req.query;
+
+      if (!q || typeof q !== 'string') {
+        res.json([]);
+        return;
+      }
+
+      const users = searchUsers(q);
+      res.json(users);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// All other user management routes require authentication and superuser role
+// Restrict middleware to /users path to prevent blocking other routes mounted at /api
+router.use('/users', authenticateToken);
+router.use('/users', requireSuperuser);
 
 // POST /api/users - Create new user
 router.post(

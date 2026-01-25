@@ -183,8 +183,14 @@ try {
     db.exec('ALTER TABLE users ADD COLUMN must_change_password BOOLEAN DEFAULT 0');
     console.log('Migration: Added must_change_password column to users table');
   }
+
+  // Migration: Add is_discoverable column to users table
+  if (!usersColumnNames.includes('is_discoverable')) {
+    db.exec('ALTER TABLE users ADD COLUMN is_discoverable BOOLEAN DEFAULT 1');
+    console.log('Migration: Added is_discoverable column to users table');
+  }
 } catch (err) {
-  console.error('Migration error (must_change_password column):', err);
+  console.error('Migration error (users table columns):', err);
 }
 
 // Migration: Add organization_members table

@@ -7,7 +7,10 @@ import * as usersService from '../services/users.service.js';
 
 // Mock dependencies
 vi.mock('../services/users.service.js');
-vi.mock('../services/audit.service.js');
+vi.mock('../services/audit.service.js', () => ({
+  createAuditLog: vi.fn(),
+  cleanupOldLogs: vi.fn(),
+}));
 
 // Mock express-rate-limit to avoid rate limiting in tests
 vi.mock('express-rate-limit', () => ({

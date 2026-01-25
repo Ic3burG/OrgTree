@@ -14,8 +14,16 @@ import { randomUUID } from 'crypto';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Connect to database
-const dbPath = process.env.DATABASE_URL || path.join(__dirname, '../database.db');
+// Connect to database - handle DATABASE_URL the same way as db.ts
+let dbPath: string;
+if (process.env.DATABASE_URL) {
+  // Remove 'file:' prefix if present (used in production)
+  dbPath = process.env.DATABASE_URL.replace(/^file:/, '');
+} else {
+  // Development fallback
+  dbPath = path.join(__dirname, '../database.db');
+}
+
 const db = new Database(dbPath);
 
 interface OrgResult {

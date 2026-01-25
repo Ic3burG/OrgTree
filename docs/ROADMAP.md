@@ -17,7 +17,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [x] **ESLint/Prettier Setup** - Enforce code style consistency across the team ✅ **DONE** (January 4, 2026)
 - [x] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces ✅ **DONE** (January 11, 2026)
 - [ ] **Storybook Integration** - Document UI components with interactive examples
-- [ ] **🚨 Search System Rebuild** - Fix FTS5 index sync, soft-delete triggers, error handling, test schema alignment (see [docs/plans/search-rebuild.md](plans/search-rebuild.md)) 🔴 **CRITICAL**
+- [x] **Search System Rebuild** - Fix FTS5 index sync, soft-delete triggers, error handling, test schema alignment ✅ **DONE** (January 24, 2026)
 
 ### Performance Optimization
 
@@ -92,7 +92,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 2. ~~**Monitoring & Alerting** - Sentry for error tracking and uptime monitoring~~ ✅ **DONE**
 3. ~~**Git Hooks** - Prevent bugs from being committed~~ ✅ **DONE**
 4. ~~**Address Medium Security Items** - Complete remaining SECURITY_AUDIT.md items~~ ✅ **DONE**
-5. **🚨 Search System Rebuild** - CRITICAL FIX: Rebuild FTS5 search from the ground up to fix sync issues, improve error handling, and add monitoring (see [docs/plans/search-rebuild.md](plans/search-rebuild.md)) 🔴 **CRITICAL**
+5. ~~**Search System Rebuild** - Rebuild FTS5 search from the ground up to fix sync issues, improve error handling, and add monitoring~~ ✅ **DONE**
 
 ### Medium Priority (Next month)
 
@@ -139,6 +139,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 12. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
 13. **Bulk Invitations** - Send invitations to multiple emails at once
 14. **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
+15. **User Discovery & Privacy Controls** - Autocomplete existing users when sharing organizations, with a privacy opt-out in security settings (see [docs/plans/user-discovery-privacy.md](plans/user-discovery-privacy.md))
 
 - [ ] **User Discovery & Privacy Controls** - Autocomplete existing users when sharing organizations, with a privacy opt-out in security settings (see [docs/plans/user-discovery-privacy.md](plans/user-discovery-privacy.md))
 
@@ -161,19 +162,25 @@ This document outlines the development roadmap for OrgTree, including technical 
 - Workspace layout presets (save/load layout configurations)
 - Sidebar pinning (auto-hide on route change unless pinned)
 
+11. **Search Enhancements**:
+    - **Typo Tolerance** - Trigram-based fuzzy matching
+    - **Search Analytics** - Track zero-result searches to identify gaps
+    - **Saved Searches** - Allow users to save frequently-used queries
+    - **Search Suggestions** - "Did you mean?" suggestions for misspellings
+
 ---
 
 ## 🎯 Current Focus
 
 **Active Work**:
 
-- 🚨 **CRITICAL: Search System Rebuild** - Fixing FTS5 sync issues, soft-delete handling, error propagation, and test coverage gaps (see [docs/plans/search-rebuild.md](plans/search-rebuild.md))
 - Increasing test coverage (currently 497+ tests across frontend and backend)
 - Performance optimization for large organizations
 - User experience refinements
 
 **Recently Completed** (January 2026):
 
+- ✅ **Search System Rebuild** - Fixed FTS5 sync, soft-deletes, error handling, and added frontend resilience (January 24, 2026)
 - ✅ **Department Hierarchy Highlighting** - Visual highlighting of ancestor departments on hover/click in Org Map (January 22, 2026)
 
 - ✅ **Inline Editing** - Edit person details directly on the Org Map (January 22, 2026)
