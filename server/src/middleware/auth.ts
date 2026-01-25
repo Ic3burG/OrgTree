@@ -35,6 +35,11 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
     }
     const decoded = jwt.verify(token, secret) as unknown as JWTPayload;
     req.user = decoded;
+    if (req.path.includes('/search')) {
+      console.error(
+        `[Auth Debug] authenticateToken success for user ${decoded.id} (${decoded.role})`
+      );
+    }
     next();
   } catch (err: unknown) {
     // Security: Log invalid/expired token attempt
@@ -65,6 +70,9 @@ export function requireRole(...allowedRoles: Array<'user' | 'admin' | 'superuser
       return;
     }
     if (!allowedRoles.includes(req.user.role)) {
+      console.error(
+        `[Auth Debug] requireRole failed. User role: ${req.user.role}, Required: ${allowedRoles.join(', ')}`
+      );
       // Security: Log permission denied - insufficient role
       const ipAddress = req.ip || req.connection?.remoteAddress;
       createAuditLog(
