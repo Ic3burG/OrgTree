@@ -73,6 +73,7 @@ describe('Colors Utility', () => {
       expect(themeIds).toContain('violet');
       expect(themeIds).toContain('amber');
       expect(themeIds).toContain('rose');
+      expect(themeIds).toContain('rainbow');
     });
 
     it('should include id, name, and swatch for each theme', () => {
@@ -128,6 +129,46 @@ describe('Colors Utility', () => {
       const depth10 = getPersonCardColor(10);
 
       expect(depth4).toBe(depth10);
+    });
+  });
+
+  describe('Rainbow Theme', () => {
+    it('should return rainbow colors for each depth', () => {
+      expect(getDepthColors(0, 'rainbow').hex).toBe('#ef4444'); // Red
+      expect(getDepthColors(1, 'rainbow').hex).toBe('#fb923c'); // Orange
+      expect(getDepthColors(2, 'rainbow').hex).toBe('#fbbf24'); // Yellow/Amber
+      expect(getDepthColors(3, 'rainbow').hex).toBe('#84cc16'); // Green
+      expect(getDepthColors(4, 'rainbow').hex).toBe('#06b6d4'); // Cyan
+      expect(getDepthColors(5, 'rainbow').hex).toBe('#3b82f6'); // Blue
+      expect(getDepthColors(6, 'rainbow').hex).toBe('#a855f7'); // Purple
+    });
+
+    it('should cycle rainbow colors for deep hierarchies', () => {
+      // Depth 7 should cycle back to red (depth 0)
+      expect(getDepthColors(7, 'rainbow').hex).toBe('#ef4444');
+      expect(getDepthColors(8, 'rainbow').hex).toBe('#fb923c');
+      expect(getDepthColors(14, 'rainbow').hex).toBe('#ef4444'); // 14 % 7 = 0
+    });
+
+    it('should include rainbow in theme list', () => {
+      const themes = getThemeList();
+      const rainbow = themes.find(t => t.id === 'rainbow');
+      expect(rainbow).toBeDefined();
+      expect(rainbow?.name).toBe('Rainbow');
+      expect(rainbow?.swatch).toBe('#ef4444');
+    });
+
+    it('should use appropriate text colors for contrast', () => {
+      // Dark text on light backgrounds (orange, yellow)
+      expect(getDepthColors(1, 'rainbow').text).toBe('text-orange-900');
+      expect(getDepthColors(2, 'rainbow').text).toBe('text-amber-900');
+
+      // White text on dark backgrounds (red, green, cyan, blue, purple)
+      expect(getDepthColors(0, 'rainbow').text).toBe('text-white');
+      expect(getDepthColors(3, 'rainbow').text).toBe('text-white');
+      expect(getDepthColors(4, 'rainbow').text).toBe('text-white');
+      expect(getDepthColors(5, 'rainbow').text).toBe('text-white');
+      expect(getDepthColors(6, 'rainbow').text).toBe('text-white');
     });
   });
 });

@@ -30,6 +30,7 @@ import analyticsRoutes from './routes/analytics.js';
 import gedsRoutes from './routes/geds.js';
 import { scheduleFtsMaintenance } from './services/fts-scheduler.service.js';
 import ftsMaintenanceRoutes from './routes/fts-maintenance.js';
+import versionRoutes from './routes/version.js';
 import { validateCsrf } from './middleware/csrf.js';
 import { metricsMiddleware } from './middleware/metrics.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -214,6 +215,9 @@ app.get('/api/health', async (_req, res) => {
 // API Routes
 // CSRF token endpoint (must be before CSRF validation middleware)
 app.use('/api', csrfRoutes);
+
+// Version endpoint (no authentication required)
+app.use('/api', versionRoutes);
 
 // Public routes (no authentication or CSRF required)
 app.use('/api/auth', authRoutes);

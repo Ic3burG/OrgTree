@@ -109,6 +109,31 @@ const themes: Record<string, Theme> = {
     ],
     swatch: '#e11d48',
   },
+  rainbow: {
+    name: 'Rainbow',
+    colors: [
+      // Depth 0: Red
+      { bg: 'bg-red-500', hex: '#ef4444', text: 'text-white', hover: 'hover:bg-red-400' },
+      // Depth 1: Orange
+      {
+        bg: 'bg-orange-400',
+        hex: '#fb923c',
+        text: 'text-orange-900',
+        hover: 'hover:bg-orange-300',
+      },
+      // Depth 2: Yellow/Amber
+      { bg: 'bg-amber-400', hex: '#fbbf24', text: 'text-amber-900', hover: 'hover:bg-amber-300' },
+      // Depth 3: Green
+      { bg: 'bg-lime-500', hex: '#84cc16', text: 'text-white', hover: 'hover:bg-lime-400' },
+      // Depth 4: Cyan/Blue
+      { bg: 'bg-cyan-500', hex: '#06b6d4', text: 'text-white', hover: 'hover:bg-cyan-400' },
+      // Depth 5: Blue
+      { bg: 'bg-blue-500', hex: '#3b82f6', text: 'text-white', hover: 'hover:bg-blue-400' },
+      // Depth 6: Purple
+      { bg: 'bg-purple-500', hex: '#a855f7', text: 'text-white', hover: 'hover:bg-purple-400' },
+    ],
+    swatch: '#ef4444', // Red swatch for theme picker
+  },
 };
 
 /**
@@ -120,6 +145,14 @@ export function getDepthColors(depth: number, themeName: string = 'slate'): Colo
     throw new Error(`Theme not found: ${themeName}`);
   }
   const safeDepth = Math.max(0, depth || 0);
+
+  // For rainbow theme, cycle through colors instead of capping
+  if (themeName === 'rainbow') {
+    const index = safeDepth % theme.colors.length;
+    return theme.colors[index] as ColorConfig;
+  }
+
+  // For other themes, cap at last color
   const index = Math.min(safeDepth, theme.colors.length - 1);
   return (theme.colors[index] || theme.colors[0]) as ColorConfig;
 }
