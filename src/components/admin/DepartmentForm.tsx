@@ -190,7 +190,7 @@ export default function DepartmentForm({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Department Name */}
             <div>
-              <label 
+              <label
                 htmlFor="name"
                 className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
               >
@@ -209,7 +209,7 @@ export default function DepartmentForm({
 
             {/* Parent Department Dropdown */}
             <div>
-              <label 
+              <label
                 htmlFor="parentId"
                 className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
               >
@@ -234,7 +234,7 @@ export default function DepartmentForm({
 
             {/* Description */}
             <div>
-              <label 
+              <label
                 htmlFor="description"
                 className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
               >
