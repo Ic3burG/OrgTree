@@ -11,6 +11,14 @@ vi.mock('socket.io-client', () => ({
   io: vi.fn(),
 }));
 
+interface MockSocket {
+  on: ReturnType<typeof vi.fn>;
+  off: ReturnType<typeof vi.fn>;
+  emit: ReturnType<typeof vi.fn>;
+  disconnect: ReturnType<typeof vi.fn>;
+  connected: boolean;
+}
+
 // Mock AuthContext
 vi.mock('./AuthContext', () => ({
   useAuth: vi.fn(),
@@ -38,7 +46,7 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 describe('SocketContext', () => {
-  let mockSocket: any;
+  let mockSocket: MockSocket;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -85,9 +93,12 @@ describe('SocketContext', () => {
 
     const { result } = renderHook(() => useSocket(), { wrapper });
 
-    expect(io).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
-      auth: { token: 'valid-token' }
-    }));
+    expect(io).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        auth: { token: 'valid-token' },
+      })
+    );
 
     // Should expose socket instance
     await waitFor(() => expect(result.current.socket).toBe(mockSocket));
@@ -100,7 +111,9 @@ describe('SocketContext', () => {
     const { result } = renderHook(() => useSocket(), { wrapper });
 
     // Find the 'connect' callback
-    const connectCallback = mockSocket.on.mock.calls.find((call: any[]) => call[0] === 'connect')?.[1];
+    const connectCallback = mockSocket.on.mock.calls.find(
+      (call: unknown[]) => call[0] === 'connect'
+    )?.[1];
     expect(connectCallback).toBeDefined();
 
     // Simulate connect
@@ -108,7 +121,9 @@ describe('SocketContext', () => {
     await waitFor(() => expect(result.current.isConnected).toBe(true));
 
     // Find disconnect callback
-    const disconnectCallback = mockSocket.on.mock.calls.find((call: any[]) => call[0] === 'disconnect')?.[1];
+    const disconnectCallback = mockSocket.on.mock.calls.find(
+      (call: unknown[]) => call[0] === 'disconnect'
+    )?.[1];
     expect(disconnectCallback).toBeDefined();
 
     // Simulate disconnect
@@ -125,9 +140,11 @@ describe('SocketContext', () => {
 
     // Join org
     act(() => result.current.joinOrg('org-1'));
-    
+
     // Simulate connect (first time)
-    const connectCallback = mockSocket.on.mock.calls.find((call: any[]) => call[0] === 'connect')?.[1];
+    const connectCallback = mockSocket.on.mock.calls.find(
+      (call: unknown[]) => call[0] === 'connect'
+    )?.[1];
     act(() => connectCallback());
 
     // Expect emit join:org
@@ -150,7 +167,6 @@ describe('SocketContext', () => {
     expect(mockSocket.on).toHaveBeenCalledWith('test:event', callback);
 
     act(() => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       unsubscribe!();
     });
 
