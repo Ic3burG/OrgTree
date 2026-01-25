@@ -14,11 +14,13 @@ router.get('/auth/:orgId', (req: Request, res: Response): void => {
   res.json({
     timestamp: new Date().toISOString(),
     authenticated: !!authReq.user,
-    user: authReq.user ? {
-      id: authReq.user.id,
-      email: authReq.user.email,
-      systemRole: authReq.user.role,
-    } : null,
+    user: authReq.user
+      ? {
+          id: authReq.user.id,
+          email: authReq.user.email,
+          systemRole: authReq.user.role,
+        }
+      : null,
     orgId,
     headers: {
       authorization: req.headers.authorization?.substring(0, 20) + '...',
