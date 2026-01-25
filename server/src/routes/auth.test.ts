@@ -559,7 +559,7 @@ describe('Auth Routes', () => {
         .expect(400);
 
       expect(response.body).toEqual({
-        message: 'At least one field (name or email) is required',
+        message: 'At least one field (name, email, or is_discoverable) is required',
       });
     });
   });
