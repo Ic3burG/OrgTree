@@ -89,8 +89,15 @@ export async function initializeDatabase(db: Database) {
   `);
 
   // Run migrations (Phase 2 & 3)
-  const { runMigrations } = await import('./migrations/index.js');
+  const { runMigrations, discoverMigrations } = await import('./migrations/index.js');
   const { legacyMigrations } = await import('./migrations/legacy-migrations.js');
 
+  // Apply hardcoded legacy migrations
   runMigrations(db, legacyMigrations);
+
+  // Apply dynamically discovered migrations
+  const discovered = await discoverMigrations();
+  if (discovered.length > 0) {
+    runMigrations(db, discovered);
+  }
 }

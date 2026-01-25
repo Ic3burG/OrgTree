@@ -12,6 +12,8 @@
     "start": "NODE_ENV=production tsx --import ./src/instrument.ts src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "migrate": "tsx scripts/migrate.ts",
+    "build": "tsc",
     "test:coverage": "vitest run --coverage",
     "backup": "tsx scripts/backup.ts",
     "backup:list": "tsx scripts/backup.ts --list",

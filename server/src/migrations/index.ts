@@ -1,10 +1,48 @@
 import { Database } from 'better-sqlite3';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export interface Migration {
   id: string; // YYYYMMDDHHMMSS format
   name: string; // Descriptive name
   up: (db: Database) => void;
   down: (db: Database) => void;
+}
+
+/**
+ * Dynamically loads migrations from the versions directory.
+ */
+export async function discoverMigrations(): Promise<Migration[]> {
+  const versionsDir = path.join(__dirname, 'versions');
+  if (!fs.existsSync(versionsDir)) {
+    return [];
+  }
+
+  const files = fs
+    .readdirSync(versionsDir)
+    .filter(
+      f =>
+        (f.endsWith('.ts') || f.endsWith('.js')) &&
+        !f.endsWith('.test.ts') &&
+        !f.endsWith('.test.js')
+    )
+    .sort();
+
+  const discoveredMigrations: Migration[] = [];
+  for (const file of files) {
+    const migrationPath = path.join(versionsDir, file);
+    // In ESM, we need to use file:// URLs for absolute paths on Windows or some Linux setups
+    const module = await import(`file://${migrationPath}`);
+    if (module.migration) {
+      discoveredMigrations.push(module.migration);
+    }
+  }
+
+  return discoveredMigrations.sort((a, b) => a.id.localeCompare(b.id));
 }
 
 /**
