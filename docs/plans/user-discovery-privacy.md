@@ -1,6 +1,6 @@
-# User Discovery and Privacy Controls Plan
+# User Discovery and Privacy Controls Plan (COMPLETED)
 
-Add the ability for users to be discovered by email when sharing an organization, while providing a privacy setting to opt out of this feature.
+**Status**: ✅ Completed January 25, 2026
 
 ## Goal
 
