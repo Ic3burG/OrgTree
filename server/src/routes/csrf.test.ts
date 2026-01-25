@@ -11,7 +11,7 @@ describe('CSRF Routes', () => {
   let app: express.Application;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     // Setup Express app with router
     app = express();

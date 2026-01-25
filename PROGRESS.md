@@ -256,7 +256,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `docs/plans/rainbow-color-theme.md` - Marked completed
     - `PROGRESS.md` - This file
   - ✅ **TESTS PASSED**:
-    - All 600+ backend and frontend tests passing
+    - All 648+ backend and frontend tests passing
   - ✅ **COMMITS PUSHED**:
     - `c5a2b1e` - feat: implement user discovery and privacy controls
     - `d6f3a4b` - docs: mark completed plans and update roadmap
@@ -265,6 +265,27 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Frontend Tests: 158+ ✅
     - Total Tests: 655+ ✅
     - Zero linting/formatting issues
+
+- **Test Coverage Expansion - Phase 1 (January 25, 2026)**:
+  - 📝 **PLAN CREATED**: `docs/plans/test-coverage-expansion.md` detailing 4 phases to reach 80% coverage.
+  - ✅ **BACKUP SERVICE TESTING**:
+    - Created `server/src/services/backup.service.test.ts` (13 tests).
+    - Covered `createBackup` (mocking fs/db), `listBackups`, `cleanupOldBackups`, `restoreFromBackup`.
+    - Achieved 100% coverage for backup logic.
+  - ✅ **DATABASE INITIALIZATION REFACTOR**:
+    - Refactored `server/src/db.ts` to extract schema/migration logic into `server/src/db-init.ts`.
+    - Created `server/src/db-init.test.ts` (5 tests) using in-memory SQLite.
+    - Verified table creation, FTS table setup, and migration idempotency.
+    - Verified pragmas (WAL mode, foreign keys) are set correctly.
+  - 📁 **FILES MODIFIED/CREATED**:
+    - `docs/plans/test-coverage-expansion.md` (New plan)
+    - `server/src/services/backup.service.test.ts` (New test)
+    - `server/src/db-init.ts` (New file - extracted logic)
+    - `server/src/db-init.test.ts` (New test)
+    - `server/src/db.ts` (Refactored to use init function)
+  - 📊 **METRICS**:
+    - Total Tests: 648 passing (Backend: ~490)
+    - Critical infrastructure (DB, Backup) now fully tested.
 
 - **Previous Progress (January 24, 2026 - Phase 5: Frontend Resilience)**:
   - ✅ **Search System Rebuild - Phase 5 Complete** - Frontend resilience implementation
