@@ -1,21 +1,14 @@
-/* eslint-disable */
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { SocketProvider, useSocket } from './SocketContext';
 import { useAuth } from './AuthContext';
 import { io } from 'socket.io-client';
 import React from 'react';
+import { act } from '@testing-library/react';
 
 // Mock socket.io-client
 vi.mock('socket.io-client', () => ({
-  io: vi.fn(() => ({
-    on: vi.fn(),
-    off: vi.fn(),
-    emit: vi.fn(),
-    connect: vi.fn(),
-    disconnect: vi.fn(),
-    connected: true,
-  })),
+  io: vi.fn(),
 }));
 
 // Mock AuthContext
@@ -23,50 +16,155 @@ vi.mock('./AuthContext', () => ({
   useAuth: vi.fn(),
 }));
 
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
+      store[key] = value.toString();
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: vi.fn(() => {
+      store = {};
+    }),
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
+
 describe('SocketContext', () => {
-  const mockUser = { id: 'u1', email: 'test@example.com', name: 'Test User' };
-  const mockToken = 'mock-token';
+  let mockSocket: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAuth as Mock).mockReturnValue({
-      user: mockUser,
-      token: mockToken,
-      isAuthenticated: true,
-    });
+    localStorageMock.clear();
+
+    // Default auth state: unauthenticated
+    (useAuth as Mock).mockReturnValue({ isAuthenticated: false });
+
+    // Mock socket instance
+    mockSocket = {
+      on: vi.fn(),
+      off: vi.fn(),
+      emit: vi.fn(),
+      disconnect: vi.fn(),
+      connected: false,
+    };
+    (io as Mock).mockReturnValue(mockSocket);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <SocketProvider>{children}</SocketProvider>
   );
 
-  it('initializes socket with token when authenticated', async () => {
-    renderHook(() => useSocket(), { wrapper });
-
-    expect(io).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        auth: { token: mockToken },
-      })
+  it('should throw error if used outside provider', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(() => renderHook(() => useSocket())).toThrow(
+      'useSocket must be used within a SocketProvider'
     );
+    consoleSpy.mockRestore();
   });
 
-  it('disconnects socket when unauthenticated', async () => {
-    (useAuth as Mock).mockReturnValue({
-      user: null,
-      token: null,
-      isAuthenticated: false,
+  it('should not connect if not authenticated', () => {
+    renderHook(() => useSocket(), { wrapper });
+    expect(io).not.toHaveBeenCalled();
+  });
+
+  it('should connect if authenticated and token exists', async () => {
+    (useAuth as Mock).mockReturnValue({ isAuthenticated: true });
+    localStorageMock.setItem('token', 'valid-token');
+
+    const { result } = renderHook(() => useSocket(), { wrapper });
+
+    expect(io).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+      auth: { token: 'valid-token' }
+    }));
+
+    // Should expose socket instance
+    await waitFor(() => expect(result.current.socket).toBe(mockSocket));
+  });
+
+  it('should update isConnected state on connect/disconnect events', async () => {
+    (useAuth as Mock).mockReturnValue({ isAuthenticated: true });
+    localStorageMock.setItem('token', 'token');
+
+    const { result } = renderHook(() => useSocket(), { wrapper });
+
+    // Find the 'connect' callback
+    const connectCallback = mockSocket.on.mock.calls.find((call: any[]) => call[0] === 'connect')?.[1];
+    expect(connectCallback).toBeDefined();
+
+    // Simulate connect
+    act(() => connectCallback());
+    await waitFor(() => expect(result.current.isConnected).toBe(true));
+
+    // Find disconnect callback
+    const disconnectCallback = mockSocket.on.mock.calls.find((call: any[]) => call[0] === 'disconnect')?.[1];
+    expect(disconnectCallback).toBeDefined();
+
+    // Simulate disconnect
+    act(() => disconnectCallback('io server disconnect'));
+    await waitFor(() => expect(result.current.isConnected).toBe(false));
+    expect(result.current.connectionError).toBe('Disconnected by server');
+  });
+
+  it('should rejoin org on reconnect if previously joined', async () => {
+    (useAuth as Mock).mockReturnValue({ isAuthenticated: true });
+    localStorageMock.setItem('token', 'token');
+
+    const { result } = renderHook(() => useSocket(), { wrapper });
+
+    // Join org
+    act(() => result.current.joinOrg('org-1'));
+    
+    // Simulate connect (first time)
+    const connectCallback = mockSocket.on.mock.calls.find((call: any[]) => call[0] === 'connect')?.[1];
+    act(() => connectCallback());
+
+    // Expect emit join:org
+    expect(mockSocket.emit).toHaveBeenCalledWith('join:org', 'org-1');
+  });
+
+  it('should handle subscriptions', async () => {
+    (useAuth as Mock).mockReturnValue({ isAuthenticated: true });
+    localStorageMock.setItem('token', 'token');
+
+    const { result } = renderHook(() => useSocket(), { wrapper });
+
+    const callback = vi.fn();
+    let unsubscribe: () => void;
+
+    act(() => {
+      unsubscribe = result.current.subscribe('test:event', callback);
     });
 
-    const { result } = renderHook(() => useSocket(), { wrapper });
+    expect(mockSocket.on).toHaveBeenCalledWith('test:event', callback);
 
-    expect(result.current.socket).toBeNull();
+    act(() => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      unsubscribe!();
+    });
+
+    expect(mockSocket.off).toHaveBeenCalledWith('test:event', callback);
   });
 
-  it('provides socket instance via useSocket', () => {
-    const { result } = renderHook(() => useSocket(), { wrapper });
+  it('should disconnect on unmount', () => {
+    (useAuth as Mock).mockReturnValue({ isAuthenticated: true });
+    localStorageMock.setItem('token', 'token');
 
-    expect(result.current.socket).toBeDefined();
-    expect(result.current.isConnected).toBe(true);
+    const { unmount } = renderHook(() => useSocket(), { wrapper });
+
+    unmount();
+
+    expect(mockSocket.disconnect).toHaveBeenCalled();
   });
 });

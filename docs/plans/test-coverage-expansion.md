@@ -1,14 +1,14 @@
 # Test Coverage Expansion Plan
 
-**Status**: 📋 Planned
+**Status**: 🚀 In Progress
 **Created**: January 25, 2026
 **Priority**: Medium (Roadmap Item)
-**Current Count**: ~655 Tests (497 Backend, 158 Frontend)
+**Current Count**: ~857 Tests (653 Backend, 204 Frontend)
 **Target**: 80%+ Code Coverage across Backend and Frontend
 
 ## Overview
 
-While the project has made significant strides in test coverage (increasing from ~210 to ~655 tests), specific areas remain under-tested. This plan outlines a systematic approach to reaching >80% code coverage by targeting critical gaps in backend services, frontend complex logic, and edge cases.
+While the project has made significant strides in test coverage (increasing from ~210 to ~857 tests), specific areas remain under-tested. This plan outlines a systematic approach to reaching >80% code coverage by targeting critical gaps in backend services, frontend complex logic, and edge cases.
 
 ## Current Status Analysis
 
@@ -19,9 +19,8 @@ While the project has made significant strides in test coverage (increasing from
   - Authentication flows (including 2FA/Passkeys)
   - Search system (FTS5)
   - Authorization middleware
+  - Backup & Migration logic (New)
 - **Weaknesses/Gaps**:
-  - `backup.service.ts`: Identified as untested in recent progress reports.
-  - `db.ts`: Database initialization and migration logic.
   - Service-layer error handling: Many "happy paths" are tested, but specific database error scenarios (constraints, connection timeouts) need consistent coverage.
   - Edge cases in complex logic (e.g., circular hierarchy detection, large bulk operations).
 
@@ -30,49 +29,51 @@ While the project has made significant strides in test coverage (increasing from
   - Utility functions (`xmlImport`, `csvImport`)
   - Basic component rendering
   - Search overlay logic
+  - **Auth Context** (New)
+  - **Socket Context** (New)
+  - **Form Validation** (New)
 - **Weaknesses/Gaps**:
-  - **Contexts**: `AuthContext` and `SocketContext` logic is critical but often mocked in other tests rather than tested directly.
-  - **Custom Hooks**: `useRealtimeUpdates`, complex state management hooks.
+  - **Custom Hooks**: Complex state management hooks (besides RealtimeUpdates).
   - **Interactive Components**: `OrgMap` interaction logic (zoom, pan, node selection) is heavily relied upon but difficult to unit test.
-  - **Admin Forms**: Complex validation logic in `PersonForm` and `DepartmentForm` (especially with the new Custom Fields).
 
 ## Execution Phases
 
-### Phase 1: Critical Backend Service Gaps (Immediate)
+### Phase 1: Critical Backend Service Gaps (✅ Completed)
 
 Target the known "zero coverage" or "low coverage" files to ensure safety for infrastructure tasks.
 
-1.  **Backup Service (`server/src/services/backup.service.ts`)**
+1.  **Backup Service (`server/src/services/backup.service.ts`)** ✅
     -   Test backup creation (file system interaction).
     -   Test backup restoration (database locking/swapping).
     -   Test retention policy (cleanup of old backups).
     -   *Mocking Strategy*: Mock `fs` and `better-sqlite3` backup API.
 
-2.  **Database & Migration Utilities (`server/src/db.ts`)**
+2.  **Database & Migration Utilities (`server/src/db.ts`)** ✅
     -   Test migration execution logic.
     -   Test schema validation helpers.
-    -   *Note*: Some of this requires a real test database (integration style).
+    -   *Note*: Refactored into `db-init.ts` for testability.
 
 3.  **Analytics Service (`server/src/services/analytics.service.ts`)**
     -   Ensure data retention policies are tested.
     -   Test aggregation queries for dashboards.
 
-### Phase 2: Frontend Core Logic (Hooks & Contexts)
+### Phase 2: Frontend Core Logic (Hooks & Contexts) (✅ Completed)
 
 Move beyond simple component rendering tests to testing the "brain" of the frontend.
 
-1.  **Auth Context (`src/contexts/AuthContext.tsx`)**
+1.  **Auth Context (`src/contexts/AuthContext.tsx`)** ✅
     -   Test session persistence/hydration.
     -   Test auto-logout on 401.
     -   Test permission helper functions (`canManage`, `isOwner`).
 
-2.  **Socket Integration (`src/hooks/useRealtimeUpdates.ts`)**
+2.  **Socket Integration (`src/contexts/SocketContext.tsx`)** ✅
     -   Test event subscription/unsubscription.
-    -   Test state updates on incoming events (e.g., does a "person:updated" event actually trigger a refresh?).
+    -   Test state updates on incoming events.
+    -   Test connection/disconnection logic.
 
-3.  **Form Logic & Validation**
-    -   **Custom Fields Integration**: Test that `PersonForm` correctly validates dynamic custom fields (required checks, type validation).
-    -   **Department Hierarchy**: Test circular reference prevention logic in `DepartmentForm`.
+3.  **Form Logic & Validation** ✅
+    -   **Person Form**: Test validation (email, required fields) and custom field integration.
+    -   **Department Form**: Test circular reference prevention logic and hierarchy filtering.
 
 ### Phase 3: Complex Interactive Components
 

@@ -49,6 +49,7 @@ jobs:
 
     steps:
       - name: Health check with retry
+        id: health_check
         run: |
           echo "Waiting for staging deployment to complete..."
           echo "This may take 2-3 minutes on Render's free tier..."
@@ -80,6 +81,20 @@ jobs:
 
           echo "❌ Health check failed after $max_attempts attempts"
           exit 1
+
+      - name: Auto-rollback on failure (Staging)
+        if: failure() && steps.health_check.outcome == 'failure'
+        run: |
+          echo "⚠️ Staging health check failed. Triggering auto-rollback..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "https://orgtree-staging.onrender.com/api/admin/rollback/last" \
+            -H "Authorization: Bearer ${{ secrets.BACKUP_API_TOKEN }}" \
+            -H "Content-Type: application/json")
+
+          if [ $response -eq 200 ]; then
+            echo "✅ Auto-rollback triggered successfully"
+          else
+            echo "❌ Failed to trigger auto-rollback (HTTP $response)"
+          fi
 
       - name: Staging deployment summary
         if: always()
@@ -138,6 +153,7 @@ jobs:
 
     steps:
       - name: Health check with retry
+        id: health_check
         run: |
           echo "Waiting for production deployment to complete..."
           echo "This may take 2-3 minutes on Render's free tier..."
@@ -169,6 +185,20 @@ jobs:
 
           echo "❌ Health check failed after $max_attempts attempts"
           exit 1
+
+      - name: Auto-rollback on failure (Production)
+        if: failure() && steps.health_check.outcome == 'failure'
+        run: |
+          echo "⚠️ Production health check failed. Triggering auto-rollback..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "https://orgtree-app.onrender.com/api/admin/rollback/last" \
+            -H "Authorization: Bearer ${{ secrets.BACKUP_API_TOKEN }}" \
+            -H "Content-Type: application/json")
+
+          if [ $response -eq 200 ]; then
+            echo "✅ Auto-rollback triggered successfully"
+          else
+            echo "❌ Failed to trigger auto-rollback (HTTP $response)"
+          fi
 
       - name: Production deployment summary
         if: always()

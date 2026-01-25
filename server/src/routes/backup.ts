@@ -8,6 +8,7 @@ import {
 } from '../services/backup.service.js';
 import logger from '../utils/logger.js';
 import type { AuthRequest } from '../types/index.js';
+import db from '../db.js';
 
 const router = express.Router();
 
@@ -176,6 +177,61 @@ router.get(
         error: error instanceof Error ? error.message : 'Unknown error',
       });
       res.status(500).json({ message: 'Failed to get backup stats' });
+    }
+  }
+);
+
+/**
+ * POST /api/admin/rollback/last
+ * Automatically rollback the last applied migration.
+ * Targeted at CI/CD pipelines for automated recovery.
+ * Requires: Superuser
+ */
+router.post(
+  '/admin/rollback/last',
+  authenticateBackupRequest,
+  requireSuperuser,
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const { discoverMigrations } = await import('../migrations/index.js');
+      const { legacyMigrations } = await import('../migrations/legacy-migrations.js');
+
+      const dbRows = db.prepare('SELECT id FROM _migrations ORDER BY id DESC LIMIT 1').get() as
+        | { id: string }
+        | undefined;
+
+      if (!dbRows) {
+        res.status(404).json({ error: 'No migrations found to rollback' });
+        return;
+      }
+
+      const allMigrations = [...legacyMigrations, ...(await discoverMigrations())];
+      const migration = allMigrations.find(m => m.id === dbRows.id);
+
+      if (!migration) {
+        res.status(404).json({ error: `Migration definition for ${dbRows.id} not found` });
+        return;
+      }
+
+      logger.info('Auto-Rollback triggered via API', {
+        migrationId: migration.id,
+        user: req.user?.email,
+      });
+
+      db.transaction(() => {
+        migration.down(db);
+        db.prepare('DELETE FROM _migrations WHERE id = ?').run(migration.id);
+      })();
+
+      res.json({ message: `Successfully rolled back migration ${migration.id}`, id: migration.id });
+    } catch (error) {
+      logger.error('Rollback failed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      res.status(500).json({
+        error: 'Rollback failed',
+        details: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 );

@@ -287,6 +287,19 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Total Tests: 648 passing (Backend: ~490)
     - Critical infrastructure (DB, Backup) now fully tested.
 
+- **Test Coverage Expansion - Phase 2 (January 25, 2026)**:
+  - ✅ **FRONTEND CORE LOGIC TESTING**:
+    - Created `src/contexts/AuthContext.test.tsx` (10 tests) covering session, login, signup, logout, and roles.
+    - Created `src/contexts/SocketContext.test.tsx` (7 tests) covering connection, disconnection, and subscriptions.
+    - Created `src/components/admin/PersonForm.test.tsx` (6 tests) covering validation and custom fields.
+    - Created `src/components/admin/DepartmentForm.test.tsx` (5 tests) covering hierarchy validation and rendering.
+  - 🛠️ **ACCESSIBILITY FIXES**:
+    - Fixed missing `htmlFor`/`id` associations in `DepartmentForm.tsx` identified during testing.
+  - 📊 **METRICS**:
+    - Frontend Tests: 204 passing (up from 176) (+28 tests).
+    - Total Tests: 857 passing.
+    - Achieved robust coverage for React Contexts and complex Forms.
+
 - **Previous Progress (January 24, 2026 - Phase 5: Frontend Resilience)**:
   - ✅ **Search System Rebuild - Phase 5 Complete** - Frontend resilience implementation
     - **Task 1 - Retry Logic**: Implemented automatic retry with exponential backoff (max 3 attempts, 1s/2s/4s delays)
