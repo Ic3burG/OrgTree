@@ -209,6 +209,9 @@ export default function OrgMap(): React.JSX.Element {
   const [flatDepartments, setFlatDepartments] = useState<Department[]>([]);
   const [canEdit, setCanEdit] = useState<boolean>(false);
 
+  // Theme hook (needed early for highlighting effect)
+  const { isDarkMode } = useTheme();
+
   // Memoize ancestor map
   const ancestorMap = useMemo(() => {
     return buildAncestorMap(flatDepartments);
@@ -247,6 +250,9 @@ export default function OrgMap(): React.JSX.Element {
     const ancestors = ancestorMap.get(activeId) || [];
     const highlightedIds = new Set([activeId, ...ancestors]);
 
+    // Theme-aware highlight color (blue-400 for dark mode, blue-600 for light mode)
+    const highlightColor = isDarkMode ? '#60a5fa' : '#2563eb';
+
     // Update Nodes
     setNodes(nds =>
       nds.map(n => {
@@ -266,21 +272,26 @@ export default function OrgMap(): React.JSX.Element {
         return {
           ...e,
           style: {
-            stroke: isHighlighted ? '#3b82f6' : '#94a3b8',
+            stroke: isHighlighted ? highlightColor : '#94a3b8',
             strokeWidth: isHighlighted ? 4 : 2,
             transition: 'all 200ms ease-in-out',
             opacity: isHighlighted ? 1 : 0.3, // Dim non-highlighted edges
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: isHighlighted ? highlightColor : '#94a3b8',
+            width: 20,
+            height: 20,
           },
           zIndex: isHighlighted ? 1000 : 0,
         };
       })
     );
-  }, [hoveredDepartmentId, selectedDepartmentId, ancestorMap, setNodes, setEdges]);
+  }, [hoveredDepartmentId, selectedDepartmentId, ancestorMap, setNodes, setEdges, isDarkMode]);
 
   const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
   const toast = useToast();
-  const { isDarkMode } = useTheme();
   // const { track } = useAnalytics();
 
   const [searchParams] = useSearchParams();
