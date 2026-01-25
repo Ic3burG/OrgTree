@@ -156,12 +156,34 @@ describe('Backup Routes', () => {
           path: mockBackupResult.path,
           sizeMB: mockBackupResult.sizeMB,
           timestamp: mockBackupResult.timestamp,
+          type: 'manual',
         },
         cleanup: {
           kept: 7,
           deleted: 3,
         },
       });
+    });
+
+    it('should support BACKUP_API_TOKEN authentication', async () => {
+      const mockBackupResult = {
+        success: true,
+        path: '/backups/pre-migration.db',
+        sizeMB: 10,
+        timestamp: new Date().toISOString(),
+      };
+
+      vi.mocked(backupService.createBackup).mockResolvedValue(mockBackupResult);
+      process.env.BACKUP_API_TOKEN = 'test-api-token';
+
+      const response = await request(app)
+        .post('/api/admin/backup')
+        .set('Authorization', 'Bearer test-api-token')
+        .send({ type: 'manual' })
+        .expect(200);
+
+      expect(response.body.message).toBe('Backup created successfully');
+      expect(response.body.backup.type).toBe('manual');
     });
 
     it('should handle backup creation failure', async () => {

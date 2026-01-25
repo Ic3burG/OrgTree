@@ -69,7 +69,7 @@ router.get(
  */
 const handlePostBackup = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { type } = req.body;
+    const { type } = req.body || {};
 
     logger.info('Backup triggered', {
       userId: req.user!.id,
