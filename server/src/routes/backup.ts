@@ -20,6 +20,16 @@ const authenticateBackupRequest = (req: AuthRequest, res: Response, next: NextFu
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
+  // Debug logging (remove after troubleshooting)
+  logger.info('Backup authentication attempt', {
+    hasAuthHeader: !!authHeader,
+    hasToken: !!token,
+    hasEnvToken: !!process.env.BACKUP_API_TOKEN,
+    tokenLength: token?.length,
+    envTokenLength: process.env.BACKUP_API_TOKEN?.length,
+    tokensMatch: token === process.env.BACKUP_API_TOKEN,
+  });
+
   // Check for fixed API token (if configured)
   if (token && process.env.BACKUP_API_TOKEN && token === process.env.BACKUP_API_TOKEN) {
     // Inject a system superuser for authorized backup operations
@@ -29,10 +39,12 @@ const authenticateBackupRequest = (req: AuthRequest, res: Response, next: NextFu
       role: 'superuser',
       name: 'Backup System Automation',
     };
+    logger.info('Backup API token authenticated successfully');
     return next();
   }
 
   // Fallback to standard token authentication
+  logger.info('Falling back to standard JWT authentication');
   return authenticateToken(req, res, next);
 };
 
