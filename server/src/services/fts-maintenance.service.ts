@@ -53,6 +53,8 @@ export function checkFtsIntegrity(): FtsHealthStatus {
       .prepare('SELECT COUNT(DISTINCT rowid) as count FROM departments_fts')
       .get() as { count: number };
 
+    // console.log(`DEBUG: deptExpected=${deptExpected.count}, deptActual=${deptActual.count}`);
+
     const deptInSync = deptExpected.count === deptActual.count;
     results.push({
       table: 'departments_fts',
@@ -155,7 +157,7 @@ export function checkFtsIntegrity(): FtsHealthStatus {
 export function rebuildDepartmentsFts(): void {
   const transaction = db.transaction(() => {
     // Clear existing FTS data
-    db.exec('INSERT INTO departments_fts(departments_fts) VALUES("delete-all")');
+    db.exec("INSERT INTO departments_fts(departments_fts) VALUES('delete-all')");
 
     // Repopulate with non-deleted departments
     db.exec(`
@@ -178,7 +180,7 @@ export function rebuildDepartmentsFts(): void {
 export function rebuildPeopleFts(): void {
   const transaction = db.transaction(() => {
     // Clear existing FTS data
-    db.exec('INSERT INTO people_fts(people_fts) VALUES("delete-all")');
+    db.exec("INSERT INTO people_fts(people_fts) VALUES('delete-all')");
 
     // Repopulate with non-deleted people
     db.exec(`
@@ -201,7 +203,7 @@ export function rebuildPeopleFts(): void {
 export function rebuildCustomFieldsFts(): void {
   const transaction = db.transaction(() => {
     // Clear existing FTS data
-    db.exec('DELETE FROM custom_fields_fts');
+    db.exec("INSERT INTO custom_fields_fts(custom_fields_fts) VALUES('delete-all')");
 
     // Repopulate with searchable custom field values
     db.exec(`

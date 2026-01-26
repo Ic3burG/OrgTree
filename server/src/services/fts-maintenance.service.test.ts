@@ -84,7 +84,7 @@ vi.mock('../db.js', () => {
   };
 });
 
-import { checkFtsIntegrity, optimizeFtsIndexes } from './fts-maintenance.service.js';
+import { checkFtsIntegrity, optimizeFtsIndexes, rebuildAllFtsIndexes, rebuildDepartmentsFts, rebuildPeopleFts, rebuildCustomFieldsFts, getFtsStatistics } from './fts-maintenance.service.js';
 
 describe('FTS Maintenance Service', () => {
   beforeEach(() => {
@@ -93,9 +93,9 @@ describe('FTS Maintenance Service', () => {
     testDb.exec('DELETE FROM people');
     testDb.exec('DELETE FROM custom_field_definitions');
     testDb.exec('DELETE FROM custom_field_values');
-    testDb.exec('DELETE FROM departments_fts WHERE rowid IN (SELECT rowid FROM departments_fts)');
-    testDb.exec('DELETE FROM people_fts WHERE rowid IN (SELECT rowid FROM people_fts)');
-    testDb.exec('DELETE FROM custom_fields_fts');
+    testDb.exec("INSERT INTO departments_fts(departments_fts) VALUES('delete-all')");
+    testDb.exec("INSERT INTO people_fts(people_fts) VALUES('delete-all')");
+    testDb.exec("INSERT INTO custom_fields_fts(custom_fields_fts) VALUES('delete-all')");
   });
 
   describe('checkFtsIntegrity()', () => {
@@ -137,6 +137,72 @@ describe('FTS Maintenance Service', () => {
       const timestamp = new Date(result.lastChecked);
       expect(timestamp.getTime()).toBeGreaterThan(0);
       expect(timestamp.getTime()).toBeLessThanOrEqual(Date.now());
+    });
+
+    it('should detect when indexes are out of sync', () => {
+        // 1. Initial state: empty tables, should be healthy (0 == 0)
+        expect(checkFtsIntegrity().healthy).toBe(true);
+
+        // 2. Add data to departments but NOT to FTS
+        testDb.prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+            .run('d1', 'org1', 'Engineering');
+        
+        const result = checkFtsIntegrity();
+        expect(result.healthy).toBe(false);
+        expect(result.issues.some(i => i.includes('departments_fts out of sync'))).toBe(true);
+    });
+  });
+
+  describe('rebuild functions', () => {
+    it('rebuildDepartmentsFts should sync data', () => {
+        testDb.prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+            .run('d1', 'org1', 'Engineering');
+        
+        rebuildDepartmentsFts();
+        
+        const count = (testDb.prepare('SELECT COUNT(*) as count FROM departments_fts').get() as any).count;
+        expect(count).toBe(1);
+    });
+
+    it('rebuildPeopleFts should sync data', () => {
+        testDb.prepare('INSERT INTO people (id, organization_id, department_id, name) VALUES (?, ?, ?, ?)')
+            .run('p1', 'org1', 'd1', 'John Doe');
+        
+        rebuildPeopleFts();
+        
+        const count = (testDb.prepare('SELECT COUNT(*) as count FROM people_fts').get() as any).count;
+        expect(count).toBe(1);
+    });
+
+    it('rebuildCustomFieldsFts should sync data', () => {
+        testDb.prepare('INSERT INTO custom_field_definitions (id, organization_id, entity_type, field_key, is_searchable) VALUES (?, ?, ?, ?, ?)')
+            .run('def1', 'org1', 'person', 'skill', 1);
+        testDb.prepare('INSERT INTO custom_field_values (id, field_definition_id, entity_id, entity_type, value) VALUES (?, ?, ?, ?, ?)')
+            .run('val1', 'def1', 'p1', 'person', 'JavaScript');
+        
+        rebuildCustomFieldsFts();
+        
+        const count = (testDb.prepare('SELECT COUNT(*) as count FROM custom_fields_fts').get() as any).count;
+        expect(count).toBe(1);
+    });
+
+    it('rebuildAllFtsIndexes should sync everything', () => {
+        testDb.prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+            .run('d1', 'org1', 'Engineering');
+        testDb.prepare('INSERT INTO people (id, organization_id, department_id, name) VALUES (?, ?, ?, ?)')
+            .run('p1', 'org1', 'd1', 'John Doe');
+        
+        const result = rebuildAllFtsIndexes();
+        expect(result.healthy).toBe(true);
+        expect(result.statistics?.totalIndexedDepartments).toBe(1);
+        expect(result.statistics?.totalIndexedPeople).toBe(1);
+    });
+  });
+
+  describe('getFtsStatistics()', () => {
+    it('should provide recommendations when empty', () => {
+        const stats = getFtsStatistics();
+        expect(stats.recommendations).toContain('FTS indexes are empty - run rebuild if you have data');
     });
   });
 

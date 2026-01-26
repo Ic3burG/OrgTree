@@ -46,7 +46,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [ ] **APM (Application Performance Monitoring)** - New Relic, DataDog, or similar
 - [x] **CI/CD Pipeline** - GitHub Actions for automated testing and deployment ✅ **DONE** (January 5, 2026)
 - [x] **Staging Environment** - Separate staging server for pre-production testing ✅ **DONE** (January 21, 2026)
-- [x] **Database Migration Rollback** - Strategy and scripts for safe rollbacks (see [docs/plans/database-migration-rollback.md](plans/database-migration-rollback.md)) ✅ **DONE** (January 25, 2026)
+- [x] **Database Migration Rollback** - Strategy and scripts for safe rollbacks (see [docs/adr/012-database-migration-rollback.md](adr/012-database-migration-rollback.md)) ✅ **DONE** (January 25, 2026)
 - [x] **Health Check Enhancement** - Add memory usage, disk space, connection pool metrics ✅ **DONE** (January 8, 2026)
 
 ### Scalability & Architecture
@@ -139,7 +139,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 12. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
 13. **Bulk Invitations** - Send invitations to multiple emails at once
 14. **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
-15. **GEDS URL Import** - Automated download, parse, and import from GEDS download URLs (see [docs/plans/geds-url-import.md](plans/geds-url-import.md))
+15. **GEDS URL Import** - Automated download, parse, and import from GEDS download URLs (see [docs/rfc/geds-url-import.md](rfc/geds-url-import.md))
 
 16. ~~**User Discovery & Privacy Controls** - Autocomplete existing users when sharing organizations, with a privacy opt-out in security settings~~ ✅ **DONE** (January 25, 2026)
 
@@ -154,7 +154,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 7. **Webhook Support** - External system notifications
 8. **Hierarchical Tree Selector Component** - Replace native selects with interactive, collapsible tree dropdowns for department selection (improved UX with search, expand/collapse, keyboard navigation)
 9. ~~**Department Hierarchy Highlighting** - Visual highlighting of ancestor departments on hover/click in Org Map~~ ✅ **DONE** (January 22, 2026)
-10. **Advanced Sidebar UI Enhancements** (see [docs/plans/advanced-sidebar-ui.md](plans/advanced-sidebar-ui.md)):
+10. **Advanced Sidebar UI Enhancements** (see [docs/rfc/advanced-sidebar-ui.md](rfc/advanced-sidebar-ui.md)):
 
 - Multi-level collapse (Icon-only → Minimized → Hidden)
 - Resizable sidebar with drag handle for custom width
@@ -162,7 +162,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - Workspace layout presets (save/load layout configurations)
 - Sidebar pinning (auto-hide on route change unless pinned)
 
-1. **Search Enhancements** (see [docs/plans/search-enhancements.md](plans/search-enhancements.md)):
+1. **Search Enhancements** (see [docs/rfc/search-enhancements.md](rfc/search-enhancements.md)):
    1. **Typo Tolerance** - Trigram-based fuzzy matching
    1. **Search Analytics** - Track zero-result searches to identify gaps
    1. **Saved Searches** - Allow users to save frequently-used queries

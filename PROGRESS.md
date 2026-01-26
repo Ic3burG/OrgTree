@@ -250,10 +250,10 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `src/components/AccountSettings/SecuritySettingsPage.tsx` - Discovery toggle
     - `src/components/admin/AddMemberModal.tsx` - Autocomplete search
     - `docs/ROADMAP.md` - Status update
-    - `docs/plans/user-discovery-privacy.md` - Marked completed
-    - `docs/plans/department-hierarchy-highlighting.md` - Marked completed
-    - `docs/plans/centered-vertical-layout.md` - Marked completed
-    - `docs/plans/rainbow-color-theme.md` - Marked completed
+    - `docs/rfc/user-discovery-privacy.md` - Marked completed
+    - `docs/adr/009-department-hierarchy-highlighting.md` - Marked completed
+    - `docs/adr/010-centered-vertical-layout.md` - Marked completed
+    - `docs/adr/011-rainbow-color-theme.md` - Marked completed
     - `PROGRESS.md` - This file
   - ✅ **TESTS PASSED**:
     - All 648+ backend and frontend tests passing
@@ -267,7 +267,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Zero linting/formatting issues
 
 - **Test Coverage Expansion - Phase 1 (January 25, 2026)**:
-  - 📝 **PLAN CREATED**: `docs/plans/test-coverage-expansion.md` detailing 4 phases to reach 80% coverage.
+  - 📝 **PLAN CREATED**: `docs/rfc/test-coverage-expansion.md` detailing 4 phases to reach 80% coverage.
   - ✅ **BACKUP SERVICE TESTING**:
     - Created `server/src/services/backup.service.test.ts` (13 tests).
     - Covered `createBackup` (mocking fs/db), `listBackups`, `cleanupOldBackups`, `restoreFromBackup`.
@@ -278,7 +278,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Verified table creation, FTS table setup, and migration idempotency.
     - Verified pragmas (WAL mode, foreign keys) are set correctly.
   - 📁 **FILES MODIFIED/CREATED**:
-    - `docs/plans/test-coverage-expansion.md` (New plan)
+    - `docs/rfc/test-coverage-expansion.md` (New plan)
     - `server/src/services/backup.service.test.ts` (New test)
     - `server/src/db-init.ts` (New file - extracted logic)
     - `server/src/db-init.test.ts` (New test)
@@ -338,7 +338,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 📁 **FILES MODIFIED**:
     - `src/hooks/useSearch.ts` - Added retry logic, cache integration, new state tracking
     - `src/components/SearchOverlay.tsx` - Added degraded mode indicators and cache badge
-    - `docs/plans/search-rebuild.md` - Updated progress tracking
+    - `docs/rfc/search-rebuild.md` - Updated progress tracking
     - `PROGRESS.md` - This file
   - ✅ **COMMITS PUSHED**:
     - `35203bd` - feat(search): add retry logic with exponential backoff to useSearch hook
