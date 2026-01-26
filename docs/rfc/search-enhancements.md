@@ -1,9 +1,14 @@
 # Search Enhancements Implementation Plan
 
 > **Priority**: MEDIUM
-> **Status**: 📋 PLANNING
+> **Status**: 🏁 SUPERSEDED by [ADR-013](../adr/013-search-enhancements.md)
 > **Date Created**: January 26, 2026
 > **Last Updated**: January 26, 2026
+
+---
+
+## ⚠️ Note: This RFC is superseded by [ADR-013](../adr/013-search-enhancements.md). 
+The architectural decisions have been accepted. This document remains as a detailed implementation reference for the defined phases.
 
 ---
 
