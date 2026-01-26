@@ -127,7 +127,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 1. ~~**Advanced Search** - Implement full-text search capabilities~~ ✅ **DONE** (December 28, 2025)
 2. ~~**Bulk Operations** - Multi-select functionality for efficiency~~ ✅ **DONE** (December 29, 2025)
-3. [x] **Custom Fields** - Allow configurable person/department attributes ✅ **DONE** (January 15, 2026)
+3. ~~**Custom Fields** - Allow configurable person/department attributes~~ ✅ **DONE** (January 15, 2026)
 4. ~~**API Documentation** - Complete REST API documentation~~ ✅ **DONE** (December 30, 2025)
 5. ~~**Dark Mode** - Add dark theme support with user preference persistence~~ ✅ **DONE** (January 9, 2026)
 6. ~~**Inline Editing on Org Map** - Quick edit person details directly on person cards without opening full modal~~ ✅ **DONE** (January 22, 2026)
