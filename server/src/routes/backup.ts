@@ -154,8 +154,20 @@ const logBackupRequest = (req: AuthRequest, _res: Response, next: NextFunction) 
   next();
 };
 
-router.post('/admin/backups', logBackupRequest, authenticateBackupRequest, requireSuperuser, handlePostBackup);
-router.post('/admin/backup', logBackupRequest, authenticateBackupRequest, requireSuperuser, handlePostBackup);
+router.post(
+  '/admin/backups',
+  logBackupRequest,
+  authenticateBackupRequest,
+  requireSuperuser,
+  handlePostBackup
+);
+router.post(
+  '/admin/backup',
+  logBackupRequest,
+  authenticateBackupRequest,
+  requireSuperuser,
+  handlePostBackup
+);
 
 /**
  * DELETE /api/admin/backups/cleanup
