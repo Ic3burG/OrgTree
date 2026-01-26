@@ -110,7 +110,7 @@ const PersonItem = memo(function PersonItem({
             {/* Show hierarchy tooltip/indicator if hierarchy is available */}
             {hierarchy.length > 1 && (
               <div
-                className="hidden group-hover:block absolute left-0 bottom-full mb-2 z-10 w-max max-w-lg bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-3"
+                className="hidden group-hover:block absolute left-full ml-3 top-0 z-10 w-max max-w-lg bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-3"
                 onClick={e => e.stopPropagation()}
               >
                 <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
