@@ -110,8 +110,16 @@ export async function downloadGedsXml(url: string, destPath: string): Promise<vo
   // Validate URL first
   validateGedsUrl(normalizedUrl);
 
+  const options = {
+    headers: {
+      'User-Agent': 'OrgTree/1.0 (Organizational Directory App)',
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.5',
+    },
+  };
+
   return new Promise((resolve, reject) => {
-    const request = https.get(normalizedUrl, response => {
+    const request = https.get(normalizedUrl, options, response => {
       // Check for redirects or errors
       if (
         response.statusCode === 301 ||
