@@ -1,4 +1,5 @@
 # ADR-016: GEDS URL Import
+
 **Status**: Accepted
 **Date**: 2026-01-25
 **Deciders**: Development Team

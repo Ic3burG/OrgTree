@@ -94,9 +94,6 @@ export default function GedsUrlImporter({
     setResults([]);
   };
 
-  const successCount = results.filter(r => r.status === 'success').length;
-  const failureCount = results.filter(r => r.status === 'failed').length;
-
   // Aggregate stats
   const totalDepsCreated = results.reduce((sum, r) => sum + (r.stats?.departmentsCreated || 0), 0);
   const totalDepsReused = results.reduce((sum, r) => sum + (r.stats?.departmentsReused || 0), 0);

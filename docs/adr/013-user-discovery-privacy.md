@@ -1,4 +1,5 @@
 # ADR-013: User Discovery and Privacy Controls
+
 **Status**: Accepted
 **Date**: 2026-01-25
 **Deciders**: Development Team
