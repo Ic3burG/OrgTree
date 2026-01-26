@@ -1,4 +1,5 @@
 # ADR-011: Rainbow Color Theme
+
 **Status**: Accepted
 **Date**: 2026-01-25
 **Deciders**: Development Team

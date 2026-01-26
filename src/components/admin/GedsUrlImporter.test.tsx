@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import GedsUrlImporter from './GedsUrlImporter';
 import { api } from '../../api/client';
+import type { GedsImportResponse } from '../../types';
 import * as Toast from '../ui/Toast';
 
 // Mock the API and Toast
@@ -87,13 +88,20 @@ https://canada.ca/some/path`,
   });
 
   it('should call importGedsUrls on button click', async () => {
-    const mockResponse = {
+    const mockResponse: GedsImportResponse = {
       results: [
         {
-          url: 'https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=test',
-          status: 'success' as const,
+          url: 'https://example.com/geds.xml',
+          status: 'success',
           message: 'Imported successfully',
-          stats: { departments: 5, people: 10 },
+          stats: {
+            departments: 5,
+            people: 10,
+            departmentsCreated: 5,
+            departmentsReused: 0,
+            peopleCreated: 10,
+            peopleSkipped: 0,
+          },
         },
       ],
     };
@@ -143,19 +151,26 @@ https://canada.ca/some/path`,
   });
 
   it('should show mixed success/failure results', async () => {
-    const mockResponse = {
+    const mockResponse: GedsImportResponse = {
       results: [
         {
-          url: 'https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=test1',
-          status: 'success' as const,
+          url: 'https://example.com/geds1.xml',
+          status: 'success',
           message: 'Imported successfully',
-          stats: { departments: 5, people: 10 },
+          stats: {
+            departments: 5,
+            people: 10,
+            departmentsCreated: 5,
+            departmentsReused: 0,
+            peopleCreated: 10,
+            peopleSkipped: 0,
+          },
         },
         {
-          url: 'https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=test2',
-          status: 'failed' as const,
+          url: 'https://example.com/geds2.xml',
+          status: 'failed',
           message: 'Import failed',
-          error: 'Network timeout',
+          error: 'Download failed',
         },
       ],
     };

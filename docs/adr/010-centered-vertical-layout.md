@@ -1,4 +1,5 @@
 # ADR-010: Centered Vertical Layout
+
 **Status**: Accepted
 **Date**: 2026-01-25
 **Deciders**: Development Team

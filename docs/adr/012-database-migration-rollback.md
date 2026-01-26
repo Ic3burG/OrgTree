@@ -1,8 +1,10 @@
 # ADR-012: Database Migration Rollback
+
 **Status**: Accepted
 **Date**: 2026-01-25
 **Deciders**: Development Team
 **Tags**: database, infrastructure, devopsary 25, 2026 (Full Implementation)
+
 > **Related Roadmap Item**: Infrastructure & DevOps - Database Migration Rollback
 
 ---

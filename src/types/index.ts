@@ -342,6 +342,10 @@ export interface GedsImportResult {
   stats?: {
     departments: number;
     people: number;
+    departmentsCreated: number;
+    departmentsReused: number;
+    peopleCreated: number;
+    peopleSkipped: number;
   };
   error?: string;
 }

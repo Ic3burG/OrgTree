@@ -33,12 +33,16 @@ Be respectful, inclusive, and constructive. We're all here to build something gr
 ### Fork and Clone
 
 1. Fork the repository on GitHub
+
 2. Clone your fork:
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/OrgTree.git
    cd OrgTree
    ```
+
 3. Add the upstream remote:
+
    ```bash
    git remote add upstream https://github.com/Ic3burG/OrgTree.git
    ```
@@ -66,6 +70,7 @@ cd server && npm install && cd ..
    ```
 
 2. Required environment variables:
+
    ```env
    JWT_SECRET=your-secret-key-here
    NODE_ENV=development
@@ -87,7 +92,7 @@ The frontend proxies API requests to the backend automatically.
 
 ## Project Structure
 
-```
+```text
 OrgTree/
 ├── src/                    # Frontend (React + TypeScript)
 │   ├── components/         # React components
@@ -109,6 +114,7 @@ OrgTree/
 │   │   └── utils/          # Utility functions
 │   └── scripts/            # Database scripts, backups
 ├── dist/                   # Production build output
+├── docs/                   # Additional documentation
 └── docs/                   # Additional documentation
 ```
 
@@ -333,13 +339,21 @@ E2E tests are located in the `e2e/` directory and cover:
 
 We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
+```text
 <type>(<scope>): <description>
 
 [optional body]
 
 [optional footer]
 ```
+
+### Strict Commit Message Requirements
+
+**DETAILED, DESCRIPTIVE COMMIT MESSAGES ARE MANDATORY.** Every commit MUST follow the conventions in [.gemini/COMMIT_GUIDELINES.md](file:///.gemini/COMMIT_GUIDELINES.md).
+
+- **Vague or short commit messages (e.g., "sync branches", "fix bugs") are UNACCEPTABLE.**
+- Every commit body MUST list ALL significant changes, explain the "why", and include technical details.
+- Failure to follow these guidelines will result in the pull request being rejected.
 
 ### Types
 
@@ -358,10 +372,16 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```bash
 feat(auth): add password reset functionality
-fix(api): handle null response in department query
-docs: update contributing guidelines
-perf: implement code splitting for vendor chunks
-test(bulk): add tests for bulk delete operation
+
+Implemented a complete password reset flow including:
+- Added POST /api/auth/reset-password endpoint
+- Implemented secure token generation and expiry (1 hour)
+- Integrated with Resend API for email delivery
+- Added frontend components for 'Forgot Password' and 'Reset Password'
+- Added 12 unit tests and 2 E2E tests for the recovery flow
+
+The token is stored in the password_resets table and is automatically
+invalidated after use or expiry.
 ```
 
 ---

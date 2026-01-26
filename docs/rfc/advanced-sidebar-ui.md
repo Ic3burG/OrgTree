@@ -3,7 +3,7 @@
 **Status**: 📋 Planned  
 **Created**: January 26, 2026  
 **Priority**: Medium  
-**Complexity**: High  
+**Complexity**: High
 
 ## Overview
 
@@ -20,16 +20,19 @@ Enhance the admin sidebar with advanced UI features including multi-level collap
 ## Current Behavior
 
 The `AdminLayout.tsx` currently implements a basic two-state sidebar:
+
 - **Expanded** (256px / `w-64`): Full sidebar with labels
 - **Collapsed** (80px / `w-20`): Icon-only mode with tooltips
 
 **Current Features**:
+
 - `isCollapsed` state with localStorage persistence (`adminSidebarCollapsed`)
 - Toggle button using `PanelLeftClose`/`PanelLeft` icons
 - Responsive behavior: hamburger menu on mobile (`lg:hidden`)
 - Transition animations (`transition-all duration-300`)
 
 **Current Limitations**:
+
 - Only two states (no fully hidden option)
 - Fixed widths (cannot resize)
 - No quick access when fully hidden
@@ -44,13 +47,14 @@ The `AdminLayout.tsx` currently implements a basic two-state sidebar:
 
 Three-state sidebar with smooth transitions:
 
-| State | Width | Visual | Description |
-|-------|-------|--------|-------------|
-| **Expanded** | 256px (`w-64`) | Full labels + icons | Default expanded state |
-| **Minimized** | 64px (`w-16`) | Icons only, tooltips | Compact icon bar |
-| **Hidden** | 0px | Completely hidden | Full-screen content |
+| State         | Width          | Visual               | Description            |
+| ------------- | -------------- | -------------------- | ---------------------- |
+| **Expanded**  | 256px (`w-64`) | Full labels + icons  | Default expanded state |
+| **Minimized** | 64px (`w-16`)  | Icons only, tooltips | Compact icon bar       |
+| **Hidden**    | 0px            | Completely hidden    | Full-screen content    |
 
 **Keyboard Shortcuts**:
+
 - `Ctrl+B` (or `Cmd+B` on Mac): Cycle through states
 - `Ctrl+Shift+B`: Toggle between expanded and hidden (skip minimized)
 
@@ -117,6 +121,7 @@ Drag handle for custom width adjustment:
 - **Persistence**: Width saved to localStorage per user
 
 **Implementation Notes**:
+
 - Use `onMouseDown`/`onMouseMove`/`onMouseUp` for drag behavior
 - Apply `cursor: col-resize` to body during drag
 - Show visual handle (thin line or `GripVertical` icon)
@@ -137,6 +142,7 @@ Quick access to sidebar when fully hidden:
 - **Auto-hide**: FAB fades after 3 seconds of inactivity (reappears on mouse move near edge)
 
 **Accessibility**:
+
 - `aria-label="Open sidebar"`
 - Keyboard accessible (`Tab` focusable)
 - High contrast in both light and dark modes
@@ -148,6 +154,7 @@ Quick access to sidebar when fully hidden:
 Save and restore complete layout configurations:
 
 **Preset Data Structure**:
+
 ```typescript
 interface WorkspacePreset {
   id: string;
@@ -155,7 +162,7 @@ interface WorkspacePreset {
   createdAt: string;
   config: {
     sidebarState: 'expanded' | 'minimized' | 'hidden';
-    sidebarWidth: number;  // px (for resizable)
+    sidebarWidth: number; // px (for resizable)
     sidebarPinned: boolean;
     darkMode: boolean;
   };
@@ -163,11 +170,13 @@ interface WorkspacePreset {
 ```
 
 **UI Components**:
+
 1. **Save Preset Button**: In sidebar header or footer
 2. **Preset Dropdown**: Quick switch between saved presets
 3. **Manage Presets Modal**: Rename, delete, reorder presets
 
 **Default Presets** (built-in, non-deletable):
+
 - "Default": Expanded sidebar, 256px width
 - "Compact": Minimized sidebar (icon-only)
 - "Focus Mode": Hidden sidebar, FAB visible
@@ -180,17 +189,19 @@ interface WorkspacePreset {
 
 Control sidebar visibility behavior on navigation:
 
-| Mode | Behavior |
-|------|----------|
-| **Pinned** (default) | Sidebar stays open across route changes |
-| **Unpinned** | Sidebar auto-collapses to minimized state on route change |
+| Mode                 | Behavior                                                  |
+| -------------------- | --------------------------------------------------------- |
+| **Pinned** (default) | Sidebar stays open across route changes                   |
+| **Unpinned**         | Sidebar auto-collapses to minimized state on route change |
 
 **Visual Indicator**:
+
 - Pin icon (`Pin` / `PinOff`) in sidebar header
 - Tooltip showing current state
 - Subtle visual difference (e.g., slight border color change when unpinned)
 
 **Interactions**:
+
 - Click pin icon to toggle
 - When unpinned, expanding sidebar temporarily shows it until next navigation
 - Route change triggers collapse animation
@@ -225,21 +236,21 @@ interface SidebarProps {
   state: 'expanded' | 'minimized' | 'hidden';
   width: number;
   pinned: boolean;
-  
+
   // Callbacks
   onStateChange: (state: 'expanded' | 'minimized' | 'hidden') => void;
   onWidthChange: (width: number) => void;
   onPinnedChange: (pinned: boolean) => void;
-  
+
   // Content
   header?: React.ReactNode;
   navigation: React.ReactNode;
   footer?: React.ReactNode;
-  
+
   // Config
-  minWidth?: number;  // Default: 200
-  maxWidth?: number;  // Default: 400
-  defaultWidth?: number;  // Default: 256
+  minWidth?: number; // Default: 200
+  maxWidth?: number; // Default: 400
+  defaultWidth?: number; // Default: 256
 }
 ```
 
@@ -270,8 +281,8 @@ interface FABProps {
   onClick: () => void;
   icon?: LucideIcon;
   position?: 'bottom-left' | 'bottom-right';
-  autoHide?: boolean;  // Fade after inactivity
-  autoHideDelay?: number;  // ms, default 3000
+  autoHide?: boolean; // Fade after inactivity
+  autoHideDelay?: number; // ms, default 3000
 }
 ```
 
@@ -311,15 +322,15 @@ interface UseSidebarReturn {
   state: 'expanded' | 'minimized' | 'hidden';
   width: number;
   pinned: boolean;
-  
+
   // Actions
   setState: (state: 'expanded' | 'minimized' | 'hidden') => void;
   setWidth: (width: number) => void;
   setPinned: (pinned: boolean) => void;
-  cycleState: () => void;  // expanded → minimized → hidden → expanded
-  toggleExpanded: () => void;  // expanded ↔ hidden (skip minimized)
-  reset: () => void;  // Reset to defaults
-  
+  cycleState: () => void; // expanded → minimized → hidden → expanded
+  toggleExpanded: () => void; // expanded ↔ hidden (skip minimized)
+  reset: () => void; // Reset to defaults
+
   // Computed
   isExpanded: boolean;
   isMinimized: boolean;
@@ -329,6 +340,7 @@ interface UseSidebarReturn {
 ```
 
 Handles:
+
 - State persistence to localStorage
 - Keyboard shortcuts registration
 - Auto-collapse on route change (when unpinned)
@@ -343,7 +355,7 @@ Hook for managing workspace presets:
 interface UseWorkspacePresetsReturn {
   presets: WorkspacePreset[];
   activePresetId: string | null;
-  
+
   applyPreset: (id: string) => void;
   savePreset: (name: string) => void;
   updatePreset: (id: string, updates: Partial<WorkspacePreset>) => void;
@@ -408,6 +420,7 @@ Apply same sidebar enhancements for consistency:
 #### [NEW] [useSidebar.test.ts](file:///Users/ojdavis/Claude%20Code/OrgTree/src/hooks/useSidebar.test.ts)
 
 Unit tests for sidebar hook:
+
 - State transitions (expanded → minimized → hidden → expanded)
 - localStorage persistence
 - Reset functionality
@@ -418,6 +431,7 @@ Unit tests for sidebar hook:
 #### [NEW] [Sidebar.test.tsx](file:///Users/ojdavis/Claude%20Code/OrgTree/src/components/ui/Sidebar.test.tsx)
 
 Component tests:
+
 - Renders in all three states
 - Resize handle interactions
 - Pin toggle
@@ -429,6 +443,7 @@ Component tests:
 #### [NEW] [useWorkspacePresets.test.ts](file:///Users/ojdavis/Claude%20Code/OrgTree/src/hooks/useWorkspacePresets.test.ts)
 
 Unit tests for presets hook:
+
 - CRUD operations for presets
 - Built-in presets cannot be deleted
 - localStorage persistence
@@ -450,6 +465,7 @@ cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test
 ```
 
 New tests to verify:
+
 - `useSidebar.test.ts`: State management and persistence
 - `useWorkspacePresets.test.ts`: Preset CRUD operations
 - `Sidebar.test.tsx`: Component rendering and interactions

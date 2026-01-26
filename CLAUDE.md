@@ -56,13 +56,24 @@ Before staging files for commit, you MUST:
 
 **Commit & Push Policy:**
 
-- Use **detailed, descriptive commit messages** for all git commits. Follow the conventions in [.gemini/COMMIT_GUIDELINES.md](file:///.gemini/COMMIT_GUIDELINES.md).
+- **DETAILED, DESCRIPTIVE COMMIT MESSAGES ARE MANDATORY.** Every commit MUST follow the conventions in [.gemini/COMMIT_GUIDELINES.md](file:///.gemini/COMMIT_GUIDELINES.md).
+
+- **Vague or short commit messages (e.g., "sync branches", "fix bugs") are UNACCEPTABLE.**
+
+- Every commit body MUST list ALL significant changes, explain the "why", and include technical details.
+
 - **Commit locally AND push to remote immediately** upon completion of a task.
+
+**Rule for AI Assistants:**
+
+- AI assistants (including Claude Code) MUST review all file changes before writing a commit message and ensure every single change is documented in the commit body.
 
 **Why this matters:**
 
 - CI/CD pipeline will fail if linting errors are present.
+
 - Detailed logs are essential for project history and collaboration.
+
 - Immediate pushing prevents divergent branch states and ensures work is backed up.
 
 **Correct workflow:**
@@ -118,25 +129,41 @@ This is a monorepo with separate frontend and backend:
 - Production: Configured via `DATABASE_URL` env var (typically `/data/database.db` on Render)
 
 **Schema** (defined in `server/src/db.ts`):
+
 - `users` - User accounts with roles, 2FA settings, and passkey support
+
 - `organizations` - Organizations with sharing settings
+
 - `org_members` - Many-to-many relationship (users ↔ organizations) with roles (owner, admin, editor, viewer)
+
 - `departments` - Hierarchical department structure (self-referencing via `parent_id`)
+
 - `people` - People belonging to departments with `is_starred` flag
+
 - `invitations` - Email invitations with expiry
+
 - `audit_logs` - Change history (1-year retention, nullable org_id for system events)
+
 - `refresh_tokens` - JWT refresh tokens with device tracking (IP, user agent)
+
 - `passkeys` - WebAuthn credentials for passwordless authentication
+
 - `custom_field_definitions` - Organization-scoped custom field schemas
+
 - `custom_field_values` - Custom field instance data per entity
+
 - `departments_fts` / `people_fts` / `custom_fields_fts` - Full-text search tables
 
 **Key Features**:
 
 - Foreign key constraints enabled
+
 - Soft deletes via `deleted_at` timestamp
+
 - Full-text search (FTS5) with Porter stemming and diacritics support
+
 - WAL mode for concurrent reads, 64MB cache
+
 - Migrations handled inline in `db.ts` (check column existence, add if missing)
 
 ### Authentication & Authorization
@@ -144,16 +171,20 @@ This is a monorepo with separate frontend and backend:
 **Token Strategy**: Dual-token system (access + refresh)
 
 - **Access Token**: Short-lived JWT (15 min), stored in localStorage, sent via Authorization header
+
 - **Refresh Token**: Long-lived (7 days), stored in httpOnly cookie, used to renew access token
+
 - Auto-refresh at 80% of token lifetime (see `src/api/client.ts:151`)
 
 **Passkey/WebAuthn Support**:
+
 - Passwordless authentication using biometrics or security keys
 - Implemented with `@simplewebauthn/server` and `@simplewebauthn/browser`
 - Routes: `/api/auth/passkey/register-options`, `/api/auth/passkey/verify-registration`, etc.
 - Multiple passkeys per user supported
 
 **Two-Factor Authentication (2FA)**:
+
 - TOTP-based (Time-based One-Time Password)
 - 8 backup codes generated on setup (single-use)
 - Routes: `/api/auth/totp/setup`, `/api/auth/totp/verify`, `/api/auth/totp/disable`
@@ -163,10 +194,14 @@ This is a monorepo with separate frontend and backend:
 
 - **System-level** (users table): `user`, `admin`, `superuser`
   - `superuser`: Full system access, user management, cross-org audit logs
+
   - `admin`: Standard user with some privileges
+
   - `user`: Default role
+
 - **Organization-level** (org_members table): `owner`, `admin`, `editor`, `viewer`
   - Checked via `checkOrgAccess()` in `server/src/services/member.service.ts`
+
   - Owner cannot be removed or demoted
 
 **Session Management**:
@@ -180,9 +215,13 @@ This is a monorepo with separate frontend and backend:
 **Technology**: Socket.IO with JWT authentication
 
 **Architecture**:
+
 - Socket server initialized in `server/src/socket.ts`
+
 - Clients authenticate via `socket.handshake.auth.token`
+
 - Organization-based rooms: `org:{orgId}`
+
 - Users join rooms on organization view, leave when switching orgs
 
 **Event Flow** (example - department creation):
@@ -194,6 +233,7 @@ This is a monorepo with separate frontend and backend:
 5. Frontend updates UI without page refresh
 
 **Frontend Integration**:
+
 - `src/contexts/SocketContext.tsx` - React context for socket connection
 - Automatically reconnects on disconnect
 - Components subscribe to events via context
@@ -207,8 +247,11 @@ This is a monorepo with separate frontend and backend:
 - Server validates token matches cookie
 
 **Implementation**:
+
 - Token fetched on app init (`src/api/client.ts:52`)
+
 - Auto-refreshed on 403 CSRF errors
+
 - Applied to all state-changing requests (POST, PUT, DELETE)
 
 ### API Client Architecture
@@ -218,9 +261,13 @@ This is a monorepo with separate frontend and backend:
 **Key Features**:
 
 - Centralized request function with automatic token refresh
+
 - CSRF token management
+
 - Request retry logic (401 → refresh → retry, 403 CSRF → refetch token → retry)
+
 - Token refresh queue (prevents concurrent refresh requests)
+
 - ApiError class with status codes
 
 **Error Handling**:
@@ -234,15 +281,21 @@ This is a monorepo with separate frontend and backend:
 **Approach**: React Context API (no Redux/Zustand)
 
 **Contexts** (`src/contexts/`):
+
 - `AuthContext.tsx` - User authentication state, login/logout, role helpers
+
 - `SocketContext.tsx` - WebSocket connection, event subscriptions
+
 - `ThemeContext.tsx` - Dark mode state with localStorage persistence
 
 **Data Fetching**:
 
 - Direct API calls in components (no global state cache)
+
 - `useState` + `useEffect` pattern
+
 - Real-time updates via Socket.IO events
+
 - Custom hooks: `usePeople`, `useDepartments`, `useSearch`, `usePasskey`
 
 ### Service Layer (Backend)
@@ -250,14 +303,21 @@ This is a monorepo with separate frontend and backend:
 **Pattern**: Service functions separated from route handlers
 
 **Structure**:
+
 - `server/src/routes/*.ts` - Express routes (thin, handle HTTP concerns)
+
 - `server/src/services/*.service.ts` - Business logic (pure functions, return data/errors)
+
 - Routes call services, services interact with database
 
 **Example** (department creation):
+
 - Route: `server/src/routes/departments.ts` - validates request, checks auth
+
 - Service: `server/src/services/department.service.ts:createDepartment()` - inserts into DB
+
 - Audit: `server/src/services/audit.service.ts:logAction()` - records change
+
 - Socket: `emitToOrg()` - notifies connected clients
 
 ### Component Organization (Frontend)
@@ -295,6 +355,7 @@ src/components/
 ```
 
 **Key Components**:
+
 - **OrgMap.tsx**: Uses `reactflow` library for interactive canvas, handles zoom/pan, theming, export to PNG/PDF
 - **DepartmentNode.tsx**: Custom React Flow node component with expand/collapse, dark mode support
 - **SearchOverlay.tsx**: Connects to FTS5 search endpoint, fuzzy matching, autocomplete, starred filter
@@ -305,16 +366,23 @@ src/components/
 **CSV Format**:
 
 - Exports separate files for departments and people (zipped)
+
 - Includes all fields including IDs and custom field values for re-import
+
 - Handled in `server/src/routes/import.ts`
+
 - Maximum 10,000 items per import
 
 **GEDS XML**:
 
 - Government Electronic Directory Services format
+
 - French character support (accents, special chars, Latin-1 encoding)
+
 - Parser: `scripts/parse-geds-xml.ts`
+
 - Converts hierarchical XML to flat department/people structure
+
 - Duplicate department prevention on re-import
 
 ### Error Monitoring
@@ -322,9 +390,13 @@ src/components/
 **Technology**: Sentry (both frontend and backend)
 
 **Setup**:
+
 - Frontend: `src/sentry.ts` - wraps app with ErrorBoundary, breadcrumbs for user actions
+
 - Backend: `server/src/sentry.ts` - captures exceptions, request data, user context
+
 - Configured via `SENTRY_DSN` environment variable
+
 - Production only (checks `NODE_ENV`)
 
 ### Security Features
@@ -332,17 +404,25 @@ src/components/
 **Implemented**:
 
 - Helmet.js for security headers (XSS, clickjacking, MIME sniffing protection)
+
 - CSRF protection (double-submit cookie)
+
 - Rate limiting on auth endpoints (`express-rate-limit`)
+
 - Bcrypt password hashing (cost factor 10)
+
 - JWT token expiry (access: 15min, refresh: 7 days)
+
 - Foreign key constraints prevent orphaned records
+
 - Soft deletes preserve referential integrity
+
 - Input validation on all endpoints
 
 **Environment Variables**:
 
 - `JWT_SECRET` - **REQUIRED**, app exits if missing or using default in production
+
 - Production check: Refuses to start with `change-this-in-production` secret
 
 ## Important Patterns
@@ -387,6 +467,7 @@ cd server && npm test -- <test-file-pattern>
 **Automatic**: All CRUD operations must call `logAction()` from `audit.service.ts`
 
 **Required Parameters**:
+
 - `organizationId` - Which org (for filtering/cleanup), nullable for system events
 - `userId` - Who made the change
 - `action` - 'created', 'updated', 'deleted'
@@ -397,19 +478,29 @@ cd server && npm test -- <test-file-pattern>
 ## Development Tips
 
 - **Frontend Port**: 3000 (Vite default), proxied to backend via Vite config
+
 - **Backend Port**: 3001 (see `server/src/index.ts:57`)
+
 - **Database Inspection**: Use any SQLite browser, or `sqlite3 server/database.db`
+
 - **Hot Reload**: Both frontend (Vite) and backend (`--watch` flag) support hot reload
+
 - **Debugging Socket**: Use browser console → Network tab → WS filter
+
 - **API Documentation**: Swagger UI available at `/api/docs` when server running
+
 - **Pre-commit Hooks**: Husky runs linting and formatting via `lint-staged` (see `.husky/pre-commit`)
 
 ## Testing
 
 - **Frontend**: Vitest + React Testing Library (124+ tests)
+
 - **Backend**: Vitest + Supertest (373+ tests)
+
 - Tests are colocated with source files (e.g., `auth.service.test.ts` next to `auth.service.ts`)
+
 - Coverage configured in `vitest.config.ts` (root) and `server/vitest.config.ts`
+
 - E2E tests with Playwright for critical user flows
 
 ## Production Deployment
@@ -431,25 +522,39 @@ cd server && npm start
 **Environment**:
 
 - `NODE_ENV=production`
+
 - `JWT_SECRET` - Must be set to secure random string
+
 - `DATABASE_URL` - Path to persistent disk (e.g., `file:/data/database.db`)
+
 - `FRONTEND_URL` - For CORS (e.g., `https://orgtree.onrender.com`)
+
 - Optional: `SENTRY_DSN`, `RESEND_API_KEY` (for email invitations)
 
 **Persistent Storage**:
 
 - Attach disk at `/data` for SQLite database
+
 - Backup strategy: Automatic via cron (see `server/scripts/backup.ts`)
 
 ## Key Files to Understand
 
 - `server/src/db.ts` - Database schema, migrations, FTS5 setup
+
 - `server/src/index.ts` - Express app setup, middleware order, route mounting
+
 - `server/src/socket.ts` - WebSocket initialization, room management
+
 - `src/api/client.ts` - API client, token refresh, CSRF handling
+
 - `src/App.tsx` - Route definitions, AuthProvider, SocketProvider, ThemeProvider
+
 - `server/src/middleware/auth.ts` - JWT verification, role checking
+
 - `server/src/services/member.service.ts` - Organization permission checking
+
 - `server/src/services/custom-fields.service.ts` - Custom field CRUD and validation
+
 - `server/src/services/passkey.service.ts` - WebAuthn passkey management
+
 - `server/src/services/totp.service.ts` - Two-factor authentication

@@ -351,6 +351,7 @@ Potential features to add:
 10. **Offline Support**: Service workers for PWA capability
 
 **Already Implemented:**
+
 - ✅ CSV Import/Export (with ZIP bundling)
 - ✅ PDF/PNG Export (via React Flow)
 - ✅ Dark Mode (with system preference detection)

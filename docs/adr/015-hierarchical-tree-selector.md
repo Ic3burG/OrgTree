@@ -1,4 +1,5 @@
 # ADR-015: Hierarchical Tree Selector
+
 **Status**: Accepted
 **Date**: 2026-01-25
 **Deciders**: Development Team
