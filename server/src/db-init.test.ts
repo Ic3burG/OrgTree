@@ -3,7 +3,7 @@ import Database from 'better-sqlite3';
 import { initializeDatabase } from './db-init.js';
 
 // Mock migrations to prevent race conditions with discovery.test.ts
-vi.mock('./migrations/index.js', async (importOriginal) => {
+vi.mock('./migrations/index.js', async importOriginal => {
   const actual = await importOriginal<typeof import('./migrations/index.js')>();
   return {
     ...actual,
@@ -11,9 +11,9 @@ vi.mock('./migrations/index.js', async (importOriginal) => {
   };
 });
 
-vi.mock('./migrations/legacy-migrations.js', async (importOriginal) => {
-    // We want the REAL legacy migrations to run so tables are created
-    return await importOriginal();
+vi.mock('./migrations/legacy-migrations.js', async importOriginal => {
+  // We want the REAL legacy migrations to run so tables are created
+  return await importOriginal();
 });
 
 describe('Database Initialization', () => {
