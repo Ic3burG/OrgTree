@@ -46,7 +46,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [ ] **APM (Application Performance Monitoring)** - New Relic, DataDog, or similar
 - [x] **CI/CD Pipeline** - GitHub Actions for automated testing and deployment ✅ **DONE** (January 5, 2026)
 - [x] **Staging Environment** - Separate staging server for pre-production testing ✅ **DONE** (January 21, 2026)
-- [ ] **Database Migration Rollback** - Strategy and scripts for safe rollbacks (see [docs/plans/database-migration-rollback.md](plans/database-migration-rollback.md))
+- [x] **Database Migration Rollback** - Strategy and scripts for safe rollbacks (see [docs/plans/database-migration-rollback.md](plans/database-migration-rollback.md)) ✅ **DONE** (January 25, 2026)
 - [x] **Health Check Enhancement** - Add memory usage, disk space, connection pool metrics ✅ **DONE** (January 8, 2026)
 
 ### Scalability & Architecture
@@ -182,6 +182,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 - ✅ **Search System Rebuild** - Fixed FTS5 sync, soft-deletes, error handling, and added frontend resilience (January 24, 2026)
 - ✅ **User Discovery & Privacy Controls** - Implemented discoverable user search with opt-out settings and autocomplete (January 25, 2026)
+- ✅ **Database Migration Rollback** - Comprehensive migration system with auto-rollback in CD (January 25, 2026)
 - ✅ **Department Hierarchy Highlighting** - Visual highlighting of ancestor departments on hover/click in Org Map (January 22, 2026)
 - ✅ **Centered Vertical Layout** - Balanced organizational structure (January 22, 2026)
 - ✅ **Rainbow Color Theme** - Vibrant depth-based coloring (January 22, 2026)
