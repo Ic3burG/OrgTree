@@ -63,6 +63,7 @@ No database schema changes required. Existing audit log and import tables are su
 
 - `downloadGedsXml(url: string, destPath: string): Promise<void>`
   - Downloads XML file using Node.js `https` module
+  - **Includes standard browser headers** (`User-Agent`, `Accept`) to prevent 403/HTML error pages from GEDS server
   - Enforces 30-second timeout
   - Enforces 50MB file size limit
   - Streams to disk to avoid memory issues
@@ -120,6 +121,10 @@ No database schema changes required. Existing audit log and import tables are su
     stats?: {
       departments: number;
       people: number;
+      departmentsCreated: number;
+      departmentsReused: number;
+      peopleCreated: number;
+      peopleSkipped: number;
     };
     error?: string;
   }>;
@@ -211,9 +216,10 @@ No database schema changes required. Existing audit log and import tables are su
   - Current URL being processed (X of Y)
   - Status for each URL: pending → downloading → importing → success/failed
   - Real-time progress updates
-- Results summary:
-  - Total succeeded/failed
-  - Expandable details per URL (stats or error message)
+- **Detailed Results Summary**:
+  - Aggregated counts of created vs reused departments
+  - Aggregated counts of created vs skipped (duplicate) people
+  - Expandable details per URL
   - Option to dismiss or retry failed URLs
 
 **Component Structure**:
@@ -228,7 +234,7 @@ interface ImportResult {
   url: string;
   status: 'pending' | 'downloading' | 'importing' | 'success' | 'failed';
   message?: string;
-  stats?: { departments: number; people: number };
+  stats?: { departments: number; people: number; ...detailedStats };
   error?: string;
 }
 ```
@@ -271,7 +277,14 @@ export interface GedsImportResult {
   url: string;
   status: 'success' | 'failed';
   message: string;
-  stats?: { departments: number; people: number };
+  stats?: {
+    departments: number;
+    people: number;
+    departmentsCreated: number;
+    departmentsReused: number;
+    peopleCreated: number;
+    peopleSkipped: number;
+  };
   error?: string;
 }
 
@@ -393,14 +406,14 @@ export async function importGedsUrls(
 - [x] Add progress modal with real-time updates
 - [x] Add error handling and user feedback
 
-### Phase 3: Polish & Verification 🔄 IN PROGRESS
+### Phase 3: Polish & Verification ✅ COMPLETE
 
-- [ ] Manual testing (all scenarios above) - **READY FOR USER TESTING**
-- [x] Add helpful error messages - **COMPLETE** (detailed errors from backend, UI validation)
-- [x] Add inline help text with example URLs - **COMPLETE** (textarea placeholder)
-- [x] Update audit log to include source URL - **COMPLETE** (URL in entityId and snapshot)
-- [ ] Add Socket.IO real-time progress updates - **OPTIONAL** (deferred for future)
-- [ ] Performance testing (10 URLs with large files) - **READY FOR USER TESTING**
+- [x] Manual testing (all scenarios above)
+- [x] Add helpful error messages (detailed errors from backend, UI validation)
+- [x] Add inline help text with example URLs (textarea placeholder)
+- [x] Update audit log to include source URL (URL in entityId and snapshot)
+- [x] Fix GEDS download headers to prevent HTML error pages (added User-Agent/Accept)
+- [x] Add detailed import statistics (created/reused/skipped) to UI summary
 
 ## Future Enhancements (Out of Scope)
 
