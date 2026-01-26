@@ -355,6 +355,8 @@ export default function ImportModal({
                       onChange={handleFileChange}
                       disabled={loading}
                       className="hidden"
+                      data-testid="file-input"
+                      aria-label={importType === 'csv' ? 'Select CSV file' : 'Select XML files'}
                     />
 
                     {importType === 'csv' ? (
