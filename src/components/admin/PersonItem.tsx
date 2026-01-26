@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Mail, Phone, Edit, Trash2, CheckSquare, Square, Star } from 'lucide-react';
 import type { Person, CustomFieldDefinition, Department } from '../../types/index.js';
 import OrganizationalHierarchy from '../OrganizationalHierarchy';
@@ -31,6 +32,9 @@ const PersonItem = memo(function PersonItem({
   fieldDefinitions = [],
   departments = [],
 }: PersonItemProps): React.JSX.Element {
+  const navigate = useNavigate();
+  const { orgId } = useParams<{ orgId: string }>();
+
   // Build hierarchy chain if departments are available
   const hierarchy =
     departments.length > 0 ? buildHierarchyChain(person.department_id, departments) : [];
@@ -42,6 +46,18 @@ const PersonItem = memo(function PersonItem({
       definition: def,
       value: person.custom_fields![def.field_key],
     }));
+
+  // Navigate to org map with person highlighted
+  const handlePersonNameClick = (e: React.MouseEvent) => {
+    if (selectionMode) return;
+    e.stopPropagation();
+    navigate(`/org/${orgId}/map?personId=${person.id}`);
+  };
+
+  // Navigate to org map with department highlighted
+  const handleDepartmentNavigate = (departmentId: string) => {
+    navigate(`/org/${orgId}/map?departmentId=${departmentId}`);
+  };
 
   return (
     <div
@@ -71,7 +87,16 @@ const PersonItem = memo(function PersonItem({
         <div className="flex-1 min-w-0 relative">
           <div className="flex items-center gap-3 mb-2">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 truncate flex items-center gap-2">
-              {person.name}
+              <button
+                onClick={handlePersonNameClick}
+                className={`text-left hover:text-blue-600 dark:hover:text-blue-400 transition-colors ${
+                  selectionMode ? 'cursor-default' : 'cursor-pointer'
+                }`}
+                disabled={selectionMode}
+                title="View on Org Map"
+              >
+                {person.name}
+              </button>
               {person.is_starred && (
                 <Star size={16} className="text-amber-400 flex-shrink-0" fill="currentColor" />
               )}
@@ -94,6 +119,7 @@ const PersonItem = memo(function PersonItem({
                 <OrganizationalHierarchy
                   hierarchy={hierarchy}
                   currentDepartmentId={person.department_id}
+                  onNavigate={handleDepartmentNavigate}
                   compact={true}
                   showIcons={true}
                 />
