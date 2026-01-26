@@ -1,14 +1,14 @@
 # Test Coverage Expansion Plan
 
-**Status**: 🚀 In Progress
+**Status**: ✅ Completed
 **Created**: January 25, 2026
 **Priority**: Medium (Roadmap Item)
-**Current Count**: ~892 Tests (657 Backend, 235 Frontend)
+**Current Count**: ~902 Tests (667 Backend, 235 Frontend)
 **Target**: 80%+ Code Coverage across Backend and Frontend
 
 ## Overview
 
-While the project has made significant strides in test coverage (increasing from ~210 to ~892 tests), specific areas remain under-tested. This plan outlines a systematic approach to reaching >80% code coverage by targeting critical gaps in backend services, frontend complex logic, and edge cases.
+While the project has made significant strides in test coverage (increasing from ~210 to ~902 tests), specific areas remain under-tested. This plan outlines a systematic approach to reaching >80% code coverage by targeting critical gaps in backend services, frontend complex logic, and edge cases.
 
 ## Current Status Analysis
 
@@ -20,6 +20,7 @@ While the project has made significant strides in test coverage (increasing from
   - Search system (FTS5)
   - Authorization middleware
   - Backup & Migration logic (New)
+  - **Performance & Edge Cases** (New)
 - **Weaknesses/Gaps**: 
   - Service-layer error handling: Many "happy paths" are tested, but specific database error scenarios (constraints, connection timeouts) need consistent coverage.
   - Edge cases in complex logic (e.g., circular hierarchy detection, large bulk operations).
@@ -93,15 +94,15 @@ Move beyond simple component rendering tests to testing the "brain" of the front
     -   Test error display for malformed files.
     -   Test duplicate warning presentations.
 
-### Phase 4: Integration & Edge Cases
+### Phase 4: Integration & Edge Cases (✅ Completed)
 
-1.  **Cascade Delete Scenarios**
+1.  **Cascade Delete Scenarios** ✅
     -   Verify (via integration test) that deleting a department soft-deletes all descendants and unassigns/soft-deletes people.
 
-2.  **Concurrency**
+2.  **Concurrency** ✅
     -   Simulate concurrent edits to the same organization in backend tests to verify optimistic locking or last-write-wins behavior (ensure no crashes).
 
-3.  **Large Dataset Performance**
+3.  **Large Dataset Performance** ✅
     -   Add regression tests for performance-critical endpoints (e.g., `GET /org-map`) to ensure response times remain within limits for known dataset sizes.
 
 ## Success Metrics
