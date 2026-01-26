@@ -49,23 +49,24 @@ export function checkFtsIntegrity(): FtsHealthStatus {
       .prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL')
       .get() as { count: number };
 
-    const deptActual = db
-      .prepare('SELECT COUNT(DISTINCT rowid) as count FROM departments_fts')
-      .get() as { count: number };
+    // For external content FTS tables, count indexed rows by querying FTS5 shadow tables
+    // The _data table has metadata rows (typically 2) plus actual indexed document rows
+    const deptRawCount = (
+      db.prepare('SELECT COUNT(*) as count FROM departments_fts_data').get() as { count: number }
+    ).count;
+    const deptActualCount = Math.max(0, deptRawCount - 2);
 
-    // console.log(`DEBUG: deptExpected=${deptExpected.count}, deptActual=${deptActual.count}`);
-
-    const deptInSync = deptExpected.count === deptActual.count;
+    const deptInSync = deptExpected.count === deptActualCount;
     results.push({
       table: 'departments_fts',
       expected: deptExpected.count,
-      actual: deptActual.count,
+      actual: deptActualCount,
       inSync: deptInSync,
     });
 
     if (!deptInSync) {
       issues.push(
-        `departments_fts out of sync: expected ${deptExpected.count}, got ${deptActual.count}`
+        `departments_fts out of sync: expected ${deptExpected.count}, got ${deptActualCount}`
       );
     }
 
@@ -74,21 +75,22 @@ export function checkFtsIntegrity(): FtsHealthStatus {
       .prepare('SELECT COUNT(*) as count FROM people WHERE deleted_at IS NULL')
       .get() as { count: number };
 
-    const peopleActual = db
-      .prepare('SELECT COUNT(DISTINCT rowid) as count FROM people_fts')
-      .get() as { count: number };
+    const peopleRawCount = (
+      db.prepare('SELECT COUNT(*) as count FROM people_fts_data').get() as { count: number }
+    ).count;
+    const peopleActualCount = Math.max(0, peopleRawCount - 2);
 
-    const peopleInSync = peopleExpected.count === peopleActual.count;
+    const peopleInSync = peopleExpected.count === peopleActualCount;
     results.push({
       table: 'people_fts',
       expected: peopleExpected.count,
-      actual: peopleActual.count,
+      actual: peopleActualCount,
       inSync: peopleInSync,
     });
 
     if (!peopleInSync) {
       issues.push(
-        `people_fts out of sync: expected ${peopleExpected.count}, got ${peopleActual.count}`
+        `people_fts out of sync: expected ${peopleExpected.count}, got ${peopleActualCount}`
       );
     }
 
@@ -105,21 +107,22 @@ export function checkFtsIntegrity(): FtsHealthStatus {
       )
       .get() as { count: number };
 
-    const customFieldsActual = db
-      .prepare('SELECT COUNT(*) as count FROM custom_fields_fts')
-      .get() as { count: number };
+    const customFieldsRawCount = (
+      db.prepare('SELECT COUNT(*) as count FROM custom_fields_fts_data').get() as { count: number }
+    ).count;
+    const customFieldsActualCount = Math.max(0, customFieldsRawCount - 2);
 
-    const customFieldsInSync = customFieldsExpected.count === customFieldsActual.count;
+    const customFieldsInSync = customFieldsExpected.count === customFieldsActualCount;
     results.push({
       table: 'custom_fields_fts',
       expected: customFieldsExpected.count,
-      actual: customFieldsActual.count,
+      actual: customFieldsActualCount,
       inSync: customFieldsInSync,
     });
 
     if (!customFieldsInSync) {
       issues.push(
-        `custom_fields_fts out of sync: expected ${customFieldsExpected.count}, got ${customFieldsActual.count}`
+        `custom_fields_fts out of sync: expected ${customFieldsExpected.count}, got ${customFieldsActualCount}`
       );
     }
 
@@ -279,20 +282,21 @@ export function optimizeFtsIndexes(): void {
 export function getFtsStatistics(): FtsStatistics {
   const recommendations: string[] = [];
 
-  // Get indexed counts
-  const deptCount = (
-    db.prepare('SELECT COUNT(DISTINCT rowid) as count FROM departments_fts').get() as {
-      count: number;
-    }
+  // Get indexed counts from FTS5 shadow tables (subtract 2 for metadata rows)
+  const deptRawCount = (
+    db.prepare('SELECT COUNT(*) as count FROM departments_fts_data').get() as { count: number }
   ).count;
+  const deptCount = Math.max(0, deptRawCount - 2);
 
-  const peopleCount = (
-    db.prepare('SELECT COUNT(DISTINCT rowid) as count FROM people_fts').get() as { count: number }
+  const peopleRawCount = (
+    db.prepare('SELECT COUNT(*) as count FROM people_fts_data').get() as { count: number }
   ).count;
+  const peopleCount = Math.max(0, peopleRawCount - 2);
 
-  const customFieldsCount = (
-    db.prepare('SELECT COUNT(*) as count FROM custom_fields_fts').get() as { count: number }
+  const customFieldsRawCount = (
+    db.prepare('SELECT COUNT(*) as count FROM custom_fields_fts_data').get() as { count: number }
   ).count;
+  const customFieldsCount = Math.max(0, customFieldsRawCount - 2);
 
   // Estimate FTS index sizes (approximate, based on row count)
   // Since we can't easily get exact size per table in SQLite, estimate based on row count
