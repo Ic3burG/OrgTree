@@ -97,6 +97,12 @@ export default function GedsUrlImporter({
   const successCount = results.filter(r => r.status === 'success').length;
   const failureCount = results.filter(r => r.status === 'failed').length;
 
+  // Aggregate stats
+  const totalDepsCreated = results.reduce((sum, r) => sum + (r.stats?.departmentsCreated || 0), 0);
+  const totalDepsReused = results.reduce((sum, r) => sum + (r.stats?.departmentsReused || 0), 0);
+  const totalPeopleCreated = results.reduce((sum, r) => sum + (r.stats?.peopleCreated || 0), 0);
+  const totalPeopleSkipped = results.reduce((sum, r) => sum + (r.stats?.peopleSkipped || 0), 0);
+
   return (
     <div className="space-y-4">
       <div>
@@ -197,29 +203,53 @@ export default function GedsUrlImporter({
                 {status === 'complete' && (
                   <div className="space-y-4">
                     {/* Summary */}
-                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                      <h3 className="font-medium text-gray-900 dark:text-white mb-2">
+                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 mb-4">
+                      <div className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
                         Import Summary
-                      </h3>
-                      <div className="space-y-1 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-300">Total URLs:</span>
-                          <span className="font-medium text-gray-900 dark:text-white">
-                            {results.length}
+                      </div>
+
+                      {/* Departments */}
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-slate-600 dark:text-slate-400">Departments:</span>
+                          <span className="font-medium text-slate-800 dark:text-slate-200">
+                            {totalDepsCreated + totalDepsReused}
                           </span>
                         </div>
-                        {successCount > 0 && (
-                          <div className="flex justify-between text-green-600 dark:text-green-400">
-                            <span>Successful:</span>
-                            <span className="font-medium">{successCount}</span>
-                          </div>
-                        )}
-                        {failureCount > 0 && (
-                          <div className="flex justify-between text-red-600 dark:text-red-400">
-                            <span>Failed:</span>
-                            <span className="font-medium">{failureCount}</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-500 ml-4">
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            {totalDepsCreated} created
+                          </span>
+                          {totalDepsReused > 0 && (
+                            <span className="flex items-center gap-1">
+                              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                              {totalDepsReused} reused
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* People */}
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-slate-600 dark:text-slate-400">People:</span>
+                          <span className="font-medium text-slate-800 dark:text-slate-200">
+                            {totalPeopleCreated + totalPeopleSkipped}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-500 ml-4">
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            {totalPeopleCreated} created
+                          </span>
+                          {totalPeopleSkipped > 0 && (
+                            <span className="flex items-center gap-1">
+                              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                              {totalPeopleSkipped} skipped (duplicates)
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -244,9 +274,16 @@ export default function GedsUrlImporter({
                               </div>
                               {result.status === 'success' && result.stats && (
                                 <div className="mt-1 text-sm text-gray-700 dark:text-gray-300">
-                                  Imported {result.stats.departments} department
-                                  {result.stats.departments === 1 ? '' : 's'} and{' '}
-                                  {result.stats.people} person
+                                  <div className="flex gap-3">
+                                    <span>
+                                      Departments: {result.stats.departmentsCreated} new,{' '}
+                                      {result.stats.departmentsReused} reused
+                                    </span>
+                                    <span>
+                                      People: {result.stats.peopleCreated} new,{' '}
+                                      {result.stats.peopleSkipped} skipped
+                                    </span>
+                                  </div>
                                 </div>
                               )}
                               {result.status === 'failed' && result.error && (

@@ -33,6 +33,10 @@ interface GedsImportResult {
   stats?: {
     departments: number;
     people: number;
+    departmentsCreated: number;
+    departmentsReused: number;
+    peopleCreated: number;
+    peopleSkipped: number;
   };
   error?: string;
 }
@@ -276,6 +280,10 @@ router.post(
             stats: {
               departments: stats.departmentsCreated + stats.departmentsReused,
               people: stats.peopleCreated,
+              departmentsCreated: stats.departmentsCreated,
+              departmentsReused: stats.departmentsReused,
+              peopleCreated: stats.peopleCreated,
+              peopleSkipped: stats.peopleSkipped,
             },
           });
         } catch (err) {
