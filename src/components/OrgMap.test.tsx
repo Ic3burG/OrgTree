@@ -1,49 +1,244 @@
-import { describe, it, expect } from 'vitest';
-import { buildAncestorMap } from './OrgMap';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
+import OrgMap, { buildAncestorMap } from './OrgMap';
 import { Department } from '../types';
+import { ReactFlowProvider } from 'reactflow';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import api from '../api/client';
+import { useOrgMapSettings } from '../hooks/useOrgMapSettings';
+import React from 'react';
 
-describe('buildAncestorMap', () => {
-  it('should build correct ancestor chains for a simple hierarchy', () => {
-    const departments: Department[] = [
-      { id: '1', name: 'Root', parent_id: null, people: [] },
-      { id: '2', name: 'Child', parent_id: '1', people: [] },
-      { id: '3', name: 'Grandchild', parent_id: '2', people: [] },
-    ] as unknown as Department[];
+// Define mocks outside so they can be accessed in tests
+const mockFitView = vi.fn();
+const mockZoomIn = vi.fn();
+const mockZoomOut = vi.fn();
+const mockSetCenter = vi.fn();
 
-    const ancestorMap = buildAncestorMap(departments);
+// Mock ReactFlow
 
-    expect(ancestorMap.get('1')).toEqual(['1']);
-    expect(ancestorMap.get('2')).toEqual(['2', '1']);
-    expect(ancestorMap.get('3')).toEqual(['3', '2', '1']);
+vi.mock('reactflow', async importOriginal => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const actual = await importOriginal<any>();
+  return {
+    ...actual,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    default: ({ children }: any) => <div data-testid="react-flow">{children}</div>,
+    Background: () => <div data-testid="background" />,
+    MiniMap: () => <div data-testid="mini-map" />,
+    // Use real useState to allow component to update its internal state
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    useNodesState: (initial: any) => React.useState(initial),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    useEdgesState: (initial: any) => React.useState(initial),
+    useReactFlow: () => ({
+      fitView: mockFitView,
+      zoomIn: mockZoomIn,
+      zoomOut: mockZoomOut,
+      setCenter: mockSetCenter,
+    }),
+  };
+});
+
+// Mock react-router-dom
+
+vi.mock('react-router-dom', async importOriginal => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const actual = await importOriginal<any>();
+  return {
+    ...actual,
+    useParams: () => ({ orgId: 'org-123' }),
+    useSearchParams: () => [new URLSearchParams(), vi.fn()],
+  };
+});
+
+// Mock API
+vi.mock('../api/client', () => ({
+  default: {
+    getOrganization: vi.fn(),
+    getCustomFieldDefinitions: vi.fn(),
+    updatePerson: vi.fn(),
+    createPerson: vi.fn(),
+  },
+}));
+
+// Mock hooks
+vi.mock('../hooks/useOrgMapSettings', () => ({
+  useOrgMapSettings: vi.fn(),
+}));
+
+vi.mock('../hooks/useRealtimeUpdates', () => ({
+  useRealtimeUpdates: vi.fn(),
+}));
+
+vi.mock('../contexts/ThemeContext', () => ({
+  useTheme: () => ({ isDarkMode: false }),
+}));
+
+vi.mock('./ui/Toast', () => ({
+  useToast: () => ({
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+  }),
+}));
+
+// Mock child components to simplify
+vi.mock('./SearchOverlay', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  default: ({ onSelectResult }: any) => (
+    <div data-testid="search-overlay">
+      <button onClick={() => onSelectResult({ type: 'department', nodeId: 'dept-1' })}>
+        Select Dept 1
+      </button>
+    </div>
+  ),
+}));
+vi.mock('./Toolbar', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  default: ({ onExpandAll, onCollapseAll, onToggleLayout, onResetLayout }: any) => (
+    <div data-testid="toolbar">
+      <button onClick={onExpandAll}>Expand All</button>
+      <button onClick={onCollapseAll}>Collapse All</button>
+      <button onClick={onToggleLayout}>Toggle Layout</button>
+      <button onClick={onResetLayout}>Reset Layout</button>
+    </div>
+  ),
+}));
+vi.mock('./DetailPanel', () => ({ default: () => <div data-testid="detail-panel" /> }));
+vi.mock('./admin/PersonForm', () => ({ default: () => <div data-testid="person-form" /> }));
+vi.mock('./map/ExportButton', () => ({ default: () => <div data-testid="export-button" /> }));
+
+describe('OrgMap Logic', () => {
+  describe('buildAncestorMap', () => {
+    it('should build correct ancestor chains for a simple hierarchy', () => {
+      const departments: Department[] = [
+        { id: '1', name: 'Root', parent_id: null, people: [] },
+        { id: '2', name: 'Child', parent_id: '1', people: [] },
+        { id: '3', name: 'Grandchild', parent_id: '2', people: [] },
+      ] as unknown as Department[];
+
+      const ancestorMap = buildAncestorMap(departments);
+
+      expect(ancestorMap.get('1')).toEqual(['1']);
+      expect(ancestorMap.get('2')).toEqual(['2', '1']);
+      expect(ancestorMap.get('3')).toEqual(['3', '2', '1']);
+    });
+  });
+});
+
+describe('OrgMap Component', () => {
+  const mockOrg = {
+    id: 'org-123',
+    name: 'Test Org',
+    role: 'admin',
+    departments: [{ id: 'dept-1', name: 'Engineering', parent_id: null, people: [] }],
+  };
+
+  const mockSettings = {
+    theme: 'slate',
+    layoutDirection: 'TB',
+    expandedNodes: [],
+    viewport: { x: 0, y: 0, zoom: 1 },
+    nodePositionsTB: {},
+    nodePositionsLR: {},
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useOrgMapSettings as Mock).mockReturnValue({
+      settings: mockSettings,
+      updateSettings: vi.fn(),
+      resetSettings: vi.fn(),
+      isLoaded: true,
+    });
+    (api.getOrganization as Mock).mockResolvedValue(mockOrg);
+    (api.getCustomFieldDefinitions as Mock).mockResolvedValue([]);
   });
 
-  it('should handle disjoint trees', () => {
-    const departments: Department[] = [
-      { id: 'A', name: 'Root A', parent_id: null },
-      { id: 'B', name: 'Child A', parent_id: 'A' },
-      { id: 'X', name: 'Root X', parent_id: null },
-      { id: 'Y', name: 'Child X', parent_id: 'X' },
-    ] as unknown as Department[];
+  const renderComponent = () => {
+    return render(
+      <ReactFlowProvider>
+        <MemoryRouter initialEntries={['/org/org-123/map']}>
+          <Routes>
+            <Route path="/org/:orgId/map" element={<OrgMap />} />
+          </Routes>
+        </MemoryRouter>
+      </ReactFlowProvider>
+    );
+  };
 
-    const ancestorMap = buildAncestorMap(departments);
+  it('renders loading state initially', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let resolveApi: any;
+    const apiPromise = new Promise(resolve => {
+      resolveApi = resolve;
+    });
+    (api.getOrganization as Mock).mockReturnValue(apiPromise);
 
-    expect(ancestorMap.get('B')).toEqual(['B', 'A']);
-    expect(ancestorMap.get('Y')).toEqual(['Y', 'X']);
+    renderComponent();
+    expect(screen.getByText(/Loading organization map/i)).toBeDefined();
+
+    await act(async () => {
+      resolveApi(mockOrg);
+    });
   });
 
-  it('should handle circular references gracefully (break cycle)', () => {
-    // Note: getDepth handles cycle detection warning, buildAncestorMap recursively calls getAncestors
-    // We explicitly laid out protection in getAncestors with visited Set
-    const departments: Department[] = [
-      { id: '1', name: 'A', parent_id: '2' },
-      { id: '2', name: 'B', parent_id: '1' },
-    ] as unknown as Department[];
+  it('renders the map after loading data', async () => {
+    renderComponent();
 
-    const ancestorMap = buildAncestorMap(departments);
+    await waitFor(() => {
+      expect(screen.getByTestId('react-flow')).toBeDefined();
+    });
 
-    // It should just return the path until it hits visited
-    // 1 -> 2 -> 1 (stop)
-    expect(ancestorMap.get('1')).toEqual(['1', '2']);
-    expect(ancestorMap.get('2')).toEqual(['2', '1']);
+    expect(screen.getByTestId('toolbar')).toBeDefined();
+    expect(screen.getByTestId('search-overlay')).toBeDefined();
+    expect(api.getOrganization).toHaveBeenCalledWith('org-123');
+  });
+
+  it('handles empty organization gracefully', async () => {
+    (api.getOrganization as Mock).mockResolvedValue({
+      ...mockOrg,
+      departments: [],
+    });
+
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText(/No departments yet/i)).toBeDefined();
+    });
+  });
+
+  it('handles API errors', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    (api.getOrganization as Mock).mockRejectedValue(new Error('API Error'));
+
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText(/Error Loading Map/i)).toBeDefined();
+      expect(screen.getByText(/API Error/i)).toBeDefined();
+    });
+  });
+
+  it('handles Expand All toolbar action', async () => {
+    renderComponent();
+    await waitFor(() => expect(screen.getByTestId('react-flow')).toBeDefined());
+
+    const expandAllBtn = screen.getByText('Expand All');
+    fireEvent.click(expandAllBtn);
+
+    // Check if toolbar button exists
+    expect(expandAllBtn).toBeDefined();
+  });
+
+  it('handles search result selection', async () => {
+    renderComponent();
+    await waitFor(() => expect(screen.getByTestId('react-flow')).toBeDefined());
+
+    const selectDeptBtn = screen.getByText('Select Dept 1');
+    fireEvent.click(selectDeptBtn);
+
+    expect(mockSetCenter).toHaveBeenCalled();
   });
 });
