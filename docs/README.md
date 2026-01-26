@@ -12,6 +12,11 @@ ADRs document significant architectural decisions that have been finalized and i
 | 010 | [Centered Vertical Layout](./adr/010-centered-vertical-layout.md) | ✅ Implemented | 2026-01-25 |
 | 011 | [Rainbow Color Theme](./adr/011-rainbow-color-theme.md) | ✅ Implemented | 2026-01-25 |
 | 012 | [Database Migration Rollback](./adr/012-database-migration-rollback.md) | ✅ Implemented | 2026-01-26 |
+| 013 | [User Discovery & Privacy](./adr/013-user-discovery-privacy.md) | ✅ Implemented | 2026-01-25 |
+| 014 | [Test Coverage Expansion](./adr/014-test-coverage-expansion.md) | ✅ Implemented | 2026-01-25 |
+| 015 | [Hierarchical Tree Selector](./adr/015-hierarchical-tree-selector.md) | ✅ Implemented | 2026-01-25 |
+| 016 | [GEDS URL Import](./adr/016-geds-url-import.md) | ✅ Implemented | 2026-01-25 |
+| 017 | [Search Enhancements](./adr/017-search-enhancements.md) | ✅ Implemented | 2026-01-26 |
 
 ## [Requests for Comments (RFCs)](./rfc/)
 
@@ -20,12 +25,8 @@ RFCs are proposals for new features or significant changes that are currently un
 | Title | Status | Priority |
 | --- | --- | --- |
 | [Advanced Sidebar UI](./rfc/advanced-sidebar-ui.md) | 📋 Planned | Medium |
-| [GEDS URL Import](./rfc/geds-url-import.md) | 📋 Planned | High |
-| [Hierarchical Tree Selector](./rfc/hierarchical-tree-selector.md) | 📋 Planned | Medium |
 | [Search Enhancements](./rfc/search-enhancements.md) | 📋 Planned | Medium |
 | [Search Rebuild](./rfc/search-rebuild.md) | 📋 Planned | High |
-| [Test Coverage Expansion](./rfc/test-coverage-expansion.md) | 📋 Planned | Low |
-| [User Discovery & Privacy](./rfc/user-discovery-privacy.md) | 📋 Planned | High |
 
 ---
 

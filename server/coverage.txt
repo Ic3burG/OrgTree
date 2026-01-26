@@ -1,0 +1,1585 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.17 [39m[90m/Users/ojdavis/Claude Code/OrgTree/server[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+[90mstdout[2m | src/routes/users.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+[90mstdout[2m | src/services/__field-naming-validation.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+[90mstdout[2m | src/routes/auth.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/audit.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+[90mstdout[2m | src/services/performance.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+[90mstdout[2m | src/services/auth.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/members.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/invitations.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+[90mstdout[2m | src/services/totp.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+[90mstdout[2m | src/services/performance.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/services/__field-naming-validation.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/services/__field-naming-validation.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 92[2mms[22m[39m
+[90mstdout[2m | src/routes/audit.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/invitations.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/users.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/services/performance.test.ts[2m > [22m[2mPerformance Regression[2m > [22m[2mgetDepartments should return within 200ms for 50 departments and 200 people
+[22m[39mgetDepartments duration: 1.20ms
+
+ [32m✓[39m src/routes/audit.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m src/routes/users.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 85[2mms[22m[39m
+[90mstdout[2m | src/routes/organizations.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ [32m✓[39m src/routes/auth.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 116[2mms[22m[39m
+ [32m✓[39m src/routes/members.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 75[2mms[22m[39m
+ [32m✓[39m src/routes/invitations.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 58[2mms[22m[39m
+[90mstdout[2m | src/services/sql-injection.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+[90mstdout[2m | src/routes/backup.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/search.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/people.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: ' OR '1'='1...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m"' OR '1'='1"[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m"' OR '1'='1"[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: ' OR '1'='1' --...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: ' OR '1'='1' /*...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: " OR "1"="1...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'" OR "1"="1'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'" OR "1"="1'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: '; DROP TABLE users; --...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: '; DELETE FROM departments; --...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 1; SELECT * FROM users...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'1; SELECT * FROM users'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'1; SELECT * FROM users'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 1 UNION SELECT * FROM users...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'1 UNION SELECT * FROM users'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m1[39m
+}
+[search] Query completed in 1ms: { query: [32m'1 UNION SELECT * FROM users'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 1' UNION SELECT password_hash FROM users...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: ' AND 1=1 --...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: ' AND 1=0 --...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 1 AND 1=1...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'1 AND 1=1'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'1 AND 1=1'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 1 AND 1=0...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'1 AND 1=0'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'1 AND 1=0'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: '; WAITFOR DELAY '00:00:05' --...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 1; SELECT CASE WHEN (1=1) THEN 1 ELSE 0 ...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'1; SELECT CASE WHEN (1=1) THEN 1 ELSE 0 END'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: {
+  query: [32m'1; SELECT CASE WHEN (1=1) THEN 1 ELSE 0 END'[39m,
+  total: [33m0[39m,
+  resultCount: [33m0[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: ' AND (SELECT 1 FROM(SELECT COUNT(*),CON...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: EXTRACTVALUE(1,CONCAT(0x7e,(SELECT versi...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'EXTRACTVALUE(1,CONCAT(0x7e,(SELECT version())))'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m1[39m
+}
+[search] Query completed in 1ms: {
+  query: [32m'EXTRACTVALUE(1,CONCAT(0x7e,(SELECT version())))'[39m,
+  total: [33m0[39m,
+  resultCount: [33m0[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: admin'--...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: admin' #...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: admin'/*...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+ [32m✓[39m src/services/totp.service.test.ts [2m([22m[2m16 tests[22m[2m)[22m[33m 411[2mms[22m[39m
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: test%00' OR '1'='1...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m"test%00' OR '1'='1"[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m"test%00' OR '1'='1"[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: \u0027 OR 1=1 --...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'\\u0027 OR 1=1 --'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'\\u0027 OR 1=1 --'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 0x27204f522027313d2731...
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'0x27204f522027313d2731'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m1[39m
+}
+[search] Query completed in 1ms: { query: [32m'0x27204f522027313d2731'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: test NEAR test
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'test NEAR test'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'test NEAR test'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: test AND test
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'test AND test'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m1[39m
+}
+[search] Query completed in 1ms: { query: [32m'test AND test'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: test OR test
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'test OR test'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'test OR test'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: test NOT test
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'test NOT test'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'test NOT test'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: "phrase search"
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'"phrase search"'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'"phrase search"'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: test*
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: { query: [32m'test*'[39m, orgId: [32m'org-123'[39m, type: [90mundefined[39m, queryTimeMs: [33m0[39m }
+[search] Query completed in 0ms: { query: [32m'test*'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: ^start
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: { query: [32m'^start'[39m, orgId: [32m'org-123'[39m, type: [90mundefined[39m, queryTimeMs: [33m1[39m }
+[search] Query completed in 1ms: { query: [32m'^start'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: column:value
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'column:value'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'column:value'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: (() OR (()))
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'(() OR (()))'[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'(() OR (()))'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: """"""
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: { query: [32m'""""""'[39m, orgId: [32m'org-123'[39m, type: [90mundefined[39m, queryTimeMs: [33m0[39m }
+[search] Query completed in 0ms: { query: [32m'""""""'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: '''
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: \\\
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: { query: [32m'\\\\\\'[39m, orgId: [32m'org-123'[39m, type: [90mundefined[39m, queryTimeMs: [33m0[39m }
+[search] Query completed in 0ms: { query: [32m'\\\\\\'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: {{{
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: { query: [32m'{{{'[39m, orgId: [32m'org-123'[39m, type: [90mundefined[39m, queryTimeMs: [33m0[39m }
+[search] Query completed in 0ms: { query: [32m'{{{'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: }}}
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: { query: [32m'}}}'[39m, orgId: [32m'org-123'[39m, type: [90mundefined[39m, queryTimeMs: [33m1[39m }
+[search] Query completed in 1ms: { query: [32m'}}}'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2mgetAutocompleteSuggestions() with injection payloads[2m > [22m[2mshould safely handle autocomplete payload: ' OR '1'='1...
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m"' OR '1'='1"[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2mgetAutocompleteSuggestions() with injection payloads[2m > [22m[2mshould safely handle autocomplete payload: ' OR '1'='1' --...
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m"' OR '1'='1' --"[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2mgetAutocompleteSuggestions() with injection payloads[2m > [22m[2mshould safely handle autocomplete payload: ' OR '1'='1' /*...
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m"' OR '1'='1' /*"[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2mgetAutocompleteSuggestions() with injection payloads[2m > [22m[2mshould safely handle autocomplete payload: " OR "1"="1...
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m'" OR "1"="1'[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2mgetAutocompleteSuggestions() with injection payloads[2m > [22m[2mshould safely handle autocomplete payload: '; DROP TABLE users; --...
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m"'; DROP TABLE users; --"[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mEdge Cases & Boundary Tests[2m > [22m[2mshould handle extremely long SQL injection payloads
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m"' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1'"[39m... 1000 more characters,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m15[39m
+}
+[search] Query completed in 15ms: {
+  query: [32m"' OR '1'='1' OR '1'='1' OR '1'='1' OR '1'='1' OR '"[39m,
+  total: [33m0[39m,
+  resultCount: [33m0[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mEdge Cases & Boundary Tests[2m > [22m[2mshould handle null byte injection
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mEdge Cases & Boundary Tests[2m > [22m[2mshould handle unicode injection attempts
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mEdge Cases & Boundary Tests[2m > [22m[2mshould handle multi-line injection attempts
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mEdge Cases & Boundary Tests[2m > [22m[2mshould handle tab character injection
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m"test\t' OR '1'='1"[39m,
+  orgId: [32m'org-123'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m1[39m
+}
+[search] Query completed in 1ms: { query: [32m"test\t' OR '1'='1"[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mData Integrity Verification[2m > [22m[2mshould not leak data across organizations via injection
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mData Integrity Verification[2m > [22m[2mshould prevent UNION-based data extraction
+[22m[39m[search] Permission check: {
+  orgId: [32m'org-123'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/routes/departments.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  override existing env vars with { override: true }
+
+ [32m✓[39m src/services/sql-injection.test.ts [2m([22m[2m95 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+[90mstdout[2m | src/services/performance.test.ts[2m > [22m[2mPerformance Regression[2m > [22m[2msearch should return within 100ms for seeded dataset
+[22m[39m[search] Permission check: {
+  orgId: [32m'496bc59c-3f82-4ab1-aa95-590a6f444629'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 355ms: { query: [32m'Person 10'[39m, total: [33m11[39m, resultCount: [33m11[39m }
+
+[90mstdout[2m | src/services/performance.test.ts[2m > [22m[2mPerformance Regression[2m > [22m[2msearch should return within 100ms for seeded dataset
+[22m[39msearch duration: 355.61ms
+
+ [32m✓[39m src/services/performance.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 418[2mms[22m[39m
+     [33m[2m✓[22m[39m search should return within 100ms for seeded dataset [33m 356[2mms[22m[39m
+[90mstdout[2m | src/routes/backup.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/routes/organizations.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 75[2mms[22m[39m
+[90mstdout[2m | src/routes/passkey.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+[90mstdout[2m | src/routes/import.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ [32m✓[39m src/routes/search.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+[90mstdout[2m | src/routes/totp.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+ [32m✓[39m src/routes/backup.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+[90mstdout[2m | src/routes/custom-fields.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/routes/people.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 66[2mms[22m[39m
+ [32m✓[39m src/routes/departments.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+[90mstdout[2m | src/routes/analytics.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/csrf.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ [32m✓[39m src/routes/import.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+[90mstdout[2m | src/routes/public.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/geds-import.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ [32m✓[39m src/routes/custom-fields.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m src/routes/totp.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/routes/passkey.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 50[2mms[22m[39m
+[90mstdout[2m | src/routes/bulk.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+[90mstdout[2m | src/routes/geds.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ [32m✓[39m src/services/auth.service.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 1046[2mms[22m[39m
+ [32m✓[39m src/routes/analytics.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [32m✓[39m src/routes/csrf.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+[90mstdout[2m | src/routes/metrics.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+[90mstdout[2m | src/services/fts-triggers.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/routes/public.test.ts [2m([22m[2m5 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[32m 26[2mms[22m[39m
+[90mstdout[2m | src/routes/geds-import.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/migrations/discovery.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-26T06:05:19.980Z] INFO: Starting GEDS URL import {"orgId":"325e8f44-86be-42fb-88d1-59b136144d9b","userId":"admin-user","urlCount":1}
+[2026-01-26T06:05:19.981Z] INFO: Processing GEDS URL 1/1 {"url":"https://geds-sage.gc.ca/test.xml"}
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-26T06:05:19.982Z] INFO: Downloaded GEDS XML {"url":"https://geds-sage.gc.ca/test.xml","tempFile":"/var/folders/c3/27_tyc5n3zxch4x0yfp0lvx80000gn/T/geds-1769407519981-0.xml"}
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-26T06:05:19.982Z] INFO: Parsed GEDS XML {"url":"https://geds-sage.gc.ca/test.xml","departments":1,"people":1}
+[2026-01-26T06:05:19.984Z] INFO: Imported GEDS data {"url":"https://geds-sage.gc.ca/test.xml","stats":{"departmentsCreated":1,"departmentsReused":0,"peopleCreated":1,"peopleSkipped":0}}
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-26T06:05:19.984Z] INFO: GEDS URL import complete {"orgId":"325e8f44-86be-42fb-88d1-59b136144d9b","userId":"admin-user","total":1,"success":1,"failed":0}
+
+[90mstdout[2m | src/migrations/discovery.test.ts[2m > [22m[2mMigration Discovery (Phase 3)[2m > [22m[2mshould discover and run migrations in the versions directory
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould handle individual URL failures
+[22m[39m[2026-01-26T06:05:19.992Z] INFO: Starting GEDS URL import {"orgId":"325e8f44-86be-42fb-88d1-59b136144d9b","userId":"admin-user","urlCount":1}
+[2026-01-26T06:05:19.992Z] INFO: Processing GEDS URL 1/1 {"url":"https://geds-sage.gc.ca/fail.xml"}
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould handle individual URL failures
+[22m[39m[2026-01-26T06:05:19.993Z] INFO: GEDS URL import complete {"orgId":"325e8f44-86be-42fb-88d1-59b136144d9b","userId":"admin-user","total":1,"success":0,"failed":1}
+
+[90mstdout[2m | src/migrations/discovery.test.ts[2m > [22m[2mMigration Discovery (Phase 3)[2m > [22m[2mshould discover and run migrations in the versions directory
+[22m[39mApplying migration: 99999999999999 - Test Migration
+Successfully applied migration: 99999999999999
+
+[90mstdout[2m | src/services/search.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+ [32m✓[39m src/migrations/discovery.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/routes/geds-import.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m src/services/fts-triggers.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+[90mstdout[2m | src/routes/bulk.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/services/org.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould search departments by name
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 2ms: { query: [32m'Engineering'[39m, total: [33m3[39m, resultCount: [33m3[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould search departments by description
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 1ms: { query: [32m'software'[39m, total: [33m2[39m, resultCount: [33m2[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould search people by name
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 1ms: { query: [32m'John'[39m, total: [33m2[39m, resultCount: [33m2[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould search people by title
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 0ms: { query: [32m'Engineer'[39m, total: [33m3[39m, resultCount: [33m3[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould search people by email
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 0ms: { query: [32m'jane'[39m, total: [33m1[39m, resultCount: [33m1[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould filter by type: departments only
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 1ms: { query: [32m'Department'[39m, total: [33m3[39m, resultCount: [33m3[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould filter by type: people only
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 0ms: { query: [32m'Manager'[39m, total: [33m1[39m, resultCount: [33m1[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould return both departments and people for type: all
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 0ms: { query: [32m'Engineering'[39m, total: [33m3[39m, resultCount: [33m3[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould support pagination with limit
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 1ms: { query: [32m'Department'[39m, total: [33m3[39m, resultCount: [33m2[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould support pagination with offset
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 0ms: { query: [32m'Department'[39m, total: [33m3[39m, resultCount: [33m1[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould support pagination with offset
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 1ms: { query: [32m'Department'[39m, total: [33m3[39m, resultCount: [33m1[39m }
+
+[90mstdout[2m | src/routes/geds.test.ts[2m > [22m[2mGEDS Routes[2m > [22m[2mGET /api/geds/proxy[2m > [22m[2mshould proxy a valid GEDS URL
+[22m[39m[2026-01-26T06:05:20.081Z] INFO: Proxying GEDS request {"url":"https://geds-sage.gc.ca/en/GEDS?abc=123","userId":"test-user"}
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould calculate hasMore correctly
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 1ms: { query: [32m'Department'[39m, total: [33m3[39m, resultCount: [33m2[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould handle empty query
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould handle whitespace-only query
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 0ms: { query: [32m'   '[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould handle query with no matches
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Zero results for query: {
+  query: [32m'NonExistentTerm12345'[39m,
+  orgId: [32m'1'[39m,
+  type: [90mundefined[39m,
+  queryTimeMs: [33m0[39m
+}
+[search] Query completed in 0ms: { query: [32m'NonExistentTerm12345'[39m, total: [33m0[39m, resultCount: [33m0[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould handle special characters safely
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould support prefix matching for partial words
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 1ms: { query: [32m'Eng'[39m, total: [33m3[39m, resultCount: [33m3[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould include people count for department results
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 1ms: { query: [32m'Engineering'[39m, total: [33m1[39m, resultCount: [33m1[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould include department name for person results
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 1ms: { query: [32m'John'[39m, total: [33m2[39m, resultCount: [33m2[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould escape HTML in highlights
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 0ms: { query: [32m'script'[39m, total: [33m1[39m, resultCount: [33m1[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2msearch()[2m > [22m[2mshould preserve <mark> tags in highlights
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 1ms: { query: [32m'Engineering'[39m, total: [33m3[39m, resultCount: [33m3[39m }
+
+[90mstdout[2m | src/db-init.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mgetAutocompleteSuggestions()[2m > [22m[2mshould return department suggestions
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m'Engineering'[39m, suggestionCount: [33m3[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mgetAutocompleteSuggestions()[2m > [22m[2mshould return person suggestions
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m'John'[39m, suggestionCount: [33m2[39m }
+
+[90mstdout[2m | src/routes/geds.test.ts[2m > [22m[2mGEDS Routes[2m > [22m[2mGET /api/geds/proxy[2m > [22m[2mshould return GEDS error status if request fails
+[22m[39m[2026-01-26T06:05:20.097Z] INFO: Proxying GEDS request {"url":"https://geds-sage.gc.ca/unknown","userId":"test-user"}
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mgetAutocompleteSuggestions()[2m > [22m[2mshould return mixed suggestions for common terms
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m'Engineering'[39m, suggestionCount: [33m3[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mgetAutocompleteSuggestions()[2m > [22m[2mshould respect limit parameter
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m'Department'[39m, suggestionCount: [33m1[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mgetAutocompleteSuggestions()[2m > [22m[2mshould use default limit of 5
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m'Department'[39m, suggestionCount: [33m3[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mgetAutocompleteSuggestions()[2m > [22m[2mshould handle empty query
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+
+[90mstdout[2m | src/routes/geds.test.ts[2m > [22m[2mGEDS Routes[2m > [22m[2mGET /api/geds/proxy[2m > [22m[2mshould handle fetch exceptions
+[22m[39m[2026-01-26T06:05:20.100Z] INFO: Proxying GEDS request {"url":"https://geds-sage.gc.ca/timeout","userId":"test-user"}
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mgetAutocompleteSuggestions()[2m > [22m[2mshould handle whitespace-only query
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 1ms: { query: [32m'   '[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mgetAutocompleteSuggestions()[2m > [22m[2mshould handle query with no matches
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m'NonExistentTerm12345'[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mgetAutocompleteSuggestions()[2m > [22m[2mshould support prefix matching
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m'Eng'[39m, suggestionCount: [33m3[39m }
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mgetAutocompleteSuggestions()[2m > [22m[2mshould return unique suggestions
+[22m[39m[autocomplete] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[autocomplete] Checking viewer permission for private org
+[autocomplete] Query completed in 0ms: { query: [32m'Department'[39m, suggestionCount: [33m3[39m }
+
+ [32m✓[39m src/services/search.service.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m src/routes/geds.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+[90mstdout[2m | src/db-init.test.ts[2m > [22m[2mDatabase Initialization[2m > [22m[2mshould create all required tables
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+ [32m✓[39m src/services/org.service.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/routes/metrics.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+[90mstdout[2m | src/services/bulk.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+[90mstdout[2m | src/db-init.test.ts[2m > [22m[2mDatabase Initialization[2m > [22m[2mshould create FTS virtual tables
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+[90mstdout[2m | src/services/geds-parser.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+[90mstdout[2m | src/db-init.test.ts[2m > [22m[2mDatabase Initialization[2m > [22m[2mshould be idempotent (can be run multiple times)
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+[90mstdout[2m | src/db-init.test.ts[2m > [22m[2mDatabase Initialization[2m > [22m[2mshould verify schema of specific tables
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+[90mstdout[2m | src/services/geds-download.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+[90mstdout[2m | src/db-init.test.ts[2m > [22m[2mDatabase Initialization[2m > [22m[2mshould set WAL mode and other pragmas
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+ [32m✓[39m src/db-init.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m src/routes/bulk.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 65[2mms[22m[39m
+[90mstdout[2m | src/routes/version.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ [32m✓[39m src/services/geds-download.service.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/services/geds-parser.service.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+[90mstdout[2m | src/services/backup.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/custom-fields-fts.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+ [32m✓[39m src/services/bulk.service.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+[90mstdout[2m | src/routes/org-membership-check.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/concurrency.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/users.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+ [32m✓[39m src/services/backup.service.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+[90mstdout[2m | src/services/concurrency.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/services/custom-fields-fts.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+[90mstdout[2m | src/middleware/auth.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/services/concurrency.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+[90mstdout[2m | src/services/email.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  override existing env vars with { override: true }
+
+ [32m✓[39m src/routes/version.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/services/users.service.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+[90mstdout[2m | src/services/audit.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/org-membership-check.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/services/audit.service.test.ts[2m > [22m[2mAudit Service[2m > [22m[2mcleanupOldLogs[2m > [22m[2mshould delete old logs
+[22m[39mCleaned up 100 old audit logs
+
+[90mstdout[2m | src/services/fts-integrity.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/services/email.service.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m src/services/audit.service.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/middleware/auth.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+[90mstdout[2m | src/services/custom-fields.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+ [32m✓[39m src/routes/org-membership-check.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 16[2mms[22m[39m
+[90mstdout[2m | src/services/invitation.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/cascade-delete.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+ [32m✓[39m src/services/fts-integrity.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+[90mstdout[2m | src/services/socket-events.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+ [32m✓[39m src/services/custom-fields.service.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+[90mstdout[2m | src/services/cascade-delete.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/services/invitation.service.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/services/socket-events.service.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/middleware/csrf.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+[90mstdout[2m | src/services/member.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+ [32m✓[39m src/services/cascade-delete.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+[90mstdout[2m | src/services/people.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+[90mstdout[2m | src/services/department.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/passkey.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ [32m✓[39m src/middleware/csrf.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+[90mstdout[2m | src/services/search-error-handling.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/services/people.service.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/services/member.service.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/services/department.service.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/services/passkey.service.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/services/migration-backup.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+[90mstdout[2m | src/services/metrics.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/utils/logger.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/search-error-handling.test.ts[2m > [22m[2mSearch Error Handling (Phase 2)[2m > [22m[2mQuery Validation[2m > [22m[2mshould reject queries with unbalanced quotes
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/search-error-handling.test.ts[2m > [22m[2mSearch Error Handling (Phase 2)[2m > [22m[2mQuery Validation[2m > [22m[2mshould reject queries with excessive wildcards
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/search-error-handling.test.ts[2m > [22m[2mSearch Error Handling (Phase 2)[2m > [22m[2mQuery Validation[2m > [22m[2mshould reject queries with invalid FTS5 operators
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/search-error-handling.test.ts[2m > [22m[2mSearch Error Handling (Phase 2)[2m > [22m[2mQuery Validation[2m > [22m[2mshould accept valid queries and return results
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 1ms: { query: [32m'Engineering'[39m, total: [33m2[39m, resultCount: [33m2[39m }
+
+[90mstdout[2m | src/services/search-error-handling.test.ts[2m > [22m[2mSearch Error Handling (Phase 2)[2m > [22m[2mError Propagation[2m > [22m[2mshould include warnings in response when search partially fails
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/search-error-handling.test.ts[2m > [22m[2mSearch Error Handling (Phase 2)[2m > [22m[2mError Propagation[2m > [22m[2mshould return empty results with warnings for completely invalid queries
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+[90mstdout[2m | src/services/search-error-handling.test.ts[2m > [22m[2mSearch Error Handling (Phase 2)[2m > [22m[2mResponse Structure[2m > [22m[2mshould maintain backward compatibility with existing response structure
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+[search] Query completed in 0ms: { query: [32m'Engineering'[39m, total: [33m2[39m, resultCount: [33m2[39m }
+
+[90mstdout[2m | src/services/search-error-handling.test.ts[2m > [22m[2mSearch Error Handling (Phase 2)[2m > [22m[2mResponse Structure[2m > [22m[2mshould optionally include warnings and usedFallback fields
+[22m[39m[search] Permission check: {
+  orgId: [32m'1'[39m,
+  userId: [32m'present'[39m,
+  isPublic: [33mfalse[39m,
+  willCheckPermission: [33mtrue[39m
+}
+
+ [32m✓[39m src/services/search-error-handling.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/services/metrics.service.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/utils/logger.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/services/migration-backup.service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+[90mstdout[2m | src/middleware/errorHandler.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  override existing env vars with { override: true }
+
+[90mstdout[2m | src/services/analytics.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/metrics-collector.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/fts-maintenance.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+[90mstdout[2m | src/services/analytics.service.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/services/metrics-collector.service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/middleware/errorHandler.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+[90mstdout[2m | src/services/fts-maintenance.service.test.ts[2m > [22m[2mFTS Maintenance Service[2m > [22m[2moptimizeFtsIndexes()[2m > [22m[2mshould execute without throwing errors
+[22m[39mFTS indexes optimized
+
+ [32m✓[39m src/services/analytics.service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/services/fts-maintenance.service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/services/metrics.service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m61 passed[39m[22m[90m (61)[39m
+[2m      Tests [22m [1m[32m702 passed[39m[22m[2m | [22m[33m1 skipped[39m[90m (703)[39m
+[2m   Start at [22m 01:05:18
+[2m   Duration [22m 2.65s[2m (transform 2.47s, setup 1.02s, import 8.27s, tests 3.64s, environment 5ms)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   72.61 |    65.09 |   74.16 |   72.69 |                   
+ src               |   20.51 |     8.33 |      10 |   20.68 |                   
+  db-init.ts       |     100 |      100 |     100 |     100 |                   
+  db.ts            |    87.5 |       50 |     100 |    87.5 | 14                
+  instrument.ts    |       0 |        0 |       0 |       0 | 4-61              
+  sentry.ts        |       0 |      100 |       0 |       0 | 9-18              
+  socket.ts        |    4.54 |     5.55 |    7.69 |    4.54 | 14-180,190        
+ src/middleware    |   89.85 |     86.2 |      75 |   89.85 |                   
+  auth.ts          |     100 |    93.75 |     100 |     100 | 69                
+  csrf.ts          |     100 |    96.42 |     100 |     100 | 98                
+  errorHandler.ts  |     100 |       80 |     100 |     100 | 18,36             
+  metrics.ts       |       0 |        0 |       0 |       0 | 14-34             
+ src/migrations    |   84.21 |    56.81 |   63.46 |   82.92 |                   
+  index.ts         |   85.71 |       70 |      80 |   88.46 | 22,77-78          
+  ...migrations.ts |   83.58 |    52.94 |    61.7 |   80.35 | ...58,318,321,331 
+ src/routes        |   73.94 |    62.91 |   81.67 |   74.18 |                   
+  analytics.ts     |    87.5 |       90 |     100 |   89.65 | 33,80-81          
+  audit.ts         |      84 |    88.46 |   66.66 |   86.48 | 87,101-105        
+  auth.ts          |   83.33 |    76.78 |   91.66 |   83.21 | ...97-398,403,428 
+  backup.ts        |   69.62 |    65.11 |      60 |   70.51 | ...10-111,245-281 
+  bulk.ts          |   75.58 |    71.87 |     100 |   75.58 | ...72,182-185,191 
+  csrf.ts          |     100 |      100 |     100 |     100 |                   
+  custom-fields.ts |   88.63 |    93.75 |     100 |   88.63 | 37,75,98,129,158  
+  debug.ts         |       0 |        0 |       0 |       0 | 4-14              
+  departments.ts   |    87.5 |    72.22 |     100 |    87.5 | 30,43,80,118,156  
+  ...ers-simple.ts |       0 |        0 |       0 |       0 | 7-111             
+  ...org-owners.ts |       0 |        0 |       0 |       0 | 7-96              
+  ...aintenance.ts |       0 |        0 |       0 |       0 | 12-174            
+  geds-import.ts   |   80.73 |    59.25 |     100 |   81.73 | ...90,292,294,331 
+  geds.ts          |     100 |       90 |     100 |     100 | 52                
+  import.ts        |   84.04 |    58.62 |     100 |   84.44 | ...78,200-203,207 
+  invitations.ts   |   90.69 |      100 |   83.33 |   90.69 | 38,54,91,118      
+  members.ts       |   89.74 |     90.9 |     100 |   89.74 | ...77,116,156,242 
+  metrics.ts       |    82.6 |      100 |     100 |    82.6 | 35,52,69,86       
+  ...ship-check.ts |    90.9 |       50 |     100 |    90.9 | 70                
+  organizations.ts |   75.32 |       60 |     100 |   75.32 | ...00,227-228,254 
+  passkey.ts       |   80.64 |     64.7 |     100 |   82.02 | ...13,222,227,237 
+  people.ts        |   89.47 |    77.77 |     100 |   89.47 | ...81,127,169,202 
+  public.ts        |   66.66 |    21.05 |   28.57 |   69.56 | ...68,198-212,235 
+  search.ts        |   72.91 |    66.66 |     100 |   72.91 | 20-29,75,108-113  
+  totp.ts          |   66.66 |    65.51 |     100 |   66.66 | ...79-180,188-189 
+  users.ts         |   73.13 |       44 |      70 |   73.13 | ...31,142,169,189 
+  version.ts       |     100 |      100 |     100 |     100 |                   
+ src/services      |   73.56 |    68.34 |   76.95 |   73.68 |                   
+  ...cs.service.ts |   80.95 |    89.47 |     100 |      85 | 67,133-134        
+  audit.service.ts |   72.27 |    72.85 |   66.66 |   72.27 | ...86,295,360-391 
+  auth.service.ts  |   61.72 |    69.23 |      50 |   61.72 | 132,244-450       
+  ...up.service.ts |    98.5 |    81.81 |     100 |   98.48 | 185               
+  bulk.service.ts  |    62.2 |    63.43 |   58.82 |    62.3 | ...16-720,762-817 
+  csrf.service.ts  |       0 |        0 |       0 |       0 | 26-111            
+  ...ds.service.ts |   84.12 |    68.11 |     100 |   85.71 | ...81-385,389-390 
+  ...nt.service.ts |   85.71 |    83.01 |     100 |   86.27 | ...79,327,347-349 
+  email.service.ts |     100 |    83.33 |     100 |     100 | 9,54              
+  ...ce.service.ts |   52.11 |    35.71 |      30 |   52.11 | ...66,306,312-313 
+  ...er.service.ts |       0 |        0 |       0 |       0 | 29-141            
+  ...ad.service.ts |   35.29 |    28.57 |    23.8 |   34.32 | 18-33,108-206     
+  ...er.service.ts |   87.85 |    69.62 |     100 |   92.55 | 83-90,249         
+  ...on.service.ts |   90.42 |    90.47 |     100 |   90.42 | ...89-391,400-402 
+  ...er.service.ts |   78.43 |    75.55 |     100 |   78.43 | ...04-406,414-416 
+  ...or.service.ts |   96.77 |    77.77 |     100 |   96.15 | 49                
+  ...cs.service.ts |   92.64 |    56.25 |     100 |   96.87 | 35,199            
+  ...up.service.ts |     100 |    83.33 |     100 |     100 | 41                
+  org.service.ts   |   76.92 |    58.33 |    87.5 |   76.31 | ...29-132,254-256 
+  ...ey.service.ts |   93.61 |    73.68 |     100 |   93.47 | 74,178,213        
+  ...le.service.ts |   73.41 |    71.01 |   85.71 |   73.41 | ...36-340,370,411 
+  ...ch.service.ts |      62 |    67.24 |   77.27 |   60.81 | ...98-917,955,984 
+  ...ts.service.ts |     100 |      100 |     100 |     100 |                   
+  totp.service.ts  |   96.77 |     90.9 |     100 |   96.66 | 71                
+  users.service.ts |   95.87 |     73.8 |   91.66 |   95.83 | 275-281           
+ src/test-helpers  |   84.61 |       75 |      80 |   84.61 |                   
+  ...-db-schema.ts |   84.61 |       75 |      80 |   84.61 | 330,378           
+ src/types         |       0 |        0 |       0 |       0 |                   
+  analytics.ts     |       0 |        0 |       0 |       0 |                   
+  global.d.ts      |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 221-228           
+  metrics.ts       |       0 |        0 |       0 |       0 |                   
+ src/utils         |   92.85 |    72.72 |     100 |   92.85 |                   
+  escape.ts        |      80 |       75 |     100 |      80 | 14                
+  logger.ts        |     100 |    71.42 |     100 |     100 | 30,41             
+-------------------|---------|----------|---------|---------|-------------------

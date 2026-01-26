@@ -29,7 +29,11 @@ An Architecture Decision Record (ADR) is a document that captures an important a
 | [010](010-centered-vertical-layout.md)             | Centered Vertical Layout               | Accepted | 2026-01-22 | map, layout, ux                                |
 | [011](011-rainbow-color-theme.md)                  | Rainbow Color Theme                    | Accepted | 2026-01-22 | map, theme, aesthetics                         |
 | [012](012-database-migration-rollback.md)          | Database Migration Rollback            | Accepted | 2026-01-25 | database, migration, infrastructure            |
-| [013](013-search-enhancements.md)                  | Search Enhancements                    | Accepted | 2026-01-26 | search, performance, ux, analytics             |
+| [013](013-user-discovery-privacy.md)               | User Discovery and Privacy Controls    | Accepted | 2026-01-25 | privacy, security, user-discovery              |
+| [014](014-test-coverage-expansion.md)              | Test Coverage Expansion                | Accepted | 2026-01-25 | testing, quality, code-coverage                |
+| [015](015-hierarchical-tree-selector.md)           | Hierarchical Tree Selector             | Accepted | 2026-01-25 | ux, map, form-controls                         |
+| [016](016-geds-url-import.md)                      | GEDS URL Import                        | Accepted | 2026-01-25 | data-import, geds, automation                  |
+| [017](017-search-enhancements.md)                  | Search Enhancements                    | Accepted | 2026-01-26 | search, performance, ux, analytics             |
 
 ## Reading Guide
 

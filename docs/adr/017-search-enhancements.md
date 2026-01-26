@@ -1,4 +1,4 @@
-# ADR-013: Search Enhancements
+# ADR-017: Search Enhancements
 
 **Status**: Accepted
 **Date**: 2026-01-26
