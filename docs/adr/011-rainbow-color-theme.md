@@ -1,9 +1,8 @@
-# Rainbow Color Theme for Org Map (COMPLETED)
-
-**Status**: ✅ Completed January 22, 2026
-**Created**: January 22, 2026
-**Priority**: Low
-**Complexity**: Very Low
+# ADR-011: Rainbow Color Theme
+**Status**: Accepted
+**Date**: 2026-01-25
+**Deciders**: Development Team
+**Tags**: ui, theme, visualizationVery Low
 
 ## Overview
 

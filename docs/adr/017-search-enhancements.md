@@ -66,4 +66,4 @@ Chosen option: **Trigram-based Fuzzy Matching and Dedicated Analytics/Saved Sear
 
 - [ADR-001: SQLite as Primary Database](001-sqlite-as-primary-database.md)
 - [ADR-006: SQLite FTS5 Search](006-fts5-full-text-search.md)
-- [RFC: Search Enhancements Implementation Plan](../rfc/search-enhancements.md)
+- [RFC: Search Rebuild Plan](../rfc/search-rebuild.md)

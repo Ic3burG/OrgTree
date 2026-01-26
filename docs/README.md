@@ -25,8 +25,7 @@ RFCs are proposals for new features or significant changes that are currently un
 | Title | Status | Priority |
 | --- | --- | --- |
 | [Advanced Sidebar UI](./rfc/advanced-sidebar-ui.md) | 📋 Planned | Medium |
-| [Search Enhancements](./rfc/search-enhancements.md) | 📋 Planned | Medium |
-| [Search Rebuild](./rfc/search-rebuild.md) | 📋 Planned | High |
+| [Search Rebuild](./rfc/search-rebuild.md) | ✅ Completed | High |
 
 ---
 

@@ -1,9 +1,8 @@
-# Test Coverage Expansion Plan
-
-**Status**: ✅ Completed
-**Created**: January 25, 2026
-**Priority**: Medium (Roadmap Item)
-**Current Count**: ~902 Tests (667 Backend, 235 Frontend)
+# ADR-014: Test Coverage Expansion
+**Status**: Accepted
+**Date**: 2026-01-25
+**Deciders**: Development Team
+**Tags**: testing, quality, ci-cd
 **Target**: 80%+ Code Coverage across Backend and Frontend
 
 ## Overview

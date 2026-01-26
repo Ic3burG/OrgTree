@@ -1,9 +1,8 @@
-# Hierarchical Tree Selector Component
-
-**Status**: 📋 Planned
-**Created**: January 25, 2026
-**Priority**: Medium
-**Complexity**: Medium-High
+# ADR-015: Hierarchical Tree Selector
+**Status**: Accepted
+**Date**: 2026-01-25
+**Deciders**: Development Team
+**Tags**: ui, components, navigation-High
 
 ## Overview
 
