@@ -13,7 +13,7 @@ export function escapeHtml(string: string | null | undefined): string {
   if (string === null || string === undefined) {
     return '';
   }
-  return String(string).replace(/[&<>"'`=\/]/g, function fromEntityMap(s) {
-    return entityMap[s];
+  return String(string).replace(/[&<>"'`=/]/g, function fromEntityMap(s) {
+    return entityMap[s] as string;
   });
 }
