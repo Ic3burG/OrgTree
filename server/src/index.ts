@@ -216,6 +216,18 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 
+// DEBUG: Simple test endpoint with no middleware (temporary)
+app.get('/api/admin/backup/test-simple', (_req, res) => {
+  logger.info('Simple backup test endpoint hit (no middleware)');
+  res.json({
+    message: 'Direct test endpoint working',
+    timestamp: new Date().toISOString(),
+    envVarConfigured: !!process.env.BACKUP_API_TOKEN,
+    envVarLength: process.env.BACKUP_API_TOKEN?.length || 0,
+    nodeEnv: process.env.NODE_ENV,
+  });
+});
+
 // API Routes
 // CSRF token endpoint (must be before CSRF validation middleware)
 app.use('/api', csrfRoutes);
