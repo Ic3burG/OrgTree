@@ -1,4 +1,5 @@
-import https, { IncomingMessage } from 'https';
+import https from 'https';
+import { IncomingMessage } from 'http';
 import fs from 'fs';
 import { pipeline } from 'stream/promises';
 
@@ -39,6 +40,26 @@ export class NetworkError extends Error {
 const ALLOWED_DOMAINS = ['.gc.ca', 'canada.ca', '.canada.ca'];
 const DOWNLOAD_TIMEOUT_MS = 30000; // 30 seconds
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024; // 50MB
+
+/**
+ * Normalizes a GEDS URL by ensuring it uses the XML export pgid (026)
+ * if it's currently using the profile page pgid (015).
+ *
+ * @param url - The GEDS URL to normalize
+ * @returns The normalized URL
+ */
+export function normalizeGedsUrl(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.searchParams.get('pgid') === '015') {
+      urlObj.searchParams.set('pgid', '026');
+      return urlObj.toString();
+    }
+  } catch {
+    // If URL parsing fails, return original and let validateGedsUrl handle it
+  }
+  return url;
+}
 
 /**
  * Validates that a URL is from an allowed GEDS domain
@@ -83,11 +104,14 @@ export function validateGedsUrl(url: string): boolean {
  * @throws NetworkError if download fails
  */
 export async function downloadGedsXml(url: string, destPath: string): Promise<void> {
+  // Normalize URL first (e.g. pgid=015 -> pgid=026)
+  const normalizedUrl = normalizeGedsUrl(url);
+
   // Validate URL first
-  validateGedsUrl(url);
+  validateGedsUrl(normalizedUrl);
 
   return new Promise((resolve, reject) => {
-    const request = https.get(url, response => {
+    const request = https.get(normalizedUrl, response => {
       // Check for redirects or errors
       if (
         response.statusCode === 301 ||

@@ -2,7 +2,12 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
-import { validateGedsUrl, cleanupTempFile, InvalidUrlError } from './geds-download.service.js';
+import {
+  validateGedsUrl,
+  cleanupTempFile,
+  InvalidUrlError,
+  normalizeGedsUrl,
+} from './geds-download.service.js';
 
 describe('GEDS Download Service', () => {
   describe('validateGedsUrl', () => {
@@ -58,6 +63,33 @@ describe('GEDS Download Service', () => {
     it('should be case-insensitive for hostname', () => {
       const url = 'https://GEDS-SAGE.GC.CA/en/GEDS';
       expect(() => validateGedsUrl(url)).not.toThrow();
+    });
+  });
+
+  describe('normalizeGedsUrl', () => {
+    it('should convert pgid=015 to pgid=026', () => {
+      const url =
+        'https://geds-sage.gc.ca/en/GEDS?pgid=015&dn=Q049QU5ERVJTT05cMkMgVkFORVNTQSxPVT1XUFNBLVdQU0EsT1U9R0FDLUFNQyxPPUdDLEM9Q0E=';
+      // URL object encodes the = to %3D
+      const expected =
+        'https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=Q049QU5ERVJTT05cMkMgVkFORVNTQSxPVT1XUFNBLVdQU0EsT1U9R0FDLUFNQyxPPUdDLEM9Q0E%3D';
+      expect(normalizeGedsUrl(url)).toBe(expected);
+    });
+
+    it('should keep pgid=026 as is', () => {
+      const url =
+        'https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=Q049QU5ERVJTT05cMkMgVkFORVNTQSxPVT1XUFNBLVdQU0EsT1U9R0FDLUFNQyxPPUdDLEM9Q0E=';
+      expect(normalizeGedsUrl(url)).toBe(url);
+    });
+
+    it('should return original URL if invalid', () => {
+      const url = 'not-a-url';
+      expect(normalizeGedsUrl(url)).toBe(url);
+    });
+
+    it('should handle URLs without pgid parameter', () => {
+      const url = 'https://geds-sage.gc.ca/en/GEDS?other=param';
+      expect(normalizeGedsUrl(url)).toBe(url);
     });
   });
 
