@@ -241,6 +241,9 @@ app.use('/api', orgMembershipCheckRoutes);
 // Migration endpoints (GET version without CSRF for easy testing)
 app.use('/api', fixOrgOwnersSimpleRoutes);
 
+// Backup and rollback endpoints (custom authentication, no CSRF required for CI/CD)
+app.use('/api', backupRoutes);
+
 // Public routes (no authentication or CSRF required)
 app.use('/api/auth', authRoutes);
 app.use('/api/auth/passkey', passkeyRoutes);
@@ -264,7 +267,6 @@ app.use('/api', invitationRoutes);
 app.use('/api', auditRoutes);
 app.use('/api', searchRoutes);
 app.use('/api', bulkRoutes);
-app.use('/api', backupRoutes);
 app.use('/api', metricsRoutes);
 app.use('/api/fts-maintenance', ftsMaintenanceRoutes);
 app.use('/api', fixOrgOwnersRoutes);
