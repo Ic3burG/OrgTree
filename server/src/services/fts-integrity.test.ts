@@ -62,9 +62,9 @@ describe('FTS Integrity Tests (Phase 3.4)', () => {
       const expected = db
         .prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL')
         .get() as { count: number };
-      const actual = db
-        .prepare('SELECT COUNT(*) as count FROM departments_fts_docsize')
-        .get() as { count: number };
+      const actual = db.prepare('SELECT COUNT(*) as count FROM departments_fts_docsize').get() as {
+        count: number;
+      };
 
       expect(expected.count).toBe(2);
       expect(actual.count).toBe(2);
@@ -110,9 +110,9 @@ describe('FTS Integrity Tests (Phase 3.4)', () => {
       const expected = db
         .prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL')
         .get() as { count: number };
-      const actual = db
-        .prepare('SELECT COUNT(*) as count FROM departments_fts_docsize')
-        .get() as { count: number };
+      const actual = db.prepare('SELECT COUNT(*) as count FROM departments_fts_docsize').get() as {
+        count: number;
+      };
 
       expect(expected.count).toBe(100);
       expect(actual.count).toBe(100);
@@ -157,9 +157,9 @@ describe('FTS Integrity Tests (Phase 3.4)', () => {
       const expected = db
         .prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL')
         .get() as { count: number };
-      const actual = db
-        .prepare('SELECT COUNT(*) as count FROM departments_fts_docsize')
-        .get() as { count: number };
+      const actual = db.prepare('SELECT COUNT(*) as count FROM departments_fts_docsize').get() as {
+        count: number;
+      };
 
       expect(expected.count).toBe(3); // dept1, dept3, dept4
       expect(actual.count).toBe(3);

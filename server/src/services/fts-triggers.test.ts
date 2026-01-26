@@ -60,11 +60,11 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           'INSERT INTO departments (id, organization_id, name, description) VALUES (?, ?, ?, ?)'
         ).run(deptId, orgId, 'Engineering', 'Tech team');
 
-
-
         // Verify FTS entry was created
         const ftsResult = db
-          .prepare("SELECT rowid, name, description FROM departments_fts WHERE departments_fts MATCH 'Engineering'")
+          .prepare(
+            "SELECT rowid, name, description FROM departments_fts WHERE departments_fts MATCH 'Engineering'"
+          )
           .get() as { rowid: number; name: string; description: string } | undefined;
 
         expect(ftsResult).toBeDefined();
@@ -105,11 +105,11 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           deptId
         );
 
-
-
         // Verify FTS was updated
         const ftsResult = db
-          .prepare("SELECT name, description FROM departments_fts WHERE departments_fts MATCH 'Product'")
+          .prepare(
+            "SELECT name, description FROM departments_fts WHERE departments_fts MATCH 'Product'"
+          )
           .get() as { name: string; description: string };
 
         expect(ftsResult.name).toBe('Product Engineering');
@@ -172,8 +172,6 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
       });
 
       it('should remove FTS entry when department is hard-deleted', () => {
-
-
         // Verify FTS entry exists
         const ftsBefore = db
           .prepare("SELECT rowid FROM departments_fts WHERE departments_fts MATCH 'Engineering'")
@@ -208,14 +206,10 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           'INSERT INTO people (id, organization_id, department_id, name, title, email, phone) VALUES (?, ?, ?, ?, ?, ?, ?)'
         ).run(personId, orgId, deptId, 'John Doe', 'Engineer', 'john@example.com', '555-1234');
 
-
-
         // Verify FTS entry was created
         const ftsResult = db
           .prepare("SELECT name, title, email, phone FROM people_fts WHERE people_fts MATCH 'John'")
-          .get() as
-          | { name: string; title: string; email: string; phone: string }
-          | undefined;
+          .get() as { name: string; title: string; email: string; phone: string } | undefined;
 
         expect(ftsResult).toBeDefined();
         expect(ftsResult?.name).toBe('John Doe');
@@ -256,8 +250,6 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           'john.doe@example.com',
           personId
         );
-
-
 
         // Verify FTS was updated
         const ftsResult = db
@@ -324,8 +316,6 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
       });
 
       it('should remove FTS entry when person is hard-deleted', () => {
-
-
         // Verify FTS entry exists
         const ftsBefore = db
           .prepare("SELECT rowid FROM people_fts WHERE people_fts MATCH 'John'")
@@ -398,8 +388,6 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           deptId
         );
       }
-
-
 
       // Verify FTS has the latest update
       const ftsResult = db
