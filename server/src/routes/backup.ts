@@ -13,6 +13,20 @@ import db from '../db.js';
 const router = express.Router();
 
 /**
+ * GET /api/admin/backup/test
+ * Test endpoint to verify routing is working (no auth required)
+ */
+router.get('/admin/backup/test', (_req, res) => {
+  logger.info('Backup test endpoint hit');
+  res.json({
+    message: 'Backup routes are working',
+    timestamp: new Date().toISOString(),
+    envVarConfigured: !!process.env.BACKUP_API_TOKEN,
+    envVarLength: process.env.BACKUP_API_TOKEN?.length || 0,
+  });
+});
+
+/**
  * Authentication middleware for backup requests.
  * Supports both standard JWT authentication and a fixed API token for server-to-server automation (CI/CD).
  */
@@ -81,6 +95,7 @@ router.get(
  * Requires: Superuser
  */
 const handlePostBackup = async (req: AuthRequest, res: Response): Promise<void> => {
+  logger.info('=== POST /admin/backup handler reached ===');
   try {
     const { type } = req.body || {};
 
@@ -128,8 +143,19 @@ const handlePostBackup = async (req: AuthRequest, res: Response): Promise<void> 
   }
 };
 
-router.post('/admin/backups', authenticateBackupRequest, requireSuperuser, handlePostBackup);
-router.post('/admin/backup', authenticateBackupRequest, requireSuperuser, handlePostBackup);
+// Logging middleware to track all backup POST requests
+const logBackupRequest = (req: AuthRequest, _res: Response, next: NextFunction) => {
+  logger.info('=== Backup POST request received ===', {
+    path: req.path,
+    method: req.method,
+    hasAuthHeader: !!req.headers['authorization'],
+    contentType: req.headers['content-type'],
+  });
+  next();
+};
+
+router.post('/admin/backups', logBackupRequest, authenticateBackupRequest, requireSuperuser, handlePostBackup);
+router.post('/admin/backup', logBackupRequest, authenticateBackupRequest, requireSuperuser, handlePostBackup);
 
 /**
  * DELETE /api/admin/backups/cleanup
