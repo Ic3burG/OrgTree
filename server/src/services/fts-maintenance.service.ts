@@ -49,21 +49,23 @@ export function checkFtsIntegrity(): FtsHealthStatus {
       .prepare('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL')
       .get() as { count: number };
 
-    const deptActual = db
-      .prepare('SELECT COUNT(DISTINCT rowid) as count FROM departments_fts')
-      .get() as { count: number };
+    // For external content FTS tables, count indexed rows by querying FTS5 shadow tables
+    // The _data table has metadata rows (typically 2) plus actual indexed document rows
+    const deptActualCount = (
+      db.prepare('SELECT COUNT(*) as count FROM departments_fts_docsize').get() as { count: number }
+    ).count;
 
-    const deptInSync = deptExpected.count === deptActual.count;
+    const deptInSync = deptExpected.count === deptActualCount;
     results.push({
       table: 'departments_fts',
       expected: deptExpected.count,
-      actual: deptActual.count,
+      actual: deptActualCount,
       inSync: deptInSync,
     });
 
     if (!deptInSync) {
       issues.push(
-        `departments_fts out of sync: expected ${deptExpected.count}, got ${deptActual.count}`
+        `departments_fts out of sync: expected ${deptExpected.count}, got ${deptActualCount}`
       );
     }
 
@@ -72,21 +74,21 @@ export function checkFtsIntegrity(): FtsHealthStatus {
       .prepare('SELECT COUNT(*) as count FROM people WHERE deleted_at IS NULL')
       .get() as { count: number };
 
-    const peopleActual = db
-      .prepare('SELECT COUNT(DISTINCT rowid) as count FROM people_fts')
-      .get() as { count: number };
+    const peopleActualCount = (
+      db.prepare('SELECT COUNT(*) as count FROM people_fts_docsize').get() as { count: number }
+    ).count;
 
-    const peopleInSync = peopleExpected.count === peopleActual.count;
+    const peopleInSync = peopleExpected.count === peopleActualCount;
     results.push({
       table: 'people_fts',
       expected: peopleExpected.count,
-      actual: peopleActual.count,
+      actual: peopleActualCount,
       inSync: peopleInSync,
     });
 
     if (!peopleInSync) {
       issues.push(
-        `people_fts out of sync: expected ${peopleExpected.count}, got ${peopleActual.count}`
+        `people_fts out of sync: expected ${peopleExpected.count}, got ${peopleActualCount}`
       );
     }
 
@@ -103,21 +105,23 @@ export function checkFtsIntegrity(): FtsHealthStatus {
       )
       .get() as { count: number };
 
-    const customFieldsActual = db
-      .prepare('SELECT COUNT(*) as count FROM custom_fields_fts')
-      .get() as { count: number };
+    const customFieldsActualCount = (
+      db.prepare('SELECT COUNT(*) as count FROM custom_fields_fts_docsize').get() as {
+        count: number;
+      }
+    ).count;
 
-    const customFieldsInSync = customFieldsExpected.count === customFieldsActual.count;
+    const customFieldsInSync = customFieldsExpected.count === customFieldsActualCount;
     results.push({
       table: 'custom_fields_fts',
       expected: customFieldsExpected.count,
-      actual: customFieldsActual.count,
+      actual: customFieldsActualCount,
       inSync: customFieldsInSync,
     });
 
     if (!customFieldsInSync) {
       issues.push(
-        `custom_fields_fts out of sync: expected ${customFieldsExpected.count}, got ${customFieldsActual.count}`
+        `custom_fields_fts out of sync: expected ${customFieldsExpected.count}, got ${customFieldsActualCount}`
       );
     }
 
@@ -155,7 +159,7 @@ export function checkFtsIntegrity(): FtsHealthStatus {
 export function rebuildDepartmentsFts(): void {
   const transaction = db.transaction(() => {
     // Clear existing FTS data
-    db.exec('INSERT INTO departments_fts(departments_fts) VALUES("delete-all")');
+    db.exec("INSERT INTO departments_fts(departments_fts) VALUES('delete-all')");
 
     // Repopulate with non-deleted departments
     db.exec(`
@@ -178,7 +182,7 @@ export function rebuildDepartmentsFts(): void {
 export function rebuildPeopleFts(): void {
   const transaction = db.transaction(() => {
     // Clear existing FTS data
-    db.exec('INSERT INTO people_fts(people_fts) VALUES("delete-all")');
+    db.exec("INSERT INTO people_fts(people_fts) VALUES('delete-all')");
 
     // Repopulate with non-deleted people
     db.exec(`
@@ -201,7 +205,7 @@ export function rebuildPeopleFts(): void {
 export function rebuildCustomFieldsFts(): void {
   const transaction = db.transaction(() => {
     // Clear existing FTS data
-    db.exec('DELETE FROM custom_fields_fts');
+    db.exec("INSERT INTO custom_fields_fts(custom_fields_fts) VALUES('delete-all')");
 
     // Repopulate with searchable custom field values
     db.exec(`
@@ -277,19 +281,17 @@ export function optimizeFtsIndexes(): void {
 export function getFtsStatistics(): FtsStatistics {
   const recommendations: string[] = [];
 
-  // Get indexed counts
+  // Get indexed counts from FTS5 shadow tables (subtract 2 for metadata rows)
   const deptCount = (
-    db.prepare('SELECT COUNT(DISTINCT rowid) as count FROM departments_fts').get() as {
-      count: number;
-    }
+    db.prepare('SELECT COUNT(*) as count FROM departments_fts_docsize').get() as { count: number }
   ).count;
 
   const peopleCount = (
-    db.prepare('SELECT COUNT(DISTINCT rowid) as count FROM people_fts').get() as { count: number }
+    db.prepare('SELECT COUNT(*) as count FROM people_fts_docsize').get() as { count: number }
   ).count;
 
   const customFieldsCount = (
-    db.prepare('SELECT COUNT(*) as count FROM custom_fields_fts').get() as { count: number }
+    db.prepare('SELECT COUNT(*) as count FROM custom_fields_fts_docsize').get() as { count: number }
   ).count;
 
   // Estimate FTS index sizes (approximate, based on row count)

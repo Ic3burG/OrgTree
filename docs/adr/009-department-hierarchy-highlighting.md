@@ -1,9 +1,9 @@
-# Department Hierarchy Highlighting Feature (COMPLETED)
+# ADR-009: Department Hierarchy Highlighting
 
-**Status**: ✅ Completed January 25, 2026
-**Created**: January 22, 2026
-**Priority**: Medium
-**Complexity**: Medium
+**Status**: Accepted
+**Date**: 2026-01-25
+**Deciders**: Development Team
+**Tags**: ui, navigation, hierarchy
 
 ## Overview
 

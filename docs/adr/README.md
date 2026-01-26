@@ -24,6 +24,16 @@ An Architecture Decision Record (ADR) is a document that captures an important a
 | [005](005-monorepo-structure.md)                   | Monorepo Structure                     | Accepted | 2025-12-15 | architecture, project-structure, monorepo      |
 | [006](006-fts5-full-text-search.md)                | SQLite FTS5 for Full-Text Search       | Accepted | 2025-12-28 | search, database, performance                  |
 | [007](007-typescript-migration.md)                 | TypeScript Migration                   | Accepted | 2026-01-07 | typescript, developer-experience, code-quality |
+| [008](008-user-analytics.md)                       | User Analytics                         | Accepted | 2026-01-21 | analytics, database, tracking                  |
+| [009](009-department-hierarchy-highlighting.md)    | Department Hierarchy Highlighting      | Accepted | 2026-01-22 | map, ux, visualization                         |
+| [010](010-centered-vertical-layout.md)             | Centered Vertical Layout               | Accepted | 2026-01-22 | map, layout, ux                                |
+| [011](011-rainbow-color-theme.md)                  | Rainbow Color Theme                    | Accepted | 2026-01-22 | map, theme, aesthetics                         |
+| [012](012-database-migration-rollback.md)          | Database Migration Rollback            | Accepted | 2026-01-25 | database, migration, infrastructure            |
+| [013](013-user-discovery-privacy.md)               | User Discovery and Privacy Controls    | Accepted | 2026-01-25 | privacy, security, user-discovery              |
+| [014](014-test-coverage-expansion.md)              | Test Coverage Expansion                | Accepted | 2026-01-25 | testing, quality, code-coverage                |
+| [015](015-hierarchical-tree-selector.md)           | Hierarchical Tree Selector             | Accepted | 2026-01-25 | ux, map, form-controls                         |
+| [016](016-geds-url-import.md)                      | GEDS URL Import                        | Accepted | 2026-01-25 | data-import, geds, automation                  |
+| [017](017-search-system-rebuild.md)           | Search System Rebuild                  | Accepted | 2026-01-24 | database, search, performance, resilience      |
 
 ## Reading Guide
 

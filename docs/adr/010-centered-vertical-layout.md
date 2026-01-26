@@ -1,9 +1,8 @@
-# Centered Vertical Layout for Org Map (COMPLETED)
-
-**Status**: ✅ Completed January 22, 2026
-**Created**: January 22, 2026
-**Priority**: Medium
-**Complexity**: Low
+# ADR-010: Centered Vertical Layout
+**Status**: Accepted
+**Date**: 2026-01-25
+**Deciders**: Development Team
+**Tags**: ui, layout, visualizationLow
 
 ## Overview
 

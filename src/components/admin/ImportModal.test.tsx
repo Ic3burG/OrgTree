@@ -35,22 +35,19 @@ vi.mock('../../utils/xmlImport', () => ({
 }));
 
 // Global mocks for FileReader interactions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let mockReadAsText: any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let mockOnLoad: any;
+let mockReadAsText: Mock;
+let mockOnLoad: ((e: { target: { result: string } }) => void) | null;
 let mockResult: string;
 
 class MockFileReader {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readAsText = (...args: any[]) => mockReadAsText(...args);
+  readAsText = (file: File) => mockReadAsText(file);
   result = mockResult;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set onload(callback: any) {
+  set onload(callback: (e: { target: { result: string } }) => void) {
     mockOnLoad = callback;
   }
   get onload() {
-    return mockOnLoad;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return mockOnLoad as any;
   }
 }
 
@@ -169,7 +166,7 @@ describe('ImportModal', () => {
   });
 
   it('should execute import on button click', async () => {
-    // Start with real timers for the setup
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     renderModal();
 
     const mockRows = [{ type: 'department', name: 'Dept 1' }];
@@ -197,26 +194,18 @@ describe('ImportModal', () => {
       errors: [],
     });
 
-    // NOW use fake timers before the click that schedules the timeout
-    vi.useFakeTimers();
-
     fireEvent.click(importBtn);
 
-    // Use vi.waitFor with fake timers if available, or just use real waitFor
-    // But we need to allow the promise to resolve first.
-    // vi.runAllTicks() or similar?
-    // Usually await waitFor works if it checks frequently.
+    await waitFor(() => {
+      expect(screen.getByText('Import Complete!')).toBeDefined();
+    });
 
-    // We can't use real waitFor with fake timers easily if it blocks.
-    // Let's use a small advancement to allow microtasks to run.
-    await vi.advanceTimersByTimeAsync(0);
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
 
-    // Wait for the success UI
-    // Note: with fake timers we might need to manually advance if waitFor times out.
-    // But let's try advancing by time directly if we know it should have happened.
-
-    // Actually, let's NOT use fake timers for the whole thing.
-    // We can just check if onSuccess is called eventually.
+    expect(mockOnSuccess).toHaveBeenCalled();
+    expect(mockOnClose).toHaveBeenCalled();
   });
 
   it('should display duplicate warnings in summary', async () => {

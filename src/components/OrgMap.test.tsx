@@ -15,21 +15,18 @@ const mockZoomOut = vi.fn();
 const mockSetCenter = vi.fn();
 
 // Mock ReactFlow
-
 vi.mock('reactflow', async importOriginal => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const actual = await importOriginal<any>();
+  const actual = await importOriginal<typeof import('reactflow')>();
   return {
     ...actual,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    default: ({ children }: any) => <div data-testid="react-flow">{children}</div>,
+    default: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="react-flow">{children}</div>
+    ),
     Background: () => <div data-testid="background" />,
     MiniMap: () => <div data-testid="mini-map" />,
     // Use real useState to allow component to update its internal state
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    useNodesState: (initial: any) => React.useState(initial),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    useEdgesState: (initial: any) => React.useState(initial),
+    useNodesState: (initial: unknown) => React.useState(initial),
+    useEdgesState: (initial: unknown) => React.useState(initial),
     useReactFlow: () => ({
       fitView: mockFitView,
       zoomIn: mockZoomIn,
@@ -40,10 +37,8 @@ vi.mock('reactflow', async importOriginal => {
 });
 
 // Mock react-router-dom
-
 vi.mock('react-router-dom', async importOriginal => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const actual = await importOriginal<any>();
+  const actual = await importOriginal<typeof import('react-router-dom')>();
   return {
     ...actual,
     useParams: () => ({ orgId: 'org-123' }),
@@ -86,7 +81,7 @@ vi.mock('./ui/Toast', () => ({
 // Mock child components to simplify
 vi.mock('./SearchOverlay', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  default: ({ onSelectResult }: any) => (
+  default: ({ onSelectResult }: { onSelectResult: (res: any) => void }) => (
     <div data-testid="search-overlay">
       <button onClick={() => onSelectResult({ type: 'department', nodeId: 'dept-1' })}>
         Select Dept 1
@@ -95,8 +90,17 @@ vi.mock('./SearchOverlay', () => ({
   ),
 }));
 vi.mock('./Toolbar', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  default: ({ onExpandAll, onCollapseAll, onToggleLayout, onResetLayout }: any) => (
+  default: ({
+    onExpandAll,
+    onCollapseAll,
+    onToggleLayout,
+    onResetLayout,
+  }: {
+    onExpandAll: () => void;
+    onCollapseAll: () => void;
+    onToggleLayout: () => void;
+    onResetLayout: () => void;
+  }) => (
     <div data-testid="toolbar">
       <button onClick={onExpandAll}>Expand All</button>
       <button onClick={onCollapseAll}>Collapse All</button>
@@ -170,7 +174,7 @@ describe('OrgMap Component', () => {
 
   it('renders loading state initially', async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let resolveApi: any;
+    let resolveApi: (value: any) => void;
     const apiPromise = new Promise(resolve => {
       resolveApi = resolve;
     });
@@ -180,7 +184,7 @@ describe('OrgMap Component', () => {
     expect(screen.getByText(/Loading organization map/i)).toBeDefined();
 
     await act(async () => {
-      resolveApi(mockOrg);
+      resolveApi!(mockOrg);
     });
   });
 

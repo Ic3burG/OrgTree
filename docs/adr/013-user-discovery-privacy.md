@@ -1,6 +1,8 @@
-# User Discovery and Privacy Controls Plan (COMPLETED)
-
-**Status**: ✅ Completed January 25, 2026
+# ADR-013: User Discovery and Privacy Controls
+**Status**: Accepted
+**Date**: 2026-01-25
+**Deciders**: Development Team
+**Tags**: security, privacy, auth
 
 ## Goal
 

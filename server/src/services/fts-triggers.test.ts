@@ -60,15 +60,12 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           'INSERT INTO departments (id, organization_id, name, description) VALUES (?, ?, ?, ?)'
         ).run(deptId, orgId, 'Engineering', 'Tech team');
 
-        // Get rowid separately
-        const dept = db.prepare('SELECT rowid FROM departments WHERE id = ?').get(deptId) as {
-          rowid: number;
-        };
-
         // Verify FTS entry was created
         const ftsResult = db
-          .prepare('SELECT rowid, name, description FROM departments_fts WHERE rowid = ?')
-          .get(dept.rowid) as { rowid: number; name: string; description: string } | undefined;
+          .prepare(
+            "SELECT rowid, name, description FROM departments_fts WHERE departments_fts MATCH 'Engineering'"
+          )
+          .get() as { rowid: number; name: string; description: string } | undefined;
 
         expect(ftsResult).toBeDefined();
         expect(ftsResult?.name).toBe('Engineering');
@@ -108,15 +105,12 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           deptId
         );
 
-        // Get rowid
-        const dept = db.prepare('SELECT rowid FROM departments WHERE id = ?').get(deptId) as {
-          rowid: number;
-        };
-
         // Verify FTS was updated
         const ftsResult = db
-          .prepare('SELECT name, description FROM departments_fts WHERE rowid = ?')
-          .get(dept.rowid) as { name: string; description: string };
+          .prepare(
+            "SELECT name, description FROM departments_fts WHERE departments_fts MATCH 'Product'"
+          )
+          .get() as { name: string; description: string };
 
         expect(ftsResult.name).toBe('Product Engineering');
         expect(ftsResult.description).toBe('Product tech team');
@@ -178,15 +172,10 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
       });
 
       it('should remove FTS entry when department is hard-deleted', () => {
-        // Get rowid before delete
-        const dept = db.prepare('SELECT rowid FROM departments WHERE id = ?').get(deptId) as {
-          rowid: number;
-        };
-
         // Verify FTS entry exists
         const ftsBefore = db
-          .prepare('SELECT rowid FROM departments_fts WHERE rowid = ?')
-          .get(dept.rowid);
+          .prepare("SELECT rowid FROM departments_fts WHERE departments_fts MATCH 'Engineering'")
+          .get();
         expect(ftsBefore).toBeDefined();
 
         // Hard delete department
@@ -194,8 +183,8 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
 
         // Verify FTS entry was removed
         const ftsAfter = db
-          .prepare('SELECT rowid FROM departments_fts WHERE rowid = ?')
-          .get(dept.rowid);
+          .prepare("SELECT rowid FROM departments_fts WHERE departments_fts MATCH 'Engineering'")
+          .get();
 
         expect(ftsAfter).toBeUndefined();
       });
@@ -217,17 +206,10 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           'INSERT INTO people (id, organization_id, department_id, name, title, email, phone) VALUES (?, ?, ?, ?, ?, ?, ?)'
         ).run(personId, orgId, deptId, 'John Doe', 'Engineer', 'john@example.com', '555-1234');
 
-        // Get rowid
-        const person = db.prepare('SELECT rowid FROM people WHERE id = ?').get(personId) as {
-          rowid: number;
-        };
-
         // Verify FTS entry was created
         const ftsResult = db
-          .prepare('SELECT name, title, email, phone FROM people_fts WHERE rowid = ?')
-          .get(person.rowid) as
-          | { name: string; title: string; email: string; phone: string }
-          | undefined;
+          .prepare("SELECT name, title, email, phone FROM people_fts WHERE people_fts MATCH 'John'")
+          .get() as { name: string; title: string; email: string; phone: string } | undefined;
 
         expect(ftsResult).toBeDefined();
         expect(ftsResult?.name).toBe('John Doe');
@@ -269,15 +251,10 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
           personId
         );
 
-        // Get rowid
-        const person = db.prepare('SELECT rowid FROM people WHERE id = ?').get(personId) as {
-          rowid: number;
-        };
-
         // Verify FTS was updated
         const ftsResult = db
-          .prepare('SELECT title, email FROM people_fts WHERE rowid = ?')
-          .get(person.rowid) as { title: string; email: string };
+          .prepare("SELECT title, email FROM people_fts WHERE people_fts MATCH 'Senior'")
+          .get() as { title: string; email: string };
 
         expect(ftsResult.title).toBe('Senior Engineer');
         expect(ftsResult.email).toBe('john.doe@example.com');
@@ -339,15 +316,10 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
       });
 
       it('should remove FTS entry when person is hard-deleted', () => {
-        // Get rowid before delete
-        const person = db.prepare('SELECT rowid FROM people WHERE id = ?').get(personId) as {
-          rowid: number;
-        };
-
         // Verify FTS entry exists
         const ftsBefore = db
-          .prepare('SELECT rowid FROM people_fts WHERE rowid = ?')
-          .get(person.rowid);
+          .prepare("SELECT rowid FROM people_fts WHERE people_fts MATCH 'John'")
+          .get();
         expect(ftsBefore).toBeDefined();
 
         // Hard delete person
@@ -355,8 +327,8 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
 
         // Verify FTS entry was removed
         const ftsAfter = db
-          .prepare('SELECT rowid FROM people_fts WHERE rowid = ?')
-          .get(person.rowid);
+          .prepare("SELECT rowid FROM people_fts WHERE people_fts MATCH 'John'")
+          .get();
 
         expect(ftsAfter).toBeUndefined();
       });
@@ -417,22 +389,17 @@ describe('FTS Trigger Integration Tests (Phase 3.2)', () => {
         );
       }
 
-      // Get rowid
-      const dept = db.prepare('SELECT rowid FROM departments WHERE id = ?').get(deptId) as {
-        rowid: number;
-      };
-
       // Verify FTS has the latest update
       const ftsResult = db
-        .prepare('SELECT description FROM departments_fts WHERE rowid = ?')
-        .get(dept.rowid) as { description: string };
+        .prepare("SELECT description FROM departments_fts WHERE departments_fts MATCH 'Updated'")
+        .get() as { description: string };
 
       expect(ftsResult.description).toBe('Updated description 10');
 
       // Verify there's only one FTS entry (no duplicates)
       const ftsCount = db
-        .prepare('SELECT COUNT(*) as count FROM departments_fts WHERE name = ?')
-        .get('Engineering') as { count: number };
+        .prepare('SELECT COUNT(*) as count FROM departments_fts_docsize')
+        .get() as { count: number };
       expect(ftsCount.count).toBe(1);
     });
   });

@@ -47,8 +47,8 @@ describe('Auth Routes', () => {
 
     // Setup error handler
     app.use(
-      (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-        res.status(500).json({ message: _err.message });
+      (_err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+        res.status(_err.status || 500).json({ message: _err.message });
       }
     );
   });

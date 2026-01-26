@@ -250,10 +250,11 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `src/components/AccountSettings/SecuritySettingsPage.tsx` - Discovery toggle
     - `src/components/admin/AddMemberModal.tsx` - Autocomplete search
     - `docs/ROADMAP.md` - Status update
-    - `docs/plans/user-discovery-privacy.md` - Marked completed
-    - `docs/plans/department-hierarchy-highlighting.md` - Marked completed
-    - `docs/plans/centered-vertical-layout.md` - Marked completed
-    - `docs/plans/rainbow-color-theme.md` - Marked completed
+    - `docs/adr/013-user-discovery-privacy.md` - Marked completed
+    - `docs/adr/009-department-hierarchy-highlighting.md` - Marked completed
+    - `docs/adr/010-centered-vertical-layout.md` - Marked completed
+    - `docs/adr/011-rainbow-color-theme.md` - Marked completed
+    - `docs/adr/017-search-system-rebuild.md` - Marked completed
     - `PROGRESS.md` - This file
   - ✅ **TESTS PASSED**:
     - All 648+ backend and frontend tests passing
@@ -267,7 +268,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Zero linting/formatting issues
 
 - **Test Coverage Expansion - Phase 1 (January 25, 2026)**:
-  - 📝 **PLAN CREATED**: `docs/plans/test-coverage-expansion.md` detailing 4 phases to reach 80% coverage.
+  - 📝 **PLAN CREATED**: `docs/adr/014-test-coverage-expansion.md` detailing 4 phases to reach 80% coverage.
   - ✅ **BACKUP SERVICE TESTING**:
     - Created `server/src/services/backup.service.test.ts` (13 tests).
     - Covered `createBackup` (mocking fs/db), `listBackups`, `cleanupOldBackups`, `restoreFromBackup`.
@@ -278,7 +279,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Verified table creation, FTS table setup, and migration idempotency.
     - Verified pragmas (WAL mode, foreign keys) are set correctly.
   - 📁 **FILES MODIFIED/CREATED**:
-    - `docs/plans/test-coverage-expansion.md` (New plan)
+    - `docs/adr/014-test-coverage-expansion.md` (New plan)
     - `server/src/services/backup.service.test.ts` (New test)
     - `server/src/db-init.ts` (New file - extracted logic)
     - `server/src/db-init.test.ts` (New test)
@@ -299,6 +300,21 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Frontend Tests: 204 passing (up from 176) (+28 tests).
     - Total Tests: 857 passing.
     - Achieved robust coverage for React Contexts and complex Forms.
+
+- **Test Coverage Expansion - Phase 3 (January 25, 2026)**:
+  - ✅ **COMPLEX INTERACTIVE COMPONENTS TESTING**:
+    - Rewrote `src/components/OrgMap.test.tsx` (7 tests) with full ReactFlow mocking and interaction coverage.
+    - Created `src/components/admin/ImportModal.test.tsx` (7 tests) covering CSV/XML parsing, API calls, and duplicate logic.
+    - Created `src/components/SearchOverlay.test.tsx` (9 tests) for query handling and filtering.
+    - Created `src/components/Toolbar.test.tsx` (4 tests) for map action controls.
+    - Created `src/components/ui/HierarchicalTreeSelector.test.tsx` (6 tests) covering complex keyboard navigation.
+  - 🛠️ **STABILITY & COMPATIBILITY**:
+    - Resolved `FileReader` mock constructor issues.
+    - Fixed race conditions between `db-init.test.ts` and `discovery.test.ts`.
+  - 📊 **METRICS**:
+    - Frontend Tests: 237 passing (up from 204) (+33 tests).
+    - Total Tests: 892 passing.
+    - Reached high coverage for all critical interactive UI elements.
 
 - **Previous Progress (January 24, 2026 - Phase 5: Frontend Resilience)**:
   - ✅ **Search System Rebuild - Phase 5 Complete** - Frontend resilience implementation
@@ -323,7 +339,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 📁 **FILES MODIFIED**:
     - `src/hooks/useSearch.ts` - Added retry logic, cache integration, new state tracking
     - `src/components/SearchOverlay.tsx` - Added degraded mode indicators and cache badge
-    - `docs/plans/search-rebuild.md` - Updated progress tracking
+    - `docs/rfc/search-enhancements.md` - Updated progress tracking
     - `PROGRESS.md` - This file
   - ✅ **COMMITS PUSHED**:
     - `35203bd` - feat(search): add retry logic with exponential backoff to useSearch hook
