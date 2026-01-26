@@ -1,7 +1,8 @@
 import React from 'react';
 import { Plus, CheckSquare, X, Search, Loader2, ArrowUpDown, Star } from 'lucide-react';
 import type { Department } from '../../types/index.js';
-import { getHierarchicalDepartments, getIndentedName } from '../../utils/departmentUtils.js';
+import { buildDepartmentTree } from '../../utils/departmentUtils.js';
+import HierarchicalTreeSelector from '../ui/HierarchicalTreeSelector.js';
 
 interface PersonManagerHeaderProps {
   searchTerm: string;
@@ -106,20 +107,14 @@ export default function PersonManagerHeader({
               />
             </div>
 
-            {/* Department Filter */}
             <div className="md:col-span-3">
-              <select
-                value={filterDepartment}
-                onChange={e => onFilterChange(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-slate-100 font-mono text-sm"
-              >
-                <option value="">All Departments</option>
-                {getHierarchicalDepartments(departments).map(dept => (
-                  <option key={dept.id} value={dept.id}>
-                    {getIndentedName(dept.name, dept.depth, dept)}
-                  </option>
-                ))}
-              </select>
+              <HierarchicalTreeSelector
+                items={buildDepartmentTree(departments)}
+                value={filterDepartment || null}
+                onChange={id => onFilterChange(id || '')}
+                placeholder="All Departments"
+                allowClear={true}
+              />
             </div>
 
             {/* Starred Filter */}

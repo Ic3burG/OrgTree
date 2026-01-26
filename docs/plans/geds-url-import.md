@@ -9,12 +9,14 @@ Enable users to import GEDS (Government Electronic Directory Services) organizat
 ## Current Workflow vs. Proposed
 
 **Current (Manual)**:
+
 1. User downloads GEDS XML file to their computer
 2. User uploads XML file through import UI
 3. System parses and imports data
 4. User manually deletes downloaded file
 
 **Proposed (Automated)**:
+
 1. User pastes one or more GEDS download URLs
 2. System downloads XML files to temporary storage
 3. System parses and imports each file
@@ -25,6 +27,7 @@ Enable users to import GEDS (Government Electronic Directory Services) organizat
 
 > [!IMPORTANT]
 > **Security Considerations**:
+>
 > - URL validation will **whitelist only `.gc.ca` and `canada.ca` domains** to prevent SSRF attacks
 > - File size limit: **50MB per XML file** to prevent memory issues
 > - Request timeout: **30 seconds** per download to prevent hanging
@@ -32,6 +35,7 @@ Enable users to import GEDS (Government Electronic Directory Services) organizat
 
 > [!NOTE]
 > **Storage & Cleanup**:
+>
 > - Temporary XML files will be stored in Node.js temp directory or scratchpad
 > - Files will be **deleted immediately after import** (success or failure)
 > - Cleanup guaranteed via `finally` blocks to prevent disk space issues
@@ -49,6 +53,7 @@ No database schema changes required. Existing audit log and import tables are su
 **Purpose**: Handle secure downloading and validation of GEDS XML files
 
 **Functions**:
+
 - `validateGedsUrl(url: string): boolean`
   - Validates URL format and domain (whitelist: `.gc.ca`, `canada.ca`)
   - Returns `true` if valid, throws error if invalid
@@ -65,6 +70,7 @@ No database schema changes required. Existing audit log and import tables are su
   - Swallows errors (file already deleted, etc.)
 
 **Error Handling**:
+
 - `InvalidUrlError` - URL fails validation
 - `DownloadTimeoutError` - Download exceeds 30 seconds
 - `FileSizeLimitError` - File exceeds 50MB
@@ -75,6 +81,7 @@ No database schema changes required. Existing audit log and import tables are su
 **Purpose**: Extract parsing logic from script into reusable service
 
 **Functions**:
+
 - `parseGedsXml(filePath: string): Promise<ParsedGedsData>`
   - Reads and parses GEDS XML file
   - Returns structured data: `{ departments: Department[], people: Person[] }`
@@ -82,6 +89,7 @@ No database schema changes required. Existing audit log and import tables are su
   - Throws `ParseError` on invalid XML
 
 **Refactoring**:
+
 - Extract core parsing logic from `scripts/parse-geds-xml.ts`
 - Script becomes thin wrapper around service for CLI usage
 - Service can be used by both CLI and API routes
@@ -91,6 +99,7 @@ No database schema changes required. Existing audit log and import tables are su
 **Endpoint**: `POST /api/organizations/:id/import/geds-urls`
 
 **Request Body**:
+
 ```typescript
 {
   urls: string[]  // Array of GEDS XML download URLs (max 10)
@@ -98,25 +107,28 @@ No database schema changes required. Existing audit log and import tables are su
 ```
 
 **Response**:
+
 ```typescript
 {
   results: Array<{
-    url: string,
-    status: 'success' | 'failed',
-    message: string,
+    url: string;
+    status: 'success' | 'failed';
+    message: string;
     stats?: {
-      departments: number,
-      people: number
-    },
-    error?: string
-  }>
+      departments: number;
+      people: number;
+    };
+    error?: string;
+  }>;
 }
 ```
 
 **Implementation Logic**:
+
 1. Validate user has admin/owner role for organization
 2. Validate request body (max 10 URLs, all URLs valid format)
 3. For each URL (sequential processing):
+
    ```typescript
    const tempFile = path.join(os.tmpdir(), `geds-${Date.now()}-${index}.xml`);
    try {
@@ -154,6 +166,7 @@ No database schema changes required. Existing audit log and import tables are su
 4. Return results array with per-URL status
 
 **Error Handling**:
+
 - Per-URL failures: Log and continue to next URL
 - Authorization failures: Return 403 immediately
 - Database errors: Return 500 after cleanup
@@ -169,8 +182,10 @@ No database schema changes required. Existing audit log and import tables are su
 #### [MODIFY] [scripts/parse-geds-xml.ts](file:///Users/ojdavis/Claude%20Code/OrgTree/scripts/parse-geds-xml.ts)
 
 **Refactoring**:
+
 - Extract parsing logic into `geds-parser.service.ts`
 - Script becomes thin wrapper:
+
   ```typescript
   import { parseGedsXml } from '../src/services/geds-parser.service.js';
 
@@ -185,6 +200,7 @@ No database schema changes required. Existing audit log and import tables are su
 **Purpose**: UI for pasting and importing GEDS URLs
 
 **Features**:
+
 - Textarea for pasting URLs (one per line)
 - Client-side URL validation (show invalid URLs immediately)
 - "Import from GEDS URLs" button with loading state
@@ -198,6 +214,7 @@ No database schema changes required. Existing audit log and import tables are su
   - Option to dismiss or retry failed URLs
 
 **Component Structure**:
+
 ```typescript
 interface GedsUrlImporterProps {
   organizationId: string;
@@ -214,6 +231,7 @@ interface ImportResult {
 ```
 
 **UX Flow**:
+
 1. User pastes URLs in textarea
 2. Component validates URLs on blur (highlight invalid)
 3. Click "Import from URLs" → Open progress modal
@@ -223,11 +241,13 @@ interface ImportResult {
 #### [MODIFY] [src/components/admin/DepartmentManager.tsx](file:///Users/ojdavis/Claude%20Code/OrgTree/src/components/admin/DepartmentManager.tsx)
 
 **Integration**:
+
 - Add new tab/section: "Import from GEDS URLs"
 - Include `<GedsUrlImporter />` component alongside existing file upload import
 - Show help text with example GEDS URL format
 
 **UI Layout**:
+
 ```
 ┌─────────────────────────────────────┐
 │ Import Data                         │
@@ -242,6 +262,7 @@ interface ImportResult {
 **Purpose**: API client functions for GEDS import
 
 **Functions**:
+
 ```typescript
 export interface GedsImportResult {
   url: string;
@@ -269,6 +290,7 @@ export async function importGedsUrls(
 #### Backend Tests
 
 **[server/src/services/geds-download.service.test.ts](file:///Users/ojdavis/Claude%20Code/OrgTree/server/src/services/geds-download.service.test.ts)**:
+
 - ✅ Valid URL passes validation (`.gc.ca` domain)
 - ✅ Invalid domain fails validation
 - ✅ Non-HTTPS URL fails validation
@@ -279,12 +301,14 @@ export async function importGedsUrls(
 - ✅ Cleanup silently handles already-deleted files
 
 **[server/src/services/geds-parser.service.test.ts](file:///Users/ojdavis/Claude%20Code/OrgTree/server/src/services/geds-parser.service.test.ts)**:
+
 - ✅ Valid GEDS XML parses correctly
 - ✅ French characters preserved (accents, special chars)
 - ✅ Invalid XML throws ParseError
 - ✅ Missing required fields handled gracefully
 
 **[server/src/routes/geds-import.test.ts](file:///Users/ojdavis/Claude%20Code/OrgTree/server/src/routes/geds-import.test.ts)**:
+
 - ✅ Requires authentication
 - ✅ Requires admin/owner role
 - ✅ Rejects >10 URLs per request
@@ -298,6 +322,7 @@ export async function importGedsUrls(
 #### Frontend Tests
 
 **[src/components/admin/GedsUrlImporter.test.tsx](file:///Users/ojdavis/Claude%20Code/OrgTree/src/components/admin/GedsUrlImporter.test.tsx)**:
+
 - ✅ Validates URLs on blur
 - ✅ Shows error for invalid URLs
 - ✅ Disables import button when no valid URLs
@@ -347,6 +372,7 @@ export async function importGedsUrls(
 ## Implementation Phases
 
 ### Phase 1: Backend Foundation ✅ COMPLETE
+
 - [x] Create `geds-download.service.ts` with URL validation and download
 - [x] Create `geds-parser.service.ts` by extracting from script
 - [x] Refactor `scripts/parse-geds-xml.ts` to use parser service
@@ -356,6 +382,7 @@ export async function importGedsUrls(
 - [x] Mount route in `server/src/index.ts`
 
 ### Phase 2: Frontend UI ✅ COMPLETE
+
 - [x] Create `GedsUrlImporter.tsx` component
 - [x] Create `src/api/geds.ts` API client
 - [x] Write component tests (8 tests)
@@ -364,6 +391,7 @@ export async function importGedsUrls(
 - [x] Add error handling and user feedback
 
 ### Phase 3: Polish & Verification 🔄 IN PROGRESS
+
 - [ ] Manual testing (all scenarios above) - **READY FOR USER TESTING**
 - [x] Add helpful error messages - **COMPLETE** (detailed errors from backend, UI validation)
 - [x] Add inline help text with example URLs - **COMPLETE** (textarea placeholder)

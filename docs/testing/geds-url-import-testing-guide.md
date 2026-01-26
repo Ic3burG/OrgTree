@@ -7,6 +7,7 @@
 ## Prerequisites
 
 1. **Run the application**:
+
    ```bash
    # Terminal 1 - Backend
    cd server && npm run dev
@@ -26,6 +27,7 @@
 **Goal**: Verify successful import of one GEDS XML URL
 
 **Steps**:
+
 1. Navigate to **Admin Panel** → **Import** → **GEDS URLs** tab
 2. Paste a valid GEDS URL in the textarea:
    ```
@@ -35,6 +37,7 @@
 4. Observe the progress modal
 
 **Expected Results**:
+
 - ✅ Button text updates to "Importing..."
 - ✅ Modal appears with spinner and message "Importing GEDS data from 1 URL..."
 - ✅ After processing, modal shows "Import Summary"
@@ -47,6 +50,7 @@
 - ✅ Departments/people visible in the org chart
 
 **Verification**:
+
 - Check **Audit Log** for entry:
   - Action: "import"
   - Entity Type: "geds_url"
@@ -59,6 +63,7 @@
 **Goal**: Verify batch import of multiple GEDS URLs
 
 **Steps**:
+
 1. Paste 3 valid GEDS URLs (one per line):
    ```
    https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=ou%3DTBS-SCT%2Cou%3DTBS-SCT%2Cou%3DGOC%2Co%3DGC%2Cc%3DCA
@@ -69,6 +74,7 @@
 3. Click **"Import from 3 GEDS URLs"** button
 
 **Expected Results**:
+
 - ✅ Modal shows "Importing GEDS data from 3 URLs..."
 - ✅ URLs processed sequentially
 - ✅ Success summary shows all 3 succeeded
@@ -83,6 +89,7 @@
 **Goal**: Verify client-side validation and partial success handling
 
 **Steps**:
+
 1. Paste a mix of valid and invalid URLs:
    ```
    https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=test1
@@ -94,6 +101,7 @@
 2. Observe validation summary
 
 **Expected Results**:
+
 - ✅ Summary shows: "✓ 2 valid URLs"
 - ✅ Summary shows: "✗ 3 invalid URLs" in red
 - ✅ Button text: "Import from 2 GEDS URLs" (only valid count)
@@ -102,6 +110,7 @@
 - ✅ Success toast for 2 imports
 
 **Invalid URL Examples**:
+
 - Non-HTTPS: `http://geds-sage.gc.ca/...` ❌
 - Wrong domain: `https://evil.com/...` ❌
 - Not a URL: `not-a-url` ❌
@@ -113,6 +122,7 @@
 **Goal**: Verify graceful handling of non-existent files
 
 **Steps**:
+
 1. Paste a valid-looking but non-existent GEDS URL:
    ```
    https://geds-sage.gc.ca/en/GEDS?pgid=999&dn=nonexistent
@@ -120,6 +130,7 @@
 2. Click **"Import from 1 GEDS URL"**
 
 **Expected Results**:
+
 - ✅ Import starts normally
 - ✅ Modal shows failure result with red cross (✗)
 - ✅ Error message displayed: "HTTP 404" or similar
@@ -129,6 +140,7 @@
 - ✅ Temporary file deleted from server
 
 **Check Server Logs**:
+
 - Should see error logged but not crash
 - Temp file path mentioned in cleanup log
 
@@ -139,10 +151,12 @@
 **Goal**: Verify 30-second timeout enforcement
 
 **Steps**:
+
 1. Find or simulate a GEDS URL that responds very slowly
 2. Paste URL and click import
 
 **Expected Results**:
+
 - ✅ After 30 seconds, import fails with timeout error
 - ✅ Result shows: "Download timeout" or "Request timeout"
 - ✅ No partial data imported
@@ -158,10 +172,12 @@
 **Goal**: Verify 50MB file size limit enforcement
 
 **Steps**:
+
 1. Find or create a GEDS XML URL that returns >50MB file
 2. Paste URL and click import
 
 **Expected Results**:
+
 - ✅ Import fails with "File size limit exceeded" error
 - ✅ Download stops when 50MB threshold reached
 - ✅ No data imported
@@ -176,10 +192,12 @@
 **Goal**: Verify max 10 URLs per request
 
 **Steps**:
+
 1. Paste 12 valid GEDS URLs (one per line)
 2. Observe validation
 
 **Expected Results**:
+
 - ✅ Summary shows: "✓ 12 valid URLs"
 - ✅ **Warning** appears: "⚠ Maximum 10 URLs allowed (you have 12)" in orange
 - ✅ Import button is **disabled** (cannot proceed)
@@ -192,11 +210,13 @@
 **Goal**: Verify only admins/owners can import
 
 **Steps**:
+
 1. **Logout** and login as a user with **viewer** or **editor** role
 2. Navigate to the organization
 3. Try to access Admin Panel → Import
 
 **Expected Results**:
+
 - ✅ Either:
   - Import button/tab is hidden for non-admins, OR
   - Import button is disabled, OR
@@ -204,6 +224,7 @@
 - ✅ Error toast: "You don't have permission to import data"
 
 **Test with Different Roles**:
+
 - Viewer: ❌ Should NOT be able to import
 - Editor: ❌ Should NOT be able to import
 - Admin: ✅ Should be able to import
@@ -216,6 +237,7 @@
 **Goal**: Verify temporary files are deleted after import
 
 **Steps**:
+
 1. Before import, check temp directory:
    ```bash
    # On Mac/Linux
@@ -228,12 +250,14 @@
 4. **After** import completes, check temp directory again
 
 **Expected Results**:
-- ✅ Before: No geds-*.xml files exist
-- ✅ During: 1-3 geds-*.xml files exist temporarily
-- ✅ After: All geds-*.xml files deleted
+
+- ✅ Before: No geds-\*.xml files exist
+- ✅ During: 1-3 geds-\*.xml files exist temporarily
+- ✅ After: All geds-\*.xml files deleted
 - ✅ Even if import fails, files still deleted (check with failed URL)
 
 **Server Logs**:
+
 - Should see cleanup messages: "Cleaned up temp file: /tmp/geds-..."
 
 ---
@@ -243,11 +267,13 @@
 **Goal**: Verify duplicate departments are reused (not re-created)
 
 **Steps**:
+
 1. Import a GEDS URL
 2. Note the number of departments created (e.g., 5 departments)
 3. **Import the same URL again**
 
 **Expected Results**:
+
 - ✅ Second import succeeds
 - ✅ Stats show:
   - `departmentsCreated: 0` (no new departments)
@@ -258,6 +284,7 @@
 - ✅ Audit log shows both import events
 
 **Verification**:
+
 - Check **Department Manager** → Count remains same after re-import
 - Check **Audit Log** → Two import entries with different stats
 
@@ -268,6 +295,7 @@
 **Goal**: Verify user experience is smooth and informative
 
 **Checklist**:
+
 - ✅ Placeholder text shows example URL format
 - ✅ Help text explains: "One per line, max 10 URLs"
 - ✅ Domain whitelist displayed: `.gc.ca, canada.ca`
@@ -289,6 +317,7 @@
 **Goal**: Verify system handles max load gracefully
 
 **Steps**:
+
 1. Paste **10 valid GEDS URLs**
 2. Click import
 3. Monitor:
@@ -297,6 +326,7 @@
    - Import duration
 
 **Expected Results**:
+
 - ✅ UI remains responsive during import
 - ✅ Progress modal shows accurate state
 - ✅ All 10 URLs process sequentially (not concurrently)
@@ -305,6 +335,7 @@
 - ✅ Server doesn't crash or hang
 
 **Metrics to Check**:
+
 - Frontend: React DevTools performance tab
 - Backend: Server logs for timing info
 - Database: Check for new departments/people via SQL query
@@ -333,6 +364,7 @@ If you encounter issues during testing, please report with:
 ```markdown
 **Scenario**: [e.g., Single Valid URL Import]
 **Steps**:
+
 1. ...
 2. ...
 
@@ -376,6 +408,6 @@ Once all scenarios pass, the feature is ready for production:
 
 ---
 
-**Testing completed by**: _______________
-**Date**: _______________
+**Testing completed by**: **\*\***\_\_\_**\*\***
+**Date**: **\*\***\_\_\_**\*\***
 **Status**: ⬜ Pass / ⬜ Fail (with bugs reported)

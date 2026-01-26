@@ -3,7 +3,8 @@ import { X, Plus, Settings, Trash2, Star } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import api from '../../api/client.js';
 import type { Person, Department, CustomFieldDefinition } from '../../types/index.js';
-import { getHierarchicalDepartments, getIndentedName } from '../../utils/departmentUtils.js';
+import { buildDepartmentTree } from '../../utils/departmentUtils.js';
+import HierarchicalTreeSelector from '../ui/HierarchicalTreeSelector.js';
 import CustomFieldInput from '../ui/CustomFieldInput.js';
 import CustomFieldForm from './CustomFieldForm.js';
 import DeleteConfirmModal from './DeleteConfirmModal.js';
@@ -278,23 +279,15 @@ export default function PersonForm({
               >
                 Department *
               </label>
-              <select
+              <HierarchicalTreeSelector
                 id="departmentId"
-                name="departmentId"
+                items={buildDepartmentTree(departments)}
                 value={formData.departmentId}
-                onChange={handleChange}
+                onChange={id => setFormData(prev => ({ ...prev, departmentId: id || '' }))}
+                placeholder="Select a department"
+                error={!!errors.departmentId}
                 disabled={isSubmitting}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 disabled:opacity-50 font-mono text-sm ${
-                  errors.departmentId ? 'border-red-500' : 'border-gray-300 dark:border-slate-600'
-                }`}
-              >
-                <option value="">Select a department</option>
-                {getHierarchicalDepartments(departments).map(dept => (
-                  <option key={dept.id} value={dept.id}>
-                    {getIndentedName(dept.name, dept.depth, dept)}
-                  </option>
-                ))}
-              </select>
+              />
               {errors.departmentId && (
                 <p className="text-sm text-red-600 mt-1">{errors.departmentId}</p>
               )}

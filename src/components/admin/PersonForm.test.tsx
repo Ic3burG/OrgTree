@@ -35,10 +35,30 @@ vi.mock('./DeleteConfirmModal', () => ({
   default: () => <div data-testid="delete-confirm-modal" />,
 }));
 
+vi.mock('../ui/HierarchicalTreeSelector', () => ({
+  default: ({ value, onChange, items, placeholder, id }: any) => (
+    <select
+      id={id}
+      value={value || ''}
+      onChange={e => onChange(e.target.value)}
+      data-testid="hierarchical-selector"
+    >
+      <option value="">{placeholder}</option>
+      {/* Simplify items for testing */}
+      {items.map((item: any) => (
+        <option key={item.id} value={item.id}>
+          {item.name}
+        </option>
+      ))}
+    </select>
+  ),
+}));
+
 // Mock department utils
 vi.mock('../../utils/departmentUtils', () => ({
   getHierarchicalDepartments: (depts: any[]) => depts,
   getIndentedName: (name: string) => name,
+  buildDepartmentTree: (depts: any[]) => depts,
 }));
 
 const mockDepartments = [

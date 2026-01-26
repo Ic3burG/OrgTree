@@ -106,6 +106,7 @@ Currently, 5 components use native `<select>` elements with `getHierarchicalDepa
 #### [NEW] [HierarchicalTreeSelector.tsx](file:///Users/ojdavis/Claude%20Code/OrgTree/src/components/ui/HierarchicalTreeSelector.tsx)
 
 New reusable component with the following features:
+
 - Tree rendering with expand/collapse controls
 - Search input with filtering
 - Keyboard navigation (arrow keys, enter, escape)
@@ -129,20 +130,20 @@ interface HierarchicalTreeSelectorProps {
   items: TreeNode[];
   value: string | null;
   onChange: (id: string | null) => void;
-  
+
   // Configuration
-  placeholder?: string;           // Default: "Select..."
-  searchPlaceholder?: string;     // Default: "Search..."
-  allowClear?: boolean;           // Default: true
-  disabled?: boolean;             // Default: false
-  error?: boolean;                // Default: false
-  showBreadcrumb?: boolean;       // Default: true
-  defaultExpandedIds?: string[];  // Default: [] (auto-expand to selection)
-  maxHeight?: number;             // Default: 300 (px)
-  
+  placeholder?: string; // Default: "Select..."
+  searchPlaceholder?: string; // Default: "Search..."
+  allowClear?: boolean; // Default: true
+  disabled?: boolean; // Default: false
+  error?: boolean; // Default: false
+  showBreadcrumb?: boolean; // Default: true
+  defaultExpandedIds?: string[]; // Default: [] (auto-expand to selection)
+  maxHeight?: number; // Default: 300 (px)
+
   // Filtering
-  excludeIds?: string[];          // Departments to exclude (e.g., current + descendants)
-  
+  excludeIds?: string[]; // Departments to exclude (e.g., current + descendants)
+
   // Styling
   className?: string;
   id?: string;
@@ -150,6 +151,7 @@ interface HierarchicalTreeSelectorProps {
 ```
 
 **Internal state management:**
+
 - Expanded node IDs (Set)
 - Search query string
 - Focused node ID (for keyboard nav)
@@ -160,6 +162,7 @@ interface HierarchicalTreeSelectorProps {
 #### [NEW] [HierarchicalTreeSelector.test.tsx](file:///Users/ojdavis/Claude%20Code/OrgTree/src/components/ui/HierarchicalTreeSelector.test.tsx)
 
 Unit tests for the new component:
+
 - Renders items in tree structure
 - Expands/collapses on click and keyboard
 - Filters items based on search
@@ -241,7 +244,7 @@ Add exclusion of current department and its descendants to prevent circular refe
   id="parentId"
   items={buildDepartmentTree(departments)}
   value={formData.parentId}
-  onChange={(id) => setFormData(prev => ({ ...prev, parentId: id }))}
+  onChange={id => setFormData(prev => ({ ...prev, parentId: id }))}
   placeholder="None (top-level)"
   excludeIds={department ? getDescendantIds(department.id, departments) : []}
   allowClear={true}
@@ -259,7 +262,7 @@ Replace select (lines 108-122) with `HierarchicalTreeSelector`:
 <HierarchicalTreeSelector
   items={buildDepartmentTree(departments)}
   value={selectedDeptId}
-  onChange={(id) => setSelectedDeptId(id || '')}
+  onChange={id => setSelectedDeptId(id || '')}
   placeholder="Select a department..."
   showBreadcrumb={true}
 />
@@ -270,6 +273,7 @@ Replace select (lines 108-122) with `HierarchicalTreeSelector`:
 #### [MODIFY] [BulkEditModal.tsx](file:///Users/ojdavis/Claude%20Code/OrgTree/src/components/admin/BulkEditModal.tsx)
 
 Two locations to update:
+
 1. Department assignment for people (around line 303)
 2. Parent department for bulk department edit (around line 410)
 
@@ -294,6 +298,7 @@ cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test
 ```
 
 New tests to add in `HierarchicalTreeSelector.test.tsx`:
+
 - Tree rendering tests
 - Search/filter functionality
 - Expand/collapse behavior
@@ -327,6 +332,7 @@ Consider adding new E2E tests for tree selector interactions in forms.
 > **User should test these scenarios manually after implementation:**
 
 #### Test 1: PersonForm Department Selection
+
 1. Log in and navigate to People tab
 2. Click "Add Person" button
 3. Click on the department selector field
@@ -339,6 +345,7 @@ Consider adding new E2E tests for tree selector interactions in forms.
 10. Save the person and verify correct department assignment
 
 #### Test 2: DepartmentForm Parent Selection
+
 1. Navigate to Departments tab
 2. Click "Add Department" or edit existing
 3. Open parent department selector
@@ -347,6 +354,7 @@ Consider adding new E2E tests for tree selector interactions in forms.
 6. **Verify**: Breadcrumb path is visible
 
 #### Test 3: Bulk Move People
+
 1. In People tab, select multiple people
 2. Click "Move" button
 3. **Verify**: Tree selector appears in modal
@@ -355,6 +363,7 @@ Consider adding new E2E tests for tree selector interactions in forms.
 6. **Verify**: People moved to correct department
 
 #### Test 4: Keyboard Navigation
+
 1. Open any tree selector
 2. Press Up/Down arrows
 3. **Verify**: Focus moves between items
@@ -368,6 +377,7 @@ Consider adding new E2E tests for tree selector interactions in forms.
 11. **Verify**: Dropdown closes without selection change
 
 #### Test 5: Mobile/Touch Testing
+
 1. Open app on mobile device or emulator
 2. Tap department selector
 3. **Verify**: Touch targets are large enough
@@ -376,6 +386,7 @@ Consider adding new E2E tests for tree selector interactions in forms.
 6. **Verify**: Selection works cleanly
 
 #### Test 6: Dark Mode
+
 1. Enable dark mode
 2. Open tree selector
 3. **Verify**: All elements visible with proper contrast
@@ -386,6 +397,7 @@ Consider adding new E2E tests for tree selector interactions in forms.
 ## Implementation Phases
 
 ### Phase 1: Core Component (2-3 hours)
+
 - Create `HierarchicalTreeSelector.tsx`
 - Implement basic tree rendering
 - Add expand/collapse functionality
@@ -393,17 +405,20 @@ Consider adding new E2E tests for tree selector interactions in forms.
 - Basic styling (light mode)
 
 ### Phase 2: Search & Navigation (1-2 hours)
+
 - Add search input and filtering
 - Implement keyboard navigation
 - Add focus management
 
 ### Phase 3: Polish & Accessibility (1-2 hours)
+
 - Dark mode support
 - ARIA attributes
 - Screen reader testing
 - Mobile touch optimization
 
 ### Phase 4: Integration (2-3 hours)
+
 - Update `PersonForm.tsx`
 - Update `DepartmentForm.tsx`
 - Update `BulkMoveModal.tsx`
@@ -412,6 +427,7 @@ Consider adding new E2E tests for tree selector interactions in forms.
 - Add utility functions to `departmentUtils.ts`
 
 ### Phase 5: Testing & Documentation (1-2 hours)
+
 - Write unit tests
 - Run E2E tests
 - Manual testing

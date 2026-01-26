@@ -3,12 +3,14 @@
 ## Problem Identified
 
 The two sample XML files had corrupted French characters:
+
 - `LEVEQUE_2C_ALEXANDRE.xml`: **L�v�que** (should be **Lévêque**)
 - `REGISME_2C_BARBARA.xml`: **R�gism�** (should be **Régismé**)
 
 ### Root Cause
 
 The files contained UTF-8 replacement characters (byte sequence `EF BF BD` = �), indicating they were corrupted before being saved. This happens when:
+
 1. Files are downloaded with incorrect encoding settings
 2. Copy-paste operations lose encoding information
 3. Text conversion tools misinterpret character encodings
@@ -53,12 +55,14 @@ Parser now warns when replacement characters are detected:
 ### 3. Created Test Files
 
 Generated corrected versions with proper UTF-8 encoding:
+
 - `LEVEQUE_2C_ALEXANDRE-FIXED.xml` ✅ **Lévêque**
 - `REGISME_2C_BARBARA-FIXED.xml` ✅ **Régismé**
 
 ### 4. Created Test Script
 
 `test-geds-encoding.js` validates encoding detection:
+
 - Tests both corrupted and fixed files
 - Shows character-by-character comparison
 - Demonstrates auto-detection working correctly
@@ -86,6 +90,7 @@ Original Files (corrupted):
 2. **Place files** in `scripts/xml-files/` directory
 
 3. **Run parser**:
+
    ```bash
    cd scripts
    node parse-geds-xml.js
@@ -100,6 +105,7 @@ Original Files (corrupted):
 ### Testing Encoding
 
 Run the test script to verify files:
+
 ```bash
 cd scripts
 node test-geds-encoding.js
@@ -108,6 +114,7 @@ node test-geds-encoding.js
 ### Verifying File Encoding
 
 Command-line verification:
+
 ```bash
 # Check encoding
 file -b --mime-encoding your-file.xml
@@ -119,12 +126,14 @@ grep "fullName" your-file.xml | hexdump -C
 ## Prevention
 
 ### ✅ DO:
+
 - Download GEDS XML directly from the API/source
 - Keep XML declaration with proper encoding
 - Verify encoding after download
 - Use the test script before bulk imports
 
 ### ❌ DON'T:
+
 - Copy-paste XML content from browsers
 - Save as "text file" without specifying UTF-8
 - Edit XML in tools that don't preserve encoding
@@ -150,19 +159,21 @@ grep "fullName" your-file.xml | hexdump -C
    - Quick reference for the fix
    - Test results and usage
 
-5. **scripts/gac-xml-sample/*-FIXED.xml** (new)
+5. **scripts/gac-xml-sample/\*-FIXED.xml** (new)
    - Corrected example files
    - Proper UTF-8 encoding with XML declaration
 
 ## Impact
 
 ### Before Fix:
+
 - Hard-coded Latin-1 encoding
 - No encoding detection
 - French characters often corrupted
 - No warnings for bad files
 
 ### After Fix:
+
 - Auto-detects encoding from XML declaration
 - Tries UTF-8 first (modern standard)
 - Falls back to Latin-1 for legacy files

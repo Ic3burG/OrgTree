@@ -17,11 +17,11 @@ function readXMLFile(filePath) {
     // Map common encoding names to Node.js encoding names
     const encodingMap = {
       'utf-8': 'utf-8',
-      'utf8': 'utf-8',
+      utf8: 'utf-8',
       'iso-8859-1': 'latin1',
-      'latin1': 'latin1',
+      latin1: 'latin1',
       'windows-1252': 'latin1',
-      'cp1252': 'latin1',
+      cp1252: 'latin1',
     };
 
     const nodeEncoding = encodingMap[declaredEncoding] || 'utf-8';

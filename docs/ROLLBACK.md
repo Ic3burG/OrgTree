@@ -29,7 +29,7 @@ Run the `down` command with the migration ID:
 npm run migrate down <migration_id>
 ```
 
-*Example:* `npm run migrate down 20240101000018`
+_Example:_ `npm run migrate down 20240101000018`
 
 ### 3. Verify the state
 

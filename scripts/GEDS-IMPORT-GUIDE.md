@@ -75,10 +75,12 @@ grep "fullName" your-file.xml | hexdump -C
 ```
 
 **Correct UTF-8 encoding of "Lévêque":**
+
 - `c3 a9` = é
 - `c3 aa` = ê
 
 **Incorrect (replacement character):**
+
 - `ef bf bd` = �
 
 ### 3. Download Directly from GEDS API
@@ -92,6 +94,7 @@ Copying XML content from web browsers or terminal windows can corrupt encoding. 
 ### 5. Test with Sample Names
 
 After download, test with known French names:
+
 - Lévêque, Dupré, Côté, Noël, François, Hélène
 
 If you see `�` or garbled characters, the encoding is incorrect.
@@ -108,6 +111,7 @@ The parser will detect and warn about corruption:
 ```
 
 **Options:**
+
 1. **Re-download** from source with correct encoding
 2. **Manual correction** if only a few files
 3. **Continue with warning** - names will be imported with � characters
@@ -122,6 +126,7 @@ node test-geds-encoding.js
 ```
 
 This will check all XML files in `gac-xml-sample/` and report:
+
 - Detected encoding
 - Presence of replacement characters
 - Correctly parsed names
@@ -142,6 +147,7 @@ node parse-geds-xml.js
 ### 3. Check Output
 
 The parser will:
+
 - Auto-detect encoding from each file
 - Warn about corrupted files
 - Generate `output/geds-import.csv` with UTF-8 encoding
@@ -149,6 +155,7 @@ The parser will:
 ### 4. Review CSV
 
 Open `output/geds-import.csv` in Excel or a text editor:
+
 - Excel: Will display French characters correctly (thanks to UTF-8 BOM)
 - Text editor: Verify names look correct (Lévêque, not L�v�que)
 
@@ -161,23 +168,26 @@ Use the CSV import feature in OrgTree to load the data.
 ### Character Encoding Primer
 
 **UTF-8**: Variable-length encoding (1-4 bytes per character)
+
 - ASCII (a-z, A-Z): 1 byte
 - French accents (é, è, ê): 2 bytes (e.g., é = 0xC3 0xA9)
 - Universal, modern standard
 
 **Latin-1 (ISO-8859-1)**: Fixed 1 byte per character
+
 - ASCII (a-z, A-Z): same as UTF-8
 - French accents (é, è, ê): 1 byte (e.g., é = 0xE9)
 - Legacy encoding for Western European languages
 
 **Windows-1252**: Superset of Latin-1
+
 - Similar to Latin-1 but with additional characters in 0x80-0x9F range
 - Common on Windows systems
 
 ### Byte Sequences for Common French Characters
 
 | Character | UTF-8 Bytes | Latin-1 Byte |
-|-----------|-------------|--------------|
+| --------- | ----------- | ------------ |
 | é         | C3 A9       | E9           |
 | è         | C3 A8       | E8           |
 | ê         | C3 AA       | EA           |
@@ -188,6 +198,7 @@ Use the CSV import feature in OrgTree to load the data.
 ### Replacement Character
 
 The Unicode replacement character (U+FFFD):
+
 - UTF-8: `EF BF BD`
 - Displayed as: �
 - Indicates: Failed to decode a byte sequence
@@ -217,6 +228,7 @@ The Unicode replacement character (U+FFFD):
 **Cause**: CSV file encoding issue or browser not reading UTF-8
 
 **Solution**:
+
 1. Verify CSV has UTF-8 BOM (first 3 bytes: EF BB BF)
 2. Check browser console for encoding errors
 3. Ensure CSV is served with `Content-Type: text/csv; charset=utf-8`

@@ -3,7 +3,8 @@ import { X, Plus, Settings, Trash2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import api from '../../api/client.js';
 import type { Department, CustomFieldDefinition } from '../../types/index.js';
-import { getHierarchicalDepartments, getIndentedName } from '../../utils/departmentUtils.js';
+import { buildDepartmentTree, getDescendantIds } from '../../utils/departmentUtils.js';
+import HierarchicalTreeSelector from '../ui/HierarchicalTreeSelector.js';
 import CustomFieldInput from '../ui/CustomFieldInput.js';
 import CustomFieldForm from './CustomFieldForm.js';
 import DeleteConfirmModal from './DeleteConfirmModal.js';
@@ -158,15 +159,6 @@ export default function DepartmentForm({
     }
   };
 
-  // Filter departments for parent dropdown
-  // Exclude current department (can't be parent of itself)
-  const availableParents = Array.isArray(departments)
-    ? departments.filter((d: Department) => {
-        if (!department) return true; // New department, show all
-        return d.id !== department.id; // Exclude self when editing
-      })
-    : [];
-
   if (!isOpen) return null;
 
   return (
@@ -215,21 +207,16 @@ export default function DepartmentForm({
               >
                 Parent Department
               </label>
-              <select
+              <HierarchicalTreeSelector
                 id="parentId"
-                value={parentId}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  setParentId(e.target.value);
-                }}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 font-mono text-sm"
-              >
-                <option value="">None (Top Level)</option>
-                {getHierarchicalDepartments(availableParents).map(d => (
-                  <option key={d.id} value={d.id}>
-                    {getIndentedName(d.name, d.depth, d)}
-                  </option>
-                ))}
-              </select>
+                items={buildDepartmentTree(departments)}
+                value={parentId === '' ? null : parentId}
+                onChange={id => setParentId(id || '')}
+                placeholder="None (Top Level)"
+                excludeIds={department ? getDescendantIds(department.id, departments) : []}
+                allowClear={true}
+                disabled={loading}
+              />
             </div>
 
             {/* Description */}

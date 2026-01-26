@@ -6,6 +6,14 @@ export interface HierarchicalDepartment extends Department {
   ancestorIsLastChild: boolean[]; // Track if each ancestor was a last child (for proper line drawing)
 }
 
+export interface TreeNode {
+  id: string;
+  name: string;
+  parentId: string | null;
+  children?: TreeNode[];
+  depth?: number;
+}
+
 /**
  * Transforms a flat list of departments into a hierarchical list ordered by parent-child relationships.
  * Each department is assigned a depth property for indentation and tracking for tree line drawing.
@@ -53,6 +61,71 @@ export function getHierarchicalDepartments(departments: Department[]): Hierarchi
   processLevel(null, 0, []);
 
   return result;
+}
+
+/**
+ * Convert flat department list to nested tree structure for HierarchicalTreeSelector
+ * @param departments - Flat list of departments
+ * @returns Nested tree structure with children arrays
+ */
+export function buildDepartmentTree(departments: Department[]): TreeNode[] {
+  const nodeMap = new Map<string, TreeNode>();
+  const roots: TreeNode[] = [];
+
+  // First pass: Create all nodes
+  departments.forEach(dept => {
+    nodeMap.set(dept.id, {
+      id: dept.id,
+      name: dept.name,
+      parentId: dept.parent_id,
+      children: [],
+    });
+  });
+
+  // Second pass: Build nested structure
+  departments.forEach(dept => {
+    const node = nodeMap.get(dept.id)!;
+    if (dept.parent_id && nodeMap.has(dept.parent_id)) {
+      nodeMap.get(dept.parent_id)!.children?.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+
+  // Add depth property recursively
+  const addDepth = (nodes: TreeNode[], depth: number) => {
+    nodes.forEach(node => {
+      node.depth = depth;
+      if (node.children && node.children.length > 0) {
+        addDepth(node.children, depth + 1);
+      }
+    });
+  };
+
+  addDepth(roots, 0);
+
+  return roots;
+}
+
+/**
+ * Get all descendant IDs for a department (for exclusion logic)
+ * @param departmentId - Root department ID
+ * @param departments - All departments
+ * @returns Array of descendant IDs including the department itself
+ */
+export function getDescendantIds(departmentId: string, departments: Department[]): string[] {
+  const descendantIds: string[] = [departmentId];
+
+  const findChildren = (parentId: string) => {
+    const children = departments.filter(d => d.parent_id === parentId);
+    children.forEach(child => {
+      descendantIds.push(child.id);
+      findChildren(child.id);
+    });
+  };
+
+  findChildren(departmentId);
+  return descendantIds;
 }
 
 /**
