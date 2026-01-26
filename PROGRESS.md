@@ -300,6 +300,21 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Total Tests: 857 passing.
     - Achieved robust coverage for React Contexts and complex Forms.
 
+- **Test Coverage Expansion - Phase 3 (January 25, 2026)**:
+  - ✅ **COMPLEX INTERACTIVE COMPONENTS TESTING**:
+    - Rewrote `src/components/OrgMap.test.tsx` (7 tests) with full ReactFlow mocking and interaction coverage.
+    - Created `src/components/admin/ImportModal.test.tsx` (7 tests) covering CSV/XML parsing, API calls, and duplicate logic.
+    - Created `src/components/SearchOverlay.test.tsx` (9 tests) for query handling and filtering.
+    - Created `src/components/Toolbar.test.tsx` (4 tests) for map action controls.
+    - Created `src/components/ui/HierarchicalTreeSelector.test.tsx` (6 tests) covering complex keyboard navigation.
+  - 🛠️ **STABILITY & COMPATIBILITY**:
+    - Resolved `FileReader` mock constructor issues.
+    - Fixed race conditions between `db-init.test.ts` and `discovery.test.ts`.
+  - 📊 **METRICS**:
+    - Frontend Tests: 237 passing (up from 204) (+33 tests).
+    - Total Tests: 892 passing.
+    - Reached high coverage for all critical interactive UI elements.
+
 - **Previous Progress (January 24, 2026 - Phase 5: Frontend Resilience)**:
   - ✅ **Search System Rebuild - Phase 5 Complete** - Frontend resilience implementation
     - **Task 1 - Retry Logic**: Implemented automatic retry with exponential backoff (max 3 attempts, 1s/2s/4s delays)
