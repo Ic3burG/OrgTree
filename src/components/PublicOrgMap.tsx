@@ -17,6 +17,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import DepartmentNode from './DepartmentNode';
 import DetailPanel from './DetailPanel';
 import Toolbar from './Toolbar';
+import SearchOverlay from './PublicSearchOverlay';
 import { calculateLayout } from '../utils/layoutEngine';
 import { getDepthColors } from '../utils/colors';
 import api from '../api/client';
@@ -127,11 +128,13 @@ function PublicOrgMapContent(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [orgName, setOrgName] = useState('Organization Chart');
-  const [currentTheme, setCurrentTheme] = useState('slate');
+  const [currentTheme, setCurrentTheme] = useState('blue');
   const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
+  const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
+  const [fullDepartments, setFullDepartments] = useState<Department[]>([]);
 
   const { isDarkMode } = useTheme();
-  const { fitView, zoomIn, zoomOut } = useReactFlow();
+  const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
 
   // Select person for detail panel
   const handleSelectPerson = useCallback((person: Person): void => {
@@ -207,6 +210,9 @@ function PublicOrgMapContent(): React.JSX.Element {
 
         // Transform API data to React Flow format
         const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(org.departments);
+
+        // Store departments for search
+        setFullDepartments(org.departments);
 
         // Apply initial layout
         const layoutedNodes = calculateLayout(parsedNodes, parsedEdges, layoutDirection);
@@ -312,6 +318,61 @@ function PublicOrgMapContent(): React.JSX.Element {
     setCurrentTheme(themeName);
   }, []);
 
+  // Handle search result selection
+  const handleSearchSelect = useCallback(
+    (result: {
+      type: 'department' | 'person';
+      id: string;
+      name: string;
+      subtitle: string;
+      nodeId: string;
+      departmentName?: string;
+      person?: {
+        id: string;
+        name: string;
+        title: string | null;
+        email: string | null;
+        phone: string | null;
+      } | null;
+    }): void => {
+      if (result.type === 'department') {
+        // Zoom to department node
+        const node = nodes.find(n => n.id === result.nodeId);
+        if (node && node.position) {
+          setCenter(node.position.x + 110, node.position.y + 35, { zoom: 1.5, duration: 800 });
+          setHighlightedNodeId(node.id);
+          setTimeout(() => setHighlightedNodeId(null), 3000);
+        }
+      } else if (result.type === 'person') {
+        // Expand department if not expanded, then zoom to it
+        const nodeId = result.nodeId;
+        const node = nodes.find(n => n.id === nodeId);
+
+        if (node && !node.data.isExpanded) {
+          handleToggleExpand(nodeId);
+        }
+
+        setTimeout(() => {
+          const updatedNode = nodes.find(n => n.id === nodeId);
+          if (updatedNode && updatedNode.position) {
+            setCenter(updatedNode.position.x + 140, updatedNode.position.y + 100, {
+              zoom: 1.5,
+              duration: 800,
+            });
+            setHighlightedNodeId(nodeId);
+            setTimeout(() => setHighlightedNodeId(null), 3000);
+          }
+
+          // Open detail panel
+          if (result.person) {
+            setSelectedPerson(result.person as Person);
+          }
+        }, 300);
+      }
+    },
+    [nodes, setCenter, handleToggleExpand]
+  );
+
   // Update nodes with callbacks and theme
   const nodesWithCallbacks = useMemo(() => {
     return nodes.map(node => ({
@@ -319,11 +380,12 @@ function PublicOrgMapContent(): React.JSX.Element {
       data: {
         ...node.data,
         theme: currentTheme, // Include theme to trigger re-render when it changes
+        isHighlighted: node.id === highlightedNodeId,
         onToggleExpand: () => handleToggleExpand(node.id),
         onSelectPerson: (person: Person) => handleSelectPerson(person),
       },
     }));
-  }, [nodes, currentTheme, handleToggleExpand, handleSelectPerson]);
+  }, [nodes, currentTheme, highlightedNodeId, handleToggleExpand, handleSelectPerson]);
 
   if (isLoading) {
     return (
@@ -411,6 +473,9 @@ function PublicOrgMapContent(): React.JSX.Element {
           </div>
         </div>
       </div>
+
+      {/* Search Overlay */}
+      <SearchOverlay departments={fullDepartments} onSelectResult={handleSearchSelect} />
 
       {/* Navigation Toolbar */}
       <Toolbar
