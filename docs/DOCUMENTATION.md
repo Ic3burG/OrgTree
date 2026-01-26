@@ -789,7 +789,6 @@ View and control all active sessions for your account.
 3. View all devices/browsers where you're logged in
 
 Each session shows:
-
 - Device type and browser
 - IP address (approximate location)
 - Last active time

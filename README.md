@@ -35,14 +35,10 @@ A modern, full-stack organizational directory and visualization platform. Build,
 - **Real-Time Sync**: Changes appear instantly across all connected users
 - **Share Links**: Public read-only sharing with full navigation
 
-### Security
-
 - **Passkey Authentication**: Passwordless login with WebAuthn/biometrics
 - **Two-Factor Authentication**: TOTP-based 2FA with backup codes
 - **Session Management**: View and revoke active sessions
 - **CSRF Protection**: Double-submit cookie pattern for state changes
-
-### Data Management
 
 - **Import/Export**:
   - CSV format for departments and people
@@ -54,8 +50,6 @@ A modern, full-stack organizational directory and visualization platform. Build,
 
 ## Tech Stack
 
-### Frontend
-
 - **React 18** with TypeScript and hooks
 - **React Flow** for interactive canvas
 - **React Router** for navigation
@@ -63,8 +57,6 @@ A modern, full-stack organizational directory and visualization platform. Build,
 - **Lucide React** for icons
 - **Socket.IO Client** for real-time updates
 - **Vite** for build tooling
-
-### Backend
 
 - **Node.js** with Express and TypeScript
 - **SQLite** with better-sqlite3

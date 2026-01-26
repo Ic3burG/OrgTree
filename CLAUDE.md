@@ -118,7 +118,6 @@ This is a monorepo with separate frontend and backend:
 - Production: Configured via `DATABASE_URL` env var (typically `/data/database.db` on Render)
 
 **Schema** (defined in `server/src/db.ts`):
-
 - `users` - User accounts with roles, 2FA settings, and passkey support
 - `organizations` - Organizations with sharing settings
 - `org_members` - Many-to-many relationship (users ↔ organizations) with roles (owner, admin, editor, viewer)
@@ -149,14 +148,12 @@ This is a monorepo with separate frontend and backend:
 - Auto-refresh at 80% of token lifetime (see `src/api/client.ts:151`)
 
 **Passkey/WebAuthn Support**:
-
 - Passwordless authentication using biometrics or security keys
 - Implemented with `@simplewebauthn/server` and `@simplewebauthn/browser`
 - Routes: `/api/auth/passkey/register-options`, `/api/auth/passkey/verify-registration`, etc.
 - Multiple passkeys per user supported
 
 **Two-Factor Authentication (2FA)**:
-
 - TOTP-based (Time-based One-Time Password)
 - 8 backup codes generated on setup (single-use)
 - Routes: `/api/auth/totp/setup`, `/api/auth/totp/verify`, `/api/auth/totp/disable`
@@ -183,7 +180,6 @@ This is a monorepo with separate frontend and backend:
 **Technology**: Socket.IO with JWT authentication
 
 **Architecture**:
-
 - Socket server initialized in `server/src/socket.ts`
 - Clients authenticate via `socket.handshake.auth.token`
 - Organization-based rooms: `org:{orgId}`
@@ -198,7 +194,6 @@ This is a monorepo with separate frontend and backend:
 5. Frontend updates UI without page refresh
 
 **Frontend Integration**:
-
 - `src/contexts/SocketContext.tsx` - React context for socket connection
 - Automatically reconnects on disconnect
 - Components subscribe to events via context
@@ -212,7 +207,6 @@ This is a monorepo with separate frontend and backend:
 - Server validates token matches cookie
 
 **Implementation**:
-
 - Token fetched on app init (`src/api/client.ts:52`)
 - Auto-refreshed on 403 CSRF errors
 - Applied to all state-changing requests (POST, PUT, DELETE)
@@ -240,7 +234,6 @@ This is a monorepo with separate frontend and backend:
 **Approach**: React Context API (no Redux/Zustand)
 
 **Contexts** (`src/contexts/`):
-
 - `AuthContext.tsx` - User authentication state, login/logout, role helpers
 - `SocketContext.tsx` - WebSocket connection, event subscriptions
 - `ThemeContext.tsx` - Dark mode state with localStorage persistence
@@ -257,13 +250,11 @@ This is a monorepo with separate frontend and backend:
 **Pattern**: Service functions separated from route handlers
 
 **Structure**:
-
 - `server/src/routes/*.ts` - Express routes (thin, handle HTTP concerns)
 - `server/src/services/*.service.ts` - Business logic (pure functions, return data/errors)
 - Routes call services, services interact with database
 
 **Example** (department creation):
-
 - Route: `server/src/routes/departments.ts` - validates request, checks auth
 - Service: `server/src/services/department.service.ts:createDepartment()` - inserts into DB
 - Audit: `server/src/services/audit.service.ts:logAction()` - records change
@@ -304,7 +295,6 @@ src/components/
 ```
 
 **Key Components**:
-
 - **OrgMap.tsx**: Uses `reactflow` library for interactive canvas, handles zoom/pan, theming, export to PNG/PDF
 - **DepartmentNode.tsx**: Custom React Flow node component with expand/collapse, dark mode support
 - **SearchOverlay.tsx**: Connects to FTS5 search endpoint, fuzzy matching, autocomplete, starred filter
@@ -332,7 +322,6 @@ src/components/
 **Technology**: Sentry (both frontend and backend)
 
 **Setup**:
-
 - Frontend: `src/sentry.ts` - wraps app with ErrorBoundary, breadcrumbs for user actions
 - Backend: `server/src/sentry.ts` - captures exceptions, request data, user context
 - Configured via `SENTRY_DSN` environment variable
@@ -398,7 +387,6 @@ cd server && npm test -- <test-file-pattern>
 **Automatic**: All CRUD operations must call `logAction()` from `audit.service.ts`
 
 **Required Parameters**:
-
 - `organizationId` - Which org (for filtering/cleanup), nullable for system events
 - `userId` - Who made the change
 - `action` - 'created', 'updated', 'deleted'
