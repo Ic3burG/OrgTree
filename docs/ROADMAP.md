@@ -17,7 +17,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [x] **ESLint/Prettier Setup** - Enforce code style consistency across the team ✅ **DONE** (January 4, 2026)
 - [x] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces ✅ **DONE** (January 11, 2026)
 - [ ] **Storybook Integration** - Document UI components with interactive examples
-- [x] **Search System Rebuild** - Fix FTS5 index sync, soft-delete triggers, error handling, test schema alignment ✅ **DONE** (January 24, 2026)
+- [x] **Search System Rebuild** - SQLite FTS5 based search with maintenance triggers (see [docs/adr/017-search-system-rebuild.md](adr/017-search-system-rebuild.md)) ✅ **DONE** (January 24, 2026)
 
 ### Performance Optimization
 

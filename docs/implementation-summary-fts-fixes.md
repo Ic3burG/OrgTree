@@ -124,7 +124,7 @@ All 30 search tests should pass with the updated schema.
 
 ## Next Steps (Phase 2+)
 
-From the original plan (docs/rfc/search-rebuild.md):
+From the original plan (docs/adr/017-search-system-rebuild.md):
 
 **Phase 2**: Error Handling (Week 2)
 

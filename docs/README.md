@@ -16,7 +16,7 @@ ADRs document significant architectural decisions that have been finalized and i
 | 014 | [Test Coverage Expansion](./adr/014-test-coverage-expansion.md) | ✅ Implemented | 2026-01-25 |
 | 015 | [Hierarchical Tree Selector](./adr/015-hierarchical-tree-selector.md) | ✅ Implemented | 2026-01-25 |
 | 016 | [GEDS URL Import](./adr/016-geds-url-import.md) | ✅ Implemented | 2026-01-25 |
-| 017 | [Search Enhancements](./adr/017-search-enhancements.md) | ✅ Implemented | 2026-01-26 |
+| 017 | [Search System Rebuild](./adr/017-search-system-rebuild.md) | ✅ Implemented | 2026-01-24 |
 
 ## [Requests for Comments (RFCs)](./rfc/)
 
@@ -25,7 +25,7 @@ RFCs are proposals for new features or significant changes that are currently un
 | Title | Status | Priority |
 | --- | --- | --- |
 | [Advanced Sidebar UI](./rfc/advanced-sidebar-ui.md) | 📋 Planned | Medium |
-| [Search Rebuild](./rfc/search-rebuild.md) | ✅ Completed | High |
+| [Search Enhancements](./rfc/search-enhancements.md) | 📋 Planned | Medium |
 
 ---
 

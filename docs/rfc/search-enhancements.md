@@ -1,9 +1,9 @@
-# ADR-017: Search Enhancements
+# Search Enhancements Implementation Plan
 
-**Status**: Accepted
-**Date**: 2026-01-26
-**Deciders**: Development Team
-**Tags**: search, performance, ux, analytics
+**Priority**: Medium
+**Status**: 📋 Planned
+**Date Created**: January 26, 2026
+**Last Updated**: January 26, 2026
 
 ## Context and Problem Statement
 
@@ -66,4 +66,4 @@ Chosen option: **Trigram-based Fuzzy Matching and Dedicated Analytics/Saved Sear
 
 - [ADR-001: SQLite as Primary Database](001-sqlite-as-primary-database.md)
 - [ADR-006: SQLite FTS5 Search](006-fts5-full-text-search.md)
-- [RFC: Search Rebuild Plan](../rfc/search-rebuild.md)
+- [ADR-017: Search System Rebuild](../adr/017-search-system-rebuild.md)

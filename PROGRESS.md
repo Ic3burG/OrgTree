@@ -254,6 +254,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `docs/adr/009-department-hierarchy-highlighting.md` - Marked completed
     - `docs/adr/010-centered-vertical-layout.md` - Marked completed
     - `docs/adr/011-rainbow-color-theme.md` - Marked completed
+    - `docs/adr/017-search-system-rebuild.md` - Marked completed
     - `PROGRESS.md` - This file
   - ✅ **TESTS PASSED**:
     - All 648+ backend and frontend tests passing
@@ -338,7 +339,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 📁 **FILES MODIFIED**:
     - `src/hooks/useSearch.ts` - Added retry logic, cache integration, new state tracking
     - `src/components/SearchOverlay.tsx` - Added degraded mode indicators and cache badge
-    - `docs/rfc/search-rebuild.md` - Updated progress tracking
+    - `docs/rfc/search-enhancements.md` - Updated progress tracking
     - `PROGRESS.md` - This file
   - ✅ **COMMITS PUSHED**:
     - `35203bd` - feat(search): add retry logic with exponential backoff to useSearch hook

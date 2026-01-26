@@ -1,10 +1,9 @@
-# Search System Rebuild Plan
+# ADR-017: Search System Rebuild
 
-> **Priority**: CRITICAL - HIGH
-> **Status**: ✅ ALL PHASES COMPLETE
-> **Date Created**: January 23, 2026
-> **Last Updated**: January 24, 2026
-> **Completion Date**: January 24, 2026
+**Status**: Accepted
+**Date**: 2026-01-24
+**Deciders**: Development Team
+**Tags**: database, search, performance, resilience
 
 ---
 
