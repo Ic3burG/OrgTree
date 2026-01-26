@@ -154,7 +154,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 7. **Webhook Support** - External system notifications
 8. **Hierarchical Tree Selector Component** - Replace native selects with interactive, collapsible tree dropdowns for department selection (improved UX with search, expand/collapse, keyboard navigation)
 9. ~~**Department Hierarchy Highlighting** - Visual highlighting of ancestor departments on hover/click in Org Map~~ ✅ **DONE** (January 22, 2026)
-10. **Advanced Sidebar UI Enhancements**:
+10. **Advanced Sidebar UI Enhancements** (see [docs/plans/advanced-sidebar-ui.md](plans/advanced-sidebar-ui.md)):
 
 - Multi-level collapse (Icon-only → Minimized → Hidden)
 - Resizable sidebar with drag handle for custom width
@@ -162,7 +162,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - Workspace layout presets (save/load layout configurations)
 - Sidebar pinning (auto-hide on route change unless pinned)
 
-1. **Search Enhancements**:
+1. **Search Enhancements** (see [docs/plans/search-enhancements.md](plans/search-enhancements.md)):
    1. **Typo Tolerance** - Trigram-based fuzzy matching
    1. **Search Analytics** - Track zero-result searches to identify gaps
    1. **Saved Searches** - Allow users to save frequently-used queries
