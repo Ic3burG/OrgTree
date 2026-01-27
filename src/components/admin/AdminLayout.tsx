@@ -179,22 +179,6 @@ export default function AdminLayout(): React.JSX.Element {
         </NavLink>
 
         <NavLink
-          to={`/org/${orgId}/geds`}
-          onClick={closeSidebar}
-          className={({ isActive }) =>
-            `flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg mb-2 transition-colors ${
-              isActive
-                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
-            }`
-          }
-          title={isCollapsed ? 'GEDS Downloader' : undefined}
-        >
-          <Download size={20} />
-          <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>GEDS Downloader</span>
-        </NavLink>
-
-        <NavLink
           to={`/org/${orgId}/settings`}
           onClick={closeSidebar}
           className={({ isActive }) =>
