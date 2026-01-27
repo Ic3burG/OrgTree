@@ -47,6 +47,10 @@ export default function OrganizationSettings(): React.JSX.Element {
     }
   }, [orgId, toast]);
 
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
   const handleRename = async () => {
     if (!orgId || !newName.trim()) return;
     try {

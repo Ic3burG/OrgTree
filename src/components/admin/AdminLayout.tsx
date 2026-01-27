@@ -13,7 +13,6 @@ import {
   PanelLeftClose,
   PanelLeft,
   Terminal,
-  Download,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
