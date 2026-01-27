@@ -179,7 +179,7 @@ router.post('/login/finish', async (req: AuthRequest, res: Response) => {
         user,
         accessToken,
         refreshToken,
-        expiresIn: 900,
+        expiresIn: 86400,
       });
     } else {
       return res.status(400).json({ verified: false, message: 'Verification failed' });

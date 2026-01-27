@@ -12,7 +12,7 @@ import type {
 } from '../types/index.js';
 
 // Token configuration
-const ACCESS_TOKEN_EXPIRY = '15m';
+const ACCESS_TOKEN_EXPIRY = '24h';
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
 export async function createUser(
@@ -66,7 +66,7 @@ export async function createUser(
     user,
     accessToken,
     refreshToken,
-    expiresIn: 900, // 15 minutes in seconds
+    expiresIn: 86400, // 24 hours in seconds
   };
 }
 
@@ -148,7 +148,7 @@ export async function loginUser(
     user,
     accessToken,
     refreshToken,
-    expiresIn: 900, // 15 minutes in seconds
+    expiresIn: 86400, // 24 hours in seconds
   };
 }
 

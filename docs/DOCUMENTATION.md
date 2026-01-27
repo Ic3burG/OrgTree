@@ -60,6 +60,8 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 | **Real-Time Collaboration**    | Changes sync instantly across all users               |
 | **Role-Based Permissions**     | Owner, Admin, Editor, and Viewer roles                |
 | **Advanced Search**            | Full-text search with fuzzy matching and autocomplete |
+| **Search Analytics**           | Track popular queries and zero-result searches        |
+| **Saved Searches**             | Save and reuse frequent search queries                |
 | **Bulk Operations**            | Select and modify multiple items at once              |
 | **Audit Trail**                | Complete history of all changes with 1-year retention |
 | **Public Sharing**             | Share read-only links with anyone                     |
@@ -590,6 +592,34 @@ On the **Departments** page:
 1. Type in the search box
 2. View switches from tree to flat list showing matches
 3. Clear search to return to tree view
+
+### Saved Searches
+
+Save frequently used search queries for quick access.
+
+1. Perform a search using the Global Search or dedicated search pages.
+2. Click the **"Save Search"** button (if available) or use the API.
+3. Access your saved searches to quickly re-run complex queries.
+
+> **Note**: Saved searches can be private (personal) or shared with the organization (requires Admin permissions).
+
+### Search Analytics
+
+OrgTree automatically tracks search performance to help administrators optimize the directory.
+
+**Metrics tracked:**
+- **Popular Queries**: Most frequently searched terms.
+- **Zero-Result Searches**: Queries that returned no results, highlighting potential missing data or synonyms needed.
+- **Click-Through Rate**: How often users find what they are looking for.
+- **Search Latency**: Time taken to return results.
+
+### Infrastructure Improvements
+
+Recent updates have significantly enhanced the search engine:
+
+- **Trigram Indexing**: Improved fuzzy matching for better typo tolerance.
+- **Search Triggers**: Automated updates ensure search results are always in sync with data changes.
+- **Optimized Performance**: Faster query execution even with large datasets.
 
 ---
 
@@ -1467,6 +1497,7 @@ If you encounter issues not covered here:
 
 | Version | Date              | Changes                                                             |
 | ------- | ----------------- | ------------------------------------------------------------------- |
+| 1.2     | January 27, 2026  | Added Search Analytics, Saved Searches, Trigram Search Optimization |
 | 1.1     | January 21, 2026  | Added Custom Fields, Star/Favorite, Passkeys, 2FA, Account Security |
 | 1.0     | December 29, 2025 | Initial documentation                                               |
 

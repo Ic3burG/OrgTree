@@ -68,7 +68,7 @@ describe('Auth Routes', () => {
         },
         accessToken: 'mock-access-token',
         refreshToken: 'mock-refresh-token',
-        expiresIn: 900,
+        expiresIn: 86400,
       };
 
       vi.mocked(authService.createUser).mockResolvedValue(mockResult as any);
@@ -168,7 +168,7 @@ describe('Auth Routes', () => {
         },
         accessToken: 'mock-access-token',
         refreshToken: 'mock-refresh-token',
-        expiresIn: 900,
+        expiresIn: 86400,
       };
 
       vi.mocked(authService.loginUser).mockResolvedValue(mockResult as any);
@@ -290,7 +290,7 @@ describe('Auth Routes', () => {
         },
         accessToken: 'new-access-token',
         refreshToken: 'new-refresh-token',
-        expiresIn: 900,
+        expiresIn: 86400,
       };
 
       vi.mocked(authService.rotateRefreshToken).mockReturnValue(mockResult as any);
@@ -303,7 +303,7 @@ describe('Auth Routes', () => {
       expect(response.body).toEqual({
         user: mockResult.user,
         accessToken: mockResult.accessToken,
-        expiresIn: 900, // Hardcoded in route
+        expiresIn: 86400, // Hardcoded in route
       });
 
       // Verify new refresh token is set
