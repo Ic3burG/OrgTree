@@ -322,7 +322,9 @@ export function initiateTransfer(
     );
   }
 
-  const row = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(id);
+  const row = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(id) as OwnershipTransferRow;
   return mapTransferRow(row) as OwnershipTransfer;
 }
 
@@ -335,7 +337,9 @@ export function acceptTransfer(
   ipAddress: string | null = null,
   userAgent: string | null = null
 ): OwnershipTransfer {
-  const row = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId);
+  const row = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   const transfer = mapTransferRow(row);
 
   if (!transfer) {
@@ -483,7 +487,9 @@ export function acceptTransfer(
     );
   }
 
-  const finalRow = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId);
+  const finalRow = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   return mapTransferRow(finalRow) as OwnershipTransfer;
 }
 
@@ -497,7 +503,9 @@ export function rejectTransfer(
   ipAddress: string | null = null,
   userAgent: string | null = null
 ): OwnershipTransfer {
-  const row = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId);
+  const row = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   const transfer = mapTransferRow(row);
 
   if (!transfer) {
@@ -600,7 +608,9 @@ export function rejectTransfer(
     );
   }
 
-  const finalRow = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId);
+  const finalRow = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   return mapTransferRow(finalRow) as OwnershipTransfer;
 }
 
@@ -614,7 +624,9 @@ export function cancelTransfer(
   ipAddress: string | null = null,
   userAgent: string | null = null
 ): OwnershipTransfer {
-  const row = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId);
+  const row = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   const transfer = mapTransferRow(row);
 
   if (!transfer) {
@@ -734,7 +746,9 @@ export function cancelTransfer(
     );
   }
 
-  const finalRow = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId);
+  const finalRow = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   return mapTransferRow(finalRow) as OwnershipTransfer;
 }
 
@@ -771,17 +785,13 @@ export function getTransferById(transferId: string, userId: string): OwnershipTr
     throw error;
   }
 
-  const transfer: OwnershipTransferWithDetails = {
-    ...result,
-    organizationId: result.organization_id,
-    fromUserId: result.from_user_id,
-    toUserId: result.to_user_id,
-    initiatedAt: result.initiated_at,
-    expiresAt: result.expires_at,
-    completedAt: result.completed_at,
-    createdAt: result.created_at,
-    updatedAt: result.updated_at,
-  };
+  const transfer = mapTransferWithDetailsRow(result);
+
+  if (!transfer) {
+    const error = new Error('Transfer data invalid') as AppError;
+    error.status = 500;
+    throw error;
+  }
 
   // Verify user has permission to view (involved party or org admin)
   const isInvolved = transfer.fromUserId === userId || transfer.toUserId === userId;

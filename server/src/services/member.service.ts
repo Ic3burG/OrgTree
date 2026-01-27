@@ -66,6 +66,11 @@ interface MemberQueryResult {
  * Returns: { hasAccess: boolean, role: 'owner'|'admin'|'editor'|'viewer'|null, isOwner: boolean }
  */
 export function checkOrgAccess(orgId: string, userId: string): OrgAccessResult {
+  // Check if user is owner
+  const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId) as
+    | DatabaseOrgRecord
+    | undefined;
+
   // Check if user is superuser (Global Role)
   // This allows superusers to search/access any organization
   const user = db.prepare('SELECT role FROM users WHERE id = ?').get(userId) as
@@ -74,13 +79,14 @@ export function checkOrgAccess(orgId: string, userId: string): OrgAccessResult {
 
   if (user?.role === 'superuser') {
     // console.log('[checkOrgAccess] User is superuser:', { orgId, userId });
-    return { hasAccess: true, role: 'owner', isOwner: false };
+    // Superusers have owner privileges, but for ownership transfer we need to know
+    // if they are the actual creator/owner of the specific organization.
+    return {
+      hasAccess: true,
+      role: 'owner',
+      isOwner: org?.created_by_id === userId,
+    };
   }
-
-  // Check if user is owner
-  const org = db.prepare('SELECT created_by_id FROM organizations WHERE id = ?').get(orgId) as
-    | DatabaseOrgRecord
-    | undefined;
 
   if (!org) {
     console.error('[checkOrgAccess] Organization not found:', { orgId, userId });
