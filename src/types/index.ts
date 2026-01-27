@@ -385,3 +385,47 @@ export interface ThemeConfig {
   hover: string;
   text: string;
 }
+
+// Ownership Transfer types
+// Ownership Transfer types
+export interface OwnershipTransfer {
+  id: string;
+  organizationId: string;
+  fromUserId: string;
+  toUserId: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'expired';
+  reason: string;
+  initiatedAt: string;
+  expiresAt: string;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  cancellationReason?: string | null;
+  // snake_case aliases for backwards compatibility if needed
+  organization_id?: string;
+  from_user_id?: string;
+  to_user_id?: string;
+  created_at?: string;
+  expires_at?: string;
+  completed_at?: string | null;
+  // Optional populated fields from backend
+  organization_name?: string;
+  from_user_name?: string;
+  from_user_email?: string;
+  to_user_name?: string;
+  to_user_email?: string;
+}
+
+export interface OwnershipTransferAuditLog {
+  id: string;
+  transfer_id: string;
+  actor_id: string;
+  action: string;
+  metadata: Record<string, unknown>;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
+  // Optional populated fields
+  actor_name?: string;
+  actor_email?: string;
+}

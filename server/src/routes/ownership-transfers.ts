@@ -44,7 +44,8 @@ router.post(
       res.json({
         success: true,
         transfer,
-        message: 'Ownership transfer accepted successfully',
+        message:
+          'Ownership transfer accepted successfully. You are now the owner of this organization.',
       });
     } catch (err) {
       next(err);
@@ -90,6 +91,7 @@ router.post(
         return;
       }
 
+      // We track IP and user agent for security audit logging
       const ipAddress = req.ip || null;
       const userAgent = req.get('user-agent') || null;
 

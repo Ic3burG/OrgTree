@@ -15,12 +15,15 @@ interface OrgAccessResult {
 
 interface OrgMemberWithUser {
   id: string;
-  organizationId: string;
-  userId: string;
+  organization_id: string;
+  user_id: string;
   role: 'owner' | 'admin' | 'editor' | 'viewer';
-  createdAt: string;
-  userName: string;
-  userEmail: string;
+  joined_at: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 interface DatabaseOrgRecord {
@@ -40,6 +43,16 @@ interface UserOrganization {
   role: 'owner' | 'admin' | 'editor' | 'viewer';
   departmentCount: number;
   departments: { length: number };
+}
+
+interface MemberQueryResult {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  role: 'owner' | 'admin' | 'editor' | 'viewer';
+  joined_at: string;
+  userName: string;
+  userEmail: string;
 }
 
 // ============================================================================
@@ -182,15 +195,15 @@ export function requireOrgPermission(
  * Returns members with user details
  */
 export function getOrgMembers(orgId: string): OrgMemberWithUser[] {
-  return db
+  const rows = db
     .prepare(
       `
     SELECT
       om.id,
-      om.organization_id as organizationId,
-      om.user_id as userId,
+      om.organization_id,
+      om.user_id,
       om.role,
-      om.created_at as createdAt,
+      om.created_at as joined_at,
       u.name as userName,
       u.email as userEmail
     FROM organization_members om
@@ -199,7 +212,20 @@ export function getOrgMembers(orgId: string): OrgMemberWithUser[] {
     ORDER BY om.created_at DESC
   `
     )
-    .all(orgId) as OrgMemberWithUser[];
+    .all(orgId) as MemberQueryResult[];
+
+  return rows.map(row => ({
+    id: row.id,
+    organization_id: row.organization_id,
+    user_id: row.user_id,
+    role: row.role,
+    joined_at: row.joined_at,
+    user: {
+      id: row.user_id,
+      name: row.userName,
+      email: row.userEmail,
+    },
+  }));
 }
 
 /**
@@ -257,15 +283,15 @@ export function addOrgMember(
   ).run(memberId, orgId, userId, role, addedBy, now, now);
 
   // Return member with user details
-  return db
+  const row = db
     .prepare(
       `
     SELECT
       om.id,
-      om.organization_id as organizationId,
-      om.user_id as userId,
+      om.organization_id,
+      om.user_id,
       om.role,
-      om.created_at as createdAt,
+      om.created_at as joined_at,
       u.name as userName,
       u.email as userEmail
     FROM organization_members om
@@ -273,7 +299,20 @@ export function addOrgMember(
     WHERE om.id = ?
   `
     )
-    .get(memberId) as OrgMemberWithUser;
+    .get(memberId) as MemberQueryResult;
+
+  return {
+    id: row.id,
+    organization_id: row.organization_id,
+    user_id: row.user_id,
+    role: row.role,
+    joined_at: row.joined_at,
+    user: {
+      id: row.user_id,
+      name: row.userName,
+      email: row.userEmail,
+    },
+  };
 }
 
 /**
@@ -317,15 +356,15 @@ export function updateMemberRole(
   ).run(newRole, now, memberId);
 
   // Return updated member
-  return db
+  const row = db
     .prepare(
       `
     SELECT
       om.id,
-      om.organization_id as organizationId,
-      om.user_id as userId,
+      om.organization_id,
+      om.user_id,
       om.role,
-      om.created_at as createdAt,
+      om.created_at as joined_at,
       u.name as userName,
       u.email as userEmail
     FROM organization_members om
@@ -333,7 +372,20 @@ export function updateMemberRole(
     WHERE om.id = ?
   `
     )
-    .get(memberId) as OrgMemberWithUser;
+    .get(memberId) as MemberQueryResult;
+
+  return {
+    id: row.id,
+    organization_id: row.organization_id,
+    user_id: row.user_id,
+    role: row.role,
+    joined_at: row.joined_at,
+    user: {
+      id: row.user_id,
+      name: row.userName,
+      email: row.userEmail,
+    },
+  };
 }
 
 /**
@@ -428,15 +480,15 @@ export function addMemberByEmail(
   ).run(memberId, orgId, user.id, role, addedBy, now, now);
 
   // Return member with user details
-  const member = db
+  const row = db
     .prepare(
       `
     SELECT
       om.id,
-      om.organization_id as organizationId,
-      om.user_id as userId,
+      om.organization_id,
+      om.user_id,
       om.role,
-      om.created_at as createdAt,
+      om.created_at as joined_at,
       u.name as userName,
       u.email as userEmail
     FROM organization_members om
@@ -444,7 +496,20 @@ export function addMemberByEmail(
     WHERE om.id = ?
   `
     )
-    .get(memberId) as OrgMemberWithUser;
+    .get(memberId) as MemberQueryResult;
+
+  const member: OrgMemberWithUser = {
+    id: row.id,
+    organization_id: row.organization_id,
+    user_id: row.user_id,
+    role: row.role,
+    joined_at: row.joined_at,
+    user: {
+      id: row.user_id,
+      name: row.userName,
+      email: row.userEmail,
+    },
+  };
 
   return { success: true, member };
 }

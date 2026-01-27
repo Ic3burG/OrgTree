@@ -3,13 +3,13 @@
 **Priority**: High
 **Status**: 📋 Planned
 **Date Created**: January 26, 2026
-**Last Updated**: January 26, 2026
+**Last Updated**: January 27, 2026
 
 ## Context and Problem Statement
 
-Organizations in the OrgTree system currently lack a formal mechanism for transferring ownership from one Super User to another. This creates several critical issues:
+Organizations in the OrgTree system currently lack a formal mechanism for transferring ownership from one Organization Owner to another. This creates several critical issues:
 
-1. **Succession Planning**: When a Super User leaves the organization or changes roles, there's no clear path to transfer administrative control.
+1. **Succession Planning**: When an Organization Owner leaves the organization or changes roles, there's no clear path to transfer administrative control.
 2. **Security Risk**: Without proper transfer mechanisms, organizations may become "orphaned" or require backend database manipulation.
 3. **Continuity**: Business continuity is compromised when ownership transitions aren't smooth and auditable.
 4. **Compliance**: Many organizations require clear audit trails for administrative privilege changes.
@@ -18,14 +18,14 @@ Organizations in the OrgTree system currently lack a formal mechanism for transf
 
 - **Security**: Prevent unauthorized transfers and maintain clear chain of custody
 - **Auditability**: Complete audit trail of ownership changes with timestamps and justification
-- **User Experience**: Simple, intuitive process for Super Users
+- **User Experience**: Simple, intuitive process for Organization Owners
 - **Safety**: Multiple confirmation steps and rollback capability
 - **Notification**: All affected parties must be notified of ownership changes
 - **Compliance**: Meet organizational governance requirements for privilege transfers
 
 ## Considered Options
 
-- **Option A: Single-Step Direct Transfer**: Super User selects new owner, confirms once, transfer happens immediately
+- **Option A: Single-Step Direct Transfer**: Owner selects new owner, confirms once, transfer happens immediately
 - **Option B: Two-Factor Transfer with Acceptance**: Current owner initiates, new owner must accept
 - **Option C: Multi-Stage Transfer with Cooling Period**: Initiate → Cooling Period → Accept → Complete
 - **Option D: Admin-Only Backend Transfer**: Require system administrator intervention
@@ -85,18 +85,17 @@ CREATE INDEX idx_transfer_audit_timestamp ON ownership_transfer_audit_log(timest
 
 #### 2. Transfer Workflow
 
-**Step 1: Initiation (Current Super User)**
-- Super User navigates to Organization Settings → Advanced → Transfer Ownership
+**Step 1: Initiation (Current Organization Owner)**
+- Organization Owner navigates to Organization Settings → Danger Zone → Transfer Ownership
 - System displays warning modal with consequences:
-  - "You will lose all Super User privileges"
+  - "You will lose all Owner privileges"
   - "The new owner will have full administrative control"
   - "This action requires acceptance from the recipient"
-- Super User selects new owner from:
+- Owner selects new owner from:
   - Existing organization admins (recommended)
   - Existing organization members
-  - New user via email invitation
-- Super User provides reason for transfer (required, minimum 10 characters)
-- Super User confirms with password re-authentication
+- Owner provides reason for transfer (required, minimum 10 characters)
+- Owner confirms with explicit "TRANSFER" text input
 - Transfer request created with 7-day expiration period
 - Notifications sent to:
   - New owner (email + in-app)

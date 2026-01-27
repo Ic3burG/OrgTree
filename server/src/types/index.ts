@@ -248,3 +248,42 @@ export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 
 // Helper to make specific fields optional
 export type WithOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+// ============================================================================
+// Ownership Transfer Types
+// ============================================================================
+
+export interface OwnershipTransfer {
+  id: string;
+  organizationId: string;
+  fromUserId: string;
+  toUserId: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'expired';
+  initiatedAt: string;
+  expiresAt: string;
+  completedAt: string | null;
+  reason: string;
+  cancellationReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OwnershipTransferWithDetails extends OwnershipTransfer {
+  from_user_name: string;
+  from_user_email: string;
+  to_user_name: string;
+  to_user_email: string;
+  organization_name: string;
+}
+
+export interface OwnershipTransferAuditLog {
+  id: string;
+  transferId: string;
+  action: 'initiated' | 'accepted' | 'rejected' | 'cancelled' | 'expired';
+  actorId: string;
+  actorRole: string;
+  metadata: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  timestamp: number;
+}

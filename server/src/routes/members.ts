@@ -66,10 +66,16 @@ router.get(
 
       res.json({
         owner: {
-          userId: org.created_by_id,
-          userName: org.name,
-          userEmail: org.email,
+          id: `owner-${org.created_by_id}`,
+          organization_id: orgId,
+          user_id: org.created_by_id,
           role: 'owner',
+          joined_at: new Date().toISOString(), // Or get from org creation date if stored
+          user: {
+            id: org.created_by_id,
+            name: org.name,
+            email: org.email,
+          },
         },
         members,
       });
@@ -171,14 +177,29 @@ router.delete(
       const member = db
         .prepare(
           `
-      SELECT om.id, om.user_id as userId, om.role, u.name as userName, u.email
+      SELECT
+        om.id,
+        om.organization_id,
+        om.user_id,
+        om.role,
+        om.created_at as joined_at,
+        u.name as user_name,
+        u.email as user_email
       FROM organization_members om
       JOIN users u ON om.user_id = u.id
       WHERE om.id = ? AND om.organization_id = ?
     `
         )
         .get(memberId, orgId) as
-        | { id: string; userId: string; role: string; userName: string; email: string }
+        | {
+            id: string;
+            organization_id: string;
+            user_id: string;
+            role: string;
+            joined_at: string;
+            user_name: string;
+            user_email: string;
+          }
         | undefined;
 
       await removeOrgMember(orgId, memberId, req.user!.id);

@@ -62,7 +62,7 @@ router.post(
         {
           name: name.trim(),
           description: description !== undefined ? String(description) : undefined,
-          parentId: parentId !== undefined ? String(parentId) : undefined,
+          parentId: parentId !== undefined && parentId !== null ? String(parentId) : null,
           customFields,
         },
         req.user!.id
@@ -100,7 +100,7 @@ router.put(
         {
           name: name?.trim(),
           description: description !== undefined ? String(description) : undefined,
-          parentId: parentId !== undefined ? String(parentId) : undefined,
+          parentId: parentId !== undefined && parentId !== null ? String(parentId) : null,
           customFields,
         },
         req.user!.id

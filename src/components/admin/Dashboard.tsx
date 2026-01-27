@@ -6,7 +6,13 @@ import { useToast } from '../ui/Toast';
 import { generateCSV, downloadCSV } from '../../utils/csvExport';
 import ImportModal from './ImportModal';
 import ShareModal from './ShareModal';
-import type { Organization, Department, CustomFieldDefinition } from '../../types/index.js';
+import PendingTransferBanner from './PendingTransferBanner';
+import type {
+  Organization,
+  Department,
+  CustomFieldDefinition,
+  OwnershipTransfer,
+} from '../../types/index.js';
 
 interface OrganizationWithDetails extends Organization {
   departments?: Department[];
@@ -21,6 +27,7 @@ export default function Dashboard(): React.JSX.Element {
   const [showImport, setShowImport] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
+  const [pendingTransfer, setPendingTransfer] = useState<OwnershipTransfer | null>(null);
   const toast = useToast();
 
   const loadOrganization = useCallback(async (): Promise<void> => {
@@ -34,6 +41,30 @@ export default function Dashboard(): React.JSX.Element {
       ]);
       setOrganization(orgData);
       setFieldDefinitions(customFields);
+
+      // Check for pending transfers
+      try {
+        // 1. Check if user is recipient (incoming transfer)
+        const myPending = await api.getPendingOwnershipTransfers();
+        let transfer = myPending.find(
+          t => t.organizationId === orgId || t.organization_id === orgId
+        );
+
+        // 2. If not recipient, and user is owner/admin, check for outgoing transfers
+        if (!transfer && (orgData.role === 'owner' || orgData.role === 'admin')) {
+          try {
+            const orgTransfers = await api.getOwnershipTransfers(orgId);
+            transfer = orgTransfers.find(t => t.status === 'pending');
+          } catch (e) {
+            // Ignore error (e.g. if permissions changed recently)
+            console.error('Failed to load org transfers', e);
+          }
+        }
+
+        setPendingTransfer(transfer || null);
+      } catch (e) {
+        console.error('Failed to check pending transfers', e);
+      }
     } catch {
       setError('Failed to load organization');
     } finally {
@@ -136,6 +167,11 @@ export default function Dashboard(): React.JSX.Element {
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-4 lg:px-8 pb-4 lg:pb-8 min-h-0">
         <div className="max-w-6xl mx-auto">
+          {/* Pending Transfer Banner */}
+          {pendingTransfer && (
+            <PendingTransferBanner transfer={pendingTransfer} onUpdate={loadOrganization} />
+          )}
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-5 lg:p-6">

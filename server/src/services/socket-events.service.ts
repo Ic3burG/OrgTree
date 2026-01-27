@@ -1,4 +1,4 @@
-import { emitToOrg } from '../socket.js';
+import { emitToOrg, emitToUser } from '../socket.js';
 import { createAuditLog } from './audit.service.js';
 
 interface Actor {
@@ -179,6 +179,67 @@ export function emitCustomFieldsReordered(
   emitToOrg(orgId, 'custom_field:reordered', payload);
 }
 
+// Ownership Transfer events
+export function emitTransferInitiated(
+  orgId: string,
+  toUserId: string,
+  data: Record<string, unknown>,
+  actor: Actor
+): void {
+  // Notify recipient privately
+  const payload = createPayload(orgId, 'ownership_transfer', 'initiated', data, actor);
+  emitToUser(toUserId, 'ownership_transfer:initiated', payload);
+
+  // Also notify admins of the org (so they know a transfer is pending)
+  emitToOrg(orgId, 'ownership_transfer:initiated', payload);
+}
+
+export function emitTransferAccepted(
+  orgId: string,
+  fromUserId: string,
+  data: Record<string, unknown>,
+  actor: Actor
+): void {
+  const payload = createPayload(orgId, 'ownership_transfer', 'accepted', data, actor);
+
+  // Notify old owner privately
+  emitToUser(fromUserId, 'ownership_transfer:accepted', payload);
+
+  // Notify whole org of ownership change
+  emitToOrg(orgId, 'ownership_transfer:accepted', payload);
+  emitToOrg(orgId, 'org:updated', { ...data, createdById: actor.id }); // Implicit update of org owner
+}
+
+export function emitTransferRejected(
+  orgId: string,
+  fromUserId: string,
+  data: Record<string, unknown>,
+  actor: Actor
+): void {
+  const payload = createPayload(orgId, 'ownership_transfer', 'rejected', data, actor);
+
+  // Notify initiator privately
+  emitToUser(fromUserId, 'ownership_transfer:rejected', payload);
+
+  // Notify admins (optional, but good for visibility)
+  emitToOrg(orgId, 'ownership_transfer:rejected', payload);
+}
+
+export function emitTransferCancelled(
+  orgId: string,
+  toUserId: string,
+  data: Record<string, unknown>,
+  actor: Actor
+): void {
+  const payload = createPayload(orgId, 'ownership_transfer', 'cancelled', data, actor);
+
+  // Notify recipient
+  emitToUser(toUserId, 'ownership_transfer:cancelled', payload);
+
+  // Notify admins
+  emitToOrg(orgId, 'ownership_transfer:cancelled', payload);
+}
+
 export default {
   emitDepartmentCreated,
   emitDepartmentUpdated,
@@ -195,4 +256,8 @@ export default {
   emitCustomFieldUpdated,
   emitCustomFieldDeleted,
   emitCustomFieldsReordered,
+  emitTransferInitiated,
+  emitTransferAccepted,
+  emitTransferRejected,
+  emitTransferCancelled,
 };

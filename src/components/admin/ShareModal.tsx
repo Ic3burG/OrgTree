@@ -274,14 +274,22 @@ export default function ShareModal({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div
+        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="share-modal-title"
+      >
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-3">
               <Link2 className="text-blue-600" size={24} />
               <div>
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+                <h2
+                  id="share-modal-title"
+                  className="text-xl font-semibold text-slate-900 dark:text-white"
+                >
                   Share Organization
                 </h2>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{orgName}</p>
@@ -297,8 +305,11 @@ export default function ShareModal({
 
           {/* Tabs - only show Team Members tab for admins */}
           <div className="border-b border-slate-200 dark:border-slate-700">
-            <div className="flex px-6">
+            <div className="flex px-6" role="tablist">
               <button
+                role="tab"
+                aria-selected={activeTab === 'public'}
+                aria-controls="share-public-panel"
                 onClick={() => setActiveTab('public')}
                 className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
                   activeTab === 'public'
@@ -311,6 +322,9 @@ export default function ShareModal({
               </button>
               {isAdmin && (
                 <button
+                  role="tab"
+                  aria-selected={activeTab === 'members'}
+                  aria-controls="share-members-panel"
                   onClick={() => setActiveTab('members')}
                   className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
                     activeTab === 'members'

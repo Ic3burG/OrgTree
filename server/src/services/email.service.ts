@@ -124,3 +124,127 @@ If you didn't expect this email, you can safely ignore it.
     return { success: false, error: (err as Error).message };
   }
 }
+
+interface TransferEmailParams {
+  to: string;
+  recipientName: string;
+  initiatorName: string;
+  orgName: string;
+  transferId?: string;
+  reason?: string;
+}
+
+/**
+ * Send ownership transfer initiated email (to recipient)
+ */
+export async function sendTransferInitiatedEmail({
+  to,
+  recipientName,
+  initiatorName,
+  orgName,
+}: TransferEmailParams): Promise<EmailResult> {
+  if (!resend) return { success: false, error: 'email_not_configured' };
+
+  const actionUrl = `${APP_URL}/org/settings`; // Directing to settings page
+
+  return resend.emails
+    .send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `Action Required: Organization Ownership Transfer for ${orgName}`,
+      html: `
+      <h2>Ownership Transfer Request</h2>
+      <p>Hello ${recipientName},</p>
+      <p><strong>${initiatorName}</strong> has initiated a request to transfer ownership of <strong>${orgName}</strong> to you.</p>
+      <p>As the new owner, you will have full administrative control over the organization. The current owner will become an administrator.</p>
+      <p>Please log in to review and accept this transfer request within 7 days.</p>
+      <a href="${actionUrl}" style="background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Review Request</a>
+    `,
+    })
+    .then(data => ({ success: true, messageId: data.data?.id }))
+    .catch(err => ({ success: false, error: err.message }));
+}
+
+/**
+ * Send ownership transfer accepted email (to old owner)
+ */
+export async function sendTransferAcceptedEmail({
+  to,
+  recipientName,
+  initiatorName,
+  orgName,
+}: TransferEmailParams): Promise<EmailResult> {
+  if (!resend) return { success: false, error: 'email_not_configured' };
+
+  return resend.emails
+    .send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `Ownership Transfer Accepted: ${orgName}`,
+      html: `
+      <h2>Transfer Accepted</h2>
+      <p>Hello ${recipientName},</p>
+      <p><strong>${initiatorName}</strong> has accepted the ownership transfer for <strong>${orgName}</strong>.</p>
+      <p>You are now an administrator of this organization.</p>
+    `,
+    })
+    .then(data => ({ success: true, messageId: data.data?.id }))
+    .catch(err => ({ success: false, error: err.message }));
+}
+
+/**
+ * Send ownership transfer rejected email (to initiator)
+ */
+export async function sendTransferRejectedEmail({
+  to,
+  recipientName,
+  initiatorName,
+  orgName,
+  reason,
+}: TransferEmailParams): Promise<EmailResult> {
+  if (!resend) return { success: false, error: 'email_not_configured' };
+
+  return resend.emails
+    .send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `Ownership Transfer Rejected: ${orgName}`,
+      html: `
+      <h2>Transfer Rejected</h2>
+      <p>Hello ${recipientName},</p>
+      <p><strong>${initiatorName}</strong> has rejected the ownership transfer request for <strong>${orgName}</strong>.</p>
+      ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+      <p>You remain the owner of the organization.</p>
+    `,
+    })
+    .then(data => ({ success: true, messageId: data.data?.id }))
+    .catch(err => ({ success: false, error: err.message }));
+}
+
+/**
+ * Send ownership transfer cancelled email (to recipient)
+ */
+export async function sendTransferCancelledEmail({
+  to,
+  recipientName,
+  initiatorName,
+  orgName,
+  reason,
+}: TransferEmailParams): Promise<EmailResult> {
+  if (!resend) return { success: false, error: 'email_not_configured' };
+
+  return resend.emails
+    .send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `Ownership Transfer Cancelled: ${orgName}`,
+      html: `
+      <h2>Transfer Cancelled</h2>
+      <p>Hello ${recipientName},</p>
+      <p><strong>${initiatorName}</strong> has cancelled the ownership transfer request for <strong>${orgName}</strong>.</p>
+      ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+    `,
+    })
+    .then(data => ({ success: true, messageId: data.data?.id }))
+    .catch(err => ({ success: false, error: err.message }));
+}

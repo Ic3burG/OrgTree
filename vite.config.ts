@@ -5,10 +5,17 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173, // Use default Vite port, NOT 3001
+    host: true, // Listen on all addresses
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
+        secure: false,
+      },
+      '/socket.io': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        ws: true,
       },
       '/api-geds': {
         target: 'https://geds-sage.gc.ca',
