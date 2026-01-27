@@ -20,15 +20,15 @@ export default function PendingTransferBanner({
 
   if (!user || transfer.status !== 'pending') return null;
 
-  const toUserId = transfer.to_user_id || transfer.toUserId;
-  const fromUserId = transfer.from_user_id || transfer.fromUserId;
+  const toUserId = transfer.toUserId || transfer.to_user_id;
+  const fromUserId = transfer.fromUserId || transfer.from_user_id;
   const isRecipient = user.id === toUserId;
   const isInitiator = user.id === fromUserId;
 
   if (!isRecipient && !isInitiator) return null;
 
-  const fromUserName = transfer.from_user_name || transfer.fromUserName || 'Unknown User';
-  const toUserName = transfer.to_user_name || transfer.toUserName || 'Unknown User';
+  const fromUserName = transfer.from_user_name || 'Unknown User';
+  const toUserName = transfer.to_user_name || 'Unknown User';
 
   const handleAction = async (action: 'accept' | 'reject' | 'cancel') => {
     try {
