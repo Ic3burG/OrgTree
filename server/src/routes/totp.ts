@@ -71,7 +71,7 @@ router.post('/verify-login', async (req, res: Response): Promise<void> => {
         role: user.role,
       },
       accessToken,
-      expiresIn: 900, // 15 minutes
+      expiresIn: 86400, // 24 hours
     });
   } catch (error) {
     console.error('2FA login verification error:', error);

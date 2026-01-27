@@ -327,7 +327,7 @@ router.post(
       res.json({
         user: result.user,
         accessToken: result.accessToken,
-        expiresIn: 900, // 15 minutes in seconds
+        expiresIn: 86400, // 24 hours in seconds
       });
     } catch (err) {
       next(err);
