@@ -3,9 +3,9 @@ import db from '../db.js';
 import { checkOrgAccess } from './member.service.js';
 import { escapeHtml } from '../utils/escape.js';
 
-// ============================================================================ 
+// ============================================================================
 // Types
-// ============================================================================ 
+// ============================================================================
 
 interface SearchResult {
   type: 'department' | 'person';
@@ -90,9 +90,9 @@ export interface SavedSearch {
   updated_at: string;
 }
 
-// ============================================================================ 
+// ============================================================================
 // Helper Functions
-// ============================================================================ 
+// ============================================================================
 
 /**
  * Validate FTS query for common issues that cause syntax errors
@@ -222,9 +222,9 @@ function logSearchAnalytics(
   }
 }
 
-// ============================================================================ 
+// ============================================================================
 // Search Implementations
-// ============================================================================ 
+// ============================================================================
 
 /**
  * Search departments using FTS5 (Standard Porter Tokenizer)
@@ -294,7 +294,7 @@ function searchDepartments(
   }>;
 
   // Merge results, keeping best rank for duplicates
-  const resultMap = new Map< 
+  const resultMap = new Map<
     string,
     {
       id: string;
@@ -374,7 +374,7 @@ function generateTrigrams(text: string): string[] {
   // "tokenize='trigram'" defaults to case-insensitive for ASCII.
   // We'll just take the raw string but maybe handle quotes.
   // Better to just slide over the raw query string.
-  
+
   for (let i = 0; i <= text.length - 3; i++) {
     trigrams.add(text.substring(i, i + 3));
   }
@@ -393,7 +393,7 @@ function searchDepartmentsTrigram(
   // Generate trigrams for fuzzy matching
   const trigrams = generateTrigrams(query);
   let matchQuery = '';
-  
+
   if (trigrams.length > 0) {
     // Construct OR query for trigrams to allow partial matching
     matchQuery = trigrams.map(t => `"${t.replace(/"/g, '""')}"`).join(' OR ');
@@ -538,7 +538,7 @@ function searchPeople(
     rank: number;
   }>;
 
-  const resultMap = new Map< 
+  const resultMap = new Map<
     string,
     {
       id: string;
@@ -627,11 +627,11 @@ function searchPeopleTrigram(
   starredOnly: boolean = false
 ): { total: number; results: SearchResult[] } {
   const starredClause = starredOnly ? 'AND p.is_starred = 1' : '';
-  
+
   // Generate trigrams for fuzzy matching
   const trigrams = generateTrigrams(query);
   let matchQuery = '';
-  
+
   if (trigrams.length > 0) {
     // Construct OR query for trigrams to allow partial matching
     matchQuery = trigrams.map(t => `"${t.replace(/"/g, '""')}"`).join(' OR ');
@@ -698,10 +698,6 @@ function searchPeopleTrigram(
     results: attachCustomFields(orgId, results),
   };
 }
-
-
-
-
 
 /**
  * Main search function - searches both departments and people
@@ -809,10 +805,10 @@ export async function search(
   // If no results from standard FTS, try Trigram Fallback
   if (total === 0) {
     console.log('[search] No results from FTS, trying trigram fallback...');
-    
+
     // Clear results just in case (though should be empty)
     results.length = 0;
-    
+
     // Trigram Department Search
     if (type === 'all' || type === 'departments') {
       try {
@@ -837,15 +833,15 @@ export async function search(
     }
 
     total = totalDepts + totalPeople;
-    
+
     if (total > 0) {
       usedFallback = true;
       warnings.push('Showing approximate matches (fuzzy search)');
     } else {
-       // If still no results, try the LIKE fallback (last resort)
-       // ... (existing fallback logic if desired, or skip it since Trigram is better than LIKE)
-       // We'll keep the LIKE fallback logic as a final safety net if Trigram fails completely or returns nothing where LIKE might (?)
-       // Actually, Trigram is superior to LIKE. We can skip LIKE fallback if Trigram was attempted.
+      // If still no results, try the LIKE fallback (last resort)
+      // ... (existing fallback logic if desired, or skip it since Trigram is better than LIKE)
+      // We'll keep the LIKE fallback logic as a final safety net if Trigram fails completely or returns nothing where LIKE might (?)
+      // Actually, Trigram is superior to LIKE. We can skip LIKE fallback if Trigram was attempted.
     }
   }
 
@@ -1003,9 +999,9 @@ export async function getAutocompleteSuggestions(
   return { suggestions: suggestions.slice(0, limit) };
 }
 
-// ============================================================================ 
+// ============================================================================
 // Saved Search Operations
-// ============================================================================ 
+// ============================================================================
 
 export async function createSavedSearch(
   orgId: string,
@@ -1025,18 +1021,23 @@ export async function createSavedSearch(
     RETURNING *
   `);
 
-  const result = stmt.get(id, orgId, userId, name, query, filtersJson, isShared ? 1 : 0) as SavedSearch;
-  
+  const result = stmt.get(
+    id,
+    orgId,
+    userId,
+    name,
+    query,
+    filtersJson,
+    isShared ? 1 : 0
+  ) as SavedSearch;
+
   return {
     ...result,
-    is_shared: Boolean(result.is_shared)
+    is_shared: Boolean(result.is_shared),
   };
 }
 
-export async function getSavedSearches(
-  orgId: string,
-  userId: string
-): Promise<SavedSearch[]> {
+export async function getSavedSearches(orgId: string, userId: string): Promise<SavedSearch[]> {
   const stmt = db.prepare(`
     SELECT * FROM saved_searches
     WHERE organization_id = ?
@@ -1045,22 +1046,19 @@ export async function getSavedSearches(
   `);
 
   const rows = stmt.all(orgId, userId) as SavedSearch[];
-  
+
   return rows.map(row => ({
     ...row,
-    is_shared: Boolean(row.is_shared)
+    is_shared: Boolean(row.is_shared),
   }));
 }
 
-export async function deleteSavedSearch(
-  id: string,
-  userId: string
-): Promise<boolean> {
+export async function deleteSavedSearch(id: string, userId: string): Promise<boolean> {
   const stmt = db.prepare(`
     DELETE FROM saved_searches
     WHERE id = ? AND user_id = ?
   `);
-  
+
   const result = stmt.run(id, userId);
   return result.changes > 0;
 }

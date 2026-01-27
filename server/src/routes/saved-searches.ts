@@ -1,9 +1,9 @@
 import express, { Response, NextFunction } from 'express';
 import { authenticateToken } from '../middleware/auth.js';
-import { 
-  createSavedSearch, 
-  getSavedSearches, 
-  deleteSavedSearch 
+import {
+  createSavedSearch,
+  getSavedSearches,
+  deleteSavedSearch,
 } from '../services/search.service.js';
 import type { AuthRequest } from '../types/index.js';
 
@@ -58,7 +58,7 @@ router.delete(
     try {
       const { id } = req.params;
       const success = await deleteSavedSearch(id, req.user!.id);
-      
+
       if (!success) {
         // Could be 404 or 403 (not owner), but service returns boolean
         res.status(404).json({ message: 'Saved search not found or access denied' });
