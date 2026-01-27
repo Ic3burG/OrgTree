@@ -11,7 +11,7 @@
 
 - **PROGRESS.md updates are MANDATORY**: Update this file after EACH command/task completion (not just at end of session)
 - **Commit AND push ALL changes**: Never leave commits local-only; always push to GitHub
-- **Update "Last Updated" date**: January 26, 2026
+- **Update "Last Updated" date**: January 27, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
 
 ### Development Preferences
@@ -231,19 +231,37 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 
 ### Recent Activity
 
-- **Today's Progress (January 27, 2026 - Phase 6 Complete)**:
+- **Today's Progress (January 27, 2026 - Phase 6 Complete & Settings Refactor)**:
   - ✅ **Ownership Transfer Features Completed (Phase 6)**
     - **Documentation**: Added comprehensive inline comments to `ownership-transfer.service.ts` and API routes
     - **Data Standardization**: Standardized all API/DB fields to `snake_case` (e.g., `from_user_id`, `organization_name`)
     - **Type Safety**: Updated frontend `OwnershipTransfer` type and mock data in tests to match backend
     - **Notifications**: Fixed Socket.IO payloads to explicitly include `orgName`/`orgId` for proper Real-time alerts
     - **Testing**: Resolved lint errors in `PendingTransferBanner.test.tsx` and improved test mocks
+    - **E2E Stability**: Debugged and fixed `e2e/ownership-transfer.spec.ts` with robust selectors and better navigation
+  - ✅ **Organization Settings & GEDS Downloader Refactor**
+    - **Sidebar Cleanup**: Removed GEDS Downloader from the main Admin sidebar to reduce clutter
+    - **Settings Integration**: Moved GEDS Downloader into a new "GEDS Tools" tab within Organization Settings
+    - **Rename Functionality**: Added organization rename feature directly to the General Settings section
+    - **Delete Organization**: Moved deletion logic to Organization Settings Danger Zone with a strict "DELETE" confirmation modal
+    - **UI Enhancements**: Implemented tabbed navigation in Organization Settings for better categorization
+  - ✅ **Server Test Maintenance**
+    - Updated `departments.test.ts` to expect `null` instead of `undefined` for `parentId`
+    - Updated `members.test.ts` and `member.service.test.ts` to match the new nested `user` object structure in responses
   - 📁 **FILES MODIFIED**:
-    - `server/src/services/ownership-transfer.service.ts` - Comments & Payloads
-    - `src/types/index.ts` - Type definitions
-    - `src/components/admin/PendingTransferBanner.tsx` - Logic update
-    - `src/components/admin/TransferHistoryList.tsx` - Logic update
+    - `server/src/services/ownership-transfer.service.ts`
+    - `server/src/routes/ownership-transfers.ts`
+    - `server/src/routes/departments.test.ts`
+    - `server/src/routes/members.test.ts`
+    - `server/src/services/member.service.test.ts`
+    - `src/components/admin/AdminLayout.tsx`
+    - `src/components/admin/OrganizationSettings.tsx`
+    - `src/components/admin/PendingTransferBanner.tsx`
+    - `src/components/admin/TransferHistoryList.tsx`
+    - `src/types/index.ts`
     - `PROGRESS.md` - This file
+
+- **Previous Progress (January 27, 2026 - Phase 6 Complete)**:
 
 - **Previous Progress (January 26, 2026 - Public Link Enhancements)**:
   - ✅ **Enhanced Public Organization Links**
