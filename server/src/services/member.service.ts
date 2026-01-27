@@ -19,6 +19,8 @@ interface OrgMemberWithUser {
   user_id: string;
   role: 'owner' | 'admin' | 'editor' | 'viewer';
   joined_at: string;
+  userName: string;
+  userEmail: string;
   user: {
     id: string;
     name: string;
@@ -226,6 +228,8 @@ export function getOrgMembers(orgId: string): OrgMemberWithUser[] {
     user_id: row.user_id,
     role: row.role,
     joined_at: row.joined_at,
+    userName: row.userName,
+    userEmail: row.userEmail,
     user: {
       id: row.user_id,
       name: row.userName,
@@ -313,6 +317,8 @@ export function addOrgMember(
     user_id: row.user_id,
     role: row.role,
     joined_at: row.joined_at,
+    userName: row.userName,
+    userEmail: row.userEmail,
     user: {
       id: row.user_id,
       name: row.userName,
@@ -386,6 +392,8 @@ export function updateMemberRole(
     user_id: row.user_id,
     role: row.role,
     joined_at: row.joined_at,
+    userName: row.userName,
+    userEmail: row.userEmail,
     user: {
       id: row.user_id,
       name: row.userName,
@@ -510,6 +518,8 @@ export function addMemberByEmail(
     user_id: row.user_id,
     role: row.role,
     joined_at: row.joined_at,
+    userName: row.userName,
+    userEmail: row.userEmail,
     user: {
       id: row.user_id,
       name: row.userName,

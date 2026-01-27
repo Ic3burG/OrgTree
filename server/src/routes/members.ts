@@ -71,6 +71,8 @@ router.get(
           user_id: org.created_by_id,
           role: 'owner',
           joined_at: new Date().toISOString(), // Or get from org creation date if stored
+          userName: org.name,
+          userEmail: org.email,
           user: {
             id: org.created_by_id,
             name: org.name,
