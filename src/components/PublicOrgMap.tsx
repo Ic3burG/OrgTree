@@ -318,6 +318,19 @@ function PublicOrgMapContent(): React.JSX.Element {
     setCurrentTheme(themeName);
   }, []);
 
+  // Handle navigation to department
+  const handleNavigateToDepartment = useCallback(
+    (departmentId: string): void => {
+      const node = nodes.find(n => n.id === departmentId);
+      if (node && node.position) {
+        setCenter(node.position.x + 110, node.position.y + 35, { zoom: 1.5, duration: 800 });
+        setHighlightedNodeId(node.id);
+        setTimeout(() => setHighlightedNodeId(null), 3000);
+      }
+    },
+    [nodes, setCenter]
+  );
+
   // Handle search result selection
   const handleSearchSelect = useCallback(
     (result: {
@@ -336,13 +349,7 @@ function PublicOrgMapContent(): React.JSX.Element {
       } | null;
     }): void => {
       if (result.type === 'department') {
-        // Zoom to department node
-        const node = nodes.find(n => n.id === result.nodeId);
-        if (node && node.position) {
-          setCenter(node.position.x + 110, node.position.y + 35, { zoom: 1.5, duration: 800 });
-          setHighlightedNodeId(node.id);
-          setTimeout(() => setHighlightedNodeId(null), 3000);
-        }
+        handleNavigateToDepartment(result.nodeId);
       } else if (result.type === 'person') {
         // Expand department if not expanded, then zoom to it
         const nodeId = result.nodeId;
@@ -370,7 +377,7 @@ function PublicOrgMapContent(): React.JSX.Element {
         }, 300);
       }
     },
-    [nodes, setCenter, handleToggleExpand]
+    [handleNavigateToDepartment, nodes, setCenter, handleToggleExpand]
   );
 
   // Update nodes with callbacks and theme
@@ -497,6 +504,8 @@ function PublicOrgMapContent(): React.JSX.Element {
           person={selectedPerson}
           onClose={handleCloseDetail}
           fieldDefinitions={fieldDefinitions}
+          departments={fullDepartments}
+          onNavigateToDepartment={handleNavigateToDepartment}
         />
       )}
     </div>
