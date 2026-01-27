@@ -17,6 +17,7 @@ import OrgMap from './components/OrgMap';
 import PublicOrgMap from './components/PublicOrgMap';
 import AdminLayout from './components/admin/AdminLayout';
 import Dashboard from './components/admin/Dashboard';
+import OrganizationSettings from './components/admin/OrganizationSettings';
 import DepartmentManager from './components/admin/DepartmentManager';
 import PersonManager from './components/admin/PersonManager';
 import AuditLog from './components/admin/AuditLog';
@@ -29,6 +30,7 @@ import { initCsrf } from './api/client';
 import AccountLayout from './components/account/AccountLayout';
 import ProfileSettings from './components/account/ProfileSettings';
 import GedsDownloader from './components/GedsDownloader';
+import TransferNotificationListener from './components/TransferNotificationListener';
 
 /**
  * App - Root component
@@ -45,6 +47,7 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <SocketProvider>
+            <TransferNotificationListener />
             <ToastProvider>
               <BrowserRouter>
                 <Routes>
@@ -124,6 +127,7 @@ function App() {
                       }
                     />
                     <Route path="audit" element={<AuditLog />} />
+                    <Route path="settings" element={<OrganizationSettings />} />
                     <Route path="geds" element={<GedsDownloader />} />
                   </Route>
 

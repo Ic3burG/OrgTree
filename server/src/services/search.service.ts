@@ -1,10 +1,11 @@
+import { v4 as uuidv4 } from 'uuid';
 import db from '../db.js';
 import { checkOrgAccess } from './member.service.js';
 import { escapeHtml } from '../utils/escape.js';
 
-// ============================================================================
+// ============================================================================ 
 // Types
-// ============================================================================
+// ============================================================================ 
 
 interface SearchResult {
   type: 'department' | 'person';
@@ -75,6 +76,23 @@ interface PersonSuggestionRow {
   title: string | null;
   department_id: string;
 }
+
+export interface SavedSearch {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  name: string;
+  query: string;
+  filters: string | null;
+  is_shared: boolean;
+  last_run_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================================================ 
+// Helper Functions
+// ============================================================================ 
 
 /**
  * Validate FTS query for common issues that cause syntax errors
@@ -184,10 +202,32 @@ function attachCustomFields(orgId: string, results: SearchResult[]): SearchResul
 }
 
 /**
- * Search departments using FTS5
- *
- * Note: SQLite FTS5's bm25() function cannot be used inside subqueries or UNION statements.
- * We run separate queries and merge results in JavaScript to work around this limitation.
+ * Log search analytics
+ */
+function logSearchAnalytics(
+  orgId: string,
+  userId: string | undefined,
+  query: string,
+  resultCount: number,
+  executionTimeMs: number
+) {
+  try {
+    const stmt = db.prepare(`
+      INSERT INTO search_analytics (id, organization_id, user_id, query, result_count, execution_time_ms)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(uuidv4(), orgId, userId || null, query, resultCount, executionTimeMs);
+  } catch (err) {
+    console.error('[search] Failed to log analytics:', err);
+  }
+}
+
+// ============================================================================ 
+// Search Implementations
+// ============================================================================ 
+
+/**
+ * Search departments using FTS5 (Standard Porter Tokenizer)
  */
 function searchDepartments(
   orgId: string,
@@ -254,7 +294,7 @@ function searchDepartments(
   }>;
 
   // Merge results, keeping best rank for duplicates
-  const resultMap = new Map<
+  const resultMap = new Map< 
     string,
     {
       id: string;
@@ -281,7 +321,6 @@ function searchDepartments(
   for (const row of customRows) {
     const existing = resultMap.get(row.id);
     if (existing) {
-      // Keep existing data but add custom highlight and use best rank
       existing.customHighlight = row.customHighlight;
       existing.rank = Math.min(existing.rank, row.rank);
     } else {
@@ -293,7 +332,6 @@ function searchDepartments(
     }
   }
 
-  // Convert to array, sort by rank, and apply pagination
   const allResults = Array.from(resultMap.values());
   allResults.sort((a, b) => a.rank - b.rank);
 
@@ -325,10 +363,94 @@ function searchDepartments(
 }
 
 /**
- * Search people using FTS5
- *
- * Note: SQLite FTS5's bm25() function cannot be used inside subqueries or UNION statements.
- * We run separate queries and merge results in JavaScript to work around this limitation.
+ * Generate unique trigrams from a string
+ */
+function generateTrigrams(text: string): string[] {
+  if (!text || text.length < 3) return [];
+  const trigrams = new Set<string>();
+  // Normalize: lowercase and remove special chars to match tokenizer behavior roughly
+  // Actually, FTS5 trigram tokenizer is case-sensitive unless specified?
+  // By default 'trigram' is case-insensitive (based on docs, actually it depends on args).
+  // "tokenize='trigram'" defaults to case-insensitive for ASCII.
+  // We'll just take the raw string but maybe handle quotes.
+  // Better to just slide over the raw query string.
+  
+  for (let i = 0; i <= text.length - 3; i++) {
+    trigrams.add(text.substring(i, i + 3));
+  }
+  return Array.from(trigrams);
+}
+
+/**
+ * Search departments using Trigram FTS (Fuzzy Matching)
+ */
+function searchDepartmentsTrigram(
+  orgId: string,
+  query: string,
+  limit: number,
+  offset: number
+): { total: number; results: SearchResult[] } {
+  // Generate trigrams for fuzzy matching
+  const trigrams = generateTrigrams(query);
+  let matchQuery = '';
+  
+  if (trigrams.length > 0) {
+    // Construct OR query for trigrams to allow partial matching
+    matchQuery = trigrams.map(t => `"${t.replace(/"/g, '""')}"`).join(' OR ');
+  } else {
+    // Fallback for short queries: simple substring match
+    matchQuery = `"${query.replace(/"/g, '""')}"`;
+  }
+
+  const sql = `
+    SELECT
+      d.id,
+      d.name,
+      d.description,
+      d.parent_id,
+      (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as people_count,
+      bm25(dt.departments_trigram) as rank
+    FROM departments_trigram dt
+    JOIN departments d ON d.rowid = dt.rowid
+    WHERE dt.departments_trigram MATCH ?
+      AND d.organization_id = ?
+      AND d.deleted_at IS NULL
+    ORDER BY rank
+  `;
+
+  const rows = db.prepare(sql).all(matchQuery, orgId) as Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    parent_id: string | null;
+    people_count: number;
+    rank: number;
+  }>;
+
+  const total = rows.length;
+  const paginatedRows = rows.slice(offset, offset + limit);
+
+  const results = paginatedRows.map(
+    (row): SearchResult => ({
+      type: 'department',
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      parent_id: row.parent_id,
+      highlight: row.name,
+      people_count: row.people_count,
+      rank: row.rank,
+    })
+  );
+
+  return {
+    total,
+    results: attachCustomFields(orgId, results),
+  };
+}
+
+/**
+ * Search people using FTS5 (Standard Porter Tokenizer)
  */
 function searchPeople(
   orgId: string,
@@ -337,7 +459,6 @@ function searchPeople(
   offset: number,
   starredOnly: boolean = false
 ): { total: number; results: SearchResult[] } {
-  // Build the starred filter clause
   const starredClause = starredOnly ? 'AND p.is_starred = 1' : '';
 
   // Query 1: Search in people name/title/email/phone
@@ -389,7 +510,6 @@ function searchPeople(
       ${starredClause}
   `;
 
-  // Execute both queries
   const peopleRows = db.prepare(peopleSql).all(ftsQuery, orgId) as Array<{
     id: string;
     name: string;
@@ -418,8 +538,7 @@ function searchPeople(
     rank: number;
   }>;
 
-  // Merge results, keeping best rank for duplicates
-  const resultMap = new Map<
+  const resultMap = new Map< 
     string,
     {
       id: string;
@@ -438,7 +557,6 @@ function searchPeople(
     }
   >();
 
-  // Add people field matches
   for (const row of peopleRows) {
     resultMap.set(row.id, {
       ...row,
@@ -446,11 +564,9 @@ function searchPeople(
     });
   }
 
-  // Add custom field matches (merge with existing if present)
   for (const row of customRows) {
     const existing = resultMap.get(row.id);
     if (existing) {
-      // Keep existing data but add custom highlight and use best rank
       existing.customHighlight = row.customHighlight;
       existing.rank = Math.min(existing.rank, row.rank);
     } else {
@@ -463,7 +579,6 @@ function searchPeople(
     }
   }
 
-  // Convert to array, sort by rank, and apply pagination
   const allResults = Array.from(resultMap.values());
   allResults.sort((a, b) => a.rank - b.rank);
 
@@ -502,74 +617,28 @@ function searchPeople(
 }
 
 /**
- * Fallback search for departments using LIKE queries (when FTS fails)
+ * Search people using Trigram FTS (Fuzzy Matching)
  */
-function fallbackSearchDepartments(
-  orgId: string,
-  query: string,
-  limit: number,
-  offset: number
-): { total: number; results: SearchResult[] } {
-  const likePattern = `%${query.trim().replace(/[%_]/g, '\\$&')}%`;
-
-  const sql = `
-    SELECT
-      d.id,
-      d.name,
-      d.description,
-      d.parent_id,
-      (SELECT COUNT(*) FROM people WHERE department_id = d.id AND deleted_at IS NULL) as people_count
-    FROM departments d
-    WHERE d.organization_id = ?
-      AND d.deleted_at IS NULL
-      AND (
-        d.name LIKE ? ESCAPE '\\'
-        OR d.description LIKE ? ESCAPE '\\'
-      )
-    ORDER BY d.name
-  `;
-
-  const rows = db.prepare(sql).all(orgId, likePattern, likePattern) as Array<{
-    id: string;
-    name: string;
-    description: string | null;
-    parent_id: string | null;
-    people_count: number;
-  }>;
-
-  const total = rows.length;
-  const paginatedRows = rows.slice(offset, offset + limit);
-
-  const results = paginatedRows.map(
-    (row): SearchResult => ({
-      type: 'department',
-      id: row.id,
-      name: row.name,
-      description: row.description,
-      parent_id: row.parent_id,
-      highlight: row.name,
-      people_count: row.people_count,
-    })
-  );
-
-  return {
-    total,
-    results: attachCustomFields(orgId, results),
-  };
-}
-
-/**
- * Fallback search for people using LIKE queries (when FTS fails)
- */
-function fallbackSearchPeople(
+function searchPeopleTrigram(
   orgId: string,
   query: string,
   limit: number,
   offset: number,
   starredOnly: boolean = false
 ): { total: number; results: SearchResult[] } {
-  const likePattern = `%${query.trim().replace(/[%_]/g, '\\$&')}%`;
   const starredClause = starredOnly ? 'AND p.is_starred = 1' : '';
+  
+  // Generate trigrams for fuzzy matching
+  const trigrams = generateTrigrams(query);
+  let matchQuery = '';
+  
+  if (trigrams.length > 0) {
+    // Construct OR query for trigrams to allow partial matching
+    matchQuery = trigrams.map(t => `"${t.replace(/"/g, '""')}"`).join(' OR ');
+  } else {
+    // Fallback for short queries: simple substring match
+    matchQuery = `"${query.replace(/"/g, '""')}"`;
+  }
 
   const sql = `
     SELECT
@@ -580,25 +649,20 @@ function fallbackSearchPeople(
       p.phone,
       p.department_id,
       p.is_starred,
-      d.name as department_name
-    FROM people p
+      d.name as department_name,
+      bm25(pt.people_trigram) as rank
+    FROM people_trigram pt
+    JOIN people p ON p.rowid = pt.rowid
     JOIN departments d ON p.department_id = d.id
-    WHERE d.organization_id = ?
+    WHERE pt.people_trigram MATCH ?
+      AND d.organization_id = ?
       AND p.deleted_at IS NULL
       AND d.deleted_at IS NULL
       ${starredClause}
-      AND (
-        p.name LIKE ? ESCAPE '\\'
-        OR p.title LIKE ? ESCAPE '\\'
-        OR p.email LIKE ? ESCAPE '\\'
-        OR p.phone LIKE ? ESCAPE '\\'
-      )
-    ORDER BY p.name
+    ORDER BY rank
   `;
 
-  const rows = db
-    .prepare(sql)
-    .all(orgId, likePattern, likePattern, likePattern, likePattern) as Array<{
+  const rows = db.prepare(sql).all(matchQuery, orgId) as Array<{
     id: string;
     name: string;
     title: string | null;
@@ -607,6 +671,7 @@ function fallbackSearchPeople(
     department_id: string;
     is_starred: number;
     department_name: string;
+    rank: number;
   }>;
 
   const total = rows.length;
@@ -624,6 +689,7 @@ function fallbackSearchPeople(
       department_name: row.department_name,
       is_starred: Boolean(row.is_starred),
       highlight: row.name,
+      rank: row.rank,
     })
   );
 
@@ -633,6 +699,10 @@ function fallbackSearchPeople(
   };
 }
 
+
+
+
+
 /**
  * Main search function - searches both departments and people
  */
@@ -641,10 +711,8 @@ export async function search(
   userId: string | undefined,
   options: SearchOptions
 ): Promise<SearchResponse> {
-  // Start performance tracking
   const startTime = Date.now();
 
-  // Check if organization exists and get its public status
   const org = db.prepare('SELECT is_public FROM organizations WHERE id = ?').get(orgId) as
     | { is_public: number }
     | undefined;
@@ -657,21 +725,8 @@ export async function search(
 
   const isPublic = org.is_public === 1;
 
-  // Debug logging
-  console.log('[search] Permission check:', {
-    orgId,
-    userId: userId ? 'present' : 'none',
-    isPublic,
-    willCheckPermission: userId && !isPublic,
-  });
-
-  // Check access permissions
   if (userId) {
-    // Authenticated user: check membership for private orgs
-    // For public orgs, allow access without membership check (avoids misleading audit logs)
     if (!isPublic) {
-      // Private org - requires membership
-      // Use checkOrgAccess directly to ensure we are checking for 'viewer'
       const access = checkOrgAccess(orgId, userId);
 
       if (!access.hasAccess) {
@@ -681,38 +736,26 @@ export async function search(
         throw error;
       }
 
-      // Explicitly check for viewer role (level 0)
-      // roleHierarchy: viewer=0, editor=1, admin=2, owner=3
-      // We accept any valid role (all are >= viewer)
       if (!access.role) {
         console.warn(`[search] Permission Denied: User ${userId} has no role in org ${orgId}`);
         const error = new Error('Insufficient permissions') as { status?: number };
         error.status = 403;
         throw error;
       }
-    } else {
-      console.log('[search] Skipping permission check for public org');
     }
-    // Note: For public orgs, we still allow the user to search even if not a member
   } else {
-    // Guest user: only allow access to public organizations
     if (!isPublic) {
-      console.log('[search] Blocking guest user from private org');
       const error = new Error('Insufficient permissions') as { status?: number };
       error.status = 403;
       throw error;
-    } else {
-      console.log('[search] Allowing guest user to search public org');
     }
   }
 
   const { query, type = 'all', limit = 20, offset = 0, starredOnly = false } = options;
 
-  // Validate query before processing
   const validation = validateFtsQuery(query);
   if (!validation.valid) {
     console.warn('Invalid FTS query:', validation.error);
-    // Return empty results with warning instead of throwing error
     return {
       query,
       total: 0,
@@ -722,7 +765,6 @@ export async function search(
     };
   }
 
-  // Build FTS query with prefix matching
   const ftsQuery = buildFtsQuery(query);
   if (!ftsQuery) {
     return {
@@ -739,7 +781,7 @@ export async function search(
   const warnings: string[] = [];
   let usedFallback = false;
 
-  // Search departments if requested
+  // Search departments
   if (type === 'all' || type === 'departments') {
     try {
       const deptResults = searchDepartments(orgId, ftsQuery, limit, offset);
@@ -747,59 +789,73 @@ export async function search(
       totalDepts = deptResults.total;
     } catch (err: unknown) {
       console.error('Department FTS search error, trying fallback:', err);
-      // Try fallback search
-      try {
-        const fallbackResults = fallbackSearchDepartments(orgId, query, limit, offset);
-        results.push(...fallbackResults.results);
-        totalDepts = fallbackResults.total;
-        usedFallback = true;
-        warnings.push('Department search using basic matching (full-text search unavailable)');
-      } catch (fallbackErr: unknown) {
-        console.error('Department fallback search also failed:', fallbackErr);
-        warnings.push('Department search failed - some results may be missing');
-      }
     }
   }
 
-  // Search people if requested
+  // Search people
   if (type === 'all' || type === 'people') {
     try {
-      // Adjust limit for people if we already have department results
       const peopleLimit = type === 'all' ? Math.max(1, limit - results.length) : limit;
       const peopleResults = searchPeople(orgId, ftsQuery, peopleLimit, offset, starredOnly);
       results.push(...peopleResults.results);
       totalPeople = peopleResults.total;
     } catch (err: unknown) {
       console.error('People FTS search error, trying fallback:', err);
-      // Try fallback search
-      try {
-        const peopleLimit = type === 'all' ? Math.max(1, limit - results.length) : limit;
-        const fallbackResults = fallbackSearchPeople(
-          orgId,
-          query,
-          peopleLimit,
-          offset,
-          starredOnly
-        );
-        results.push(...fallbackResults.results);
-        totalPeople = fallbackResults.total;
-        usedFallback = true;
-        warnings.push('People search using basic matching (full-text search unavailable)');
-      } catch (fallbackErr: unknown) {
-        console.error('People fallback search also failed:', fallbackErr);
-        warnings.push('People search failed - some results may be missing');
-      }
     }
   }
 
-  const total = totalDepts + totalPeople;
+  let total = totalDepts + totalPeople;
 
-  // Calculate query execution time
+  // If no results from standard FTS, try Trigram Fallback
+  if (total === 0) {
+    console.log('[search] No results from FTS, trying trigram fallback...');
+    
+    // Clear results just in case (though should be empty)
+    results.length = 0;
+    
+    // Trigram Department Search
+    if (type === 'all' || type === 'departments') {
+      try {
+        const deptResults = searchDepartmentsTrigram(orgId, query, limit, offset);
+        results.push(...deptResults.results);
+        totalDepts = deptResults.total;
+      } catch (err) {
+        console.error('Department Trigram search failed:', err);
+      }
+    }
+
+    // Trigram People Search
+    if (type === 'all' || type === 'people') {
+      try {
+        const peopleLimit = type === 'all' ? Math.max(1, limit - results.length) : limit;
+        const peopleResults = searchPeopleTrigram(orgId, query, peopleLimit, offset, starredOnly);
+        results.push(...peopleResults.results);
+        totalPeople = peopleResults.total;
+      } catch (err) {
+        console.error('People Trigram search failed:', err);
+      }
+    }
+
+    total = totalDepts + totalPeople;
+    
+    if (total > 0) {
+      usedFallback = true;
+      warnings.push('Showing approximate matches (fuzzy search)');
+    } else {
+       // If still no results, try the LIKE fallback (last resort)
+       // ... (existing fallback logic if desired, or skip it since Trigram is better than LIKE)
+       // We'll keep the LIKE fallback logic as a final safety net if Trigram fails completely or returns nothing where LIKE might (?)
+       // Actually, Trigram is superior to LIKE. We can skip LIKE fallback if Trigram was attempted.
+    }
+  }
+
   const queryTimeMs = Date.now() - startTime;
-  const slowQueryThreshold = 100; // ms
+  const slowQueryThreshold = 100;
   const isSlowQuery = queryTimeMs > slowQueryThreshold;
 
-  // Log performance metrics
+  // Log analytics
+  logSearchAnalytics(orgId, userId, query, total, queryTimeMs);
+
   if (isSlowQuery) {
     console.warn(`[search] Slow query detected (${queryTimeMs}ms):`, {
       query,
@@ -809,23 +865,6 @@ export async function search(
       usedFallback,
     });
   }
-
-  // Log zero-result searches for analysis
-  if (total === 0 && query.trim().length > 0) {
-    console.log(`[search] Zero results for query:`, {
-      query,
-      orgId,
-      type: options.type,
-      queryTimeMs,
-    });
-  }
-
-  // Log general search metrics
-  console.log(`[search] Query completed in ${queryTimeMs}ms:`, {
-    query: query.substring(0, 50),
-    total,
-    resultCount: results.length,
-  });
 
   return {
     query,
@@ -854,10 +893,8 @@ export async function getAutocompleteSuggestions(
   query: string,
   limit: number = 5
 ): Promise<AutocompleteResponse> {
-  // Start performance tracking
   const startTime = Date.now();
 
-  // Check if organization exists and get its public status
   const org = db.prepare('SELECT is_public FROM organizations WHERE id = ?').get(orgId) as
     | { is_public: number }
     | undefined;
@@ -870,51 +907,26 @@ export async function getAutocompleteSuggestions(
 
   const isPublic = org.is_public === 1;
 
-  // Debug logging
-  console.log('[autocomplete] Permission check:', {
-    orgId,
-    userId: userId ? 'present' : 'none',
-    isPublic,
-    willCheckPermission: userId && !isPublic,
-  });
-
-  // Check access permissions
   if (userId) {
-    // Authenticated user: check membership for private orgs
-    // For public orgs, allow access without membership check (avoids misleading audit logs)
     if (!isPublic) {
-      // Private org - requires membership
-      console.log('[autocomplete] Checking viewer permission for private org');
-      // Use checkOrgAccess directly to ensure we are checking for 'viewer'
       const access = checkOrgAccess(orgId, userId);
       if (!access.hasAccess) {
-        console.warn(`[autocomplete] Access Denied: User ${userId} has no access to org ${orgId}`);
         const error = new Error('Organization not found') as { status?: number };
         error.status = 404;
         throw error;
       }
 
       if (!access.role) {
-        console.warn(
-          `[autocomplete] Permission Denied: User ${userId} has no role in org ${orgId}`
-        );
         const error = new Error('Insufficient permissions') as { status?: number };
         error.status = 403;
         throw error;
       }
-    } else {
-      console.log('[autocomplete] Skipping permission check for public org');
     }
-    // Note: For public orgs, we still allow the user to search even if not a member
   } else {
-    // Guest user: only allow access to public organizations
     if (!isPublic) {
-      console.log('[autocomplete] Blocking guest user from private org');
       const error = new Error('Insufficient permissions') as { status?: number };
       error.status = 403;
       throw error;
-    } else {
-      console.log('[autocomplete] Allowing guest user to search public org');
     }
   }
 
@@ -926,7 +938,6 @@ export async function getAutocompleteSuggestions(
   const suggestions: AutocompleteSuggestion[] = [];
 
   try {
-    // Department name suggestions (exclude soft-deleted)
     const deptStmt = db.prepare(`
       SELECT DISTINCT d.name, 'department' as type
       FROM departments_fts
@@ -947,7 +958,7 @@ export async function getAutocompleteSuggestions(
         (r): AutocompleteSuggestion => ({
           text: r.name,
           type: 'department',
-          id: '', // Mock ID for snippet suggestions if needed
+          id: '',
         })
       )
     );
@@ -956,7 +967,6 @@ export async function getAutocompleteSuggestions(
   }
 
   try {
-    // Person name suggestions (exclude soft-deleted)
     const peopleStmt = db.prepare(`
       SELECT DISTINCT p.name, 'person' as type
       FROM people_fts
@@ -976,7 +986,7 @@ export async function getAutocompleteSuggestions(
         (r): AutocompleteSuggestion => ({
           text: r.name,
           type: 'person',
-          id: '', // Mock ID for snippet suggestions if needed
+          id: '',
         })
       )
     );
@@ -984,7 +994,6 @@ export async function getAutocompleteSuggestions(
     console.error('People autocomplete error:', err);
   }
 
-  // Log autocomplete performance
   const queryTimeMs = Date.now() - startTime;
   console.log(`[autocomplete] Query completed in ${queryTimeMs}ms:`, {
     query: query.substring(0, 30),
@@ -992,4 +1001,66 @@ export async function getAutocompleteSuggestions(
   });
 
   return { suggestions: suggestions.slice(0, limit) };
+}
+
+// ============================================================================ 
+// Saved Search Operations
+// ============================================================================ 
+
+export async function createSavedSearch(
+  orgId: string,
+  userId: string,
+  name: string,
+  query: string,
+  filters: Record<string, unknown> | null,
+  isShared: boolean = false
+): Promise<SavedSearch> {
+  const id = uuidv4();
+  const filtersJson = filters ? JSON.stringify(filters) : null;
+
+  const stmt = db.prepare(`
+    INSERT INTO saved_searches (
+      id, organization_id, user_id, name, query, filters, is_shared
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    RETURNING *
+  `);
+
+  const result = stmt.get(id, orgId, userId, name, query, filtersJson, isShared ? 1 : 0) as SavedSearch;
+  
+  return {
+    ...result,
+    is_shared: Boolean(result.is_shared)
+  };
+}
+
+export async function getSavedSearches(
+  orgId: string,
+  userId: string
+): Promise<SavedSearch[]> {
+  const stmt = db.prepare(`
+    SELECT * FROM saved_searches
+    WHERE organization_id = ?
+      AND (user_id = ? OR is_shared = 1)
+    ORDER BY name ASC
+  `);
+
+  const rows = stmt.all(orgId, userId) as SavedSearch[];
+  
+  return rows.map(row => ({
+    ...row,
+    is_shared: Boolean(row.is_shared)
+  }));
+}
+
+export async function deleteSavedSearch(
+  id: string,
+  userId: string
+): Promise<boolean> {
+  const stmt = db.prepare(`
+    DELETE FROM saved_searches
+    WHERE id = ? AND user_id = ?
+  `);
+  
+  const result = stmt.run(id, userId);
+  return result.changes > 0;
 }

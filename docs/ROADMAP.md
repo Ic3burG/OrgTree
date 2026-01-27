@@ -139,7 +139,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 12. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
 13. **Bulk Invitations** - Send invitations to multiple emails at once
 14. **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
-15. **GEDS URL Import** - Automated download, parse, and import from GEDS download URLs (see [docs/rfc/geds-url-import.md](rfc/geds-url-import.md))
+15. **GEDS URL Import** - Automated download, parse, and import from GEDS download URLs (see [docs/adr/016-geds-url-import.md](adr/016-geds-url-import.md))
 
 16. ~~**User Discovery & Privacy Controls** - Autocomplete existing users when sharing organizations, with a privacy opt-out in security settings~~ ✅ **DONE** (January 25, 2026)
 
@@ -162,11 +162,11 @@ This document outlines the development roadmap for OrgTree, including technical 
 - Workspace layout presets (save/load layout configurations)
 - Sidebar pinning (auto-hide on route change unless pinned)
 
-1. **Search Enhancements** (see [docs/rfc/search-enhancements.md](rfc/search-enhancements.md)):
-   1. **Typo Tolerance** - Trigram-based fuzzy matching
-   1. **Search Analytics** - Track zero-result searches to identify gaps
-   1. **Saved Searches** - Allow users to save frequently-used queries
-   1. **Search Suggestions** - "Did you mean?" suggestions for misspellings
+1. ~~**Search Enhancements** (see [docs/adr/019-trigram-search-enhancements.md](adr/019-trigram-search-enhancements.md))~~ ✅ **DONE** (January 27, 2026):
+   1. ~~**Typo Tolerance** - Trigram-based fuzzy matching~~ ✅ **DONE**
+   1. ~~**Search Analytics** - Track zero-result searches to identify gaps~~ ✅ **DONE**
+   1. ~~**Saved Searches** - Allow users to save frequently-used queries~~ ✅ **DONE**
+   1. **Search Suggestions** - "Did you mean?" suggestions for misspellings (Partially covered by fuzzy match fallback)
 
 ---
 
@@ -174,12 +174,13 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 **Active Work**:
 
-- Increasing test coverage (currently 497+ tests across frontend and backend)
+- ~~Increasing test coverage (currently 497+ tests across frontend and backend)~~ ✅ **DONE** (Moved to maintenance mode, >900 tests now)
 - Performance optimization for large organizations
 - User experience refinements
 
 **Recently Completed** (January 2026):
 
+- ✅ **Search Enhancements** - Trigram fuzzy matching, analytics, and saved searches (January 27, 2026)
 - ✅ **Search System Rebuild** - Fixed FTS5 sync, soft-deletes, error handling, and added frontend resilience (January 24, 2026)
 - ✅ **User Discovery & Privacy Controls** - Implemented discoverable user search with opt-out settings and autocomplete (January 25, 2026)
 - ✅ **Database Migration Rollback** - Comprehensive migration system with auto-rollback in CD (January 25, 2026)
@@ -197,7 +198,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - ✅ **Collapsible Admin Sidebar** - Icon-only mode with localStorage persistence (January 13, 2026)
 - ✅ **Dark Mode Refinements** - Applied to org map, MiniMap, and all components (January 12, 2026)
 - ✅ **Staging Environment** - develop→staging, main→production pipeline with workflow_run trigger (January 21, 2026)
-- ✅ **Test Coverage Expansion** - 497+ tests total (373 backend, 124 frontend) (January 21, 2026)
+- ✅ **Test Coverage Expansion** - 900+ tests total (January 25, 2026)
 - ✅ **Performance Testing** - Successfully tested 1000+ records with 467ms load time (January 11, 2026)
 - ✅ **E2E Testing** - Playwright tests for critical user flows (January 11, 2026)
 - ✅ **TypeScript Migration** - Full strict mode compilation (January 7, 2026)
@@ -216,7 +217,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - Items marked ✅ **DONE** include completion dates
 - High/Medium/Low priorities are reassessed monthly
 - Feature requests from users may be added to this roadmap
-- See [PROGRESS.md](PROGRESS.md) for detailed session-by-session progress
+- See [PROGRESS.md](../PROGRESS.md) for detailed session-by-session progress
 
 **Maintainers**: Claude Code + Development Team
 **Repository**: <https://github.com/Ic3burG/OrgTree>

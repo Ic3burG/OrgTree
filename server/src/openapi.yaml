@@ -336,6 +336,44 @@ components:
           format: uri
           nullable: true
 
+    OwnershipTransfer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organizationId:
+          type: string
+          format: uuid
+        organizationName:
+          type: string
+        fromUserId:
+          type: string
+          format: uuid
+        fromUserName:
+          type: string
+        toUserId:
+          type: string
+          format: uuid
+        toUserName:
+          type: string
+        toUserEmail:
+          type: string
+        status:
+          type: string
+          enum: [pending, accepted, rejected, cancelled, expired]
+        reason:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
   responses:
     Unauthorized:
       description: Authentication required
@@ -2188,3 +2226,274 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '429':
           description: Rate limit exceeded
+
+  # ==================== OWNERSHIP TRANSFERS ====================
+  /organizations/{orgId}/ownership/transfer:
+    parameters:
+      - name: orgId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    post:
+      tags: [Ownership Transfers]
+      summary: Initiate ownership transfer
+      description: Start the process of transferring organization ownership. Requires owner role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [toUserId, reason]
+              properties:
+                toUserId:
+                  type: string
+                  format: uuid
+                reason:
+                  type: string
+      responses:
+        '201':
+          description: Transfer initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  transfer:
+                    $ref: '#/components/schemas/OwnershipTransfer'
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /organizations/{orgId}/ownership/transfers:
+    parameters:
+      - name: orgId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      tags: [Ownership Transfers]
+      summary: List organization transfers
+      description: List all transfers for an organization. Requires admin role or above.
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, accepted, rejected, cancelled, expired]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of transfers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transfers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OwnershipTransfer'
+                  total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ownership/transfers/pending:
+    get:
+      tags: [Ownership Transfers]
+      summary: List pending transfers
+      description: Get pending transfers where the current user is the recipient.
+      responses:
+        '200':
+          description: List of pending transfers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OwnershipTransfer'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ownership/transfers/{transferId}:
+    parameters:
+      - name: transferId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      tags: [Ownership Transfers]
+      summary: Get transfer details
+      description: Get details of a specific transfer.
+      responses:
+        '200':
+          description: Transfer details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnershipTransfer'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /ownership/transfers/{transferId}/accept:
+    parameters:
+      - name: transferId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    post:
+      tags: [Ownership Transfers]
+      summary: Accept transfer
+      description: Accept an ownership transfer. Current user must be the recipient.
+      responses:
+        '200':
+          description: Transfer accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  transfer:
+                    $ref: '#/components/schemas/OwnershipTransfer'
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ownership/transfers/{transferId}/reject:
+    parameters:
+      - name: transferId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    post:
+      tags: [Ownership Transfers]
+      summary: Reject transfer
+      description: Reject an ownership transfer.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Transfer rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  transfer:
+                    $ref: '#/components/schemas/OwnershipTransfer'
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ownership/transfers/{transferId}/cancel:
+    parameters:
+      - name: transferId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    post:
+      tags: [Ownership Transfers]
+      summary: Cancel transfer
+      description: Cancel a pending transfer. Requester must be the initiator (owner).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Transfer cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  transfer:
+                    $ref: '#/components/schemas/OwnershipTransfer'
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ownership/transfers/{transferId}/audit-log:
+    parameters:
+      - name: transferId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      tags: [Ownership Transfers]
+      summary: Get transfer audit log
+      description: Get history of actions for this transfer.
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

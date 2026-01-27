@@ -19,6 +19,7 @@ import memberRoutes from './routes/members.js';
 import invitationRoutes from './routes/invitations.js';
 import auditRoutes from './routes/audit.js';
 import searchRoutes from './routes/search.js';
+import savedSearchesRoutes from './routes/saved-searches.js';
 import bulkRoutes from './routes/bulk.js';
 import csrfRoutes from './routes/csrf.js';
 import backupRoutes from './routes/backup.js';
@@ -29,7 +30,9 @@ import metricsRoutes from './routes/metrics.js';
 import analyticsRoutes from './routes/analytics.js';
 import gedsRoutes from './routes/geds.js';
 import gedsImportRoutes from './routes/geds-import.js';
+import ownershipTransfersRoutes from './routes/ownership-transfers.js';
 import { scheduleFtsMaintenance } from './services/fts-scheduler.service.js';
+import { scheduleTransferExpiration } from './services/transfer-expiration-scheduler.service.js';
 import ftsMaintenanceRoutes from './routes/fts-maintenance.js';
 import versionRoutes from './routes/version.js';
 import orgMembershipCheckRoutes from './routes/org-membership-check.js';
@@ -256,6 +259,7 @@ app.use('/api/geds', gedsRoutes);
 app.use('/api', validateCsrf); // Apply CSRF middleware to all routes below
 
 app.use('/api', organizationRoutes);
+app.use('/api', ownershipTransfersRoutes);
 app.use('/api', departmentRoutes);
 app.use('/api', peopleRoutes);
 app.use('/api', importRoutes);
@@ -266,6 +270,7 @@ app.use('/api', memberRoutes);
 app.use('/api', invitationRoutes);
 app.use('/api', auditRoutes);
 app.use('/api', searchRoutes);
+app.use('/api', savedSearchesRoutes);
 app.use('/api', bulkRoutes);
 app.use('/api', metricsRoutes);
 app.use('/api/fts-maintenance', ftsMaintenanceRoutes);
@@ -301,6 +306,9 @@ server.listen(PORT, () => {
 
   // Schedule FTS maintenance (nightly integrity checks and optimization)
   scheduleFtsMaintenance();
+
+  // Schedule ownership transfer expiration (daily at 2:00 AM)
+  scheduleTransferExpiration();
 
   // Run initial cleanup on startup
   cleanupExpiredTokens();

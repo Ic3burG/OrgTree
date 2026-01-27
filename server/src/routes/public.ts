@@ -87,7 +87,7 @@ router.get(
       const people = db
         .prepare(
           `
-      SELECT p.id, p.department_id, p.name, p.title, p.email, p.phone, p.sort_order
+      SELECT p.id, p.department_id, p.name, p.title, p.email, p.phone, p.is_starred, p.sort_order
       FROM people p
       INNER JOIN departments d ON p.department_id = d.id
       WHERE d.organization_id = ? AND p.deleted_at IS NULL AND d.deleted_at IS NULL
@@ -101,6 +101,7 @@ router.get(
         title: string | null;
         email: string | null;
         phone: string | null;
+        is_starred: number;
         sort_order: number;
       }[];
 
@@ -153,6 +154,7 @@ router.get(
         title: string | null;
         email: string | null;
         phone: string | null;
+        is_starred: boolean;
         sortOrder: number;
         custom_fields?: Record<string, string>;
       }
@@ -172,6 +174,7 @@ router.get(
           title: person.title,
           email: person.email,
           phone: person.phone,
+          is_starred: Boolean(person.is_starred),
           sortOrder: person.sort_order,
           custom_fields: valuesByEntity[person.id] || {},
         });

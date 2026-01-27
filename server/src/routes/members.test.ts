@@ -89,10 +89,16 @@ describe('Members Routes', () => {
 
       expect(response.body).toEqual({
         owner: {
-          userId: 'owner1',
-          userName: 'Owner User',
-          userEmail: 'owner@example.com',
+          id: expect.any(String),
+          joined_at: expect.any(String),
+          organization_id: 'org1',
+          user_id: 'owner1',
           role: 'owner',
+          user: {
+            id: 'owner1',
+            name: 'Owner User',
+            email: 'owner@example.com',
+          },
         },
         members: mockMembers,
       });

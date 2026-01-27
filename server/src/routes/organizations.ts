@@ -256,4 +256,67 @@ router.post(
   }
 );
 
+// POST /api/organizations/:id/ownership/transfer
+// Initiate ownership transfer (Super User only)
+router.post(
+  '/organizations/:id/ownership/transfer',
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const orgId = req.params.id!;
+      const { toUserId, reason } = req.body;
+
+      if (!toUserId || !reason) {
+        res.status(400).json({ message: 'toUserId and reason are required' });
+        return;
+      }
+
+      const ipAddress = req.ip || null;
+      const userAgent = req.get('user-agent') || null;
+
+      const { initiateTransfer } = await import('../services/ownership-transfer.service.js');
+      const transfer = initiateTransfer(
+        orgId,
+        req.user!.id,
+        toUserId,
+        reason,
+        ipAddress,
+        userAgent
+      );
+
+      res.status(201).json({
+        success: true,
+        transfer,
+        message: 'Ownership transfer initiated successfully',
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// GET /api/organizations/:id/ownership/transfers
+// List all transfers for an organization (Admin+ only)
+router.get(
+  '/organizations/:id/ownership/transfers',
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const orgId = req.params.id!;
+      const { status, limit, offset } = req.query;
+
+      const filters = {
+        status: status as 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'expired' | undefined,
+        limit: limit ? parseInt(limit as string, 10) : undefined,
+        offset: offset ? parseInt(offset as string, 10) : undefined,
+      };
+
+      const { listTransfers } = await import('../services/ownership-transfer.service.js');
+      const transfers = listTransfers(orgId, req.user!.id, filters);
+
+      res.json(transfers);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 export default router;

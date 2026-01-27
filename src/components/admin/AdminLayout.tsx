@@ -13,7 +13,6 @@ import {
   PanelLeftClose,
   PanelLeft,
   Terminal,
-  Download,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
@@ -179,7 +178,7 @@ export default function AdminLayout(): React.JSX.Element {
         </NavLink>
 
         <NavLink
-          to={`/org/${orgId}/geds`}
+          to={`/org/${orgId}/settings`}
           onClick={closeSidebar}
           className={({ isActive }) =>
             `flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg mb-2 transition-colors ${
@@ -188,10 +187,10 @@ export default function AdminLayout(): React.JSX.Element {
                 : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
             }`
           }
-          title={isCollapsed ? 'GEDS Downloader' : undefined}
+          title={isCollapsed ? 'Settings' : undefined}
         >
-          <Download size={20} />
-          <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>GEDS Downloader</span>
+          <Settings size={20} />
+          <span className={`font-medium ${isCollapsed ? 'sr-only' : ''}`}>Settings</span>
         </NavLink>
       </nav>
 

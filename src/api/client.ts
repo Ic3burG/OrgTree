@@ -19,6 +19,8 @@ import type {
   TotpSetup,
   CustomFieldDefinition,
   AutocompleteResponse,
+  OwnershipTransfer,
+  OwnershipTransferAuditLog,
 } from '../types/index.js';
 import type {
   OverviewMetrics,
@@ -489,8 +491,8 @@ const api = {
     }),
 
   // Organization members
-  getOrgMembers: (orgId: string): Promise<OrgMember[]> =>
-    request<OrgMember[]>(`/organizations/${orgId}/members`),
+  getOrgMembers: (orgId: string): Promise<{ owner: OrgMember; members: OrgMember[] }> =>
+    request<{ owner: OrgMember; members: OrgMember[] }>(`/organizations/${orgId}/members`),
 
   addOrgMember: (
     orgId: string,
@@ -802,6 +804,47 @@ const api = {
     request<PerformanceMetrics>('/admin/metrics/performance'),
 
   getMetricsAudit: (): Promise<AuditMetrics> => request<AuditMetrics>('/admin/metrics/audit'),
+
+  // Ownership Transfers
+  initiateOwnershipTransfer: (
+    orgId: string,
+    toUserId: string,
+    reason: string
+  ): Promise<{ success: boolean; transfer: OwnershipTransfer }> =>
+    request<{ success: boolean; transfer: OwnershipTransfer }>(
+      `/organizations/${orgId}/ownership/transfer`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ toUserId, reason }),
+      }
+    ),
+
+  getOwnershipTransfers: (orgId: string): Promise<OwnershipTransfer[]> =>
+    request<OwnershipTransfer[]>(`/organizations/${orgId}/ownership/transfers`),
+
+  getPendingOwnershipTransfers: (): Promise<OwnershipTransfer[]> =>
+    request<OwnershipTransfer[]>('/ownership/transfers/pending'),
+
+  getOwnershipTransfer: (transferId: string): Promise<OwnershipTransfer> =>
+    request<OwnershipTransfer>(`/ownership/transfers/${transferId}`),
+
+  acceptOwnershipTransfer: (transferId: string): Promise<OwnershipTransfer> =>
+    request<OwnershipTransfer>(`/ownership/transfers/${transferId}/accept`, {
+      method: 'POST',
+    }),
+
+  rejectOwnershipTransfer: (transferId: string): Promise<OwnershipTransfer> =>
+    request<OwnershipTransfer>(`/ownership/transfers/${transferId}/reject`, {
+      method: 'POST',
+    }),
+
+  cancelOwnershipTransfer: (transferId: string): Promise<OwnershipTransfer> =>
+    request<OwnershipTransfer>(`/ownership/transfers/${transferId}/cancel`, {
+      method: 'POST',
+    }),
+
+  getOwnershipTransferAuditLog: (transferId: string): Promise<OwnershipTransferAuditLog[]> =>
+    request<OwnershipTransferAuditLog[]>(`/ownership/transfers/${transferId}/audit-log`),
 };
 
 export default api;

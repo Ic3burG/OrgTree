@@ -103,7 +103,7 @@ describe('Departments Routes', () => {
         {
           name: 'New Dept',
           description: 'Desc',
-          parentId: undefined,
+          parentId: null,
           customFields: undefined,
         },
         'user-1'
@@ -139,7 +139,7 @@ describe('Departments Routes', () => {
         {
           name: 'Updated Dept',
           description: undefined,
-          parentId: undefined,
+          parentId: null,
           customFields: undefined,
         },
         'user-1'

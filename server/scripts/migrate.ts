@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Database from 'better-sqlite3';
 import { runMigrations, discoverMigrations } from '../src/migrations/index.js';
 import { legacyMigrations } from '../src/migrations/legacy-migrations.js';
@@ -7,7 +8,15 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = process.env.DATABASE_URL || path.join(__dirname, '..', 'data', 'orgtree.db');
+let dbPath;
+if (process.env.DATABASE_URL) {
+  // Remove 'file:' prefix if present
+  dbPath = process.env.DATABASE_URL.replace(/^file:/, '');
+} else {
+  // Development fallback
+  dbPath = path.join(__dirname, '..', 'data', 'orgtree.db');
+}
+
 const db = new Database(dbPath);
 
 async function main() {

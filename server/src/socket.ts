@@ -51,6 +51,16 @@ export function initializeSocket(httpServer: HTTPServer, allowedOrigins: string[
       userName: socket.user.name,
     });
 
+    // Join user-specific room for private notifications
+    const userRoom = `user:${socket.user.id}`;
+    socket.join(userRoom);
+
+    logger.info('User joined rooms', {
+      socketId: socket.id,
+      userId: socket.user.id,
+      rooms: [userRoom],
+    });
+
     // Join organization room
     socket.on('join:org', async (orgId: string) => {
       try {
@@ -169,6 +179,25 @@ export function emitToOrg(orgId: string, eventType: string, payload: unknown): v
 }
 
 /**
+ * Emit an event to a specific user
+ */
+export function emitToUser(userId: string, eventType: string, payload: unknown): void {
+  if (!io) {
+    logger.warn('Socket.IO not initialized, skipping emit');
+    return;
+  }
+
+  const roomName = `user:${userId}`;
+  io.to(roomName).emit(eventType, payload);
+
+  logger.info('Emitted event to user', {
+    userId,
+    eventType,
+    room: roomName,
+  });
+}
+
+/**
  * Emit an event to the admin metrics room (superusers only)
  */
 export function emitToAdminMetrics(eventType: string, payload: unknown): void {
@@ -190,4 +219,11 @@ export function getActiveConnectionCount(): number {
   return io.sockets.sockets.size;
 }
 
-export default { initializeSocket, getIO, emitToOrg, emitToAdminMetrics, getActiveConnectionCount };
+export default {
+  initializeSocket,
+  getIO,
+  emitToOrg,
+  emitToUser,
+  emitToAdminMetrics,
+  getActiveConnectionCount,
+};

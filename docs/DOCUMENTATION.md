@@ -208,6 +208,31 @@ Your role is displayed on organization cards and in the sidebar.
 2. Or click **"← Back to Organizations"** in the sidebar
 3. Select a different organization from the list
 
+### Transferring Organization Ownership
+
+> **Requires**: Organization Owner role
+
+Transferring ownership allows you to hand over full control of the organization to another member.
+
+1. Navigate to **Settings** → **Organization Settings**
+2. Scroll to the **"Danger Zone"** at the bottom
+3. Click **"Transfer Ownership"**
+4. Select the new owner from the dropdown list
+   - Only existing organization members can be selected
+5. Provide a reason for the transfer (required)
+6. Enter your password to confirm
+7. Click **"Transfer Ownership"**
+
+**What happens next:**
+- The selected member receives an email and in-app notification
+- The transfer enters a **Pending** state (expires in 7 days)
+- You remain the owner until they accept
+- Once accepted, you are automatically demoted to **Admin** role
+- The new owner gains full control including billing and deletion rights
+
+**Cancelling a Transfer:**
+- You can cancel a pending transfer at any time from the "Danger Zone" or the transfer banner.
+
 ---
 
 ## Department Management

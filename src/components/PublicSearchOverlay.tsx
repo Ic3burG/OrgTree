@@ -20,6 +20,7 @@ interface TransformedSearchResult {
     title: string | null;
     email: string | null;
     phone: string | null;
+    is_starred?: boolean;
   } | null;
 }
 
@@ -103,6 +104,7 @@ export default function PublicSearchOverlay({
                 title: result.title || null,
                 email: (result as unknown as { email?: string | null }).email || null,
                 phone: (result as unknown as { phone?: string | null }).phone || null,
+                is_starred: result.is_starred,
               }
             : null,
       };

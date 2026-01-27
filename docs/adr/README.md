@@ -34,6 +34,8 @@ An Architecture Decision Record (ADR) is a document that captures an important a
 | [015](015-hierarchical-tree-selector.md)           | Hierarchical Tree Selector             | Accepted | 2026-01-25 | ux, map, form-controls                         |
 | [016](016-geds-url-import.md)                      | GEDS URL Import                        | Accepted | 2026-01-25 | data-import, geds, automation                  |
 | [017](017-search-system-rebuild.md)                | Search System Rebuild                  | Accepted | 2026-01-24 | database, search, performance, resilience      |
+| [018](018-organization-ownership-transfer.md)      | Organization Ownership Transfer        | Accepted | 2026-01-27 | ownership, security, workflow                  |
+| [019](019-trigram-search-enhancements.md)          | Trigram Search Enhancements            | Accepted | 2026-01-27 | search, database, performance, ux              |
 
 ## Reading Guide
 
