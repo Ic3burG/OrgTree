@@ -322,7 +322,9 @@ export function initiateTransfer(
     );
   }
 
-  const row = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(id) as OwnershipTransferRow;
+  const row = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(id) as OwnershipTransferRow;
   return mapTransferRow(row) as OwnershipTransfer;
 }
 
@@ -335,7 +337,9 @@ export function acceptTransfer(
   ipAddress: string | null = null,
   userAgent: string | null = null
 ): OwnershipTransfer {
-  const row = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId) as OwnershipTransferRow;
+  const row = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   const transfer = mapTransferRow(row);
 
   if (!transfer) {
@@ -483,7 +487,9 @@ export function acceptTransfer(
     );
   }
 
-  const finalRow = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId) as OwnershipTransferRow;
+  const finalRow = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   return mapTransferRow(finalRow) as OwnershipTransfer;
 }
 
@@ -497,7 +503,9 @@ export function rejectTransfer(
   ipAddress: string | null = null,
   userAgent: string | null = null
 ): OwnershipTransfer {
-  const row = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId) as OwnershipTransferRow;
+  const row = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   const transfer = mapTransferRow(row);
 
   if (!transfer) {
@@ -600,7 +608,9 @@ export function rejectTransfer(
     );
   }
 
-  const finalRow = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId) as OwnershipTransferRow;
+  const finalRow = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   return mapTransferRow(finalRow) as OwnershipTransfer;
 }
 
@@ -614,7 +624,9 @@ export function cancelTransfer(
   ipAddress: string | null = null,
   userAgent: string | null = null
 ): OwnershipTransfer {
-  const row = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId) as OwnershipTransferRow;
+  const row = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   const transfer = mapTransferRow(row);
 
   if (!transfer) {
@@ -734,7 +746,9 @@ export function cancelTransfer(
     );
   }
 
-  const finalRow = db.prepare('SELECT * FROM ownership_transfers WHERE id = ?').get(transferId) as OwnershipTransferRow;
+  const finalRow = db
+    .prepare('SELECT * FROM ownership_transfers WHERE id = ?')
+    .get(transferId) as OwnershipTransferRow;
   return mapTransferRow(finalRow) as OwnershipTransfer;
 }
 

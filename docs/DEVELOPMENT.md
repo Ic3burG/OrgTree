@@ -314,7 +314,7 @@ useEffect(() => {
 
 ### Running Quality Checks
 
-Before committing code, always run:
+**CRITICAL**: Always run lint and formatting checks before committing your changes. This ensures code consistency and prevents CI failures.
 
 ```bash
 # Lint check
@@ -323,6 +323,10 @@ cd server && npm run lint # Backend
 
 # Format check
 npm run format:check      # Frontend
+cd server && npm run format:check # Backend
+
+# Fix formatting automatically
+npm run format            # Frontend
 cd server && npm run format # Backend
 
 # Type check
