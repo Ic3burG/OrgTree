@@ -24,6 +24,7 @@ describe('TransferHistoryList', () => {
       completedAt: '2023-01-02',
       completed_at: '2023-01-02',
       reason: 'test',
+      updatedAt: '2023-01-02',
     },
     {
       id: '2',
@@ -44,6 +45,7 @@ describe('TransferHistoryList', () => {
       reason: 'test',
       completedAt: null,
       completed_at: null,
+      updatedAt: '2023-01-03',
     },
     {
       id: '3',
@@ -64,6 +66,7 @@ describe('TransferHistoryList', () => {
       reason: 'test',
       completedAt: null,
       completed_at: null,
+      updatedAt: '2023-01-05',
     },
   ];
 
