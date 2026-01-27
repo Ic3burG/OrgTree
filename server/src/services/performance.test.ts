@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import db from '../db.js';
 import * as orgService from './org.service.js';
 import * as departmentService from './department.service.js';
-import * as peopleService from './people.service.js';
 import { randomUUID } from 'crypto';
 import { performance } from 'perf_hooks';
 
@@ -12,7 +11,7 @@ describe('Large Dataset Performance', () => {
 
   // Constants for test dataset size
   // We want enough data to measure, but not so much it times out CI
-  const NUM_DEPTS = 100;
+  // const _NUM_DEPTS = 100; // Not used but good for reference
   const PEOPLE_PER_DEPT = 5; // = 500 people total
 
   beforeAll(async () => {

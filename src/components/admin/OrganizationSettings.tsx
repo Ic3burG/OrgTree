@@ -58,7 +58,7 @@ export default function OrganizationSettings(): React.JSX.Element {
       await api.updateOrganization(orgId, newName.trim());
       toast.success('Organization renamed successfully');
       loadData();
-    } catch (err) {
+    } catch {
       toast.error('Failed to rename organization');
     } finally {
       setIsRenaming(false);
@@ -76,7 +76,7 @@ export default function OrganizationSettings(): React.JSX.Element {
       await api.deleteOrganization(orgId);
       toast.success('Organization deleted successfully');
       window.location.href = '/';
-    } catch (err) {
+    } catch {
       toast.error('Failed to delete organization');
       setIsDeleting(false);
     }

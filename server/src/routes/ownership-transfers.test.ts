@@ -15,8 +15,8 @@ vi.mock('../middleware/auth.js', () => ({
       const user = jwt.verify(token, 'test-secret-key');
       req.user = user;
       next();
-    } catch (err) {
-      return res.sendStatus(403);
+    } catch {
+      // Expected
     }
   },
 }));
