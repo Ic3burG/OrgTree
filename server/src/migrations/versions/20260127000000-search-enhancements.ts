@@ -3,7 +3,7 @@ import { Migration } from '../index.js';
 export const migration: Migration = {
   id: '20260127000000',
   name: 'Add search enhancements (trigram, analytics, saved searches)',
-  up: (db) => {
+  up: db => {
     // 1. Create Trigram FTS tables for fuzzy matching
     // Using explicit transaction for safety
     db.transaction(() => {
@@ -100,7 +100,7 @@ export const migration: Migration = {
       `);
     })();
   },
-  down: (db) => {
+  down: db => {
     db.exec(`
       DROP TABLE IF EXISTS saved_searches;
       DROP TABLE IF EXISTS search_analytics;
