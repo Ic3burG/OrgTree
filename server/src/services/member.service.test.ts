@@ -21,9 +21,11 @@ type AccessResult = {
 type MemberResult = {
   id: string;
   role: string;
-  userId: string;
-  userName?: string;
-  userEmail?: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
 };
 
 type AddMemberByEmailResult = {
@@ -280,10 +282,11 @@ describe('Member Service', () => {
 
       const members: MemberResult[] = getOrgMembers(org.id);
 
-      expect(members[0]).toHaveProperty('userName');
-      expect(members[0]).toHaveProperty('userEmail');
+      expect(members[0]).toHaveProperty('user');
+      expect(members[0]!.user).toHaveProperty('name');
+      expect(members[0]!.user).toHaveProperty('email');
       expect(members[0]).toHaveProperty('role');
-      expect(members[0]!.userName).toBe('Member');
+      expect(members[0]!.user.name).toBe('Member');
     });
   });
 
@@ -293,7 +296,7 @@ describe('Member Service', () => {
 
       expect(result).toHaveProperty('id');
       expect(result.role).toBe('editor');
-      expect(result.userId).toBe(member.id);
+      expect(result.user.id).toBe(member.id);
     });
 
     it('should throw if user is already a member', () => {
@@ -338,7 +341,7 @@ describe('Member Service', () => {
       );
 
       expect(result.success).toBe(true);
-      expect(result.member?.userId).toBe(member.id);
+      expect(result.member?.user.id).toBe(member.id);
     });
 
     it('should return error if user not found', () => {
