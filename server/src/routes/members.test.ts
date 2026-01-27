@@ -94,6 +94,8 @@ describe('Members Routes', () => {
           organization_id: 'org1',
           user_id: 'owner1',
           role: 'owner',
+          userName: 'Owner User',
+          userEmail: 'owner@example.com',
           user: {
             id: 'owner1',
             name: 'Owner User',
