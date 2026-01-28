@@ -24,9 +24,9 @@ const mServerInstance = {
 
 vi.mock('socket.io', () => {
   return {
-    Server: function () {
+    Server: vi.fn().mockImplementation(function () {
       return mServerInstance;
-    },
+    }),
   };
 });
 
