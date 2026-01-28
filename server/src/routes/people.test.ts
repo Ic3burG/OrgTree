@@ -29,6 +29,16 @@ describe('People Routes', () => {
     vi.clearAllMocks();
     process.env.JWT_SECRET = 'test-secret-key';
 
+    // Reset DB mock to default state
+    vi.mocked(db.prepare).mockImplementation(
+      () =>
+        ({
+          get: vi.fn(),
+          run: vi.fn(),
+          all: vi.fn(),
+        }) as any
+    );
+
     app = express();
     app.use(express.json());
     app.use('/api', peopleRouter);
