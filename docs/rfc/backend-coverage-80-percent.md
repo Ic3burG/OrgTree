@@ -12,9 +12,9 @@ A deeper analysis reveals that several high-complexity services have significant
 
 ## 2. Goals
 
-1.  **Overall Target**: Reach **>80%** statement coverage for the backend (`server/`).
-2.  **Critical Path Target**: Reach **>90%** coverage for Security/Auth and Data Integrity services.
-3.  **Zero "Untested" Core Files**: Ensure no core logic file has 0% coverage.
+1. **Overall Target**: Reach **>80%** statement coverage for the backend (`server/`).
+2. **Critical Path Target**: Reach **>90%** coverage for Security/Auth and Data Integrity services.
+3. **Zero "Untested" Core Files**: Ensure no core logic file has 0% coverage.
 
 ## 3. Coverage Gap Analysis
 
@@ -84,8 +84,8 @@ _Focus: Locking down permissions and data mutations._
 
 To prevent regression, we will implement:
 
-1.  **Husky Pre-push Check**: Fail push if coverage drops (using `jest-coverage-ratchet` or similar logic).
-2.  **Coverage Reports**: Generate HTML reports in CI for visibility.
+1. **Husky Pre-push Check**: Fail push if coverage drops (using `jest-coverage-ratchet` or similar logic).
+2. **Coverage Reports**: Generate HTML reports in CI for visibility.
 
 ## 6. Timeline Estimate
 
