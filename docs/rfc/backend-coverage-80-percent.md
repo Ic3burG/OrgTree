@@ -59,13 +59,14 @@ _Focus: Locking down permissions and data mutations._
   - Large payload handling.
   - Transaction rollbacks on critical failure.
 
-### Phase 3: Infrastructure & Maintenance
+### Phase 3: Infrastructure & Maintenance [x]
 
-_Focus: Stability and monitoring._
-
-- [ ] **Test `routes/fts-maintenance.ts`**: Ensure maintenance triggers work and handle database locks gracefully.
-- [ ] **Test `socket.ts`**: Implement a test harness for Socket.IO to verify event emission and room joining logic.
-- [ ] **Fix `geds-download.service.ts`**: Add mock tests for external URL failures (already started but low coverage).
+- **Target**: `routes/fts-maintenance.ts`, `socket.ts`, `geds-download.service.ts`
+- **Goal**: Ensure infrastructure components are reliable.
+- **Status**: Completed (January 28, 2026)
+- [x] **Test `routes/fts-maintenance.ts`**: Ensure maintenance triggers work and handle database locks gracefully.
+- [x] **Test `socket.ts`**: Implement a test harness for Socket.IO to verify event emission and room joining logic.
+- [x] **Fix `geds-download.service.ts`**: Add mock tests for external URL failures (already started but low coverage).
 
 ### Phase 4: Route Layer Coverage
 
