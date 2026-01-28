@@ -90,7 +90,7 @@ describe('GEDS Download Service', () => {
       mockResponse.statusCode = 404;
       mockResponse.statusMessage = 'Not Found';
 
-      vi.mocked(https.get).mockImplementation((url: any, options: any, callback?: any) => {
+      vi.mocked(https.get).mockImplementation((_url: any, options: any, callback?: any) => {
         if (typeof options === 'function') callback = options;
         callback(mockResponse);
         return { on: vi.fn(), setTimeout: vi.fn() } as any;
@@ -106,7 +106,7 @@ describe('GEDS Download Service', () => {
       mockResponse.statusCode = 200;
       mockResponse.headers = { 'content-length': (60 * 1024 * 1024).toString() }; // 60MB > 50MB
 
-      vi.mocked(https.get).mockImplementation((url: any, options: any, callback?: any) => {
+      vi.mocked(https.get).mockImplementation((_url: any, options: any, callback?: any) => {
         if (typeof options === 'function') callback = options;
         callback(mockResponse);
         return { on: vi.fn(), setTimeout: vi.fn() } as any;
