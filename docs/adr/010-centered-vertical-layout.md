@@ -25,13 +25,15 @@ Modify the vertical (top-to-bottom) layout algorithm to center the root departme
 
 **Current Layout (Vertical)**:
 
-```text
+```texttext
+
 Root Dept
 ├── Child 1
 │   ├── Grandchild 1
 │   └── Grandchild 2
 └── Child 2
     └── Grandchild 3
+
 ```
 
 ## Proposed Behavior
@@ -43,12 +45,14 @@ Root Dept
 
 **Proposed Layout (Vertical)**:
 
-```text
+```texttext
+
         Root Dept
        /         \
    Child 1     Child 2
    /     \         \
 Grand 1  Grand 2  Grand 3
+
 ```
 
 ## Technical Implementation
@@ -62,6 +66,7 @@ The fix is straightforward - change the Dagre alignment setting from `'UL'` to `
 **Current Code** (lines 44-52):
 
 ```typescript
+
 g.setGraph({
   rankdir: direction, // 'TB' (vertical) or 'LR' (horizontal)
   nodesep: 80, // horizontal spacing between nodes at same level
@@ -71,11 +76,13 @@ g.setGraph({
   align: 'UL', // alignment: UL (up-left), UR, DL, DR
   ranker: 'tight-tree', // better for tree-like structures
 });
+
 ```
 
 **Proposed Change - Option A (Conditional Alignment)**:
 
 ```typescript
+
 g.setGraph({
   rankdir: direction,
   nodesep: 80,
@@ -86,11 +93,13 @@ g.setGraph({
   align: direction === 'TB' ? undefined : 'UL',
   ranker: 'tight-tree',
 });
+
 ```
 
 **Proposed Change - Option B (Always Centered)**:
 
 ```typescript
+
 g.setGraph({
   rankdir: direction,
   nodesep: 80,
@@ -100,6 +109,7 @@ g.setGraph({
   // Remove align property entirely for default centering
   ranker: 'tight-tree',
 });
+
 ```
 
 **Recommended**: **Option B** - Remove the `align` property entirely. Dagre's default behavior centers nodes, which works well for both vertical and horizontal layouts.
@@ -109,6 +119,7 @@ g.setGraph({
 For better visual balance with centered layout, consider adjusting spacing:
 
 ```typescript
+
 g.setGraph({
   rankdir: direction,
   // Increase horizontal spacing for better symmetry in TB layout
@@ -118,29 +129,34 @@ g.setGraph({
   marginy: 40,
   ranker: 'tight-tree',
 });
+
 ```
 
 ### Visual Comparison
 
 **Before (Left-Aligned)**:
 
-```text
+```texttext
+
 CEO
 ├── Engineering
 │   ├── Frontend
 │   └── Backend
 └── Sales
     └── Regional
+
 ```
 
 **After (Centered)**:
 
-```text
+```texttext
+
          CEO
     ┌─────┴─────┐
 Engineering   Sales
   ┌──┴──┐        │
 Front  Back  Regional
+
 ```
 
 ### Testing Strategy
@@ -152,6 +168,7 @@ Front  Back  Regional
 Add test cases to verify centered layout:
 
 ```typescript
+
 describe('calculateLayout', () => {
   // ... existing tests
 
@@ -210,13 +227,16 @@ describe('calculateLayout', () => {
     expect(root!.position!.x).toBeLessThan(child1!.position!.x);
   });
 });
+
 ```
 
 **How to Run**:
 
 ```bash
+
 cd /Users/ojdavis/Claude\ Code/OrgTree
 npm test -- src/utils/layoutEngine.test.ts
+
 ```
 
 #### Visual/Manual Testing
@@ -226,10 +246,12 @@ npm test -- src/utils/layoutEngine.test.ts
 1. **Setup**: Navigate to Org Map with test data
 
    ```bash
+
    # Start development server
    npm run dev
 
    # Navigate to: http://localhost:5173/organizations/{orgId}/org-map
+
    ```
 
 2. **Test Vertical Layout (TB)**:
@@ -335,6 +357,7 @@ If centering causes issues:
 Instead of relying on Dagre's alignment, manually calculate center offset:
 
 ```typescript
+
 export function calculateLayout(
   nodes: FlowNode[],
   edges: FlowEdge[],
@@ -373,6 +396,7 @@ export function calculateLayout(
 
   return layoutedNodes;
 }
+
 ```
 
 **Not Recommended**: This adds complexity and may conflict with React Flow's fitView.

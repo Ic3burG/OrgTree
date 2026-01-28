@@ -15,8 +15,10 @@ If a deployment fails or a bug is discovered immediately after a migration, foll
 Run the following command to see all applied migrations:
 
 ```bash
+
 cd server
 npm run migrate status
+
 ```
 
 Locate the ID of the migration you wish to revert.
@@ -26,7 +28,9 @@ Locate the ID of the migration you wish to revert.
 Run the `down` command with the migration ID:
 
 ```bash
+
 npm run migrate down <migration_id>
+
 ```
 
 _Example:_ `npm run migrate down 20240101000018`
@@ -36,7 +40,9 @@ _Example:_ `npm run migrate down 20240101000018`
 Check the status again to ensure it was removed from the tracking table:
 
 ```bash
+
 npm run migrate status
+
 ```
 
 ## Emergency Recovery (Full Restore)
@@ -54,7 +60,9 @@ Command: `npm run backup:list`
 Use the restore command:
 
 ```bash
+
 npm run backup:restore <backup_filename>
+
 ```
 
 ## Automated Rollback Strategy

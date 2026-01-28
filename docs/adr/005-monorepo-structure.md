@@ -32,7 +32,8 @@ Chosen option: **Simple monorepo with frontend at root**, because it provides th
 
 ### Directory Structure
 
-```
+```texttext
+
 OrgTree/
 ├── src/                      # Frontend React code
 │   ├── components/
@@ -54,6 +55,7 @@ OrgTree/
 ├── vite.config.ts            # Vite configuration
 ├── tsconfig.json             # Frontend TypeScript config
 └── docker-compose.yml        # Development environment
+
 ```
 
 ### Build and Deployment Process
@@ -61,21 +63,25 @@ OrgTree/
 **Development**:
 
 ```bash
+
 # Terminal 1: Frontend dev server (port 3000)
 npm run dev
 
 # Terminal 2: Backend dev server (port 3001)
 cd server && npm run dev
+
 ```
 
 **Production**:
 
 ```bash
+
 # Build frontend to dist/
 npm run build
 
 # Express serves dist/ at root
 cd server && npm start
+
 ```
 
 ### Positive Consequences
@@ -151,16 +157,20 @@ cd server && npm start
 **Future improvement**: TypeScript project references
 
 ```json
+
 // server/tsconfig.json
 {
   "references": [{ "path": "../" }]
 }
+
 ```
 
 This would allow importing types directly:
 
 ```typescript
+
 import type { Department } from '../../src/types/models';
+
 ```
 
 **Alternative considered**: Extract shared types to `packages/types/`
@@ -188,6 +198,7 @@ import type { Department } from '../../src/types/models';
 **GitHub Actions** (`.github/workflows/ci.yml`):
 
 ```yaml
+
 - name: Install dependencies
   run: |
     npm ci
@@ -205,6 +216,7 @@ import type { Department } from '../../src/types/models';
 
 - name: Build
   run: npm run build
+
 ```
 
 Simple sequential execution (no workspace orchestration needed).
@@ -214,12 +226,14 @@ Simple sequential execution (no workspace orchestration needed).
 **Render.com**:
 
 ```yaml
+
 # render.yaml
 services:
   - type: web
     name: orgtree
     buildCommand: npm install && npm run build && cd server && npm install
     startCommand: cd server && npm start
+
 ```
 
 Single service deploys both frontend and backend.

@@ -106,7 +106,9 @@ Returns status for all 3 FTS tables:
 ### Automated Testing
 
 ```bash
+
 cd server && npm test -- search.service.test
+
 ```
 
 All 30 search tests should pass with the updated schema.
@@ -152,12 +154,14 @@ From the original plan (docs/adr/017-search-system-rebuild.md):
 
 ## Files Modified
 
-```text
+```texttext
+
 server/src/db.ts                                     (migrations added)
 server/src/index.ts                                  (route mounted)
 server/src/services/fts-maintenance.service.ts       (new file)
 server/src/routes/fts-maintenance.ts                 (new file)
 server/src/services/search.service.test.ts           (schema fixed)
+
 ```
 
 ## Metrics

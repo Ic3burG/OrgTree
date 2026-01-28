@@ -60,7 +60,8 @@ Three-state sidebar with smooth transitions:
 
 **Visual Design**:
 
-```
+```texttext
+
 ┌─────────────────────────────────────────────────────────────────┐
 │ [Expanded State]                                                │
 │ ┌──────────────────┐┌───────────────────────────────────────────│
@@ -104,6 +105,7 @@ Three-state sidebar with smooth transitions:
 │                                                                 │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
+
 ```
 
 ---
@@ -156,6 +158,7 @@ Save and restore complete layout configurations:
 **Preset Data Structure**:
 
 ```typescript
+
 interface WorkspacePreset {
   id: string;
   name: string;
@@ -167,6 +170,7 @@ interface WorkspacePreset {
     darkMode: boolean;
   };
 }
+
 ```
 
 **UI Components**:
@@ -213,10 +217,10 @@ Control sidebar visibility behavior on navigation:
 
 > [!IMPORTANT]
 > **Significant State Management Changes**: This enhancement introduces a new `useSidebar` hook that will manage multiple sidebar states. This replaces the simple `isCollapsed` boolean with a more complex state machine.
-
+>
 > [!WARNING]
 > **localStorage Keys**: New keys will be added (`sidebarState`, `sidebarWidth`, `sidebarPinned`, `workspacePresets`). Consider migration from existing `adminSidebarCollapsed` key.
-
+>
 > [!CAUTION]
 > **Performance Consideration**: Resize operations with continuous event listeners may impact performance on lower-end devices. Debouncing will be implemented.
 
@@ -231,6 +235,7 @@ Control sidebar visibility behavior on navigation:
 Refactored sidebar component extracted from `AdminLayout.tsx`:
 
 ```typescript
+
 interface SidebarProps {
   // State
   state: 'expanded' | 'minimized' | 'hidden';
@@ -252,6 +257,7 @@ interface SidebarProps {
   maxWidth?: number; // Default: 400
   defaultWidth?: number; // Default: 256
 }
+
 ```
 
 ---
@@ -261,10 +267,12 @@ interface SidebarProps {
 Resize handle component with drag-to-resize functionality:
 
 ```typescript
+
 interface ResizeHandleProps {
   onResize: (deltaX: number) => void;
   onResizeEnd: () => void;
 }
+
 ```
 
 Visual: 4px wide strip with `GripVertical` icon centered, subtle hover effect.
@@ -276,6 +284,7 @@ Visual: 4px wide strip with `GripVertical` icon centered, subtle hover effect.
 FAB for quick sidebar access:
 
 ```typescript
+
 interface FABProps {
   visible: boolean;
   onClick: () => void;
@@ -284,6 +293,7 @@ interface FABProps {
   autoHide?: boolean; // Fade after inactivity
   autoHideDelay?: number; // ms, default 3000
 }
+
 ```
 
 ---
@@ -317,6 +327,7 @@ Modal for managing workspace presets:
 Central hook for all sidebar state management:
 
 ```typescript
+
 interface UseSidebarReturn {
   // State
   state: 'expanded' | 'minimized' | 'hidden';
@@ -337,6 +348,7 @@ interface UseSidebarReturn {
   isHidden: boolean;
   showFAB: boolean;
 }
+
 ```
 
 Handles:
@@ -352,6 +364,7 @@ Handles:
 Hook for managing workspace presets:
 
 ```typescript
+
 interface UseWorkspacePresetsReturn {
   presets: WorkspacePreset[];
   activePresetId: string | null;
@@ -362,6 +375,7 @@ interface UseWorkspacePresetsReturn {
   deletePreset: (id: string) => void;
   reorderPresets: (fromIndex: number, toIndex: number) => void;
 }
+
 ```
 
 ---
@@ -371,6 +385,7 @@ interface UseWorkspacePresetsReturn {
 Generic hook for resizable elements:
 
 ```typescript
+
 interface UseResizableOptions {
   minWidth: number;
   maxWidth: number;
@@ -384,6 +399,7 @@ interface UseResizableReturn {
   isResizing: boolean;
   handleMouseDown: React.MouseEventHandler;
 }
+
 ```
 
 ---
@@ -461,7 +477,9 @@ Unit tests for presets hook:
 Run all unit tests including new hook and component tests:
 
 ```bash
+
 cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test
+
 ```
 
 New tests to verify:
@@ -475,7 +493,9 @@ New tests to verify:
 Verify existing AdminLayout-related tests still pass:
 
 ```bash
+
 cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test -- src/components/admin/
+
 ```
 
 #### 3. E2E Tests (Playwright)
@@ -483,7 +503,9 @@ cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test -- src/components/admin/
 Run E2E tests to catch any regressions:
 
 ```bash
+
 cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test:e2e
+
 ```
 
 #### 4. Lint & Format
@@ -491,13 +513,15 @@ cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test:e2e
 Ensure code quality:
 
 ```bash
+
 cd /Users/ojdavis/Claude\ Code/OrgTree && npm run lint && npm run format:check
+
 ```
 
 ---
 
 ### Manual Verification
-
+>
 > [!NOTE]
 > **User should test these scenarios manually after implementation:**
 
@@ -630,7 +654,7 @@ cd /Users/ojdavis/Claude\ Code/OrgTree && npm run lint && npm run format:check
 - Manual testing across browsers
 - Update documentation if needed
 
-**Estimated Total: 12-18 hours**
+### Estimated Total: 12-18 hours
 
 ---
 

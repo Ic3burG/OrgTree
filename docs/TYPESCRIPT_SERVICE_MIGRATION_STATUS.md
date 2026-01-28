@@ -103,6 +103,7 @@ This document tracks the progress of migrating backend service files from JavaSc
 ### Standard TypeScript Service Template
 
 ```typescript
+
 import db from '../db.js';
 import type {
   DatabaseUser, // or DatabaseOrganization, DatabaseDepartment, etc.
@@ -145,6 +146,7 @@ export async function createItem(params: CreateItemParams, userId: string): Prom
     createdAt: item.created_at,
   };
 }
+
 ```
 
 ### Key TypeScript Rules for Services
@@ -152,43 +154,54 @@ export async function createItem(params: CreateItemParams, userId: string): Prom
 1. **All imports must include `.js` extension**:
 
    ```typescript
+
    import db from '../db.js';
    import { someFunction } from './other.service.js';
    import type { DatabaseUser } from '../types/index.js';
+
    ```
 
 2. **Type all function parameters**:
 
    ```typescript
+
    export function myFunction(id: string, options: MyOptions): Promise<Result> {
      // ...
    }
+
    ```
 
 3. **Type all database queries**:
 
    ```typescript
+
    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id) as DatabaseUser | undefined;
    const users = db.prepare('SELECT * FROM users').all() as DatabaseUser[];
+
    ```
 
 4. **Convert SQLite booleans**:
 
    ```typescript
+
    mustChangePassword: Boolean(user.must_change_password); // 0/1 -> boolean
+
    ```
 
 5. **Type errors properly**:
 
    ```typescript
+
    const error = new Error('Message') as AppError;
    error.status = 404;
    throw error;
+
    ```
 
 6. **Define interfaces for complex return types**:
 
    ```typescript
+
    interface SearchResult {
      total: number;
      results: SearchItem[];
@@ -198,6 +211,7 @@ export async function createItem(params: CreateItemParams, userId: string): Prom
    export function search(query: string): SearchResult {
      // ...
    }
+
    ```
 
 ## Current Status Summary
@@ -225,9 +239,11 @@ export async function createItem(params: CreateItemParams, userId: string): Prom
 After completing each service, run:
 
 ```bash
+
 cd server
 npx tsc --noEmit  # Check for TypeScript errors
 npm test          # Run all tests to ensure functionality
+
 ```
 
 ## Common Issues and Solutions

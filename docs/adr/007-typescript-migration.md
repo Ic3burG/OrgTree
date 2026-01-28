@@ -267,7 +267,7 @@ const parentName = department.parent.name;
 const parentName = department.parent?.name ?? 'No parent';
 ```
 
-2. **Implicit any parameters**:
+1. **Implicit any parameters**:
 
 ```typescript
 // Before (JavaScript - no type checking)
@@ -281,7 +281,7 @@ function createDepartment(name: string, parentId: number | null): Department {
 }
 ```
 
-3. **Array methods with wrong types**:
+1. **Array methods with wrong types**:
 
 ```typescript
 // Before (JavaScript - runtime error if filter returns null)
@@ -291,7 +291,7 @@ const ids = departments.map(d => d.id);
 const ids: number[] = departments.map(d => d.id);
 ```
 
-4. **Event handler types**:
+1. **Event handler types**:
 
 ```typescript
 // Before (JavaScript - no autocomplete)
@@ -344,7 +344,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 - Difficult refactoring (fear of breaking changes)
 - No autocomplete for API responses
 
-### After TypeScript
+### Post-Migration Verification
 
 - Compile-time error detection (catch bugs before running)
 - Self-documenting code (types show expected data shapes)

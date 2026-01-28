@@ -450,6 +450,7 @@ Implement "Did you mean?" suggestions for misspellings.
 ### Departments Trigger
 
 ```sql
+
 -- Drop existing triggers
 DROP TRIGGER IF EXISTS departments_fts_insert;
 DROP TRIGGER IF EXISTS departments_fts_delete;
@@ -480,11 +481,13 @@ CREATE TRIGGER departments_fts_update AFTER UPDATE ON departments BEGIN
   SELECT NEW.rowid, NEW.name, NEW.description
   WHERE NEW.deleted_at IS NULL;
 END;
+
 ```
 
 ### People Trigger
 
 ```sql
+
 DROP TRIGGER IF EXISTS people_fts_insert;
 DROP TRIGGER IF EXISTS people_fts_delete;
 DROP TRIGGER IF EXISTS people_fts_update;
@@ -509,6 +512,7 @@ CREATE TRIGGER people_fts_update AFTER UPDATE ON people BEGIN
   SELECT NEW.rowid, NEW.name, NEW.title, NEW.email, NEW.phone
   WHERE NEW.deleted_at IS NULL;
 END;
+
 ```
 
 ---
@@ -518,6 +522,7 @@ END;
 ### Rebuild All FTS Indexes
 
 ```sql
+
 -- Rebuild departments FTS
 INSERT INTO departments_fts(departments_fts) VALUES('rebuild');
 
@@ -537,19 +542,23 @@ WHERE d.is_searchable = 1
   AND d.deleted_at IS NULL
   AND v.deleted_at IS NULL
 GROUP BY v.entity_id, v.entity_type;
+
 ```
 
 ### Optimize FTS Indexes
 
 ```sql
+
 -- Run periodically to optimize storage
 INSERT INTO departments_fts(departments_fts) VALUES('optimize');
 INSERT INTO people_fts(people_fts) VALUES('optimize');
+
 ```
 
 ### Check FTS Integrity
 
 ```sql
+
 -- Check departments sync
 SELECT
   (SELECT COUNT(*) FROM departments WHERE deleted_at IS NULL) as expected,
@@ -559,4 +568,5 @@ SELECT
 SELECT
   (SELECT COUNT(*) FROM people WHERE deleted_at IS NULL) as expected,
   (SELECT COUNT(DISTINCT rowid) FROM people_fts) as actual;
+
 ```

@@ -47,18 +47,18 @@ While the project has made significant strides in test coverage (increasing from
 
 Target the known "zero coverage" or "low coverage" files to ensure safety for infrastructure tasks.
 
-1.  **Backup Service (`server/src/services/backup.service.ts`)** ✅
+1. **Backup Service (`server/src/services/backup.service.ts`)** ✅
     - Test backup creation (file system interaction).
     - Test backup restoration (database locking/swapping).
     - Test retention policy (cleanup of old backups).
     - _Mocking Strategy_: Mock `fs` and `better-sqlite3` backup API.
 
-2.  **Database & Migration Utilities (`server/src/db.ts`)** ✅
+2. **Database & Migration Utilities (`server/src/db.ts`)** ✅
     - Test migration execution logic.
     - Test schema validation helpers.
     - _Note_: Refactored into `db-init.ts` for testability.
 
-3.  **Analytics Service (`server/src/services/analytics.service.ts`)**
+3. **Analytics Service (`server/src/services/analytics.service.ts`)**
     - Ensure data retention policies are tested.
     - Test aggregation queries for dashboards.
 
@@ -66,45 +66,45 @@ Target the known "zero coverage" or "low coverage" files to ensure safety for in
 
 Move beyond simple component rendering tests to testing the "brain" of the frontend.
 
-1.  **Auth Context (`src/contexts/AuthContext.tsx`)** ✅
+1. **Auth Context (`src/contexts/AuthContext.tsx`)** ✅
     - Test session persistence/hydration.
     - Test auto-logout on 401.
     - Test permission helper functions (`canManage`, `isOwner`).
 
-2.  **Socket Integration (`src/contexts/SocketContext.tsx`)** ✅
+2. **Socket Integration (`src/contexts/SocketContext.tsx`)** ✅
     - Test event subscription/unsubscription.
     - Test state updates on incoming events.
     - Test connection/disconnection logic.
 
-3.  **Form Logic & Validation** ✅
+3. **Form Logic & Validation** ✅
     - **Person Form**: Test validation (email, required fields) and custom field integration.
     - **Department Form**: Test circular reference prevention logic and hierarchy filtering.
 
 ### Phase 3: Complex Interactive Components (✅ Completed)
 
-1.  **Organization Map Logic (`src/components/OrgMap.tsx` & helpers)** ✅
+1. **Organization Map Logic (`src/components/OrgMap.tsx` & helpers)** ✅
     - Test layout calculation (Dagre integration) in isolation.
     - Test search result highlighting logic.
     - Test toolbar actions (Expand/Collapse/Layout).
 
-2.  **Search & Navigation UI** ✅
+2. **Search & Navigation UI** ✅
     - **Search Overlay**: Test result display and type filtering.
     - **Hierarchical Selector**: Test keyboard navigation and node expansion.
 
-3.  **Data Import UI (`src/components/admin/ImportModal.tsx`)** ✅
+3. **Data Import UI (`src/components/admin/ImportModal.tsx`)** ✅
     - Test file selection and parsing state transitions.
     - Test error display for malformed files.
     - Test duplicate warning presentations.
 
 ### Phase 4: Integration & Edge Cases (✅ Completed)
 
-1.  **Cascade Delete Scenarios** ✅
+1. **Cascade Delete Scenarios** ✅
     - Verify (via integration test) that deleting a department soft-deletes all descendants and unassigns/soft-deletes people.
 
-2.  **Concurrency** ✅
+2. **Concurrency** ✅
     - Simulate concurrent edits to the same organization in backend tests to verify optimistic locking or last-write-wins behavior (ensure no crashes).
 
-3.  **Large Dataset Performance** ✅
+3. **Large Dataset Performance** ✅
     - Add regression tests for performance-critical endpoints (e.g., `GET /org-map`) to ensure response times remain within limits for known dataset sizes.
 
 ## Success Metrics

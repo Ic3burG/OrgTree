@@ -14,6 +14,24 @@
 - **Update "Last Updated" date**: January 27, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
 
+**Session 44 (January 27, 2026 - Documentation Maintenance)**:
+
+- 🛠️ **DOCUMENTATION MAINTENANCE**: Resolved comprehensive markdown linting issues across the repository
+- ✅ **LINT FIXES**:
+  - Resolved all issues in `docs/adr/018-organization-ownership-transfer.md` (spacing, list markers)
+  - Fixed bare URLs in `docs/adr/README.md` and `PROGRESS.md`
+  - Replaced corrupted Unicode characters and fixed list indentation in `PROGRESS.md`
+  - Standardized `PROGRESS.md` session log formatting for better readability
+  - Fixed fenced code blocks (blanks and language tags), blockquote spacing, and emphasis headings in:
+    - `docs/rfc/advanced-sidebar-ui.md`
+    - `docs/testing/geds-url-import-testing-guide.md`
+    - `docs/DEVELOPMENT.md`
+    - `docs/DOCUMENTATION.md`
+    - `docs/adr/006-fts5-full-text-search.md`
+  - Resolved duplicate headings in `docs/adr/007-typescript-migration.md`
+- 🌑 **CLEANUP**: Removed stale RFC file and verified promotion to ADR-018
+- 🎯 **STATUS**: All critical documentation files now pass `markdownlint` checks (ignoring styling MD013/MD060)
+
 ### Development Preferences
 
 - **Render CLI**: Installed and configured with API key authentication (not using CLI tokens)
@@ -38,12 +56,14 @@
 **Workflow**:
 
 ```bash
+
 # ALWAYS run these before git commit:
 cd server && npm run lint && npm run format:check
 cd .. && npm run lint && npm run format:check
 
 # If format:check fails, auto-fix:
 cd server && npm run format  # or npm run format in root
+
 ```
 
 **Why this matters**: The user should NEVER see lint/format errors after a push. Code quality checks are automated in pre-commit hooks, but they must be run manually during development to catch issues early.
@@ -159,7 +179,7 @@ OrgTree is a comprehensive organizational directory and visualization tool that 
 - ✅ **Real-time collaboration** - Changes sync instantly between users via WebSocket
 - ✅ **Bulk Operations** - Multi-select with batch delete, move, and edit
 
-## 🛠️ Technical Debt & Maintenance
+## ️ Technical Debt & Maintenance
 
 ### Code Quality
 
@@ -188,7 +208,7 @@ For detailed technical debt items, feature plans, and priority recommendations, 
 - Performance testing with larger datasets
 - Development Documentation (Architecture Decision Records)
 
-## 🛠️ Development Environment
+## ️ Development Environment
 
 ### Prerequisites
 
@@ -199,6 +219,7 @@ For detailed technical debt items, feature plans, and priority recommendations, 
 ### Quick Start
 
 ```bash
+
 # Clone repository
 git clone https://github.com/Ic3burG/OrgTree.git
 cd OrgTree
@@ -210,6 +231,7 @@ cd server && npm install && cd ..
 # Start development servers
 npm run dev          # Frontend (http://localhost:5173)
 cd server && npm run dev  # Backend (http://localhost:3001)
+
 ```
 
 ### Key Scripts
@@ -219,7 +241,7 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - `cd server && npm run dev` - Start backend server
 - `git push origin [branch]` - Deploy to GitHub
 
-## �첨 Project Metrics
+## Project Metrics
 
 ### Codebase Statistics
 
@@ -340,11 +362,11 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Production build successful ✅
   - ✅ **COMMITS PUSHED**:
     - `abbfea9` - feat: enhance public links with blue theme and search functionality
-  - �첨 **TECHNICAL APPROACH**:
-    - Chose client-side search over backend API for simplicity and performance
-    - Public links already load all data, making client filtering efficient
-    - No backend changes required, maintaining API security
-    - Scales well for typical organization sizes (hundreds of nodes)
+- 📁 **TECHNICAL APPROACH**:
+  - Chose client-side search over backend API for simplicity and performance
+  - Public links already load all data, making client filtering efficient
+  - No backend changes required, maintaining API security
+  - Scales well for typical organization sizes (hundreds of nodes)
 
 - **Previous Progress (January 26, 2026 - Branch Sync & Documentation Rules)**:
   - ✅ **Synchronized main and develop branches**
@@ -396,11 +418,12 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - ✅ **COMMITS PUSHED**:
     - `c5a2b1e` - feat: implement user discovery and privacy controls
     - `d6f3a4b` - docs: mark completed plans and update roadmap
-  - �첨 **METRICS**:
-    - Backend Tests: 497+ ✅
-    - Frontend Tests: 158+ ✅
-    - Total Tests: 655+ ✅
-    - Zero linting/formatting issues
+
+- 📁 **METRICS**:
+  - Backend Tests: 497+ ✅
+  - Frontend Tests: 158+ ✅
+  - Total Tests: 655+ ✅
+  - Zero linting/formatting issues
 
 - **Test Coverage Expansion - Phase 1 (January 25, 2026)**:
   - 📝 **PLAN CREATED**: `docs/adr/014-test-coverage-expansion.md` detailing 4 phases to reach 80% coverage.
@@ -419,9 +442,9 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `server/src/db-init.ts` (New file - extracted logic)
     - `server/src/db-init.test.ts` (New test)
     - `server/src/db.ts` (Refactored to use init function)
-  - �첨 **METRICS**:
-    - Total Tests: 648 passing (Backend: ~490)
-    - Critical infrastructure (DB, Backup) now fully tested.
+- 📁 **METRICS**:
+  - Total Tests: 648 passing (Backend: ~490)
+  - Critical infrastructure (DB, Backup) now fully tested.
 
 - **Test Coverage Expansion - Phase 2 (January 25, 2026)**:
   - ✅ **FRONTEND CORE LOGIC TESTING**:
@@ -429,12 +452,12 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Created `src/contexts/SocketContext.test.tsx` (7 tests) covering connection, disconnection, and subscriptions.
     - Created `src/components/admin/PersonForm.test.tsx` (6 tests) covering validation and custom fields.
     - Created `src/components/admin/DepartmentForm.test.tsx` (5 tests) covering hierarchy validation and rendering.
-  - 🛠️ **ACCESSIBILITY FIXES**:
-    - Fixed missing `htmlFor`/`id` associations in `DepartmentForm.tsx` identified during testing.
-  - �첨 **METRICS**:
-    - Frontend Tests: 204 passing (up from 176) (+28 tests).
-    - Total Tests: 857 passing.
-    - Achieved robust coverage for React Contexts and complex Forms.
+  - ️ **ACCESSIBILITY FIXES**:
+  - Fixed missing `htmlFor`/`id` associations in `DepartmentForm.tsx` identified during testing.
+- 📁 **METRICS**:
+  - Frontend Tests: 204 passing (up from 176) (+28 tests).
+  - Total Tests: 857 passing.
+  - Achieved robust coverage for React Contexts and complex Forms.
 
 - **Test Coverage Expansion - Phase 3 (January 25, 2026)**:
   - ✅ **COMPLEX INTERACTIVE COMPONENTS TESTING**:
@@ -443,13 +466,13 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Created `src/components/SearchOverlay.test.tsx` (9 tests) for query handling and filtering.
     - Created `src/components/Toolbar.test.tsx` (4 tests) for map action controls.
     - Created `src/components/ui/HierarchicalTreeSelector.test.tsx` (6 tests) covering complex keyboard navigation.
-  - 🛠️ **STABILITY & COMPATIBILITY**:
-    - Resolved `FileReader` mock constructor issues.
-    - Fixed race conditions between `db-init.test.ts` and `discovery.test.ts`.
-  - �첨 **METRICS**:
-    - Frontend Tests: 237 passing (up from 204) (+33 tests).
-    - Total Tests: 892 passing.
-    - Reached high coverage for all critical interactive UI elements.
+  - ️ **STABILITY & COMPATIBILITY**:
+  - Resolved `FileReader` mock constructor issues.
+  - Fixed race conditions between `db-init.test.ts` and `discovery.test.ts`.
+- 📁 **METRICS**:
+  - Frontend Tests: 237 passing (up from 204) (+33 tests).
+  - Total Tests: 892 passing.
+  - Reached high coverage for all critical interactive UI elements.
 
 - **Previous Progress (January 24, 2026 - Phase 5: Frontend Resilience)**:
   - ✅ **Search System Rebuild - Phase 5 Complete** - Frontend resilience implementation
@@ -480,12 +503,12 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `35203bd` - feat(search): add retry logic with exponential backoff to useSearch hook
     - `33aec53` - feat(search): add degraded mode UI indicators to SearchOverlay
     - `2c4634e` - feat(search): implement IndexedDB offline cache for search results
-  - �첨 **METRICS**:
-    - 3 new commits pushed to develop branch
-    - 1 new service file created (searchCache.ts)
-    - All 158 frontend tests passing
-    - Zero linting errors
-    - **Phase 5 Status**: ✅ COMPLETE
+- 📁 **METRICS**:
+  - 3 new commits pushed to develop branch
+  - 1 new service file created (searchCache.ts)
+  - All 158 frontend tests passing
+  - Zero linting errors
+  - **Phase 5 Status**: ✅ COMPLETE
   - 🌑 **SEARCH REBUILD PHASES STATUS**:
     - ✅ Phase 1: Foundation Repair (triggers, FTS population, rebuild utility)
     - ✅ Phase 2: Error Handling (validation, fallback search, error propagation)
@@ -531,32 +554,33 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `src/components/OrgMap.tsx` - Export/Theme tracking
     - `src/components/superuser/MetricsDashboard.tsx` - Dashboard update
   - ✅ **COMMITS PUSHED**: Multiple commits covering full analytics implementation
-  - �첨 **METRICS**:
-    - New Table: `analytics_events`
-    - New API Route: `POST /api/analytics/events`
-    - Dashboard Metric: "Analytics Events"
+
+- 📁 **METRICS**:
+  - New Table: `analytics_events`
+  - New API Route: `POST /api/analytics/events`
+  - Dashboard Metric: "Analytics Events"
 
 - **Previous Progress (January 21, 2026 - Session 60)**:
-  - 🧬 **TEST COVERAGE EXPANSION (PHASE 5 & 6)**
-    - **Frontend Refactoring & Testing**:
-      - Created `useDepartments` and `usePeople` custom hooks to decouple logic from UI.
-      - Refactored `DepartmentManager` and `PersonManager` to use these hooks.
-      - Added comprehensive unit tests for both hooks and integration tests for the manager components.
-      - **Result**: Frontend test count increased to 124 tests.
-    - **Backend Integration Tests**:
-      - Created integration tests for `backup`, `custom-fields`, `departments`, `organizations`, `people`, and `search` routes.
-      - Mocked `audit.service` in backup tests to resolve foreign key constraint failures.
-      - **Result**: Backend test count increased to ~373+ tests.
-    - **Quality Assurance**:
-      - Resolved `no-explicit-any` lint errors in hooks by refining types (used `Partial<T>`)
-      - Fixed `totp.service.test.ts` module resolution error.
-      - Applied Prettier formatting to 9 backend files to fix style warnings.
+  - **TEST COVERAGE EXPANSION (PHASE 5 & 6)**
+  - **Frontend Refactoring & Testing**:
+    - Created `useDepartments` and `usePeople` custom hooks to decouple logic from UI.
+    - Refactored `DepartmentManager` and `PersonManager` to use these hooks.
+    - Added comprehensive unit tests for both hooks and integration tests for the manager components.
+    - **Result**: Frontend test count increased to 124 tests.
+  - **Backend Integration Tests**:
+    - Created integration tests for `backup`, `custom-fields`, `departments`, `organizations`, `people`, and `search` routes.
+    - Mocked `audit.service` in backup tests to resolve foreign key constraint failures.
+    - **Result**: Backend test count increased to ~373+ tests.
+  - **Quality Assurance**:
+    - Resolved `no-explicit-any` lint errors in hooks by refining types (used `Partial<T>`)
+    - Fixed `totp.service.test.ts` module resolution error.
+    - Applied Prettier formatting to 9 backend files to fix style warnings.
   - 📁 **FILES MODIFIED**: ~15+ files (hooks, components, test files)
   - ✅ **COMMITS PUSHED**: Multiple commits covering refactoring, tests, and lint fixes.
-  - �첨 **METIRCS**:
-    - Backend Tests: 373+ ✅
-    - Frontend Tests: 124 ✅
-    - Total Tests: ~500+ ✅
+- 📁 **METIRCS**:
+  - Backend Tests: 373+ ✅
+  - Frontend Tests: 124 ✅
+  - Total Tests: ~500+ ✅
 
 - **Phase 7: Import/Export & Bulk Operations Coverage (Backend)**
   - **Date**: January 21, 2026
@@ -612,13 +636,13 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `40f3d1c` - docs(ci): add free tier limitations note for staging
     - `5ad7751` - fix(build): include devDependencies in Render build
   - 🌎 **ENVIRONMENTS**:
-    - Staging: https://orgtree-staging.onrender.com ✅ Live
-    - Production: https://orgtree-app.onrender.com ✅ Live
-  - �첨 **TESTING**:
-    - All frontend tests passing ✅
-    - All backend tests passing ✅
-    - CI/CD pipeline verified working ✅
-    - Health checks passing on both environments ✅
+    - Staging: [https://orgtree-staging.onrender.com](https://orgtree-staging.onrender.com) ✅ Live
+    - Production: [https://orgtree-app.onrender.com](https://orgtree-app.onrender.com) ✅ Live
+- 📁 **TESTING**:
+  - All frontend tests passing ✅
+  - All backend tests passing ✅
+  - CI/CD pipeline verified working ✅
+  - Health checks passing on both environments ✅
 
 - **Previous Progress (January 19, 2026 - Session 58)**:
   - ✧ **FEATURE**: Star/Favorite People
@@ -629,9 +653,9 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - **Testing**: Added backend tests for persistence and sorting logic. Verified frontend type safety.
   - 📁 **FILES MODIFIED**: 8+ files across stack (`server/src/db.ts`, `services/people.service.ts`, `types/index.ts`, `PersonForm.tsx`, `OrgMap.tsx`, `PersonRowCard.tsx`, etc.)
   - ✅ **COMMITS PUSHED**: Commit [hash] - "feat: implement star/favorite person feature"
-  - �첨 **TESTING**:
-    - Backend tests passing ✅ (including new star logic)
-    - Frontend type check passing ✅
+- 📁 **TESTING**:
+  - Backend tests passing ✅ (including new star logic)
+  - Frontend type check passing ✅
   - ✧ **FEATURE**: Collapsible Admin Sidebar (Option B)
     - **Implementation**: Added a user-controlled toggle to the admin sidebar with `localStorage` persistence to remember user preference across sessions.
     - **Visual Design**: Switched from simple arrows to modern `PanelLeftClose` and `PanelLeft` icons, matching high-end agent manager interfaces.
@@ -640,10 +664,10 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - **Future-Proofing**: Updated `ROADMAP.md` with advanced sidebar features (resizable sidebar, multi-level collapse).
   - 📁 **FILES MODIFIED**: 2 files (`src/components/admin/AdminLayout.tsx`, `ROADMAP.md`)
   - ✅ **COMMITS PUSHED**: Commit 821e627 - "feat: improve sidebar collapse button with panel icons"
-  - �첨 **TESTING**:
-    - All 110 frontend tests passing ✅
-    - All 403 backend tests passing ✅
-    - Production build successful ✅
+- 📁 **TESTING**:
+  - All 110 frontend tests passing ✅
+  - All 403 backend tests passing ✅
+  - Production build successful ✅
 
 - **Previous Progress (January 16, 2026 - Session 57)**:
   - 🐛 **BUG FIX**: Department Hover Tooltip Links Not Working
@@ -653,11 +677,11 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - **Impact**: Users can now hover over any department's people count, move their mouse into the tooltip, click on any person's name, and be taken directly to the Org Map with that person's department expanded and in focus.
   - 📁 **FILES MODIFIED**: 1 file (`src/components/admin/DepartmentItem.tsx`)
   - ✅ **COMMITS PUSHED**: Commit 3328a32 - "Fix department hover tooltip links"
-  - �첨 **TESTING**:
-    - All 110 frontend tests passing ✅
-    - All 168 backend tests passing ✅
-    - Production build successful ✅
-    - All linters passing (ESLint + Prettier) ✅
+- 📁 **TESTING**:
+  - All 110 frontend tests passing ✅
+  - All 168 backend tests passing ✅
+  - Production build successful ✅
+  - All linters passing (ESLint + Prettier) ✅
 
 - **Previous Progress (January 15, 2026 - Session 56)**:
   - ✧ **FEATURE COMPLETE**: Custom Fields Redesign & Integration
@@ -743,10 +767,10 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Real-time Sync: Socket events for field definition changes (creation, updates, deletion, reordering).
     - Audit Logging: Standardized tracking of all custom field administrative actions.
     - Type Safety: Full TypeScript coverage for custom field interfaces and API methods.
-  - �첨 **VERIFICATION**:
-    - Verified search results correctly highlight matches in custom fields.
-    - Confirmed drag-and-drop reordering persists to backend.
-    - Validated CSV import/export round-trip for custom data.
+- 📁 **VERIFICATION**:
+  - Verified search results correctly highlight matches in custom fields.
+  - Confirmed drag-and-drop reordering persists to backend.
+  - Validated CSV import/export round-trip for custom data.
   - 📁 **FILES MODIFIED/CREATED**: 25+ files
   - ✅ **COMMITS PUSHED**: Multiple commits covering backend and frontend integration
 - **Previous Progress (January 14, 2026 - Session 52)**:
@@ -800,8 +824,8 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - ✅ **BUILD FIX**: Resolved TypeScript error in `usePasskey.ts`
     - Fixed `PasskeyLoginResult` missing `created_at` property required by `User` type.
     - Updated hook to use shared `User` interface from `types/index.ts`.
-  - �첨 **TESTING**:
-    - TypeScript: 0 compilation errors ✅
+- 📁 **TESTING**:
+  - TypeScript: 0 compilation errors ✅
   - 🎉 **DEPLOYMENT**:
     - Verified live on Render (commit 9fe7234)
     - Server startup clean, no errors in logs
@@ -832,11 +856,11 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - QR code setup flow working with backup codes for account recovery
     - Login flow enforces 2FA verification when enabled
     - Complete passwordless authentication stack: Passkeys + 2FA backup
-  - �첨 **TESTING**:
-    - All 423 backend tests passing ✅
-    - All 108 frontend tests passing ✅
-    - All linters passing (ESLint + Prettier) ✅
-    - TypeScript: 0 compilation errors ✅
+- 📁 **TESTING**:
+  - All 423 backend tests passing ✅
+  - All 108 frontend tests passing ✅
+  - All linters passing (ESLint + Prettier) ✅
+  - TypeScript: 0 compilation errors ✅
   - 📁 **FILES MODIFIED**: 2 files
   - ✅ **COMMITTED AND PUSHED**: Commit 0abd2ae
 
@@ -928,15 +952,15 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 📁 **FILES MODIFIED**: 6 files
   - ✅ **COMMITTED AND PUSHED**: Commit da3156e
 
-  - �첨 **SESSION SUMMARY**:
-    - **Features Added**: 1 (Nested Department Dropdowns)
-    - **Bugs Fixed**: 3 (permission errors, dark mode readability, audit log details)
-    - **Tests Added**: 5 new tests for audit formatting
-    - **Total Tests**: 103 → 108 frontend tests
-    - **Files Modified**: 12 files
-    - **Commits**: 4 commits (all pushed to GitHub)
-    - **Code Quality**: All lint/format checks passed before each commit ✅
-    - **CI/CD**: All GitHub Actions passing ✅
+- 📁 **SESSION SUMMARY**:
+  - **Features Added**: 1 (Nested Department Dropdowns)
+  - **Bugs Fixed**: 3 (permission errors, dark mode readability, audit log details)
+  - **Tests Added**: 5 new tests for audit formatting
+  - **Total Tests**: 103 → 108 frontend tests
+  - **Files Modified**: 12 files
+  - **Commits**: 4 commits (all pushed to GitHub)
+  - **Code Quality**: All lint/format checks passed before each commit ✅
+  - **CI/CD**: All GitHub Actions passing ✅
 
   - 💭 **LESSONS LEARNED**:
     - Diagnostic logging is crucial for production debugging
@@ -1007,15 +1031,15 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Documents when to use workspaces vs. separate packages
     - Prevents future regression of this configuration error
     - Committed (commit: 56b5023)
-  - �첨 **VALIDATION**:
-    - All GitHub Actions jobs passing ✅
-      - Lint: 36s
-      - Security Audit: 9s
-      - Test Backend: 29s (423 tests)
-      - Test Frontend: 29s (103 tests)
-      - Build: 35s
-    - Pre-commit and pre-push hooks working ✅
-    - Application deployed and healthy at https://orgtree-app.onrender.com ✅
+- 📁 **VALIDATION**:
+  - All GitHub Actions jobs passing ✅
+    - Lint: 36s
+    - Security Audit: 9s
+    - Test Backend: 29s (423 tests)
+    - Test Frontend: 29s (103 tests)
+    - Build: 35s
+  - Pre-commit and pre-push hooks working ✅
+  - Application deployed and healthy at [https://orgtree-app.onrender.com](https://orgtree-app.onrender.com) ✅
   - 🌑 **IMPACT**:
     - ✅ CI/CD pipeline fully operational
     - ✅ All tests running in both local and CI environments
@@ -1057,12 +1081,12 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `server/src/index.ts` - Restored catch-all route `'/*'` → `'*'` (Express 4 syntax)
     - Committed and deployed (commit: 39148e8)
     - **Result**: Awaiting deployment confirmation ⌛️
-  - �첨 **VALIDATION**:
-    - All 423 backend tests passing ✅
-    - All 103 frontend tests passing ✅
-    - All linters passing (ESLint + Prettier) ✅
-    - GitHub Actions CI/CD both successful ✅
-    - `npm install` successful (8 packages added, 37 removed with Express 4)
+- 📁 **VALIDATION**:
+  - All 423 backend tests passing ✅
+  - All 103 frontend tests passing ✅
+  - All linters passing (ESLint + Prettier) ✅
+  - GitHub Actions CI/CD both successful ✅
+  - `npm install` successful (8 packages added, 37 removed with Express 4)
   - 🌑 **IMPACT**:
     - ✅ Restored working deployment configuration
     - ✅ Application should deploy successfully again
@@ -1126,11 +1150,11 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - Added E2E tests for transfer flow
   - Documented architecture (ADR-018) and API (OpenAPI)
     - **Inline code comments**: Added CRITICAL warnings in org.service.ts explaining OrgMap dependency
-  - �첨 **TESTING**:
-    - All 328 backend tests passing ✅ (+7 validation tests)
-    - All 103 frontend tests passing ✅
-    - Production build successful ✅
-    - All linters passing (ESLint + Prettier) ✅
+- 📁 **TESTING**:
+  - All 328 backend tests passing ✅ (+7 validation tests)
+  - All 103 frontend tests passing ✅
+  - Production build successful ✅
+  - All linters passing (ESLint + Prettier) ✅
   - 🌑 **IMPACT**:
     - ✅ Department hierarchy lines now render correctly
     - ✅ Parent-child relationships visualized properly
@@ -1194,11 +1218,11 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Relaxed backend rate limits in development mode (`authLimiter`) to allow seeding
     - Fixed `package.json` dev script compatibility issue with `tsx` flags
     - Points seed script directly to backend port 3001 for automated reliability
-  - �첨 **FILES MODIFIED/CREATED**:
-    - `server/scripts/seed-via-api.ts` (New) - API-based data generator
-    - `e2e/performance.spec.ts` (Refined) - Playwright benchmark script
-    - `server/src/routes/auth.ts` - Relaxed rate limits for dev
-    - `server/package.json` - Fixed `npm run dev` script
+- 📁 **FILES MODIFIED/CREATED**:
+  - `server/scripts/seed-via-api.ts` (New) - API-based data generator
+  - `e2e/performance.spec.ts` (Refined) - Playwright benchmark script
+  - `server/src/routes/auth.ts` - Relaxed rate limits for dev
+  - `server/package.json` - Fixed `npm run dev` script
   - 🌑 **IMPACT**:
     - Confirmed application scalability for standard-sized organizations (~1000 records)
     - Established repeatable benchmarking infrastructure for future optimizations
@@ -1225,23 +1249,23 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Cascade deletion still works as intended (deletes children with parents)
     - Error messages only shown for truly missing departments
   - 📁 **FILES MODIFIED**: `server/src/services/bulk.service.ts` - Added cascade-aware deletion check (18 lines added)
-  - 🧬 **TEST COVERAGE EXPANSION (PHASE 2 & 3)**:
-    - **Target**: `src/utils` and `src/hooks` directories
-    - **`src/utils` Coverage**:
-      - Statements: 49.68% → **93.03%**
-      - Functions: 36.36% → **89.09%**
-      - Added tests for `layoutEngine.ts`, `csvExport.ts`, `csvImport.ts`, `exportUtils.ts` (mocking jsPDF/html-to-image)
-    - **`src/hooks` Coverage**:
-      - Statements: 13.11% → **65.57%**
-      - Functions: 23.8% → **71.42%**
-      - Added tests for `useSearch.ts` (debouncing), `useRealtimeUpdates.ts` (socket mocking), `usePasskey.ts` (WebAuthn mocking)
-  - 🛠️ **BUILD PROCESS HARDENING**:
-    - **Linting Enforcement**: `npm run build` now runs `npm run lint` and `npm run format:check` _before_ compilation
-    - **Verification**: Confirmed build failures on lint/format errors to prevent technical debt accumulation
-  - �첨 **FILES MODIFIED/CREATED**:
-    - `package.json` - Updated build script
-    - `src/utils/*.test.ts` - 4 new test files
-    - `src/hooks/*.test.ts` - 3 new test files
+  - **TEST COVERAGE EXPANSION (PHASE 2 & 3)**:
+  - **Target**: `src/utils` and `src/hooks` directories
+  - **`src/utils` Coverage**:
+    - Statements: 49.68% → **93.03%**
+    - Functions: 36.36% → **89.09%**
+    - Added tests for `layoutEngine.ts`, `csvExport.ts`, `csvImport.ts`, `exportUtils.ts` (mocking jsPDF/html-to-image)
+  - **`src/hooks` Coverage**:
+    - Statements: 13.11% → **65.57%**
+    - Functions: 23.8% → **71.42%**
+    - Added tests for `useSearch.ts` (debouncing), `useRealtimeUpdates.ts` (socket mocking), `usePasskey.ts` (WebAuthn mocking)
+  - ️ **BUILD PROCESS HARDENING**:
+  - **Linting Enforcement**: `npm run build` now runs `npm run lint` and `npm run format:check` _before_ compilation
+  - **Verification**: Confirmed build failures on lint/format errors to prevent technical debt accumulation
+- 📁 **FILES MODIFIED/CREATED**:
+  - `package.json` - Updated build script
+  - `src/utils/*.test.ts` - 4 new test files
+  - `src/hooks/*.test.ts` - 3 new test files
 
 - **Previous Session (January 11, 2026 - Session 44)**:
   - 🐛 **CRITICAL BUG FIX**: Fixed XML import not extracting full department hierarchy
@@ -1256,17 +1280,17 @@ cd server && npm run dev  # Backend (http://localhost:3001)
   - 📣 **ROOT CAUSE**:
     - Original Node.js script used `xml2js` library which converts element names to properties
     - Browser's DOMParser keeps actual tag names (doesn't convert `<name>` to property)
-    - Comment in original script said "xml2js parses <n> as 'name' property" but this was misleading
-    - XML actually has `<name>` tags, not `<n>` tags
+    - Comment in original script said "xml2js parses `<n>` as 'name' property" but this was misleading
+    - XML actually has `<name>` tags, not `<name>` tags
   - ✅ **TESTING**:
     - Created comprehensive test suite (`src/utils/xmlImport.test.ts`) with 3 tests
     - Tests verify full hierarchy extraction, fallback behavior, and duplicate detection
     - All 62 frontend tests passing ✅ (59 existing + 3 new)
     - All 321 backend tests passing ✅
-  - �첨 **GITHUB METADATA UPDATE**:
-    - Added repository description: "Full-stack organizational directory and visualization platform..."
-    - Added 12 topics: react, nodejs, express, sqlite, typescript, organizational-chart, etc.
-    - Added homepage URL: https://orgtree.onrender.com
+- 📁 **GITHUB METADATA UPDATE**:
+  - Added repository description: "Full-stack organizational directory and visualization platform..."
+  - Added 12 topics: react, nodejs, express, sqlite, typescript, organizational-chart, etc.
+  - Added homepage URL: [https://orgtree.onrender.com](https://orgtree.onrender.com)
   - 🌑 **IMPACT**:
     - GEDS XML imports now create full department hierarchies (6+ levels)
     - Sub-departments correctly imported and organized
@@ -1278,17 +1302,17 @@ cd server && npm run dev  # Backend (http://localhost:3001)
 - **Previous Session (January 11, 2026 - Session 43)**:
   - 🐛 **CRITICAL BUG FIX**: Fixed case-sensitive duplicate detection allowing duplicate records
   - ✅ **ISSUE IDENTIFIED**:
-    - XML/CSV imports could create duplicate people with different email casing (e.g., "john@example.com" vs "John@Example.com")
+    - XML/CSV imports could create duplicate people with different email casing (e.g., `"john@example.com"` vs `"John@Example.com"`)
     - Regular people creation API had NO duplicate checking at all
     - Department and person name comparisons were also case-sensitive
     - SQLite's = operator is case-sensitive by default
   - ✅ **FIXES APPLIED** (2 files):
     - `server/src/routes/import.ts` - Updated all duplicate checks to use `LOWER(TRIM())` for case-insensitive, whitespace-tolerant comparisons
     - `server/src/services/people.service.ts` - Added duplicate detection to `createPerson()` and `updatePerson()` functions (was completely missing)
-  - �첨 **DUPLICATE DETECTION RULES**:
-    - For people with emails: Check email uniqueness within entire organization (case-insensitive)
-    - For people without emails: Check name uniqueness within department (case-insensitive)
-    - For departments: Check name uniqueness within same parent (case-insensitive)
+- 📁 **DUPLICATE DETECTION RULES**:
+  - For people with emails: Check email uniqueness within entire organization (case-insensitive)
+  - For people without emails: Check name uniqueness within department (case-insensitive)
+  - For departments: Check name uniqueness within same parent (case-insensitive)
   - ✅ **TESTING**:
     - All 321 backend tests passing ✅
     - All 59 frontend tests passing ✅
@@ -1313,10 +1337,10 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - `people.service.ts` - Added filter to max sort order query for new person creation
     - `search.service.ts` - Added filters to all FTS5 search queries (departments, people, autocomplete)
     - `org.service.test.ts` - Updated test database schema to include `deleted_at` columns
-  - �첨 **TESTING**:
-    - All 321 backend tests passing ✅
-    - Test schema aligned with production schema
-    - Verified no regressions in existing functionality
+- 📁 **TESTING**:
+  - All 321 backend tests passing ✅
+  - Test schema aligned with production schema
+  - Verified no regressions in existing functionality
   - 🌑 **IMPACT**:
     - Soft-deleted records no longer visible in UI
     - Bulk operations now work correctly
@@ -1339,13 +1363,13 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Confirmed: Build is NOT failing - deployments successful since 16:53 UTC
     - Earlier failures (16:11-16:26) were caused by missing `passkey.ts` file
     - Fixed in commit 37fc894 (already deployed)
-  - �첨 **TESTING**:
-    - All 380 tests passing (321 backend + 59 frontend) ✅
-    - Build successful with 0 TypeScript errors ✅
-    - PDF export functionality verified working with jsPDF 4.0.0
+- 📁 **TESTING**:
+  - All 380 tests passing (321 backend + 59 frontend) ✅
+  - Build successful with 0 TypeScript errors ✅
+  - PDF export functionality verified working with jsPDF 4.0.0
   - 🎉 **DEPLOYMENT**:
     - Commit b872f5d deployed successfully at 20:35:47 UTC
-    - Service live at https://orgtree-app.onrender.com
+    - Service live at [https://orgtree-app.onrender.com](https://orgtree-app.onrender.com)
     - 0 npm vulnerabilities remaining
   - 📁 **FILES MODIFIED** (2 files):
     - `package.json` - Updated jsPDF and react-router versions
@@ -1373,27 +1397,26 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - Added WebAuthn variables to `.env.example`: `RP_NAME`, `RP_ID`, `ORIGIN`
     - Configured local development environment
     - Documented production configuration requirements
-  - 
-D83D� **DEPENDENCIES ADDED**:
-    - Backend: `otplib` (TOTP), `qrcode` (QR generation), `@simplewebauthn/server`, `@simplewebauthn/types`
-    - Frontend: `@simplewebauthn/browser`, `qrcode`, `qrcode.react`
-  - �첨 **FILES MODIFIED/CREATED** (20 files):
-    - **Backend** (10 files): `db.ts`, `index.ts`, `auth.service.ts`, `totp.service.ts` (new), `totp.ts` routes (new), `.env.example`, 4 route files (type fixes), `package.json`
-    - **Frontend** (10 files): `App.tsx`, `LoginPage.tsx`, `SecuritySettingsPage.tsx` (new), `TwoFactorVerification.tsx` (new), `PasskeyPrompt.tsx` (new), `package.json`
-  - �첨 **COVERAGE**:
-    - TypeScript: 0 errors in production code ✅
-    - All authentication flows tested and working
-    - Dark mode support throughout
-  - 🎉 **PRODUCTION READY**: Complete passwordless authentication with 2FA backup
+- 📦 **DEPENDENCIES ADDED**:
+  - Backend: `otplib` (TOTP), `qrcode` (QR generation), `@simplewebauthn/server`, `@simplewebauthn/types`
+  - Frontend: `@simplewebauthn/browser`, `qrcode`, `qrcode.react`
+- 📁 **FILES MODIFIED/CREATED** (20 files):
+  - **Backend** (10 files): `db.ts`, `index.ts`, `auth.service.ts`, `totp.service.ts` (new), `totp.ts` routes (new), `.env.example`, 4 route files (type fixes), `package.json`
+  - **Frontend** (10 files): `App.tsx`, `LoginPage.tsx`, `SecuritySettingsPage.tsx` (new), `TwoFactorVerification.tsx` (new), `PasskeyPrompt.tsx` (new), `package.json`
+- 🎯 **COVERAGE**:
+  - TypeScript: 0 errors in production code ✅
+  - All authentication flows tested and working
+  - Dark mode support throughout
+- 🎉 **PRODUCTION READY**: Complete passwordless authentication with 2FA backup
 
 - **Previous Session (January 10, 2026 - Session 39)**:
   - 🎉 **PHASE 1 COMPLETE**: Backend Route Testing - 13 new test files created
-  - �첨 **TEST COVERAGE EXPANSION**: Added 157 new route tests
-    - Backend tests: 216 → 373 (+157 tests, +73%)
-    - Total test files: 21 passing
-    - Routes with tests: 1 → 14 routes (93% of testable routes)
-  - ✅ **NEW TEST FILES** (13 files created):
-    - `departments.test.ts` (15 tests, 95% coverage)
+- 📁 **TEST COVERAGE EXPANSION**: Added 157 new route tests
+  - Backend tests: 216 → 373 (+157 tests, +73%)
+  - Total test files: 21 passing
+  - Routes with tests: 1 → 14 routes (93% of testable routes)
+- ✅ **NEW TEST FILES** (13 files created):
+  - `departments.test.ts` (15 tests, 95% coverage)
     - `people.test.ts` (17 tests, 96% coverage)
     - `organizations.test.ts` (20 tests, 90% coverage)
     - `search.test.ts` (16 tests, 95% coverage)
@@ -1422,21 +1445,21 @@ D83D� **DEPENDENCIES ADDED**:
 
 - **Previous Session (January 10, 2026 - Session 37)**:
   - ⚠️ **CRITICAL FIX**: Resolved infinite loop causing Organization Map to not load
-  - 🛠️ **Root Cause**: Circular dependency in useCallback hooks
-    - `loadData` depended on `handleToggleExpand`
-    - `handleToggleExpand` depended on `edges`
-    - `loadData` updated `edges` via `setEdges()`
-    - This created an infinite re-render cycle
+  - ️ **Root Cause**: Circular dependency in useCallback hooks
+  - `loadData` depended on `handleToggleExpand`
+  - `handleToggleExpand` depended on `edges`
+  - `loadData` updated `edges` via `setEdges()`
+  - This created an infinite re-render cycle
   - ✅ **Solution Implemented**:
     - Removed `handleToggleExpand` and `handleSelectPerson` from `loadData` dependencies
     - Removed callback injection from all layout functions (`handleToggleExpand`, `handleExpandAll`, `handleCollapseAll`, `handleToggleLayout`)
     - Callbacks now exclusively added via `nodesWithHighlight` useMemo (existing pattern)
     - Memoized real-time update callbacks to prevent unnecessary re-subscriptions
-  - 🛠️ **XML Import Name Format Fix**: Corrected name order in GEDS XML imports
-    - **Issue**: Names were imported as "[Last Name], [First Name]" instead of "[First Name] [Last Name]"
-    - **Root Cause**: Code was using the `fullName` field directly from XML (which is in "Last, First" format)
-    - **Solution**: Always construct name from firstName + lastName fields in correct order
-    - **Impact**: All imported names now display correctly as "First Last"
+  - ️ **XML Import Name Format Fix**: Corrected name order in GEDS XML imports
+  - **Issue**: Names were imported as "[Last Name], [First Name]" instead of "[First Name] [Last Name]"
+  - **Root Cause**: Code was using the `fullName` field directly from XML (which is in "Last, First" format)
+  - **Solution**: Always construct name from firstName + lastName fields in correct order
+  - **Impact**: All imported names now display correctly as "First Last"
   - 🔒 **Duplicate Department Prevention**: Backend now prevents duplicate departments
     - **Issue**: Importing same data twice created duplicate departments
     - **Root Cause**: Backend only checked for duplicate people, not departments
@@ -1444,16 +1467,16 @@ D83D� **DEPENDENCIES ADDED**:
     - **Behavior**: If department exists, reuses existing ID instead of creating duplicate
     - **Metrics**: Tracks `departmentsCreated` vs `departmentsReused` separately
     - **Impact**: Safe to re-import data without creating duplicates
-  - 🛠️ **Bulk Operations UI Refresh Bug**: Fixed bulk operations not refreshing UI
-    - **Issue**: Bulk delete/move/edit showed success dialog but UI didn't refresh - counts stayed same
-    - **Root Cause**: Frontend using wrong API response field names
-      - Code was checking `result.success` (boolean) and `result.failed` instead of `result.deletedCount`, `result.updatedCount`, etc. (numbers)
-      - Condition `if (result.success > 0)` evaluated to `if (true > 0)` = false
-      - This prevented `loadData()` from being called, so UI never refreshed
-    - **Solution**: Updated all bulk operation handlers to use correct field names
-      - PersonManager: `handleBulkDelete`, `handleBulkMove`, `handleBulkEdit`
-      - DepartmentManager: `handleBulkDelete`, `handleBulkEdit`
-    - **Impact**: All bulk operations now correctly refresh the UI after completion
+  - ️ **Bulk Operations UI Refresh Bug**: Fixed bulk operations not refreshing UI
+  - **Issue**: Bulk delete/move/edit showed success dialog but UI didn't refresh - counts stayed same
+  - **Root Cause**: Frontend using wrong API response field names
+    - Code was checking `result.success` (boolean) and `result.failed` instead of `result.deletedCount`, `result.updatedCount`, etc. (numbers)
+    - Condition `if (result.success > 0)` evaluated to `if (true > 0)` = false
+    - This prevented `loadData()` from being called, so UI never refreshed
+  - **Solution**: Updated all bulk operation handlers to use correct field names
+    - PersonManager: `handleBulkDelete`, `handleBulkMove`, `handleBulkEdit`
+    - DepartmentManager: `handleBulkDelete`, `handleBulkEdit`
+  - **Impact**: All bulk operations now correctly refresh the UI after completion
   - 📝 **Files Modified**:
     - `src/components/OrgMap.tsx` - Refactored callback dependency chain
     - `src/utils/xmlImport.ts` - Fixed name construction order
@@ -1482,19 +1505,19 @@ D83D� **DEPENDENCIES ADDED**:
     - Warning UI with amber/yellow color scheme (separate from errors)
     - Shows individual duplicate warnings and summary count
   - ✅ **Import Button Label**: Changed "Import CSV" → "Import Data" to reflect dual-format support
-  - �첨 **Audit Logging for Imports**: All CSV/XML imports now logged in audit trail
-    - Tracks: departments created, people created, people skipped, duplicates found
-    - Action type: `import`, Entity type: `data_import`
-    - Visible in organization audit logs and system audit logs
-    - Easy filtering with `duplicatesFound` boolean flag
+- 📁 **Audit Logging for Imports**: All CSV/XML imports now logged in audit trail
+  - Tracks: departments created, people created, people skipped, duplicates found
+  - Action type: `import`, Entity type: `data_import`
+  - Visible in organization audit logs and system audit logs
+  - Easy filtering with `duplicatesFound` boolean flag
   - 🌙 **ImportModal Dark Mode**: Complete dark mode support for import dialog
-  - �첨 **Files Modified**: 6 files
-    - `src/components/admin/Dashboard.tsx` - Button label
-    - `src/utils/xmlImport.ts` - Duplicate detection
-    - `src/components/admin/ImportModal.tsx` - Warning UI + dark mode
-    - `src/components/admin/AdminLayout.tsx` - Dark mode visibility fixes
-    - `src/components/superuser/SuperuserLayout.tsx` - Dark mode visibility fixes
-    - `server/src/routes/import.ts` - Audit logging
+- 📁 **Files Modified**: 6 files
+  - `src/components/admin/Dashboard.tsx` - Button label
+  - `src/utils/xmlImport.ts` - Duplicate detection
+  - `src/components/admin/ImportModal.tsx` - Warning UI + dark mode
+  - `src/components/admin/AdminLayout.tsx` - Dark mode visibility fixes
+  - `src/components/superuser/SuperuserLayout.tsx` - Dark mode visibility fixes
+  - `server/src/routes/import.ts` - Audit logging
   - ✅ **Quality Metrics**:
     - Frontend: 59 tests passing ✅
     - Backend: 216 tests passing ✅
@@ -1505,7 +1528,7 @@ D83D� **DEPENDENCIES ADDED**:
   - ✅ **Duplicate Prevention**: Backend now checks for existing emails within organization to prevent duplicates (skips if found)
   - ✅ **Frontend Utility**: Native browser-based XML parsing via `DOMParser` (no Node.js dependency)
   - ✅ **UI Updates**: `ImportModal` supports multi-file XML selection and feedback on skipped people
-  - �첨 **Files Modified**: 4 files (`import.ts`, `ImportModal.tsx`, `xmlImport.ts`, `types/index.ts`)
+- 📁 **Files Modified**: 4 files (`import.ts`, `ImportModal.tsx`, `xmlImport.ts`, `types/index.ts`)
   - 📁 **New Artifacts**: `src/utils/xmlImport.ts`, `walkthrough.md`
 - **Previous Progress (January 9, 2026 - Session 33)**:
   - 🌙 **DARK MODE IMPLEMENTATION COMPLETE**: Full dark mode support across entire application
@@ -1526,7 +1549,7 @@ D83D� **DEPENDENCIES ADDED**:
     - Tests: 275 passing ✅
     - Build: Successful ✅
     - Pre-commit/pre-push: All checks passing ✅
-  - �첨 **Files Changed**: 12 files modified (1,357 insertions, 125 deletions)
+- 📁 **Files Changed**: 12 files modified (1,357 insertions, 125 deletions)
   - 🎉 **Deployment**: Pushed to production
 - **Refinement Session (January 9, 2026 - Session 34)**:
   - 🎨 **UX IMPROVEMENTS**: Refined dark mode readability and consistency
@@ -1549,8 +1572,8 @@ D83D� **DEPENDENCIES ADDED**:
     - Tests cover delete, move, edit for people and departments
   - ✅ **Service Layer Testing**: Comprehensive tests for bulk operations with validation and permissions
   - ✅ **Test Patterns**: Database transaction mocking, permission checking, partial failure scenarios
-  - �첨 **Test Statistics**: 195 → 216 backend tests (+21), 12 test files
-  - �첨 **Phase 4 Total**: 275 tests (+21 from Session 31)
+- 📁 **Test Statistics**: 195 → 216 backend tests (+21), 12 test files
+- 📁 **Phase 4 Total**: 275 tests (+21 from Session 31)
 - **Previous Progress (January 9, 2026 - Session 31)**:
   - ✧ **CONTINUED TEST COVERAGE EXPANSION**: Added 44 new tests (all backend)
   - ✅ **Backend Coverage**: 22.11% → 30.55% (+8.44%) - now 195 tests total
@@ -1560,8 +1583,8 @@ D83D� **DEPENDENCIES ADDED**:
     - Invitation service coverage: 0% → 90.42% statements
   - ✅ **Service Layer Testing**: Comprehensive tests for user management and email invitations
   - ✅ **Test Patterns**: Established robust mocking strategies for database operations
-  - �첨 **Test Statistics**: 173 → 195 backend tests (+22), 11 test files
-  - �첨 **Phase 3 Total**: 232 tests (+22 from Session 30)
+- 📁 **Test Statistics**: 173 → 195 backend tests (+22), 11 test files
+- 📁 **Phase 3 Total**: 232 tests (+22 from Session 30)
 - **Previous Progress (January 8, 2026 - Session 30)**:
   - ✧ **MAJOR TEST COVERAGE EXPANSION**: Added 81 new tests (54 backend + 27 frontend)
   - ✅ **Backend Coverage**: 15.72% → 22.11% (+6.39%) - now 151 tests total
@@ -1576,7 +1599,7 @@ D83D� **DEPENDENCIES ADDED**:
     - Utils coverage: 5.55% → 25.75%
   - ✅ **Critical Security Testing**: JWT validation, CSRF protection, token rotation, session management
   - ✅ **Integration Testing**: Installed Supertest for API route testing
-  - �첨 **Test Statistics**: 97 → 151 backend tests, 32 → 59 frontend tests
+- 📁 **Test Statistics**: 97 → 151 backend tests, 32 → 59 frontend tests
 - **Previous Progress (January 8, 2026 - Session 29)**:
   - ✅ **Sentry Instrumentation**: Implemented Node.js `--import` for Sentry v8+ to enable early initialization and automatic Express tracking
   - ✅ **CSS Optimization**: Refactored `index.css` to use Tailwind layers and improved theme config
@@ -1585,7 +1608,7 @@ D83D� **DEPENDENCIES ADDED**:
   - ✅ Updated OpenAPI specification to match the new health check schema
   - ✅ Fixed a missing import in `src/utils/audit.test.ts` discovered during validation
   - ✅ Suggested and implemented four "quick wins" from the ROADMAP.md
-  - 🧬 **Verified backend logic** (all frontend tests passing, backend index.ts types correct)
+  - **Verified backend logic** (all frontend tests passing, backend index.ts types correct)
 
 - **Previous Progress (January 8, 2026)**:
   - ⚠️ **CRITICAL BUG FIX #1**: Fixed departments not displaying in UI
@@ -1620,7 +1643,7 @@ D83D� **DEPENDENCIES ADDED**:
   - ✅ CI/CD Resolution: Diagnosed and fixed formatting issues in new test files
 - **Recent Session Highlights**:
 
-  **January 8, 2026 - Observability: Sentry Express Instrumentation (Session 29)** 🚦🛠️:
+  **January 8, 2026 - Observability: Sentry Express Instrumentation (Session 29)** ️:
   - ✅ **INSTRUMENTATION COMPLETE**: Migrated Sentry setup to the modern `--import` pattern
   - 🔍 **DETAILS**:
     - Created `server/src/instrument.ts` for early-access Sentry initialization
@@ -1628,10 +1651,11 @@ D83D� **DEPENDENCIES ADDED**:
     - Updated `server/package.json` scripts to use the `--import` flag
     - Removed manual Sentry initialization from `index.ts` to allow automatic instrumentation
     - Refactored `sentry.ts` to provide clean re-exports and global error handlers
-  - �첨 **IMPACT**:
-    - Express middleware and routes are now automatically instrumented for performance
-    - Clearer stack traces and error reporting with early-stage initialization
-    - Resolved the "Express not instrumented" warning in production logs
+
+- 📁 **IMPACT**:
+  - Express middleware and routes are now automatically instrumented for performance
+  - Clearer stack traces and error reporting with early-stage initialization
+  - Resolved the "Express not instrumented" warning in production logs
   - 📁 **FILES MODIFIED** (5 files):
     - `server/src/instrument.ts` (new file)
     - `server/src/sentry.ts` (refactored)
@@ -1647,10 +1671,11 @@ D83D� **DEPENDENCIES ADDED**:
     - Removed redundant CSS resets (already handled by Tailwind Preflight)
     - Improved consistency of focus rings, scrollbars, and hover effects
     - Fixed `index.html` main script path (main.jsx → main.tsx)
-  - �첨 **RESULTS**:
-    - Improved Gzip compression (9.09kB → 9.01kB)
-    - Better purging of unused styles through JIT-friendly architecture
-    - Unified theme management via Tailwind config
+
+- 📁 **RESULTS**:
+  - Improved Gzip compression (9.09kB → 9.01kB)
+  - Better purging of unused styles through JIT-friendly architecture
+  - Unified theme management via Tailwind config
   - 📁 **FILES MODIFIED** (4 files):
     - `src/index.css` (refactored)
     - `tailwind.config.js` (theme extensions)
@@ -1680,9 +1705,10 @@ D83D� **DEPENDENCIES ADDED**:
   - 🐛 **BUG FIX**:
     - Discovered missing `afterEach` import in `src/utils/audit.test.ts` during pre-check
     - Fixed the test file to ensure CI/CD remains green
-  - �첨 **VALIDATION**:
-    - Type-checked backend routes
-    - Verified all 129 tests passing
+
+- 📁 **VALIDATION**:
+  - Type-checked backend routes
+  - Verified all 129 tests passing
   - 📁 **FILES MODIFIED** (4 files):
     - `server/src/index.ts` (enhanced endpoint)
     - `server/src/openapi.yaml` (updated schema)
@@ -1708,7 +1734,7 @@ D83D� **DEPENDENCIES ADDED**:
   - 📁 **FILES MODIFIED** (1 file):
     - `ROADMAP.md` (added Sentry instrumentation item)
 
-  **January 8, 2026 - CI Pipeline Unblocked (Session 25 Part 3)** ⚠️🛠️:
+  **January 8, 2026 - CI Pipeline Unblocked (Session 25 Part 3)** ⚠️ ️:
   - 🐛 **CRITICAL CI ISSUE**: GitHub Actions pipeline failing on formatting checks
   - 🔍 **ROOT CAUSE ANALYSIS**:
     - CI format:check step was failing on search.service.test.ts
@@ -1718,11 +1744,12 @@ D83D� **DEPENDENCIES ADDED**:
     - Ran `prettier --write` on search.service.test.ts
     - Fixed 62 lines of formatting inconsistencies
     - Verified formatting checks now pass
-  - �첨 **TESTING**:
-    - All 97 backend tests passing
-    - All 32 frontend tests passing
-    - Production build verified successful
-    - Prettier format:check now passes
+
+- 📁 **TESTING**:
+  - All 97 backend tests passing
+  - All 32 frontend tests passing
+  - Production build verified successful
+  - Prettier format:check now passes
   - 🎉 **DEPLOYMENT**:
     - Pushed commit `f7d98c6` to main branch
     - GitHub Actions CI/CD unblocked
@@ -1748,14 +1775,15 @@ D83D� **DEPENDENCIES ADDED**:
     - Fixed org.service.ts getOrganizationById() people query (3 fields: department_id, sort_order, created_at)
     - Fixed org.service.ts all organization queries (3 fields: created_by_id, created_at, updated_at)
     - Updated org.service.test.ts assertions (createdById → created_by_id)
-  - �첨 **TESTING**:
-    - All 97 backend tests passing
-    - All 32 frontend tests passing
-    - Production build verified successful
+
+- 📁 **TESTING**:
+  - All 97 backend tests passing
+  - All 32 frontend tests passing
+  - Production build verified successful
   - 🎉 **DEPLOYMENT**:
     - Pushed commit `da076d3` to main branch
     - GitHub Actions CI/CD triggered
-    - Deployed to production at <https://orgtree-app.onrender.com>
+    - Deployed to production at <[https://orgtree-app.onrender.com](https://orgtree-app.onrender.com)>
   - 🌑 **IMPACT**:
     - Department hierarchy lines now display correctly
     - Parent-child relationships visualized with smooth arrows
@@ -1766,7 +1794,7 @@ D83D� **DEPENDENCIES ADDED**:
     - `server/src/services/org.service.test.ts` (fixed 1 assertion)
   - 🌑 **PREVENTION**: Complete field naming consistency now achieved across ALL backend services
 
-  **January 8, 2026 - Critical Bug Fix #1: Departments Now Visible (Session 25 Part 1)** ⚠️🛠️:
+  **January 8, 2026 - Critical Bug Fix #1: Departments Now Visible (Session 25 Part 1)** ⚠️ ️:
   - 🐛 **CRITICAL BUG IDENTIFIED**: Departments not visible in Departments tab
   - 🔍 **ROOT CAUSE ANALYSIS**:
     - TypeScript migration (Session 19) introduced field naming mismatch
@@ -1780,14 +1808,12 @@ D83D� **DEPENDENCIES ADDED**:
     - Fixed `people.ts` route type assertion (departmentId → department_id)
     - Updated `department.service.test.ts` field name assertions
     - Updated `people.service.test.ts` field name assertions
-  - �첨 **TESTING**:
-    - All 97 backend tests passing (including updated test assertions)
-    - All 32 frontend tests passing
-    - Production build verified successful
+
+- 📁 **TESTING**: - All 97 backend tests passing (including updated test assertions) - All 32 frontend tests passing - Production build verified successful
   - 🎉 **DEPLOYMENT**:
     - Pushed commit `1732bec` to main branch
     - GitHub Actions CI/CD triggered
-    - Deployed to production at <https://orgtree-app.onrender.com>
+    - Deployed to production at <[https://orgtree-app.onrender.com](https://orgtree-app.onrender.com)>
   - 🌑 **IMPACT**:
     - Departments now display correctly in UI
     - Department creation/update/delete operations restored
@@ -1801,7 +1827,7 @@ D83D� **DEPENDENCIES ADDED**:
     - `server/src/services/people.service.test.ts`
   - 🌑 **LESSON LEARNED**: When migrating to TypeScript, maintain consistency between database schema (snake_case), backend responses, and frontend types to prevent silent parsing failures
 
-  **January 7, 2026 - Code Cleanup, Testing & Compliance (Session 22)** 🗑️🧬⚖️:
+  **January 7, 2026 - Code Cleanup, Testing & Compliance (Session 22)** 🗑️ ⚖️:
   - ✅ **DEAD CODE ELIMINATION**:
     - Removed `src/utils/parseCSVToFlow.ts` (obsolete client-side parsing)
     - Removed `scripts/rename-to-typescript.sh` (one-time migration script)
@@ -1825,7 +1851,7 @@ D83D� **DEPENDENCIES ADDED**:
     - `6b19318 chore: Fix formatting issues in new test files`
     - `[latest] docs: Final session update for January 7`
 
-  **January 7, 2026 - Developer Experience Improvements (Session 21)** 🛠️:
+  **January 7, 2026 - Developer Experience Improvements (Session 21)** ️:
   - ✅ **ROADMAP ITEMS COMPLETE**: All Developer Experience items from ROADMAP.md finished
   - ✅ **DOCKER DEVELOPMENT ENVIRONMENT**:
     ... - **api-types.ts**: Auto-generated types from OpenAPI specification
@@ -1841,20 +1867,21 @@ D83D� **DEPENDENCIES ADDED**:
     - `src/sdk/index.ts` - API client SDK (613 lines)
     - `src/sdk/api-types.ts` - Generated TypeScript types from OpenAPI
     - `LICENSE` - GPL 3.0 license
-  - 
-D83D� **DEPENDENCIES ADDED**:
-    - `openapi-typescript` (devDependency) - Generates types from OpenAPI spec
-  - 🌑 **DEVELOPER EXPERIENCE ROADMAP STATUS**:
-    - ✅ Git Hooks (Husky) - Done January 4, 2026
-    - ✅ Docker Development Environment - Done January 7, 2026
-    - ✅ Contribution Guidelines - Done January 7, 2026
-    - ✅ API Client SDK - Done January 7, 2026
-    - ⌛️ Development Documentation (ADRs) - Remaining item
-  - 🎉 **COMMITS**:
-    - `ede53bc feat: Add Docker development environment`
-    - `67bad3f docs: Add CONTRIBUTING.md with comprehensive guidelines`
-    - `99ece00 feat: Generate TypeScript API SDK from OpenAPI spec`
-    - `7497bf1 docs: Add GPL 3.0 LICENSE file`
+
+- 📦 **DEPENDENCIES ADDED**:
+  - `openapi-typescript` (devDependency) - Generates types from OpenAPI spec
+
+- 🌑 **DEVELOPER EXPERIENCE ROADMAP STATUS**:
+- ✅ Git Hooks (Husky) - Done January 4, 2026
+- ✅ Docker Development Environment - Done January 7, 2026
+- ✅ Contribution Guidelines - Done January 7, 2026
+- ✅ API Client SDK - Done January 7, 2026
+- ⌛️ Development Documentation (ADRs) - Remaining item
+- 🎉 **COMMITS**:
+  - `ede53bc feat: Add Docker development environment`
+  - `67bad3f docs: Add CONTRIBUTING.md with comprehensive guidelines`
+  - `99ece00 feat: Generate TypeScript API SDK from OpenAPI spec`
+  - `7497bf1 docs: Add GPL 3.0 LICENSE file`
 
   **January 7, 2026 - TypeScript Migration Phases 4-8 COMPLETE (Session 19)** 🎉:
   - ✅ **MAJOR MILESTONE**: Complete TypeScript migration with ZERO errors
@@ -1958,13 +1985,14 @@ D83D� **DEPENDENCIES ADDED**:
       - ✅ Production build: Successful (3.17s build time)
       - ✅ Pre-commit hooks: All passing
       - ✅ Pre-push hooks: All passing
-  - �첨 **MIGRATION STATISTICS**:
-    - **Total Errors Fixed**: 950+ TypeScript errors → 0
-    - **Files Migrated**: 93 files (45+ backend, 45+ frontend, 3+ scripts)
-    - **Type Coverage**: 100% (strict mode, no implicit any)
-    - **Lines Changed**: 4,076 insertions, 1,876 deletions
-    - **Commits**: 3 commits (main migration + 2 fixes)
-    - **Time**: ~4 hours (estimated based on agent work)
+
+- 📁 **MIGRATION STATISTICS**:
+  - **Total Errors Fixed**: 950+ TypeScript errors → 0
+  - **Files Migrated**: 93 files (45+ backend, 45+ frontend, 3+ scripts)
+  - **Type Coverage**: 100% (strict mode, no implicit any)
+  - **Lines Changed**: 4,076 insertions, 1,876 deletions
+  - **Commits**: 3 commits (main migration + 2 fixes)
+  - **Time**: ~4 hours (estimated based on agent work)
   - 🌑 **KEY TECHNICAL PATTERNS ESTABLISHED**:
     - **Backend**: All imports use `.js` extensions for ES modules
     - **Express**: Route handlers return `Promise<void>`, not data types
@@ -2041,11 +2069,10 @@ D83D� **DEPENDENCIES ADDED**:
       - Operations: BulkOperationResult, CSVImportResult, AuditLog, Session
     - **Backend Types** (`server/src/types/index.ts`): 30+ interfaces and types
       - Express extensions: AuthRequest (adds user to Request)
-      - Database types: All Database* interfaces for SQLite results (handles 0/1 booleans)
+      - Database types: All Database\* interfaces for SQLite results (handles 0/1 booleans)
       - Service return types: CreateUserResult, LoginResult, RefreshResult, OrgAccessCheck
       - JWT & Auth: JWTPayload, SocketUser, CSRFTokenData
       - Custom error: AppError class with status codes
       - Utility types: WithRequired, WithOptional, SQLiteBoolean
       - Re-exports: All shared types for backend convenience
     - **Global Declarations**:
-

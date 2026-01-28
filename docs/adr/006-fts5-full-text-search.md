@@ -39,6 +39,7 @@ Chosen option: **SQLite FTS5**, because it's built into SQLite, provides product
 **Schema** (`server/src/db.js`):
 
 ```sql
+
 -- Virtual FTS5 tables (no data storage, just indexes)
 CREATE VIRTUAL TABLE departments_fts USING fts5(
   name,
@@ -68,11 +69,13 @@ CREATE TRIGGER departments_au AFTER UPDATE ON departments BEGIN
   SET name = new.name
   WHERE rowid = old.id;
 END;
+
 ```
 
 **Search Query** (`server/src/services/search.service.ts`):
 
 ```typescript
+
 // FTS5 MATCH query with BM25 ranking
 const results = db
   .prepare(
@@ -80,7 +83,7 @@ const results = db
   SELECT
     d.id,
     d.name,
-    snippet(departments_fts, 0, '<mark>', '</mark>', '...', 32) as highlight,
+    snippet(departments_fts, 0, '`<mark>`', '`</mark>`', '...', 32) as highlight,
     bm25(departments_fts) as rank
   FROM departments_fts
   JOIN departments d ON d.id = departments_fts.rowid
@@ -92,6 +95,7 @@ const results = db
 `
   )
   .all(query, orgId);
+
 ```
 
 **Features**:
@@ -241,27 +245,35 @@ FTS5 supports advanced query operators:
 **Basic**:
 
 ```sql
+
 WHERE departments_fts MATCH 'sales'  -- Single word
 WHERE departments_fts MATCH 'sales department'  -- Multiple words (AND)
+
 ```
 
 **Prefix**:
 
 ```sql
+
 WHERE departments_fts MATCH 'sal*'  -- Matches "sales", "salary", "salesperson"
+
 ```
 
 **Phrases**:
 
 ```sql
+
 WHERE departments_fts MATCH '"human resources"'  -- Exact phrase
+
 ```
 
 **Boolean**:
 
 ```sql
+
 WHERE departments_fts MATCH 'sales OR marketing'  -- Either word
 WHERE departments_fts MATCH 'sales NOT department'  -- Exclude word
+
 ```
 
 OrgTree currently uses basic queries (tokenized words with AND logic).
@@ -271,6 +283,7 @@ OrgTree currently uses basic queries (tokenized words with AND logic).
 **Automatic synchronization via triggers**:
 
 ```sql
+
 -- On INSERT
 CREATE TRIGGER departments_ai AFTER INSERT ON departments BEGIN
   INSERT INTO departments_fts(rowid, name) VALUES (new.id, new.name);
@@ -286,6 +299,7 @@ CREATE TRIGGER departments_ad AFTER UPDATE ON departments
 WHEN new.deleted_at IS NOT NULL BEGIN
   DELETE FROM departments_fts WHERE rowid = old.id;
 END;
+
 ```
 
 **Transaction safety**:
@@ -301,12 +315,14 @@ END;
 **Example**:
 
 ```sql
-snippet(departments_fts, 0, '<mark>', '</mark>', '...', 32)
+
+snippet(departments_fts, 0, '`<mark>`', '`</mark>`', '...', 32)
+
 ```
 
 **Input**: "Senior Software Engineering Manager"
 **Query**: "engineer"
-**Output**: "Senior Software <mark>Engineering</mark> Manager"
+**Output**: "Senior Software `<mark>`Engineering`</mark>` Manager"
 
 **Security**: HTML tags are escaped in search.service.ts to prevent XSS.
 

@@ -29,7 +29,9 @@ Before deploying, ensure you have:
 ### Generate Secure JWT Secret
 
 ```bash
+
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+
 ```
 
 Save this 128-character string - you'll need it for environment variables.
@@ -54,9 +56,11 @@ Ensure these files exist in your repository:
 #### 1.2 Commit and Push
 
 ```bash
+
 git add .
 git commit -m "Production-ready build"
 git push origin main
+
 ```
 
 ---
@@ -145,25 +149,31 @@ After first deployment, initialize the database schema:
 The database should auto-initialize when the server starts (migrations run automatically in `db.js`). Verify:
 
 ```bash
+
 ls -la /opt/render/project/src/data/
 # Should show production.db
+
 ```
 
 #### 3.3 Check Health
 
 ```bash
+
 curl http://localhost:3001/api/health
+
 ```
 
 Expected response:
 
 ```json
+
 {
   "status": "ok",
   "timestamp": "2025-01-17T...",
   "database": "connected",
   "environment": "production"
 }
+
 ```
 
 ---
@@ -175,17 +185,21 @@ Create an admin user via API:
 **From your local machine:**
 
 ```bash
+
 curl -X POST https://orgtree-app.onrender.com/api/auth/signup \
   -H "Content-Type: application/json" \
   -d '{"name":"Admin User","email":"admin@yourcompany.com","password":"secure_password_123"}'
+
 ```
 
 **From Render Shell:**
 
 ```bash
+
 curl -X POST http://localhost:3001/api/auth/signup \
   -H "Content-Type: application/json" \
   -d '{"name":"Admin User","email":"admin@yourcompany.com","password":"secure_password_123"}'
+
 ```
 
 **Important**:
@@ -277,7 +291,9 @@ Render automatically monitors `/api/health` endpoint:
 Manual health check:
 
 ```bash
+
 curl https://orgtree-app.onrender.com/api/health
+
 ```
 
 ### View Logs
@@ -287,6 +303,7 @@ curl https://orgtree-app.onrender.com/api/health
 **Structured logs** (JSON in production):
 
 ```json
+
 {
   "timestamp": "2025-01-17T10:30:00.000Z",
   "level": "info",
@@ -294,11 +311,13 @@ curl https://orgtree-app.onrender.com/api/health
   "port": 3001,
   "environment": "production"
 }
+
 ```
 
 **Error logs**:
 
 ```json
+
 {
   "timestamp": "2025-01-17T10:30:05.000Z",
   "level": "error",
@@ -307,6 +326,7 @@ curl https://orgtree-app.onrender.com/api/health
   "path": "/api/organizations",
   "method": "GET"
 }
+
 ```
 
 ### Performance Metrics
@@ -326,6 +346,7 @@ Render Dashboard → Metrics tab shows:
 Via Render Shell:
 
 ```bash
+
 # Navigate to data directory
 cd /opt/render/project/src/data
 
@@ -336,6 +357,7 @@ sqlite3 production.db ".backup backup-$(date +%Y%m%d).db"
 gzip backup-*.db
 
 # Download via Render file browser
+
 ```
 
 #### Automated Backups (Recommended)
@@ -345,6 +367,7 @@ Use an external service to hit a backup endpoint:
 1. Create backup endpoint (add to `server/src/index.js`):
 
 ```javascript
+
 app.post('/api/admin/backup', authenticateToken, async (req, res) => {
   // Check if user is admin
   if (req.user.role !== 'admin') {
@@ -359,9 +382,10 @@ app.post('/api/admin/backup', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'Backup failed', error: error.message });
   }
 });
+
 ```
 
-2. Schedule via [cron-job.org](https://cron-job.org) (free):
+1. Schedule via [cron-job.org](https://cron-job.org) (free):
    - Daily at 2 AM
    - POST to `https://orgtree-app.onrender.com/api/admin/backup`
    - With Authorization header
@@ -392,25 +416,33 @@ Use [UptimeRobot](https://uptimerobot.com) (free tier):
 
 1. **Missing environment variables**
 
-   ```
+   ```texttext
+
    Error: FATAL: JWT_SECRET environment variable is required
+
    ```
 
    → Check all env vars are set in Render dashboard
 
 2. **Database connection failed**
 
-   ```
+   ```texttext
+
    Error: FATAL: Missing database tables
+
    ```
 
    → Ensure persistent disk is mounted at correct path
    → Run migrations via Shell
 
 3. **Build failed**
-   ```
+
+   ```texttext
+
    Error: Cannot find module
+
    ```
+
    → Ensure `npm install` completed successfully
    → Check build logs for dependency errors
 
@@ -492,14 +524,18 @@ When you outgrow SQLite:
 2. **Update database configuration**:
 
    ```javascript
+
    // Replace better-sqlite3 with pg
    npm install pg
+
    ```
 
 3. **Update DATABASE_URL**:
 
-   ```
+   ```texttext
+
    postgresql://user:pass@host:5432/orgtree
+
    ```
 
 4. **Migrate data**:
@@ -612,6 +648,7 @@ Includes:
 Similar to Render, slightly different pricing:
 
 ```bash
+
 # Install Railway CLI
 npm install -g railway
 
@@ -625,6 +662,7 @@ railway variables set JWT_SECRET=<your-secret>
 
 # Deploy
 railway up
+
 ```
 
 Cost: $5/month base + usage (~$2-5/month for small scale)
@@ -636,6 +674,7 @@ Self-hosted option:
 1. **Create Dockerfile** (in project root):
 
 ```dockerfile
+
 FROM node:18-alpine
 
 WORKDIR /app
@@ -655,20 +694,23 @@ WORKDIR /app/server
 EXPOSE 3001
 
 CMD ["npm", "start"]
+
 ```
 
-2. **Build and run**:
+1. **Build and run**:
 
 ```bash
+
 docker build -t orgtree .
 docker run -p 3001:3001 \
   -e NODE_ENV=production \
   -e JWT_SECRET=<secret> \
   -v orgtree-data:/app/server/data \
   orgtree
+
 ```
 
-3. **Deploy to VPS**: Use DigitalOcean, Linode, or AWS EC2
+1. **Deploy to VPS**: Use DigitalOcean, Linode, or AWS EC2
 
 Cost: $5-10/month for VPS
 

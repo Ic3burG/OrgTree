@@ -42,6 +42,7 @@ Add a vibrant rainbow color theme to the Org Map that cycles through rainbow col
 Add rainbow theme to the `themes` object:
 
 ```typescript
+
 const themes: Record<string, Theme> = {
   // ... existing themes
   rainbow: {
@@ -70,11 +71,13 @@ const themes: Record<string, Theme> = {
     swatch: '#dc2626', // Red swatch for theme picker
   },
 };
+
 ```
 
 **Alternative Rainbow Palette** (More Vibrant):
 
 ```typescript
+
 rainbow: {
   name: 'Rainbow',
   colors: [
@@ -88,6 +91,7 @@ rainbow: {
   ],
   swatch: '#ef4444',
 },
+
 ```
 
 #### 2. Update `getDepthColors` Function
@@ -95,17 +99,20 @@ rainbow: {
 The existing function already handles cycling through colors:
 
 ```typescript
+
 export function getDepthColors(depth: number, themeName: string = 'slate'): ColorConfig {
   const theme = themes[themeName] || themes['slate'];
   const safeDepth = Math.max(0, depth || 0);
   const index = Math.min(safeDepth, theme.colors.length - 1);
   return theme.colors[index];
 }
+
 ```
 
 For rainbow theme with cycling:
 
 ```typescript
+
 export function getDepthColors(depth: number, themeName: string = 'slate'): ColorConfig {
   const theme = themes[themeName] || themes['slate'];
   const safeDepth = Math.max(0, depth || 0);
@@ -120,13 +127,15 @@ export function getDepthColors(depth: number, themeName: string = 'slate'): Colo
   const index = Math.min(safeDepth, theme.colors.length - 1);
   return theme.colors[index];
 }
+
 ```
 
 ### Visual Design
 
 **Rainbow Theme Appearance**:
 
-```text
+```texttext
+
 Level 0 (CEO)           → Red
   ├─ Level 1 (VP)       → Orange
   │   ├─ Level 2 (Dir)  → Yellow
@@ -139,6 +148,7 @@ Level 0 (CEO)           → Red
                   └─ Level 5 → Indigo
                       └─ Level 6 → Violet
                           └─ Level 7 → Red (cycles)
+
 ```
 
 ### Testing Strategy
@@ -150,6 +160,7 @@ Level 0 (CEO)           → Red
 Add test cases for rainbow theme:
 
 ```typescript
+
 describe('Rainbow Theme', () => {
   it('should return rainbow colors for each depth', () => {
     expect(getDepthColors(0, 'rainbow').hex).toBe('#dc2626'); // Red
@@ -174,13 +185,16 @@ describe('Rainbow Theme', () => {
     expect(rainbow?.name).toBe('Rainbow');
   });
 });
+
 ```
 
 **Run Command**:
 
 ```bash
+
 cd /Users/ojdavis/Claude\ Code/OrgTree
 npm test -- src/utils/colors.test.ts
+
 ```
 
 #### Manual Testing
@@ -188,8 +202,10 @@ npm test -- src/utils/colors.test.ts
 1. **Setup**:
 
    ```bash
+
    npm run dev
    # Navigate to org map
+
    ```
 
 2. **Test Rainbow Theme**:
@@ -229,6 +245,7 @@ npm test -- src/utils/colors.test.ts
 **Option 1: Pastel Rainbow** (Softer colors):
 
 ```typescript
+
 colors: [
   { bg: 'bg-red-400', hex: '#f87171', text: 'text-red-900', hover: 'hover:bg-red-300' },
   { bg: 'bg-orange-300', hex: '#fdba74', text: 'text-orange-900', hover: 'hover:bg-orange-200' },
@@ -238,11 +255,13 @@ colors: [
   { bg: 'bg-indigo-400', hex: '#818cf8', text: 'text-indigo-900', hover: 'hover:bg-indigo-300' },
   { bg: 'bg-purple-400', hex: '#c084fc', text: 'text-purple-900', hover: 'hover:bg-purple-300' },
 ],
+
 ```
 
 **Option 2: Neon Rainbow** (High saturation):
 
 ```typescript
+
 colors: [
   { bg: 'bg-red-600', hex: '#dc2626', text: 'text-white', hover: 'hover:bg-red-500' },
   { bg: 'bg-orange-600', hex: '#ea580c', text: 'text-white', hover: 'hover:bg-orange-500' },
@@ -252,6 +271,7 @@ colors: [
   { bg: 'bg-indigo-600', hex: '#4f46e5', text: 'text-white', hover: 'hover:bg-indigo-500' },
   { bg: 'bg-fuchsia-600', hex: '#c026d3', text: 'text-white', hover: 'hover:bg-fuchsia-500' },
 ],
+
 ```
 
 ## Success Metrics
