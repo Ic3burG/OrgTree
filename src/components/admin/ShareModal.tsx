@@ -103,10 +103,14 @@ export default function ShareModal({
             userName: response.owner.userName,
             userEmail: response.owner.userEmail,
           } as OrgMemberWithDetails);
+
+          // Filter owner out of members list to avoid duplication
+          // The backend returns all members including the owner
+          setMembers((response.members || []).filter(member => member.role !== 'owner'));
         } else {
           setOwner(null);
+          setMembers(response.members || []);
         }
-        setMembers(response.members || []);
       } catch (err) {
         console.error('Failed to load members:', err);
         if (showLoading) toast.error('Failed to load members');
