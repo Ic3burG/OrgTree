@@ -1,4 +1,4 @@
-# RFC: Security Audit Phase 2
+# RFC: Security Audit Phase 2 (COMPLETED)
 
 ## Context
 

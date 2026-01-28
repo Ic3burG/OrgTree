@@ -176,8 +176,94 @@ describe('Auth Service', () => {
       );
 
       const user: User = await getUserById(created.id);
-
       expect(user).not.toHaveProperty('password_hash');
+    });
+  });
+
+  describe('refresh token functions', () => {
+    let testUserId: string;
+    let testToken: string;
+
+    beforeEach(async () => {
+      const result = await createUser('Refresh Test', 'refresh@example.com', 'password123');
+      testUserId = result.user.id;
+      testToken = result.refreshToken;
+    });
+
+    it('validateRefreshToken should return user data for valid token', () => {
+      const data = import('./auth.service.js').then(m => m.validateRefreshToken(testToken));
+      return data.then(d => {
+        expect(d).not.toBeNull();
+        expect(d?.userId).toBe(testUserId);
+      });
+    });
+
+    it('validateRefreshToken should return null for invalid token', async () => {
+      const { validateRefreshToken } = await import('./auth.service.js');
+      expect(validateRefreshToken('invalid-token')).toBeNull();
+    });
+
+    it('revokeRefreshToken should revoke a token', async () => {
+      const { revokeRefreshToken, validateRefreshToken } = await import('./auth.service.js');
+      const result = revokeRefreshToken(testToken);
+      expect(result).toBe(true);
+      expect(validateRefreshToken(testToken)).toBeNull();
+    });
+
+    it('rotateRefreshToken should issue new tokens and revoke old', async () => {
+      const { rotateRefreshToken, validateRefreshToken } = await import('./auth.service.js');
+      const result = rotateRefreshToken(testToken);
+      expect(result).not.toBeNull();
+      expect(result?.refreshToken).not.toBe(testToken);
+      expect(validateRefreshToken(testToken)).toBeNull();
+    });
+  });
+
+  describe('session management', () => {
+    let testUserId: string;
+    let testToken: string;
+
+    beforeEach(async () => {
+      const result = await createUser('Session Test', 'session@example.com', 'password123');
+      testUserId = result.user.id;
+      testToken = result.refreshToken;
+    });
+
+    it('getUserSessions should return all active sessions', async () => {
+      const { getUserSessions, storeRefreshToken } = await import('./auth.service.js');
+      storeRefreshToken(testUserId, 'additional-token', { userAgent: 'Other Device' });
+
+      const sessions = getUserSessions(testUserId);
+      expect(sessions).toHaveLength(2);
+    });
+
+    it('revokeOtherSessions should revoke all but current', async () => {
+      const { revokeOtherSessions, getUserSessions, storeRefreshToken } =
+        await import('./auth.service.js');
+      storeRefreshToken(testUserId, 'other-token');
+
+      const count = revokeOtherSessions(testUserId, testToken);
+      expect(count).toBe(1);
+
+      const sessions = getUserSessions(testUserId);
+      expect(sessions).toHaveLength(1);
+    });
+
+    it('cleanupExpiredTokens should remove old tokens', async () => {
+      const { cleanupExpiredTokens } = await import('./auth.service.js');
+
+      // Manually insert an expired token
+      (db as DatabaseType)
+        .prepare(
+          `
+        INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at)
+        VALUES ('expired-1', ?, 'expired-hash', datetime('now', '-1 day'))
+      `
+        )
+        .run(testUserId);
+
+      const count = cleanupExpiredTokens();
+      expect(count).toBeGreaterThan(0);
     });
   });
 });

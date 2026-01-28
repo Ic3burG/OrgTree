@@ -22,11 +22,10 @@ ADRs document significant architectural decisions that have been finalized and i
 
 RFCs are proposals for new features or significant changes that are currently under discussion or in progress.
 
-| Title                                                     | Status      | Priority |
-| --------------------------------------------------------- | ----------- | -------- |
-| [Advanced Sidebar UI](./rfc/advanced-sidebar-ui.md)       | 📋 Planned  | Medium   |
-| [Search Enhancements](./rfc/search-enhancements.md)       | 📋 Planned  | Medium   |
-| [Security Audit Phase 2](./rfc/security-audit-phase-2.md) | 💡 Proposed | High     |
+| Title                                               | Status     | Priority |
+| --------------------------------------------------- | ---------- | -------- |
+| [Advanced Sidebar UI](./rfc/advanced-sidebar-ui.md) | 📋 Planned | Medium   |
+| [Search Enhancements](./rfc/search-enhancements.md) | 📋 Planned | Medium   |
 
 ## [Security Documentation](./security/)
 
@@ -35,6 +34,7 @@ Contains audit reports, security RFCs, and guidelines.
 - [Security Overview & Audits](./security/README.md)
 - [Audit Phase 1 (Jan 2026)](./security/audit-phase-1-report.md)
 - [Audit Phase 2 (Jan 2026)](./security/audit-phase-2-report.md)
+- [Audit Phase 2 RFC (Jan 2026)](./security/audit-phase-2-rfc.md)
 
 ---
 

@@ -341,4 +341,120 @@ describe('Ownership Transfer Service', () => {
       }).toThrow('Only the initiator or an Organization Owner');
     });
   });
+
+  describe('getTransferById', () => {
+    it('should return transfer details if authorized (involved party)', () => {
+      const mockResult = {
+        id: mockTransferId,
+        organization_id: mockOrgId,
+        from_user_id: mockOwnerId,
+        to_user_id: mockMemberId,
+        status: 'pending',
+        initiated_at: mockNow,
+        expires_at: mockNow + 1000,
+        from_user_name: 'Owner',
+        from_user_email: 'owner@example.com',
+        to_user_name: 'Member',
+        to_user_email: 'member@example.com',
+        organization_name: 'Test Org',
+      };
+
+      (db.prepare as any).mockReturnValue({ get: () => mockResult });
+      (checkOrgAccess as any).mockReturnValue({ role: 'viewer', isOwner: false });
+
+      const result = ownershipService.getTransferById(mockTransferId, mockOwnerId);
+      expect(result.id).toBe(mockTransferId);
+      expect(result.from_user_name).toBe('Owner');
+    });
+
+    it('should return transfer details if authorized (org admin)', () => {
+      const mockResult = {
+        id: mockTransferId,
+        organization_id: mockOrgId,
+        from_user_id: 'other-user',
+        to_user_id: mockMemberId,
+        status: 'pending',
+      };
+
+      (db.prepare as any).mockReturnValue({ get: () => mockResult });
+      // User is not involved but is admin of the org
+      (checkOrgAccess as any).mockReturnValue({ role: 'admin', isOwner: false });
+
+      const result = ownershipService.getTransferById(mockTransferId, 'admin-user');
+      expect(result).toBeDefined();
+    });
+
+    it('should throw 403 if user is not authorized to view', () => {
+      const mockResult = {
+        id: mockTransferId,
+        organization_id: mockOrgId,
+        from_user_id: mockOwnerId,
+        to_user_id: mockMemberId,
+        status: 'pending',
+      };
+
+      (db.prepare as any).mockReturnValue({ get: () => mockResult });
+      // User is not involved and only a viewer (or not in org at all)
+      (checkOrgAccess as any).mockReturnValue({ role: 'viewer', isOwner: false });
+
+      expect(() => {
+        ownershipService.getTransferById(mockTransferId, 'random-user');
+      }).toThrow('Insufficient permissions');
+    });
+  });
+
+  describe('Race Conditions', () => {
+    it('should prevent multiple concurrent accepts from succeeding', async () => {
+      const mockTransfer = {
+        id: mockTransferId,
+        organization_id: mockOrgId,
+        from_user_id: mockOwnerId,
+        to_user_id: mockMemberId,
+        status: 'pending',
+        expires_at: mockNow + 1000,
+      };
+
+      let callCount = 0;
+      (db.prepare as any).mockImplementation((sql: string) => {
+        if (sql.includes('SELECT * FROM ownership_transfers') && !sql.includes('audit')) {
+          return {
+            get: () => {
+              // Simulate first call seeing pending, subsequent calls seeing accepted
+              const status = callCount === 0 ? 'pending' : 'accepted';
+              callCount++;
+              return { ...mockTransfer, status };
+            },
+          };
+        }
+        return { get: vi.fn(), run: vi.fn() };
+      });
+
+      // First call should succeed
+      ownershipService.acceptTransfer(mockTransferId, mockMemberId);
+
+      // Second call should fail because status is now 'accepted'
+      expect(() => {
+        ownershipService.acceptTransfer(mockTransferId, mockMemberId);
+      }).toThrow('Transfer cannot be accepted. Current status: accepted');
+    });
+
+    it('should prevent initiates when a pending transfer already exists', () => {
+      (checkOrgAccess as any).mockReturnValue({ role: 'owner', isOwner: true });
+      (db.prepare as any).mockImplementation((sql: string) => {
+        if (sql.includes('SELECT id FROM users')) return { get: () => ({ id: mockMemberId }) };
+        if (sql.includes('SELECT id FROM ownership_transfers'))
+          return { get: () => ({ id: 'existing-pending' }) };
+        return { get: vi.fn(), run: vi.fn() };
+      });
+
+      expect(() => {
+        ownershipService.initiateTransfer(
+          mockOrgId,
+          mockOwnerId,
+          mockMemberId,
+          'Valid reason for transfer'
+        );
+      }).toThrow('A pending transfer already exists');
+    });
+  });
 });

@@ -15,7 +15,7 @@ Security audits are conducted in phases. Each report details the vulnerabilities
 
 ## Related Documentation
 
-- **[Security Audit Phase 2 RFC](file:///Users/ojdavis/Claude Code/OrgTree/docs/rfc/security-audit-phase-2.md)** - The planning document for the Phase 2 audit.
+- **[Security Audit Phase 2 RFC](file:///Users/ojdavis/Claude Code/OrgTree/docs/security/audit-phase-2-rfc.md)** - The planning document for the Phase 2 audit.
 - **[Search System Rebuild (ADR-017)](file:///Users/ojdavis/Claude Code/OrgTree/docs/adr/017-search-system-rebuild.md)** - Includes security considerations for the new search infrastructure.
 
 ## Security Practices
