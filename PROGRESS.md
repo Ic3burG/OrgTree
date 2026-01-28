@@ -261,12 +261,15 @@ cd server && npm run dev  # Backend (http://localhost:3001)
     - **Ownership Audit**: Verified atomic handover logic and strict permission boundaries for sensitive actions.
     - **TypeScript Review**: Confirmed zero `as any` or `@ts-ignore` in source files.
   - ✅ **Security Audit Report**: Documented final findings and recommendations in `docs/security/audit-phase-2-report.md`.
+  - ✅ **Documentation Reorganization**: Moved `docs/SECURITY_AUDIT.md` to `docs/security/audit-phase-1-report.md` and created a central `docs/security/README.md` index.
   - 📁 **FILES CREATED**:
     - `docs/security/audit-phase-2-report.md` (Audit Report)
     - `server/src/services/search.security.test.ts` (Security tests)
     - `server/src/services/ownership.security.test.ts` (Security tests)
   - 📁 **FILES MODIFIED**:
     - `server/src/services/search.service.ts` (Exported validators for testing)
+    - `server/src/services/search.security.test.ts` (Fixed lint errors)
+    - `server/src/services/ownership.security.test.ts` (Fixed lint errors)
     - `PROGRESS.md` (This file)
 
 - **Session 45 (January 28, 2026 - Security Audit Phase 2 RFC)**:
