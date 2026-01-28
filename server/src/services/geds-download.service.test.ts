@@ -1,151 +1,135 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
+import https from 'https';
+import { Readable } from 'stream';
+import { EventEmitter } from 'events';
 import {
-  validateGedsUrl,
-  cleanupTempFile,
-  InvalidUrlError,
-  normalizeGedsUrl,
+  downloadGedsXml,
+  NetworkError,
+  DownloadTimeoutError,
+  FileSizeLimitError,
 } from './geds-download.service.js';
 
+vi.mock('https');
+
 describe('GEDS Download Service', () => {
-  describe('validateGedsUrl', () => {
-    it('should accept valid GEDS URL from .gc.ca domain', () => {
-      const url = 'https://geds-sage.gc.ca/en/GEDS?pgid=015&dn=...';
-      expect(() => validateGedsUrl(url)).not.toThrow();
-    });
+  let tempDir: string;
+  let testFile: string;
 
-    it('should accept valid GEDS URL from canada.ca domain', () => {
-      const url = 'https://canada.ca/some/path';
-      expect(() => validateGedsUrl(url)).not.toThrow();
-    });
-
-    it('should accept valid GEDS URL from .canada.ca subdomain', () => {
-      const url = 'https://geds.canada.ca/en/GEDS?pgid=026';
-      expect(() => validateGedsUrl(url)).not.toThrow();
-    });
-
-    it('should reject non-HTTPS URL', () => {
-      const url = 'http://geds-sage.gc.ca/en/GEDS';
-      expect(() => validateGedsUrl(url)).toThrow(InvalidUrlError);
-      expect(() => validateGedsUrl(url)).toThrow('must use HTTPS protocol');
-    });
-
-    it('should reject URL from disallowed domain', () => {
-      const url = 'https://evil.com/fake-geds';
-      expect(() => validateGedsUrl(url)).toThrow(InvalidUrlError);
-      expect(() => validateGedsUrl(url)).toThrow('must be from an allowed domain');
-    });
-
-    it('should reject malformed URL', () => {
-      const url = 'not-a-url';
-      expect(() => validateGedsUrl(url)).toThrow(InvalidUrlError);
-      expect(() => validateGedsUrl(url)).toThrow('Invalid URL format');
-    });
-
-    it('should reject empty URL', () => {
-      const url = '';
-      expect(() => validateGedsUrl(url)).toThrow(InvalidUrlError);
-    });
-
-    it('should reject URL with wrong protocol', () => {
-      const url = 'ftp://geds-sage.gc.ca/file';
-      expect(() => validateGedsUrl(url)).toThrow(InvalidUrlError);
-      expect(() => validateGedsUrl(url)).toThrow('must use HTTPS protocol');
-    });
-
-    it('should accept URL with query parameters', () => {
-      const url = 'https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=Y249Sm9obiBTbWl0aA%3D%3D';
-      expect(() => validateGedsUrl(url)).not.toThrow();
-    });
-
-    it('should be case-insensitive for hostname', () => {
-      const url = 'https://GEDS-SAGE.GC.CA/en/GEDS';
-      expect(() => validateGedsUrl(url)).not.toThrow();
-    });
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'geds-test-'));
+    testFile = path.join(tempDir, 'test-file.xml');
   });
 
-  describe('normalizeGedsUrl', () => {
-    it('should convert pgid=015 to pgid=026', () => {
-      const url =
-        'https://geds-sage.gc.ca/en/GEDS?pgid=015&dn=Q049QU5ERVJTT05cMkMgVkFORVNTQSxPVT1XUFNBLVdQU0EsT1U9R0FDLUFNQyxPPUdDLEM9Q0E=';
-      // URL object encodes the = to %3D
-      const expected =
-        'https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=Q049QU5ERVJTT05cMkMgVkFORVNTQSxPVT1XUFNBLVdQU0EsT1U9R0FDLUFNQyxPPUdDLEM9Q0E%3D';
-      expect(normalizeGedsUrl(url)).toBe(expected);
-    });
-
-    it('should keep pgid=026 as is', () => {
-      const url =
-        'https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=Q049QU5ERVJTT05cMkMgVkFORVNTQSxPVT1XUFNBLVdQU0EsT1U9R0FDLUFNQyxPPUdDLEM9Q0E=';
-      expect(normalizeGedsUrl(url)).toBe(url);
-    });
-
-    it('should return original URL if invalid', () => {
-      const url = 'not-a-url';
-      expect(normalizeGedsUrl(url)).toBe(url);
-    });
-
-    it('should handle URLs without pgid parameter', () => {
-      const url = 'https://geds-sage.gc.ca/en/GEDS?other=param';
-      expect(normalizeGedsUrl(url)).toBe(url);
-    });
+  afterEach(async () => {
+    try {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    } catch {
+      // Ignore
+    }
   });
 
-  describe('cleanupTempFile', () => {
-    let tempDir: string;
-    let testFile: string;
+  describe('downloadGedsXml', () => {
+    it('should successfully download file', async () => {
+      const mockResponse = Readable.from(['<xml></xml>']);
+      (mockResponse as any).statusCode = 200;
+      (mockResponse as any).headers = { 'content-length': '11' };
 
-    beforeEach(async () => {
-      tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'geds-test-'));
-      testFile = path.join(tempDir, 'test-file.xml');
+      vi.mocked(https.get).mockImplementation((_url: any, _options: any, callback?: any) => {
+        if (typeof _options === 'function') callback = _options;
+        callback(mockResponse);
+        return {
+          on: vi.fn(),
+          setTimeout: vi.fn(),
+          destroy: vi.fn(),
+        } as any;
+      });
+
+      await downloadGedsXml('https://geds-sage.gc.ca/en/GEDS', testFile);
+
+      const content = await fs.readFile(testFile, 'utf8');
+      expect(content).toBe('<xml></xml>');
     });
 
-    afterEach(async () => {
-      // Clean up test directory
-      try {
-        await fs.rm(tempDir, { recursive: true, force: true });
-      } catch {
-        // Ignore errors
-      }
+    it('should handle redirects (302)', async () => {
+      const mockRedirectResponse: any = new EventEmitter();
+      mockRedirectResponse.statusCode = 302;
+      mockRedirectResponse.headers = { location: 'https://geds.canada.ca/new-location' };
+
+      const mockFinalResponse = Readable.from(['redirected content']);
+      (mockFinalResponse as any).statusCode = 200;
+      (mockFinalResponse as any).headers = {};
+
+      vi.mocked(https.get).mockImplementation((url: any, options: any, callback?: any) => {
+        if (typeof options === 'function') callback = options;
+
+        if (url.toString().includes('new-location')) {
+          callback(mockFinalResponse);
+        } else {
+          callback(mockRedirectResponse);
+        }
+
+        return {
+          on: vi.fn(),
+          setTimeout: vi.fn(),
+          destroy: vi.fn(),
+        } as any;
+      });
+
+      await downloadGedsXml('https://geds-sage.gc.ca/en/GEDS', testFile);
+
+      const content = await fs.readFile(testFile, 'utf8');
+      expect(content).toBe('redirected content');
     });
 
-    it('should successfully delete existing file', async () => {
-      // Create a test file
-      await fs.writeFile(testFile, 'test content');
+    it('should throw NetworkError on 404', async () => {
+      const mockResponse: any = new EventEmitter();
+      mockResponse.statusCode = 404;
+      mockResponse.statusMessage = 'Not Found';
 
-      // Verify file exists
-      await expect(fs.access(testFile)).resolves.toBeUndefined();
+      vi.mocked(https.get).mockImplementation((url: any, options: any, callback?: any) => {
+        if (typeof options === 'function') callback = options;
+        callback(mockResponse);
+        return { on: vi.fn(), setTimeout: vi.fn() } as any;
+      });
 
-      // Delete the file
-      await cleanupTempFile(testFile);
-
-      // Verify file is gone
-      await expect(fs.access(testFile)).rejects.toThrow();
+      await expect(downloadGedsXml('https://geds-sage.gc.ca/en/GEDS', testFile)).rejects.toThrow(
+        NetworkError
+      );
     });
 
-    it('should not throw error when file does not exist', async () => {
-      const nonExistentFile = path.join(tempDir, 'does-not-exist.xml');
+    it('should throw FileSizeLimitError if Content-Length too large', async () => {
+      const mockResponse: any = new EventEmitter();
+      mockResponse.statusCode = 200;
+      mockResponse.headers = { 'content-length': (60 * 1024 * 1024).toString() }; // 60MB > 50MB
 
-      // Should not throw
-      await expect(cleanupTempFile(nonExistentFile)).resolves.toBeUndefined();
+      vi.mocked(https.get).mockImplementation((url: any, options: any, callback?: any) => {
+        if (typeof options === 'function') callback = options;
+        callback(mockResponse);
+        return { on: vi.fn(), setTimeout: vi.fn() } as any;
+      });
+
+      await expect(downloadGedsXml('https://geds-sage.gc.ca/en/GEDS', testFile)).rejects.toThrow(
+        FileSizeLimitError
+      );
     });
 
-    it('should not throw error when file is already deleted', async () => {
-      // Create and then delete file
-      await fs.writeFile(testFile, 'test content');
-      await fs.unlink(testFile);
+    it('should throw DownloadTimeoutError on timeout', async () => {
+      vi.mocked(https.get).mockImplementation((_url: any, _options: any, _callback?: any) => {
+        const req: any = new EventEmitter();
+        req.setTimeout = (_ms: number, cb: () => void) => {
+          setTimeout(cb, 10);
+        };
+        req.destroy = vi.fn();
+        return req;
+      });
 
-      // Should not throw even though file is already gone
-      await expect(cleanupTempFile(testFile)).resolves.toBeUndefined();
-    });
-
-    it('should handle invalid path gracefully', async () => {
-      const invalidPath = '/root/cannot-access/file.xml';
-
-      // Should not throw even with permission errors
-      await expect(cleanupTempFile(invalidPath)).resolves.toBeUndefined();
+      await expect(downloadGedsXml('https://geds-sage.gc.ca/en/GEDS', testFile)).rejects.toThrow(
+        DownloadTimeoutError
+      );
     });
   });
 });

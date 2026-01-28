@@ -97,7 +97,7 @@ export interface SavedSearch {
 /**
  * Validate FTS query for common issues that cause syntax errors
  */
-function validateFtsQuery(query: string): { valid: boolean; error?: string } {
+export function validateFtsQuery(query: string): { valid: boolean; error?: string } {
   if (!query || query.trim().length === 0) {
     return { valid: true };
   }
@@ -142,7 +142,7 @@ function validateFtsQuery(query: string): { valid: boolean; error?: string } {
 /**
  * Build FTS query from simple search string
  */
-function buildFtsQuery(query: string): string {
+export function buildFtsQuery(query: string): string {
   if (!query) return '';
   // Split into tokens, escape, and add asterisk for prefix matching
   return query

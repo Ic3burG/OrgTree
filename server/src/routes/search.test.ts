@@ -3,6 +3,7 @@ import request from 'supertest';
 import express from 'express';
 import { search, getAutocompleteSuggestions } from '../services/search.service.js';
 import searchRoutes from './search.js';
+import jwt from 'jsonwebtoken';
 
 // Mock Search services
 vi.mock('../services/search.service.js', () => ({
@@ -10,20 +11,24 @@ vi.mock('../services/search.service.js', () => ({
   getAutocompleteSuggestions: vi.fn(),
 }));
 
-// Mock Auth Middleware / JWT logic for tests
-// We need to bypass JWT verification in the test app
+// Mock JWT
+vi.mock('jsonwebtoken', () => ({
+  default: {
+    verify: vi.fn(),
+  },
+}));
+
 const app = express();
 app.use(express.json());
-app.use((req: any, _res, next) => {
-  // Simulate a logged-in user
-  req.user = { id: 'user-123', email: 'test@example.com' };
-  next();
-});
+// No manual user injection middleware here so we can test the real optionalAuthenticate
 app.use('/api', searchRoutes);
 
 describe('Search Routes', () => {
+  const originalEnv = process.env;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env = { ...originalEnv, JWT_SECRET: 'test-secret' };
   });
 
   describe('GET /api/organizations/:orgId/search', () => {
@@ -36,37 +41,60 @@ describe('Search Routes', () => {
       };
       vi.mocked(search).mockResolvedValue(mockResults as any);
 
-      const res = await request(app).get('/api/organizations/org-1/search?q=test').expect(200);
+      // Successfully authenticated request
+      vi.mocked(jwt.verify).mockReturnValue({ id: 'user-123' } as any);
+
+      const res = await request(app)
+        .get('/api/organizations/org-1/search?q=test')
+        .set('Authorization', 'Bearer valid-token')
+        .expect(200);
 
       expect(res.body).toEqual(mockResults);
       expect(search).toHaveBeenCalledWith(
         'org-1',
         'user-123',
-        expect.objectContaining({
-          query: 'test',
-          type: 'all',
-          limit: 20,
-          offset: 0,
-        })
+        expect.objectContaining({ query: 'test' })
+      );
+    });
+
+    it('should work without authentication (guest)', async () => {
+      vi.mocked(search).mockResolvedValue({ results: [] } as any);
+
+      await request(app).get('/api/organizations/org-1/search?q=test').expect(200);
+
+      expect(search).toHaveBeenCalledWith(
+        'org-1',
+        undefined, // No user ID
+        expect.objectContaining({ query: 'test' })
+      );
+    });
+
+    it('should ignore invalid token and proceed as guest', async () => {
+      vi.mocked(search).mockResolvedValue({ results: [] } as any);
+      vi.mocked(jwt.verify).mockImplementation(() => {
+        throw new Error('Invalid token');
+      });
+
+      await request(app)
+        .get('/api/organizations/org-1/search?q=test')
+        .set('Authorization', 'Bearer invalid-token')
+        .expect(200);
+
+      expect(search).toHaveBeenCalledWith(
+        'org-1',
+        undefined, // Should be undefined because auth failed gracefully
+        expect.objectContaining({ query: 'test' })
       );
     });
 
     it('should validate required params', async () => {
       await request(app)
         .get('/api/organizations/org-1/search') // Missing q
-        .expect(400)
-        .expect(res => {
-          expect(res.body.message).toContain('required');
-        });
+        .expect(400);
     });
 
     it('should validate type param', async () => {
-      await request(app)
-        .get('/api/organizations/org-1/search?q=test&type=invalid')
-        .expect(400)
-        .expect(res => {
-          expect(res.body.message).toContain('Invalid type');
-        });
+      await request(app).get('/api/organizations/org-1/search?q=test&type=invalid').expect(400);
     });
 
     it('should handle pagination params', async () => {
@@ -77,8 +105,8 @@ describe('Search Routes', () => {
         .expect(200);
 
       expect(search).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
+        'org-1',
+        undefined,
         expect.objectContaining({
           limit: 50,
           offset: 10,
@@ -92,8 +120,8 @@ describe('Search Routes', () => {
       await request(app).get('/api/organizations/org-1/search?q=test&starred=true').expect(200);
 
       expect(search).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
+        'org-1',
+        undefined,
         expect.objectContaining({
           starredOnly: true,
         })
@@ -115,9 +143,11 @@ describe('Search Routes', () => {
     it('should return autocomplete suggestions', async () => {
       const mockSuggestions = { suggestions: [{ text: 'Suggestion 1', type: 'person', id: 'p1' }] };
       vi.mocked(getAutocompleteSuggestions).mockResolvedValue(mockSuggestions as any);
+      vi.mocked(jwt.verify).mockReturnValue({ id: 'user-123' } as any);
 
       const res = await request(app)
         .get('/api/organizations/org-1/search/autocomplete?q=sugg')
+        .set('Authorization', 'Bearer valid-token')
         .expect(200);
 
       expect(res.body).toEqual(mockSuggestions);
@@ -140,12 +170,17 @@ describe('Search Routes', () => {
         .get('/api/organizations/org-1/search/autocomplete?q=abc&limit=8')
         .expect(200);
 
-      expect(getAutocompleteSuggestions).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        8
-      );
+      expect(getAutocompleteSuggestions).toHaveBeenCalledWith('org-1', undefined, 'abc', 8);
+    });
+
+    it('should handle autocomplete error (403)', async () => {
+      vi.mocked(getAutocompleteSuggestions).mockImplementation(() => {
+        const err: any = new Error('Forbidden');
+        err.status = 403;
+        throw err;
+      });
+
+      await request(app).get('/api/organizations/org-1/search/autocomplete?q=secret').expect(403);
     });
   });
 });

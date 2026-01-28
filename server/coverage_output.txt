@@ -1,0 +1,372 @@
+
+> orgtree-server@1.0.0 test:coverage
+> vitest run --coverage src/routes/
+
+[1m[43m DEPRECATED [49m[22m [33m`test.poolOptions` was removed in Vitest 4. All previous `poolOptions` are now top-level options. Please, refer to the migration guide: https://vitest.dev/guide/migration#pool-rework[39m
+
+[1m[46m RUN [49m[22m [36mv4.0.17 [39m[90m/Users/ojdavis/Claude Code/OrgTree/server[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+[90mstdout[2m | src/routes/import.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+[90mstdout[2m | src/routes/auth.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/ownership-transfers.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/people.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/backup.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+[90mstdout[2m | src/routes/members.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/users.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+[90mstdout[2m | src/routes/invitations.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+[90mstdout[2m | src/routes/passkey.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+[90mstdout[2m | src/routes/backup.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/users.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/invitations.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[2m1:17:32 PM[22m [33m[1m[vite][22m[39m (ssr) warning: File URL host must be "localhost" or empty on darwin
+  Plugin: vite:dynamic-import-vars
+  File: /Users/ojdavis/Claude Code/OrgTree/server/src/migrations/index.ts
+ [32m✓[39m src/routes/import.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 53[2mms[22m[39m
+[90mstderr[2m | src/routes/passkey.test.ts[2m > [22m[2mPasskey Routes[2m > [22m[2mPOST /api/auth/passkey/register/start[2m > [22m[2mshould handle errors
+[22m[39mPasskey register start error: Error: Failed options
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/passkey.test.ts:84:9
+    at [90mfile:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:145:11
+    at [90mfile:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:915:26
+    at [90mfile:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:1653:12[90m)[39m
+
+ [32m✓[39m src/routes/people.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 58[2mms[22m[39m
+ [32m✓[39m src/routes/auth.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 125[2mms[22m[39m
+[90mstdout[2m | src/routes/organizations.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/routes/members.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 88[2mms[22m[39m
+ [32m✓[39m src/routes/backup.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 102[2mms[22m[39m
+ [32m✓[39m src/routes/ownership-transfers.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 81[2mms[22m[39m
+ [32m✓[39m src/routes/passkey.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 128[2mms[22m[39m
+ [32m✓[39m src/routes/users.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 116[2mms[22m[39m
+[90mstdout[2m | src/routes/audit.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  override existing env vars with { override: true }
+
+[90mstdout[2m | src/routes/csrf.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+[90mstdout[2m | src/routes/departments.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ [32m✓[39m src/routes/invitations.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 120[2mms[22m[39m
+[90mstdout[2m | src/routes/fts-maintenance.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/custom-fields.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/totp.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/fix-org-owners-simple.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/geds.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+[90mstdout[2m | src/routes/audit.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/fix-org-owners-simple.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstderr[2m | src/routes/csrf.test.ts[2m > [22m[2mCSRF Routes[2m > [22m[2mGET /api/csrf-token[2m > [22m[2mshould handle CSRF token generation errors
+[22m[39mError generating CSRF token: Error: Token generation failed
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/csrf.test.ts:85:15
+    at createCsrfTokenPair [90m(file:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/spy/dist/index.js:285:34[90m)[39m
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/csrf.ts:28:29
+    at Layer.handleRequest [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/layer.js:152:17[90m)[39m
+    at next [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/route.js:157:13[90m)[39m
+    at Route.dispatch [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/route.js:117:3[90m)[39m
+    at handle [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/index.js:435:11[90m)[39m
+    at Layer.handleRequest [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/layer.js:152:17[90m)[39m
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/index.js:295:15
+    at processParams [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/index.js:582:12[90m)[39m
+
+ [32m✓[39m src/routes/csrf.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+[90mstdout[2m | src/routes/fts-maintenance.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/routes/organizations.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+[90mstdout[2m | src/routes/fix-org-owners-simple.test.ts[2m > [22m[2mFix Org Owners Simple Route[2m > [22m[2mshould fix organizations with missing owners
+[22m[39m[fix-org-owners] Starting migration...
+[fix-org-owners] Found 1051 organizations
+[fix-org-owners] Missing: admin@example.com for org "Test Org"
+[fix-org-owners] Missing: owner@example.com for org "Test Org"
+[fix-org-owners] Missing: fix-user-b5f35dba-3152-45a3-91e7-ca6e51175a6e@example.com for org "Missing Owner Org"
+[fix-org-owners] Fixing 3 organizations...
+[fix-org-owners] ✅ Fixed: admin@example.com → "Test Org"
+[fix-org-owners] ✅ Fixed: owner@example.com → "Test Org"
+[fix-org-owners] ✅ Fixed: fix-user-b5f35dba-3152-45a3-91e7-ca6e51175a6e@example.com → "Missing Owner Org"
+[fix-org-owners] Migration complete. Fixed: 3, Errors: 0
+
+ [32m✓[39m src/routes/custom-fields.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 78[2mms[22m[39m
+[90mstdout[2m | src/routes/geds.test.ts[2m > [22m[2mGEDS Routes[2m > [22m[2mGET /api/geds/proxy[2m > [22m[2mshould proxy a valid GEDS URL
+[22m[39m[2026-01-28T18:17:32.921Z] INFO: Proxying GEDS request {"url":"https://geds-sage.gc.ca/en/GEDS?abc=123","userId":"test-user"}
+
+[90mstdout[2m | src/routes/fix-org-owners-simple.test.ts[2m > [22m[2mFix Org Owners Simple Route[2m > [22m[2mshould return no-op if all owners exist
+[22m[39m[fix-org-owners] Starting migration...
+[fix-org-owners] Found 1051 organizations
+[fix-org-owners] No missing owners found
+
+[90mstderr[2m | src/routes/fts-maintenance.test.ts[2m > [22m[2mFTS Maintenance Routes[2m > [22m[2mGET /api/fts-maintenance/health[2m > [22m[2mshould handle errors
+[22m[39mError checking FTS health: Error: Database error
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/fts-maintenance.test.ts:61:15
+    at checkFtsIntegrity [90m(file:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/spy/dist/index.js:285:34[90m)[39m
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/fts-maintenance.ts:24:20
+    at Layer.handleRequest [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/layer.js:152:17[90m)[39m
+    at next [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/route.js:157:13[90m)[39m
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/fts-maintenance.test.ts:39:7
+    at authenticateToken [90m(file:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/spy/dist/index.js:285:34[90m)[39m
+    at Layer.handleRequest [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/layer.js:152:17[90m)[39m
+    at next [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/route.js:157:13[90m)[39m
+    at Route.dispatch [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/route.js:117:3[90m)[39m
+
+ [32m✓[39m src/routes/audit.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 99[2mms[22m[39m
+[90mstdout[2m | src/routes/geds.test.ts[2m > [22m[2mGEDS Routes[2m > [22m[2mGET /api/geds/proxy[2m > [22m[2mshould return GEDS error status if request fails
+[22m[39m[2026-01-28T18:17:32.938Z] INFO: Proxying GEDS request {"url":"https://geds-sage.gc.ca/unknown","userId":"test-user"}
+
+[90mstderr[2m | src/routes/geds.test.ts[2m > [22m[2mGEDS Routes[2m > [22m[2mGET /api/geds/proxy[2m > [22m[2mshould return GEDS error status if request fails
+[22m[39m[2026-01-28T18:17:32.938Z] ERROR: GEDS proxy request failed {"url":"https://geds-sage.gc.ca/unknown","status":404,"userId":"test-user"}
+
+ [32m✓[39m src/routes/fix-org-owners-simple.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+[90mstdout[2m | src/routes/geds.test.ts[2m > [22m[2mGEDS Routes[2m > [22m[2mGET /api/geds/proxy[2m > [22m[2mshould handle fetch exceptions
+[22m[39m[2026-01-28T18:17:32.944Z] INFO: Proxying GEDS request {"url":"https://geds-sage.gc.ca/timeout","userId":"test-user"}
+
+[90mstderr[2m | src/routes/geds.test.ts[2m > [22m[2mGEDS Routes[2m > [22m[2mGET /api/geds/proxy[2m > [22m[2mshould handle fetch exceptions
+[22m[39m[2026-01-28T18:17:32.944Z] ERROR: GEDS proxy unexpected error {"err":{},"query":{"url":"https://geds-sage.gc.ca/timeout"}}
+
+[90mstderr[2m | src/routes/fts-maintenance.test.ts[2m > [22m[2mFTS Maintenance Routes[2m > [22m[2mFTS Rebuild Operations[2m > [22m[2mshould handle rebuild errors
+[22m[39mError rebuilding FTS indexes: Error: Rebuild failed
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/fts-maintenance.test.ts:129:15
+    at rebuildAllFtsIndexes [90m(file:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/spy/dist/index.js:285:34[90m)[39m
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/fts-maintenance.ts:54:22
+    at Layer.handleRequest [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/layer.js:152:17[90m)[39m
+    at next [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/route.js:157:13[90m)[39m
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/fts-maintenance.test.ts:39:7
+    at authenticateToken [90m(file:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/spy/dist/index.js:285:34[90m)[39m
+    at Layer.handleRequest [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/layer.js:152:17[90m)[39m
+    at next [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/route.js:157:13[90m)[39m
+    at Route.dispatch [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/route.js:117:3[90m)[39m
+
+ [32m✓[39m src/routes/departments.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 58[2mms[22m[39m
+[90mstderr[2m | src/routes/fts-maintenance.test.ts[2m > [22m[2mFTS Maintenance Routes[2m > [22m[2mPOST /api/fts-maintenance/optimize[2m > [22m[2mshould handle optimization errors
+[22m[39mError optimizing FTS indexes: Error: Optimization failed
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/fts-maintenance.test.ts:158:15
+    at optimizeFtsIndexes [90m(file:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/spy/dist/index.js:285:34[90m)[39m
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/fts-maintenance.ts:170:5
+    at Layer.handleRequest [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/layer.js:152:17[90m)[39m
+    at next [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/route.js:157:13[90m)[39m
+    at [90m/Users/ojdavis/Claude Code/OrgTree/server/[39msrc/routes/fts-maintenance.test.ts:39:7
+    at authenticateToken [90m(file:///Users/ojdavis/Claude%20Code/OrgTree/server/[39mnode_modules/[4m@vitest[24m/spy/dist/index.js:285:34[90m)[39m
+    at Layer.handleRequest [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/layer.js:152:17[90m)[39m
+    at next [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/route.js:157:13[90m)[39m
+    at Route.dispatch [90m(/Users/ojdavis/Claude Code/OrgTree/server/[39mnode_modules/[4mrouter[24m/lib/route.js:117:3[90m)[39m
+
+ [32m✓[39m src/routes/geds.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+[90mstdout[2m | src/routes/analytics.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+ [32m✓[39m src/routes/fts-maintenance.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m src/routes/totp.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 58[2mms[22m[39m
+[90mstdout[2m | src/routes/geds-import.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+[90mstdout[2m | src/routes/search.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/fix-org-owners.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/bulk.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+[90mstdout[2m | src/routes/public.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+[90mstdout[2m | src/routes/org-membership-check.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/metrics.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+[90mstdout[2m | src/routes/version.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+[90mstdout[2m | src/routes/fix-org-owners.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/geds-import.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/routes/analytics.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+[90mstdout[2m | src/routes/org-membership-check.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/bulk.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/routes/fix-org-owners.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 38[2mms[22m[39m
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-28T18:17:33.336Z] INFO: Starting GEDS URL import {"orgId":"1a4d7ef9-0de9-4e27-8dcc-70910ae72b04","userId":"admin-user","urlCount":1}
+[2026-01-28T18:17:33.342Z] INFO: Processing GEDS URL 1/1 {"url":"https://geds-sage.gc.ca/test.xml"}
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-28T18:17:33.342Z] INFO: Downloaded GEDS XML {"url":"https://geds-sage.gc.ca/test.xml","tempFile":"/var/folders/c3/27_tyc5n3zxch4x0yfp0lvx80000gn/T/geds-1769624253342-0.xml"}
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-28T18:17:33.342Z] INFO: Parsed GEDS XML {"url":"https://geds-sage.gc.ca/test.xml","departments":1,"people":1}
+[2026-01-28T18:17:33.349Z] INFO: Imported GEDS data {"url":"https://geds-sage.gc.ca/test.xml","stats":{"departmentsCreated":1,"departmentsReused":0,"peopleCreated":1,"peopleSkipped":0}}
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-28T18:17:33.349Z] INFO: GEDS URL import complete {"orgId":"1a4d7ef9-0de9-4e27-8dcc-70910ae72b04","userId":"admin-user","total":1,"success":1,"failed":0}
+
+ [32m✓[39m src/routes/search.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould handle individual URL failures
+[22m[39m[2026-01-28T18:17:33.362Z] INFO: Starting GEDS URL import {"orgId":"1a4d7ef9-0de9-4e27-8dcc-70910ae72b04","userId":"admin-user","urlCount":1}
+[2026-01-28T18:17:33.362Z] INFO: Processing GEDS URL 1/1 {"url":"https://geds-sage.gc.ca/fail.xml"}
+
+[90mstderr[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould handle individual URL failures
+[22m[39m[2026-01-28T18:17:33.362Z] ERROR: GEDS URL import failed {"url":"https://geds-sage.gc.ca/fail.xml","error":"Download failed","errorType":"Error"}
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould handle individual URL failures
+[22m[39m[2026-01-28T18:17:33.362Z] INFO: GEDS URL import complete {"orgId":"1a4d7ef9-0de9-4e27-8dcc-70910ae72b04","userId":"admin-user","total":1,"success":0,"failed":1}
+
+ [32m✓[39m src/routes/org-membership-check.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/routes/geds-import.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+ [32m✓[39m src/routes/metrics.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m src/routes/version.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/routes/public.test.ts [2m([22m[2m5 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[32m 25[2mms[22m[39m
+[90mstdout[2m | src/routes/debug.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+ [32m✓[39m src/routes/bulk.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m src/routes/debug.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 14[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m28 passed[39m[22m[90m (28)[39m
+[2m      Tests [22m [1m[32m227 passed[39m[22m[2m | [22m[33m1 skipped[39m[90m (228)[39m
+[2m   Start at [22m 13:17:31
+[2m   Duration [22m 1.95s[2m (transform 2.20s, setup 667ms, import 7.55s, tests 1.72s, environment 2ms)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   31.69 |    22.87 |   24.35 |   31.98 |                   
+ src               |   17.46 |        4 |    4.76 |    17.6 |                   
+  db-init.ts       |     100 |       50 |     100 |     100 | 100               
+  db.ts            |    87.5 |       50 |     100 |    87.5 | 14                
+  instrument.ts    |       0 |        0 |       0 |       0 | 4-61              
+  sentry.ts        |       0 |      100 |       0 |       0 | 9-18              
+  socket.ts        |    1.33 |        0 |       0 |    1.33 | 14-219            
+ src/middleware    |   37.68 |    18.96 |    37.5 |   37.68 |                   
+  auth.ts          |   89.65 |    68.75 |     100 |   89.65 | 34,64-65          
+  csrf.ts          |       0 |        0 |       0 |       0 | 19-135            
+  errorHandler.ts  |       0 |        0 |       0 |       0 | 16-35             
+  metrics.ts       |       0 |        0 |       0 |       0 | 14-34             
+ src/migrations    |   21.05 |    13.63 |    7.69 |   21.95 |                   
+  index.ts         |   67.85 |       60 |      80 |   65.38 | 22,65-78          
+  ...migrations.ts |    1.49 |        0 |       0 |    1.78 | 22-339            
+ ...tions/versions |    9.09 |      100 |       0 |    9.09 |                   
+  ...hancements.ts |   14.28 |      100 |       0 |   14.28 | 9-104             
+  ...p-transfer.ts |    6.66 |      100 |       0 |    6.66 | 10-85             
+ src/routes        |   78.74 |    65.42 |   85.21 |   79.07 |                   
+  analytics.ts     |    87.5 |       90 |     100 |   89.65 | 33,80-81          
+  audit.ts         |      84 |    88.46 |   66.66 |   86.48 | 87,101-105        
+  auth.ts          |   83.33 |    76.78 |   91.66 |   83.21 | ...97-398,403,428 
+  backup.ts        |   69.62 |    65.11 |      60 |   70.51 | ...10-111,245-281 
+  bulk.ts          |   75.58 |    71.87 |     100 |   75.58 | ...72,182-185,191 
+  csrf.ts          |     100 |      100 |     100 |     100 |                   
+  custom-fields.ts |   88.63 |    93.75 |     100 |   88.63 | 37,75,98,129,158  
+  debug.ts         |     100 |       50 |     100 |     100 | 17                
+  departments.ts   |    87.5 |    68.18 |     100 |    87.5 | 30,43,80,118,156  
+  ...ers-simple.ts |   88.23 |       60 |     100 |   88.23 | 89-90,110-111     
+  ...org-owners.ts |      84 |       50 |     100 |      84 | 57-62,80,96       
+  ...aintenance.ts |   78.18 |    45.45 |     100 |   78.18 | ...39-140,150-151 
+  geds-import.ts   |   80.73 |    59.25 |     100 |   81.73 | ...98,300,302,339 
+  geds.ts          |     100 |       90 |     100 |     100 | 52                
+  import.ts        |   84.04 |    58.62 |     100 |   84.44 | ...78,200-203,207 
+  invitations.ts   |   90.69 |      100 |   83.33 |   90.69 | 38,54,91,118      
+  members.ts       |   89.74 |     90.9 |     100 |   89.74 | ...85,124,164,265 
+  metrics.ts       |    82.6 |      100 |     100 |    82.6 | 35,52,69,86       
+  ...ship-check.ts |    90.9 |       50 |     100 |    90.9 | 70                
+  organizations.ts |   71.71 |    57.14 |      90 |   71.71 | ...54,292,302-317 
+  ...-transfers.ts |   70.83 |     62.5 |   66.66 |   70.83 | ...16-122,132-138 
+  passkey.ts       |   80.64 |     64.7 |     100 |   82.02 | ...13,222,227,237 
+  people.ts        |   89.47 |    77.77 |     100 |   89.47 | ...81,127,169,202 
+  public.ts        |   66.66 |    21.05 |   28.57 |   69.56 | ...70,201-215,238 
+  ...d-searches.ts |       0 |        0 |       0 |       0 | 10-70             
+  search.ts        |   72.91 |    66.66 |     100 |   72.91 | 20-29,75,108-113  
+  totp.ts          |   66.66 |    65.51 |     100 |   66.66 | ...79-180,188-189 
+  users.ts         |   73.13 |       44 |      70 |   73.13 | ...31,142,169,189 
+  version.ts       |     100 |      100 |     100 |     100 |                   
+ src/services      |    0.53 |     0.78 |    0.32 |    0.55 |                   
+  ...cs.service.ts |       0 |        0 |       0 |       0 | 10-134            
+  audit.service.ts |    6.93 |     7.14 |   11.11 |    6.93 | 48-391            
+  auth.service.ts  |       0 |        0 |       0 |       0 | 15-450            
+  ...up.service.ts |       0 |        0 |       0 |       0 | 7-247             
+  bulk.service.ts  |       0 |        0 |       0 |       0 | 128-817           
+  csrf.service.ts  |       0 |        0 |       0 |       0 | 26-111            
+  ...ds.service.ts |       0 |        0 |       0 |       0 | 13-401            
+  ...nt.service.ts |       0 |        0 |       0 |       0 | 13-423            
+  email.service.ts |   12.19 |    16.66 |       0 |   13.51 | 16-249            
+  ...ce.service.ts |       0 |        0 |       0 |       0 | 43-318            
+  ...er.service.ts |       0 |        0 |       0 |       0 | 29-141            
+  ...ad.service.ts |       0 |        0 |       0 |       0 | 11-226            
+  ...er.service.ts |       0 |        0 |       0 |       0 | 4-290             
+  ...on.service.ts |       0 |        0 |       0 |       0 | 11-405            
+  ...er.service.ts |       0 |        0 |       0 |       0 | 72-590            
+  ...or.service.ts |       0 |        0 |       0 |       0 | 12-114            
+  ...cs.service.ts |       0 |        0 |       0 |       0 | 28-358            
+  ...up.service.ts |       0 |        0 |       0 |       0 | 6-43              
+  org.service.ts   |       0 |        0 |       0 |       0 | 65-262            
+  ...er.service.ts |       0 |        0 |       0 |       0 | 73-957            
+  ...ey.service.ts |       0 |        0 |       0 |       0 | 20-228            
+  ...le.service.ts |       0 |        0 |       0 |       0 | 17-411            
+  ...ch.service.ts |       0 |        0 |       0 |       0 | 101-1063          
+  ...ts.service.ts |       0 |        0 |       0 |       0 | 32-240            
+  totp.service.ts  |       0 |        0 |       0 |       0 | 17-130            
+  ...er.service.ts |       0 |        0 |       0 |       0 | 11-27             
+  users.service.ts |       0 |        0 |       0 |       0 | 6-445             
+ src/test-helpers  |       0 |        0 |       0 |       0 |                   
+  ...-db-schema.ts |       0 |        0 |       0 |       0 | 11-378            
+ src/types         |       0 |        0 |       0 |       0 |                   
+  analytics.ts     |       0 |        0 |       0 |       0 |                   
+  global.d.ts      |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 221-228           
+  metrics.ts       |       0 |        0 |       0 |       0 |                   
+ src/utils         |   42.85 |    27.27 |   42.85 |   42.85 |                   
+  escape.ts        |       0 |        0 |       0 |       0 | 1-17              
+  logger.ts        |   66.66 |    42.85 |      60 |   66.66 | 37,41-42          
+-------------------|---------|----------|---------|---------|-------------------
