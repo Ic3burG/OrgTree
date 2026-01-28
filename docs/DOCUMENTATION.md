@@ -111,7 +111,8 @@ If your account was created by an administrator:
 
 After logging in, you'll see the **Organization Selector** page:
 
-```text
+```texttext
+
 ┌─────────────────────────────────────────────────────────┐
 │  OrgTree                          [User Name] [Logout]  │
 ├─────────────────────────────────────────────────────────┤
@@ -127,6 +128,7 @@ After logging in, you'll see the **Organization Selector** page:
 │  [+ Create New Organization]                            │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
+
 ```
 
 ---
@@ -139,7 +141,8 @@ The Dashboard is your central hub for managing an organization. Access it by cli
 
 #### Dashboard Layout
 
-```text
+```texttext
+
 ┌─────────────────────────────────────────────────────────┐
 │  [Logo] Organization Name                    [User] ▼   │
 ├──────────────┬──────────────────────────────────────────┤
@@ -154,6 +157,7 @@ The Dashboard is your central hub for managing an organization. Access it by cli
 │  [Share]     │                                          │
 │              │                                          │
 └──────────────┴──────────────────────────────────────────┘
+
 ```
 
 #### Dashboard Features
@@ -193,7 +197,7 @@ Your role is displayed on organization cards and in the sidebar.
 2. Click the **pencil icon** (✏️) on the card
 3. Enter the new name
 4. Click **"Save"**
-
+>
 > **Note**: Only Owners and Admins can rename organizations.
 
 ### Deleting an Organization
@@ -211,7 +215,7 @@ Your role is displayed on organization cards and in the sidebar.
 3. Select a different organization from the list
 
 ### Transferring Organization Ownership
-
+>
 > **Requires**: Organization Owner role
 
 Transferring ownership allows you to hand over full control of the organization to another member.
@@ -226,6 +230,7 @@ Transferring ownership allows you to hand over full control of the organization 
 7. Click **"Transfer Ownership"**
 
 **What happens next:**
+
 - The selected member receives an email and in-app notification
 - The transfer enters a **Pending** state (expires in 7 days)
 - You remain the owner until they accept
@@ -233,6 +238,7 @@ Transferring ownership allows you to hand over full control of the organization 
 - The new owner gains full control including billing and deletion rights
 
 **Cancelling a Transfer:**
+
 - You can cancel a pending transfer at any time from the "Danger Zone" or the transfer banner.
 
 ---
@@ -244,7 +250,8 @@ Transferring ownership allows you to hand over full control of the organization 
 1. Navigate to **Departments** in the sidebar
 2. Departments are displayed in a tree structure showing the hierarchy
 
-```text
+```texttext
+
 ┌─────────────────────────────────────────────────────────┐
 │  Departments                        [Select] [+ Add]    │
 ├─────────────────────────────────────────────────────────┤
@@ -261,6 +268,7 @@ Transferring ownership allows you to hand over full control of the organization 
 │  ▼ Human Resources                           6 people   │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
+
 ```
 
 ### Creating a Department
@@ -294,7 +302,7 @@ To change a department's parent (re-organize hierarchy):
 1. Hover over the department row
 2. Click the **trash icon** (🗑️)
 3. Confirm the deletion
-
+>
 > **Warning**: Deleting a department also deletes:
 >
 > - All sub-departments
@@ -314,7 +322,8 @@ To change a department's parent (re-organize hierarchy):
 1. Navigate to **People** in the sidebar
 2. All people across all departments are listed
 
-```text
+```texttext
+
 ┌─────────────────────────────────────────────────────────┐
 │  People                             [Select] [+ Add]    │
 ├─────────────────────────────────────────────────────────┤
@@ -332,6 +341,7 @@ To change a department's parent (re-organize hierarchy):
 │  📧 jane@example.com  📞 555-0102                       │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
+
 ```
 
 ### Filtering People
@@ -408,7 +418,7 @@ Custom fields are organization-specific and can be configured by Owners and Admi
 | **Phone**        | Phone number                             | Mobile Number             |
 
 ### Creating Custom Fields
-
+>
 > **Requires**: Admin or Owner role
 
 1. Navigate to organization settings or the Admin panel
@@ -457,7 +467,8 @@ Custom field values are included in CSV exports:
 
 ### Org Chart Interface
 
-```text
+```texttext
+
 ┌─────────────────────────────────────────────────────────┐
 │  [🔍 Search] [Theme ▼] [Layout ▼] [Export ▼] [⛶ Full]  │
 ├─────────────────────────────────────────────────────────┤
@@ -478,6 +489,7 @@ Custom field values are included in CSV exports:
 │                                                         │
 │  [−] [100%] [+]                    [Fit] [Center]      │
 └─────────────────────────────────────────────────────────┘
+
 ```
 
 ### Navigation Controls
@@ -608,6 +620,7 @@ Save frequently used search queries for quick access.
 OrgTree automatically tracks search performance to help administrators optimize the directory.
 
 **Metrics tracked:**
+
 - **Popular Queries**: Most frequently searched terms.
 - **Zero-Result Searches**: Queries that returned no results, highlighting potential missing data or synonyms needed.
 - **Click-Through Rate**: How often users find what they are looking for.
@@ -808,7 +821,7 @@ Add an extra layer of security with time-based one-time passwords (TOTP).
    - Microsoft Authenticator
 4. Enter the 6-digit code from your app to verify
 5. **Save your backup codes** in a secure location
-
+>
 > **Important**: Backup codes are shown only once. Store them safely - they're your only recovery option if you lose your authenticator device.
 
 #### Using 2FA
@@ -880,7 +893,8 @@ Team members are users who have access to your organization. Each member has a s
 2. Select the **"Team Members"** tab
 3. View list of all members with their roles
 
-```text
+```texttext
+
 ┌─────────────────────────────────────────────────────────┐
 │  Share Organization                              [X]    │
 ├─────────────────────────────────────────────────────────┤
@@ -906,6 +920,7 @@ Team members are users who have access to your organization. Each member has a s
 │  [+ Add Member]                                         │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
+
 ```
 
 ### Adding a Team Member
@@ -929,7 +944,7 @@ Team members are users who have access to your organization. Each member has a s
 - Once they create an account and accept, they're added
 
 ### Changing a Member's Role
-
+>
 > **Requires**: Admin or Owner role
 
 1. Find the member in the Team Members list
@@ -944,7 +959,7 @@ Team members are users who have access to your organization. Each member has a s
 1. Find the member in the Team Members list
 2. Click the **trash icon** (🗑️)
 3. Confirm the removal
-
+>
 > **Note**: The Owner cannot be removed.
 
 ### Pending Invitations
@@ -994,7 +1009,7 @@ Users with the public link can:
 ### Regenerating the Public Link
 
 If you need to invalidate the existing link:
-
+>
 > **Requires**: Admin or Owner role
 
 1. Click **"Regenerate Link"**
@@ -1029,10 +1044,12 @@ In selection mode:
 - Selected items show a **checkmark** and blue highlight
 - A **floating action bar** appears at the bottom
 
-```text
+```texttext
+
 ┌─────────────────────────────────────────────────────────┐
 │        5 people selected    [Move] [Edit] [Delete]  [X]│
 └─────────────────────────────────────────────────────────┘
+
 ```
 
 ### Bulk Delete
@@ -1061,7 +1078,7 @@ In selection mode:
    - **Departments**: Parent Department
 4. Click **"Update"**
 5. View results
-
+>
 > **Note**: Empty fields are left unchanged.
 
 ### Exiting Selection Mode
@@ -1096,18 +1113,22 @@ Export your organization data to CSV format:
 **departments.csv:**
 
 ```csv
+
 id,name,description,parentId
 dept-001,Engineering,Technical teams,
 dept-002,Frontend,UI development,dept-001
 dept-003,Backend,API development,dept-001
+
 ```
 
 **people.csv:**
 
 ```csv
+
 id,name,title,email,phone,departmentId
 person-001,John Smith,Developer,john@example.com,555-0101,dept-002
 person-002,Jane Doe,Designer,jane@example.com,555-0102,dept-002
+
 ```
 
 ### CSV Import
@@ -1141,14 +1162,15 @@ OrgTree supports importing from GEDS (Government Electronic Directory Services) 
 The audit trail provides a complete history of all changes made to your organization.
 
 ### Accessing Audit Logs
-
+>
 > **Requires**: Admin or Owner role
 
 1. Navigate to **"Audit Log"** in the sidebar
 
 ### Audit Log Interface
 
-```text
+```texttext
+
 ┌─────────────────────────────────────────────────────────┐
 │  Audit Log                                              │
 ├─────────────────────────────────────────────────────────┤
@@ -1174,6 +1196,7 @@ The audit trail provides a complete history of all changes made to your organiza
 │  [Load More]                                            │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
+
 ```
 
 ### Audit Log Entry Details
@@ -1249,7 +1272,8 @@ Superusers have system-wide administrative access beyond individual organization
 
 ### Superuser Dashboard
 
-```text
+```texttext
+
 ┌─────────────────────────────────────────────────────────┐
 │  [Logo] System Administration           [Superuser] ▼   │
 ├──────────────────┬──────────────────────────────────────┤
@@ -1261,6 +1285,7 @@ Superusers have system-wide administrative access beyond individual organization
 │  [← Back]        │                                      │
 │                  │                                      │
 └──────────────────┴──────────────────────────────────────┘
+
 ```
 
 ### User Management
@@ -1317,7 +1342,7 @@ Superusers have system-wide administrative access beyond individual organization
 1. Find the user in the list
 2. Click the **trash icon** (🗑️)
 3. Confirm the deletion
-
+>
 > **Warning**: This deletes the user's account. Organizations they own will lose their owner.
 
 ### System Audit Logs
@@ -1336,8 +1361,10 @@ If a superuser is locked out:
 2. Run the reset script:
 
    ```bash
+
    cd server
    node scripts/reset-superuser.js <email>
+
    ```
 
 3. Use the generated temporary password to log in

@@ -3,6 +3,7 @@
 ## Quick Start
 
 ```bash
+
 # Install dependencies
 npm install
 
@@ -14,13 +15,15 @@ npm run build
 
 # Preview production build
 npm run preview
+
 ```
 
 ## Project Architecture
 
 ### Component Hierarchy
 
-```
+```texttext
+
 Directory (main container)
 ├── SearchBar
 ├── Breadcrumbs
@@ -29,6 +32,7 @@ Directory (main container)
 │   └── PersonCard
 │       └── ContactIcons
 └── DetailPanel
+
 ```
 
 ### Package Management & Build System
@@ -65,11 +69,13 @@ Use Multi-Package (like OrgTree) when:
 **Testing Both Packages:**
 
 ```bash
+
 # Run all tests (frontend + backend)
 npm run test:all    # Runs: npm test && cd server && npm test
 
 # Run all linters
 npm run lint:all    # Runs: npm run lint && cd server && npm run lint
+
 ```
 
 ### State Management
@@ -133,6 +139,7 @@ Text color automatically switches between white and dark for contrast.
 Edit `src/utils/colors.js`:
 
 ```javascript
+
 export function getDepthColors(depth) {
   const backgrounds = [
     'bg-blue-700', // Change to your preferred color
@@ -141,6 +148,7 @@ export function getDepthColors(depth) {
   ];
   // ...
 }
+
 ```
 
 ### Adding New Data Fields
@@ -149,19 +157,23 @@ export function getDepthColors(depth) {
 2. Update `parseCSV.js` to include new field:
 
 ```javascript
+
 if (node.type === 'person') {
   node.department = row.Department ? row.Department.trim() : '';
 }
+
 ```
 
-3. Display in `PersonCard.jsx` or `DetailPanel.jsx`
+1. Display in `PersonCard.jsx` or `DetailPanel.jsx`
 
 ### Customizing Icons
 
 Icons are from Lucide React. Change imports in component files:
 
 ```javascript
+
 import { Building, Users, Mail } from 'lucide-react';
+
 ```
 
 See [Lucide icons](https://lucide.dev) for available options.
@@ -191,10 +203,12 @@ See [Lucide icons](https://lucide.dev) for available options.
 ### Example
 
 ```csv
+
 Path,Type,Name,Title,Email,Phone
 /Engineering,department,Engineering Department,,,,
 /Engineering/Software,department,Software Development,,,,
 /Engineering/Software/jane-doe,person,Jane Doe,Senior Engineer,jane@company.org,555-1234,Room 301
+
 ```
 
 ## Performance Considerations
@@ -266,6 +280,7 @@ Common issues:
 When you don't need the error object in a catch block, use an empty catch instead of naming an unused parameter:
 
 ```typescript
+
 // ❌ Bad - unused variable warning
 try {
   await navigator.clipboard.writeText(text);
@@ -279,15 +294,17 @@ try {
 } catch {
   // Fallback
 }
+
 ```
 
 #### useEffect Dependencies
 
 React's `exhaustive-deps` rule ensures effects re-run when their dependencies change. However, there are valid cases to disable it:
 
-**Case 1: Functions defined in component scope**
+### Case 1: Functions defined in component scope
 
 ```typescript
+
 const fetchData = async () => {
   /* ... */
 };
@@ -296,11 +313,13 @@ useEffect(() => {
   fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []); // Only run on mount - function changes every render
+
 ```
 
-**Case 2: State being set within the effect**
+### Case 2: State being set within the effect
 
 ```typescript
+
 useEffect(() => {
   const socket = io();
   setSocket(socket);
@@ -308,6 +327,7 @@ useEffect(() => {
   return () => socket.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [isAuthenticated]); // Adding 'socket' would cause infinite loop
+
 ```
 
 **Important**: When disabling the rule, always add a comment explaining WHY, not just suppressing the warning blindly.
@@ -317,6 +337,7 @@ useEffect(() => {
 **CRITICAL**: Always run lint and formatting checks before committing your changes. This ensures code consistency and prevents CI failures.
 
 ```bash
+
 # Lint check
 npm run lint              # Frontend
 cd server && npm run lint # Backend
@@ -335,6 +356,7 @@ npx tsc --noEmit          # TypeScript compilation
 # Tests
 npm test                  # Frontend
 cd server && npm test     # Backend
+
 ```
 
 Pre-commit hooks (via Husky) automatically run linting and formatting, but manual checks help catch issues earlier.

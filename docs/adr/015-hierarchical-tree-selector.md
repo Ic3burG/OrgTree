@@ -65,7 +65,8 @@ Currently, 5 components use native `<select>` elements with `getHierarchicalDepa
 
 ### Visual Design
 
-```
+```texttext
+
 ┌─────────────────────────────────────────────────┐
 │ 🔍 Search departments...                    ×  │
 ├─────────────────────────────────────────────────┤
@@ -79,6 +80,7 @@ Currently, 5 components use native `<select>` elements with `getHierarchicalDepa
 │   │   └─ Research                              │
 │   └─ ▶ Operations                              │
 └─────────────────────────────────────────────────┘
+
 ```
 
 - **Selected state**: Checkmark icon and highlight
@@ -93,7 +95,7 @@ Currently, 5 components use native `<select>` elements with `getHierarchicalDepa
 
 > [!IMPORTANT]
 > **New Shared Component**: This creates a new reusable UI component (`HierarchicalTreeSelector`) in `src/components/ui/`. This is a significant addition to the component library.
-
+>
 > [!WARNING]
 > **Breaking Change to Forms**: All 5 components using department selects will be modified. The API changes from `value`/`onChange` on a `<select>` to a custom component API. Form styling and behavior will change.
 
@@ -117,6 +119,7 @@ New reusable component with the following features:
 **Component API:**
 
 ```typescript
+
 interface TreeNode {
   id: string;
   name: string;
@@ -148,6 +151,7 @@ interface HierarchicalTreeSelectorProps {
   className?: string;
   id?: string;
 }
+
 ```
 
 **Internal state management:**
@@ -183,6 +187,7 @@ Unit tests for the new component:
 Add new utility function for tree node conversion:
 
 ```typescript
+
 /**
  * Convert flat department list to nested tree structure for HierarchicalTreeSelector
  * @param departments - Flat list of departments
@@ -197,6 +202,7 @@ export function buildDepartmentTree(departments: Department[]): TreeNode[];
  * @returns Array of descendant IDs including the department itself
  */
 export function getDescendantIds(departmentId: string, departments: Department[]): string[];
+
 ```
 
 ---
@@ -208,6 +214,7 @@ export function getDescendantIds(departmentId: string, departments: Department[]
 Replace native `<select>` (lines 281-297) with `HierarchicalTreeSelector`:
 
 ```tsx
+
 // Before
 <select
   id="departmentId"
@@ -229,6 +236,7 @@ Replace native `<select>` (lines 281-297) with `HierarchicalTreeSelector`:
   error={!!errors.departmentId}
   disabled={isSubmitting}
 />
+
 ```
 
 ---
@@ -240,6 +248,7 @@ Replace parent department select (around line 219) with `HierarchicalTreeSelecto
 Add exclusion of current department and its descendants to prevent circular references:
 
 ```tsx
+
 <HierarchicalTreeSelector
   id="parentId"
   items={buildDepartmentTree(departments)}
@@ -250,6 +259,7 @@ Add exclusion of current department and its descendants to prevent circular refe
   allowClear={true}
   disabled={loading}
 />
+
 ```
 
 ---
@@ -259,6 +269,7 @@ Add exclusion of current department and its descendants to prevent circular refe
 Replace select (lines 108-122) with `HierarchicalTreeSelector`:
 
 ```tsx
+
 <HierarchicalTreeSelector
   items={buildDepartmentTree(departments)}
   value={selectedDeptId}
@@ -266,6 +277,7 @@ Replace select (lines 108-122) with `HierarchicalTreeSelector`:
   placeholder="Select a department..."
   showBreadcrumb={true}
 />
+
 ```
 
 ---
@@ -294,7 +306,9 @@ Replace department filter select (around line 117) with `HierarchicalTreeSelecto
 Run all unit tests including the new component tests:
 
 ```bash
+
 cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test
+
 ```
 
 New tests to add in `HierarchicalTreeSelector.test.tsx`:
@@ -312,8 +326,10 @@ New tests to add in `HierarchicalTreeSelector.test.tsx`:
 Verify existing component tests still pass after modifications:
 
 ```bash
+
 cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test -- src/components/admin/DepartmentManager.test.tsx
 cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test -- src/components/admin/PersonManager.test.tsx
+
 ```
 
 #### 3. E2E Tests (Playwright)
@@ -321,13 +337,15 @@ cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test -- src/components/admin/P
 Run existing E2E tests to catch regressions:
 
 ```bash
+
 cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test:e2e
+
 ```
 
 Consider adding new E2E tests for tree selector interactions in forms.
 
 ### Manual Verification
-
+>
 > [!NOTE]
 > **User should test these scenarios manually after implementation:**
 
@@ -433,7 +451,7 @@ Consider adding new E2E tests for tree selector interactions in forms.
 - Manual testing
 - Update any relevant docs
 
-**Estimated Total: 8-12 hours**
+### Estimated Total: 8-12 hours
 
 ---
 

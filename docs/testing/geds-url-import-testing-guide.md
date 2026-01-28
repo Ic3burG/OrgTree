@@ -9,11 +9,13 @@
 1. **Run the application**:
 
    ```bash
+
    # Terminal 1 - Backend
    cd server && npm run dev
 
    # Terminal 2 - Frontend
    npm run dev
+
    ```
 
 2. **Login** as a user with **admin** or **owner** role for an organization
@@ -30,9 +32,13 @@
 
 1. Navigate to **Admin Panel** → **Import** → **GEDS URLs** tab
 2. Paste a valid GEDS URL in the textarea:
-   ```
+
+   ```texttext
+
    https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=ou%3DTBS-SCT%2Cou%3DTBS-SCT%2Cou%3DGOC%2Co%3DGC%2Cc%3DCA
+
    ```
+
 3. Click **"Import from 1 GEDS URL"** button
 4. Observe the progress modal
 
@@ -65,11 +71,15 @@
 **Steps**:
 
 1. Paste 3 valid GEDS URLs (one per line):
-   ```
+
+   ```texttext
+
    https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=ou%3DTBS-SCT%2Cou%3DTBS-SCT%2Cou%3DGOC%2Co%3DGC%2Cc%3DCA
    https://canada.ca/some/geds/export
    https://sage-geds.gc.ca/another/export
+
    ```
+
 2. Verify validation summary shows: "✓ 3 valid URLs"
 3. Click **"Import from 3 GEDS URLs"** button
 
@@ -91,13 +101,17 @@
 **Steps**:
 
 1. Paste a mix of valid and invalid URLs:
-   ```
+
+   ```texttext
+
    https://geds-sage.gc.ca/en/GEDS?pgid=026&dn=test1
    https://evil.com/fake-geds-export
    http://geds-sage.gc.ca/insecure
    https://canada.ca/valid-geds
    not-a-url
+
    ```
+
 2. Observe validation summary
 
 **Expected Results**:
@@ -124,9 +138,13 @@
 **Steps**:
 
 1. Paste a valid-looking but non-existent GEDS URL:
-   ```
+
+   ```texttext
+
    https://geds-sage.gc.ca/en/GEDS?pgid=999&dn=nonexistent
+
    ```
+
 2. Click **"Import from 1 GEDS URL"**
 
 **Expected Results**:
@@ -239,12 +257,16 @@
 **Steps**:
 
 1. Before import, check temp directory:
+
    ```bash
+
    # On Mac/Linux
    ls -la /tmp/geds-*
    # Or
    ls -la /private/tmp/claude/-Users-ojdavis-Claude-Code-OrgTree/*/scratchpad/geds-*
+
    ```
+
 2. Import 3 GEDS URLs
 3. **During** import, check temp directory again (files should exist briefly)
 4. **After** import completes, check temp directory again
@@ -362,6 +384,7 @@ After testing GEDS URL import, verify these existing features:
 If you encounter issues during testing, please report with:
 
 ```markdown
+
 **Scenario**: [e.g., Single Valid URL Import]
 **Steps**:
 
@@ -375,6 +398,7 @@ If you encounter issues during testing, please report with:
 **Console Errors**: [paste any errors from browser console]
 **Server Logs**: [paste relevant server output]
 **Screenshots**: [if applicable]
+
 ```
 
 ---

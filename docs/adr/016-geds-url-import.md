@@ -35,7 +35,7 @@ Enable users to import GEDS (Government Electronic Directory Services) organizat
 > - File size limit: **50MB per XML file** to prevent memory issues
 > - Request timeout: **30 seconds** per download to prevent hanging
 > - Max URLs per request: **10 URLs** to prevent abuse
-
+>
 > [!NOTE]
 > **Storage & Cleanup**:
 >
@@ -105,14 +105,17 @@ No database schema changes required. Existing audit log and import tables are su
 **Request Body**:
 
 ```typescript
+
 {
   urls: string[]  // Array of GEDS XML download URLs (max 10)
 }
+
 ```
 
 **Response**:
 
 ```typescript
+
 {
   results: Array<{
     url: string;
@@ -129,6 +132,7 @@ No database schema changes required. Existing audit log and import tables are su
     error?: string;
   }>;
 }
+
 ```
 
 **Implementation Logic**:
@@ -138,6 +142,7 @@ No database schema changes required. Existing audit log and import tables are su
 3. For each URL (sequential processing):
 
    ```typescript
+
    const tempFile = path.join(os.tmpdir(), `geds-${Date.now()}-${index}.xml`);
    try {
      // Download
@@ -169,6 +174,7 @@ No database schema changes required. Existing audit log and import tables are su
    } finally {
      await cleanupTempFile(tempFile);
    }
+
    ```
 
 4. Return results array with per-URL status
@@ -182,9 +188,12 @@ No database schema changes required. Existing audit log and import tables are su
 #### [MODIFY] [server/src/index.ts](file:///Users/ojdavis/Claude%20Code/OrgTree/server/src/index.ts)
 
 - Import and mount new GEDS import route:
+
   ```typescript
+
   import gedsImportRoutes from './routes/geds-import.js';
   app.use('/api/organizations', gedsImportRoutes);
+
   ```
 
 #### [MODIFY] [scripts/parse-geds-xml.ts](file:///Users/ojdavis/Claude%20Code/OrgTree/scripts/parse-geds-xml.ts)
@@ -195,10 +204,12 @@ No database schema changes required. Existing audit log and import tables are su
 - Script becomes thin wrapper:
 
   ```typescript
+
   import { parseGedsXml } from '../src/services/geds-parser.service.js';
 
   const parsed = await parseGedsXml(inputFile);
   await fs.writeFile(outputFile, JSON.stringify(parsed, null, 2));
+
   ```
 
 ### Frontend
@@ -225,6 +236,7 @@ No database schema changes required. Existing audit log and import tables are su
 **Component Structure**:
 
 ```typescript
+
 interface GedsUrlImporterProps {
   organizationId: string;
   onImportComplete: () => void;
@@ -237,6 +249,7 @@ interface ImportResult {
   stats?: { departments: number; people: number; ...detailedStats };
   error?: string;
 }
+
 ```
 
 **UX Flow**:
@@ -257,13 +270,15 @@ interface ImportResult {
 
 **UI Layout**:
 
-```
+```texttext
+
 ┌─────────────────────────────────────┐
 │ Import Data                         │
 ├─────────────────────────────────────┤
 │ [Upload CSV] [Upload GEDS XML]      │
 │ [Import from GEDS URLs]   ← NEW     │
 └─────────────────────────────────────┘
+
 ```
 
 #### [NEW] [src/api/geds.ts](file:///Users/ojdavis/Claude%20Code/OrgTree/src/api/geds.ts)
@@ -273,6 +288,7 @@ interface ImportResult {
 **Functions**:
 
 ```typescript
+
 export interface GedsImportResult {
   url: string;
   status: 'success' | 'failed';
@@ -297,6 +313,7 @@ export async function importGedsUrls(
     body: JSON.stringify({ urls }),
   });
 }
+
 ```
 
 ## Verification Plan

@@ -37,6 +37,7 @@ Chosen option: **React Context API**, because OrgTree's state management needs a
 **Authentication Context** (`src/contexts/AuthContext.tsx`):
 
 ```typescript
+
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
@@ -56,11 +57,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 // Hook for components
 export const useAuth = () => useContext(AuthContext);
+
 ```
 
 **Socket Context** (`src/contexts/SocketContext.tsx`):
 
 ```typescript
+
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
@@ -77,17 +80,20 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 };
 
 export const useSocket = () => useContext(SocketContext);
+
 ```
 
 **Usage in Components**:
 
 ```typescript
+
 function AdminDashboard() {
   const { user } = useAuth();
   const { socket } = useSocket();
 
   // Component logic
 }
+
 ```
 
 ### Positive Consequences
@@ -176,6 +182,7 @@ OrgTree uses **fetch-on-demand** pattern instead of global state cache:
 **Pattern**:
 
 ```typescript
+
 function DepartmentList() {
   const [departments, setDepartments] = useState<Department[]>([]);
 
@@ -190,6 +197,7 @@ function DepartmentList() {
 
   return <div>{/* render departments */}</div>;
 }
+
 ```
 
 **Rationale**:
@@ -210,6 +218,7 @@ function DepartmentList() {
 **1. Split Contexts**: Separate concerns to avoid unnecessary re-renders
 
 ```typescript
+
 // ✅ Good: Separate contexts
 <AuthProvider>
   <SocketProvider>
@@ -219,23 +228,28 @@ function DepartmentList() {
 
 // ❌ Bad: Single context with all state
 <AppStateProvider> // Any change re-renders everything
+
 ```
 
 **2. Memoization**: Use `useMemo` for expensive computations
 
 ```typescript
+
 const sortedDepartments = useMemo(
   () => departments.sort((a, b) => a.name.localeCompare(b.name)),
   [departments]
 );
+
 ```
 
 **3. Component Memoization**: Prevent re-renders with `React.memo`
 
 ```typescript
+
 const DepartmentNode = React.memo(({ department, theme }) => {
   // Only re-renders if department or theme changes
 });
+
 ```
 
 ## Context Structure

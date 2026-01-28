@@ -34,6 +34,7 @@ OrgTree uses **SQLite** with the following configuration:
 Migrations are currently implemented as **inline startup checks** in [db.ts](file:///Users/ojdavis/Claude%20Code/OrgTree/server/src/db.ts):
 
 ```typescript
+
 // Example: Current migration pattern in db.ts
 try {
   const tableInfo = db.prepare('PRAGMA table_info(users)').all();
@@ -46,6 +47,7 @@ try {
 } catch (err) {
   console.error('Migration error:', err);
 }
+
 ```
 
 **Current Migration Types in db.ts**:
@@ -79,15 +81,15 @@ OrgTree already has a robust backup system in place:
 
 | Branch    | Environment | Trigger                   | URL                                  |
 | --------- | ----------- | ------------------------- | ------------------------------------ |
-| `develop` | Staging     | CI success + workflow_run | https://orgtree-staging.onrender.com |
-| `main`    | Production  | CI success + workflow_run | https://orgtree-app.onrender.com     |
+| `develop` | Staging     | CI success + workflow_run | <https://orgtree-staging.onrender.com> |
+| `main`    | Production  | CI success + workflow_run | <https://orgtree-app.onrender.com>     |
 
 ---
 
 ## 2. Gap Analysis
 
 ### 2.1 Current Limitations
-
+>
 > [!CAUTION]
 > **Critical Gap**: No mechanism exists to revert schema changes once applied. Migrations are forward-only.
 
@@ -123,6 +125,7 @@ SQLite has limited schema alteration capabilities:
 Add automatic backup creation before any migration runs:
 
 ```typescript
+
 // server/src/services/migration-backup.service.ts [NEW]
 
 export async function createPreMigrationBackup(): Promise<string> {
@@ -131,6 +134,7 @@ export async function createPreMigrationBackup(): Promise<string> {
   await createBackup(backupPath);
   return backupPath;
 }
+
 ```
 
 #### 3.1.2 GitHub Actions Pre-Deploy Backup
@@ -138,12 +142,14 @@ export async function createPreMigrationBackup(): Promise<string> {
 Modify [cd.yml](file:///Users/ojdavis/Claude%20Code/OrgTree/.github/workflows/cd.yml) to create backups before deployments:
 
 ```yaml
+
 - name: Create pre-deployment backup
   run: |
     curl -X POST "https://orgtree-app.onrender.com/api/admin/backup" \
       -H "Authorization: Bearer ${{ secrets.BACKUP_API_TOKEN }}" \
       -H "Content-Type: application/json" \
       -d '{"type": "pre-deployment"}'
+
 ```
 
 ---
@@ -155,6 +161,7 @@ Modify [cd.yml](file:///Users/ojdavis/Claude%20Code/OrgTree/.github/workflows/cd
 Track applied migrations with a dedicated table:
 
 ```sql
+
 CREATE TABLE IF NOT EXISTS _migrations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   version TEXT NOT NULL UNIQUE,
@@ -163,24 +170,28 @@ CREATE TABLE IF NOT EXISTS _migrations (
   checksum TEXT,
   rollback_sql TEXT
 );
+
 ```
 
 #### 3.2.2 Migration File Structure
 
 Migrate from inline code to versioned migration files:
 
-```
+```texttext
+
 server/
 └── migrations/
     ├── 001_initial_schema.ts
     ├── 002_add_sharing_columns.ts
     ├── 003_add_organization_members.ts
     └── ...
+
 ```
 
 Each migration file exports `up()` and `down()` functions:
 
 ```typescript
+
 // server/migrations/004_add_is_discoverable.ts
 
 export const version = '004';
@@ -208,6 +219,7 @@ export const rollbackSQL = `
   DROP TABLE users;
   ALTER TABLE users_new RENAME TO users;
 `;
+
 ```
 
 ---
@@ -219,6 +231,7 @@ export const rollbackSQL = `
 Create a migration runner that handles up/down migrations:
 
 ```typescript
+
 // server/src/services/migration-runner.service.ts [NEW]
 
 interface MigrationFile {
@@ -248,6 +261,7 @@ export async function runMigrations(direction: 'up' | 'down' = 'up') {
     }
   }
 }
+
 ```
 
 #### 3.3.2 CLI Commands
@@ -255,6 +269,7 @@ export async function runMigrations(direction: 'up' | 'down' = 'up') {
 Add migration CLI commands to `package.json`:
 
 ```json
+
 {
   "scripts": {
     "migrate": "tsx scripts/migrate.ts up",
@@ -263,6 +278,7 @@ Add migration CLI commands to `package.json`:
     "migrate:create": "tsx scripts/migrate.ts create"
   }
 }
+
 ```
 
 ---
@@ -282,6 +298,7 @@ Define three rollback strategies based on severity:
 #### 3.4.2 Rollback Decision Tree
 
 ```mermaid
+
 flowchart TD
     A[Issue Detected] --> B{Data Corruption?}
     B -->|No| C{Schema Issue?}
@@ -293,11 +310,13 @@ flowchart TD
     E --> I[Run migrate:down]
     D --> J[Restore from Backup]
     G --> K[Rollback Deployment]
+
 ```
 
 #### 3.4.3 Automated Rollback Script
 
 ```bash
+
 #!/bin/bash
 # server/scripts/rollback.sh
 
@@ -319,6 +338,7 @@ case "$1" in
     echo "Usage: ./rollback.sh [migration|backup|full] [backup-file]"
     ;;
 esac
+
 ```
 
 ---
@@ -330,6 +350,7 @@ esac
 Update [cd.yml](file:///Users/ojdavis/Claude%20Code/OrgTree/.github/workflows/cd.yml) with rollback capabilities:
 
 ```yaml
+
 deploy-production:
   steps:
     - name: Create pre-deployment backup
@@ -352,11 +373,13 @@ deploy-production:
         curl -X POST "${{ secrets.ROLLBACK_API_URL }}" \
           -H "Authorization: Bearer ${{ secrets.API_TOKEN }}" \
           -d '{"backupId": "${{ steps.backup.outputs.backup_id }}"}'
+
 ```
 
 #### 3.5.2 Health Check with Migration Verification
 
 ```yaml
+
 - name: Verify migrations
   run: |
     MIGRATION_STATUS=$(curl -s "$HEALTH_URL/api/migrations/status")
@@ -366,6 +389,7 @@ deploy-production:
       echo "❌ Migrations failed - $PENDING pending"
       exit 1
     fi
+
 ```
 
 ---
@@ -410,6 +434,7 @@ deploy-production:
 **When to Use**: Schema change caused issues, data is intact
 
 ```bash
+
 # 1. Check current migration status
 npm run migrate:status
 
@@ -421,6 +446,7 @@ npm run migrate:status
 
 # 4. Restart application
 pm2 restart orgtree
+
 ```
 
 ### 5.2 Backup Restore Procedure
@@ -428,6 +454,7 @@ pm2 restart orgtree
 **When to Use**: Data corruption detected
 
 ```bash
+
 # 1. List available backups
 npm run backup:list
 
@@ -441,6 +468,7 @@ npm run backup:restore orgtree-backup-2026-01-25-020000.db
 pm2 restart orgtree
 
 # 5. Notify users of potential data loss window
+
 ```
 
 ### 5.3 Emergency Full Rollback
@@ -448,6 +476,7 @@ pm2 restart orgtree
 **When to Use**: Catastrophic failure, production is down
 
 ```bash
+
 # 1. Stop all traffic (if using load balancer)
 # 2. Stop application
 pm2 stop orgtree
@@ -462,6 +491,7 @@ pm2 start orgtree
 
 # 5. Verify health
 curl https://orgtree-app.onrender.com/api/health
+
 ```
 
 ---
@@ -471,6 +501,7 @@ curl https://orgtree-app.onrender.com/api/health
 ### 6.1 Automated Tests
 
 ```typescript
+
 // server/src/services/migration-runner.service.test.ts
 
 describe('Migration Runner', () => {
@@ -481,6 +512,7 @@ describe('Migration Runner', () => {
   it('should track migration state correctly');
   it('should handle down migration for complex schemas');
 });
+
 ```
 
 ### 6.2 Manual Verification
@@ -553,6 +585,7 @@ describe('Migration Runner', () => {
 ## Appendix A: Migration Template
 
 ```typescript
+
 // server/migrations/XXX_migration_name.ts
 
 import type { Database } from 'better-sqlite3';
@@ -585,6 +618,7 @@ export function down(db: Database): void {
 export const rollbackSQL = `
   -- Manual rollback SQL for emergency use
 `;
+
 ```
 
 ---
@@ -594,6 +628,7 @@ export const rollbackSQL = `
 Since SQLite doesn't support `DROP COLUMN`, use this pattern:
 
 ```sql
+
 -- 1. Begin transaction for atomicity
 BEGIN TRANSACTION;
 
@@ -620,8 +655,9 @@ CREATE INDEX idx_table_name ON table_original(name);
 
 -- 7. Commit transaction
 COMMIT;
-```
 
+```
+>
 > [!WARNING]
 > Table reconstruction locks the table and can be slow for large tables. Schedule during low-traffic periods.
 

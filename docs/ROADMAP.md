@@ -12,7 +12,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 ### Code Quality & Testing
 
 - [x] **TypeScript Migration** - Convert codebase from JavaScript to TypeScript for better type safety ✅ **DONE** (January 7, 2026)
-- [ ] **Increase Test Coverage** - Expand from 210 tests to cover edge cases and integration scenarios (target: 80%+ coverage) 🚀 **IN PROGRESS** (Test Suites: Backend 373 tests, Frontend: 124 tests - **Phase 6: Components & Hooks Coverage Increased**)
+- [ ] **Increase Test Coverage** - Expand from 210 tests to cover edge cases and integration scenarios (target: 80%+ coverage) 🚀 **IN PROGRESS** (Total: 929 tests - Backend: 697 tests, ~73% coverage; Frontend: 232 tests, ~36% coverage)
 - [x] **E2E Testing** - Add end-to-end tests with Playwright or Cypress for critical user flows ✅ **DONE** (January 11, 2026)
 - [x] **ESLint/Prettier Setup** - Enforce code style consistency across the team ✅ **DONE** (January 4, 2026)
 - [x] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces ✅ **DONE** (January 11, 2026)
@@ -96,7 +96,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 ### Medium Priority (Next month)
 
-1. **Increase Test Coverage** - Improve test coverage beyond current 210 tests (Backend: 22%, Frontend: 3%)
+1. **Increase Test Coverage** - Improve test coverage beyond current 210 tests (Backend: ~73%, Frontend: ~36%)
 2. ~~**Database Indexing Audit** - Optimize query performance~~ ✅ **DONE** (January 5, 2026)
 3. ~~**CI/CD Pipeline** - Automate testing and deployment~~ ✅ **DONE** (January 5, 2026)
 4. ~~**ESLint/Prettier Setup** - Enforce code consistency~~ ✅ **DONE**
@@ -174,7 +174,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 **Active Work**:
 
-- ~~Increasing test coverage (currently 497+ tests across frontend and backend)~~ ✅ **DONE** (Moved to maintenance mode, >900 tests now)
+- ~~Increasing test coverage (currently 929 tests: 697 Backend, 232 Frontend)~~ ✅ **DONE** (Backend near goal at 73%, Frontend ongoing at 36%)
 - Performance optimization for large organizations
 - User experience refinements
 
@@ -198,7 +198,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - ✅ **Collapsible Admin Sidebar** - Icon-only mode with localStorage persistence (January 13, 2026)
 - ✅ **Dark Mode Refinements** - Applied to org map, MiniMap, and all components (January 12, 2026)
 - ✅ **Staging Environment** - develop→staging, main→production pipeline with workflow_run trigger (January 21, 2026)
-- ✅ **Test Coverage Expansion** - 900+ tests total (January 25, 2026)
+- ✅ **Test Coverage Expansion** - 929 tests total (January 25, 2026)
 - ✅ **Performance Testing** - Successfully tested 1000+ records with 467ms load time (January 11, 2026)
 - ✅ **E2E Testing** - Playwright tests for critical user flows (January 11, 2026)
 - ✅ **TypeScript Migration** - Full strict mode compilation (January 7, 2026)

@@ -36,6 +36,7 @@ Chosen option: **Socket.IO**, because it provides the most robust real-time comm
 **Server-side** (`server/src/socket.js`):
 
 ```typescript
+
 // Initialize Socket.IO with JWT authentication
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
@@ -48,11 +49,13 @@ socket.join(`org:${orgId}`);
 
 // Emit to all users in organization
 io.to(`org:${orgId}`).emit('department:created', payload);
+
 ```
 
 **Client-side** (`src/contexts/SocketContext.tsx`):
 
 ```typescript
+
 // Connect with authentication
 const socket = io({ auth: { token: accessToken } });
 
@@ -60,6 +63,7 @@ const socket = io({ auth: { token: accessToken } });
 socket.on('department:created', department => {
   // Update UI without page refresh
 });
+
 ```
 
 **Event Flow**:

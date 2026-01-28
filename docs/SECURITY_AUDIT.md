@@ -68,10 +68,12 @@ This security audit reviewed the OrgTree application's authentication and author
 **CVSS:** 7.5
 
 ```javascript
+
 // VULNERABLE: Uses Math.random() - predictable IDs
 const generateId = () => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 };
+
 ```
 
 **Risk:** Attackers can predict/enumerate IDs, leading to IDOR vulnerabilities.
@@ -79,8 +81,10 @@ const generateId = () => {
 **Fix:** Replace with `crypto.randomUUID()`:
 
 ```javascript
+
 import { randomUUID } from 'crypto';
 const id = randomUUID();
+
 ```
 
 ---
@@ -95,12 +99,14 @@ const id = randomUUID();
 **Fix:** Add rate limiting:
 
 ```javascript
+
 const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   message: { message: 'Too many requests' },
 });
 router.use(publicLimiter);
+
 ```
 
 ---
@@ -111,9 +117,11 @@ router.use(publicLimiter);
 **CVSS:** 6.5
 
 ```javascript
+
 // VULNERABLE: No field whitelist validation
 const { personIds, updates } = req.body;
 const result = bulkEditPeople(orgId, personIds, updates, req.user);
+
 ```
 
 **Risk:** Attackers can update unintended fields.
@@ -121,10 +129,12 @@ const result = bulkEditPeople(orgId, personIds, updates, req.user);
 **Fix:** Validate allowed fields:
 
 ```javascript
+
 const allowedFields = ['title', 'departmentId'];
 const sanitizedUpdates = Object.fromEntries(
   Object.entries(updates).filter(([key]) => allowedFields.includes(key))
 );
+
 ```
 
 ---
@@ -216,9 +226,11 @@ Added helmet.js middleware providing:
 Now explicitly specifies HS256 algorithm to prevent algorithm confusion attacks:
 
 ```javascript
+
 const decoded = jwt.verify(token, process.env.JWT_SECRET, {
   algorithms: ['HS256'],
 });
+
 ```
 
 ---
@@ -314,10 +326,12 @@ Removed 15 debug console.log statements from production code.
 **Previous Implementation:**
 
 ```javascript
+
 const tempPassword = randomBytes(9)
   .toString('base64')
   .replace(/[^a-zA-Z0-9]/g, '')
   .slice(0, 12);
+
 ```
 
 **New Implementation:**
@@ -539,21 +553,21 @@ Replaced manual role check (`if (req.user.role !== 'superuser')`) with standard 
 
 ### SHORT-TERM (Next 2 Weeks)
 
-6. [ ] Increase password minimum to 12 characters
-7. [ ] Add complexity requirements to passwords
-8. [ ] Add rate limiting to admin endpoints
-9. [ ] Standardize permission check patterns
-10. [ ] Add array size validation to bulk routes
-11. [ ] Remove debug console.log statements
+1. [ ] Increase password minimum to 12 characters
+2. [ ] Add complexity requirements to passwords
+3. [ ] Add rate limiting to admin endpoints
+4. [ ] Standardize permission check patterns
+5. [ ] Add array size validation to bulk routes
+6. [ ] Remove debug console.log statements
 
 ### MEDIUM-TERM (Next Month)
 
-12. [ ] Implement refresh tokens
-13. [ ] Add CSRF protection
-14. [ ] Improve audit logging coverage
-15. [ ] Add password change verification
-16. [ ] Limit invitation metadata exposure
-17. [ ] Add CSV import size limits
+1. [ ] Implement refresh tokens
+2. [ ] Add CSRF protection
+3. [ ] Improve audit logging coverage
+4. [ ] Add password change verification
+5. [ ] Limit invitation metadata exposure
+6. [ ] Add CSV import size limits
 
 ---
 

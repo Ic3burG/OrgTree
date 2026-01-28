@@ -146,8 +146,8 @@ Create an ADR when making decisions about:
 
 ### ADR Tools
 
-- **adr-tools**: CLI for managing ADRs (https://github.com/npryce/adr-tools)
-- **log4brains**: ADR visualization and browser (https://github.com/thomvaill/log4brains)
+- **adr-tools**: CLI for managing ADRs ([https://github.com/npryce/adr-tools](https://github.com/npryce/adr-tools))
+- **log4brains**: ADR visualization and browser ([https://github.com/thomvaill/log4brains](https://github.com/thomvaill/log4brains))
 
 ### Further Reading
 

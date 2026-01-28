@@ -10,6 +10,7 @@ Implement a privacy-respecting, self-hosted user analytics system to track featu
 Add a new table `analytics_events` via migration pattern:
 
 ```sql
+
 CREATE TABLE analytics_events (
   id TEXT PRIMARY KEY,
   event_name TEXT NOT NULL,
@@ -25,6 +26,7 @@ CREATE TABLE analytics_events (
 CREATE INDEX idx_analytics_events_name ON analytics_events(event_name);
 CREATE INDEX idx_analytics_events_created ON analytics_events(created_at);
 CREATE INDEX idx_analytics_events_session ON analytics_events(session_id);
+
 ```
 
 ## 2. Backend API
