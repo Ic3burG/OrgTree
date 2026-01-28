@@ -22,10 +22,11 @@ ADRs document significant architectural decisions that have been finalized and i
 
 RFCs are proposals for new features or significant changes that are currently under discussion or in progress.
 
-| Title                                               | Status     | Priority |
-| --------------------------------------------------- | ---------- | -------- |
-| [Advanced Sidebar UI](./rfc/advanced-sidebar-ui.md) | 📋 Planned | Medium   |
-| [Search Enhancements](./rfc/search-enhancements.md) | 📋 Planned | Medium   |
+| Title                                                     | Status      | Priority |
+| --------------------------------------------------------- | ----------- | -------- |
+| [Advanced Sidebar UI](./rfc/advanced-sidebar-ui.md)       | 📋 Planned  | Medium   |
+| [Search Enhancements](./rfc/search-enhancements.md)       | 📋 Planned  | Medium   |
+| [Security Audit Phase 2](./rfc/security-audit-phase-2.md) | 💡 Proposed | High     |
 
 ---
 
