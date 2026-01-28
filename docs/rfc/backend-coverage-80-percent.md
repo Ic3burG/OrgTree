@@ -68,14 +68,17 @@ _Focus: Locking down permissions and data mutations._
 - [x] **Test `socket.ts`**: Implement a test harness for Socket.IO to verify event emission and room joining logic.
 - [x] **Fix `geds-download.service.ts`**: Add mock tests for external URL failures (already started but low coverage).
 
-### Phase 4: Route Layer Coverage [/]
+### Phase 4: Route Layer Coverage [x]
 
 - **Target**: `routes/saved-searches.ts`, `routes/organizations.ts`
 - **Goal**: Reach >80% coverage for these routes.
-- **Status**: In Progress
+- **Status**: Completed (January 28, 2026)
 
 - [x] **`routes/saved-searches.ts`** (0% -> 88.88%): Implemented full CRUD tests.
 - [x] **`routes/organizations.ts`** (-> 84.84%): Expanded tests to cover ownership transfer and sharing endpoints.
+- [x] **`routes/member.ts`** (-> 89.74%): Verified administrative operations coverage.
+- [x] **`routes/people.ts`** (-> 89.47%): Fixed timeout issues and verified CRUD flows.
+- [x] **`routes/search.ts`** (-> 95.83%): Added tests for optional auth and error handling.
 
 ## 5. Tooling & Standards
 
