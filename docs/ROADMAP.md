@@ -12,7 +12,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 ### Code Quality & Testing
 
 - [x] **TypeScript Migration** - Convert codebase from JavaScript to TypeScript for better type safety ✅ **DONE** (January 7, 2026)
-- [ ] **Increase Test Coverage** - Expand from 210 tests to cover edge cases and integration scenarios (target: 80%+ coverage) 🚀 **IN PROGRESS** (Total: 929 tests - Backend: 697 tests, ~73% coverage; Frontend: 232 tests, ~36% coverage)
+- [x] **Increase Test Coverage** - Expand from 210 tests to cover edge cases and integration scenarios (target: >80% coverage) ✅ **DONE** (January 28, 2026) - (Total: ~945 tests - Backend: >80% coverage; Frontend: 232 tests)
 - [x] **E2E Testing** - Add end-to-end tests with Playwright or Cypress for critical user flows ✅ **DONE** (January 11, 2026)
 - [x] **ESLint/Prettier Setup** - Enforce code style consistency across the team ✅ **DONE** (January 4, 2026)
 - [x] **Component Refactoring** - Break down large components (DepartmentManager, PersonManager) into smaller, reusable pieces ✅ **DONE** (January 11, 2026)
