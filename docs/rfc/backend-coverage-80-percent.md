@@ -45,13 +45,14 @@ We propose a 4-phase attack plan to reach our goal.
 
 _Focus: Locking down permissions and data mutations._
 
-- [ ] **Rewrite `member.service.test.ts`**: Mock database calls to test all edge cases for member role promotion/demotion.
-- [ ] **Expand `ownership-transfer.service.test.ts`**: specific focus on expiry logic and race conditions.
-- [ ] **Fortify `auth.service.ts`**: Add tests for token refresh failures, mfa-bypass attempts, and session revocation.
+- [x] **Rewrite `member.service.test.ts`**: Mock database calls to test all edge cases for member role promotion/demotion.
+- [x] **Expand `ownership-transfer.service.test.ts`**: specific focus on expiry logic and race conditions.
+- [x] **Fortify `auth.service.ts`**: Add tests for token refresh failures, mfa-bypass attempts, and session revocation.
 
-### Phase 2: Administrative Bulk Operations
+### Phase 2: Administrative Bulk Operations (In Progress)
 
-_Focus: Complex logic with high regression potential._
+- [x] `bulk.service.ts` (Achieved 84.6% coverage)
+      _Focus: Complex logic with high regression potential._
 
 - [ ] **Deep dive `bulk.service.ts`**: This likely contains complex loops and validation logic. We need unit tests for:
   - Partial failures (some items valid, some invalid).

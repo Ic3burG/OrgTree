@@ -95,6 +95,7 @@ describe('Bulk Operations Service', () => {
       const result = bulkDeletePeople(orgId, ['non-existent'], actor);
       expect(result.success).toBe(false);
       expect(result.failedCount).toBe(1);
+      expect(result.failed[0]?.error).toContain('not found');
     });
 
     it('should throw 400 for empty personId array', () => {
@@ -286,7 +287,7 @@ describe('Bulk Operations Service', () => {
       // Try to make d1 (ancestor) a child of d3 (descendant)
       const result = bulkEditDepartments(orgId, [d1], { parentId: d3 }, actor);
       expect(result.success).toBe(false);
-      expect(result.failed[0].error).toContain('descendant');
+      expect(result.failed[0]?.error).toContain('descendant');
     });
 
     it('should throw 400 if self-parenting', () => {
