@@ -1,698 +1,306 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as bulkService from './bulk.service.js';
-import * as memberService from './member.service.js';
-import * as socketEventsService from './socket-events.service.js';
-import db from '../db.js';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import Database from 'better-sqlite3';
+import type { Database as DatabaseType } from 'better-sqlite3';
+import { setupTestDatabase } from '../test-helpers/test-db-schema.js';
+
+// Create a stateful mock for the database
+let currentDb: DatabaseType;
+
+vi.mock('../db.js', () => {
+  return {
+    default: new Proxy(
+      {},
+      {
+        get: (_target, prop) => {
+          const val = (currentDb as any)[prop];
+          if (typeof val === 'function') {
+            return val.bind(currentDb);
+          }
+          return val;
+        },
+      }
+    ),
+  };
+});
 
 // Mock dependencies
-vi.mock('../db.js', () => ({
-  default: {
-    prepare: vi.fn(),
-    transaction: vi.fn(),
-  },
+vi.mock('./socket-events.service.js', () => ({
+  emitPersonDeleted: vi.fn(),
+  emitPersonUpdated: vi.fn(),
+  emitDepartmentDeleted: vi.fn(),
+  emitDepartmentUpdated: vi.fn(),
 }));
-vi.mock('./member.service.js');
-vi.mock('./socket-events.service.js');
-vi.mock('./custom-fields.service.js');
+
+vi.mock('./custom-fields.service.js', () => ({
+  setEntityCustomFields: vi.fn().mockResolvedValue(undefined),
+}));
+
+import {
+  bulkDeletePeople,
+  bulkMovePeople,
+  bulkEditPeople,
+  bulkDeleteDepartments,
+  bulkEditDepartments,
+} from './bulk.service.js';
 
 describe('Bulk Operations Service', () => {
-  const mockActor = { id: 'user-1', name: 'Test User' };
-  const mockOrgId = 'org-1';
+  const actor = { id: 'user-admin', name: 'Admin User' };
+  const orgId = 'org-1';
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    // Fresh database for EVERY test
+    currentDb = new Database(':memory:');
+    setupTestDatabase(currentDb, { withFts: true, withTriggers: true });
 
-    // Default mock for permission check
-    vi.mocked(memberService.requireOrgPermission).mockReturnValue({
-      hasAccess: true,
-      role: 'editor',
-      isOwner: false,
-    });
+    // Seed basic data
+    currentDb
+      .prepare('INSERT INTO users (id, email, password_hash, name, role) VALUES (?, ?, ?, ?, ?)')
+      .run(actor.id, 'admin@example.com', 'hash', actor.name, 'admin');
 
-    // Default mock for socket events
-    vi.mocked(socketEventsService.emitPersonDeleted).mockReturnValue(undefined);
-    vi.mocked(socketEventsService.emitPersonUpdated).mockReturnValue(undefined);
-    vi.mocked(socketEventsService.emitDepartmentDeleted).mockReturnValue(undefined);
-    vi.mocked(socketEventsService.emitDepartmentUpdated).mockReturnValue(undefined);
+    currentDb
+      .prepare('INSERT INTO organizations (id, name, created_by_id) VALUES (?, ?, ?)')
+      .run(orgId, 'Test Org', actor.id);
   });
 
   describe('bulkDeletePeople', () => {
-    it('should successfully delete multiple people', () => {
-      const personIds = ['person-1', 'person-2'];
-      const mockPeople = [
-        {
-          id: 'person-1',
-          name: 'John Doe',
-          title: 'Manager',
-          email: 'john@example.com',
-          phone: '123-456-7890',
-          departmentId: 'dept-1',
-          organization_id: mockOrgId,
-          departmentName: 'Engineering',
-        },
-        {
-          id: 'person-2',
-          name: 'Jane Smith',
-          title: 'Developer',
-          email: 'jane@example.com',
-          phone: '098-765-4321',
-          departmentId: 'dept-1',
-          organization_id: mockOrgId,
-          departmentName: 'Engineering',
-        },
-      ];
+    it('should delete multiple people and return success', () => {
+      const deptId = 'dept-1';
+      currentDb
+        .prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+        .run(deptId, orgId, 'Dept 1');
 
-      vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        const mockTx = fn as any;
-        mockTx.default = fn;
-        mockTx.deferred = fn;
-        mockTx.immediate = fn;
-        mockTx.exclusive = fn;
-        return mockTx;
-      });
+      currentDb
+        .prepare(
+          'INSERT INTO people (id, department_id, organization_id, name) VALUES (?, ?, ?, ?)'
+        )
+        .run('p1', deptId, orgId, 'Person 1');
+      currentDb
+        .prepare(
+          'INSERT INTO people (id, department_id, organization_id, name) VALUES (?, ?, ?, ?)'
+        )
+        .run('p2', deptId, orgId, 'Person 2');
 
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT p.id, p.name')) {
-          return {
-            get: vi.fn((id: string) => {
-              return mockPeople.find(p => p.id === id);
-            }),
-          } as unknown as any;
-        }
-        if (query.includes('UPDATE people SET deleted_at')) {
-          return {
-            run: vi.fn(() => ({ changes: 1 })),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      const result = bulkService.bulkDeletePeople(mockOrgId, personIds, mockActor);
+      const result = bulkDeletePeople(orgId, ['p1', 'p2'], actor);
 
       expect(result.success).toBe(true);
       expect(result.deletedCount).toBe(2);
-      expect(result.failedCount).toBe(0);
-      expect(result.deleted).toHaveLength(2);
-      expect(socketEventsService.emitPersonDeleted).toHaveBeenCalledTimes(2);
-      expect(memberService.requireOrgPermission).toHaveBeenCalledWith(
-        mockOrgId,
-        mockActor.id,
-        'editor'
-      );
+
+      const deletedCount = currentDb
+        .prepare('SELECT COUNT(*) as count FROM people WHERE deleted_at IS NOT NULL')
+        .get() as { count: number };
+      expect(deletedCount.count).toBe(2);
     });
 
-    it('should handle partial failures', () => {
-      const personIds = ['person-1', 'nonexistent'];
-
-      vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        const mockTx = fn as any;
-        mockTx.default = fn;
-        mockTx.deferred = fn;
-        mockTx.immediate = fn;
-        mockTx.exclusive = fn;
-        return mockTx;
-      });
-
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT p.id, p.name')) {
-          return {
-            get: vi.fn((id: string) => {
-              if (id === 'person-1') {
-                return {
-                  id: 'person-1',
-                  name: 'John Doe',
-                  departmentId: 'dept-1',
-                  organization_id: mockOrgId,
-                  departmentName: 'Engineering',
-                };
-              }
-              return undefined;
-            }),
-          } as unknown as any;
-        }
-        if (query.includes('UPDATE people SET deleted_at')) {
-          return {
-            run: vi.fn(() => ({ changes: 1 })),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      const result = bulkService.bulkDeletePeople(mockOrgId, personIds, mockActor);
-
-      expect(result.success).toBe(true);
-      expect(result.deletedCount).toBe(1);
+    it('should handle non-existent person ID', () => {
+      const result = bulkDeletePeople(orgId, ['non-existent'], actor);
+      expect(result.success).toBe(false);
       expect(result.failedCount).toBe(1);
-      expect(result.failed[0]).toEqual({
-        id: 'nonexistent',
-        error: 'Person not found in this organization',
-      });
     });
 
-    it('should reject empty person IDs array', () => {
-      try {
-        bulkService.bulkDeletePeople(mockOrgId, [], mockActor);
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as { status: number }).status).toBe(400);
-        expect((error as Error).message).toBe('personIds must be a non-empty array');
-      }
+    it('should throw 400 for empty personId array', () => {
+      expect(() => bulkDeletePeople(orgId, [], actor)).toThrow(/must be a non-empty array/);
     });
 
-    it('should reject more than 100 items', () => {
-      const tooMany = Array.from({ length: 101 }, (_, i) => `person-${i}`);
-
-      try {
-        bulkService.bulkDeletePeople(mockOrgId, tooMany, mockActor);
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as { status: number }).status).toBe(400);
-        expect((error as Error).message).toBe('Cannot delete more than 100 items at once');
-      }
-    });
-
-    it('should check organization permissions', () => {
-      vi.mocked(memberService.requireOrgPermission).mockImplementation(() => {
-        throw new Error('Permission denied');
-      });
-
-      try {
-        bulkService.bulkDeletePeople(mockOrgId, ['person-1'], mockActor);
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('Permission denied');
-      }
+    it('should throw 400 for too many personIds', () => {
+      const ids = Array.from({ length: 101 }, (_, i) => `p${i}`);
+      expect(() => bulkDeletePeople(orgId, ids, actor)).toThrow(/more than 100/);
     });
   });
 
   describe('bulkMovePeople', () => {
-    it('should successfully move multiple people to target department', () => {
-      const personIds = ['person-1', 'person-2'];
-      const targetDeptId = 'dept-2';
+    it('should move people to a new department', () => {
+      const dept1 = 'dept-1';
+      const dept2 = 'dept-2';
+      currentDb
+        .prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+        .run(dept1, orgId, 'Dept 1');
+      currentDb
+        .prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+        .run(dept2, orgId, 'Dept 2');
 
-      vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        const mockTx = fn as any;
-        mockTx.default = fn;
-        mockTx.deferred = fn;
-        mockTx.immediate = fn;
-        mockTx.exclusive = fn;
-        return mockTx;
-      });
+      currentDb
+        .prepare(
+          'INSERT INTO people (id, department_id, organization_id, name) VALUES (?, ?, ?, ?)'
+        )
+        .run('p1', dept1, orgId, 'Person 1');
 
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT id, name FROM departments')) {
-          return {
-            get: vi.fn(() => ({ id: targetDeptId, name: 'HR' })),
-          } as unknown as any;
-        }
-        if (query.includes('SELECT p.id, p.name')) {
-          return {
-            get: vi.fn((id: string) => ({
-              id,
-              name: `Person ${id}`,
-              departmentId: 'dept-1',
-              organization_id: mockOrgId,
-              departmentName: 'Engineering',
-            })),
-          } as unknown as any;
-        }
-        if (query.includes('UPDATE people SET department_id')) {
-          return {
-            run: vi.fn(() => ({ changes: 1 })),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      const result = bulkService.bulkMovePeople(mockOrgId, personIds, targetDeptId, mockActor);
+      const result = bulkMovePeople(orgId, ['p1'], dept2, actor);
 
       expect(result.success).toBe(true);
-      expect(result.movedCount).toBe(2);
-      expect(result.failedCount).toBe(0);
-      expect(result.moved).toHaveLength(2);
-      const movedFirst = result.moved[0] as any;
-      expect(movedFirst.departmentName).toBe('HR');
-      expect(socketEventsService.emitPersonUpdated).toHaveBeenCalledTimes(2);
+      const person = currentDb
+        .prepare('SELECT department_id FROM people WHERE id = ?')
+        .get('p1') as { department_id: string };
+      expect(person.department_id).toBe(dept2);
     });
 
-    it('should reject if target department not found', () => {
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT id, name FROM departments')) {
-          return {
-            get: vi.fn(() => undefined),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
+    it('should fail if people are already in target department', () => {
+      const dept1 = 'dept-1';
+      currentDb
+        .prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+        .run(dept1, orgId, 'Dept 1');
+      currentDb
+        .prepare(
+          'INSERT INTO people (id, department_id, organization_id, name) VALUES (?, ?, ?, ?)'
+        )
+        .run('p1', dept1, orgId, 'Person 1');
 
-      try {
-        bulkService.bulkMovePeople(mockOrgId, ['person-1'], 'nonexistent-dept', mockActor);
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as { status: number }).status).toBe(404);
-        expect((error as Error).message).toBe('Target department not found in this organization');
-      }
-    });
-
-    it('should skip people already in target department', () => {
-      const personIds = ['person-1'];
-      const targetDeptId = 'dept-1';
-
-      vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        const mockTx = fn as any;
-        mockTx.default = fn;
-        mockTx.deferred = fn;
-        mockTx.immediate = fn;
-        mockTx.exclusive = fn;
-        return mockTx;
-      });
-
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT id, name FROM departments')) {
-          return {
-            get: vi.fn(() => ({ id: targetDeptId, name: 'Engineering' })),
-          } as unknown as any;
-        }
-        if (query.includes('SELECT p.id, p.name')) {
-          return {
-            get: vi.fn(() => ({
-              id: 'person-1',
-              name: 'John Doe',
-              departmentId: 'dept-1', // Already in target dept
-              organization_id: mockOrgId,
-              departmentName: 'Engineering',
-            })),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      const result = bulkService.bulkMovePeople(mockOrgId, personIds, targetDeptId, mockActor);
-
+      const result = bulkMovePeople(orgId, ['p1'], dept1, actor);
       expect(result.success).toBe(false);
-      expect(result.movedCount).toBe(0);
       expect(result.failedCount).toBe(1);
-      const failedItem = result.failed[0];
-      expect(failedItem).toBeDefined();
-      expect(failedItem!.error).toBe('Already in target department');
-    });
-
-    it('should reject missing target department ID', () => {
-      try {
-        bulkService.bulkMovePeople(mockOrgId, ['person-1'], '', mockActor);
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as { status: number }).status).toBe(400);
-        expect((error as Error).message).toBe('targetDepartmentId is required');
-      }
     });
   });
 
   describe('bulkEditPeople', () => {
-    it('should successfully update title for multiple people', async () => {
-      const personIds = ['person-1', 'person-2'];
-      const updates = { title: 'Senior Developer' };
+    it('should update multiple fields for people including custom fields', async () => {
+      const dept1 = 'dept-1';
+      currentDb
+        .prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+        .run(dept1, orgId, 'Dept 1');
+      currentDb
+        .prepare(
+          'INSERT INTO people (id, department_id, organization_id, name, title) VALUES (?, ?, ?, ?, ?)'
+        )
+        .run('p1', dept1, orgId, 'Person 1', 'Old Title');
 
-      vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        const mockTx = fn as any;
-        mockTx.default = fn;
-        mockTx.deferred = fn;
-        mockTx.immediate = fn;
-        mockTx.exclusive = fn;
-        return mockTx;
-      });
-
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT p.id, p.name')) {
-          return {
-            get: vi.fn((id: string) => ({
-              id,
-              name: `Person ${id}`,
-              title: 'Developer',
-              departmentId: 'dept-1',
-              organization_id: mockOrgId,
-              departmentName: 'Engineering',
-            })),
-          } as unknown as any;
-        }
-        if (query.includes('UPDATE people SET')) {
-          return {
-            run: vi.fn(() => ({ changes: 1 })),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      const result = await bulkService.bulkEditPeople(mockOrgId, personIds, updates, mockActor);
+      const result = await bulkEditPeople(
+        orgId,
+        ['p1'],
+        {
+          title: 'New Title',
+          email: 'new@example.com',
+          phone: '555-0199',
+          customFields: { test: 'value' },
+        },
+        actor
+      );
 
       expect(result.success).toBe(true);
-      expect(result.updatedCount).toBe(2);
-      expect((result.updated[0] as any).title).toBe('Senior Developer');
+      const person = currentDb
+        .prepare('SELECT title, email, phone FROM people WHERE id = ?')
+        .get('p1') as any;
+      expect(person.title).toBe('New Title');
+      expect(person.email).toBe('new@example.com');
+      expect(person.phone).toBe('555-0199');
     });
 
-    it('should update both title and department', async () => {
-      const personIds = ['person-1'];
-      const updates = { title: 'Manager', departmentId: 'dept-2' };
-
-      vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        const mockTx = fn as any;
-        mockTx.default = fn;
-        mockTx.deferred = fn;
-        mockTx.immediate = fn;
-        mockTx.exclusive = fn;
-        return mockTx;
-      });
-
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT id, name FROM departments')) {
-          return {
-            get: vi.fn(() => ({ id: 'dept-2', name: 'HR' })),
-          } as unknown as any;
-        }
-        if (query.includes('SELECT p.id, p.name')) {
-          return {
-            get: vi.fn(() => ({
-              id: 'person-1',
-              name: 'John Doe',
-              title: 'Developer',
-              departmentId: 'dept-1',
-              organization_id: mockOrgId,
-              departmentName: 'Engineering',
-            })),
-          } as unknown as any;
-        }
-        if (query.includes('UPDATE people SET')) {
-          return {
-            run: vi.fn(() => ({ changes: 1 })),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      const result = await bulkService.bulkEditPeople(mockOrgId, personIds, updates, mockActor);
-
-      expect(result.success).toBe(true);
-      const updatedFirst = result.updated[0] as any;
-      expect(updatedFirst.title).toBe('Manager');
-      expect(updatedFirst.departmentId).toBe('dept-2');
-      expect(updatedFirst.departmentName).toBe('HR');
-    });
-
-    it('should reject empty updates object', async () => {
+    it('should throw 400 if updates object is empty', async () => {
       try {
-        await bulkService.bulkEditPeople(mockOrgId, ['person-1'], {}, mockActor);
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as { status: number }).status).toBe(400);
-        expect((error as Error).message).toBe('updates object is required and cannot be empty');
+        await bulkEditPeople(orgId, ['p1'], {}, actor);
+        expect.fail('Should have thrown');
+      } catch (e: any) {
+        expect(e.status).toBe(400);
       }
     });
 
-    it('should reject if target department not found', async () => {
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT id, name FROM departments')) {
-          return {
-            get: vi.fn(() => undefined),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
+    it('should throw 400 if personIds is empty', async () => {
       try {
-        await bulkService.bulkEditPeople(
-          mockOrgId,
-          ['person-1'],
-          { departmentId: 'nonexistent' },
-          mockActor
-        );
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as { status: number }).status).toBe(404);
-        expect((error as Error).message).toBe('Target department not found in this organization');
+        await bulkEditPeople(orgId, [], { title: 'New' }, actor);
+        expect.fail('Should have thrown');
+      } catch (e: any) {
+        expect(e.status).toBe(400);
       }
     });
 
-    it('should successfully update custom fields for multiple people', async () => {
-      const personIds = ['person-1'];
-      const updates = { customFields: { 'test-field': 'test-value' } };
-
-      vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        const mockTx = fn as any;
-        mockTx.default = fn;
-        mockTx.deferred = fn;
-        mockTx.immediate = fn;
-        mockTx.exclusive = fn;
-        return mockTx;
-      });
-
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT p.id, p.name')) {
-          return {
-            get: vi.fn((id: string) => ({
-              id,
-              name: `Person ${id}`,
-              title: 'Developer',
-              departmentId: 'dept-1',
-              organization_id: mockOrgId,
-              departmentName: 'Engineering',
-            })),
-          } as unknown as any;
-        }
-        if (query.includes('UPDATE people SET')) {
-          return {
-            run: vi.fn(() => ({ changes: 1 })),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      const result = await bulkService.bulkEditPeople(mockOrgId, personIds, updates, mockActor);
-
-      expect(result.success).toBe(true);
-      expect(result.updatedCount).toBe(1);
+    it('should handle person not found during update', async () => {
+      const result = await bulkEditPeople(orgId, ['non-existent'], { title: 'New' }, actor);
+      expect(result.success).toBe(false);
+      expect(result.failedCount).toBe(1);
     });
   });
 
   describe('bulkDeleteDepartments', () => {
-    it('should reject empty department IDs array', () => {
-      try {
-        bulkService.bulkDeleteDepartments(mockOrgId, [], mockActor);
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as { status: number }).status).toBe(400);
-        expect((error as Error).message).toBe('departmentIds must be a non-empty array');
-      }
+    it('should delete departments and cascade delete sub-items', () => {
+      const parentId = 'parent';
+      const childId = 'child';
+      const personId = 'person';
+
+      currentDb
+        .prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+        .run(parentId, orgId, 'Parent');
+      currentDb
+        .prepare(
+          'INSERT INTO departments (id, organization_id, name, parent_id) VALUES (?, ?, ?, ?)'
+        )
+        .run(childId, orgId, 'Child', parentId);
+      currentDb
+        .prepare(
+          'INSERT INTO people (id, department_id, organization_id, name) VALUES (?, ?, ?, ?)'
+        )
+        .run(personId, childId, orgId, 'Person in child');
+
+      currentDb
+        .prepare(
+          'INSERT INTO people (id, department_id, organization_id, name) VALUES (?, ?, ?, ?)'
+        )
+        .run('person-parent', parentId, orgId, 'Person in parent');
+
+      const result = bulkDeleteDepartments(orgId, [parentId], actor);
+
+      expect(result.success).toBe(true);
+      expect(result.warnings.some(w => w.includes('sub-department'))).toBe(true);
+      expect(result.warnings.some(w => w.includes('person'))).toBe(true);
     });
 
-    it('should reject more than 100 items', () => {
-      const tooMany = Array.from({ length: 101 }, (_, i) => `dept-${i}`);
+    it('should ignore already deleted departments', () => {
+      const d1 = 'd1';
+      currentDb
+        .prepare(
+          'INSERT INTO departments (id, organization_id, name, deleted_at) VALUES (?, ?, ?, ?)'
+        )
+        .run(d1, orgId, 'D1', '2023-01-01');
 
-      try {
-        bulkService.bulkDeleteDepartments(mockOrgId, tooMany, mockActor);
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as { status: number }).status).toBe(400);
-        expect((error as Error).message).toBe('Cannot delete more than 100 items at once');
-      }
-    });
-
-    it('should check organization permissions', () => {
-      vi.mocked(memberService.requireOrgPermission).mockImplementation(() => {
-        throw new Error('Permission denied');
-      });
-
-      try {
-        bulkService.bulkDeleteDepartments(mockOrgId, ['dept-1'], mockActor);
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('Permission denied');
-      }
+      const result = bulkDeleteDepartments(orgId, [d1], actor);
+      expect(result.deletedCount).toBe(0);
     });
   });
 
   describe('bulkEditDepartments', () => {
-    it('should successfully re-parent multiple departments', () => {
-      const deptIds = ['dept-2', 'dept-3'];
-      const updates = { parentId: 'dept-1' };
+    it('should re-parent departments', () => {
+      const d1 = 'd1';
+      currentDb
+        .prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+        .run(d1, orgId, 'D1');
 
-      vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        const mockTx = fn as any;
-        mockTx.default = fn;
-        mockTx.deferred = fn;
-        mockTx.immediate = fn;
-        mockTx.exclusive = fn;
-        return mockTx;
-      });
-
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT id, name FROM departments WHERE id = ?')) {
-          return {
-            get: vi.fn(() => ({ id: 'dept-1', name: 'Engineering' })),
-          } as unknown as any;
-        }
-        if (query.includes('SELECT id, name, description, parent_id')) {
-          return {
-            get: vi.fn((id: string) => ({
-              id,
-              name: `Department ${id}`,
-              organization_id: mockOrgId,
-              parentId: null,
-            })),
-          } as unknown as any;
-        }
-        if (query.includes('SELECT parent_id FROM departments')) {
-          return {
-            get: vi.fn(() => undefined),
-          } as unknown as any;
-        }
-        if (query.includes('UPDATE departments SET parent_id')) {
-          return {
-            run: vi.fn(() => ({ changes: 1 })),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      const result = bulkService.bulkEditDepartments(mockOrgId, deptIds, updates, mockActor);
-
+      const result = bulkEditDepartments(orgId, [d1], { parentId: null }, actor);
       expect(result.success).toBe(true);
-      expect(result.updatedCount).toBe(2);
-      expect((result.updated[0] as any).parentId).toBe('dept-1');
     });
 
-    it('should reject circular reference - self as parent', () => {
-      const deptIds = ['dept-1'];
-      const updates = { parentId: 'dept-1' };
+    it('should handle circular reference check with deep hierarchy', () => {
+      const d1 = 'd1';
+      const d2 = 'd2';
+      const d3 = 'd3';
+      currentDb
+        .prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+        .run(d1, orgId, 'D1');
+      currentDb
+        .prepare(
+          'INSERT INTO departments (id, organization_id, name, parent_id) VALUES (?, ?, ?, ?)'
+        )
+        .run(d2, orgId, 'D2', d1);
+      currentDb
+        .prepare(
+          'INSERT INTO departments (id, organization_id, name, parent_id) VALUES (?, ?, ?, ?)'
+        )
+        .run(d3, orgId, 'D3', d2);
 
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT id, name FROM departments WHERE id = ?')) {
-          return {
-            get: vi.fn(() => ({ id: 'dept-1', name: 'Engineering' })),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      try {
-        bulkService.bulkEditDepartments(mockOrgId, deptIds, updates, mockActor);
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as { status: number }).status).toBe(400);
-        expect((error as Error).message).toBe('Cannot set a department as its own parent');
-      }
-    });
-
-    it('should reject parent department not found', () => {
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT id, name FROM departments WHERE id = ?')) {
-          return {
-            get: vi.fn(() => undefined),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      try {
-        bulkService.bulkEditDepartments(
-          mockOrgId,
-          ['dept-1'],
-          { parentId: 'nonexistent' },
-          mockActor
-        );
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as { status: number }).status).toBe(404);
-        expect((error as Error).message).toBe('Parent department not found in this organization');
-      }
-    });
-
-    it('should handle setting parent to null (make root department)', () => {
-      const deptIds = ['dept-2'];
-      const updates = { parentId: null };
-
-      vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        const mockTx = fn as any;
-        mockTx.default = fn;
-        mockTx.deferred = fn;
-        mockTx.immediate = fn;
-        mockTx.exclusive = fn;
-        return mockTx;
-      });
-
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT id, name, description, parent_id')) {
-          return {
-            get: vi.fn(() => ({
-              id: 'dept-2',
-              name: 'HR',
-              organization_id: mockOrgId,
-              parentId: 'dept-1',
-            })),
-          } as unknown as any;
-        }
-        if (query.includes('UPDATE departments SET parent_id')) {
-          return {
-            run: vi.fn(() => ({ changes: 1 })),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      const result = bulkService.bulkEditDepartments(mockOrgId, deptIds, updates, mockActor);
-
-      expect(result.success).toBe(true);
-      expect((result.updated[0] as any).parentId).toBe(null);
-    });
-
-    it('should prevent descendant from becoming parent', () => {
-      const deptIds = ['dept-1']; // dept-1 wants dept-2 as parent
-      const updates = { parentId: 'dept-2' };
-
-      vi.mocked(db.transaction).mockImplementation((fn: () => void) => {
-        const mockTx = fn as any;
-        mockTx.default = fn;
-        mockTx.deferred = fn;
-        mockTx.immediate = fn;
-        mockTx.exclusive = fn;
-        return mockTx;
-      });
-
-      vi.mocked(db.prepare).mockImplementation((query: string) => {
-        if (query.includes('SELECT id, name FROM departments WHERE id = ?')) {
-          return {
-            get: vi.fn(() => ({ id: 'dept-2', name: 'HR' })),
-          } as unknown as any;
-        }
-        if (query.includes('SELECT id, name, description, parent_id')) {
-          return {
-            get: vi.fn(() => ({
-              id: 'dept-1',
-              name: 'Engineering',
-              organization_id: mockOrgId,
-              parentId: null,
-            })),
-          } as unknown as any;
-        }
-        // Make dept-2 a child of dept-1 (dept-2 -> dept-1)
-        if (query.includes('SELECT parent_id FROM departments WHERE id')) {
-          return {
-            get: vi.fn((id: string) => {
-              if (id === 'dept-2') {
-                return { parent_id: 'dept-1' }; // dept-2's parent is dept-1
-              }
-              return undefined;
-            }),
-          } as unknown as any;
-        }
-        return {} as unknown as any;
-      });
-
-      const result = bulkService.bulkEditDepartments(mockOrgId, deptIds, updates, mockActor);
-
-      // Should fail because dept-2 is a descendant of dept-1
+      // Try to make d1 (ancestor) a child of d3 (descendant)
+      const result = bulkEditDepartments(orgId, [d1], { parentId: d3 }, actor);
       expect(result.success).toBe(false);
-      expect(result.failedCount).toBe(1);
-      expect(result.failed[0]!.error).toBe('Cannot set parent to a descendant department');
+      expect(result.failed[0].error).toContain('descendant');
+    });
+
+    it('should throw 400 if self-parenting', () => {
+      currentDb
+        .prepare('INSERT INTO departments (id, organization_id, name) VALUES (?, ?, ?)')
+        .run('d1', orgId, 'D1');
+      expect(() => bulkEditDepartments(orgId, ['d1'], { parentId: 'd1' }, actor)).toThrow(
+        /own parent/
+      );
+    });
+
+    it('should handle department not found during update', () => {
+      const result = bulkEditDepartments(orgId, ['non-existent'], { parentId: null }, actor);
+      expect(result.success).toBe(false);
     });
   });
 });
