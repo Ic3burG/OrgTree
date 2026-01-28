@@ -35,7 +35,9 @@ describe('Ownership Transfer Security', () => {
     for (const table of tables) {
       try {
         db.prepare(`DELETE FROM ${table}`).run();
-      } catch (e) {}
+      } catch {
+        // Ignore table deletion errors
+      }
     }
 
     // Setup Users

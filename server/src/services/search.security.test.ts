@@ -33,8 +33,8 @@ describe('Search & User Discovery Security', () => {
     for (const table of tables) {
       try {
         db.prepare(`DELETE FROM ${table}`).run();
-      } catch (_e) {
-        // console.error(`Failed to clear table ${table}:`, _e);
+      } catch {
+        // Ignore table deletion errors
       }
     }
 
