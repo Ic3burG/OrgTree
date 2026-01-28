@@ -35,10 +35,14 @@ export async function discoverMigrations(): Promise<Migration[]> {
   const discoveredMigrations: Migration[] = [];
   for (const file of files) {
     const migrationPath = path.join(versionsDir, file);
-    // In ESM, we need to use file:// URLs for absolute paths on Windows or some Linux setups
-    const module = await import(`file://${migrationPath}`);
-    if (module.migration) {
-      discoveredMigrations.push(module.migration);
+    try {
+      // In ESM, we need to use file:// URLs for absolute paths on Windows or some Linux setups
+      const module = await import(`file://${migrationPath}`);
+      if (module.migration) {
+        discoveredMigrations.push(module.migration);
+      }
+    } catch (err) {
+      console.warn(`Skipping migration file ${file} due to load error:`, err);
     }
   }
 
