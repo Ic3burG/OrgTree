@@ -45,9 +45,13 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [x] **Monitoring & Alerting** - Sentry for error tracking ✅ **DONE** (January 4, 2026)
 - [ ] **APM (Application Performance Monitoring)** - New Relic, DataDog, or similar
 - [x] **CI/CD Pipeline** - GitHub Actions for automated testing and deployment ✅ **DONE** (January 5, 2026)
-- [x] **Staging Environment** - Separate staging server for pre-production testing ✅ **DONE** (January 21, 2026)
 - [x] **Database Migration Rollback** - Strategy and scripts for safe rollbacks (see [docs/adr/012-database-migration-rollback.md](adr/012-database-migration-rollback.md)) ✅ **DONE** (January 25, 2026)
 - [x] **Health Check Enhancement** - Add memory usage, disk space, connection pool metrics ✅ **DONE** (January 8, 2026)
+
+### Long-term Infrastructure Goals
+
+- [ ] **Re-implement Staging Environment** - Separate staging server for pre-production testing (Temporarily suspended to conserve pipeline minutes)
+
 
 ### Scalability & Architecture
 
@@ -197,7 +201,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - ✅ **Star/Favorite People** - Mark key individuals with starred filter in search (January 14, 2026)
 - ✅ **Collapsible Admin Sidebar** - Icon-only mode with localStorage persistence (January 13, 2026)
 - ✅ **Dark Mode Refinements** - Applied to org map, MiniMap, and all components (January 12, 2026)
-- ✅ **Staging Environment** - develop→staging, main→production pipeline with workflow_run trigger (January 21, 2026)
+- ~~✅ **Staging Environment** - develop→staging, main→production pipeline with workflow_run trigger (January 21, 2026)~~ (Suspended Jan 28, 2026)
 - ✅ **Test Coverage Expansion** - 929 tests total (January 25, 2026)
 - ✅ **Performance Testing** - Successfully tested 1000+ records with 467ms load time (January 11, 2026)
 - ✅ **E2E Testing** - Playwright tests for critical user flows (January 11, 2026)
