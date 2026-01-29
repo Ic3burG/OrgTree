@@ -52,7 +52,6 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 - [ ] **Re-implement Staging Environment** - Separate staging server for pre-production testing (Temporarily suspended to conserve pipeline minutes)
 
-
 ### Scalability & Architecture
 
 - [x] **Database Connection Pooling** - Better-sqlite3 optimization for concurrent requests ✅ **DONE** (January 11, 2026)
@@ -142,7 +141,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 11. ~~**Rainbow Color Theme** - Add vibrant rainbow color theme cycling through spectrum by depth~~ ✅ **DONE** (January 22, 2026)
 12. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
 13. **Bulk Invitations** - Send invitations to multiple emails at once
-14. **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
+14. **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails (see [docs/rfc/invitation-enhancements.md](rfc/invitation-enhancements.md))
 15. ~~**GEDS URL Import** - Automated download, parse, and import from GEDS download URLs (see [docs/adr/016-geds-url-import.md](adr/016-geds-url-import.md))~~ ✅ **DONE** (January 25, 2026)
 
 16. ~~**User Discovery & Privacy Controls** - Autocomplete existing users when sharing organizations, with a privacy opt-out in security settings~~ ✅ **DONE** (January 25, 2026)
