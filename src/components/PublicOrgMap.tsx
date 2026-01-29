@@ -20,6 +20,7 @@ import Toolbar from './Toolbar';
 import SearchOverlay from './PublicSearchOverlay';
 import { calculateLayout } from '../utils/layoutEngine';
 import { getDepthColors } from '../utils/colors';
+import { buildAncestorMap } from '../utils/departmentHierarchy';
 import api from '../api/client';
 import type { Department, Person, CustomFieldDefinition } from '../types/index.js';
 
@@ -61,7 +62,11 @@ interface NodeData {
 /**
  * Transform API data to React Flow format
  */
-function transformToFlowData(departments: Department[]): {
+function transformToFlowData(
+  departments: Department[],
+  onHover: (id: string | null, isHovering: boolean) => void,
+  onSelect: (id: string) => void
+): {
   nodes: Node<NodeData>[];
   edges: Edge[];
 } {
@@ -95,6 +100,9 @@ function transformToFlowData(departments: Department[]): {
         description: dept.description || '',
         people: dept.people || [],
         isExpanded: false,
+        isHighlighted: false,
+        onHover: (isHovering: boolean) => onHover(dept.id, isHovering),
+        onSelect: () => onSelect(dept.id),
       },
     });
 
@@ -133,12 +141,20 @@ function PublicOrgMapContent(): React.JSX.Element {
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
   const [fullDepartments, setFullDepartments] = useState<Department[]>([]);
 
+  // Hierarchy highlighting state
+  const [hoveredDepartmentId, setHoveredDepartmentId] = useState<string | null>(null);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | null>(null);
+
   const { isDarkMode } = useTheme();
   const { fitView, zoomIn, zoomOut, setCenter } = useReactFlow();
 
   // Select person for detail panel
   const handleSelectPerson = useCallback((person: Person): void => {
     setSelectedPerson(person);
+    // Highlight the person's department
+    if (person.department_id) {
+      setSelectedDepartmentId(person.department_id);
+    }
   }, []);
 
   // Toggle department expansion
@@ -176,6 +192,78 @@ function PublicOrgMapContent(): React.JSX.Element {
     [edges, layoutDirection, setNodes, handleSelectPerson]
   );
 
+  // Memoize ancestor map
+  const ancestorMap = useMemo(() => {
+    return buildAncestorMap(fullDepartments);
+  }, [fullDepartments]);
+
+  const handleNodeHover = useCallback((id: string | null, isHovering: boolean) => {
+    setHoveredDepartmentId(isHovering ? id : null);
+  }, []);
+
+  const handleNodeSelect = useCallback((id: string) => {
+    setSelectedDepartmentId(prev => (prev === id ? null : id));
+  }, []);
+
+  // Effect to update highlighting
+  useEffect(() => {
+    const activeId = hoveredDepartmentId || selectedDepartmentId;
+
+    if (!activeId) {
+      // Clear highlighting
+      setNodes(nds =>
+        nds.map(n =>
+          n.data.isHighlighted ? { ...n, data: { ...n.data, isHighlighted: false } } : n
+        )
+      );
+      setEdges(eds =>
+        eds.map(e => ({
+          ...e,
+          style: { stroke: '#94a3b8', strokeWidth: 2, transition: 'all 200ms ease-in-out' },
+          zIndex: 0,
+          animated: false,
+        }))
+      );
+      return;
+    }
+
+    const ancestors = ancestorMap.get(activeId) || [];
+    const highlightedIds = new Set([activeId, ...ancestors]);
+    const highlightColor = isDarkMode ? '#60a5fa' : '#2563eb';
+
+    setNodes(nds =>
+      nds.map(n => {
+        const shouldHighlight = highlightedIds.has(n.id);
+        if (n.data.isHighlighted !== shouldHighlight) {
+          return { ...n, data: { ...n.data, isHighlighted: shouldHighlight } };
+        }
+        return n;
+      })
+    );
+
+    setEdges(eds =>
+      eds.map(e => {
+        const isHighlighted = highlightedIds.has(e.target) && highlightedIds.has(e.source);
+        return {
+          ...e,
+          style: {
+            stroke: isHighlighted ? highlightColor : '#94a3b8',
+            strokeWidth: isHighlighted ? 4 : 2,
+            transition: 'all 200ms ease-in-out',
+            opacity: isHighlighted ? 1 : 0.3,
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: isHighlighted ? highlightColor : '#94a3b8',
+            width: 20,
+            height: 20,
+          },
+          zIndex: isHighlighted ? 1000 : 0,
+        };
+      })
+    );
+  }, [hoveredDepartmentId, selectedDepartmentId, ancestorMap, setNodes, setEdges, isDarkMode]);
+
   // Load organization data from public API
   useEffect(() => {
     async function loadData(): Promise<void> {
@@ -209,7 +297,11 @@ function PublicOrgMapContent(): React.JSX.Element {
         }
 
         // Transform API data to React Flow format
-        const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(org.departments);
+        const { nodes: parsedNodes, edges: parsedEdges } = transformToFlowData(
+          org.departments,
+          handleNodeHover,
+          handleNodeSelect
+        );
 
         // Store departments for search
         setFullDepartments(org.departments);
@@ -243,6 +335,7 @@ function PublicOrgMapContent(): React.JSX.Element {
   // Close detail panel
   const handleCloseDetail = useCallback((): void => {
     setSelectedPerson(null);
+    setSelectedDepartmentId(null);
   }, []);
 
   // Expand all departments
@@ -328,7 +421,7 @@ function PublicOrgMapContent(): React.JSX.Element {
         setTimeout(() => setHighlightedNodeId(null), 3000);
       }
     },
-    [nodes, setCenter]
+    [nodes, setCenter, setHighlightedNodeId]
   );
 
   // Handle search result selection
@@ -377,7 +470,7 @@ function PublicOrgMapContent(): React.JSX.Element {
         }, 300);
       }
     },
-    [handleNavigateToDepartment, nodes, setCenter, handleToggleExpand]
+    [handleNavigateToDepartment, nodes, setCenter, handleToggleExpand, setHighlightedNodeId]
   );
 
   // Update nodes with callbacks and theme

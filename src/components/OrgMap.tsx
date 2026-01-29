@@ -22,6 +22,7 @@ import ExportButton from './map/ExportButton';
 import PersonForm from './admin/PersonForm';
 import { calculateLayout } from '../utils/layoutEngine';
 import { getDepthColors } from '../utils/colors';
+import { buildAncestorMap } from '../utils/departmentHierarchy';
 import { exportToPng, exportToPdf } from '../utils/exportUtils';
 import { useToast } from './ui/Toast';
 import { useRealtimeUpdates } from '../hooks/useRealtimeUpdates';
@@ -63,32 +64,6 @@ type Direction = 'TB' | 'LR';
 const nodeTypes: NodeTypes = {
   department: DepartmentNodeComponent,
 };
-
-// Build a map of department ID to ancestor IDs (including self)
-export function buildAncestorMap(departments: Department[]): Map<string, string[]> {
-  const deptMap = new Map(departments.map(d => [d.id, d]));
-  const ancestorMap = new Map<string, string[]>();
-
-  function getAncestors(deptId: string, visited = new Set<string>()): string[] {
-    if (visited.has(deptId)) return [];
-    visited.add(deptId);
-
-    const dept = deptMap.get(deptId);
-    if (!dept) return [];
-
-    const ancestors = [deptId];
-    if (dept.parent_id) {
-      ancestors.push(...getAncestors(dept.parent_id, visited));
-    }
-    return ancestors;
-  }
-
-  departments.forEach(dept => {
-    ancestorMap.set(dept.id, getAncestors(dept.id));
-  });
-
-  return ancestorMap;
-}
 
 // Default edge styling
 const defaultEdgeOptions = {

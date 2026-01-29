@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
-import OrgMap, { buildAncestorMap } from './OrgMap';
-import { Department } from '../types';
+import OrgMap from './OrgMap';
 import { ReactFlowProvider } from 'reactflow';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import api from '../api/client';
@@ -112,24 +111,6 @@ vi.mock('./Toolbar', () => ({
 vi.mock('./DetailPanel', () => ({ default: () => <div data-testid="detail-panel" /> }));
 vi.mock('./admin/PersonForm', () => ({ default: () => <div data-testid="person-form" /> }));
 vi.mock('./map/ExportButton', () => ({ default: () => <div data-testid="export-button" /> }));
-
-describe('OrgMap Logic', () => {
-  describe('buildAncestorMap', () => {
-    it('should build correct ancestor chains for a simple hierarchy', () => {
-      const departments: Department[] = [
-        { id: '1', name: 'Root', parent_id: null, people: [] },
-        { id: '2', name: 'Child', parent_id: '1', people: [] },
-        { id: '3', name: 'Grandchild', parent_id: '2', people: [] },
-      ] as unknown as Department[];
-
-      const ancestorMap = buildAncestorMap(departments);
-
-      expect(ancestorMap.get('1')).toEqual(['1']);
-      expect(ancestorMap.get('2')).toEqual(['2', '1']);
-      expect(ancestorMap.get('3')).toEqual(['3', '2', '1']);
-    });
-  });
-});
 
 describe('OrgMap Component', () => {
   const mockOrg = {

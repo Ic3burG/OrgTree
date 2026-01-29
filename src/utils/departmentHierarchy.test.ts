@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildHierarchyChain, getHierarchyPath } from './departmentHierarchy';
+import { buildHierarchyChain, getHierarchyPath, buildAncestorMap } from './departmentHierarchy';
 import { Department } from '../types';
 
 describe('buildHierarchyChain', () => {
@@ -113,5 +113,33 @@ describe('getHierarchyPath', () => {
   it('should format hierarchy path with custom separator', () => {
     const path = getHierarchyPath('3', departments, ' / ');
     expect(path).toBe('CEO / Ops / Eng');
+  });
+});
+
+describe('buildAncestorMap', () => {
+  const departments = [
+    { id: '1', name: 'Root', parent_id: null } as unknown as Department,
+    { id: '2', name: 'Child1', parent_id: '1' } as unknown as Department,
+    { id: '3', name: 'Child2', parent_id: '1' } as unknown as Department,
+    { id: '4', name: 'Grandchild', parent_id: '2' } as unknown as Department,
+  ];
+
+  it('should build map of ancestors for all departments', () => {
+    const ancestorMap = buildAncestorMap(departments);
+
+    // Root has no ancestors (except self)
+    expect(ancestorMap.get('1')).toEqual(['1']);
+
+    // Child1 has Root as ancestor
+    expect(ancestorMap.get('2')).toEqual(['2', '1']);
+
+    // Grandchild has Child1 and Root as ancestors
+    expect(ancestorMap.get('4')).toEqual(expect.arrayContaining(['4', '2', '1']));
+    expect(ancestorMap.get('4')).toHaveLength(3);
+  });
+
+  it('should handle empty departments array', () => {
+    const ancestorMap = buildAncestorMap([]);
+    expect(ancestorMap.size).toBe(0);
   });
 });

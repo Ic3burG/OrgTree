@@ -58,3 +58,40 @@ export function getHierarchyPath(
   const chain = buildHierarchyChain(departmentId, departments);
   return chain.map(level => level.name).join(separator);
 }
+
+/**
+ * Build a map of department ID to ancestor IDs (including self)
+ * @param departments - List of departments
+ * @returns Map where key is department ID and value is array of ancestor IDs
+ */
+export function buildAncestorMap(departments: Department[]): Map<string, string[]> {
+  const deptMap = new Map(departments.map(d => [d.id, d]));
+  const ancestorMap = new Map<string, string[]>();
+
+  function getAncestors(deptId: string, visited = new Set<string>()): string[] {
+    if (visited.has(deptId)) return [];
+    visited.add(deptId);
+
+    const dept = deptMap.get(deptId);
+    if (!dept) return [];
+
+    const ancestors = [deptId];
+    if (dept.parent_id) {
+      ancestors.push(...getAncestors(dept.parent_id, visited));
+    } else {
+      // Handle public API camelCase which might occur in public views
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const parentId = (dept as any).parentId;
+      if (parentId) {
+        ancestors.push(...getAncestors(parentId, visited));
+      }
+    }
+    return ancestors;
+  }
+
+  departments.forEach(dept => {
+    ancestorMap.set(dept.id, getAncestors(dept.id));
+  });
+
+  return ancestorMap;
+}
