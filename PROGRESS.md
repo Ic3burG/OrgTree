@@ -14,6 +14,13 @@
 - **Update "Last Updated" date**: January 28, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
 
+**Session 49 (January 28, 2026 - Documentation Reorganization & Testing Strategy)**:
+
+- ✅ **RFC Promotion**: Promoted `docs/rfc/backend-coverage-80-percent.md` to `docs/adr/020-backend-test-coverage-80-percent.md` following completion.
+- ✅ **Strategy Update**: Updated `ADR-014: Test Coverage Expansion` to include "Phase 5: Maintenance & Frontend Quality", linking the new coverage maintenance and frontend E2E RFCs.
+- ✅ **Index Cleanup**: Updated `docs/README.md` and `docs/adr/README.md` to include missing ADRs (018, 019, 020) and correct the RFC registry.
+- ✅ **Branch Sync**: Merged all changes to `develop` and synced with `main`.
+
 **Session 48 (January 28, 2026 - Backend Coverage Phase 4)**:
 
 - ✅ **Phase 4 Complete**: Achieved high test coverage for core route files.

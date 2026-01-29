@@ -48,69 +48,84 @@ While the project has made significant strides in test coverage (increasing from
 Target the known "zero coverage" or "low coverage" files to ensure safety for infrastructure tasks.
 
 1. **Backup Service (`server/src/services/backup.service.ts`)** ✅
-    - Test backup creation (file system interaction).
-    - Test backup restoration (database locking/swapping).
-    - Test retention policy (cleanup of old backups).
-    - _Mocking Strategy_: Mock `fs` and `better-sqlite3` backup API.
+   - Test backup creation (file system interaction).
+   - Test backup restoration (database locking/swapping).
+   - Test retention policy (cleanup of old backups).
+   - _Mocking Strategy_: Mock `fs` and `better-sqlite3` backup API.
 
 2. **Database & Migration Utilities (`server/src/db.ts`)** ✅
-    - Test migration execution logic.
-    - Test schema validation helpers.
-    - _Note_: Refactored into `db-init.ts` for testability.
+   - Test migration execution logic.
+   - Test schema validation helpers.
+   - _Note_: Refactored into `db-init.ts` for testability.
 
 3. **Analytics Service (`server/src/services/analytics.service.ts`)**
-    - Ensure data retention policies are tested.
-    - Test aggregation queries for dashboards.
+   - Ensure data retention policies are tested.
+   - Test aggregation queries for dashboards.
 
 ### Phase 2: Frontend Core Logic (Hooks & Contexts) (✅ Completed)
 
 Move beyond simple component rendering tests to testing the "brain" of the frontend.
 
 1. **Auth Context (`src/contexts/AuthContext.tsx`)** ✅
-    - Test session persistence/hydration.
-    - Test auto-logout on 401.
-    - Test permission helper functions (`canManage`, `isOwner`).
+   - Test session persistence/hydration.
+   - Test auto-logout on 401.
+   - Test permission helper functions (`canManage`, `isOwner`).
 
 2. **Socket Integration (`src/contexts/SocketContext.tsx`)** ✅
-    - Test event subscription/unsubscription.
-    - Test state updates on incoming events.
-    - Test connection/disconnection logic.
+   - Test event subscription/unsubscription.
+   - Test state updates on incoming events.
+   - Test connection/disconnection logic.
 
 3. **Form Logic & Validation** ✅
-    - **Person Form**: Test validation (email, required fields) and custom field integration.
-    - **Department Form**: Test circular reference prevention logic and hierarchy filtering.
+   - **Person Form**: Test validation (email, required fields) and custom field integration.
+   - **Department Form**: Test circular reference prevention logic and hierarchy filtering.
 
 ### Phase 3: Complex Interactive Components (✅ Completed)
 
 1. **Organization Map Logic (`src/components/OrgMap.tsx` & helpers)** ✅
-    - Test layout calculation (Dagre integration) in isolation.
-    - Test search result highlighting logic.
-    - Test toolbar actions (Expand/Collapse/Layout).
+   - Test layout calculation (Dagre integration) in isolation.
+   - Test search result highlighting logic.
+   - Test toolbar actions (Expand/Collapse/Layout).
 
 2. **Search & Navigation UI** ✅
-    - **Search Overlay**: Test result display and type filtering.
-    - **Hierarchical Selector**: Test keyboard navigation and node expansion.
+   - **Search Overlay**: Test result display and type filtering.
+   - **Hierarchical Selector**: Test keyboard navigation and node expansion.
 
 3. **Data Import UI (`src/components/admin/ImportModal.tsx`)** ✅
-    - Test file selection and parsing state transitions.
-    - Test error display for malformed files.
-    - Test duplicate warning presentations.
+   - Test file selection and parsing state transitions.
+   - Test error display for malformed files.
+   - Test duplicate warning presentations.
 
 ### Phase 4: Integration & Edge Cases (✅ Completed)
 
 1. **Cascade Delete Scenarios** ✅
-    - Verify (via integration test) that deleting a department soft-deletes all descendants and unassigns/soft-deletes people.
+   - Verify (via integration test) that deleting a department soft-deletes all descendants and unassigns/soft-deletes people.
 
 2. **Concurrency** ✅
-    - Simulate concurrent edits to the same organization in backend tests to verify optimistic locking or last-write-wins behavior (ensure no crashes).
+   - Simulate concurrent edits to the same organization in backend tests to verify optimistic locking or last-write-wins behavior (ensure no crashes).
 
 3. **Large Dataset Performance** ✅
-    - Add regression tests for performance-critical endpoints (e.g., `GET /org-map`) to ensure response times remain within limits for known dataset sizes.
+   - Add regression tests for performance-critical endpoints (e.g., `GET /org-map`) to ensure response times remain within limits for known dataset sizes.
+
+### Phase 5: Maintenance & Frontend Quality (💡 Proposed)
+
+With the backend reaching its >80% target, focus shifts to sustaining those gains and bringing the frontend to parity.
+
+1. **Coverage Maintenance & Ratcheting**
+   - Implement a automated ratchet mechanism to prevent coverage degradation.
+   - Enforce strict thresholds in CI/CD.
+   - See [RFC: Automated Coverage Maintenance & Ratcheting](../rfc/coverage-maintenance-ratcheting.md).
+
+2. **Frontend Quality & E2E Expansion**
+   - Target 60% frontend statement coverage.
+   - Expand Playwright suite to cover all Critical User Journeys (CUJs).
+   - Introduce Visual Regression Testing (VRT).
+   - See [RFC: Frontend Quality & E2E Testing Strategy](../rfc/frontend-quality-e2e-strategy.md).
 
 ## Success Metrics
 
-- **Backend Statement Coverage**: > 80%
-- **Frontend Statement Coverage**: > 60% (Higher is better, but UI is harder to cover fully without brittle tests)
+- **Backend Statement Coverage**: > 80% (✅ **Completed**: 80.82% on Jan 28, 2026)
+- **Frontend Statement Coverage**: > 60% (⏳ **In Progress**: 36%)
 - **Critical Paths**: 100% coverage on Auth, Permissions, and Data Import/Export logic.
 - **CI Execution Time**: Maintain < 5 minutes total (use parallelization if needed).
 
