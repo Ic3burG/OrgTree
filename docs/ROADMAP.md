@@ -143,7 +143,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 12. **Social Authentication** - Sign in with Google and Sign in with Apple (OAuth integration)
 13. **Bulk Invitations** - Send invitations to multiple emails at once
 14. **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails
-15. **GEDS URL Import** - Automated download, parse, and import from GEDS download URLs (see [docs/adr/016-geds-url-import.md](adr/016-geds-url-import.md))
+15. ~~**GEDS URL Import** - Automated download, parse, and import from GEDS download URLs (see [docs/adr/016-geds-url-import.md](adr/016-geds-url-import.md))~~ ✅ **DONE** (January 25, 2026)
 
 16. ~~**User Discovery & Privacy Controls** - Autocomplete existing users when sharing organizations, with a privacy opt-out in security settings~~ ✅ **DONE** (January 25, 2026)
 
