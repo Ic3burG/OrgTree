@@ -36,6 +36,7 @@ An Architecture Decision Record (ADR) is a document that captures an important a
 | [017](017-search-system-rebuild.md)                | Search System Rebuild                  | Accepted | 2026-01-24 | database, search, performance, resilience      |
 | [018](018-organization-ownership-transfer.md)      | Organization Ownership Transfer        | Accepted | 2026-01-27 | ownership, security, workflow                  |
 | [019](019-trigram-search-enhancements.md)          | Trigram Search Enhancements            | Accepted | 2026-01-27 | search, database, performance, ux              |
+| [020](020-backend-test-coverage-80-percent.md)     | Backend Test Coverage (80% Achieved)   | Accepted | 2026-01-28 | testing, backend, code-quality                 |
 
 ## Reading Guide
 
