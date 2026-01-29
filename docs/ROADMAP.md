@@ -100,7 +100,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 ### Medium Priority (Next month)
 
-1. **Increase Test Coverage** - Improve test coverage beyond current 210 tests (Backend: ~73%, Frontend: ~36%)
+1. ~~**Increase Test Coverage** - Improve test coverage (Backend: >80% coverage)~~ ✅ **DONE** (January 28, 2026)
 2. ~~**Database Indexing Audit** - Optimize query performance~~ ✅ **DONE** (January 5, 2026)
 3. ~~**CI/CD Pipeline** - Automate testing and deployment~~ ✅ **DONE** (January 5, 2026)
 4. ~~**ESLint/Prettier Setup** - Enforce code consistency~~ ✅ **DONE**
