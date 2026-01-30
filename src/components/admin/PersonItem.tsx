@@ -1,6 +1,16 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Mail, Phone, Edit, Trash2, CheckSquare, Square, Star } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  Edit,
+  Trash2,
+  CheckSquare,
+  Square,
+  Star,
+  GitBranch,
+  ChevronUp,
+} from 'lucide-react';
 import type { Person, CustomFieldDefinition, Department } from '../../types/index.js';
 import OrganizationalHierarchy from '../OrganizationalHierarchy';
 import { buildHierarchyChain } from '../../utils/departmentHierarchy';
@@ -34,6 +44,7 @@ const PersonItem = memo(function PersonItem({
 }: PersonItemProps): React.JSX.Element {
   const navigate = useNavigate();
   const { orgId } = useParams<{ orgId: string }>();
+  const [isHierarchyExpanded, setIsHierarchyExpanded] = useState(false);
 
   // Build hierarchy chain if departments are available
   const hierarchy =
@@ -107,25 +118,51 @@ const PersonItem = memo(function PersonItem({
               </span>
             )}
 
-            {/* Show hierarchy tooltip/indicator if hierarchy is available */}
+            {/* Show hierarchy toggle if hierarchy is available */}
             {hierarchy.length > 1 && (
-              <div
-                className="hidden group-hover:block absolute left-full ml-3 top-0 z-10 w-max max-w-lg bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-3"
-                onClick={e => e.stopPropagation()}
+              <button
+                onClick={e => {
+                  e.stopPropagation();
+                  setIsHierarchyExpanded(!isHierarchyExpanded);
+                }}
+                className={`p-1 rounded-md transition-colors ${
+                  isHierarchyExpanded
+                    ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+                    : 'text-gray-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400'
+                }`}
+                title={isHierarchyExpanded ? 'Hide reporting chain' : 'Show reporting chain'}
               >
-                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
-                  Reporting Chain
-                </div>
-                <OrganizationalHierarchy
-                  hierarchy={hierarchy}
-                  currentDepartmentId={person.department_id}
-                  onNavigate={handleDepartmentNavigate}
-                  compact={true}
-                  showIcons={true}
-                />
-              </div>
+                <GitBranch size={16} />
+              </button>
             )}
           </div>
+
+          {/* Expanded Hierarchy View */}
+          {isHierarchyExpanded && hierarchy.length > 1 && (
+            <div className="mb-3 p-3 bg-gray-50 dark:bg-slate-800/50 rounded-lg border border-gray-100 dark:border-slate-700 animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Reporting Chain
+                </div>
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    setIsHierarchyExpanded(false);
+                  }}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  <ChevronUp size={14} />
+                </button>
+              </div>
+              <OrganizationalHierarchy
+                hierarchy={hierarchy}
+                currentDepartmentId={person.department_id}
+                onNavigate={handleDepartmentNavigate}
+                compact={false}
+                showIcons={true}
+              />
+            </div>
+          )}
 
           {person.title && (
             <p className="text-sm text-gray-600 dark:text-slate-400 mb-3 truncate">
