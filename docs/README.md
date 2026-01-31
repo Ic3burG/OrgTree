@@ -21,6 +21,7 @@ ADRs document significant architectural decisions that have been finalized and i
 | 019 | [Trigram Search Enhancements](./adr/019-trigram-search-enhancements.md)               | ✅ Implemented | 2026-01-27 |
 | 020 | [Backend Test Coverage (80% Achieved)](./adr/020-backend-test-coverage-80-percent.md) | ✅ Implemented | 2026-01-28 |
 | 021 | [Frontend Quality & E2E Testing Strategy](./adr/021-frontend-quality-e2e-strategy.md) | ✅ Implemented | 2026-01-29 |
+| 022 | [Advanced Sidebar UI](./adr/022-advanced-sidebar-ui.md)                             | ✅ Implemented | 2026-01-31 |
 
 ## [Requests for Comments (RFCs)](./rfc/)
 
@@ -28,7 +29,6 @@ RFCs are proposals for new features or significant changes that are currently un
 
 | Title                                                            | Status      | Priority |
 | ---------------------------------------------------------------- | ----------- | -------- |
-| [Advanced Sidebar UI](./rfc/advanced-sidebar-ui.md)              | 📋 Planned  | Medium   |
 | [Coverage Maintenance](./rfc/coverage-maintenance-ratcheting.md) | 💡 Proposed | High     |
 
 ## [Security Documentation](./security/)
