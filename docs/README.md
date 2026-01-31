@@ -30,6 +30,8 @@ RFCs are proposals for new features or significant changes that are currently un
 | Title                                                            | Status      | Priority |
 | ---------------------------------------------------------------- | ----------- | -------- |
 | [Coverage Maintenance](./rfc/coverage-maintenance-ratcheting.md) | 💡 Proposed | High     |
+| [Invitation Enhancements](./rfc/invitation-enhancements.md)      | 💡 Proposed | High     |
+| [Organization Analytics Dashboard](./rfc/organization-analytics-dashboard.md) | 📝 Draft | Medium |
 
 ## [Security Documentation](./security/)
 
@@ -47,4 +49,5 @@ Contains audit reports, security RFCs, and guidelines.
 - ✅ **Implemented**: Decision enacted and code merged.
 - 📋 **Planned**: RFC approved, awaiting implementation.
 - 💡 **Proposed**: Open for discussion.
+- 📝 **Draft**: Initial draft, not yet ready for full review.
 - ⛔ **Superseded**: Replaced by a newer decision.
