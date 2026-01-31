@@ -61,20 +61,20 @@ export default defineConfig({
    *   Terminal 2: cd server && npm run dev
    * Then run: npm run test:e2e
    */
-  // webServer: [
-  //   {
-  //     command: 'npm run dev',
-  //     url: 'http://localhost:5173',
-  //     reuseExistingServer: !process.env.CI,
-  //     timeout: 120 * 1000,
-  //   },
-  //   {
-  //     command: 'cd server && npm run dev',
-  //     url: 'http://localhost:3001/api/health',
-  //     reuseExistingServer: !process.env.CI,
-  //     timeout: 120 * 1000,
-  //   },
-  // ],
+  webServer: [
+    {
+      command: 'npm run dev',
+      url: 'http://localhost:5173',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    },
+    {
+      command: 'cd server && npm run dev',
+      url: 'http://localhost:3001/api/health',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    },
+  ],
 
   /* Output directory for test artifacts */
   outputDir: 'test-results/',

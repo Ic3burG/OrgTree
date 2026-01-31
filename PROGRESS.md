@@ -14,6 +14,25 @@
 - **Update "Last Updated" date**: January 28, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
 
+**Session 50 (January 31, 2026 - E2E Testing Expansion)**:
+
+- ✅ **E2E Infrastructure**: Established comprehensive End-to-End testing framework using Playwright.
+  - **CI Workflow**: Created `.github/workflows/e2e.yml` running tests on Chromium, Firefox, and WebKit matrix.
+  - **Config**: Enabled `webServer` in `playwright.config.ts` to auto-start backend/frontend in CI.
+- ✅ **Critical User Journeys (CUJs)**:
+  - **CUJ-1 (Org Management)**: Implemented full lifecycle test (Create Org -> Add Depts -> Staffing -> Re-org).
+  - **CUJ-2 (Search & Discovery)**: Implemented search, filtering, and navigation flows.
+- 🔧 **Test Stability**:
+  - Implemented robust selector strategies (Dialog scoping, `exact: true` matching) to prevent strict mode violations.
+  - Tests implemented but require further tuning for local execution timeouts.
+- 📁 **FILES CREATED**:
+  - `e2e/cuj-org-management.spec.ts`
+  - `e2e/cuj-search.spec.ts`
+  - `.github/workflows/e2e.yml`
+- 📁 **FILES MODIFIED**:
+  - `playwright.config.ts`
+  - `PROGRESS.md` (This file)
+
 **Session 49 (January 28, 2026 - Documentation Reorganization & Testing Strategy)**:
 
 - ✅ **RFC Promotion**: Promoted `docs/rfc/backend-coverage-80-percent.md` to `docs/adr/020-backend-test-coverage-80-percent.md` following completion.
