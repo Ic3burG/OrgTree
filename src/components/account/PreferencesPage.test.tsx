@@ -87,7 +87,8 @@ describe('PreferencesPage', () => {
 
     render(<PreferencesPage />);
     const applyButtons = screen.getAllByTitle('Apply this layout');
-    fireEvent.click(applyButtons[1]); // Click the second one (Custom)
+
+    fireEvent.click(applyButtons[1]!); // Click the second one (Custom)
 
     expect(mockApplyPreset).toHaveBeenCalledWith('custom-1');
     expect(mockSetState).toHaveBeenCalledWith('minimized');
