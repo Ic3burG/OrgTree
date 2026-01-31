@@ -9,7 +9,11 @@ test.describe('CUJ-2: Search & Discovery', () => {
     const personName = `Alice Searchable ${timestamp}`;
 
     // Create Org
-    await authenticatedPage.getByRole('button', { name: /new organization/i }).click();
+    // Handle both empty state ("Create Your First Organization") and header button ("New Organization")
+    const createOrgButton = authenticatedPage.getByRole('button', {
+      name: /new organization|create your first organization/i,
+    });
+    await createOrgButton.click();
 
     const createDialog = authenticatedPage.getByRole('dialog');
     await expect(createDialog).toBeVisible({ timeout: 5000 });

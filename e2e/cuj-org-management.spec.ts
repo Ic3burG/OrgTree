@@ -12,8 +12,13 @@ test.describe('CUJ-1: Organization Management', () => {
 
     // 2. Create Organization
     console.log('Step 1: Creating Organization');
-    // Click the "New Organization" button - use exact match to avoid ambiguity
-    await authenticatedPage.getByRole('button', { name: /new organization/i }).click();
+    // Click the organization creation button (handles both empty state and header button)
+    // Empty state: "Create Your First Organization"
+    // Header state: "New Organization"
+    const createOrgButton = authenticatedPage.getByRole('button', {
+      name: /new organization|create your first organization/i,
+    });
+    await createOrgButton.click();
 
     // Wait for the dialog to be fully visible
     const createDialog = authenticatedPage.getByRole('dialog');
