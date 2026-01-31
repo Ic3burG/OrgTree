@@ -11,16 +11,6 @@ vi.mock('../../hooks/useResizable', () => ({
   }),
 }));
 
-vi.mock('../../hooks/useWorkspacePresets', () => ({
-  useWorkspacePresets: () => ({
-    presets: [],
-    activePresetId: null,
-    savePreset: vi.fn(),
-    applyPreset: vi.fn(),
-    deletePreset: vi.fn(),
-  }),
-}));
-
 describe('Sidebar', () => {
   const defaultProps = {
     state: 'expanded' as const,
@@ -43,8 +33,7 @@ describe('Sidebar', () => {
 
   it('renders correctly in minimized state', () => {
     render(<Sidebar {...defaultProps} state="minimized" />);
-    // In minimized, header is visually hidden but still in DOM for layout transitions,
-    // but w-0 opacity-0 classes should be applied.
+    // In minimized, header is still in DOM (layout handles visibility)
     // We check that resize handle is NOT present
     expect(screen.queryByRole('separator')).not.toBeInTheDocument();
   });

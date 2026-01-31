@@ -7,6 +7,7 @@ export default function AccountLayout(): React.JSX.Element {
 
   const tabs = [
     { id: 'profile', label: 'General', icon: User, path: '/settings' },
+    { id: 'preferences', label: 'Interface', icon: Monitor, path: '/settings/preferences' },
     { id: 'security', label: 'Security', icon: Shield, path: '/settings/security' },
     { id: 'sessions', label: 'Active Sessions', icon: Monitor, path: '/settings/sessions' },
   ];

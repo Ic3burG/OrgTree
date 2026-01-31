@@ -29,6 +29,7 @@ import AcceptInvitation from './components/AcceptInvitation';
 import { initCsrf } from './api/client';
 import AccountLayout from './components/account/AccountLayout';
 import ProfileSettings from './components/account/ProfileSettings';
+import PreferencesPage from './components/account/PreferencesPage';
 import GedsDownloader from './components/GedsDownloader';
 import TransferNotificationListener from './components/TransferNotificationListener';
 
@@ -77,6 +78,7 @@ function App() {
                     }
                   >
                     <Route index element={<ProfileSettings />} />
+                    <Route path="preferences" element={<PreferencesPage />} />
                     <Route path="security" element={<SecuritySettingsPage />} />
                     <Route path="sessions" element={<SessionsPage />} />
                   </Route>
