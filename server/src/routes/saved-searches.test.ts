@@ -27,9 +27,11 @@ describe('Saved Searches Routes', () => {
     app.use('/api', savedSearchesRouter);
 
     // Error handler
-    app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-      res.status(err.status || 500).json({ message: err.message });
-    });
+    app.use(
+      (err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+        res.status(err.status || 500).json({ message: err.message });
+      }
+    );
   });
 
   afterEach(() => {

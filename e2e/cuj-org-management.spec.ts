@@ -26,9 +26,12 @@ test.describe('CUJ-1: Organization Management', () => {
     await expect(createOrgButton.first()).toBeVisible({ timeout: 10000 });
     await createOrgButton.first().click();
 
+    // Wait a moment for the click to trigger and dialog to start opening
+    await authenticatedPage.waitForTimeout(500);
+
     // Wait for the dialog to be fully visible
     const createDialog = authenticatedPage.getByRole('dialog');
-    await expect(createDialog).toBeVisible({ timeout: 5000 });
+    await expect(createDialog).toBeVisible({ timeout: 10000 });
 
     // Fill in the organization name using the specific label
     await createDialog.getByLabel(/organization name/i).fill(orgName);

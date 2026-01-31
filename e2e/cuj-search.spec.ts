@@ -21,8 +21,11 @@ test.describe('CUJ-2: Search & Discovery', () => {
     await expect(createOrgButton.first()).toBeVisible({ timeout: 10000 });
     await createOrgButton.first().click();
 
+    // Wait a moment for the click to trigger and dialog to start opening
+    await authenticatedPage.waitForTimeout(500);
+
     const createDialog = authenticatedPage.getByRole('dialog');
-    await expect(createDialog).toBeVisible({ timeout: 5000 });
+    await expect(createDialog).toBeVisible({ timeout: 10000 });
 
     await createDialog.getByLabel(/organization name/i).fill(orgName);
     await createDialog.getByRole('button', { name: /^create organization$/i }).click();

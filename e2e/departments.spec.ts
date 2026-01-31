@@ -13,8 +13,16 @@ test.describe('Departments', () => {
     });
     await expect(createButton.first()).toBeVisible({ timeout: 10000 });
     await createButton.first().click();
-    await authenticatedPage.getByLabel(/name/i).fill(orgName);
-    await authenticatedPage.getByRole('button', { name: /create|save|submit/i }).click();
+
+    // Wait a moment for the click to trigger and dialog to start opening
+    await authenticatedPage.waitForTimeout(500);
+
+    // Wait for the dialog to be fully visible
+    const createDialog = authenticatedPage.getByRole('dialog');
+    await expect(createDialog).toBeVisible({ timeout: 10000 });
+
+    await createDialog.getByLabel(/name/i).fill(orgName);
+    await createDialog.getByRole('button', { name: /create|save|submit/i }).click();
 
     // Navigate to the organization
     await authenticatedPage.getByText(orgName).click();

@@ -21,11 +21,18 @@ test.describe('Organizations', () => {
     await expect(createButton.first()).toBeVisible({ timeout: 10000 });
     await createButton.first().click();
 
+    // Wait a moment for the click to trigger and dialog to start opening
+    await authenticatedPage.waitForTimeout(500);
+
+    // Wait for the dialog to be fully visible
+    const createDialog = authenticatedPage.getByRole('dialog');
+    await expect(createDialog).toBeVisible({ timeout: 10000 });
+
     // Fill in organization name
-    await authenticatedPage.getByLabel(/name/i).fill(orgName);
+    await createDialog.getByLabel(/name/i).fill(orgName);
 
     // Submit
-    await authenticatedPage.getByRole('button', { name: /create|save|submit/i }).click();
+    await createDialog.getByRole('button', { name: /create|save|submit/i }).click();
 
     // Should see the new organization
     await expect(authenticatedPage.getByText(orgName)).toBeVisible({ timeout: 10000 });
@@ -43,8 +50,16 @@ test.describe('Organizations', () => {
     });
     await expect(createButton.first()).toBeVisible({ timeout: 10000 });
     await createButton.first().click();
-    await authenticatedPage.getByLabel(/name/i).fill(orgName);
-    await authenticatedPage.getByRole('button', { name: /create|save|submit/i }).click();
+
+    // Wait a moment for the click to trigger and dialog to start opening
+    await authenticatedPage.waitForTimeout(500);
+
+    // Wait for the dialog to be fully visible
+    const createDialog = authenticatedPage.getByRole('dialog');
+    await expect(createDialog).toBeVisible({ timeout: 10000 });
+
+    await createDialog.getByLabel(/name/i).fill(orgName);
+    await createDialog.getByRole('button', { name: /create|save|submit/i }).click();
 
     // Wait for org to appear and click it
     await authenticatedPage.getByText(orgName).click();
