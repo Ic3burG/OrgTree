@@ -1,5 +1,5 @@
-import { Router, Request, Response } from 'express';
-import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
+import { Router, Response } from 'express';
+import { authenticateToken } from '../middleware/auth.js';
 import { AuthRequest } from '../types/index.js';
 import {
   checkFtsIntegrity,
@@ -9,8 +9,6 @@ import {
   rebuildPeopleFts,
   rebuildCustomFieldsFts,
 } from '../services/fts-maintenance.service.js';
-import db from '../db.js';
-import logger from '../utils/logger.js';
 
 const router = Router();
 

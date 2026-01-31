@@ -106,6 +106,23 @@ function buildPath(departments: string[], acronymMap: Map<string, string>): stri
   return pathParts;
 }
 
+interface GedsXmlResult {
+  gedsPerson?: {
+    firstName?: unknown;
+    lastName?: unknown;
+    title?: unknown;
+    email?: unknown;
+    workPhone?: unknown;
+    departmentAcronym?: unknown;
+    organizationAcronym?: unknown;
+    orgStructure?: Array<{
+      org?: Array<{
+        name?: string[];
+      }>;
+    }>;
+  };
+}
+
 /**
  * Parse a single GEDS XML person record
  */
@@ -116,7 +133,7 @@ async function parsePersonXml(xmlContent: string): Promise<{
   orgAcronym: string | null;
 }> {
   try {
-    const result = (await parseXML(xmlContent)) as any;
+    const result = (await parseXML(xmlContent)) as GedsXmlResult;
     const person = result.gedsPerson;
 
     if (!person) {
