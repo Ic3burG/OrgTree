@@ -42,10 +42,9 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test --project=${{ matrix.project }}
         env:
-          # Assuming we use CI=true to trigger webServer startup in playwright.config
-          # Or we can manually start them if webServer config is tricky
-          # playwright.config.ts has webServer config commented out? I need to check.
           CI: true
+          # JWT_SECRET required for backend server to start
+          JWT_SECRET: test-secret-for-e2e-only-not-for-production
 
       - name: Upload artifacts
         if: failure()
