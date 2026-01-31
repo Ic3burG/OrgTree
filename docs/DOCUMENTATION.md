@@ -20,17 +20,18 @@
 8. [Org Chart Visualization](#org-chart-visualization)
 9. [Search Features](#search-features)
 10. [Dark Mode](#dark-mode)
-11. [Account Security](#account-security)
-12. [Team Collaboration](#team-collaboration)
-13. [Sharing & Public Access](#sharing--public-access)
-14. [Bulk Operations](#bulk-operations)
-15. [Data Import & Export](#data-import--export)
-16. [Audit Trail](#audit-trail)
-17. [Administration Guide](#administration-guide)
-18. [Superuser Guide](#superuser-guide)
-19. [Troubleshooting](#troubleshooting)
-20. [Keyboard Shortcuts](#keyboard-shortcuts)
-21. [Glossary](#glossary)
+11. [Interface Customization](#interface-customization)
+12. [Account Security](#account-security)
+13. [Team Collaboration](#team-collaboration)
+14. [Sharing & Public Access](#sharing--public-access)
+15. [Bulk Operations](#bulk-operations)
+16. [Data Import & Export](#data-import--export)
+17. [Audit Trail](#audit-trail)
+18. [Administration Guide](#administration-guide)
+19. [Superuser Guide](#superuser-guide)
+20. [Troubleshooting](#troubleshooting)
+21. [Keyboard Shortcuts](#keyboard-shortcuts)
+22. [Glossary](#glossary)
 
 ---
 
@@ -747,6 +748,41 @@ For developers and advanced users:
 - **Values**: `"true"` (dark) or `"false"` (light)
 - **System Detection**: Uses `prefers-color-scheme` media query
 - **Implementation**: Tailwind CSS class-based dark mode
+
+---
+
+## Interface Customization
+
+Customize your workspace layout to suit your workflow.
+
+### Sidebar Controls
+
+The sidebar navigation can be adjusted to maximize your screen real estate:
+
+*   **Expand/Collapse**: Click the arrow icon (▶/◀) in the sidebar header to toggle between expanded and minimized (icon-only) modes.
+*   **Resize**: Drag the right edge of the sidebar to adjust its width (200px - 400px).
+*   **Pinning**: Click the pin icon (📌) to toggle auto-collapse behavior.
+    *   **Pinned**: Sidebar stays open when navigating between pages.
+    *   **Unpinned**: Sidebar automatically collapses to minimized mode after you click a link.
+
+### Workspace Presets
+
+Save your preferred sidebar configurations for different tasks (e.g., "Focus Mode", "Wide Screen").
+
+1.  Navigate to **Settings** → **Interface**.
+2.  **Save Current Layout**: Enter a name and click "Save" to store your current sidebar state (width, collapsed state, pin status).
+3.  **Apply Preset**: Click the checkmark (✓) next to a saved preset to restore it.
+4.  **Manage**: Delete unused presets with the trash icon.
+
+### Quick Access (Focus Mode)
+
+When the sidebar is fully hidden (via keyboard shortcuts), a floating action button (☰) appears in the bottom-left corner.
+*   Hover near the corner to reveal the button.
+*   Click it to temporarily open the sidebar.
+
+**Keyboard Shortcuts:**
+*   `Ctrl + B` (or `Cmd + B`): Cycle sidebar modes (Expanded → Minimized → Hidden).
+*   `Ctrl + Shift + B`: Toggle immediately between Expanded and Hidden.
 
 ---
 
@@ -1524,6 +1560,7 @@ If you encounter issues not covered here:
 
 | Version | Date              | Changes                                                             |
 | ------- | ----------------- | ------------------------------------------------------------------- |
+| 1.3     | January 31, 2026  | Added Interface Customization (Sidebar presets, resize, pinning)    |
 | 1.2     | January 27, 2026  | Added Search Analytics, Saved Searches, Trigram Search Optimization |
 | 1.1     | January 21, 2026  | Added Custom Fields, Star/Favorite, Passkeys, 2FA, Account Security |
 | 1.0     | December 29, 2025 | Initial documentation                                               |

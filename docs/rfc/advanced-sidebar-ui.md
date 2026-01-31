@@ -1,9 +1,11 @@
 # Advanced Sidebar UI Enhancements
 
-**Status**: 📋 Planned  
+**Status**: ✅ Implemented (Jan 31, 2026)  
 **Created**: January 26, 2026  
 **Priority**: Medium  
 **Complexity**: High
+
+> **Implementation Note**: The final implementation diverges slightly from this RFC. The **Workspace Presets** selector was moved from the Sidebar header to a dedicated **Settings > Interface** page (`/settings/preferences`) to reduce visual clutter. The sidebar retains collapse, resize, and pin controls.
 
 ## Overview
 
