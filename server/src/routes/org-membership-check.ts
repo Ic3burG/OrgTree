@@ -15,7 +15,11 @@ router.get(
   authenticateToken,
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { orgId } = req.params;
+      const orgId = req.params.orgId;
+      if (!orgId) {
+        res.status(400).json({ error: 'Organization ID is required' });
+        return;
+      }
       const userId = req.user!.id;
 
       // Check access using the same function as search

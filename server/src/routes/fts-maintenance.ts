@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
+import { AuthRequest } from '../types/index.js';
 import {
   checkFtsIntegrity,
   rebuildAllFtsIndexes,
@@ -8,6 +9,8 @@ import {
   rebuildPeopleFts,
   rebuildCustomFieldsFts,
 } from '../services/fts-maintenance.service.js';
+import db from '../db.js';
+import logger from '../utils/logger.js';
 
 const router = Router();
 
@@ -19,7 +22,7 @@ const router = Router();
  * GET /api/fts-maintenance/health
  * Check FTS index integrity
  */
-router.get('/health', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+router.get('/health', authenticateToken, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const health = checkFtsIntegrity();
     res.json(health);
@@ -43,7 +46,7 @@ router.get('/health', authenticateToken, async (req: Request, res: Response): Pr
 router.post(
   '/rebuild/all',
   authenticateToken,
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       // Check if user is superuser
       if (req.user?.role !== 'superuser') {
@@ -73,7 +76,7 @@ router.post(
 router.post(
   '/rebuild/departments',
   authenticateToken,
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       if (req.user?.role !== 'superuser') {
         res.status(403).json({ error: 'Forbidden: Superuser access required' });
@@ -103,7 +106,7 @@ router.post(
 router.post(
   '/rebuild/people',
   authenticateToken,
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       if (req.user?.role !== 'superuser') {
         res.status(403).json({ error: 'Forbidden: Superuser access required' });
@@ -133,7 +136,7 @@ router.post(
 router.post(
   '/rebuild/custom-fields',
   authenticateToken,
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       if (req.user?.role !== 'superuser') {
         res.status(403).json({ error: 'Forbidden: Superuser access required' });
@@ -160,7 +163,7 @@ router.post(
  * POST /api/fts-maintenance/optimize
  * Optimize FTS indexes (superuser only)
  */
-router.post('/optimize', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+router.post('/optimize', authenticateToken, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (req.user?.role !== 'superuser') {
       res.status(403).json({ error: 'Forbidden: Superuser access required' });

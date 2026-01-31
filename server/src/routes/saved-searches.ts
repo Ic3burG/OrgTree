@@ -15,7 +15,11 @@ router.post(
   '/organizations/:orgId/saved-searches',
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { orgId } = req.params;
+      const orgId = req.params.orgId;
+      if (!orgId) {
+        res.status(400).json({ message: 'Organization ID is required' });
+        return;
+      }
       const { name, query, filters, isShared } = req.body;
 
       if (!name || !query) {
@@ -43,7 +47,11 @@ router.get(
   '/organizations/:orgId/saved-searches',
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { orgId } = req.params;
+      const orgId = req.params.orgId;
+      if (!orgId) {
+        res.status(400).json({ message: 'Organization ID is required' });
+        return;
+      }
       const searches = await getSavedSearches(orgId, req.user!.id);
       res.json(searches);
     } catch (err) {
@@ -57,6 +65,11 @@ router.delete(
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
+      const orgId = req.params.orgId;
+      if (!orgId) {
+        res.status(400).json({ message: 'Organization ID is required' });
+        return;
+      }
       const success = await deleteSavedSearch(id, req.user!.id);
 
       if (!success) {

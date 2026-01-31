@@ -116,7 +116,7 @@ async function parsePersonXml(xmlContent: string): Promise<{
   orgAcronym: string | null;
 }> {
   try {
-    const result = await parseXML(xmlContent);
+    const result = (await parseXML(xmlContent)) as any;
     const person = result.gedsPerson;
 
     if (!person) {
