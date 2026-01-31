@@ -15,10 +15,11 @@ test.describe('CUJ-1: Organization Management', () => {
     // Click the organization creation button (handles both empty state and header button)
     // Empty state: "Create Your First Organization"
     // Header state: "New Organization"
+    // Use .first() to handle cases where both buttons temporarily exist during page load
     const createOrgButton = authenticatedPage.getByRole('button', {
       name: /new organization|create your first organization/i,
     });
-    await createOrgButton.click();
+    await createOrgButton.first().click();
 
     // Wait for the dialog to be fully visible
     const createDialog = authenticatedPage.getByRole('dialog');
