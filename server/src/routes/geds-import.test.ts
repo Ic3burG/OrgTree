@@ -79,6 +79,8 @@ describe('GEDS Import Routes', () => {
         ],
       };
 
+      (downloadService.downloadGedsXml as any).mockResolvedValue(undefined);
+      (downloadService.cleanupTempFile as any).mockResolvedValue(undefined);
       (parserService.parseGedsXml as any).mockResolvedValue(mockParsedData);
       (fs.readFile as any).mockResolvedValue('<xml>content</xml>');
 
@@ -107,6 +109,7 @@ describe('GEDS Import Routes', () => {
     it('should handle individual URL failures', async () => {
       const urls = ['https://geds-sage.gc.ca/fail.xml'];
       (downloadService.downloadGedsXml as any).mockRejectedValue(new Error('Download failed'));
+      (downloadService.cleanupTempFile as any).mockResolvedValue(undefined);
 
       const response = await request(app)
         .post(`/api/organizations/${orgId}/import/geds-urls`)
