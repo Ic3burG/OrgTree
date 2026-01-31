@@ -13,9 +13,7 @@ test.describe('CUJ-1: Organization Management', () => {
     // 2. Create Organization
     console.log('Step 1: Creating Organization');
     // Click the "New Organization" button - use exact match to avoid ambiguity
-    await authenticatedPage
-      .getByRole('button', { name: /new organization/i })
-      .click();
+    await authenticatedPage.getByRole('button', { name: /new organization/i }).click();
 
     // Wait for the dialog to be fully visible
     const createDialog = authenticatedPage.getByRole('dialog');
@@ -91,7 +89,10 @@ test.describe('CUJ-1: Organization Management', () => {
     await authenticatedPage.waitForTimeout(1000);
 
     // Click Add Person button
-    await authenticatedPage.getByRole('button', { name: /add person/i }).first().click();
+    await authenticatedPage
+      .getByRole('button', { name: /add person/i })
+      .first()
+      .click();
 
     // Wait for person dialog to appear
     const personDialog = authenticatedPage.getByRole('dialog');
@@ -120,7 +121,10 @@ test.describe('CUJ-1: Organization Management', () => {
     await authenticatedPage.waitForTimeout(500);
 
     // Click Edit button
-    await authenticatedPage.getByRole('button', { name: /^edit$/i }).first().click();
+    await authenticatedPage
+      .getByRole('button', { name: /^edit$/i })
+      .first()
+      .click();
 
     // Wait for edit dialog to appear
     const editDialog = authenticatedPage.getByRole('dialog');
@@ -136,10 +140,7 @@ test.describe('CUJ-1: Organization Management', () => {
 
     // Wait for dropdown options to appear and click the Frontend department
     // Options appear in a div with role="button"
-    await editDialog
-      .getByRole('button', { name: frontendDept })
-      .first()
-      .click({ timeout: 5000 });
+    await editDialog.getByRole('button', { name: frontendDept }).first().click({ timeout: 5000 });
 
     // Click Update Person button
     await editDialog.getByRole('button', { name: /^update person$/i }).click();

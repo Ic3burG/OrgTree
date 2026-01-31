@@ -125,7 +125,10 @@ test.describe('Ownership Transfer', () => {
 
     await owner.page.getByPlaceholder(/explain why/i).fill('Happy Path Transfer');
     await owner.page.getByPlaceholder('TRANSFER', { exact: true }).fill('TRANSFER');
-    await owner.page.getByRole('dialog').getByRole('button', { name: 'Transfer Ownership' }).click();
+    await owner.page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Transfer Ownership' })
+      .click();
 
     await expect(owner.page.getByText(/ownership transfer pending/i)).toBeVisible();
 
@@ -156,7 +159,10 @@ test.describe('Ownership Transfer', () => {
     await owner.page.locator('select').first().selectOption({ index: 1 });
     await owner.page.getByPlaceholder(/explain why/i).fill('To be rejected');
     await owner.page.getByPlaceholder('TRANSFER', { exact: true }).fill('TRANSFER');
-    await owner.page.getByRole('dialog').getByRole('button', { name: 'Transfer Ownership' }).click();
+    await owner.page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Transfer Ownership' })
+      .click();
 
     // Member Rejects
     await member.page.goto(`/org/${orgId}/dashboard`);
@@ -197,7 +203,10 @@ test.describe('Ownership Transfer', () => {
     await owner.page.locator('select').first().selectOption({ index: 1 });
     await owner.page.getByPlaceholder(/explain why/i).fill('To be cancelled');
     await owner.page.getByPlaceholder('TRANSFER', { exact: true }).fill('TRANSFER');
-    await owner.page.getByRole('dialog').getByRole('button', { name: 'Transfer Ownership' }).click();
+    await owner.page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Transfer Ownership' })
+      .click();
 
     // Verify Pending Banner
     await expect(owner.page.getByText(/ownership transfer pending/i)).toBeVisible();
@@ -230,7 +239,10 @@ test.describe('Ownership Transfer', () => {
     await owner.page.locator('select').first().selectOption({ index: 1 });
     await owner.page.getByPlaceholder(/explain why/i).fill('Audit Test');
     await owner.page.getByPlaceholder('TRANSFER', { exact: true }).fill('TRANSFER');
-    await owner.page.getByRole('dialog').getByRole('button', { name: 'Transfer Ownership' }).click();
+    await owner.page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Transfer Ownership' })
+      .click();
     await owner.page.getByRole('button', { name: /cancel/i }).click();
     await owner.page.getByPlaceholder(/reason/i).fill('Audit Check');
     await owner.page.getByRole('button', { name: 'Cancel Transfer' }).click();

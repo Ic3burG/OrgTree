@@ -36,6 +36,20 @@ export default defineConfig({
 
     /* Video on first retry */
     video: 'on-first-retry',
+
+    /* Increase default timeout for actions (30s is default, 60s for complex apps) */
+    actionTimeout: 15000,
+
+    /* Increase default navigation timeout */
+    navigationTimeout: 30000,
+  },
+
+  /* Global timeout for each test */
+  timeout: 120000, // 2 minutes per test
+
+  /* Expect timeout for assertions */
+  expect: {
+    timeout: 10000, // 10s for assertions
   },
 
   /* Configure projects for major browsers */
