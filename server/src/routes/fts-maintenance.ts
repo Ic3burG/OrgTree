@@ -161,22 +161,26 @@ router.post(
  * POST /api/fts-maintenance/optimize
  * Optimize FTS indexes (superuser only)
  */
-router.post('/optimize', authenticateToken, async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    if (req.user?.role !== 'superuser') {
-      res.status(403).json({ error: 'Forbidden: Superuser access required' });
-      return;
-    }
+router.post(
+  '/optimize',
+  authenticateToken,
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      if (req.user?.role !== 'superuser') {
+        res.status(403).json({ error: 'Forbidden: Superuser access required' });
+        return;
+      }
 
-    optimizeFtsIndexes();
-    res.json({ message: 'FTS indexes optimized successfully' });
-  } catch (err) {
-    console.error('Error optimizing FTS indexes:', err);
-    res.status(500).json({
-      error: 'Failed to optimize FTS indexes',
-      details: err instanceof Error ? err.message : String(err),
-    });
+      optimizeFtsIndexes();
+      res.json({ message: 'FTS indexes optimized successfully' });
+    } catch (err) {
+      console.error('Error optimizing FTS indexes:', err);
+      res.status(500).json({
+        error: 'Failed to optimize FTS indexes',
+        details: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
-});
+);
 
 export default router;
