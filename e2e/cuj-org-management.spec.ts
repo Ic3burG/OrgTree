@@ -12,112 +12,143 @@ test.describe('CUJ-1: Organization Management', () => {
 
     // 2. Create Organization
     console.log('Step 1: Creating Organization');
-    // Handle empty state or header button
+    // Click the "New Organization" button - use exact match to avoid ambiguity
     await authenticatedPage
-      .getByRole('button', { name: /create|new|add/i })
-      .first()
+      .getByRole('button', { name: /new organization/i })
       .click();
 
-    await authenticatedPage.getByLabel(/name/i).fill(orgName);
-
-    // Scope to the dialog
+    // Wait for the dialog to be fully visible
     const createDialog = authenticatedPage.getByRole('dialog');
-    if (await createDialog.isVisible()) {
-      await createDialog.getByRole('button', { name: 'Create Organization' }).click();
-    } else {
-      await authenticatedPage.getByRole('button', { name: 'Create Organization' }).click();
-    }
+    await expect(createDialog).toBeVisible({ timeout: 5000 });
 
-    // Verify Org Created and Navigate
-    await expect(authenticatedPage.getByText(orgName)).toBeVisible({ timeout: 10000 });
-    await authenticatedPage.getByText(orgName).click();
-    await authenticatedPage.waitForURL(/\/org\/|\/organizations\//, { timeout: 10000 });
+    // Fill in the organization name using the specific label
+    await createDialog.getByLabel(/organization name/i).fill(orgName);
+
+    // Click the Create Organization button within the dialog
+    await createDialog.getByRole('button', { name: /^create organization$/i }).click();
+
+    // Wait for navigation and verify org appears in the list
+    await expect(authenticatedPage.getByText(orgName).first()).toBeVisible({ timeout: 15000 });
+
+    // Click on the organization card to navigate
+    await authenticatedPage.getByText(orgName).first().click();
+    await authenticatedPage.waitForURL(/\/org\/[^/]+/, { timeout: 15000 });
 
     // 3. Add Top-Level Department (Engineering)
     console.log('Step 2: Adding Top-Level Department');
     // Navigate to Departments page to ensure button is visible
-    await authenticatedPage.getByRole('link', { name: /departments/i }).click();
-    await authenticatedPage.waitForURL(/\/departments/, { timeout: 10000 });
+    await authenticatedPage.getByRole('link', { name: /^departments$/i }).click();
+    await authenticatedPage.waitForURL(/\/departments/, { timeout: 15000 });
 
-    await authenticatedPage.getByRole('button', { name: /add department|new department/i }).click();
-    await authenticatedPage.getByLabel(/name/i).fill(engineeringDept);
+    // Wait for page to be fully loaded
+    await authenticatedPage.waitForLoadState('networkidle', { timeout: 10000 });
 
+    // Click Add Department button
+    await authenticatedPage.getByRole('button', { name: /add department/i }).click();
+
+    // Wait for dialog to appear
     const deptDialog = authenticatedPage.getByRole('dialog');
-    if (await deptDialog.isVisible()) {
-      await deptDialog.getByRole('button', { name: 'Add Department', exact: true }).click();
-    } else {
-      await authenticatedPage.getByRole('button', { name: 'Add Department', exact: true }).click();
-    }
+    await expect(deptDialog).toBeVisible({ timeout: 5000 });
 
-    // Verify Engineering exists
-    await expect(authenticatedPage.getByText(engineeringDept)).toBeVisible();
+    // Fill in department name - use specific label to avoid conflicts
+    await deptDialog.getByLabel(/^department name/i).fill(engineeringDept);
+
+    // Click the Add Department button within the dialog
+    await deptDialog.getByRole('button', { name: /^add department$/i }).click();
+
+    // Wait for dialog to close
+    await expect(deptDialog).not.toBeVisible({ timeout: 5000 });
+
+    // Verify department appears in the list
+    await expect(authenticatedPage.getByText(engineeringDept).first()).toBeVisible({
+      timeout: 10000,
+    });
 
     // 4. Add Another Department (Frontend)
     console.log('Step 3: Adding Second Department');
-    await authenticatedPage.getByRole('button', { name: /add department|new department/i }).click();
-    await authenticatedPage.getByLabel(/name/i).fill(frontendDept);
+    await authenticatedPage.getByRole('button', { name: /add department/i }).click();
 
-    if (await deptDialog.isVisible()) {
-      await deptDialog.getByRole('button', { name: 'Add Department', exact: true }).click();
-    } else {
-      await authenticatedPage.getByRole('button', { name: 'Add Department', exact: true }).click();
-    }
-    await expect(authenticatedPage.getByText(frontendDept)).toBeVisible();
+    // Wait for dialog
+    await expect(deptDialog).toBeVisible({ timeout: 5000 });
+
+    await deptDialog.getByLabel(/^department name/i).fill(frontendDept);
+    await deptDialog.getByRole('button', { name: /^add department$/i }).click();
+
+    // Wait for dialog to close
+    await expect(deptDialog).not.toBeVisible({ timeout: 5000 });
+
+    await expect(authenticatedPage.getByText(frontendDept).first()).toBeVisible({
+      timeout: 10000,
+    });
 
     // 5. Staffing: Add Person to Engineering
     console.log('Step 4: Adding Person to Department');
-    await authenticatedPage.getByText(engineeringDept).click();
-    await authenticatedPage
-      .getByRole('button', { name: /add person|add member/i })
-      .first()
-      .click();
 
-    await authenticatedPage.getByLabel(/name/i).fill(personName);
-    await authenticatedPage.getByLabel(/email/i).fill(personEmail);
+    // Click on the Engineering department to select it
+    await authenticatedPage.getByText(engineeringDept).first().click();
 
+    // Wait a moment for the department to be selected
+    await authenticatedPage.waitForTimeout(1000);
+
+    // Click Add Person button
+    await authenticatedPage.getByRole('button', { name: /add person/i }).first().click();
+
+    // Wait for person dialog to appear
     const personDialog = authenticatedPage.getByRole('dialog');
-    // Person modal might use "Add Member" or "Add Person"
-    // We'll try generic "Add" or "Save" but check if strict mode fails.
-    // Usually "Add Member" is used. Let's try "Add Member" if safe, or regex but ensure specificity.
-    // If "Add Field" is there, "Add Member" is distinct.
-    if (await personDialog.isVisible()) {
-      await personDialog.getByRole('button', { name: /save|add member|create/i }).click();
-    } else {
-      await authenticatedPage.getByRole('button', { name: /save|add member|create/i }).click();
-    }
+    await expect(personDialog).toBeVisible({ timeout: 5000 });
 
-    // Verify Person is visible
-    await expect(authenticatedPage.getByText(personName)).toBeVisible();
+    // Fill in person details using exact label matches
+    await personDialog.getByLabel(/^full name/i).fill(personName);
+    await personDialog.getByLabel(/^email$/i).fill(personEmail);
+
+    // Click Add Person button (not "Add Field" or other buttons)
+    await personDialog.getByRole('button', { name: /^add person$/i }).click();
+
+    // Wait for dialog to close
+    await expect(personDialog).not.toBeVisible({ timeout: 5000 });
+
+    // Verify person appears in the list
+    await expect(authenticatedPage.getByText(personName).first()).toBeVisible({ timeout: 10000 });
 
     // 6. Move Person (Re-org)
     console.log('Step 5: Moving Person');
-    await authenticatedPage.getByText(personName).click();
-    await authenticatedPage.getByRole('button', { name: /edit/i }).click();
 
-    // Changing department
-    const deptSelect = authenticatedPage.getByLabel(/department/i);
-    // Wait for options to load if needed
-    if (await deptSelect.isVisible()) {
-      const tagName = await deptSelect.evaluate(el => el.tagName);
-      if (tagName === 'SELECT') {
-        await deptSelect.selectOption({ label: frontendDept });
-      } else {
-        await deptSelect.click();
-        await authenticatedPage.getByRole('option', { name: frontendDept }).click();
-      }
-    }
+    // Click on the person name to open details/actions
+    await authenticatedPage.getByText(personName).first().click();
 
-    if (await authenticatedPage.getByRole('dialog').isVisible()) {
-      await authenticatedPage
-        .getByRole('dialog')
-        .getByRole('button', { name: /save|update/i })
-        .click();
-    } else {
-      await authenticatedPage.getByRole('button', { name: /save|update/i }).click();
-    }
+    // Wait for any details panel or context to load
+    await authenticatedPage.waitForTimeout(500);
 
-    // 7. Verify Move
-    await expect(authenticatedPage.getByText(personName)).toBeVisible();
+    // Click Edit button
+    await authenticatedPage.getByRole('button', { name: /^edit$/i }).first().click();
+
+    // Wait for edit dialog to appear
+    const editDialog = authenticatedPage.getByRole('dialog');
+    await expect(editDialog).toBeVisible({ timeout: 5000 });
+
+    // Change department using the HierarchicalTreeSelector
+    // The component has id="departmentId" and renders as a custom dropdown
+    const deptSelector = editDialog.locator('#departmentId');
+    await expect(deptSelector).toBeVisible({ timeout: 3000 });
+
+    // Click to open the dropdown
+    await deptSelector.click();
+
+    // Wait for dropdown options to appear and click the Frontend department
+    // Options appear in a div with role="button"
+    await editDialog
+      .getByRole('button', { name: frontendDept })
+      .first()
+      .click({ timeout: 5000 });
+
+    // Click Update Person button
+    await editDialog.getByRole('button', { name: /^update person$/i }).click();
+
+    // Wait for dialog to close
+    await expect(editDialog).not.toBeVisible({ timeout: 5000 });
+
+    // 7. Verify Person still visible after move
+    await expect(authenticatedPage.getByText(personName).first()).toBeVisible({ timeout: 10000 });
     console.log('CUJ-1 Complete');
   });
 });

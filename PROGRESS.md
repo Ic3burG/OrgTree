@@ -22,6 +22,9 @@
 - ✅ **Critical User Journeys (CUJs)**:
   - **CUJ-1 (Org Management)**: Implemented full lifecycle test (Create Org -> Add Depts -> Staffing -> Re-org).
   - **CUJ-2 (Search & Discovery)**: Implemented search, filtering, and navigation flows.
+- ✅ **Documentation Updated**:
+  - **RFC Promotion**: Moved `docs/rfc/frontend-quality-e2e-strategy.md` to `docs/adr/021-frontend-quality-e2e-strategy.md` (Status: Accepted).
+  - Updated `docs/README.md` and `docs/adr/README.md` indices.
 - 🔧 **Test Stability**:
   - Implemented robust selector strategies (Dialog scoping, `exact: true` matching) to prevent strict mode violations.
   - Tests implemented but require further tuning for local execution timeouts.

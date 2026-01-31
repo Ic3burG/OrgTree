@@ -1,8 +1,9 @@
-# RFC: Frontend Quality & E2E Testing Strategy
+# ADR 021: Frontend Quality & E2E Testing Strategy
 
-> **Status**: Proposed
-> **Date**: January 28, 2026
+> **Status**: Accepted
+> **Date**: January 31, 2026
 > **Author**: Claude Code
+> **Decision**: Adopted stricter frontend testing standards including comprehensive unit tests, E2E critical user journeys, and visual regression testing.
 
 ## 1. Problem Description
 
@@ -16,9 +17,9 @@ This disparity creates a risk where backend API changes are well-verified, but t
 
 ## 2. Goals
 
-1.  **Parity**: Bring frontend unit coverage to >60% within 3 months, eventually matching backend's 80%.
-2.  **Confidence**: Ensure critical user journeys (Sign up -> Search -> Edit -> Logout) are fully automated.
-3.  **Visual Stability**: Prevent accidental CSS breakages or layout shifts.
+1. **Parity**: Bring frontend unit coverage to >60% within 3 months, eventually matching backend's 80%.
+2. **Confidence**: Ensure critical user journeys (Sign up -> Search -> Edit -> Logout) are fully automated.
+3. **Visual Stability**: Prevent accidental CSS breakages or layout shifts.
 
 ## 3. Proposed Strategy
 
@@ -62,21 +63,21 @@ This will run in CI to catch unexpected layout shifts, color changes, or broken 
 
 ## 4. Implementation Phase
 
-### Phase 1: Foundation (Weeks 1-2)
+### Phase 1: Foundation (Completed)
 
-- [ ] Audit and remove dead frontend code (to lower denominator).
-- [ ] Configure `vitest` for frontend with separate thresholds.
-- [ ] Setup Visual Regression baseline screenshots.
+- [x] Audit and remove dead frontend code.
+- [x] Configure `vitest` for frontend with separate thresholds.
+- [x] Setup Visual Regression baseline screenshots.
 
-### Phase 2: Critical Components (Weeks 3-4)
+### Phase 2: Critical Components (Completed)
 
-- [ ] Write unit tests for all `src/hooks/*`.
-- [ ] Write unit tests for atomic components in `src/components/ui/*`.
+- [x] Write unit tests for all `src/hooks/*`.
+- [x] Write unit tests for atomic components in `src/components/ui/*`.
 
-### Phase 3: E2E Expansion (Month 2)
+### Phase 3: E2E Expansion (Completed)
 
-- [ ] Implement CUJ-1 and CUJ-2 in Playwright.
-- [ ] Setup GitHub Actions matrix to run E2E on Chromium, Firefox, and WebKit.
+- [x] Implement CUJ-1 and CUJ-2 in Playwright.
+- [x] Setup GitHub Actions matrix to run E2E on Chromium, Firefox, and WebKit.
 
 ## 5. Metrics for Success
 

@@ -9,48 +9,48 @@ test.describe('CUJ-2: Search & Discovery', () => {
     const personName = `Alice Searchable ${timestamp}`;
 
     // Create Org
-    await authenticatedPage
-      .getByRole('button', { name: /create|new|add/i })
-      .first()
-      .click();
-    await authenticatedPage.getByLabel(/name/i).fill(orgName);
+    await authenticatedPage.getByRole('button', { name: /new organization/i }).click();
+
     const createDialog = authenticatedPage.getByRole('dialog');
-    if (await createDialog.isVisible()) {
-      await createDialog.getByRole('button', { name: 'Create Organization' }).click();
-    } else {
-      await authenticatedPage.getByRole('button', { name: 'Create Organization' }).click();
-    }
-    await expect(authenticatedPage.getByText(orgName)).toBeVisible({ timeout: 10000 });
-    await authenticatedPage.getByText(orgName).click();
+    await expect(createDialog).toBeVisible({ timeout: 5000 });
+
+    await createDialog.getByLabel(/organization name/i).fill(orgName);
+    await createDialog.getByRole('button', { name: /^create organization$/i }).click();
+
+    await expect(authenticatedPage.getByText(orgName).first()).toBeVisible({ timeout: 15000 });
+    await authenticatedPage.getByText(orgName).first().click();
+    await authenticatedPage.waitForURL(/\/org\/[^/]+/, { timeout: 15000 });
 
     // Add Dept
-    await authenticatedPage.getByRole('link', { name: /departments/i }).click();
-    await authenticatedPage.waitForURL(/\/departments/);
+    await authenticatedPage.getByRole('link', { name: /^departments$/i }).click();
+    await authenticatedPage.waitForURL(/\/departments/, { timeout: 15000 });
+    await authenticatedPage.waitForLoadState('networkidle', { timeout: 10000 });
 
-    await authenticatedPage.getByRole('button', { name: /add department|new department/i }).click();
-    await authenticatedPage.getByLabel(/name/i).fill(deptName);
+    await authenticatedPage.getByRole('button', { name: /add department/i }).click();
+
     const deptDialog = authenticatedPage.getByRole('dialog');
-    if (await deptDialog.isVisible()) {
-      await deptDialog.getByRole('button', { name: 'Add Department', exact: true }).click();
-    } else {
-      await authenticatedPage.getByRole('button', { name: 'Add Department', exact: true }).click();
-    }
-    await expect(authenticatedPage.getByText(deptName)).toBeVisible();
+    await expect(deptDialog).toBeVisible({ timeout: 5000 });
+
+    await deptDialog.getByLabel(/^department name/i).fill(deptName);
+    await deptDialog.getByRole('button', { name: /^add department$/i }).click();
+    await expect(deptDialog).not.toBeVisible({ timeout: 5000 });
+
+    await expect(authenticatedPage.getByText(deptName).first()).toBeVisible({ timeout: 10000 });
 
     // Add Person
-    await authenticatedPage.getByText(deptName).click();
-    await authenticatedPage
-      .getByRole('button', { name: /add person|add member/i })
-      .first()
-      .click();
-    await authenticatedPage.getByLabel(/name/i).fill(personName);
+    await authenticatedPage.getByText(deptName).first().click();
+    await authenticatedPage.waitForTimeout(1000);
+
+    await authenticatedPage.getByRole('button', { name: /add person/i }).first().click();
+
     const personDialog = authenticatedPage.getByRole('dialog');
-    if (await personDialog.isVisible()) {
-      await personDialog.getByRole('button', { name: /save|add member|create/i }).click();
-    } else {
-      await authenticatedPage.getByRole('button', { name: /save|add member|create/i }).click();
-    }
-    await expect(authenticatedPage.getByText(personName)).toBeVisible();
+    await expect(personDialog).toBeVisible({ timeout: 5000 });
+
+    await personDialog.getByLabel(/^full name/i).fill(personName);
+    await personDialog.getByRole('button', { name: /^add person$/i }).click();
+    await expect(personDialog).not.toBeVisible({ timeout: 5000 });
+
+    await expect(authenticatedPage.getByText(personName).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('Global Search, Filtering and Navigation', async ({ authenticatedPage }) => {
