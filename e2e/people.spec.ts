@@ -6,11 +6,15 @@ test.describe('People', () => {
     const orgName = `People Test Org ${Date.now()}`;
     const deptName = `Test Department ${Date.now()}`;
 
+    // Wait for page to be fully loaded
+    await authenticatedPage.waitForLoadState('networkidle', { timeout: 10000 });
+
     // Create org
-    await authenticatedPage
-      .getByRole('button', { name: /create|new|add/i })
-      .first()
-      .click();
+    const createButton = authenticatedPage.getByRole('button', {
+      name: /new organization|create your first organization/i,
+    });
+    await expect(createButton.first()).toBeVisible({ timeout: 10000 });
+    await createButton.first().click();
     await authenticatedPage.getByLabel(/name/i).fill(orgName);
     await authenticatedPage.getByRole('button', { name: /create|save|submit/i }).click();
 

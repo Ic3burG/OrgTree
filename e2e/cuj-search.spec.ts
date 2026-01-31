@@ -9,11 +9,16 @@ test.describe('CUJ-2: Search & Discovery', () => {
     const personName = `Alice Searchable ${timestamp}`;
 
     // Create Org
+    // Wait for page to be fully loaded
+    await authenticatedPage.waitForLoadState('networkidle', { timeout: 10000 });
+
     // Handle both empty state ("Create Your First Organization") and header button ("New Organization")
     // Use .first() to handle cases where both buttons temporarily exist during page load
     const createOrgButton = authenticatedPage.getByRole('button', {
       name: /new organization|create your first organization/i,
     });
+    // Wait for button to be visible and clickable
+    await expect(createOrgButton.first()).toBeVisible({ timeout: 10000 });
     await createOrgButton.first().click();
 
     const createDialog = authenticatedPage.getByRole('dialog');

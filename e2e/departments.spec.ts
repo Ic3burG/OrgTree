@@ -5,10 +5,14 @@ test.describe('Departments', () => {
     // Create an organization for department tests
     const orgName = `Dept Test Org ${Date.now()}`;
 
-    await authenticatedPage
-      .getByRole('button', { name: /create|new|add/i })
-      .first()
-      .click();
+    // Wait for page to be fully loaded
+    await authenticatedPage.waitForLoadState('networkidle', { timeout: 10000 });
+
+    const createButton = authenticatedPage.getByRole('button', {
+      name: /new organization|create your first organization/i,
+    });
+    await expect(createButton.first()).toBeVisible({ timeout: 10000 });
+    await createButton.first().click();
     await authenticatedPage.getByLabel(/name/i).fill(orgName);
     await authenticatedPage.getByRole('button', { name: /create|save|submit/i }).click();
 

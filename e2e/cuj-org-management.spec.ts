@@ -12,6 +12,9 @@ test.describe('CUJ-1: Organization Management', () => {
 
     // 2. Create Organization
     console.log('Step 1: Creating Organization');
+    // Wait for page to be fully loaded
+    await authenticatedPage.waitForLoadState('networkidle', { timeout: 10000 });
+
     // Click the organization creation button (handles both empty state and header button)
     // Empty state: "Create Your First Organization"
     // Header state: "New Organization"
@@ -19,6 +22,8 @@ test.describe('CUJ-1: Organization Management', () => {
     const createOrgButton = authenticatedPage.getByRole('button', {
       name: /new organization|create your first organization/i,
     });
+    // Wait for button to be visible and clickable
+    await expect(createOrgButton.first()).toBeVisible({ timeout: 10000 });
     await createOrgButton.first().click();
 
     // Wait for the dialog to be fully visible
