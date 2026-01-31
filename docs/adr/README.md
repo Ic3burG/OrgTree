@@ -38,6 +38,7 @@ An Architecture Decision Record (ADR) is a document that captures an important a
 | [019](019-trigram-search-enhancements.md)          | Trigram Search Enhancements             | Accepted | 2026-01-27 | search, database, performance, ux              |
 | [020](020-backend-test-coverage-80-percent.md)     | Backend Test Coverage (80% Achieved)    | Accepted | 2026-01-28 | testing, backend, code-quality                 |
 | [021](021-frontend-quality-e2e-strategy.md)        | Frontend Quality & E2E Testing Strategy | Accepted | 2026-01-27 | testing, frontend, e2e, quality                |
+| [022](022-advanced-sidebar-ui.md)           | Advanced Sidebar UI Enhancements        | Accepted | 2026-01-31 | frontend, ui, ux, state-management             |
 
 ## Reading Guide
 
@@ -176,5 +177,5 @@ ADRs are **living documents**. If circumstances change:
 
 ---
 
-**Last Updated**: January 7, 2026
+**Last Updated**: January 31, 2026
 **Maintainers**: OrgTree Development Team
