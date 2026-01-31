@@ -67,7 +67,9 @@ describe('useOrgMapSettings', () => {
     expect(result.current.settings.nodePositionsTB).toEqual(legacySettings.nodePositions);
     expect(result.current.settings.nodePositionsLR).toEqual({});
     // Should remove legacy field
-    expect((result.current.settings as Record<string, unknown>).nodePositions).toBeUndefined();
+    expect(
+      (result.current.settings as unknown as Record<string, unknown>).nodePositions
+    ).toBeUndefined();
   });
 
   it('should load legacy theme from global key if no specific settings exist', () => {

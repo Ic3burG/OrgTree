@@ -32,8 +32,8 @@ describe('useWorkspacePresets', () => {
     });
 
     expect(result.current.presets).toHaveLength(4);
-    expect(result.current.presets[3].name).toBe('My Preset');
-    expect(result.current.activePresetId).toBe(result.current.presets[3].id);
+    expect(result.current.presets[3]!.name).toBe('My Preset');
+    expect(result.current.activePresetId).toBe(result.current.presets[3]!.id);
   });
 
   it('should delete a custom preset', () => {
@@ -48,7 +48,7 @@ describe('useWorkspacePresets', () => {
     act(() => {
       result.current.savePreset('Temp', config);
     });
-    newId = result.current.presets[3].id;
+    newId = result.current.presets[3]!.id;
 
     act(() => {
       result.current.deletePreset(newId);
