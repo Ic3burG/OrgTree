@@ -2,8 +2,8 @@
 
 > Complete User Guide and Administration Manual
 
-**Version**: 1.1
-**Last Updated**: January 21, 2026
+**Version**: 1.3
+**Last Updated**: January 31, 2026
 **Application URL**: <https://orgtree-app.onrender.com>
 
 ---
@@ -112,7 +112,7 @@ If your account was created by an administrator:
 
 After logging in, you'll see the **Organization Selector** page:
 
-```texttext
+```text
 
 ┌─────────────────────────────────────────────────────────┐
 │  OrgTree                          [User Name] [Logout]  │
@@ -142,7 +142,7 @@ The Dashboard is your central hub for managing an organization. Access it by cli
 
 #### Dashboard Layout
 
-```texttext
+```text
 
 ┌─────────────────────────────────────────────────────────┐
 │  [Logo] Organization Name                    [User] ▼   │
@@ -198,8 +198,7 @@ Your role is displayed on organization cards and in the sidebar.
 2. Click the **pencil icon** (✏️) on the card
 3. Enter the new name
 4. Click **"Save"**
->
-> **Note**: Only Owners and Admins can rename organizations.
+   > **Note**: Only Owners and Admins can rename organizations.
 
 ### Deleting an Organization
 
@@ -216,7 +215,7 @@ Your role is displayed on organization cards and in the sidebar.
 3. Select a different organization from the list
 
 ### Transferring Organization Ownership
->
+
 > **Requires**: Organization Owner role
 
 Transferring ownership allows you to hand over full control of the organization to another member.
@@ -251,7 +250,7 @@ Transferring ownership allows you to hand over full control of the organization 
 1. Navigate to **Departments** in the sidebar
 2. Departments are displayed in a tree structure showing the hierarchy
 
-```texttext
+```text
 
 ┌─────────────────────────────────────────────────────────┐
 │  Departments                        [Select] [+ Add]    │
@@ -303,11 +302,10 @@ To change a department's parent (re-organize hierarchy):
 1. Hover over the department row
 2. Click the **trash icon** (🗑️)
 3. Confirm the deletion
->
-> **Warning**: Deleting a department also deletes:
->
-> - All sub-departments
-> - All people in the department and sub-departments
+   > **Warning**: Deleting a department also deletes:
+   >
+   > - All sub-departments
+   > - All people in the department and sub-departments
 
 ### Expanding/Collapsing Departments
 
@@ -323,7 +321,7 @@ To change a department's parent (re-organize hierarchy):
 1. Navigate to **People** in the sidebar
 2. All people across all departments are listed
 
-```texttext
+```text
 
 ┌─────────────────────────────────────────────────────────┐
 │  People                             [Select] [+ Add]    │
@@ -419,7 +417,7 @@ Custom fields are organization-specific and can be configured by Owners and Admi
 | **Phone**        | Phone number                             | Mobile Number             |
 
 ### Creating Custom Fields
->
+
 > **Requires**: Admin or Owner role
 
 1. Navigate to organization settings or the Admin panel
@@ -468,7 +466,7 @@ Custom field values are included in CSV exports:
 
 ### Org Chart Interface
 
-```texttext
+```text
 
 ┌─────────────────────────────────────────────────────────┐
 │  [🔍 Search] [Theme ▼] [Layout ▼] [Export ▼] [⛶ Full]  │
@@ -759,11 +757,11 @@ Customize your workspace layout to suit your workflow.
 
 The sidebar navigation can be adjusted to maximize your screen real estate:
 
-*   **Expand/Collapse**: Click the arrow icon (▶/◀) in the sidebar header to toggle between expanded and minimized (icon-only) modes.
-*   **Resize**: Drag the right edge of the sidebar to adjust its width (200px - 400px).
-*   **Pinning**: Click the pin icon (📌) to toggle auto-collapse behavior.
-    *   **Pinned**: Sidebar stays open when navigating between pages.
-    *   **Unpinned**: Sidebar automatically collapses to minimized mode after you click a link.
+- **Expand/Collapse**: Click the arrow icon (▶/◀) in the sidebar header to toggle between expanded and minimized (icon-only) modes.
+- **Resize**: Drag the right edge of the sidebar to adjust its width (200px - 400px).
+- **Pinning**: Click the pin icon (📌) to toggle auto-collapse behavior.
+  - **Pinned**: Sidebar stays open when navigating between pages.
+  - **Unpinned**: Sidebar automatically collapses to minimized mode after you click a link.
 
 ### Workspace Presets
 
@@ -777,12 +775,14 @@ Save your preferred sidebar configurations for different tasks (e.g., "Focus Mod
 ### Quick Access (Focus Mode)
 
 When the sidebar is fully hidden (via keyboard shortcuts), a floating action button (☰) appears in the bottom-left corner.
-*   Hover near the corner to reveal the button.
-*   Click it to temporarily open the sidebar.
+
+- Hover near the corner to reveal the button.
+- Click it to temporarily open the sidebar.
 
 **Keyboard Shortcuts:**
-*   `Ctrl + B` (or `Cmd + B`): Cycle sidebar modes (Expanded → Minimized → Hidden).
-*   `Ctrl + Shift + B`: Toggle immediately between Expanded and Hidden.
+
+- `Ctrl + B` (or `Cmd + B`): Cycle sidebar modes (Expanded → Minimized → Hidden).
+- `Ctrl + Shift + B`: Toggle immediately between Expanded and Hidden.
 
 ---
 
@@ -857,8 +857,7 @@ Add an extra layer of security with time-based one-time passwords (TOTP).
    - Microsoft Authenticator
 4. Enter the 6-digit code from your app to verify
 5. **Save your backup codes** in a secure location
->
-> **Important**: Backup codes are shown only once. Store them safely - they're your only recovery option if you lose your authenticator device.
+   > **Important**: Backup codes are shown only once. Store them safely - they're your only recovery option if you lose your authenticator device.
 
 #### Using 2FA
 
@@ -929,7 +928,7 @@ Team members are users who have access to your organization. Each member has a s
 2. Select the **"Team Members"** tab
 3. View list of all members with their roles
 
-```texttext
+```text
 
 ┌─────────────────────────────────────────────────────────┐
 │  Share Organization                              [X]    │
@@ -980,7 +979,7 @@ Team members are users who have access to your organization. Each member has a s
 - Once they create an account and accept, they're added
 
 ### Changing a Member's Role
->
+
 > **Requires**: Admin or Owner role
 
 1. Find the member in the Team Members list
@@ -995,8 +994,7 @@ Team members are users who have access to your organization. Each member has a s
 1. Find the member in the Team Members list
 2. Click the **trash icon** (🗑️)
 3. Confirm the removal
->
-> **Note**: The Owner cannot be removed.
+   > **Note**: The Owner cannot be removed.
 
 ### Pending Invitations
 
@@ -1045,7 +1043,7 @@ Users with the public link can:
 ### Regenerating the Public Link
 
 If you need to invalidate the existing link:
->
+
 > **Requires**: Admin or Owner role
 
 1. Click **"Regenerate Link"**
@@ -1080,7 +1078,7 @@ In selection mode:
 - Selected items show a **checkmark** and blue highlight
 - A **floating action bar** appears at the bottom
 
-```texttext
+```text
 
 ┌─────────────────────────────────────────────────────────┐
 │        5 people selected    [Move] [Edit] [Delete]  [X]│
@@ -1114,8 +1112,7 @@ In selection mode:
    - **Departments**: Parent Department
 4. Click **"Update"**
 5. View results
->
-> **Note**: Empty fields are left unchanged.
+   > **Note**: Empty fields are left unchanged.
 
 ### Exiting Selection Mode
 
@@ -1198,14 +1195,14 @@ OrgTree supports importing from GEDS (Government Electronic Directory Services) 
 The audit trail provides a complete history of all changes made to your organization.
 
 ### Accessing Audit Logs
->
+
 > **Requires**: Admin or Owner role
 
 1. Navigate to **"Audit Log"** in the sidebar
 
 ### Audit Log Interface
 
-```texttext
+```text
 
 ┌─────────────────────────────────────────────────────────┐
 │  Audit Log                                              │
@@ -1308,7 +1305,7 @@ Superusers have system-wide administrative access beyond individual organization
 
 ### Superuser Dashboard
 
-```texttext
+```text
 
 ┌─────────────────────────────────────────────────────────┐
 │  [Logo] System Administration           [Superuser] ▼   │
@@ -1378,8 +1375,7 @@ Superusers have system-wide administrative access beyond individual organization
 1. Find the user in the list
 2. Click the **trash icon** (🗑️)
 3. Confirm the deletion
->
-> **Warning**: This deletes the user's account. Organizations they own will lose their owner.
+   > **Warning**: This deletes the user's account. Organizations they own will lose their owner.
 
 ### System Audit Logs
 
