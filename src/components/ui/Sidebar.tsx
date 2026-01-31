@@ -1,0 +1,183 @@
+import React, { useState } from 'react';
+import { ChevronsLeft, ChevronsRight, Pin, PinOff } from 'lucide-react';
+import { useResizable } from '../../hooks/useResizable';
+import SidebarResizeHandle from './SidebarResizeHandle';
+import FloatingActionButton from './FloatingActionButton';
+import { useWorkspacePresets } from '../../hooks/useWorkspacePresets';
+import WorkspacePresetSelector from './WorkspacePresetSelector';
+import WorkspacePresetModal from './WorkspacePresetModal';
+import { SidebarState } from '../../hooks/useSidebar';
+
+interface SidebarProps {
+  // State
+  state: SidebarState;
+  width: number;
+  pinned: boolean;
+
+  // Actions
+  onStateChange: (state: SidebarState) => void;
+  onWidthChange: (width: number) => void;
+  onPinnedChange: (pinned: boolean) => void;
+
+  // Content
+  header?: React.ReactNode;
+  navigation: React.ReactNode;
+  footer?: React.ReactNode;
+
+  // Config
+  minWidth?: number;
+  maxWidth?: number;
+  defaultWidth?: number;
+  className?: string;
+}
+
+export default function Sidebar({
+  state,
+  width,
+  pinned,
+  onStateChange,
+  onWidthChange,
+  onPinnedChange,
+  header,
+  navigation,
+  footer,
+  minWidth = 200,
+  maxWidth = 400,
+  className = '',
+}: SidebarProps): React.JSX.Element {
+  const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
+  const { presets, activePresetId, savePreset, applyPreset, deletePreset } = useWorkspacePresets();
+
+  // Resize logic
+  const {
+    handleMouseDown,
+    isResizing,
+    width: currentWidth,
+  } = useResizable({
+    minWidth,
+    maxWidth,
+    initialWidth: width,
+    onResize: _w => {
+      // Optional: Update width in real-time if needed, but usually handled by hook
+    },
+    onResizeEnd: onWidthChange,
+  });
+
+  const handleToggleCollapse = () => {
+    if (state === 'expanded') {
+      onStateChange('minimized');
+    } else {
+      onStateChange('expanded');
+    }
+  };
+
+  const handleApplyPreset = (id: string) => {
+    const config = applyPreset(id);
+    if (config) {
+      onStateChange(config.sidebarState);
+      onWidthChange(config.sidebarWidth);
+      onPinnedChange(config.sidebarPinned);
+    }
+  };
+
+  const handleSavePreset = (name: string) => {
+    savePreset(name, {
+      sidebarState: state,
+      sidebarWidth: width,
+      sidebarPinned: pinned,
+    });
+  };
+
+  // Determine actual width to render
+  const renderWidth =
+    state === 'hidden' ? 0 : state === 'minimized' ? 64 : isResizing ? currentWidth : width;
+  const isExpanded = state === 'expanded';
+  const isHidden = state === 'hidden';
+
+  return (
+    <>
+      <aside
+        className={`relative flex flex-col h-full bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 transition-[width] duration-300 ease-in-out ${className} ${
+          isResizing ? 'transition-none select-none' : ''
+        }`}
+        style={{ width: renderWidth, overflow: 'hidden' }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-slate-700 shrink-0">
+          <div
+            className={`flex items-center gap-2 overflow-hidden ${!isExpanded ? 'w-0 opacity-0' : 'w-full opacity-100'} transition-all duration-300`}
+          >
+            {header}
+          </div>
+
+          {/* Controls (visible in both states, layout shifts) */}
+          <div className={`flex items-center gap-1 ${!isExpanded ? 'mx-auto' : ''}`}>
+            {isExpanded && (
+              <>
+                <WorkspacePresetSelector
+                  presets={presets}
+                  activePresetId={activePresetId}
+                  currentConfig={{
+                    sidebarState: state,
+                    sidebarWidth: width,
+                    sidebarPinned: pinned,
+                  }}
+                  onApplyPreset={handleApplyPreset}
+                  onSavePreset={handleSavePreset}
+                  onManagePresets={() => setIsPresetModalOpen(true)}
+                />
+                <button
+                  onClick={() => onPinnedChange(!pinned)}
+                  className={`p-1.5 rounded-md transition-colors ${
+                    pinned
+                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                      : 'text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300'
+                  }`}
+                  title={pinned ? 'Unpin sidebar (auto-collapse on navigate)' : 'Pin sidebar'}
+                >
+                  {pinned ? <Pin size={16} /> : <PinOff size={16} />}
+                </button>
+              </>
+            )}
+
+            <button
+              onClick={handleToggleCollapse}
+              className="p-1.5 text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              title={isExpanded ? 'Minimize sidebar' : 'Expand sidebar'}
+            >
+              {isExpanded ? <ChevronsLeft size={20} /> : <ChevronsRight size={20} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation Content */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
+          {navigation}
+        </div>
+
+        {/* Footer */}
+        {footer && (
+          <div className="border-t border-gray-200 dark:border-slate-700 p-4 shrink-0">
+            <div className={`${!isExpanded ? 'flex justify-center' : ''}`}>{footer}</div>
+          </div>
+        )}
+
+        {/* Resize Handle */}
+        {isExpanded && (
+          <SidebarResizeHandle onMouseDown={handleMouseDown} isResizing={isResizing} />
+        )}
+      </aside>
+
+      {/* Floating Action Button for Hidden State */}
+      <FloatingActionButton visible={isHidden} onClick={() => onStateChange('expanded')} />
+
+      {/* Preset Manager Modal */}
+      <WorkspacePresetModal
+        isOpen={isPresetModalOpen}
+        onClose={() => setIsPresetModalOpen(false)}
+        presets={presets}
+        onDeletePreset={deletePreset}
+      />
+    </>
+  );
+}

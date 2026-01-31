@@ -1,0 +1,1038 @@
+
+> orgtree-server@1.0.0 test:coverage
+> vitest run --coverage
+
+
+[1m[46m RUN [49m[22m [36mv4.0.17 [39m[90m/Users/ojdavis/Claude Code/OrgTree/server[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+[90mstdout[2m | src/services/totp.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/auth.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  override existing env vars with { override: true }
+
+[90mstdout[2m | src/routes/auth.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+[90mstdout[2m | src/routes/bulk.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+[90mstdout[2m | src/routes/invitations.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/fix-org-owners-simple.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/people.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+[90mstdout[2m | src/routes/audit.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+[90mstdout[2m | src/routes/departments.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/fix-org-owners-simple.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/invitations.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/bulk.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/audit.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/fix-org-owners-simple.test.ts[2m > [22m[2mFix Org Owners Simple Route[2m > [22m[2mshould fix organizations with missing owners
+[22m[39m[fix-org-owners] Starting migration...
+[fix-org-owners] Found 1199 organizations
+[fix-org-owners] Missing: owner@example.com for org "Test Org"
+[fix-org-owners] Missing: metrics-user-677f252f-80e6-448a-9e66-b40353289c7b@example.com for org "Metrics Org"
+[fix-org-owners] Missing: fix-user-9cfb209c-2740-4a7c-9f1e-de1979b64c48@example.com for org "Missing Owner Org"
+[fix-org-owners] Fixing 3 organizations...
+[fix-org-owners] ✅ Fixed: owner@example.com → "Test Org"
+[fix-org-owners] ✅ Fixed: metrics-user-677f252f-80e6-448a-9e66-b40353289c7b@example.com → "Metrics Org"
+[fix-org-owners] ✅ Fixed: fix-user-9cfb209c-2740-4a7c-9f1e-de1979b64c48@example.com → "Missing Owner Org"
+[fix-org-owners] Migration complete. Fixed: 3, Errors: 0
+
+[90mstdout[2m | src/routes/fix-org-owners-simple.test.ts[2m > [22m[2mFix Org Owners Simple Route[2m > [22m[2mshould return no-op if all owners exist
+[22m[39m[fix-org-owners] Starting migration...
+[fix-org-owners] Found 1199 organizations
+[fix-org-owners] No missing owners found
+
+ [32m✓[39m src/routes/fix-org-owners-simple.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/routes/audit.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 84[2mms[22m[39m
+ [32m✓[39m src/routes/departments.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m src/routes/auth.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 126[2mms[22m[39m
+ [32m✓[39m src/routes/bulk.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m src/routes/people.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 78[2mms[22m[39m
+[90mstdout[2m | src/routes/custom-fields.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+ [32m✓[39m src/routes/invitations.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+[90mstdout[2m | src/routes/import.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/backup.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/__field-naming-validation.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+[90mstdout[2m | src/routes/organizations.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+[90mstdout[2m | src/routes/geds-import.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/__field-naming-validation.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/members.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ [32m✓[39m src/services/__field-naming-validation.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 81[2mms[22m[39m
+ [32m✓[39m src/services/totp.service.test.ts [2m([22m[2m16 tests[22m[2m)[22m[33m 593[2mms[22m[39m
+ [32m✓[39m src/routes/custom-fields.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+[90mstdout[2m | src/routes/backup.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/geds-import.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/routes/import.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 54[2mms[22m[39m
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-28T18:50:30.896Z] INFO: Starting GEDS URL import {"orgId":"792eda28-0f68-41ed-8b50-1c4b67fa216e","userId":"admin-user","urlCount":1}
+[2026-01-28T18:50:30.899Z] INFO: Processing GEDS URL 1/1 {"url":"https://geds-sage.gc.ca/test.xml"}
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-28T18:50:30.899Z] INFO: Downloaded GEDS XML {"url":"https://geds-sage.gc.ca/test.xml","tempFile":"/var/folders/c3/27_tyc5n3zxch4x0yfp0lvx80000gn/T/geds-1769626230899-0.xml"}
+
+[90mstdout[2m | src/routes/users.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-28T18:50:30.899Z] INFO: Parsed GEDS XML {"url":"https://geds-sage.gc.ca/test.xml","departments":1,"people":1}
+[2026-01-28T18:50:30.913Z] INFO: Imported GEDS data {"url":"https://geds-sage.gc.ca/test.xml","stats":{"departmentsCreated":1,"departmentsReused":0,"peopleCreated":1,"peopleSkipped":0}}
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould successfully import from a valid URL
+[22m[39m[2026-01-28T18:50:30.913Z] INFO: GEDS URL import complete {"orgId":"792eda28-0f68-41ed-8b50-1c4b67fa216e","userId":"admin-user","total":1,"success":1,"failed":0}
+
+[90mstdout[2m | src/services/sql-injection.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould handle individual URL failures
+[22m[39m[2026-01-28T18:50:30.922Z] INFO: Starting GEDS URL import {"orgId":"792eda28-0f68-41ed-8b50-1c4b67fa216e","userId":"admin-user","urlCount":1}
+[2026-01-28T18:50:30.922Z] INFO: Processing GEDS URL 1/1 {"url":"https://geds-sage.gc.ca/fail.xml"}
+
+[90mstdout[2m | src/routes/geds-import.test.ts[2m > [22m[2mGEDS Import Routes[2m > [22m[2mPOST /api/organizations/:orgId/import/geds-urls[2m > [22m[2mshould handle individual URL failures
+[22m[39m[2026-01-28T18:50:30.923Z] INFO: GEDS URL import complete {"orgId":"792eda28-0f68-41ed-8b50-1c4b67fa216e","userId":"admin-user","total":1,"success":0,"failed":1}
+
+ [32m✓[39m src/routes/geds-import.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/routes/organizations.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 90[2mms[22m[39m
+[90mstdout[2m | src/services/search.security.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/routes/backup.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 91[2mms[22m[39m
+[90mstdout[2m | src/routes/passkey.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+[90mstdout[2m | src/services/search.security.test.ts
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+[90mstdout[2m | src/services/search.security.test.ts
+[22m[39mApplying migration: 20260127000000 - Add search enhancements (trigram, analytics, saved searches)
+Successfully applied migration: 20260127000000
+Applying migration: 20260127105000 - ownership-transfer
+✓ Created ownership_transfers table
+✓ Created ownership_transfer_audit_log table
+✓ Created all required indices
+Successfully applied migration: 20260127105000
+
+ [32m✓[39m src/routes/members.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 89[2mms[22m[39m
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: ' OR '1'='1...
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: " OR "1"="1...
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 1; SELECT * FROM users...
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 1 UNION SELECT * FROM users...
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 1 AND 1=1...
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 1 AND 1=0...
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 1; SELECT CASE WHEN (1=1) THEN 1 ELSE 0 ...
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: EXTRACTVALUE(1,CONCAT(0x7e,(SELECT versi...
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: test%00' OR '1'='1...
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: \u0027 OR 1=1 --...
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with classic SQL injection payloads[2m > [22m[2mshould safely handle payload: 0x27204f522027313d2731...
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: test NEAR test
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/search.security.test.ts[2m > [22m[2mSearch & User Discovery Security[2m > [22m[2mSearch Service (Within Org)[2m > [22m[2mshould handle FTS syntax injection characters safely
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/search.security.test.ts[2m > [22m[2mSearch & User Discovery Security[2m > [22m[2mSearch Service (Within Org)[2m > [22m[2mshould handle FTS syntax injection characters safely
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/search.security.test.ts[2m > [22m[2mSearch & User Discovery Security[2m > [22m[2mSearch Service (Within Org)[2m > [22m[2mshould handle FTS syntax injection characters safely
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/routes/saved-searches.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+[90mstdout[2m | src/routes/ownership-transfers.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/users.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/totp.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+[90mstdout[2m | src/services/search.security.test.ts[2m > [22m[2mSearch & User Discovery Security[2m > [22m[2mSearch Service (Within Org)[2m > [22m[2mshould prevent DoS via extremely long queries
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: test AND test
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: test OR test
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: test NOT test
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: "phrase search"
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: test*
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: ^start
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: column:value
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: (() OR (()))
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: """"""
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: \\\
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: {{{
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2msearch() with FTS5 injection payloads[2m > [22m[2mshould safely handle FTS5 payload: }}}
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2mgetAutocompleteSuggestions() with injection payloads[2m > [22m[2mshould safely handle autocomplete payload: ' OR '1'='1...
+[22m[39m[autocomplete] Query completed in 0ms: { query: [32m"' OR '1'='1"[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2mgetAutocompleteSuggestions() with injection payloads[2m > [22m[2mshould safely handle autocomplete payload: ' OR '1'='1' --...
+[22m[39m[autocomplete] Query completed in 0ms: { query: [32m"' OR '1'='1' --"[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2mgetAutocompleteSuggestions() with injection payloads[2m > [22m[2mshould safely handle autocomplete payload: ' OR '1'='1' /*...
+[22m[39m[autocomplete] Query completed in 0ms: { query: [32m"' OR '1'='1' /*"[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2mgetAutocompleteSuggestions() with injection payloads[2m > [22m[2mshould safely handle autocomplete payload: " OR "1"="1...
+[22m[39m[autocomplete] Query completed in 0ms: { query: [32m'" OR "1"="1'[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mSearch Service - SQL Injection Protection[2m > [22m[2mgetAutocompleteSuggestions() with injection payloads[2m > [22m[2mshould safely handle autocomplete payload: '; DROP TABLE users; --...
+[22m[39m[autocomplete] Query completed in 0ms: { query: [32m"'; DROP TABLE users; --"[39m, suggestionCount: [33m0[39m }
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mEdge Cases & Boundary Tests[2m > [22m[2mshould handle extremely long SQL injection payloads
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/sql-injection.test.ts[2m > [22m[2mSQL Injection Security Tests[2m > [22m[2mEdge Cases & Boundary Tests[2m > [22m[2mshould handle tab character injection
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+ [32m✓[39m src/services/search.security.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 69[2mms[22m[39m
+ [32m✓[39m src/services/sql-injection.test.ts [2m([22m[2m95 tests[22m[2m)[22m[32m 83[2mms[22m[39m
+[90mstdout[2m | src/services/bulk.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/search.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/saved-searches.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/analytics.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+ [32m✓[39m src/routes/users.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 110[2mms[22m[39m
+ [32m✓[39m src/services/bulk.service.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m src/routes/saved-searches.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+ [32m✓[39m src/routes/ownership-transfers.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32m✓[39m src/routes/totp.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+ [32m✓[39m src/routes/passkey.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+[90mstdout[2m | src/routes/fts-maintenance.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+[90mstdout[2m | src/services/ownership.security.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  override existing env vars with { override: true }
+
+[90mstdout[2m | src/services/ownership.security.test.ts
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+[90mstdout[2m | src/services/performance.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+[90mstdout[2m | src/services/ownership.security.test.ts
+[22m[39mApplying migration: 20260127000000 - Add search enhancements (trigram, analytics, saved searches)
+Successfully applied migration: 20260127000000
+Applying migration: 20260127105000 - ownership-transfer
+✓ Created ownership_transfers table
+✓ Created ownership_transfer_audit_log table
+✓ Created all required indices
+Successfully applied migration: 20260127105000
+
+[90mstdout[2m | src/routes/csrf.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/performance.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/routes/search.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 75[2mms[22m[39m
+ [32m✓[39m src/routes/analytics.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+[90mstdout[2m | src/services/geds-download.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+[90mstdout[2m | src/migrations/discovery.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+[90mstdout[2m | src/routes/fts-maintenance.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/services/performance.test.ts[2m > [22m[2mLarge Dataset Performance[2m > [22m[2mshould fetch organization hierarchy within performance limits
+[22m[39m[Performance] Fetched 101 departments in 1.96ms
+
+[90mstdout[2m | src/services/performance.test.ts[2m > [22m[2mLarge Dataset Performance[2m > [22m[2mshould fetch full organization data including people quickly
+[22m[39m[Performance] Fetched full org data in 3.32ms
+
+[90mstdout[2m | src/migrations/discovery.test.ts[2m > [22m[2mMigration Discovery (Phase 3)[2m > [22m[2mshould discover and run migrations in the versions directory
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+ [32m✓[39m src/services/performance.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 48[2mms[22m[39m
+[90mstdout[2m | src/migrations/discovery.test.ts[2m > [22m[2mMigration Discovery (Phase 3)[2m > [22m[2mshould discover and run migrations in the versions directory
+[22m[39mApplying migration: 20260127000000 - Add search enhancements (trigram, analytics, saved searches)
+Successfully applied migration: 20260127000000
+Applying migration: 20260127105000 - ownership-transfer
+✓ Created ownership_transfers table
+✓ Created ownership_transfer_audit_log table
+✓ Created all required indices
+Successfully applied migration: 20260127105000
+Applying migration: 99999999999999 - Test Migration
+Successfully applied migration: 99999999999999
+
+ [32m✓[39m src/migrations/discovery.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 45[2mms[22m[39m
+[90mstdout[2m | src/routes/org-membership-check.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+ [32m✓[39m src/services/geds-download.service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 73[2mms[22m[39m
+[90mstdout[2m | src/routes/fix-org-owners.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+ [32m✓[39m src/routes/csrf.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+[90mstdout[2m | src/routes/geds.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ [32m✓[39m src/routes/fts-maintenance.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 78[2mms[22m[39m
+ [32m✓[39m src/services/ownership.security.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+[90mstdout[2m | src/routes/version.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+[90mstdout[2m | src/services/cascade-delete.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/public.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+[90mstdout[2m | src/routes/fix-org-owners.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/routes/org-membership-check.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/services/cascade-delete.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/services/fts-triggers.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+[90mstdout[2m | src/db-init.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/routes/org-membership-check.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/services/cascade-delete.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+[90mstdout[2m | src/routes/geds.test.ts[2m > [22m[2mGEDS Routes[2m > [22m[2mGET /api/geds/proxy[2m > [22m[2mshould proxy a valid GEDS URL
+[22m[39m[2026-01-28T18:50:31.824Z] INFO: Proxying GEDS request {"url":"https://geds-sage.gc.ca/en/GEDS?abc=123","userId":"test-user"}
+
+ [32m✓[39m src/routes/fix-org-owners.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 33[2mms[22m[39m
+[90mstdout[2m | src/routes/geds.test.ts[2m > [22m[2mGEDS Routes[2m > [22m[2mGET /api/geds/proxy[2m > [22m[2mshould return GEDS error status if request fails
+[22m[39m[2026-01-28T18:50:31.841Z] INFO: Proxying GEDS request {"url":"https://geds-sage.gc.ca/unknown","userId":"test-user"}
+
+[90mstdout[2m | src/routes/geds.test.ts[2m > [22m[2mGEDS Routes[2m > [22m[2mGET /api/geds/proxy[2m > [22m[2mshould handle fetch exceptions
+[22m[39m[2026-01-28T18:50:31.845Z] INFO: Proxying GEDS request {"url":"https://geds-sage.gc.ca/timeout","userId":"test-user"}
+
+[90mstdout[2m | src/db-init.test.ts[2m > [22m[2mDatabase Initialization[2m > [22m[2mshould create all required tables
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+[90mstdout[2m | src/db-init.test.ts[2m > [22m[2mDatabase Initialization[2m > [22m[2mshould create FTS virtual tables
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+[90mstdout[2m | src/db-init.test.ts[2m > [22m[2mDatabase Initialization[2m > [22m[2mshould be idempotent (can be run multiple times)
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+[90mstdout[2m | src/db-init.test.ts[2m > [22m[2mDatabase Initialization[2m > [22m[2mshould verify schema of specific tables
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+ [32m✓[39m src/routes/version.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 21[2mms[22m[39m
+[90mstdout[2m | src/db-init.test.ts[2m > [22m[2mDatabase Initialization[2m > [22m[2mshould set WAL mode and other pragmas
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+ [32m✓[39m src/routes/geds.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m src/db-init.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m src/services/fts-triggers.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+[90mstdout[2m | src/services/auth.service.test.ts[2m > [22m[2mAuth Service[2m > [22m[2msession management[2m > [22m[2mcleanupExpiredTokens should remove old tokens
+[22m[39mCleaned up 1 expired/revoked refresh tokens
+
+ [32m✓[39m src/services/auth.service.test.ts [2m([22m[2m18 tests[22m[2m)[22m[33m 1700[2mms[22m[39m
+[90mstdout[2m | src/services/email.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  override existing env vars with { override: true }
+
+[90mstdout[2m | src/routes/metrics.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/geds-parser.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+[90mstdout[2m | src/services/custom-fields-fts.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+[90mstdout[2m | src/services/metrics.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+[90mstdout[2m | src/middleware/auth.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+[90mstdout[2m | src/services/org.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+[90mstdout[2m | src/services/concurrency.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  override existing env vars with { override: true }
+
+ [32m✓[39m src/services/email.service.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+[90mstdout[2m | src/services/metrics.service.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/services/custom-fields-fts.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m src/services/geds-parser.service.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+[90mstdout[2m | src/services/concurrency.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/routes/public.test.ts [2m([22m[2m5 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[32m 92[2mms[22m[39m
+ [32m✓[39m src/services/org.service.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/middleware/auth.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/routes/metrics.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/services/concurrency.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+[90mstdout[2m | src/services/backup.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+[90mstdout[2m | src/services/invitation.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  override existing env vars with { override: true }
+
+[90mstdout[2m | src/routes/debug.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ [32m✓[39m src/services/metrics.service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+[90mstdout[2m | src/services/ownership-transfer.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+[90mstdout[2m | src/services/custom-fields.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+[90mstdout[2m | src/services/search-error-handling.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+[90mstdout[2m | src/services/fts-integrity.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+ [32m✓[39m src/services/backup.service.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+[90mstdout[2m | src/services/audit.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+ [32m✓[39m src/services/invitation.service.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/services/ownership-transfer.service.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+[90mstdout[2m | src/services/audit.service.test.ts[2m > [22m[2mAudit Service[2m > [22m[2mcleanupOldLogs[2m > [22m[2mshould delete old logs
+[22m[39mCleaned up 100 old audit logs
+
+ [32m✓[39m src/services/fts-integrity.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/services/audit.service.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/services/search-error-handling.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/services/custom-fields.service.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+[90mstdout[2m | src/services/member.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ [32m✓[39m src/routes/debug.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 24[2mms[22m[39m
+[90mstdout[2m | src/services/users.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/department.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+[90mstdout[2m | src/services/people.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+[90mstdout[2m | src/middleware/csrf.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+[90mstdout[2m | src/services/socket-events.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/fts-maintenance.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+[90mstdout[2m | src/services/passkey.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ [32m✓[39m src/services/member.service.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/services/users.service.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/services/department.service.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+[90mstdout[2m | src/services/search.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+[90mstdout[2m | src/services/fts-maintenance.service.test.ts[2m > [22m[2mFTS Maintenance Service[2m > [22m[2mrebuild functions[2m > [22m[2mrebuildDepartmentsFts should sync data
+[22m[39mRebuilt departments_fts index
+
+[90mstdout[2m | src/services/fts-maintenance.service.test.ts[2m > [22m[2mFTS Maintenance Service[2m > [22m[2mrebuild functions[2m > [22m[2mrebuildPeopleFts should sync data
+[22m[39mRebuilt people_fts index
+
+[90mstdout[2m | src/services/fts-maintenance.service.test.ts[2m > [22m[2mFTS Maintenance Service[2m > [22m[2mrebuild functions[2m > [22m[2mrebuildCustomFieldsFts should sync data
+[22m[39mRebuilt custom_fields_fts index
+
+[90mstdout[2m | src/services/fts-maintenance.service.test.ts[2m > [22m[2mFTS Maintenance Service[2m > [22m[2mrebuild functions[2m > [22m[2mrebuildAllFtsIndexes should sync everything
+[22m[39mStarting full FTS rebuild...
+Rebuilt departments_fts index
+Rebuilt people_fts index
+Rebuilt custom_fields_fts index
+FTS rebuild completed successfully
+
+[90mstdout[2m | src/services/fts-maintenance.service.test.ts[2m > [22m[2mFTS Maintenance Service[2m > [22m[2moptimizeFtsIndexes()[2m > [22m[2mshould execute without throwing errors
+[22m[39mFTS indexes optimized
+
+ [32m✓[39m src/middleware/csrf.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/services/socket-events.service.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/services/people.service.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/services/fts-maintenance.service.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/services/passkey.service.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/services/search.service.test.ts
+[22m[39mApplying migration: 20240101000001 - Add sharing columns to organizations
+Successfully applied migration: 20240101000001
+Applying migration: 20240101000002 - Remove office column from people table
+Successfully applied migration: 20240101000002
+Applying migration: 20240101000003 - Add user account flags
+Successfully applied migration: 20240101000003
+Applying migration: 20240101000004 - Create organization_members table
+Successfully applied migration: 20240101000004
+Applying migration: 20240101000005 - Create invitations table
+Successfully applied migration: 20240101000005
+Applying migration: 20240101000006 - Create audit_logs table
+Successfully applied migration: 20240101000006
+Applying migration: 20240101000007 - Add FTS5 search tables
+Successfully applied migration: 20240101000007
+Applying migration: 20240101000008 - Fix FTS triggers for soft deletes
+Successfully applied migration: 20240101000008
+Applying migration: 20240101000009 - Create refresh_tokens table
+Successfully applied migration: 20240101000009
+Applying migration: 20240101000010 - Create passkeys table
+Successfully applied migration: 20240101000010
+Applying migration: 20240101000011 - Add TOTP columns for 2FA
+Successfully applied migration: 20240101000011
+Applying migration: 20240101000012 - Add soft delete columns
+Successfully applied migration: 20240101000012
+Applying migration: 20240101000013 - Make audit_logs.organization_id nullable
+Successfully applied migration: 20240101000013
+Applying migration: 20240101000014 - Add performance optimization indexes
+Successfully applied migration: 20240101000014
+Applying migration: 20240101000015 - Create custom fields tables
+Successfully applied migration: 20240101000015
+Applying migration: 20240101000016 - Add deleted_at to custom fields
+Successfully applied migration: 20240101000016
+Applying migration: 20240101000017 - Add is_starred to people
+Successfully applied migration: 20240101000017
+Applying migration: 20240101000018 - Create analytics_events table
+Successfully applied migration: 20240101000018
+
+[90mstdout[2m | src/services/search.service.test.ts
+[22m[39mApplying migration: 20260127000000 - Add search enhancements (trigram, analytics, saved searches)
+Successfully applied migration: 20260127000000
+Applying migration: 20260127105000 - ownership-transfer
+✓ Created ownership_transfers table
+✓ Created ownership_transfer_audit_log table
+✓ Created all required indices
+Successfully applied migration: 20260127105000
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mshould perform exact match search
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mshould perform fuzzy search (typo tolerance)
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mshould perform partial match fuzzy search
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/search.service.test.ts[2m > [22m[2mSearch Service[2m > [22m[2mshould log analytics
+[22m[39m[search] No results from FTS, trying trigram fallback...
+
+[90mstdout[2m | src/services/analytics.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+ [32m✓[39m src/services/search.service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/services/migration-backup.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+[90mstdout[2m | src/services/analytics.service.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+[90mstdout[2m | src/utils/logger.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+[90mstdout[2m | src/middleware/errorHandler.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+[90mstdout[2m | src/socket.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+[90mstdout[2m | src/services/fts-scheduler.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+[90mstdout[2m | src/services/metrics-collector.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
+
+[90mstdout[2m | src/services/csrf.service.test.ts
+[22m[39m[dotenv@17.2.3] injecting env (3) from .env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ [32m✓[39m src/services/analytics.service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/utils/logger.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/services/migration-backup.service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/middleware/errorHandler.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/services/metrics-collector.service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/services/csrf.service.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+[90mstdout[2m | src/services/fts-scheduler.service.test.ts[2m > [22m[2mFTS Scheduler Service[2m > [22m[2mrunFtsMaintenance should optimize if healthy
+[22m[39m[FTS Scheduler] Starting scheduled FTS maintenance...
+[FTS Scheduler] FTS indexes healthy, running optimization...
+
+[90mstdout[2m | src/services/fts-scheduler.service.test.ts[2m > [22m[2mFTS Scheduler Service[2m > [22m[2mrunFtsMaintenance should rebuild if unhealthy
+[22m[39m[FTS Scheduler] Starting scheduled FTS maintenance...
+[FTS Scheduler] Attempting automatic FTS rebuild...
+
+[90mstdout[2m | src/services/fts-scheduler.service.test.ts[2m > [22m[2mFTS Scheduler Service[2m > [22m[2mscheduleFtsMaintenance should register cron tasks
+[22m[39m[FTS Scheduler] Scheduled nightly FTS maintenance at 2:00 AM (America/New_York)
+[FTS Scheduler] Scheduled weekly FTS deep maintenance on Sundays at 3:00 AM (America/New_York)
+
+ [32m✓[39m src/services/fts-scheduler.service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+[90mstdout[2m | src/socket.test.ts
+[22m[39mInitializing database at: /Users/ojdavis/Claude Code/OrgTree/server/database.db
+
+ [32m✓[39m src/socket.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m73 passed[39m[22m[90m (73)[39m
+[2m      Tests [22m [1m[32m759 passed[39m[22m[2m | [22m[33m1 skipped[39m[90m (760)[39m
+[2m   Start at [22m 13:50:29
+[2m   Duration [22m 3.09s[2m (transform 2.53s, setup 1.18s, import 9.20s, tests 4.92s, environment 6ms)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   80.82 |    69.72 |   82.41 |    81.3 |                   
+ src               |   64.28 |       38 |   57.14 |    64.8 |                   
+  db-init.ts       |     100 |      100 |     100 |     100 |                   
+  db.ts            |    87.5 |       50 |     100 |    87.5 | 14                
+  instrument.ts    |       0 |        0 |       0 |       0 | 4-61              
+  sentry.ts        |       0 |      100 |       0 |       0 | 9-18              
+  socket.ts        |      80 |       80 |   78.57 |      80 | ...38,143,205-206 
+ src/middleware    |   89.85 |     86.2 |      75 |   89.85 |                   
+  auth.ts          |     100 |    93.75 |     100 |     100 | 69                
+  csrf.ts          |     100 |    96.42 |     100 |     100 | 98                
+  errorHandler.ts  |     100 |       80 |     100 |     100 | 18,36             
+  metrics.ts       |       0 |        0 |       0 |       0 | 14-34             
+ src/migrations    |   84.53 |    56.81 |   65.38 |   82.14 |                   
+  index.ts         |   86.66 |       70 |     100 |   85.71 | 22,45,81-82       
+  ...migrations.ts |   83.58 |    52.94 |    61.7 |   80.35 | ...58,318,321,331 
+ ...tions/versions |   77.27 |      100 |      60 |   77.27 |                   
+  ...hancements.ts |   85.71 |      100 |   66.66 |   85.71 | 104               
+  ...p-transfer.ts |   73.33 |      100 |      50 |   73.33 | 81-85             
+ src/routes        |   81.84 |    68.06 |   88.02 |   82.24 |                   
+  analytics.ts     |    87.5 |       90 |     100 |   89.65 | 33,80-81          
+  audit.ts         |      84 |    88.46 |   66.66 |   86.48 | 87,101-105        
+  auth.ts          |   83.33 |    76.78 |   91.66 |   83.21 | ...97-398,403,428 
+  backup.ts        |   69.62 |    65.11 |      60 |   70.51 | ...10-111,245-281 
+  bulk.ts          |   75.58 |    71.87 |     100 |   75.58 | ...72,182-185,191 
+  csrf.ts          |     100 |      100 |     100 |     100 |                   
+  custom-fields.ts |   88.63 |    93.75 |     100 |   88.63 | 37,75,98,129,158  
+  debug.ts         |     100 |       50 |     100 |     100 | 17                
+  departments.ts   |    87.5 |    68.18 |     100 |    87.5 | 30,43,80,118,156  
+  ...ers-simple.ts |   88.23 |       60 |     100 |   88.23 | 89-90,110-111     
+  ...org-owners.ts |      84 |       50 |     100 |      84 | 57-62,80,96       
+  ...aintenance.ts |   78.18 |    45.45 |     100 |   78.18 | ...39-140,150-151 
+  geds-import.ts   |   80.73 |    59.25 |     100 |   81.73 | ...98,300,302,339 
+  geds.ts          |     100 |       90 |     100 |     100 | 52                
+  import.ts        |   84.04 |    58.62 |     100 |   84.44 | ...78,200-203,207 
+  invitations.ts   |   90.69 |      100 |   83.33 |   90.69 | 38,54,91,118      
+  members.ts       |   89.74 |     90.9 |     100 |   89.74 | ...85,124,164,265 
+  metrics.ts       |    82.6 |      100 |     100 |    82.6 | 35,52,69,86       
+  ...ship-check.ts |    90.9 |       50 |     100 |    90.9 | 70                
+  organizations.ts |   84.84 |    71.42 |     100 |   84.84 | ...28,254,292,317 
+  ...-transfers.ts |   70.83 |     62.5 |   66.66 |   70.83 | ...16-122,132-138 
+  passkey.ts       |   80.64 |     64.7 |     100 |   82.02 | ...13,222,227,237 
+  people.ts        |   89.47 |    77.77 |     100 |   89.47 | ...81,127,169,202 
+  public.ts        |   66.66 |    21.05 |   28.57 |   69.56 | ...70,201-215,238 
+  ...d-searches.ts |   88.88 |      100 |     100 |   88.88 | 37,50,70          
+  search.ts        |   95.83 |    80.55 |     100 |   95.83 | 75,113            
+  totp.ts          |   66.66 |    65.51 |     100 |   66.66 | ...79-180,188-189 
+  users.ts         |   73.13 |       44 |      70 |   73.13 | ...31,142,169,189 
+  version.ts       |     100 |      100 |     100 |     100 |                   
+ src/services      |   80.77 |    71.78 |   84.91 |   81.46 |                   
+  ...cs.service.ts |   80.95 |    89.47 |     100 |      85 | 67,133-134        
+  audit.service.ts |   72.27 |    72.85 |   66.66 |   72.27 | ...86,295,360-391 
+  auth.service.ts  |   92.59 |    88.46 |    87.5 |   92.59 | ...21,341,397-407 
+  ...up.service.ts |    98.5 |    81.81 |     100 |   98.48 | 185               
+  bulk.service.ts  |    74.8 |    63.43 |     100 |      75 | ...54,716-720,755 
+  csrf.service.ts  |   81.08 |    82.14 |     100 |   81.08 | ...4,80,89,93,101 
+  ...ds.service.ts |   84.12 |    68.11 |     100 |   85.71 | ...81-385,389-390 
+  ...nt.service.ts |   85.71 |    83.01 |     100 |   86.27 | ...79,327,347-349 
+  email.service.ts |   60.97 |       50 |   28.57 |   67.56 | 164-165,191-249   
+  ...ce.service.ts |   87.32 |    57.14 |     100 |   87.32 | ...49,269-270,308 
+  ...er.service.ts |   51.61 |    33.33 |      40 |   51.61 | ...98,112-121,141 
+  ...ad.service.ts |   73.91 |    76.19 |   66.66 |   73.52 | ...96-200,213-226 
+  ...er.service.ts |   87.85 |    69.62 |     100 |   92.55 | 83-90,249         
+  ...on.service.ts |   90.42 |    90.47 |     100 |   90.42 | ...89-391,400-402 
+  ...er.service.ts |   74.76 |    73.33 |     100 |   74.52 | ...70-472,480-482 
+  ...or.service.ts |   96.77 |    77.77 |     100 |   96.15 | 49                
+  ...cs.service.ts |   92.64 |    56.25 |     100 |   96.87 | 35,199            
+  ...up.service.ts |     100 |    83.33 |     100 |     100 | 41                
+  org.service.ts   |   76.92 |    58.33 |    87.5 |   76.31 | ...29-132,254-256 
+  ...er.service.ts |   67.14 |    74.82 |   54.54 |   68.47 | ...91-793,819-957 
+  ...ey.service.ts |   93.61 |    73.68 |     100 |   93.47 | 74,178,213        
+  ...le.service.ts |   73.41 |    71.01 |   85.71 |   73.41 | ...36-340,370,411 
+  ...ch.service.ts |   78.96 |    61.06 |   83.33 |   79.58 | ...54-962,982-990 
+  ...ts.service.ts |   86.66 |      100 |      90 |   86.66 | 219-240           
+  totp.service.ts  |   96.77 |     90.9 |     100 |   96.66 | 71                
+  ...er.service.ts |       0 |        0 |       0 |       0 | 11-27             
+  users.service.ts |   98.96 |    83.33 |     100 |   98.95 | 276               
+ src/test-helpers  |   84.61 |       75 |      80 |   84.61 |                   
+  ...-db-schema.ts |   84.61 |       75 |      80 |   84.61 | 330,378           
+ src/types         |       0 |        0 |       0 |       0 |                   
+  analytics.ts     |       0 |        0 |       0 |       0 |                   
+  global.d.ts      |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 221-228           
+  metrics.ts       |       0 |        0 |       0 |       0 |                   
+ src/utils         |   92.85 |    72.72 |     100 |   92.85 |                   
+  escape.ts        |      80 |       75 |     100 |      80 | 14                
+  logger.ts        |     100 |    71.42 |     100 |     100 | 30,41             
+-------------------|---------|----------|---------|---------|-------------------

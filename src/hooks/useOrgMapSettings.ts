@@ -45,13 +45,12 @@ export function useOrgMapSettings(orgId: string | undefined) {
         if (parsed.nodePositions && !parsed.nodePositionsTB && !parsed.nodePositionsLR) {
           // Assume legacy positions belong to the saved layout direction (or TB if missing)
           const direction = (parsed.layoutDirection as 'TB' | 'LR') || 'TB';
+          const { nodePositions, ...cleanParsed } = parsed;
           return {
             ...DEFAULT_SETTINGS,
-            ...parsed,
-            nodePositionsTB: direction === 'TB' ? parsed.nodePositions : {},
-            nodePositionsLR: direction === 'LR' ? parsed.nodePositions : {},
-            // Remove legacy field from state
-            nodePositions: undefined,
+            ...cleanParsed,
+            nodePositionsTB: direction === 'TB' ? nodePositions : {},
+            nodePositionsLR: direction === 'LR' ? nodePositions : {},
           };
         }
 
@@ -85,11 +84,12 @@ export function useOrgMapSettings(orgId: string | undefined) {
         // Same migration logic for effect
         if (parsed.nodePositions && !parsed.nodePositionsTB && !parsed.nodePositionsLR) {
           const direction = (parsed.layoutDirection as 'TB' | 'LR') || 'TB';
+          const { nodePositions, ...cleanParsed } = parsed;
           setSettings({
             ...DEFAULT_SETTINGS,
-            ...parsed,
-            nodePositionsTB: direction === 'TB' ? parsed.nodePositions : {},
-            nodePositionsLR: direction === 'LR' ? parsed.nodePositions : {},
+            ...cleanParsed,
+            nodePositionsTB: direction === 'TB' ? nodePositions : {},
+            nodePositionsLR: direction === 'LR' ? nodePositions : {},
           });
         } else {
           setSettings({ ...DEFAULT_SETTINGS, ...parsed });
@@ -148,10 +148,13 @@ export function useOrgMapSettings(orgId: string | undefined) {
 
   const resetSettings = useCallback(() => {
     if (!orgId) return;
-    const storageKey = `orgMap_${orgId}_settings`;
-    localStorage.removeItem(storageKey);
-    localStorage.removeItem('orgTreeTheme');
-    setSettings(DEFAULT_SETTINGS);
+
+    // Use functional update to ensure we preserve the latest theme
+    // even if the closure is stale.
+    setSettings(prev => ({
+      ...DEFAULT_SETTINGS,
+      theme: prev.theme || DEFAULT_SETTINGS.theme,
+    }));
   }, [orgId]);
 
   return { settings, updateSettings, resetSettings, isLoaded };

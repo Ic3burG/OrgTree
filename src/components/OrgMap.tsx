@@ -158,6 +158,15 @@ export default function OrgMap(): React.JSX.Element {
     resetSettings,
     isLoaded: isSettingsLoaded,
   } = useOrgMapSettings(orgId);
+
+  // Use a ref to track current settings to avoid stale closures in loadData
+  // This is critical for resetLayout to work correctly, as loadData needs to see the *new* reset settings
+  const settingsRef = useRef(settings);
+
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+
   const [nodes, setNodes, onNodesChange] = useNodesState<DepartmentNodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
@@ -397,9 +406,12 @@ export default function OrgMap(): React.JSX.Element {
         // Merge layout positions with original data AND saved positions
         const nodesWithLayout = layoutedNodes.map((layoutNode: unknown, idx: number) => {
           const typedLayoutNode = layoutNode as Node;
-          // Use direction-specific positions
+          // Use direction-specific positions from REF to ensure we have latest after reset
+          const currentSettings = settingsRef.current;
           const currentPositions =
-            settings.layoutDirection === 'LR' ? settings.nodePositionsLR : settings.nodePositionsTB;
+            currentSettings.layoutDirection === 'LR'
+              ? currentSettings.nodePositionsLR
+              : currentSettings.nodePositionsTB;
           const savedPos = currentPositions[typedLayoutNode.id];
 
           return {

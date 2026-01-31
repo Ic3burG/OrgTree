@@ -1,0 +1,99 @@
+
+> orgtree-server@1.0.0 test:coverage
+> vitest run --coverage src/routes/search.ts
+
+
+[1m[46m RUN [49m[22m [36mv4.0.17 [39m[90m/Users/ojdavis/Claude Code/OrgTree/server[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |       0 |        0 |       0 |       0 |                   
+ src               |       0 |        0 |       0 |       0 |                   
+  db-init.ts       |       0 |        0 |       0 |       0 | 10-101            
+  db.ts            |       0 |        0 |     100 |       0 | 6-23              
+  instrument.ts    |       0 |        0 |       0 |       0 | 4-61              
+  sentry.ts        |       0 |      100 |       0 |       0 | 9-18              
+  socket.ts        |       0 |        0 |       0 |       0 | 8-219             
+ src/middleware    |       0 |        0 |       0 |       0 |                   
+  auth.ts          |       0 |        0 |       0 |       0 | 7-94              
+  csrf.ts          |       0 |        0 |       0 |       0 | 19-135            
+  errorHandler.ts  |       0 |        0 |       0 |       0 | 16-35             
+  metrics.ts       |       0 |        0 |       0 |       0 | 14-34             
+ src/migrations    |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 6-82              
+  ...migrations.ts |       0 |        0 |       0 |       0 | 17-339            
+ ...tions/versions |       0 |      100 |       0 |       0 |                   
+  ...hancements.ts |       0 |      100 |       0 |       0 | 3-104             
+  ...p-transfer.ts |       0 |      100 |       0 |       0 | 4-85              
+ src/routes        |       0 |        0 |       0 |       0 |                   
+  analytics.ts     |       0 |        0 |       0 |       0 | 9-81              
+  audit.ts         |       0 |        0 |       0 |       0 | 12-105            
+  auth.ts          |       0 |        0 |       0 |       0 | 21-428            
+  backup.ts        |       0 |        0 |       0 |       0 | 13-281            
+  bulk.ts          |       0 |        0 |       0 |       0 | 12-191            
+  csrf.ts          |       0 |      100 |       0 |       0 | 4-49              
+  custom-fields.ts |       0 |        0 |       0 |       0 | 19-158            
+  debug.ts         |       0 |        0 |       0 |       0 | 4-14              
+  departments.ts   |       0 |        0 |       0 |       0 | 18-156            
+  ...ers-simple.ts |       0 |        0 |       0 |       0 | 7-111             
+  ...org-owners.ts |       0 |        0 |       0 |       0 | 7-96              
+  ...aintenance.ts |       0 |        0 |       0 |       0 | 12-174            
+  geds-import.ts   |       0 |        0 |       0 |       0 | 22-339            
+  geds.ts          |       0 |        0 |       0 |       0 | 6-61              
+  import.ts        |       0 |        0 |       0 |       0 | 9-252             
+  invitations.ts   |       0 |        0 |       0 |       0 | 13-118            
+  members.ts       |       0 |        0 |       0 |       0 | 19-265            
+  metrics.ts       |       0 |      100 |       0 |       0 | 17-86             
+  ...ship-check.ts |       0 |        0 |       0 |       0 | 7-70              
+  organizations.ts |       0 |        0 |       0 |       0 | 16-317            
+  ...-transfers.ts |       0 |        0 |       0 |       0 | 13-138            
+  passkey.ts       |       0 |        0 |       0 |       0 | 20-237            
+  people.ts        |       0 |        0 |       0 |       0 | 19-202            
+  public.ts        |       0 |        0 |       0 |       0 | 8-238             
+  ...d-searches.ts |       0 |        0 |       0 |       0 | 10-70             
+  search.ts        |       0 |        0 |       0 |       0 | 6-113             
+  totp.ts          |       0 |        0 |       0 |       0 | 12-189            
+  users.ts         |       0 |        0 |       0 |       0 | 17-217            
+  version.ts       |       0 |      100 |       0 |       0 | 3-14              
+ src/services      |       0 |        0 |       0 |       0 |                   
+  ...cs.service.ts |       0 |        0 |       0 |       0 | 10-134            
+  audit.service.ts |       0 |        0 |       0 |       0 | 22-391            
+  auth.service.ts  |       0 |        0 |       0 |       0 | 15-450            
+  ...up.service.ts |       0 |        0 |       0 |       0 | 7-247             
+  bulk.service.ts  |       0 |        0 |       0 |       0 | 128-817           
+  csrf.service.ts  |       0 |        0 |       0 |       0 | 26-111            
+  ...ds.service.ts |       0 |        0 |       0 |       0 | 13-401            
+  ...nt.service.ts |       0 |        0 |       0 |       0 | 13-423            
+  email.service.ts |       0 |        0 |       0 |       0 | 4-249             
+  ...ce.service.ts |       0 |        0 |       0 |       0 | 43-318            
+  ...er.service.ts |       0 |        0 |       0 |       0 | 29-141            
+  ...ad.service.ts |       0 |        0 |       0 |       0 | 11-226            
+  ...er.service.ts |       0 |        0 |       0 |       0 | 4-290             
+  ...on.service.ts |       0 |        0 |       0 |       0 | 11-405            
+  ...er.service.ts |       0 |        0 |       0 |       0 | 72-590            
+  ...or.service.ts |       0 |        0 |       0 |       0 | 12-114            
+  ...cs.service.ts |       0 |        0 |       0 |       0 | 28-358            
+  ...up.service.ts |       0 |        0 |       0 |       0 | 6-43              
+  org.service.ts   |       0 |        0 |       0 |       0 | 65-262            
+  ...er.service.ts |       0 |        0 |       0 |       0 | 73-957            
+  ...ey.service.ts |       0 |        0 |       0 |       0 | 20-228            
+  ...le.service.ts |       0 |        0 |       0 |       0 | 17-411            
+  ...ch.service.ts |       0 |        0 |       0 |       0 | 101-1063          
+  ...ts.service.ts |       0 |        0 |       0 |       0 | 32-240            
+  totp.service.ts  |       0 |        0 |       0 |       0 | 17-130            
+  ...er.service.ts |       0 |        0 |       0 |       0 | 11-27             
+  users.service.ts |       0 |        0 |       0 |       0 | 6-445             
+ src/test-helpers  |       0 |        0 |       0 |       0 |                   
+  ...-db-schema.ts |       0 |        0 |       0 |       0 | 11-378            
+ src/types         |       0 |        0 |       0 |       0 |                   
+  analytics.ts     |       0 |        0 |       0 |       0 |                   
+  global.d.ts      |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 221-228           
+  metrics.ts       |       0 |        0 |       0 |       0 |                   
+ src/utils         |       0 |        0 |       0 |       0 |                   
+  escape.ts        |       0 |        0 |       0 |       0 | 1-17              
+  logger.ts        |       0 |        0 |       0 |       0 | 20-42             
+-------------------|---------|----------|---------|---------|-------------------

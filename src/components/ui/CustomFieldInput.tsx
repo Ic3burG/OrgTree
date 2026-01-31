@@ -14,13 +14,15 @@ export default function CustomFieldInput({
   onChange,
   disabled = false,
 }: CustomFieldInputProps): React.JSX.Element {
-  const { name, field_type, options, is_required } = definition;
+  const { name, field_type, options, is_required, id } = definition;
+  const fieldId = `custom-field-${id}`;
 
   const renderInput = () => {
     switch (field_type) {
       case 'number':
         return (
           <input
+            id={fieldId}
             type="number"
             value={value || ''}
             onChange={e => onChange(e.target.value || null)}
@@ -32,6 +34,7 @@ export default function CustomFieldInput({
       case 'date':
         return (
           <input
+            id={fieldId}
             type="date"
             value={value || ''}
             onChange={e => onChange(e.target.value || null)}
@@ -43,6 +46,7 @@ export default function CustomFieldInput({
       case 'select':
         return (
           <select
+            id={fieldId}
             value={value || ''}
             onChange={e => onChange(e.target.value || null)}
             disabled={disabled}
@@ -63,7 +67,7 @@ export default function CustomFieldInput({
         // but ideally we'd use a better UI. Let's just do a basic implementation first.
         const selectedOptions = value ? value.split(',') : [];
         return (
-          <div className="space-y-2">
+          <div className="space-y-2" id={fieldId} role="group" aria-label={name}>
             <div className="flex flex-wrap gap-2 mb-2">
               {options?.map(opt => (
                 <label key={opt} className="flex items-center gap-2 cursor-pointer group">
@@ -91,6 +95,7 @@ export default function CustomFieldInput({
       case 'url':
         return (
           <input
+            id={fieldId}
             type="url"
             value={value || ''}
             onChange={e => onChange(e.target.value || null)}
@@ -103,6 +108,7 @@ export default function CustomFieldInput({
       case 'email':
         return (
           <input
+            id={fieldId}
             type="email"
             value={value || ''}
             onChange={e => onChange(e.target.value || null)}
@@ -115,6 +121,7 @@ export default function CustomFieldInput({
       case 'phone':
         return (
           <input
+            id={fieldId}
             type="tel"
             value={value || ''}
             onChange={e => onChange(e.target.value || null)}
@@ -128,6 +135,7 @@ export default function CustomFieldInput({
       default:
         return (
           <input
+            id={fieldId}
             type="text"
             value={value || ''}
             onChange={e => onChange(e.target.value || null)}
@@ -141,7 +149,10 @@ export default function CustomFieldInput({
 
   return (
     <div className="space-y-1">
-      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+      <label
+        htmlFor={fieldId}
+        className="block text-sm font-medium text-gray-700 dark:text-slate-300"
+      >
         {name}
         {is_required && <span className="text-red-500 ml-1">*</span>}
       </label>
