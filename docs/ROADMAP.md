@@ -155,7 +155,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 5. **LDAP/AD Integration** - Import from existing directory services
 6. **SSO Support** - SAML integration for enterprise
 7. **Webhook Support** - External system notifications
-8. **Hierarchical Tree Selector Component** - Replace native selects with interactive, collapsible tree dropdowns for department selection (improved UX with search, expand/collapse, keyboard navigation)
+8. ~~**Hierarchical Tree Selector Component** - Replace native selects with interactive, collapsible tree dropdowns for department selection (improved UX with search, expand/collapse, keyboard navigation)~~ ✅ **DONE** (January 28, 2026)
 9. ~~**Department Hierarchy Highlighting** - Visual highlighting of ancestor departments on hover/click in Org Map~~ ✅ **DONE** (January 22, 2026)
 10. **Advanced Sidebar UI Enhancements** (see [docs/rfc/advanced-sidebar-ui.md](rfc/advanced-sidebar-ui.md)):
 
