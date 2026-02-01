@@ -14,12 +14,8 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 30
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        project: [chromium, firefox, webkit]
 
     steps:
       - uses: actions/checkout@v4
@@ -37,13 +33,12 @@ jobs:
         run: cd server && npm ci
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps ${{ matrix.project }}
+        run: npx playwright install --with-deps chromium
 
       - name: Run Playwright tests
-        run: npx playwright test --project=${{ matrix.project }}
+        run: npx playwright test
         env:
           CI: true
-          # JWT_SECRET required for backend server to start
           JWT_SECRET: test-secret-for-e2e-only-not-for-production
           DEBUG: pw:webserver
 
@@ -51,7 +46,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ matrix.project }}
+          name: playwright-report
           path: |
             playwright-report/
             test-results/

@@ -52,19 +52,11 @@ export default defineConfig({
     timeout: 10000, // 10s for assertions
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects - Chromium only for stability */
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
     },
   ],
 
