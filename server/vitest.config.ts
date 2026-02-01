@@ -12,18 +12,14 @@ export default defineConfig({
       include: ['src/**/*.{js,ts}'],
       exclude: ['src/index.ts', 'src/**/*.test.{js,ts}', 'node_modules/**'],
       thresholds: {
-        statements: 10,
-        branches: 5,
-        functions: 10,
-        lines: 10,
+        statements: 80.72,
+        branches: 69.61,
+        functions: 82.41,
+        lines: 81.19,
       },
     },
     testTimeout: 10000,
     hookTimeout: 10000,
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-    },
+    fileParallelism: false,
   },
 });

@@ -8,8 +8,13 @@ if [ "$(arch)" = "i386" ]; then
 fi
 
 # Run full test suite (frontend + backend)
-echo "Running full test suite..."
-npm run test:all
+# Run frontend tests
+echo "Running frontend tests..."
+npm test
+
+# Run backend tests with strict coverage
+echo "Running backend tests with strict coverage..."
+cd server && npm run test:coverage
 
 if [ $? -ne 0 ]; then
   echo "Tests failed. Push aborted."
