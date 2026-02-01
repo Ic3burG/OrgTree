@@ -139,7 +139,6 @@ Text color automatically switches between white and dark for contrast.
 Edit `src/utils/colors.js`:
 
 ```javascript
-
 export function getDepthColors(depth) {
   const backgrounds = [
     'bg-blue-700', // Change to your preferred color
@@ -148,7 +147,6 @@ export function getDepthColors(depth) {
   ];
   // ...
 }
-
 ```
 
 ### Adding New Data Fields
@@ -157,11 +155,9 @@ export function getDepthColors(depth) {
 2. Update `parseCSV.js` to include new field:
 
 ```javascript
-
 if (node.type === 'person') {
   node.department = row.Department ? row.Department.trim() : '';
 }
-
 ```
 
 1. Display in `PersonCard.jsx` or `DetailPanel.jsx`
@@ -171,9 +167,7 @@ if (node.type === 'person') {
 Icons are from Lucide React. Change imports in component files:
 
 ```javascript
-
 import { Building, Users, Mail } from 'lucide-react';
-
 ```
 
 See [Lucide icons](https://lucide.dev) for available options.
@@ -280,7 +274,6 @@ Common issues:
 When you don't need the error object in a catch block, use an empty catch instead of naming an unused parameter:
 
 ```typescript
-
 // ❌ Bad - unused variable warning
 try {
   await navigator.clipboard.writeText(text);
@@ -294,7 +287,6 @@ try {
 } catch {
   // Fallback
 }
-
 ```
 
 #### useEffect Dependencies
@@ -304,7 +296,6 @@ React's `exhaustive-deps` rule ensures effects re-run when their dependencies ch
 ### Case 1: Functions defined in component scope
 
 ```typescript
-
 const fetchData = async () => {
   /* ... */
 };
@@ -313,13 +304,11 @@ useEffect(() => {
   fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []); // Only run on mount - function changes every render
-
 ```
 
 ### Case 2: State being set within the effect
 
 ```typescript
-
 useEffect(() => {
   const socket = io();
   setSocket(socket);
@@ -327,7 +316,6 @@ useEffect(() => {
   return () => socket.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [isAuthenticated]); // Adding 'socket' would cause infinite loop
-
 ```
 
 **Important**: When disabling the rule, always add a comment explaining WHY, not just suppressing the warning blindly.
@@ -360,6 +348,26 @@ cd server && npm test     # Backend
 ```
 
 Pre-commit hooks (via Husky) automatically run linting and formatting, but manual checks help catch issues earlier.
+
+### Code Coverage & Ratcheting
+
+We enforce strict code coverage thresholds for the backend. Coverage must **never decrease**. We use a "ratcheting" system to ensure that as we add more tests, the required coverage percentage automatically goes up.
+
+#### Updating Thresholds (Ratcheting)
+
+If you have improved test coverage (e.g., by adding new tests), you should run the ratcheting script to "lock in" these gains:
+
+```bash
+npx tsx server/scripts/update-coverage-thresholds.ts
+```
+
+This script will:
+
+1. Read the latest coverage report (`coverage/coverage-final.json`).
+2. Compare it with current thresholds in `vitest.config.ts`.
+3. Update `vitest.config.ts` if the new coverage is higher.
+
+**Recommendation**: Run this script after adding significant tests to keep our quality bar rising.
 
 ## Future Enhancements
 
