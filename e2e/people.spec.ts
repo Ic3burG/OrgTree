@@ -30,12 +30,16 @@ test.describe('People', () => {
     await authenticatedPage.getByText(orgName).click();
     await authenticatedPage.waitForURL(/\/org\/|\/organizations\//, { timeout: 10000 });
 
+    // Navigate to Departments page to create a department
+    await authenticatedPage.getByRole('link', { name: /departments/i }).click();
+    await authenticatedPage.waitForURL(/\/departments/, { timeout: 10000 });
+
     // Create a department
     const addDeptButton = authenticatedPage.getByRole('button', { name: /add department|new department/i });
     await expect(addDeptButton).toBeVisible({ timeout: 10000 });
     await addDeptButton.click();
     await authenticatedPage.getByLabel(/name/i).fill(deptName);
-    await authenticatedPage.getByRole('button', { name: /save|create|add/i }).click();
+    await authenticatedPage.getByRole('dialog').getByRole('button', { name: /add department|update department/i }).click();
 
     // Wait for department to appear
     await expect(authenticatedPage.getByText(deptName)).toBeVisible({ timeout: 10000 });
@@ -44,6 +48,10 @@ test.describe('People', () => {
   test('should add a person to a department', async ({ authenticatedPage }) => {
     const personName = `John Doe ${Date.now()}`;
     const personEmail = `john.doe.${Date.now()}@example.com`;
+
+    // Navigate to People page
+    await authenticatedPage.getByRole('link', { name: /people/i }).click();
+    await authenticatedPage.waitForURL(/\/people/, { timeout: 10000 });
 
     // Click on department to select it, then add person
     await authenticatedPage
@@ -56,7 +64,7 @@ test.describe('People', () => {
     await authenticatedPage.getByLabel(/email/i).fill(personEmail);
 
     // Save
-    await authenticatedPage.getByRole('button', { name: /save|add|create/i }).click();
+    await authenticatedPage.getByRole('dialog').getByRole('button', { name: /add person|update person/i }).click();
 
     // Should see the person
     await expect(authenticatedPage.getByText(personName)).toBeVisible({ timeout: 10000 });
@@ -66,24 +74,28 @@ test.describe('People', () => {
     const personName = `Edit Person ${Date.now()}`;
     const updatedName = `Updated ${personName}`;
 
+    // Navigate to People page
+    await authenticatedPage.getByRole('link', { name: /people/i }).click();
+    await authenticatedPage.waitForURL(/\/people/, { timeout: 10000 });
+
     // Add a person first
     await authenticatedPage
       .getByRole('button', { name: /add person|add member/i })
       .first()
       .click();
     await authenticatedPage.getByLabel(/name/i).fill(personName);
-    await authenticatedPage.getByRole('button', { name: /save|add|create/i }).click();
+    await authenticatedPage.getByRole('dialog').getByRole('button', { name: /add person|update person/i }).click();
 
     // Wait for person to appear
     await expect(authenticatedPage.getByText(personName)).toBeVisible({ timeout: 10000 });
 
     // Edit the person
     await authenticatedPage.getByText(personName).click();
-    await authenticatedPage.getByRole('button', { name: /edit/i }).click();
+    await authenticatedPage.getByRole('button', { name: /^edit/i }).click();
 
     // Update name
     await authenticatedPage.getByLabel(/name/i).fill(updatedName);
-    await authenticatedPage.getByRole('button', { name: /save|update/i }).click();
+    await authenticatedPage.getByRole('dialog').getByRole('button', { name: /add person|update person/i }).click();
 
     // Should see updated name
     await expect(authenticatedPage.getByText(updatedName)).toBeVisible({ timeout: 10000 });
@@ -92,23 +104,27 @@ test.describe('People', () => {
   test('should delete a person', async ({ authenticatedPage }) => {
     const personName = `Delete Person ${Date.now()}`;
 
+    // Navigate to People page
+    await authenticatedPage.getByRole('link', { name: /people/i }).click();
+    await authenticatedPage.waitForURL(/\/people/, { timeout: 10000 });
+
     // Add a person
     await authenticatedPage
       .getByRole('button', { name: /add person|add member/i })
       .first()
       .click();
     await authenticatedPage.getByLabel(/name/i).fill(personName);
-    await authenticatedPage.getByRole('button', { name: /save|add|create/i }).click();
+    await authenticatedPage.getByRole('dialog').getByRole('button', { name: /add person|update person/i }).click();
 
     // Wait for person to appear
     await expect(authenticatedPage.getByText(personName)).toBeVisible({ timeout: 10000 });
 
     // Delete the person
     await authenticatedPage.getByText(personName).click();
-    await authenticatedPage.getByRole('button', { name: /delete/i }).click();
+    await authenticatedPage.getByRole('button', { name: /^delete/i }).click();
 
     // Confirm if needed
-    const confirmButton = authenticatedPage.getByRole('button', { name: /confirm|yes|delete/i });
+    const confirmButton = authenticatedPage.getByRole('dialog').getByRole('button', { name: /confirm|yes|delete/i });
     if (await confirmButton.isVisible()) {
       await confirmButton.click();
     }

@@ -223,10 +223,18 @@ export default function OrganizationSelector(): React.JSX.Element {
 
       {/* Create Organization Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-org-title"
+        >
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
+              <h2
+                id="create-org-title"
+                className="text-xl font-semibold text-gray-900 dark:text-slate-100"
+              >
                 Create New Organization
               </h2>
             </div>
