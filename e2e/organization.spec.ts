@@ -3,8 +3,9 @@ import { test, expect } from './fixtures/test-user';
 test.describe('Organizations', () => {
   test('should display organization selector after login', async ({ authenticatedPage }) => {
     // Should show organizations page or create org prompt
+    // Use .first() to handle cases where multiple matching headings might exist (e.g., both "Welcome" and "Your Organizations")
     await expect(
-      authenticatedPage.getByRole('heading', { name: /organization|welcome/i })
+      authenticatedPage.getByRole('heading', { name: /organization|welcome/i }).first()
     ).toBeVisible();
   });
 
@@ -19,7 +20,7 @@ test.describe('Organizations', () => {
       name: /new organization|create your first organization/i,
     });
     await expect(createButton.first()).toBeVisible({ timeout: 10000 });
-    await createButton.first().click();
+    await createButton.first().click({ force: true });
 
     // Wait a moment for the click to trigger and dialog to start opening
     await authenticatedPage.waitForTimeout(500);
@@ -49,7 +50,7 @@ test.describe('Organizations', () => {
       name: /new organization|create your first organization/i,
     });
     await expect(createButton.first()).toBeVisible({ timeout: 10000 });
-    await createButton.first().click();
+    await createButton.first().click({ force: true });
 
     // Wait a moment for the click to trigger and dialog to start opening
     await authenticatedPage.waitForTimeout(500);

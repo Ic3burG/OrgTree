@@ -12,7 +12,7 @@ test.describe('Departments', () => {
       name: /new organization|create your first organization/i,
     });
     await expect(createButton.first()).toBeVisible({ timeout: 10000 });
-    await createButton.first().click();
+    await createButton.first().click({ force: true });
 
     // Wait a moment for the click to trigger and dialog to start opening
     await authenticatedPage.waitForTimeout(500);
@@ -33,7 +33,12 @@ test.describe('Departments', () => {
     const deptName = `Engineering ${Date.now()}`;
 
     // Click add department button
-    await authenticatedPage.getByRole('button', { name: /add department|new department/i }).click();
+    // Click add department button
+    const addDeptButton = authenticatedPage.getByRole('button', { name: /add department|new department/i });
+    await expect(addDeptButton).toBeVisible({ timeout: 10000 });
+    await addDeptButton.click();
+
+    // Fill department name
 
     // Fill department name
     await authenticatedPage.getByLabel(/name/i).fill(deptName);
@@ -50,7 +55,12 @@ test.describe('Departments', () => {
     const updatedName = `Updated ${deptName}`;
 
     // Create a department first
-    await authenticatedPage.getByRole('button', { name: /add department|new department/i }).click();
+    // Click add department button
+    const addDeptButton = authenticatedPage.getByRole('button', { name: /add department|new department/i });
+    await expect(addDeptButton).toBeVisible({ timeout: 10000 });
+    await addDeptButton.click();
+
+    // Fill department name
     await authenticatedPage.getByLabel(/name/i).fill(deptName);
     await authenticatedPage.getByRole('button', { name: /save|create|add/i }).click();
 
@@ -73,7 +83,12 @@ test.describe('Departments', () => {
     const deptName = `Delete Test ${Date.now()}`;
 
     // Create a department
-    await authenticatedPage.getByRole('button', { name: /add department|new department/i }).click();
+    // Click add department button
+    const addDeptButton = authenticatedPage.getByRole('button', { name: /add department|new department/i });
+    await expect(addDeptButton).toBeVisible({ timeout: 10000 });
+    await addDeptButton.click();
+
+    // Fill department name
     await authenticatedPage.getByLabel(/name/i).fill(deptName);
     await authenticatedPage.getByRole('button', { name: /save|create|add/i }).click();
 

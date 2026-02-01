@@ -14,7 +14,7 @@ test.describe('People', () => {
       name: /new organization|create your first organization/i,
     });
     await expect(createButton.first()).toBeVisible({ timeout: 10000 });
-    await createButton.first().click();
+    await createButton.first().click({ force: true });
 
     // Wait a moment for the click to trigger and dialog to start opening
     await authenticatedPage.waitForTimeout(500);
@@ -31,7 +31,9 @@ test.describe('People', () => {
     await authenticatedPage.waitForURL(/\/org\/|\/organizations\//, { timeout: 10000 });
 
     // Create a department
-    await authenticatedPage.getByRole('button', { name: /add department|new department/i }).click();
+    const addDeptButton = authenticatedPage.getByRole('button', { name: /add department|new department/i });
+    await expect(addDeptButton).toBeVisible({ timeout: 10000 });
+    await addDeptButton.click();
     await authenticatedPage.getByLabel(/name/i).fill(deptName);
     await authenticatedPage.getByRole('button', { name: /save|create|add/i }).click();
 

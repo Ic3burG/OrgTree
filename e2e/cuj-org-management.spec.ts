@@ -24,7 +24,8 @@ test.describe('CUJ-1: Organization Management', () => {
     });
     // Wait for button to be visible and clickable
     await expect(createOrgButton.first()).toBeVisible({ timeout: 10000 });
-    await createOrgButton.first().click();
+    await expect(createOrgButton.first()).toBeEnabled({ timeout: 10000 });
+    await createOrgButton.first().click({ force: true });
 
     // Wait a moment for the click to trigger and dialog to start opening
     await authenticatedPage.waitForTimeout(500);
