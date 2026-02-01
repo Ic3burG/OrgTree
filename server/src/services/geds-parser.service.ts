@@ -162,8 +162,7 @@ async function parsePersonXml(xmlContent: string): Promise<{
 
     if (
       person.orgStructure &&
-      Array.isArray(person.orgStructure) &&
-      person.orgStructure.length > 0 &&
+      person.orgStructure[0] &&
       person.orgStructure[0].org &&
       Array.isArray(person.orgStructure[0].org)
     ) {
@@ -173,7 +172,7 @@ async function parsePersonXml(xmlContent: string): Promise<{
       for (let i = 1; i < orgs.length; i++) {
         const org = orgs[i];
         // xml2js parses <n> as "name" property
-        if (org.name && Array.isArray(org.name) && org.name[0]) {
+        if (org && org.name && Array.isArray(org.name) && org.name[0]) {
           let deptName = org.name[0];
           // Decode HTML entities and trim whitespace
           deptName = deptName.replace(/&amp;/g, '&').trim();
@@ -224,10 +223,16 @@ export async function parseGedsXml(xmlContent: string): Promise<ParsedGedsData> 
     // Build acronym map from this record
     const acronymMap = new Map<string, string>();
     if (parsed.deptAcronym && parsed.departments.length > 0) {
-      acronymMap.set(parsed.departments[0], parsed.deptAcronym);
+      const firstDept = parsed.departments[0];
+      if (firstDept) {
+        acronymMap.set(firstDept, parsed.deptAcronym);
+      }
     }
     if (parsed.orgAcronym && parsed.departments.length > 0) {
-      acronymMap.set(parsed.departments[parsed.departments.length - 1], parsed.orgAcronym);
+      const lastDept = parsed.departments[parsed.departments.length - 1];
+      if (lastDept) {
+        acronymMap.set(lastDept, parsed.orgAcronym);
+      }
     }
 
     // Build path parts using the acronym map
@@ -238,13 +243,17 @@ export async function parseGedsXml(xmlContent: string): Promise<ParsedGedsData> 
     let currentPath = '';
 
     for (let i = 0; i < pathParts.length; i++) {
-      currentPath += '/' + pathParts[i];
-      departments.push({
-        path: currentPath,
-        type: 'department',
-        name: parsed.departments[i],
-        description: undefined,
-      });
+      const pathPart = pathParts[i];
+      const deptName = parsed.departments[i];
+      if (pathPart && deptName) {
+        currentPath += '/' + pathPart;
+        departments.push({
+          path: currentPath,
+          type: 'department',
+          name: deptName,
+          description: undefined,
+        });
+      }
     }
 
     // Create person record with full path

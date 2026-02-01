@@ -83,7 +83,7 @@ export default defineConfig({
       timeout: 120 * 1000,
     },
     {
-      command: 'cd server && npm run dev',
+      command: process.env.CI ? 'cd server && npx tsx --import ./src/instrument.ts src/index.ts' : 'cd server && npm run dev',
       url: 'http://127.0.0.1:3001/api/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,

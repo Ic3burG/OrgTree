@@ -292,7 +292,7 @@ if (process.env.SENTRY_DSN) {
 // Custom error handler (must be last)
 app.use(errorHandler);
 
-server.listen(PORT, () => {
+server.listen(Number(PORT), '0.0.0.0', () => {
   logger.info(`Server running on port ${PORT}`, {
     port: PORT,
     environment: process.env.NODE_ENV || 'development',
