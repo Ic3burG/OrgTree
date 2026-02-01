@@ -39,7 +39,13 @@ export default function AdminLayout(): React.JSX.Element {
   };
 
   const closeSidebar = (): void => {
+    // Mobile: Always close drawer
     setSidebarOpen(false);
+
+    // Desktop: Auto-collapse if not pinned and currently expanded
+    if (!pinned && isExpanded) {
+      setState('minimized');
+    }
   };
 
   // Header content for the Sidebar

@@ -31,7 +31,13 @@ export default function SuperuserLayout(): React.JSX.Element {
   };
 
   const closeSidebar = () => {
+    // Mobile: Always close drawer
     setSidebarOpen(false);
+
+    // Desktop: Auto-collapse if not pinned and currently expanded
+    if (!pinned && isExpanded) {
+      setState('minimized');
+    }
   };
 
   const SidebarHeader = (
