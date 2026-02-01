@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Visual Regression', () => {
+  // Skip visual regression in CI until we have a consistent Docker environment for generating snapshots
+  test.skip(!!process.env.CI, 'Skip visual regression in CI due to platform differences');
+
   test('landing page visual', async ({ page }) => {
     // Go to landing page
     await page.goto('/');
