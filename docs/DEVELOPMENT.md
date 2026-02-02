@@ -351,7 +351,7 @@ Pre-commit hooks (via Husky) automatically run linting and formatting, but manua
 
 ### Code Coverage & Ratcheting
 
-We enforce strict code coverage thresholds for the backend. Coverage must **never decrease**. We use a "ratcheting" system to ensure that as we add more tests, the required coverage percentage automatically goes up.
+We enforce strict code coverage thresholds for the backend (see [ADR 024](adr/024-coverage-maintenance-ratcheting.md)). Coverage must **never decrease**. We use a "ratcheting" system to ensure that as we add more tests, the required coverage percentage automatically goes up.
 
 #### Updating Thresholds (Ratcheting)
 

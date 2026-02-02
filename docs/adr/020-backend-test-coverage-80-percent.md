@@ -38,7 +38,7 @@ We have implemented comprehensive test suites for all core backend services, rea
 
 - **Higher Confidence**: Refactoring and feature additions are now guarded by a robust test suite.
 - **Improved Bug Detection**: Several edge cases and race conditions were identified and fixed during the test expansion.
-- **Maintenance Requirement**: New code must now include tests that maintain or improve these thresholds (see [RFC: Automated Coverage Maintenance & Ratcheting](../rfc/coverage-maintenance-ratcheting.md)).
+- **Maintenance Requirement**: New code must now include tests that maintain or improve these thresholds (see [ADR 024: Automated Coverage Maintenance & Ratcheting](024-coverage-maintenance-ratcheting.md)).
 
 ## Results Summary (Jan 28, 2026)
 
@@ -54,5 +54,5 @@ We have implemented comprehensive test suites for all core backend services, rea
 ## Links
 
 - [ADR-014: Test Coverage Expansion](014-test-coverage-expansion.md)
-- [RFC: Automated Coverage Maintenance & Ratcheting](../rfc/coverage-maintenance-ratcheting.md)
+- [ADR 024: Automated Coverage Maintenance & Ratcheting](024-coverage-maintenance-ratcheting.md)
 - [RFC: Frontend Quality & E2E Testing Strategy](../rfc/frontend-quality-e2e-strategy.md)

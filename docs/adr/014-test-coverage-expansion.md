@@ -114,7 +114,7 @@ With the backend reaching its >80% target, focus shifts to sustaining those gain
 1. **Coverage Maintenance & Ratcheting**
    - Implement a automated ratchet mechanism to prevent coverage degradation.
    - Enforce strict thresholds in CI/CD.
-   - See [RFC: Automated Coverage Maintenance & Ratcheting](../rfc/coverage-maintenance-ratcheting.md).
+   - See [ADR 024: Automated Coverage Maintenance & Ratcheting](024-coverage-maintenance-ratcheting.md).
 
 2. **Frontend Quality & E2E Expansion**
    - Target 60% frontend statement coverage.
