@@ -119,7 +119,11 @@ export default function Sidebar({
 
         {/* Footer */}
         {footer && (
-          <div className="border-t border-gray-200 dark:border-slate-700 p-4 shrink-0">
+          <div
+            className={`border-t border-gray-200 dark:border-slate-700 shrink-0 ${
+              isExpanded ? 'p-4' : 'px-0 py-4'
+            }`}
+          >
             <div className={`${!isExpanded ? 'flex justify-center' : ''}`}>{footer}</div>
           </div>
         )}

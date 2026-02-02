@@ -57,7 +57,7 @@ export default function AdminLayout(): React.JSX.Element {
           handleBackToOrgs();
           closeSidebar();
         }}
-        className={`w-full flex items-center ${!isExpanded ? 'justify-center' : 'gap-2'} text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 mb-2 transition-all`}
+        className={`w-full flex items-center ${!isExpanded ? 'justify-center' : 'gap-2 pr-12'} text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 mb-2 transition-all`}
         title={!isExpanded ? 'All Organizations' : undefined}
       >
         <ArrowLeft size={16} />
