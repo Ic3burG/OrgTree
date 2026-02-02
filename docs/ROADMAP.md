@@ -185,8 +185,6 @@ This document outlines the development roadmap for OrgTree, including technical 
 
 - ✅ **Search Enhancements** - Trigram fuzzy matching, analytics, and saved searches (January 27, 2026)
 - ✅ **Organization Analytics Dashboard** - Overview, Growth, Structure, Activity, Search, and Export (February 2, 2026)
-
-- ✅ **Organization Analytics Dashboard** - Overview, Growth, Structure, Activity, Search, and Export (February 2, 2026)
 - ✅ **Search System Rebuild** - Fixed FTS5 sync, soft-deletes, error handling, and added frontend resilience (January 24, 2026)
 - ✅ **User Discovery & Privacy Controls** - Implemented discoverable user search with opt-out settings and autocomplete (January 25, 2026)
 - ✅ **Database Migration Rollback** - Comprehensive migration system with auto-rollback in CD (January 25, 2026)
