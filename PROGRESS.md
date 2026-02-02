@@ -22,6 +22,7 @@
   - **Export Functionality**: Added CSV export for all analytics tabs via `analyticsExport.ts` utility.
   - **Backend Services**: Implemented `OrgAnalyticsService` with endpoints for overview, growth trends, structural health, and activity metrics.
   - **API Routes**: Created `server/src/routes/org-analytics.ts` with role-based access control (owner/admin only).
+- 🐛 **Bug Fix**: Resolved infinite loop in Analytics Dashboard caused by `useEffect` dependency cycle on data objects.
 - ✅ **Documentation**:
   - **ADR-023**: Created and reformatted `docs/adr/023-organization-analytics-dashboard.md` to match standard ADR template.
   - **RFC Update**: Marked `docs/rfc/organization-analytics-dashboard.md` as superseded by ADR-023.
