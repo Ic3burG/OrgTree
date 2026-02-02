@@ -14,32 +14,33 @@ An Architecture Decision Record (ADR) is a document that captures an important a
 
 ## ADR Index
 
-| ADR                                                | Title                                   | Status   | Date       | Tags                                           |
-| -------------------------------------------------- | --------------------------------------- | -------- | ---------- | ---------------------------------------------- |
-| [000](000-adr-template.md)                         | ADR Template                            | Template | -          | -                                              |
-| [001](001-sqlite-as-primary-database.md)           | SQLite as Primary Database              | Accepted | 2025-12-15 | database, architecture, infrastructure         |
-| [002](002-dual-token-jwt-authentication.md)        | Dual-Token JWT Authentication Strategy  | Accepted | 2025-12-20 | security, authentication, architecture         |
-| [003](003-socketio-for-real-time-collaboration.md) | Socket.IO for Real-Time Collaboration   | Accepted | 2025-12-22 | real-time, websockets, collaboration           |
-| [004](004-react-context-for-state-management.md)   | React Context API for State Management  | Accepted | 2025-12-16 | frontend, state-management, react              |
-| [005](005-monorepo-structure.md)                   | Monorepo Structure                      | Accepted | 2025-12-15 | architecture, project-structure, monorepo      |
-| [006](006-fts5-full-text-search.md)                | SQLite FTS5 for Full-Text Search        | Accepted | 2025-12-28 | search, database, performance                  |
-| [007](007-typescript-migration.md)                 | TypeScript Migration                    | Accepted | 2026-01-07 | typescript, developer-experience, code-quality |
-| [008](008-user-analytics.md)                       | User Analytics                          | Accepted | 2026-01-21 | analytics, database, tracking                  |
-| [009](009-department-hierarchy-highlighting.md)    | Department Hierarchy Highlighting       | Accepted | 2026-01-22 | map, ux, visualization                         |
-| [010](010-centered-vertical-layout.md)             | Centered Vertical Layout                | Accepted | 2026-01-22 | map, layout, ux                                |
-| [011](011-rainbow-color-theme.md)                  | Rainbow Color Theme                     | Accepted | 2026-01-22 | map, theme, aesthetics                         |
-| [012](012-database-migration-rollback.md)          | Database Migration Rollback             | Accepted | 2026-01-25 | database, migration, infrastructure            |
-| [013](013-user-discovery-privacy.md)               | User Discovery and Privacy Controls     | Accepted | 2026-01-25 | privacy, security, user-discovery              |
-| [014](014-test-coverage-expansion.md)              | Test Coverage Expansion                 | Accepted | 2026-01-25 | testing, quality, code-coverage                |
-| [015](015-hierarchical-tree-selector.md)           | Hierarchical Tree Selector              | Accepted | 2026-01-25 | ux, map, form-controls                         |
-| [016](016-geds-url-import.md)                      | GEDS URL Import                         | Accepted | 2026-01-25 | data-import, geds, automation                  |
-| [017](017-search-system-rebuild.md)                | Search System Rebuild                   | Accepted | 2026-01-24 | database, search, performance, resilience      |
-| [018](018-organization-ownership-transfer.md)      | Organization Ownership Transfer         | Accepted | 2026-01-27 | ownership, security, workflow                  |
-| [019](019-trigram-search-enhancements.md)          | Trigram Search Enhancements             | Accepted | 2026-01-27 | search, database, performance, ux              |
-| [020](020-backend-test-coverage-80-percent.md)     | Backend Test Coverage (80% Achieved)    | Accepted | 2026-01-28 | testing, backend, code-quality                 |
-| [021](021-frontend-quality-e2e-strategy.md)        | Frontend Quality & E2E Testing Strategy | Accepted | 2026-01-27 | testing, frontend, e2e, quality                |
-| [022](022-advanced-sidebar-ui.md)                  | Advanced Sidebar UI Enhancements        | Accepted | 2026-01-31 | frontend, ui, ux, state-management             |
-| [024](024-coverage-maintenance-ratcheting.md)      | Automated Coverage Maintenance & Ratcheting | Accepted | 2026-01-28 | testing, devops, code-quality                  |
+| ADR                                                | Title                                       | Status   | Date       | Tags                                                |
+| -------------------------------------------------- | ------------------------------------------- | -------- | ---------- | --------------------------------------------------- |
+| [000](000-adr-template.md)                         | ADR Template                                | Template | -          | -                                                   |
+| [001](001-sqlite-as-primary-database.md)           | SQLite as Primary Database                  | Accepted | 2025-12-15 | database, architecture, infrastructure              |
+| [002](002-dual-token-jwt-authentication.md)        | Dual-Token JWT Authentication Strategy      | Accepted | 2025-12-20 | security, authentication, architecture              |
+| [003](003-socketio-for-real-time-collaboration.md) | Socket.IO for Real-Time Collaboration       | Accepted | 2025-12-22 | real-time, websockets, collaboration                |
+| [004](004-react-context-for-state-management.md)   | React Context API for State Management      | Accepted | 2025-12-16 | frontend, state-management, react                   |
+| [005](005-monorepo-structure.md)                   | Monorepo Structure                          | Accepted | 2025-12-15 | architecture, project-structure, monorepo           |
+| [006](006-fts5-full-text-search.md)                | SQLite FTS5 for Full-Text Search            | Accepted | 2025-12-28 | search, database, performance                       |
+| [007](007-typescript-migration.md)                 | TypeScript Migration                        | Accepted | 2026-01-07 | typescript, developer-experience, code-quality      |
+| [008](008-user-analytics.md)                       | User Analytics                              | Accepted | 2026-01-21 | analytics, database, tracking                       |
+| [009](009-department-hierarchy-highlighting.md)    | Department Hierarchy Highlighting           | Accepted | 2026-01-22 | map, ux, visualization                              |
+| [010](010-centered-vertical-layout.md)             | Centered Vertical Layout                    | Accepted | 2026-01-22 | map, layout, ux                                     |
+| [011](011-rainbow-color-theme.md)                  | Rainbow Color Theme                         | Accepted | 2026-01-22 | map, theme, aesthetics                              |
+| [012](012-database-migration-rollback.md)          | Database Migration Rollback                 | Accepted | 2026-01-25 | database, migration, infrastructure                 |
+| [013](013-user-discovery-privacy.md)               | User Discovery and Privacy Controls         | Accepted | 2026-01-25 | privacy, security, user-discovery                   |
+| [014](014-test-coverage-expansion.md)              | Test Coverage Expansion                     | Accepted | 2026-01-25 | testing, quality, code-coverage                     |
+| [015](015-hierarchical-tree-selector.md)           | Hierarchical Tree Selector                  | Accepted | 2026-01-25 | ux, map, form-controls                              |
+| [016](016-geds-url-import.md)                      | GEDS URL Import                             | Accepted | 2026-01-25 | data-import, geds, automation                       |
+| [017](017-search-system-rebuild.md)                | Search System Rebuild                       | Accepted | 2026-01-24 | database, search, performance, resilience           |
+| [018](018-organization-ownership-transfer.md)      | Organization Ownership Transfer             | Accepted | 2026-01-27 | ownership, security, workflow                       |
+| [019](019-trigram-search-enhancements.md)          | Trigram Search Enhancements                 | Accepted | 2026-01-27 | search, database, performance, ux                   |
+| [020](020-backend-test-coverage-80-percent.md)     | Backend Test Coverage (80% Achieved)        | Accepted | 2026-01-28 | testing, backend, code-quality                      |
+| [021](021-frontend-quality-e2e-strategy.md)        | Frontend Quality & E2E Testing Strategy     | Accepted | 2026-01-27 | testing, frontend, e2e, quality                     |
+| [022](022-advanced-sidebar-ui.md)                  | Advanced Sidebar UI Enhancements            | Accepted | 2026-01-31 | frontend, ui, ux, state-management                  |
+| [023](023-organization-analytics-dashboard.md)     | Organization Analytics Dashboard            | Accepted | 2026-02-02 | analytics, dashboard, visualization, admin-features |
+| [024](024-coverage-maintenance-ratcheting.md)      | Automated Coverage Maintenance & Ratcheting | Accepted | 2026-01-28 | testing, devops, code-quality                       |
 
 ## Reading Guide
 
@@ -178,5 +179,5 @@ ADRs are **living documents**. If circumstances change:
 
 ---
 
-**Last Updated**: January 31, 2026
+**Last Updated**: February 2, 2026
 **Maintainers**: OrgTree Development Team
