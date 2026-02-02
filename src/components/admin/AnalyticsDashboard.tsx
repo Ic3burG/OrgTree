@@ -65,7 +65,7 @@ export default function AnalyticsDashboard(): React.JSX.Element {
     };
 
     fetchData();
-  }, [orgId, activeTab, period, overviewData, structureData, activityData, searchData]);
+  }, [orgId, activeTab, period]);
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
