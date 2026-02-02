@@ -11,6 +11,7 @@ import {
   X,
   Settings,
   Terminal,
+  BarChart3,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import MobileNav from '../mobile/MobileNav';
@@ -247,6 +248,21 @@ export default function AdminLayout(): React.JSX.Element {
       >
         <Settings size={20} />
         <span className={`font-medium ${!isExpanded ? 'sr-only' : ''}`}>Settings</span>
+      </NavLink>
+      <NavLink
+        to={`/org/${orgId}/analytics`}
+        onClick={closeSidebar}
+        className={({ isActive }) =>
+          `flex items-center ${!isExpanded ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg transition-colors ${
+            isActive
+              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+              : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
+          }`
+        }
+        title={!isExpanded ? 'Analytics' : undefined}
+      >
+        <BarChart3 size={20} />
+        <span className={`font-medium ${!isExpanded ? 'sr-only' : ''}`}>Analytics</span>
       </NavLink>
     </nav>
   );

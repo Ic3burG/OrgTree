@@ -14,7 +14,7 @@ npm test
 
 # Run backend tests with strict coverage
 echo "Running backend tests with strict coverage..."
-cd server && npm run test:coverage
+(cd server && npm run test:coverage)
 
 if [ $? -ne 0 ]; then
   echo "Tests failed. Push aborted."

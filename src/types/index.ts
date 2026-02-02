@@ -429,3 +429,39 @@ export interface OwnershipTransferAuditLog {
   actor_name?: string;
   actor_email?: string;
 }
+
+// Analytics types
+export interface OrgAnalyticsOverview {
+  totalDepartments: number;
+  totalPeople: number;
+  totalMembers: number;
+  avgUpdatesPerDay: number;
+}
+
+export interface OrgGrowthTrend {
+  date: string;
+  peopleCount: number;
+  departmentCount: number;
+}
+
+export interface OrgStructuralHealth {
+  maxDepth: number;
+  avgSpanOfControl: number; // Currently 0 due to schema limitation
+  departmentSizes: { name: string; count: number }[];
+}
+
+export interface OrgActivityMetrics {
+  totalEdits: number;
+  editsPerDay: { date: string; count: number }[];
+  topEditors: { userId: string; email: string; editCount: number }[];
+  peakActivityHour: number;
+  recentActions: { action: string; count: number }[];
+}
+
+export interface OrgSearchAnalytics {
+  topQueries: { query: string; count: number }[];
+  totalSearches: number;
+  uniqueSearchers: number;
+  zeroResultQueries: { query: string; count: number }[];
+  avgResultsPerSearch: number;
+}

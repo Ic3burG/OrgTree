@@ -1,0 +1,419 @@
+import db from '../db.js';
+import logger from '../utils/logger.js';
+
+export interface OrgAnalyticsOverview {
+  totalDepartments: number;
+  totalPeople: number;
+  totalMembers: number;
+  departmentGrowth30d: number; // % change
+  peopleGrowth30d: number;
+  avgUpdatesPerDay: number;
+  activeUsers7d: number;
+  lastActivityAt: string | null;
+}
+
+export interface GrowthTrend {
+  date: string; // ISO date
+  departmentCount: number;
+  peopleCount: number;
+  memberCount: number;
+}
+
+export interface StructuralHealth {
+  maxDepth: number;
+  avgDepth: number;
+  avgSpanOfControl: number; // avg direct reports per manager
+  largestDepartment: { id: string; name: string; size: number } | null;
+  orphanedPeople: number; // people in deleted departments or no department
+  emptyDepartments: number; // departments with 0 people
+}
+
+export interface ActivityMetrics {
+  totalEdits: number;
+  editsPerDay: { date: string; count: number }[];
+  topEditors: { userId: string; email: string; editCount: number }[];
+  peakActivityHour: number; // 0-23
+  recentActions: { action: string; count: number }[]; // created/updated/deleted
+}
+
+export interface SearchAnalytics {
+  totalSearches: number;
+  uniqueSearchers: number;
+  topQueries: { query: string; count: number }[];
+  zeroResultQueries: { query: string; count: number }[];
+  avgResultsPerSearch: number;
+}
+
+/**
+ * Get high-level analytics overview for an organization
+ */
+export function getOrgAnalyticsOverview(orgId: string): OrgAnalyticsOverview {
+  try {
+    // Current counts
+    const counts = db
+      .prepare(
+        `
+      SELECT 
+        (SELECT COUNT(*) FROM departments WHERE organization_id = @orgId AND deleted_at IS NULL) as deptCount,
+        (SELECT COUNT(*) FROM people p JOIN departments d ON p.department_id = d.id WHERE d.organization_id = @orgId AND p.deleted_at IS NULL AND d.deleted_at IS NULL) as peopleCount,
+        (SELECT COUNT(*) FROM organization_members WHERE organization_id = @orgId) as memberCount
+    `
+      )
+      .get({ orgId }) as { deptCount: number; peopleCount: number; memberCount: number };
+
+    // Growth inputs (30 days ago)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const thirtyDaysAgoStr = thirtyDaysAgo.toISOString();
+
+    const oldCounts = db
+      .prepare(
+        `
+      SELECT 
+        (SELECT COUNT(*) FROM departments WHERE organization_id = @orgId AND created_at <= @date AND deleted_at IS NULL) as deptCount,
+        (SELECT COUNT(*) FROM people p JOIN departments d ON p.department_id = d.id WHERE d.organization_id = @orgId AND p.created_at <= @date AND p.deleted_at IS NULL AND d.deleted_at IS NULL) as peopleCount
+    `
+      )
+      .get({ orgId, date: thirtyDaysAgoStr }) as { deptCount: number; peopleCount: number };
+
+    // Calculate growth percentages
+    const calculateGrowth = (current: number, old: number) => {
+      if (old === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - old) / old) * 100);
+    };
+
+    // Activity stats
+    const activityStats = db
+      .prepare(
+        `
+      SELECT 
+        COUNT(*) as totalEdits,
+        MAX(created_at) as lastActivity
+      FROM audit_logs 
+      WHERE organization_id = @orgId 
+      AND created_at >= @date
+    `
+      )
+      .get({ orgId, date: thirtyDaysAgoStr }) as { totalEdits: number; lastActivity: string };
+
+    const activeUsers = db
+      .prepare(
+        `
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM analytics_events 
+      WHERE properties LIKE '%"organization_id":"' || @orgId || '"%'
+      AND created_at >= date('now', '-7 days')
+    `
+      )
+      .get({ orgId }) as { count: number };
+
+    return {
+      totalDepartments: counts.deptCount,
+      totalPeople: counts.peopleCount,
+      totalMembers: counts.memberCount,
+      departmentGrowth30d: calculateGrowth(counts.deptCount, oldCounts.deptCount),
+      peopleGrowth30d: calculateGrowth(counts.peopleCount, oldCounts.peopleCount),
+      avgUpdatesPerDay: Math.round((activityStats.totalEdits / 30) * 10) / 10,
+      activeUsers7d: activeUsers?.count || 0,
+      lastActivityAt: activityStats.lastActivity || null,
+    };
+  } catch (error) {
+    logger.error('Failed to get org analytics overview', { error, orgId });
+    throw error;
+  }
+}
+
+/**
+ * Get growth trends over time
+ */
+export function getOrgGrowthTrends(
+  orgId: string,
+  period: '7d' | '30d' | '90d' | '1y'
+): GrowthTrend[] {
+  try {
+    const days = period === '7d' ? 7 : period === '30d' ? 30 : period === '90d' ? 90 : 365;
+
+    // We'll generate a series of dates and aggregate counts for each
+    // This is a simplified approach; primarily using created_at.
+    // It doesn't account for deletions perfectly but gives a good trend line.
+    const trends = db
+      .prepare(
+        `
+      WITH RECURSIVE dates(date) AS (
+        SELECT date('now', '-' || @days || ' days')
+        UNION ALL
+        SELECT date(date, '+1 day')
+        FROM dates
+        WHERE date < date('now')
+      )
+      SELECT 
+        d.date,
+        (SELECT COUNT(*) FROM departments dept WHERE dept.organization_id = @orgId AND date(dept.created_at) <= d.date AND dept.deleted_at IS NULL) as departmentCount,
+        (SELECT COUNT(*) FROM people p JOIN departments dept ON p.department_id = dept.id WHERE dept.organization_id = @orgId AND date(p.created_at) <= d.date AND p.deleted_at IS NULL AND dept.deleted_at IS NULL) as peopleCount,
+        (SELECT COUNT(*) FROM organization_members m WHERE m.organization_id = @orgId AND date(m.created_at) <= d.date) as memberCount
+      FROM dates d
+    `
+      )
+      .all({ orgId, days }) as GrowthTrend[];
+
+    return trends;
+  } catch (error) {
+    logger.error('Failed to get org growth trends', { error, orgId });
+    throw error;
+  }
+}
+
+/**
+ * Get structural health metrics
+ */
+export function getOrgStructuralHealth(orgId: string): StructuralHealth {
+  try {
+    // Empty departments (departments with no people)
+    const emptyDepts = db
+      .prepare(
+        `
+      SELECT d.id
+      FROM departments d
+      LEFT JOIN people p ON p.department_id = d.id AND p.deleted_at IS NULL
+      WHERE d.organization_id = @orgId AND d.deleted_at IS NULL
+      GROUP BY d.id
+      HAVING COUNT(p.id) = 0
+    `
+      )
+      .all({ orgId });
+
+    const emptyDepartmentsCount = emptyDepts.length;
+
+    // Orphaned people (people in departments that don't exist or are deleted)
+    const orphanedPeople = db
+      .prepare(
+        `
+      SELECT COUNT(*) as count 
+      FROM people p
+      LEFT JOIN departments d ON p.department_id = d.id
+      WHERE (d.id IS NULL OR d.deleted_at IS NOT NULL)
+      AND p.deleted_at IS NULL
+      AND d.organization_id = @orgId
+    `
+      )
+      .get({ orgId }) as { count: number };
+
+    // Largest department
+    const largestDept = db
+      .prepare(
+        `
+      SELECT d.id, d.name, COUNT(p.id) as size
+      FROM departments d
+      JOIN people p ON p.department_id = d.id
+      WHERE d.organization_id = @orgId AND d.deleted_at IS NULL AND p.deleted_at IS NULL
+      GROUP BY d.id
+      ORDER BY size DESC
+      LIMIT 1
+    `
+      )
+      .get({ orgId }) as { id: string; name: string; size: number } | undefined;
+
+    // Span of control (avg reports per manager)
+    // NOTE: 'manager_id' does not exist in the current schema yet.
+    // Returning 0 for now until the feature is implemented.
+    const avgSpanOfControl = 0;
+
+    // Depth analysis requires recursive CTE
+    const depthStats = db
+      .prepare(
+        `
+      WITH RECURSIVE dept_tree AS (
+        SELECT id, parent_id, 1 as depth
+        FROM departments
+        WHERE organization_id = @orgId AND parent_id IS NULL AND deleted_at IS NULL
+        
+        UNION ALL
+        
+        SELECT d.id, d.parent_id, dt.depth + 1
+        FROM departments d
+        JOIN dept_tree dt ON d.parent_id = dt.id
+        WHERE d.organization_id = @orgId AND d.deleted_at IS NULL
+      )
+      SELECT MAX(depth) as maxDepth, AVG(depth) as avgDepth
+      FROM dept_tree
+    `
+      )
+      .get({ orgId }) as { maxDepth: number; avgDepth: number };
+
+    return {
+      maxDepth: depthStats?.maxDepth || 0,
+      avgDepth: Math.round((depthStats?.avgDepth || 0) * 10) / 10,
+      avgSpanOfControl: avgSpanOfControl,
+      largestDepartment: largestDept || null,
+      orphanedPeople: orphanedPeople.count,
+      emptyDepartments: emptyDepartmentsCount,
+    };
+  } catch (error) {
+    logger.error('Failed to get structural health', { error, orgId });
+    throw error;
+  }
+}
+
+/**
+ * Get activity metrics
+ */
+export function getOrgActivityMetrics(
+  orgId: string,
+  period: '7d' | '30d' | '90d'
+): ActivityMetrics {
+  try {
+    const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+
+    const stats = db
+      .prepare(
+        `
+      SELECT 
+        COUNT(*) as totalEdits,
+        strftime('%H', created_at) as hour,
+        COUNT(*) as hourCount
+      FROM audit_logs
+      WHERE organization_id = @orgId 
+      AND created_at >= date('now', '-' || @days || ' days')
+      GROUP BY hour
+      ORDER BY hourCount DESC
+    `
+      )
+      .all({ orgId, days }) as { totalEdits: number; hour: string; hourCount: number }[];
+
+    const totalEdits = stats.reduce((acc, curr) => acc + curr.hourCount, 0);
+    const peakActivityHour = stats.length > 0 ? parseInt(stats[0].hour) : 0;
+
+    const editsPerDay = db
+      .prepare(
+        `
+      SELECT date(created_at) as date, COUNT(*) as count
+      FROM audit_logs
+      WHERE organization_id = @orgId 
+      AND created_at >= date('now', '-' || @days || ' days')
+      GROUP BY date
+      ORDER BY date
+    `
+      )
+      .all({ orgId, days }) as { date: string; count: number }[];
+
+    const topEditors = db
+      .prepare(
+        `
+      SELECT 
+        a.actor_id as userId, 
+        u.email,
+        COUNT(*) as editCount
+      FROM audit_logs a
+      JOIN users u ON a.actor_id = u.id
+      WHERE a.organization_id = @orgId 
+      AND a.created_at >= date('now', '-' || @days || ' days')
+      GROUP BY a.actor_id
+      ORDER BY editCount DESC
+      LIMIT 5
+    `
+      )
+      .all({ orgId, days }) as { userId: string; email: string; editCount: number }[];
+
+    const recentActions = db
+      .prepare(
+        `
+      SELECT action_type as action, COUNT(*) as count
+      FROM audit_logs
+      WHERE organization_id = @orgId 
+      AND created_at >= date('now', '-' || @days || ' days')
+      GROUP BY action_type
+      ORDER BY count DESC
+    `
+      )
+      .all({ orgId, days }) as { action: string; count: number }[];
+
+    return {
+      totalEdits,
+      editsPerDay,
+      topEditors,
+      peakActivityHour,
+      recentActions,
+    };
+  } catch (error) {
+    logger.error('Failed to get activity metrics', { error, orgId });
+    throw error;
+  }
+}
+
+/**
+ * Get search analytics
+ */
+export function getOrgSearchAnalytics(orgId: string, _period: '30d'): SearchAnalytics {
+  try {
+    const days = 30; // restricted to 30d for now
+
+    // Note: We need to filter analytics events by properties JSON to find orgId
+    // property structure: {"organization_id":"..."}
+
+    const searchEvents = (db
+      .prepare(
+        `
+        SELECT 
+            COUNT(*) as total,
+            COUNT(DISTINCT user_id) as uniqueUsers
+        FROM analytics_events
+        WHERE event_name = 'search'
+        AND properties LIKE '%"organization_id":"' || @orgId || '"%'
+        AND created_at >= date('now', '-' || @days || ' days')
+    `
+      )
+      .get({ orgId, days }) as { total: number; uniqueUsers: number }) || {
+      total: 0,
+      uniqueUsers: 0,
+    };
+
+    // This is expensive on large datasets, but okay for MVP
+    // We need to parse JSON to look at queries?
+    // Ideally we'd extracting specific fields, but standard sqlite json extraction: json_extract(properties, '$.query')
+
+    const topQueries = db
+      .prepare(
+        `
+        SELECT 
+            json_extract(properties, '$.query') as query,
+            COUNT(*) as count
+        FROM analytics_events
+        WHERE event_name = 'search'
+        AND properties LIKE '%"organization_id":"' || @orgId || '"%'
+        AND created_at >= date('now', '-' || @days || ' days')
+        GROUP BY query
+        ORDER BY count DESC
+        LIMIT 10
+    `
+      )
+      .all({ orgId, days }) as { query: string; count: number }[];
+
+    const zeroResultQueries = db
+      .prepare(
+        `
+        SELECT 
+            json_extract(properties, '$.query') as query,
+            COUNT(*) as count
+        FROM analytics_events
+        WHERE event_name = 'search_zero_results'
+        AND properties LIKE '%"organization_id":"' || @orgId || '"%'
+        AND created_at >= date('now', '-' || @days || ' days')
+        GROUP BY query
+        ORDER BY count DESC
+        LIMIT 10
+    `
+      )
+      .all({ orgId, days }) as { query: string; count: number }[];
+
+    return {
+      totalSearches: searchEvents.total,
+      uniqueSearchers: searchEvents.uniqueUsers,
+      topQueries: topQueries.filter(q => q.query), // filter nulls
+      zeroResultQueries: zeroResultQueries.filter(q => q.query),
+      avgResultsPerSearch: 0, // TODO: Need to track result count in event properties to calc this
+    };
+  } catch (error) {
+    logger.error('Failed to get search analytics', { error, orgId });
+    throw error;
+  }
+}

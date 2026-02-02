@@ -28,6 +28,7 @@ import totpRoutes from './routes/totp.js';
 import customFieldsRoutes from './routes/custom-fields.js';
 import metricsRoutes from './routes/metrics.js';
 import analyticsRoutes from './routes/analytics.js';
+import orgAnalyticsRoutes from './routes/org-analytics.js';
 import gedsRoutes from './routes/geds.js';
 import gedsImportRoutes from './routes/geds-import.js';
 import ownershipTransfersRoutes from './routes/ownership-transfers.js';
@@ -90,6 +91,7 @@ const allowedOrigins: string[] =
         'http://localhost:3000',
         'http://127.0.0.1:5173',
         'http://127.0.0.1:5174',
+        'http://127.0.0.1:3000',
         'http://127.0.0.1:3000',
       ]; // Development: all local ports
 
@@ -259,6 +261,7 @@ app.use('/api/geds', gedsRoutes);
 app.use('/api', validateCsrf); // Apply CSRF middleware to all routes below
 
 app.use('/api', organizationRoutes);
+app.use('/api', orgAnalyticsRoutes);
 app.use('/api', ownershipTransfersRoutes);
 app.use('/api', departmentRoutes);
 app.use('/api', peopleRoutes);
@@ -292,35 +295,44 @@ if (process.env.SENTRY_DSN) {
 // Custom error handler (must be last)
 app.use(errorHandler);
 
-server.listen(Number(PORT), '0.0.0.0', () => {
-  logger.info(`Server running on port ${PORT}`, {
-    port: PORT,
-    environment: process.env.NODE_ENV || 'development',
-  });
+// Only listen if this file is the main module
+// Using a check safe for ESM
+import { fileURLToPath as fUrl } from 'url';
+const isMainModule = process.argv[1] === fUrl(import.meta.url);
 
-  // Schedule token cleanup job - runs every hour
-  const TOKEN_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
-  setInterval(() => {
+if (isMainModule) {
+  server.listen(Number(PORT), '0.0.0.0', () => {
+    logger.info(`Server running on port ${PORT}`, {
+      port: PORT,
+      environment: process.env.NODE_ENV || 'development',
+    });
+
+    // Schedule token cleanup job - runs every hour
+    const TOKEN_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
+    setInterval(() => {
+      cleanupExpiredTokens();
+    }, TOKEN_CLEANUP_INTERVAL);
+
+    // Schedule FTS maintenance (nightly integrity checks and optimization)
+    scheduleFtsMaintenance();
+
+    // Schedule ownership transfer expiration (daily at 2:00 AM)
+    scheduleTransferExpiration();
+
+    // Run initial cleanup on startup
     cleanupExpiredTokens();
-  }, TOKEN_CLEANUP_INTERVAL);
 
-  // Schedule FTS maintenance (nightly integrity checks and optimization)
-  scheduleFtsMaintenance();
+    logger.info('Token cleanup job scheduled', { intervalMs: TOKEN_CLEANUP_INTERVAL });
 
-  // Schedule ownership transfer expiration (daily at 2:00 AM)
-  scheduleTransferExpiration();
+    // Schedule real-time metrics emission - every 5 seconds
+    const METRICS_EMIT_INTERVAL = 5 * 1000; // 5 seconds
+    setInterval(() => {
+      const snapshot = getRealtimeSnapshot();
+      emitToAdminMetrics('metrics:update', snapshot);
+    }, METRICS_EMIT_INTERVAL);
 
-  // Run initial cleanup on startup
-  cleanupExpiredTokens();
+    logger.info('Metrics emission scheduled', { intervalMs: METRICS_EMIT_INTERVAL });
+  });
+}
 
-  logger.info('Token cleanup job scheduled', { intervalMs: TOKEN_CLEANUP_INTERVAL });
-
-  // Schedule real-time metrics emission - every 5 seconds
-  const METRICS_EMIT_INTERVAL = 5 * 1000; // 5 seconds
-  setInterval(() => {
-    const snapshot = getRealtimeSnapshot();
-    emitToAdminMetrics('metrics:update', snapshot);
-  }, METRICS_EMIT_INTERVAL);
-
-  logger.info('Metrics emission scheduled', { intervalMs: METRICS_EMIT_INTERVAL });
-});
+export default app;

@@ -1,6 +1,6 @@
 # RFC: Organization Analytics Dashboard
 
-**Status**: Draft
+**Status**: Superseded by [ADR-023](../adr/023-organization-analytics-dashboard.md)
 **Created**: January 31, 2026
 **Author**: Development Team
 
@@ -46,7 +46,7 @@ The existing analytics infrastructure (event tracking + superuser metrics) provi
 
 ### Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                   Organization Analytics Dashboard               │
 ├─────────────────────────────────────────────────────────────────┤

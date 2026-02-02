@@ -28,6 +28,13 @@ import type {
   PerformanceMetrics,
   AuditMetrics,
 } from '../types/metrics.js';
+import type {
+  OrgAnalyticsOverview,
+  OrgGrowthTrend,
+  OrgStructuralHealth,
+  OrgActivityMetrics,
+  OrgSearchAnalytics,
+} from '../types/index.js';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -797,6 +804,31 @@ const api = {
   // Metrics (superuser only)
   getMetricsOverview: (): Promise<OverviewMetrics> =>
     request<OverviewMetrics>('/admin/metrics/overview'),
+
+  // Analytics
+  getOrgAnalyticsOverview: (orgId: string): Promise<OrgAnalyticsOverview> =>
+    request<OrgAnalyticsOverview>(`/organizations/${orgId}/analytics/overview`),
+
+  getOrgGrowthTrends: (
+    orgId: string,
+    period: '7d' | '30d' | '90d' | '1y' = '30d'
+  ): Promise<OrgGrowthTrend[]> =>
+    request<OrgGrowthTrend[]>(`/organizations/${orgId}/analytics/growth?period=${period}`),
+
+  getOrgStructuralHealth: (orgId: string): Promise<OrgStructuralHealth> =>
+    request<OrgStructuralHealth>(`/organizations/${orgId}/analytics/health`),
+
+  getOrgActivityMetrics: (
+    orgId: string,
+    period: '7d' | '30d' | '90d' = '30d'
+  ): Promise<OrgActivityMetrics> =>
+    request<OrgActivityMetrics>(`/organizations/${orgId}/analytics/activity?period=${period}`),
+
+  getOrgSearchAnalytics: (
+    orgId: string,
+    period: '7d' | '30d' | '90d' = '30d'
+  ): Promise<OrgSearchAnalytics> =>
+    request<OrgSearchAnalytics>(`/organizations/${orgId}/analytics/search?period=${period}`),
 
   getMetricsUsage: (): Promise<UsageMetrics> => request<UsageMetrics>('/admin/metrics/usage'),
 

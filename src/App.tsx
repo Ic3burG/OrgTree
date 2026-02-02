@@ -17,6 +17,7 @@ import OrgMap from './components/OrgMap';
 import PublicOrgMap from './components/PublicOrgMap';
 import AdminLayout from './components/admin/AdminLayout';
 import Dashboard from './components/admin/Dashboard';
+import AnalyticsDashboard from './components/admin/AnalyticsDashboard';
 import OrganizationSettings from './components/admin/OrganizationSettings';
 import DepartmentManager from './components/admin/DepartmentManager';
 import PersonManager from './components/admin/PersonManager';
@@ -129,6 +130,7 @@ function App() {
                       }
                     />
                     <Route path="audit" element={<AuditLog />} />
+                    <Route path="analytics" element={<AnalyticsDashboard />} />
                     <Route path="settings" element={<OrganizationSettings />} />
                     <Route path="geds" element={<GedsDownloader />} />
                   </Route>
