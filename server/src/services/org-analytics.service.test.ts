@@ -124,5 +124,49 @@ describe('OrgAnalyticsService', () => {
     expect(metrics.totalEdits).toBeDefined();
     expect(metrics.topEditors).toBeDefined();
     expect(metrics.recentActions).toBeDefined();
+
+    // Verify name is present
+    if (metrics.topEditors.length > 0) {
+      expect(metrics.topEditors[0].name).toBe('Test User');
+    }
+  });
+
+  it('getOrgSearchAnalytics should return correct stats', () => {
+    // Insert search analytics data
+    const now = new Date().toISOString();
+
+    // 1. Successful search by user
+    db.prepare(
+      `
+      INSERT INTO search_analytics (id, organization_id, user_id, query, result_count, execution_time_ms, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `
+    ).run(uuidv4(), orgId, userId, 'john', 5, 100, now);
+
+    // 2. Another search by same user
+    db.prepare(
+      `
+      INSERT INTO search_analytics (id, organization_id, user_id, query, result_count, execution_time_ms, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `
+    ).run(uuidv4(), orgId, userId, 'dept', 2, 50, now);
+
+    // 3. Zero result search
+    db.prepare(
+      `
+      INSERT INTO search_analytics (id, organization_id, user_id, query, result_count, execution_time_ms, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `
+    ).run(uuidv4(), orgId, userId, 'missing', 0, 20, now);
+
+    const analytics = OrgAnalyticsService.getOrgSearchAnalytics(orgId, '30d');
+
+    expect(analytics.totalSearches).toBe(3);
+    expect(analytics.uniqueSearchers).toBe(1);
+    expect(analytics.zeroResultQueries.length).toBe(1);
+    if (analytics.zeroResultQueries.length > 0) {
+      expect(analytics.zeroResultQueries[0].query).toBe('missing');
+    }
+    expect(analytics.topQueries.length).toBeGreaterThan(0);
   });
 });

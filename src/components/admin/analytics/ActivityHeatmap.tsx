@@ -7,7 +7,7 @@ import { Calendar, Clock, User } from 'lucide-react';
 interface ActivityMetrics {
   totalEdits: number;
   editsPerDay: { date: string; count: number }[];
-  topEditors: { userId: string; email: string; editCount: number }[];
+  topEditors: { userId: string; name: string; email: string; editCount: number }[];
   peakActivityHour: number;
   recentActions: { action: string; count: number }[];
 }
@@ -72,8 +72,11 @@ export default function ActivityHeatmap({
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Top Contributor</p>
-            <p className="text-sm font-bold text-gray-900 dark:text-slate-100 truncate max-w-[150px]">
-              {data.topEditors[0]?.email || 'N/A'}
+            <p
+              className="text-sm font-bold text-gray-900 dark:text-slate-100 truncate max-w-[150px]"
+              title={data.topEditors[0]?.email || ''}
+            >
+              {data.topEditors[0]?.name || data.topEditors[0]?.email || 'N/A'}
             </p>
           </div>
         </div>

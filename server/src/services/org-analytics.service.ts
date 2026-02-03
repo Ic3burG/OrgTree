@@ -31,7 +31,7 @@ export interface StructuralHealth {
 export interface ActivityMetrics {
   totalEdits: number;
   editsPerDay: { date: string; count: number }[];
-  topEditors: { userId: string; email: string; editCount: number }[];
+  topEditors: { userId: string; name: string; email: string; editCount: number }[];
   peakActivityHour: number; // 0-23
   recentActions: { action: string; count: number }[]; // created/updated/deleted
 }
@@ -281,7 +281,7 @@ export function getOrgActivityMetrics(
       .all({ orgId, days }) as { totalEdits: number; hour: string; hourCount: number }[];
 
     const totalEdits = stats.reduce((acc, curr) => acc + curr.hourCount, 0);
-    const peakActivityHour = stats.length > 0 ? parseInt(stats[0].hour) : 0;
+    const peakActivityHour = stats.length > 0 && stats[0] ? parseInt(stats[0].hour) : 0;
 
     const editsPerDay = db
       .prepare(
@@ -301,6 +301,7 @@ export function getOrgActivityMetrics(
         `
       SELECT 
         a.actor_id as userId, 
+        u.name,
         u.email,
         COUNT(*) as editCount
       FROM audit_logs a
@@ -312,7 +313,7 @@ export function getOrgActivityMetrics(
       LIMIT 5
     `
       )
-      .all({ orgId, days }) as { userId: string; email: string; editCount: number }[];
+      .all({ orgId, days }) as { userId: string; name: string; email: string; editCount: number }[];
 
     const recentActions = db
       .prepare(
@@ -347,39 +348,28 @@ export function getOrgSearchAnalytics(orgId: string, _period: '30d'): SearchAnal
   try {
     const days = 30; // restricted to 30d for now
 
-    // Note: We need to filter analytics events by properties JSON to find orgId
-    // property structure: {"organization_id":"..."}
-
-    const searchEvents = (db
+    const searchStats = db
       .prepare(
         `
         SELECT 
             COUNT(*) as total,
-            COUNT(DISTINCT user_id) as uniqueUsers
-        FROM analytics_events
-        WHERE event_name = 'search'
-        AND properties LIKE '%"organization_id":"' || @orgId || '"%'
+            COUNT(DISTINCT user_id) as uniqueUsers,
+            AVG(result_count) as avgResults
+        FROM search_analytics
+        WHERE organization_id = @orgId
         AND created_at >= date('now', '-' || @days || ' days')
     `
       )
-      .get({ orgId, days }) as { total: number; uniqueUsers: number }) || {
-      total: 0,
-      uniqueUsers: 0,
-    };
-
-    // This is expensive on large datasets, but okay for MVP
-    // We need to parse JSON to look at queries?
-    // Ideally we'd extracting specific fields, but standard sqlite json extraction: json_extract(properties, '$.query')
+      .get({ orgId, days }) as { total: number; uniqueUsers: number; avgResults: number };
 
     const topQueries = db
       .prepare(
         `
         SELECT 
-            json_extract(properties, '$.query') as query,
+            query,
             COUNT(*) as count
-        FROM analytics_events
-        WHERE event_name = 'search'
-        AND properties LIKE '%"organization_id":"' || @orgId || '"%'
+        FROM search_analytics
+        WHERE organization_id = @orgId
         AND created_at >= date('now', '-' || @days || ' days')
         GROUP BY query
         ORDER BY count DESC
@@ -388,15 +378,16 @@ export function getOrgSearchAnalytics(orgId: string, _period: '30d'): SearchAnal
       )
       .all({ orgId, days }) as { query: string; count: number }[];
 
+    // For "zero results", we find queries where result_count = 0
     const zeroResultQueries = db
       .prepare(
         `
         SELECT 
-            json_extract(properties, '$.query') as query,
+            query,
             COUNT(*) as count
-        FROM analytics_events
-        WHERE event_name = 'search_zero_results'
-        AND properties LIKE '%"organization_id":"' || @orgId || '"%'
+        FROM search_analytics
+        WHERE organization_id = @orgId
+        AND result_count = 0
         AND created_at >= date('now', '-' || @days || ' days')
         GROUP BY query
         ORDER BY count DESC
@@ -406,11 +397,11 @@ export function getOrgSearchAnalytics(orgId: string, _period: '30d'): SearchAnal
       .all({ orgId, days }) as { query: string; count: number }[];
 
     return {
-      totalSearches: searchEvents.total,
-      uniqueSearchers: searchEvents.uniqueUsers,
-      topQueries: topQueries.filter(q => q.query), // filter nulls
-      zeroResultQueries: zeroResultQueries.filter(q => q.query),
-      avgResultsPerSearch: 0, // TODO: Need to track result count in event properties to calc this
+      totalSearches: searchStats.total || 0,
+      uniqueSearchers: searchStats.uniqueUsers || 0,
+      topQueries: topQueries || [],
+      zeroResultQueries: zeroResultQueries || [],
+      avgResultsPerSearch: Math.round((searchStats.avgResults || 0) * 10) / 10,
     };
   } catch (error) {
     logger.error('Failed to get search analytics', { error, orgId });
