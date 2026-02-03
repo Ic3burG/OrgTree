@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
 import authRouter from './auth.js';
 import * as authService from '../services/auth.service.js';
 import * as usersService from '../services/users.service.js';
@@ -43,6 +44,7 @@ describe('Auth Routes', () => {
     // Setup Express app with router
     app = express();
     app.use(express.json());
+    app.use(cookieParser());
     app.use('/api/auth', authRouter);
 
     // Setup error handler
@@ -92,9 +94,12 @@ describe('Auth Routes', () => {
       const cookies = response.headers['set-cookie'];
       expect(cookies).toBeDefined();
       if (cookies) {
-        expect(cookies[0]).toContain('refreshToken=mock-refresh-token');
-        expect(cookies[0]).toContain('HttpOnly');
-        expect(cookies[0]).toContain('Path=/api/auth');
+        // We set two cookies: one to clear old path, one to set new
+        // The last one should be the valid one with Path=/
+        const validCookie = cookies.find((c: string) => c.includes('refreshToken=mock-refresh-token'));
+        expect(validCookie).toBeDefined();
+        expect(validCookie).toContain('HttpOnly');
+        expect(validCookie).toContain('Path=/');
       }
 
       // IP address from supertest will be ::ffff:127.0.0.1 (IPv6-mapped IPv4)
@@ -191,7 +196,11 @@ describe('Auth Routes', () => {
       const cookies = response.headers['set-cookie'];
       expect(cookies).toBeDefined();
       if (cookies) {
-        expect(cookies[0]).toContain('refreshToken=mock-refresh-token');
+        // We set two cookies: one to clear old path, one to set new
+        const validCookie = cookies.find((c: string) => c.includes('refreshToken=mock-refresh-token'));
+        expect(validCookie).toBeDefined();
+        expect(validCookie).toContain('HttpOnly');
+        expect(validCookie).toContain('Path=/');
       }
 
       expect(authService.loginUser).toHaveBeenCalledWith(
@@ -310,7 +319,10 @@ describe('Auth Routes', () => {
       const cookies = response.headers['set-cookie'];
       expect(cookies).toBeDefined();
       if (cookies) {
-        expect(cookies[0]).toContain('refreshToken=new-refresh-token');
+        // We clear old and set new
+        const validCookie = cookies.find((c: string) => c.includes('refreshToken=new-refresh-token'));
+        expect(validCookie).toBeDefined();
+        expect(validCookie).toContain('Path=/');
       }
 
       expect(authService.rotateRefreshToken).toHaveBeenCalledWith(
@@ -371,8 +383,12 @@ describe('Auth Routes', () => {
       const cookies = response.headers['set-cookie'];
       expect(cookies).toBeDefined();
       if (cookies) {
-        expect(cookies[0]).toContain('refreshToken=;');
-        expect(cookies[0]).toContain('Expires=');
+        // Should clear both paths
+        expect(cookies.length).toBeGreaterThanOrEqual(2);
+        const clearRoot = cookies.find((c: string) => c.includes('Path=/') && c.includes('Expires='));
+        const clearApi = cookies.find((c: string) => c.includes('Path=/api/auth') && c.includes('Expires='));
+        expect(clearRoot).toBeDefined();
+        expect(clearApi).toBeDefined();
       }
 
       expect(authService.revokeRefreshToken).toHaveBeenCalledWith('valid-refresh-token');

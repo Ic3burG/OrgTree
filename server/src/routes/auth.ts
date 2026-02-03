@@ -21,16 +21,13 @@ import type { AuthRequest } from '../types/index.js';
 
 const router = express.Router();
 
-// Cookie parser for refresh tokens
-router.use(cookieParser());
-
 // Cookie options for refresh token
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict' as const,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  path: '/api/auth', // Only sent to auth endpoints
+  path: '/', // Accessible across the app
 };
 
 // Rate limiter for authentication endpoints - prevents brute force attacks
@@ -87,6 +84,9 @@ router.post(
 
       const result = await createUser(name, email, password, ipAddress, userAgent);
 
+      // Clear legacy cookie path if exists
+      res.clearCookie('refreshToken', { path: '/api/auth' });
+
       // Set refresh token in httpOnly cookie
       res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
 
@@ -119,6 +119,9 @@ router.post(
       const userAgent = req.headers['user-agent'];
 
       const result = await loginUser(email, password, ipAddress, userAgent);
+
+      // Clear legacy cookie path if exists
+      res.clearCookie('refreshToken', { path: '/api/auth' });
 
       // Set refresh token in httpOnly cookie
       res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
@@ -253,7 +256,8 @@ router.post(
       // Security: Revoke all refresh tokens (force re-login on all devices)
       const revokedCount = revokeAllUserTokens(req.user!.id);
 
-      // Clear the refresh token cookie
+      // Clear the refresh token cookie (both paths)
+      res.clearCookie('refreshToken', { path: REFRESH_COOKIE_OPTIONS.path });
       res.clearCookie('refreshToken', { path: '/api/auth' });
 
       // Return updated user info
@@ -305,7 +309,8 @@ router.post(
       const result = rotateRefreshToken(refreshToken, { ipAddress, userAgent });
 
       if (!result) {
-        // Clear invalid cookie
+        // Clear invalid cookie (both paths)
+        res.clearCookie('refreshToken', { path: REFRESH_COOKIE_OPTIONS.path });
         res.clearCookie('refreshToken', { path: '/api/auth' });
 
         // Log potential token reuse attack
@@ -322,6 +327,8 @@ router.post(
         return;
       }
 
+      // Clear legacy cookie path if exists
+      res.clearCookie('refreshToken', { path: '/api/auth' });
       // Set new refresh token cookie
       res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
 
@@ -346,7 +353,8 @@ router.post('/logout', async (req: Request, res: Response, next: NextFunction): 
       revokeRefreshToken(refreshToken);
     }
 
-    // Clear the cookie
+    // Clear the cookie (both paths)
+    res.clearCookie('refreshToken', { path: REFRESH_COOKIE_OPTIONS.path });
     res.clearCookie('refreshToken', { path: '/api/auth' });
 
     res.json({ message: 'Logged out successfully' });
@@ -426,6 +434,7 @@ router.post(
       const currentToken = req.cookies.refreshToken as string | undefined;
 
       if (!currentToken) {
+        console.error('Revoke others failed: No refresh token cookie. Cookies received:', Object.keys(req.cookies));
         res.status(400).json({ message: 'No current session found' });
         return;
       }
