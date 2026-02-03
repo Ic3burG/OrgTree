@@ -6,8 +6,12 @@ let resendInitialized = false;
 
 function getResendClient(): Resend | null {
   if (!resendInitialized) {
-    if (process.env.RESEND_API_KEY) {
-      resend = new Resend(process.env.RESEND_API_KEY);
+    const apiKey = process.env.RESEND_API_KEY;
+    if (apiKey) {
+      resend = new Resend(apiKey);
+      console.log('[Email Service] Resend client initialized');
+    } else {
+      console.warn('[Email Service] RESEND_API_KEY not configured - emails will not be sent');
     }
     resendInitialized = true;
   }
@@ -131,7 +135,7 @@ If you didn't expect this email, you can safely ignore it.
     });
 
     if (error) {
-      console.error('Failed to send invitation email:', error);
+      console.error('[Email Service] Failed to send invitation email:', error);
       return { success: false, error: error.message };
     }
 
