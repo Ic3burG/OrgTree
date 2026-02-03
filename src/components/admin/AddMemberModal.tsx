@@ -295,6 +295,7 @@ export default function AddMemberModal({
                   value={searchQuery}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     setSearchQuery(e.target.value);
+                    setEmail(e.target.value); // Allow typing email directly
                     if (!e.target.value.trim()) {
                       setEmail('');
                       setUserNotFound(false);

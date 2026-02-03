@@ -96,7 +96,9 @@ describe('Auth Routes', () => {
       if (cookies) {
         // We set two cookies: one to clear old path, one to set new
         // The last one should be the valid one with Path=/
-        const validCookie = cookies.find((c: string) => c.includes('refreshToken=mock-refresh-token'));
+        const validCookie = cookies.find((c: string) =>
+          c.includes('refreshToken=mock-refresh-token')
+        );
         expect(validCookie).toBeDefined();
         expect(validCookie).toContain('HttpOnly');
         expect(validCookie).toContain('Path=/');
@@ -197,7 +199,9 @@ describe('Auth Routes', () => {
       expect(cookies).toBeDefined();
       if (cookies) {
         // We set two cookies: one to clear old path, one to set new
-        const validCookie = cookies.find((c: string) => c.includes('refreshToken=mock-refresh-token'));
+        const validCookie = cookies.find((c: string) =>
+          c.includes('refreshToken=mock-refresh-token')
+        );
         expect(validCookie).toBeDefined();
         expect(validCookie).toContain('HttpOnly');
         expect(validCookie).toContain('Path=/');
@@ -320,7 +324,9 @@ describe('Auth Routes', () => {
       expect(cookies).toBeDefined();
       if (cookies) {
         // We clear old and set new
-        const validCookie = cookies.find((c: string) => c.includes('refreshToken=new-refresh-token'));
+        const validCookie = cookies.find((c: string) =>
+          c.includes('refreshToken=new-refresh-token')
+        );
         expect(validCookie).toBeDefined();
         expect(validCookie).toContain('Path=/');
       }
@@ -385,8 +391,12 @@ describe('Auth Routes', () => {
       if (cookies) {
         // Should clear both paths
         expect(cookies.length).toBeGreaterThanOrEqual(2);
-        const clearRoot = cookies.find((c: string) => c.includes('Path=/') && c.includes('Expires='));
-        const clearApi = cookies.find((c: string) => c.includes('Path=/api/auth') && c.includes('Expires='));
+        const clearRoot = cookies.find(
+          (c: string) => c.includes('Path=/') && c.includes('Expires=')
+        );
+        const clearApi = cookies.find(
+          (c: string) => c.includes('Path=/api/auth') && c.includes('Expires=')
+        );
         expect(clearRoot).toBeDefined();
         expect(clearApi).toBeDefined();
       }

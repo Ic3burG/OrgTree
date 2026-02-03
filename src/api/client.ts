@@ -526,15 +526,25 @@ const api = {
       method: 'DELETE',
     }),
 
-  addMemberByEmail: (
+  addMemberByEmail: async (
     orgId: string,
     email: string,
     role: 'admin' | 'editor' | 'viewer'
-  ): Promise<OrgMember> =>
-    request<OrgMember>(`/organizations/${orgId}/members/by-email`, {
-      method: 'POST',
-      body: JSON.stringify({ email, role }),
-    }),
+  ): Promise<OrgMember> => {
+    const result = await request<OrgMember | { success: boolean; message?: string }>(
+      `/organizations/${orgId}/members/by-email`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ email, role }),
+      }
+    );
+
+    if ('success' in result && result.success === false) {
+      throw new Error('User not found');
+    }
+
+    return result as OrgMember;
+  },
 
   // Public (no auth)
   getPublicOrganization: async (shareToken: string): Promise<Organization> => {

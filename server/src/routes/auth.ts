@@ -1,6 +1,5 @@
 import express, { Response, NextFunction, Request } from 'express';
 import bcrypt from 'bcrypt';
-import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import db from '../db.js';
 import {
@@ -434,7 +433,10 @@ router.post(
       const currentToken = req.cookies.refreshToken as string | undefined;
 
       if (!currentToken) {
-        console.error('Revoke others failed: No refresh token cookie. Cookies received:', Object.keys(req.cookies));
+        console.error(
+          'Revoke others failed: No refresh token cookie. Cookies received:',
+          Object.keys(req.cookies)
+        );
         res.status(400).json({ message: 'No current session found' });
         return;
       }

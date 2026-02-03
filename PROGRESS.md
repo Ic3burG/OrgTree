@@ -14,6 +14,22 @@
 - **Update "Last Updated" date**: February 3, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
 
+**Session 55 (February 3, 2026 - Invitation Flow Fix)**:
+
+- 🐛 **Bug Fix**: Resolved issue where "Send Invitation" option was not appearing when adding a new member by email (user not found).
+  - **Root Cause**:
+    1. `api.client.ts`: `addMemberByEmail` was returning `{ success: false }` instead of throwing an error, bypassing usage of `catch` block in `AddMemberModal`.
+    2. `AddMemberModal.tsx`: The "Add Member" button was disabled because `email` state wasn't being updated when typing in the search box (only on selection).
+  - **Fix**:
+    - Updated `src/api/client.ts` to throw "User not found" error when backend returns `success: false`.
+    - Updated `src/components/admin/AddMemberModal.tsx` to sync `email` state with search query, allowing submission of unknown emails.
+  - **Verification**: Created `src/components/admin/AddMemberModal.test.tsx` to verify the fix and prevent regression.
+- 📁 **FILES MODIFIED**:
+  - `src/api/client.ts`
+  - `src/components/admin/AddMemberModal.tsx`
+  - `src/components/admin/AddMemberModal.test.tsx` (Created)
+  - `PROGRESS.md` (This file)
+
 **Session 54 (February 3, 2026 - Session Revocation Fix)**:
 
 - 🐛 **Bug Fix**: Resolved "No current session found" error when clicking "Revoke All Other Sessions".
