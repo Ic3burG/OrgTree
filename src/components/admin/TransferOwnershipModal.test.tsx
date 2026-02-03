@@ -87,7 +87,7 @@ describe('TransferOwnershipModal', () => {
     expect(submitButton).toBeDisabled();
 
     // Select member
-    const select = screen.getByRole('combobox');
+    const select = await screen.findByRole('combobox');
     fireEvent.change(select, { target: { value: 'user-1' } });
 
     // Type short reason
@@ -123,8 +123,9 @@ describe('TransferOwnershipModal', () => {
 
     await waitFor(() => expect(api.getOrgMembers).toHaveBeenCalled());
 
-    // Fill form
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'user-1' } });
+    // Select member
+    const select = await screen.findByRole('combobox');
+    fireEvent.change(select, { target: { value: 'user-1' } });
     fireEvent.change(screen.getByPlaceholderText(/explain why/i), {
       target: { value: 'Valid reason for transfer' },
     });
@@ -160,7 +161,8 @@ describe('TransferOwnershipModal', () => {
     await waitFor(() => expect(api.getOrgMembers).toHaveBeenCalled());
 
     // Fill form
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'user-1' } });
+    const select = await screen.findByRole('combobox');
+    fireEvent.change(select, { target: { value: 'user-1' } });
     fireEvent.change(screen.getByPlaceholderText(/explain why/i), {
       target: { value: 'Valid reason for transfer' },
     });
