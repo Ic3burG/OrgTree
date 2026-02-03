@@ -668,6 +668,11 @@ const api = {
       method: 'DELETE',
     }),
 
+  resendInvitation: (orgId: string, invitationId: string): Promise<Invitation> =>
+    request<Invitation>(`/organizations/${orgId}/invitations/${invitationId}/resend`, {
+      method: 'POST',
+    }),
+
   getInvitationByToken: async (token: string): Promise<Invitation> => {
     const response = await fetch(`${API_BASE}/public/invitation/${token}`);
     const data = (await response.json()) as Invitation | { message?: string };

@@ -34,6 +34,7 @@ import gedsImportRoutes from './routes/geds-import.js';
 import ownershipTransfersRoutes from './routes/ownership-transfers.js';
 import { scheduleFtsMaintenance } from './services/fts-scheduler.service.js';
 import { scheduleTransferExpiration } from './services/transfer-expiration-scheduler.service.js';
+import { scheduleInvitationReminders } from './services/invitation-scheduler.service.js';
 import ftsMaintenanceRoutes from './routes/fts-maintenance.js';
 import versionRoutes from './routes/version.js';
 import orgMembershipCheckRoutes from './routes/org-membership-check.js';
@@ -318,6 +319,9 @@ if (isMainModule) {
 
     // Schedule ownership transfer expiration (daily at 2:00 AM)
     scheduleTransferExpiration();
+
+    // Schedule invitation reminders (daily at 09:00 AM)
+    scheduleInvitationReminders();
 
     // Run initial cleanup on startup
     cleanupExpiredTokens();

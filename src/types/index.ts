@@ -141,9 +141,8 @@ export interface Invitation {
   created_by_id: string;
   created_at: string;
   // Optional fields
-  organization_name?: string;
   organizationName?: string; // Alias for convenience
-  status?: 'pending' | 'accepted' | 'expired';
+  status: 'pending' | 'accepted' | 'expired';
 }
 
 // Audit log types
@@ -453,7 +452,7 @@ export interface OrgStructuralHealth {
 export interface OrgActivityMetrics {
   totalEdits: number;
   editsPerDay: { date: string; count: number }[];
-  topEditors: { userId: string; email: string; editCount: number }[];
+  topEditors: { userId: string; name: string; email: string; editCount: number }[];
   peakActivityHour: number;
   recentActions: { action: string; count: number }[];
 }

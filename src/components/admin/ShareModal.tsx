@@ -237,6 +237,18 @@ export default function ShareModal({
     }
   };
 
+  // Resend invitation
+  const handleResendInvitation = async (invitationId: string, email: string): Promise<void> => {
+    try {
+      await api.resendInvitation(orgId, invitationId);
+      toast.success(`Invitation resent to ${email}`);
+      loadInvitations();
+    } catch (err) {
+      console.error('Failed to resend invitation:', err);
+      toast.error('Failed to resend invitation');
+    }
+  };
+
   // Update member role
   const handleUpdateRole = async (memberId: string, newRole: string): Promise<void> => {
     try {
@@ -577,7 +589,7 @@ export default function ShareModal({
                     {invitations.length > 0 && (
                       <div className="space-y-2">
                         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Pending Invitations
+                          Pending and Expired Invitations
                         </h3>
                         {invitations.map((invitation: InvitationWithDetails) => (
                           <div
@@ -610,23 +622,46 @@ export default function ShareModal({
                                   </div>
                                   <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                                     Sent {new Date(invitation.created_at).toLocaleDateString()}
+                                    {invitation.status === 'expired' && (
+                                      <span className="text-red-500 ml-2 font-medium">
+                                        (Expired)
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                               </div>
                               <div className="flex items-center space-x-3">
-                                <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
-                                  Pending
+                                <span
+                                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                    invitation.status === 'expired'
+                                      ? 'bg-red-100 text-red-800'
+                                      : 'bg-amber-100 text-amber-800'
+                                  }`}
+                                >
+                                  {invitation.status.charAt(0).toUpperCase() +
+                                    invitation.status.slice(1)}
                                 </span>
                                 {isAdmin && (
-                                  <button
-                                    onClick={() =>
-                                      handleCancelInvitation(invitation.id, invitation.email)
-                                    }
-                                    className="text-red-600 hover:text-red-800 transition-colors"
-                                    title="Cancel invitation"
-                                  >
-                                    <Trash2 size={18} />
-                                  </button>
+                                  <>
+                                    <button
+                                      onClick={() =>
+                                        handleResendInvitation(invitation.id, invitation.email)
+                                      }
+                                      className="text-blue-600 hover:text-blue-800 transition-colors"
+                                      title="Resend invitation"
+                                    >
+                                      <RefreshCw size={18} />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleCancelInvitation(invitation.id, invitation.email)
+                                      }
+                                      className="text-red-600 hover:text-red-800 transition-colors"
+                                      title="Cancel invitation"
+                                    >
+                                      <Trash2 size={18} />
+                                    </button>
+                                  </>
                                 )}
                               </div>
                             </div>

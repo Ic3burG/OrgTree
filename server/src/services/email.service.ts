@@ -22,6 +22,7 @@ interface SendInvitationEmailParams {
   orgName: string;
   role: string;
   token: string;
+  isReminder?: boolean;
 }
 
 interface EmailResult {
@@ -39,6 +40,7 @@ export async function sendInvitationEmail({
   orgName,
   role,
   token,
+  isReminder = false,
 }: SendInvitationEmailParams): Promise<EmailResult> {
   if (!resend) {
     console.warn('Email service not configured. Set RESEND_API_KEY to enable emails.');
@@ -53,11 +55,17 @@ export async function sendInvitationEmail({
   };
   const roleDesc = roleDescription[role] || 'access';
 
+  const subjectPrefix = isReminder ? 'Reminder: ' : '';
+  const headerText = isReminder ? 'Invitation Reminder' : "You're Invited!";
+  const introText = isReminder
+    ? `This is a reminder that <strong>${inviterName}</strong> has invited you to join <strong>${orgName}</strong> on OrgTree.`
+    : `<strong>${inviterName}</strong> has invited you to join <strong>${orgName}</strong> on OrgTree.`;
+
   try {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
-      subject: `You've been invited to join ${orgName} on OrgTree`,
+      subject: `${subjectPrefix}You've been invited to join ${orgName} on OrgTree`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -67,12 +75,12 @@ export async function sendInvitationEmail({
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 24px;">You're Invited!</h1>
+            <h1 style="color: white; margin: 0; font-size: 24px;">${headerText}</h1>
           </div>
 
           <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
             <p style="font-size: 16px; margin-top: 0;">
-              <strong>${inviterName}</strong> has invited you to join <strong>${orgName}</strong> on OrgTree.
+              ${introText}
             </p>
 
             <p style="font-size: 14px; color: #64748b;">
@@ -100,7 +108,7 @@ export async function sendInvitationEmail({
         </html>
       `,
       text: `
-You've been invited to join ${orgName} on OrgTree!
+${isReminder ? 'Reminder: ' : ''}You've been invited to join ${orgName} on OrgTree!
 
 ${inviterName} has invited you to ${roleDesc} this organization.
 

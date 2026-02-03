@@ -3,6 +3,7 @@ import { authenticateToken } from '../middleware/auth.js';
 import {
   createInvitation,
   getOrgInvitations,
+  resendInvitation,
   cancelInvitation,
   getInvitationByToken,
   acceptInvitation,
@@ -34,6 +35,22 @@ router.post(
 
       const invitation = await createInvitation(orgId!, email, role, req.user!.id);
       res.status(201).json(invitation);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /api/organizations/:orgId/invitations/:invitationId/resend
+// Resend an invitation (requires admin)
+router.post(
+  '/organizations/:orgId/invitations/:invitationId/resend',
+  authenticateToken,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { orgId, invitationId } = req.params;
+      const invitation = await resendInvitation(orgId!, invitationId!, req.user!.id);
+      res.json(invitation);
     } catch (err) {
       next(err);
     }

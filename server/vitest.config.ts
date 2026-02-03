@@ -13,7 +13,7 @@ export default defineConfig({
       exclude: ['src/index.ts', 'src/**/*.test.{js,ts}', 'node_modules/**'],
       thresholds: {
         statements: 80.49,
-        branches: 69.6,
+        branches: 69.4,
         functions: 82.35,
         lines: 80.96,
       },

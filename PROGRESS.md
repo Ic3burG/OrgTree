@@ -11,8 +11,34 @@
 
 - **PROGRESS.md updates are MANDATORY**: Update this file after EACH command/task completion (not just at end of session)
 - **Commit AND push ALL changes**: Never leave commits local-only; always push to GitHub
-- **Update "Last Updated" date**: February 2, 2026
+- **Update "Last Updated" date**: February 3, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
+
+**Session 52 (February 3, 2026 - Invitation Enhancements)**:
+
+- ✅ **Invitation System Enhancements**: Implemented enhancements to the invitation system as per ADR-025.
+  - **Resend Invitations**: Added ability to resend pending and expired invitations with token rotation.
+  - **Custom Expiry**: Configurable invitation expiry (default 7 days) via `INVITATION_EXPIRY_DAYS` env var.
+  - **Automated Reminders**: Created cron job to send reminder emails to pending invitations expiring in 24-48 hours.
+  - **Status Handling**: Updated system to handle 'expired' status explicitly and reset expiry on resend.
+- ✅ **Documentation**:
+  - **ADR-025**: Created `docs/adr/025-invitation-enhancements.md` outlining the design.
+  - **Roadmap**: Updated `docs/ROADMAP.md` to reference the new ADR.
+- 📁 **FILES CREATED**:
+  - `server/src/services/invitation-scheduler.service.ts`
+  - `server/src/migrations/versions/20260203000000-invitation-reminders.ts`
+  - `docs/adr/025-invitation-enhancements.md`
+- 📁 **FILES MODIFIED**:
+  - `server/src/services/invitation.service.ts` (Resend/Reminder logic)
+  - `server/src/services/invitation.service.test.ts` (Tests)
+  - `server/src/routes/invitations.ts` (Resend endpoint)
+  - `server/src/services/email.service.ts` (Reminder support)
+  - `server/src/index.ts` (Scheduler registration)
+  - `src/api/client.ts` (Resend API)
+  - `src/components/admin/ShareModal.tsx` (UI updates)
+  - `src/types/index.ts` (Status type update)
+  - `docs/ROADMAP.md` (Link update)
+  - `PROGRESS.md` (This file)
 
 **Session 51 (February 2, 2026 - Organization Analytics Dashboard)**:
 
@@ -23,6 +49,8 @@
   - **Backend Services**: Implemented `OrgAnalyticsService` with endpoints for overview, growth trends, structural health, and activity metrics.
   - **API Routes**: Created `server/src/routes/org-analytics.ts` with role-based access control (owner/admin only).
 - 🐛 **Bug Fix**: Resolved infinite loop in Analytics Dashboard caused by `useEffect` dependency cycle on data objects.
+- 🐛 **Bug Fix**: Reactivated Search Analytics retrieval by querying correct `search_analytics` table instead of raw events.
+- 💅 **UI Enhancement**: Updated Activity Heatmap to display Usernames for Top Contributors (with email on hover).
 - ✅ **Documentation**:
   - **ADR-023**: Created and reformatted `docs/adr/023-organization-analytics-dashboard.md` to match standard ADR template.
   - **RFC Update**: Marked `docs/rfc/organization-analytics-dashboard.md` as superseded by ADR-023.

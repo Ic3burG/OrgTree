@@ -665,5 +665,195 @@ describe('Invitation Service', () => {
 
       expect(result.success).toBe(true);
     });
+    describe('resendInvitation', () => {
+      it('should resend invitation successfully', async () => {
+        vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+          hasAccess: true,
+          role: 'admin',
+          isOwner: true,
+        });
+
+        const mockInvitation = {
+          id: 'inv-123',
+          email: 'user@example.com',
+          role: 'editor',
+          status: 'pending',
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          created_at: new Date().toISOString(),
+        };
+
+        vi.mocked(db.prepare).mockImplementation((sql: string) => {
+          if (sql.includes('SELECT id, email, role, status')) {
+            return { get: vi.fn(() => mockInvitation), run: vi.fn(), all: vi.fn() } as never;
+          }
+          if (sql.includes('SELECT name FROM users')) {
+            return {
+              get: vi.fn(() => ({ name: 'John Inviter' })),
+              run: vi.fn(),
+              all: vi.fn(),
+            } as never;
+          }
+          if (sql.includes('SELECT name FROM organizations')) {
+            return {
+              get: vi.fn(() => ({ name: 'Test Org' })),
+              run: vi.fn(),
+              all: vi.fn(),
+            } as never;
+          }
+          if (sql.includes('UPDATE invitations')) {
+            return { run: vi.fn(() => ({ changes: 1 })), get: vi.fn(), all: vi.fn() } as never;
+          }
+          return { get: vi.fn(), run: vi.fn(), all: vi.fn() } as never;
+        });
+
+        vi.mocked(emailService.sendInvitationEmail).mockResolvedValue({ success: true });
+
+        const result = await invitationService.resendInvitation(
+          'org-123',
+          'inv-123',
+          'inviter-123'
+        );
+
+        expect(result.id).toBe('inv-123');
+        expect(result.email).toBe('user@example.com');
+        expect(result.status).toBe('pending');
+        expect(emailService.sendInvitationEmail).toHaveBeenCalled();
+        expect(memberService.requireOrgPermission).toHaveBeenCalledWith(
+          'org-123',
+          'inviter-123',
+          'admin'
+        );
+      });
+
+      it('should throw error when invitation not found', async () => {
+        vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+          hasAccess: true,
+          role: 'admin',
+          isOwner: true,
+        });
+
+        vi.mocked(db.prepare).mockImplementation((sql: string) => {
+          if (sql.includes('SELECT id, email, role, status')) {
+            return { get: vi.fn(() => undefined), run: vi.fn(), all: vi.fn() } as never;
+          }
+          return { get: vi.fn(), run: vi.fn(), all: vi.fn() } as never;
+        });
+
+        await expect(
+          invitationService.resendInvitation('org-123', 'inv-999', 'inviter-123')
+        ).rejects.toThrow('Invitation not found');
+      });
+
+      it('should throw error when invitation is accepted', async () => {
+        vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+          hasAccess: true,
+          role: 'admin',
+          isOwner: true,
+        });
+
+        const mockInvitation = {
+          id: 'inv-123',
+          status: 'accepted',
+        };
+
+        vi.mocked(db.prepare).mockImplementation((sql: string) => {
+          if (sql.includes('SELECT id, email, role, status')) {
+            return { get: vi.fn(() => mockInvitation), run: vi.fn(), all: vi.fn() } as never;
+          }
+          return { get: vi.fn(), run: vi.fn(), all: vi.fn() } as never;
+        });
+
+        await expect(
+          invitationService.resendInvitation('org-123', 'inv-123', 'inviter-123')
+        ).rejects.toThrow('Only pending or expired invitations can be resent');
+      });
+
+      it('should reset expiry if invitation is expired', async () => {
+        vi.mocked(memberService.requireOrgPermission).mockReturnValue({
+          hasAccess: true,
+          role: 'admin',
+          isOwner: true,
+        });
+
+        const mockInvitation = {
+          id: 'inv-123',
+          email: 'user@example.com',
+          role: 'editor',
+          status: 'expired',
+          expires_at: new Date(Date.now() - 1000).toISOString(), // Expired
+          created_at: new Date().toISOString(),
+        };
+
+        const mockRun = vi.fn(() => ({ changes: 1 }));
+
+        vi.mocked(db.prepare).mockImplementation((sql: string) => {
+          if (sql.includes('SELECT id, email, role, status')) {
+            return { get: vi.fn(() => mockInvitation), run: vi.fn(), all: vi.fn() } as never;
+          }
+          if (
+            sql.includes('SELECT name FROM users') ||
+            sql.includes('SELECT name FROM organizations')
+          ) {
+            return { get: vi.fn(() => ({ name: 'Test' })), run: vi.fn(), all: vi.fn() } as never;
+          }
+          if (sql.includes('UPDATE invitations')) {
+            return { run: mockRun, get: vi.fn(), all: vi.fn() } as never;
+          }
+          return { get: vi.fn(), run: vi.fn(), all: vi.fn() } as never;
+        });
+
+        vi.mocked(emailService.sendInvitationEmail).mockResolvedValue({ success: true });
+
+        const result = await invitationService.resendInvitation(
+          'org-123',
+          'inv-123',
+          'inviter-123'
+        );
+
+        const newExpiry = new Date(result.expiresAt);
+        const now = new Date();
+        // Should be roughly 7 days from now (or whatever configured default)
+        // We check if it is > 6 days from now to be safe
+        expect(newExpiry.getTime()).toBeGreaterThan(now.getTime() + 6 * 24 * 60 * 60 * 1000);
+      });
+    });
+
+    describe('sendInvitationReminders', () => {
+      it('should send reminders for expiring invitations', async () => {
+        const mockInvitations = [
+          {
+            id: 'inv-1',
+            email: 'user1@example.com',
+            role: 'editor',
+            token: 'token-1',
+            invited_by_id: 'inviter-1',
+            organization_id: 'org-1',
+            org_name: 'Test Org',
+          },
+        ];
+
+        vi.mocked(db.prepare).mockImplementation((sql: string) => {
+          if (sql.includes('SELECT')) {
+            return { all: vi.fn(() => mockInvitations), get: vi.fn(), run: vi.fn() } as never;
+          }
+          if (sql.includes('UPDATE invitations')) {
+            return { run: vi.fn(() => ({ changes: 1 })), get: vi.fn(), all: vi.fn() } as never;
+          }
+          return { get: vi.fn(), run: vi.fn(), all: vi.fn() } as never;
+        });
+
+        vi.mocked(emailService.sendInvitationEmail).mockResolvedValue({ success: true });
+
+        const count = await invitationService.sendInvitationReminders();
+
+        expect(count).toBe(1);
+        expect(emailService.sendInvitationEmail).toHaveBeenCalledWith(
+          expect.objectContaining({
+            to: 'user1@example.com',
+            isReminder: true,
+          })
+        );
+      });
+    });
   });
 });
