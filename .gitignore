@@ -23,6 +23,7 @@ server/dist
 .env.development.local
 .env.test.local
 .env.production.local
+server/.env
 
 # Server database
 server/database.db

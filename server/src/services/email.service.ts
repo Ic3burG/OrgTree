@@ -1,9 +1,17 @@
 import { Resend } from 'resend';
 
-// Initialize Resend client (will be null if no API key configured)
+// Lazy-initialize Resend client to ensure env vars are loaded first
 let resend: Resend | null = null;
-if (process.env.RESEND_API_KEY) {
-  resend = new Resend(process.env.RESEND_API_KEY);
+let resendInitialized = false;
+
+function getResendClient(): Resend | null {
+  if (!resendInitialized) {
+    if (process.env.RESEND_API_KEY) {
+      resend = new Resend(process.env.RESEND_API_KEY);
+    }
+    resendInitialized = true;
+  }
+  return resend;
 }
 
 const APP_URL = process.env.APP_URL || 'http://localhost:5173';
@@ -13,7 +21,7 @@ const FROM_EMAIL = process.env.FROM_EMAIL || 'OrgTree <onboarding@resend.dev>';
  * Check if email service is configured
  */
 export function isEmailConfigured(): boolean {
-  return resend !== null;
+  return getResendClient() !== null;
 }
 
 interface SendInvitationEmailParams {
@@ -42,7 +50,8 @@ export async function sendInvitationEmail({
   token,
   isReminder = false,
 }: SendInvitationEmailParams): Promise<EmailResult> {
-  if (!resend) {
+  const client = getResendClient();
+  if (!client) {
     console.warn('Email service not configured. Set RESEND_API_KEY to enable emails.');
     return { success: false, error: 'email_not_configured' };
   }
@@ -62,7 +71,7 @@ export async function sendInvitationEmail({
     : `<strong>${inviterName}</strong> has invited you to join <strong>${orgName}</strong> on OrgTree.`;
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await client.emails.send({
       from: FROM_EMAIL,
       to: [to],
       subject: `${subjectPrefix}You've been invited to join ${orgName} on OrgTree`,
@@ -151,11 +160,12 @@ export async function sendTransferInitiatedEmail({
   initiatorName,
   orgName,
 }: TransferEmailParams): Promise<EmailResult> {
-  if (!resend) return { success: false, error: 'email_not_configured' };
+  const client = getResendClient();
+  if (!client) return { success: false, error: 'email_not_configured' };
 
   const actionUrl = `${APP_URL}/org/settings`; // Directing to settings page
 
-  return resend.emails
+  return client.emails
     .send({
       from: FROM_EMAIL,
       to: [to],
@@ -182,9 +192,10 @@ export async function sendTransferAcceptedEmail({
   initiatorName,
   orgName,
 }: TransferEmailParams): Promise<EmailResult> {
-  if (!resend) return { success: false, error: 'email_not_configured' };
+  const client = getResendClient();
+  if (!client) return { success: false, error: 'email_not_configured' };
 
-  return resend.emails
+  return client.emails
     .send({
       from: FROM_EMAIL,
       to: [to],
@@ -210,9 +221,10 @@ export async function sendTransferRejectedEmail({
   orgName,
   reason,
 }: TransferEmailParams): Promise<EmailResult> {
-  if (!resend) return { success: false, error: 'email_not_configured' };
+  const client = getResendClient();
+  if (!client) return { success: false, error: 'email_not_configured' };
 
-  return resend.emails
+  return client.emails
     .send({
       from: FROM_EMAIL,
       to: [to],
@@ -239,9 +251,10 @@ export async function sendTransferCancelledEmail({
   orgName,
   reason,
 }: TransferEmailParams): Promise<EmailResult> {
-  if (!resend) return { success: false, error: 'email_not_configured' };
+  const client = getResendClient();
+  if (!client) return { success: false, error: 'email_not_configured' };
 
-  return resend.emails
+  return client.emails
     .send({
       from: FROM_EMAIL,
       to: [to],
