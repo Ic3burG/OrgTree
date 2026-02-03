@@ -30,6 +30,20 @@
   - `src/components/admin/AddMemberModal.test.tsx` (Created)
   - `PROGRESS.md` (This file)
 
+**Session 55b (February 3, 2026 - Invitation "Invalid Date" Fix)**:
+
+- 🐛 **Bug Fix**: Resolved "Sent Invalid Date" display issue when viewing pending invitations.
+  - **Root Cause**: Backend `getOrgInvitations` was aliasing database fields to camelCase (`createdAt`, `expiresAt`) but frontend types expected snake_case (`created_at`, `expires_at`).
+  - **Fix**:
+    - Updated `server/src/services/invitation.service.ts` to return snake_case field names matching frontend types.
+    - Added `created_at` field to `CreateInvitationResult` interface and both `createInvitation` and `resendInvitation` return values.
+    - Updated `InvitationRecord` interface to include `created_at` field.
+  - **Email Issue**: The "email not sent" issue is due to missing `RESEND_API_KEY` configuration. Email service gracefully degrades when not configured.
+- 📁 **FILES MODIFIED**:
+  - `server/src/services/invitation.service.ts`
+  - `server/src/routes/auth.ts` (Formatting)
+  - `PROGRESS.md` (This file)
+
 **Session 54 (February 3, 2026 - Session Revocation Fix)**:
 
 - 🐛 **Bug Fix**: Resolved "No current session found" error when clicking "Revoke All Other Sessions".

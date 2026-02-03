@@ -17,6 +17,7 @@ interface CreateInvitationResult {
   role: string;
   status: string;
   expiresAt: string;
+  created_at: string;
   emailSent: boolean;
   emailError?: string;
 }
@@ -166,6 +167,7 @@ export async function createInvitation(
     role,
     status: 'pending',
     expiresAt: expiresAt.toISOString(),
+    created_at: now.toISOString(),
     emailSent: emailResult.success,
     emailError: emailResult.error,
   };
@@ -252,6 +254,7 @@ export async function resendInvitation(
     role: invitation.role,
     status: 'pending',
     expiresAt: expiresAt.toISOString(),
+    created_at: invitation.created_at, // Keep original creation date
     emailSent: emailResult.success,
     emailError: emailResult.error,
   };
@@ -272,8 +275,8 @@ export function getOrgInvitations(orgId: string, userId: string): InvitationInfo
       i.email,
       i.role,
       i.status,
-      i.expires_at as expiresAt,
-      i.created_at as createdAt,
+      i.expires_at,
+      i.created_at,
       u.name as invitedByName
     FROM invitations i
     JOIN users u ON i.invited_by_id = u.id
@@ -373,6 +376,7 @@ interface InvitationRecord {
   role: string;
   status: string;
   expires_at: string;
+  created_at: string;
   invited_by_id: string;
 }
 
