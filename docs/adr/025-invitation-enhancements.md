@@ -1,22 +1,47 @@
-# 25. Invitation Enhancements
+# ADR-025: Invitation Enhancements
 
-Date: 2026-02-03
+**Status**: Accepted
+**Date**: 2026-02-03
+**Deciders**: Engineering Team
+**Tags**: backend, frontend, ux, email, scheduling
 
-## Status
-
-Accepted
-
-## Context
+## Context and Problem Statement
 
 The current invitation system in OrgTree is functional but basic, suffering from several limitations that increase administrative workload and delay user onboarding:
 
-1.  **No Resend Mechanism**: If an invitation expires or the email is lost, administrators must manually delete the old invitation and create a new one.
-2.  **Fixed Expiry**: The expiry period is hardcoded (defaulting to a specific time) and not easily configurable, which may not suit all organization policies.
-3.  **No Follow-up**: Users often miss the initial email. Without automated reminders, invitations sit in a pending state indefinitely until manual intervention occurs.
+1. **No Resend Mechanism**: If an invitation expires or the email is lost, administrators must manually delete the old invitation and create a new one.
+2. **Fixed Expiry**: The expiry period is hardcoded (defaulting to a specific time) and not easily configurable, which may not suit all organization policies.
+3. **No Follow-up**: Users often miss the initial email. Without automated reminders, invitations sit in a pending state indefinitely until manual intervention occurs.
 
-## Decision
+## Decision Drivers
 
-We will enhance the invitation system by implementing the following three key features:
+- Reduce administrative overhead for managing invitations.
+- Improve user onboarding conversion rates.
+- Provide more flexibility in invitation security policies (expiry).
+- Enhance the user experience for both admins and invitees.
+
+## Considered Options
+
+- **Option 1: Manual Management Only (Status Quo)** - Admins continue to delete/recreate invitations manually.
+- **Option 2: Client-side Logic** - Handle reminders via client-side triggers (rejected due to reliability).
+- **Option 3: Server-side Enhancements (Chosen)** - Implement resend endpoints, configurable expiry, and cron-based reminders.
+
+## Decision Outcome
+
+Chosen option: "Option 3: Server-side Enhancements", because it provides a robust, automated solution that solves all identified problems with minimal ongoing maintenance.
+
+### Positive Consequences
+
+- **Reduced Admin Overhead**: Administrators no longer need to manually recreate invitations or send manual reminders.
+- **Improved Onboarding**: Automated reminders and easy resends will likely increase the conversion rate of invited users.
+- **Flexibility**: Organizations can adjust the invitation window to match their specific security or operational needs.
+
+### Negative Consequences
+
+- **Increased Email Volume**: Automated reminders will increase the total number of emails sent, which could impact quotas on the email provider (Resend).
+- **Cron Complexity**: Relying on `node-cron` requires a persistent running server process. If the server sleeps (e.g. valid for some PaaS free tiers), jobs might be missed.
+
+## Implementation Details
 
 ### 1. Resend Capability
 
@@ -46,20 +71,21 @@ We will automate follow-up emails for pending invitations using the existing `no
   - Update the `last_reminder_sent_at` timestamp.
 - **Schema Change**: Add `last_reminder_sent_at` (DATETIME, nullable) to the `invitations` table.
 
-## Consequences
+## Pros and Cons of the Options
 
-### Positive
+### Option 1: Manual Management Only
 
-- **Reduced Admin Overhead**: Administrators no longer need to manually recreate invitations or send manual reminders.
-- **Improved Onboarding**: Automated reminders and easy resends will likely increase the conversion rate of invited users.
-- **Flexibility**: Organizations can adjust the invitation window to match their specific security or operational needs.
+- **Good**, because it requires zero engineering effort.
+- **Bad**, because it frustrates admins and delays onboarding.
+- **Bad**, because it lacks professional polish.
 
-### Negative
+### Option 3: Server-side Enhancements (Chosen)
 
-- **Increased Email Volume**: Automated reminders will increase the total number of emails sent, which could impact quotas on the email provider (Resend).
-- **Cron Complexity**: Relying on `node-cron` in a potentially serverless or ephemeral environment (like some Render configurations) can be unreliable if the instance spins down. However, for our current persistent server setup, this is acceptable.
+- **Good**, because it completely automates the reminder lifecycle.
+- **Good**, because it standardizes the resend process without data duplication.
+- **Bad**, because it introduces statefulness (cron jobs) to the server.
 
-## References
+## Links
 
-- Original RFC: `docs/rfc/invitation-enhancements.md` (now migrated to this ADR)
-- GitHub Issue/Roadmap: "Invitation Enhancements"
+- [Reference] [Original RFC](docs/rfc/invitation-enhancements.md) (archived)
+- [Task] Invitation Enhancements Roadmap Item
