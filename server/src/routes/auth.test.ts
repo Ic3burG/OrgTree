@@ -96,15 +96,15 @@ describe('Auth Routes', () => {
       if (cookies) {
         // We set two cookies: one to clear old path, one to set new
         // The last one should be the valid one with Path=/
-        const validCookie = cookies.find((c: string) =>
-          c.includes('refreshToken=mock-refresh-token')
-        );
-        expect(validCookie).toBeDefined();
-        expect(validCookie).toContain('HttpOnly');
-        expect(validCookie).toContain('Path=/');
-      }
-
-      // IP address from supertest will be ::ffff:127.0.0.1 (IPv6-mapped IPv4)
+                const validCookie = cookies.find((c: string) => c.includes('refreshToken=mock-refresh-token'));
+                expect(validCookie).toBeDefined();
+                expect(validCookie).toContain('HttpOnly');
+                expect(validCookie).toContain('Path=/');
+                // Expect SameSite=Lax for compatibility with dev/prod environments
+                expect(validCookie).toContain('SameSite=Lax');
+              }
+        
+              // IP address from supertest will be ::ffff:127.0.0.1 (IPv6-mapped IPv4)
       // User agent will be undefined unless explicitly set
       expect(authService.createUser).toHaveBeenCalledWith(
         'Test User',
