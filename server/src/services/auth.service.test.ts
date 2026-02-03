@@ -235,6 +235,11 @@ describe('Auth Service', () => {
 
       const sessions = getUserSessions(testUserId);
       expect(sessions).toHaveLength(2);
+      // Verify snake_case properties
+      expect(sessions[0]).toHaveProperty('device_info');
+      expect(sessions[0]).toHaveProperty('ip_address');
+      expect(sessions[0]).toHaveProperty('last_used_at');
+      expect(sessions[0]).toHaveProperty('created_at');
     });
 
     it('revokeOtherSessions should revoke all but current', async () => {

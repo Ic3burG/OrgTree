@@ -361,10 +361,10 @@ export function rotateRefreshToken(
 
 interface SessionInfo {
   id: string;
-  deviceInfo: string | null;
-  ipAddress: string | null;
-  createdAt: string;
-  lastUsedAt: string;
+  device_info: string | null;
+  ip_address: string | null;
+  created_at: string;
+  last_used_at: string;
 }
 
 /**
@@ -376,10 +376,10 @@ export function getUserSessions(userId: string): SessionInfo[] {
       `
     SELECT
       id,
-      device_info as deviceInfo,
-      ip_address as ipAddress,
-      created_at as createdAt,
-      last_used_at as lastUsedAt
+      device_info,
+      ip_address,
+      created_at,
+      last_used_at
     FROM refresh_tokens
     WHERE user_id = ? AND revoked_at IS NULL AND expires_at > datetime('now')
     ORDER BY last_used_at DESC

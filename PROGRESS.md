@@ -14,6 +14,20 @@
 - **Update "Last Updated" date**: February 3, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
 
+**Session 53 (February 3, 2026 - Active Sessions Bug Fix)**:
+
+- 🐛 **Bug Fix**: Resolved "Active Settings" (Active Sessions) display issue where all information was "unknown".
+  - **Root Cause**: Backend `getUserSessions` was returning camelCase fields (`deviceInfo`, `ipAddress`) while frontend expected snake_case (`device_info`, `ip_address`).
+  - **Fix**: Updated `server/src/services/auth.service.ts` to alias SQL columns to snake_case.
+  - **Enhancement**: Implemented `is_current` logic in `server/src/routes/auth.ts` by matching the refresh token cookie.
+  - **Testing**: Updated `auth.service.test.ts` and `auth.test.ts` to verify snake_case properties and current session detection.
+- 📁 **FILES MODIFIED**:
+  - `server/src/services/auth.service.ts`
+  - `server/src/routes/auth.ts`
+  - `server/src/services/auth.service.test.ts`
+  - `server/src/routes/auth.test.ts`
+  - `PROGRESS.md` (This file)
+
 **Session 52 (February 3, 2026 - Invitation Enhancements)**:
 
 - ✅ **Invitation System Enhancements**: Implemented enhancements to the invitation system as per ADR-025.

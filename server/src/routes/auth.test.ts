@@ -405,17 +405,17 @@ describe('Auth Routes', () => {
       const mockSessions = [
         {
           id: 'session1',
-          deviceInfo: 'Chrome on Mac',
-          ipAddress: '127.0.0.1',
-          lastUsed: '2024-01-01',
-          createdAt: '2024-01-01',
+          device_info: 'Chrome on Mac',
+          ip_address: '127.0.0.1',
+          last_used_at: '2024-01-01',
+          created_at: '2024-01-01',
         },
         {
           id: 'session2',
-          deviceInfo: 'Firefox on Windows',
-          ipAddress: '192.168.1.1',
-          lastUsed: '2024-01-02',
-          createdAt: '2024-01-02',
+          device_info: 'Firefox on Windows',
+          ip_address: '192.168.1.1',
+          last_used_at: '2024-01-02',
+          created_at: '2024-01-02',
         },
       ];
 
@@ -432,11 +432,51 @@ describe('Auth Routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      // API returns { sessions: [...] } with isCurrent flag added
+      // API returns { sessions: [...] } with is_current flag added
       expect(response.body).toHaveProperty('sessions');
       expect(response.body.sessions).toHaveLength(2);
-      expect(response.body.sessions[0]).toHaveProperty('isCurrent', false);
+      expect(response.body.sessions[0]).toHaveProperty('is_current', false);
       expect(authService.getUserSessions).toHaveBeenCalledWith('1');
+    });
+
+    it('should mark current session based on refresh token', async () => {
+      const mockSessions = [
+        {
+          id: 'session1',
+          device_info: 'Chrome on Mac',
+          ip_address: '127.0.0.1',
+          last_used_at: '2024-01-01',
+          created_at: '2024-01-01',
+        },
+        {
+          id: 'session2',
+          device_info: 'Firefox on Windows',
+          ip_address: '192.168.1.1',
+          last_used_at: '2024-01-02',
+          created_at: '2024-01-02',
+        },
+      ];
+
+      vi.mocked(authService.getUserSessions).mockReturnValue(mockSessions as any);
+      vi.mocked(authService.validateRefreshToken).mockReturnValue({
+        tokenId: 'session1',
+        userId: '1',
+      } as any);
+
+      const token = jwt.sign(
+        { id: '1', email: 'test@example.com', name: 'Test User', role: 'user' },
+        'test-secret-key',
+        { expiresIn: '1h' }
+      );
+
+      const response = await request(app)
+        .get('/api/auth/sessions')
+        .set('Authorization', `Bearer ${token}`)
+        .set('Cookie', ['refreshToken=valid-token'])
+        .expect(200);
+
+      expect(response.body.sessions[0]).toHaveProperty('is_current', true);
+      expect(response.body.sessions[1]).toHaveProperty('is_current', false);
     });
 
     it('should reject unauthenticated requests', async () => {

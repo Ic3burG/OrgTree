@@ -13,6 +13,7 @@ import {
   getUserSessions,
   revokeSession,
   revokeOtherSessions,
+  validateRefreshToken,
 } from '../services/auth.service.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { createAuditLog } from '../services/audit.service.js';
@@ -365,11 +366,22 @@ router.get(
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const sessions = getUserSessions(req.user!.id);
+      const currentRefreshToken = req.cookies.refreshToken;
+      let currentSessionId: string | null = null;
+
+      if (currentRefreshToken) {
+        // Identify current session from refresh token
+        // validateRefreshToken also updates last_used_at
+        const tokenData = validateRefreshToken(currentRefreshToken);
+        if (tokenData) {
+          currentSessionId = tokenData.tokenId;
+        }
+      }
 
       // Mark current session
       const sessionsWithCurrent = sessions.map(session => ({
         ...session,
-        isCurrent: false, // We can't easily determine this without storing the hash
+        is_current: session.id === currentSessionId,
       }));
 
       res.json({ sessions: sessionsWithCurrent });
