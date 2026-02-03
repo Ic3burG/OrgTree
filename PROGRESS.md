@@ -44,6 +44,19 @@
   - `server/src/routes/auth.ts` (Formatting)
   - `PROGRESS.md` (This file)
 
+**Session 55c (February 3, 2026 - Email Error Handling Improvement)**:
+
+- 🐛 **Bug Fix**: Resolved "Email service is not configured. Please contact the administrator." error that was blocking invitation creation.
+  - **Root Cause**: Frontend was treating email sending failure as a hard error, preventing successful invitation creation from being recognized.
+  - **Fix**:
+    - Updated `src/components/admin/AddMemberModal.tsx` to check `emailSent` field in invitation response.
+    - Changed error handling to show success toast with informative note when invitation is created but email can't be sent.
+    - Invitation creation now succeeds gracefully even when email service is not configured.
+  - **User Experience**: Users now see "Invitation created successfully! Note: Email notification could not be sent, but the user can still accept via the invite link."
+- 📁 **FILES MODIFIED**:
+  - `src/components/admin/AddMemberModal.tsx`
+  - `PROGRESS.md` (This file)
+
 **Session 54 (February 3, 2026 - Session Revocation Fix)**:
 
 - 🐛 **Bug Fix**: Resolved "No current session found" error when clicking "Revoke All Other Sessions".

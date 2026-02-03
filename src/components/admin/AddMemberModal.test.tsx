@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import AddMemberModal from './AddMemberModal';
 import api from '../../api/client';
+import { ToastProvider } from '../ui/Toast';
 
 // Mock API
 vi.mock('../../api/client', () => {
@@ -31,12 +32,14 @@ describe('AddMemberModal', () => {
     vi.mocked(api.addMemberByEmail).mockRejectedValue(new Error('User not found'));
 
     render(
-      <AddMemberModal
-        isOpen={true}
-        onClose={mockOnClose}
-        onMemberAdded={mockOnMemberAdded}
-        orgId={orgId}
-      />
+      <ToastProvider>
+        <AddMemberModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onMemberAdded={mockOnMemberAdded}
+          orgId={orgId}
+        />
+      </ToastProvider>
     );
 
     // Enter email
@@ -71,12 +74,14 @@ describe('AddMemberModal', () => {
     });
 
     render(
-      <AddMemberModal
-        isOpen={true}
-        onClose={mockOnClose}
-        onMemberAdded={mockOnMemberAdded}
-        orgId={orgId}
-      />
+      <ToastProvider>
+        <AddMemberModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onMemberAdded={mockOnMemberAdded}
+          orgId={orgId}
+        />
+      </ToastProvider>
     );
 
     // Enter email

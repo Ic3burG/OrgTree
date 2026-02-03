@@ -2,6 +2,7 @@ import React, { useState, FormEvent, ChangeEvent, useEffect, useRef } from 'reac
 import api from '../../api/client';
 import type { OrgMember, Invitation, User } from '../../types/index.js';
 import { Search, User as UserIcon, Mail, Loader2 } from 'lucide-react';
+import { useToast } from '../ui/Toast';
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export default function AddMemberModal({
   const [error, setError] = useState('');
   const [userNotFound, setUserNotFound] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
+  const toast = useToast();
 
   // Search/Autocomplete State
   const [searchQuery, setSearchQuery] = useState('');
@@ -136,6 +138,15 @@ export default function AddMemberModal({
       const invitation = await api.sendInvitation(orgId, email.trim(), roleValue);
 
       setInviteSent(true);
+
+      // Check if email was sent successfully
+      if ('emailSent' in invitation && !invitation.emailSent) {
+        // Invitation created but email not sent - show as success with note
+        toast.success(
+          'Invitation created successfully! Note: Email notification could not be sent, but the user can still accept via the invite link.'
+        );
+      }
+
       if (onInvitationSent) {
         onInvitationSent(invitation);
       }
@@ -145,12 +156,7 @@ export default function AddMemberModal({
       }, 2000);
     } catch (err) {
       if (err instanceof Error) {
-        // Check if it's an email configuration error
-        if (err.message.includes('email') || err.message.includes('configured')) {
-          setError('Email service is not configured. Please contact the administrator.');
-        } else {
-          setError(err.message || 'Failed to send invitation');
-        }
+        setError(err.message || 'Failed to send invitation');
       } else {
         setError('Failed to send invitation');
       }
