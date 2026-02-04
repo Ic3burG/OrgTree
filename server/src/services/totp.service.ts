@@ -2,6 +2,7 @@ import { generateSecret, generateSync, verifySync, generateURI } from 'otplib';
 import QRCode from 'qrcode';
 import db from '../db.js';
 import type { AppError } from '../types/index.js';
+import { randomBytes } from 'crypto';
 
 interface TotpSetupResult {
   secret: string;
@@ -115,8 +116,9 @@ function generateBackupCodes(count: number): string[] {
   const codes: string[] = [];
 
   for (let i = 0; i < count; i++) {
-    // Generate 8-character alphanumeric code
-    const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+    // Security: Use crypto.randomBytes for cryptographically secure backup codes
+    // Generate 6 random bytes and convert to hex string
+    const code = randomBytes(6).toString('hex').toUpperCase().substring(0, 8);
     codes.push(code);
   }
 

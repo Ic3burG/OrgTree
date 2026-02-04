@@ -193,7 +193,6 @@ app.get('/api/health', async (_req, res) => {
       status: 'ok',
       timestamp: new Date().toISOString(),
       version: process.env.npm_package_version || '1.0.0',
-      environment: process.env.NODE_ENV || 'development',
       uptime: {
         seconds: Math.floor(uptime),
         human: new Date(uptime * 1000).toISOString().substr(11, 8),

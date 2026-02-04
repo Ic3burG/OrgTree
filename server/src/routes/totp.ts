@@ -1,4 +1,5 @@
 import { Router, type Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { verifyTotp, setupTotp, verifyAndEnableTotp } from '../services/totp.service.js';
 import {
   generateToken,
@@ -10,6 +11,15 @@ import type { DatabaseUser, AuthRequest } from '../types/index.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
+
+// Security: Rate limit 2FA verification to prevent brute force attacks
+const twoFAVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per window
+  message: 'Too many verification attempts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Cookie options for refresh token
 const REFRESH_COOKIE_OPTIONS = {
@@ -23,8 +33,9 @@ const REFRESH_COOKIE_OPTIONS = {
 /**
  * POST /api/auth/2fa/verify-login
  * Verify TOTP code and complete login
+ * Security: Rate limited to 5 attempts per 15 minutes
  */
-router.post('/verify-login', async (req, res: Response): Promise<void> => {
+router.post('/verify-login', twoFAVerifyLimiter, async (req, res: Response): Promise<void> => {
   try {
     const { userId, token } = req.body;
 
@@ -140,33 +151,39 @@ router.get('/status', authenticateToken, (req: AuthRequest, res: Response): void
 /**
  * POST /api/auth/2fa/verify
  * Verify TOTP token and enable 2FA for authenticated user
+ * Security: Rate limited to 5 attempts per 15 minutes
  */
-router.post('/verify', authenticateToken, (req: AuthRequest, res: Response): void => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
+router.post(
+  '/verify',
+  twoFAVerifyLimiter,
+  authenticateToken,
+  (req: AuthRequest, res: Response): void => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
 
-    const { token } = req.body;
-    if (!token) {
-      res.status(400).json({ error: 'Token is required' });
-      return;
-    }
+      const { token } = req.body;
+      if (!token) {
+        res.status(400).json({ error: 'Token is required' });
+        return;
+      }
 
-    const success = verifyAndEnableTotp(userId, token);
+      const success = verifyAndEnableTotp(userId, token);
 
-    if (success) {
-      res.json({ success: true });
-    } else {
-      res.status(400).json({ error: 'Invalid token', success: false });
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(400).json({ error: 'Invalid token', success: false });
+      }
+    } catch (error) {
+      console.error('2FA verification error:', error);
+      res.status(500).json({ error: 'Failed to verify 2FA' });
     }
-  } catch (error) {
-    console.error('2FA verification error:', error);
-    res.status(500).json({ error: 'Failed to verify 2FA' });
   }
-});
+);
 
 /**
  * POST /api/auth/2fa/disable
