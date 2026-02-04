@@ -62,10 +62,10 @@
 - 🐛 **Bug Fix**: Resolved "No current session found" error when clicking "Revoke All Other Sessions".
   - **Root Cause**: Cookie path restrictions (`/api/auth`) likely prevented the refresh token cookie from being sent correctly in some environments, making it impossible to identify the current session to exclude from revocation.
   - **Fix**:
-    - Widened `refreshToken` cookie path to `/` (root) for maximum compatibility.
-    - Implemented cleanup logic: Login/Refresh now explicitly clears legacy cookies at `/api/auth` to prevent duplicates.
-    - Updated Logout/Change-Password to clear cookies for BOTH paths.
-    - Removed redundant `cookieParser` middleware from `auth.ts` (caused testing issues).
+    - **Cookie Security**: Relaxed `SameSite` from `Strict` to `Lax` to allow cookies in cross-port development environments (e.g., frontend on 5173, backend on 3001).
+    - **Cookie Path**: Widened `refreshToken` cookie path to `/` (root) for maximum compatibility.
+    - **Cleanup**: Implemented migration logic to clear legacy cookies at `/api/auth` during login/refresh.
+    - **Refactor**: Removed redundant `cookieParser` middleware from `auth.ts`.
   - **Testing**: Updated `auth.test.ts` to verify multiple cookie operations and correct paths.
 - 📁 **FILES MODIFIED**:
   - `server/src/routes/auth.ts`
