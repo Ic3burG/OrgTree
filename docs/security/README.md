@@ -12,6 +12,9 @@ Security audits are conducted in phases. Each report details the vulnerabilities
 - **[Audit Phase 2 (Jan 2026)](file:///Users/ojdavis/Claude Code/OrgTree/docs/security/audit-phase-2-report.md)**
   - Scope: Advanced Search (FTS5/Trigrams), User Discovery, and Organization Ownership Transfer.
   - Result: All new features verified secure against injection and DoS.
+- **[Audit Phase 3 (Feb 2026)](file:///Users/ojdavis/Claude Code/OrgTree/docs/security/audit-phase-3-report.md)**
+  - Scope: Dependency Security (jsPDF, lodash), TOTP/Passkey implementation review, and Information Disclosure fixes.
+  - Result: 0 vulnerabilities remaining, backup code randomness fixed, 2FA rate limiting added.
 
 ## Related Documentation
 

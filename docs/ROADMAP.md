@@ -33,6 +33,8 @@ This document outlines the development roadmap for OrgTree, including technical 
 ### Security Hardening
 
 - [x] **Address Medium/Low Severity Items** - Complete remaining items from SECURITY_AUDIT.md ✅ **DONE** (January 4, 2026) - All 25 items resolved
+- [x] **Security Audit Phase 2** - Audit Search, User Discovery, and Ownership Transfer ✅ **DONE** (January 28, 2026)
+- [x] **Security Audit Phase 3** - Audit Dependencies, 2FA/Passkeys, and Info Disclosure ✅ **DONE** (February 4, 2026)
 - [x] **CSRF Protection** - Add CSRF tokens for state-changing operations ✅ **DONE** (December 31, 2025)
 - [x] **Dependency Scanning Automation** - GitHub Dependabot or Snyk integration ✅ **DONE** (January 8, 2026)
 - [ ] **Penetration Testing** - Professional security assessment
@@ -181,10 +183,16 @@ This document outlines the development roadmap for OrgTree, including technical 
 - Performance optimization for large organizations
 - User experience refinements
 
+**Recently Completed** (February 2026):
+
+- ✅ **Security Audit Phase 3** - Resolved critical jsPDF vulnerabilities, fixed weak backup code randomness, added 2FA rate limiting, and patched environment disclosure (February 4, 2026)
+- ✅ **Organization Analytics Dashboard** - Overview, Growth, Structure, Activity, Search, and Export (February 2, 2026)
+- ✅ **Invitation Enhancements** - Resend expired invitations, custom expiry periods, reminder emails (February 3, 2026)
+
 **Recently Completed** (January 2026):
 
 - ✅ **Search Enhancements** - Trigram fuzzy matching, analytics, and saved searches (January 27, 2026)
-- ✅ **Organization Analytics Dashboard** - Overview, Growth, Structure, Activity, Search, and Export (February 2, 2026)
+- ✅ **Security Audit Phase 2** - Verified Search, User Discovery, and Ownership Transfer (January 28, 2026)
 - ✅ **Search System Rebuild** - Fixed FTS5 sync, soft-deletes, error handling, and added frontend resilience (January 24, 2026)
 - ✅ **User Discovery & Privacy Controls** - Implemented discoverable user search with opt-out settings and autocomplete (January 25, 2026)
 - ✅ **Database Migration Rollback** - Comprehensive migration system with auto-rollback in CD (January 25, 2026)
