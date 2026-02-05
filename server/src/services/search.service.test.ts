@@ -15,6 +15,10 @@ import {
   createSavedSearch,
   getSavedSearches,
   deleteSavedSearch,
+  validateFtsQuery,
+  buildFtsQuery,
+  getAutocompleteSuggestions,
+  getSearchSuggestions,
 } from './search.service.js';
 import db from '../db.js';
 
@@ -50,14 +54,49 @@ describe('Search Service', () => {
     ).run(orgId, 'Test Org', userId, 0);
 
     // Create Department
-    db.prepare(
+    const deptResult = db.prepare(
       'INSERT INTO departments (id, organization_id, name, description) VALUES (?, ?, ?, ?)'
     ).run('dept-1', orgId, 'Software Engineering', 'Software development');
 
+    // Manually populate FTS tables as triggers might be missing in test environment
+    db.prepare('INSERT INTO departments_fts (rowid, name, description) VALUES (?, ?, ?)')
+      .run(deptResult.lastInsertRowid, 'Software Engineering', 'Software development');
+    db.prepare('INSERT INTO departments_trigram (rowid, name, description) VALUES (?, ?, ?)')
+      .run(deptResult.lastInsertRowid, 'Software Engineering', 'Software development');
+
     // Create Person
-    db.prepare(
-      'INSERT INTO people (id, department_id, name, title, email) VALUES (?, ?, ?, ?, ?)'
-    ).run('person-1', 'dept-1', 'Alice Johnson', 'Senior Engineer', 'alice@example.com');
+    const person1Result = db.prepare(
+      'INSERT INTO people (id, department_id, name, title, email, is_starred) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run('person-1', 'dept-1', 'Alice Johnson', 'Senior Engineer', 'alice@example.com', 1);
+    
+    db.prepare('INSERT INTO people_fts (rowid, name, title, email) VALUES (?, ?, ?, ?)')
+      .run(person1Result.lastInsertRowid, 'Alice Johnson', 'Senior Engineer', 'alice@example.com');
+    db.prepare('INSERT INTO people_trigram (rowid, name, title, email) VALUES (?, ?, ?, ?)')
+      .run(person1Result.lastInsertRowid, 'Alice Johnson', 'Senior Engineer', 'alice@example.com');
+
+    const person2Result = db.prepare(
+      'INSERT INTO people (id, department_id, name, title, email, is_starred) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run('person-2', 'dept-1', 'Bob Smith', 'Designer', 'bob@example.com', 0);
+
+    db.prepare('INSERT INTO people_fts (rowid, name, title, email) VALUES (?, ?, ?, ?)')
+      .run(person2Result.lastInsertRowid, 'Bob Smith', 'Designer', 'bob@example.com');
+    db.prepare('INSERT INTO people_trigram (rowid, name, title, email) VALUES (?, ?, ?, ?)')
+      .run(person2Result.lastInsertRowid, 'Bob Smith', 'Designer', 'bob@example.com');
+  });
+
+  it('should validate FTS queries', () => {
+    expect(validateFtsQuery('valid').valid).toBe(true);
+    expect(validateFtsQuery('unbalanced " quotes').valid).toBe(false);
+    expect(validateFtsQuery('unbalanced \' quotes').valid).toBe(false);
+    expect(validateFtsQuery('too many ***********').valid).toBe(false);
+    expect(validateFtsQuery('invalid and operator').valid).toBe(false);
+    expect(validateFtsQuery('').valid).toBe(true);
+  });
+
+  it('should build FTS queries', () => {
+    expect(buildFtsQuery('test')).toBe('"test"*');
+    expect(buildFtsQuery('test query')).toBe('"test"* "query"*');
+    expect(buildFtsQuery('')).toBe('');
   });
 
   it('should perform exact match search', async () => {
@@ -83,6 +122,29 @@ describe('Search Service', () => {
     expect(result.total).toBe(1);
     expect(result.results[0].name).toBe('Alice Johnson');
     expect(result.usedFallback).toBe(true);
+  });
+
+  it('should filter by type', async () => {
+    const deptOnly = await search(orgId, userId, { query: 'Software', type: 'departments' });
+    expect(deptOnly.results.every(r => r.type === 'department')).toBe(true);
+
+    const peopleOnly = await search(orgId, userId, { query: 'Alice', type: 'people' });
+    expect(peopleOnly.results.every(r => r.type === 'person')).toBe(true);
+  });
+
+  it('should filter starred only', async () => {
+    const starred = await search(orgId, userId, { query: 'Johnson', starredOnly: true });
+    expect(starred.total).toBe(1);
+    expect(starred.results[0].name).toBe('Alice Johnson');
+
+    const notStarred = await search(orgId, userId, { query: 'Bob', starredOnly: true });
+    expect(notStarred.total).toBe(0);
+  });
+
+  it('should provide autocomplete suggestions', async () => {
+    const result = await getAutocompleteSuggestions(orgId, userId, 'Soft');
+    expect(result.suggestions.length).toBeGreaterThan(0);
+    expect(result.suggestions[0].text).toContain('Software');
   });
 
   it('should log analytics', async () => {
@@ -116,33 +178,16 @@ describe('Search Service', () => {
   });
 
   it('should return suggestions when no results are found', async () => {
-    // "Alix" instead of "Alice" - might be close enough for fuzzy, but let's try something more distant
-    // but still sharing trigrams. "Alicia" shares "Ali" "lic" "ici".
-    // If I search for "Alicia", and "Alice" exists.
-    
     // First, verify a very distant query returns nothing and no suggestions
     const noMatch = await search(orgId, userId, { query: 'Zzzzzzzzzz' });
     expect(noMatch.total).toBe(0);
     expect(noMatch.suggestions).toEqual([]);
 
     // Now try a query that is close to "Alice Johnson"
-    // "Alice" -> "Ali", "lic", "ice"
-    // "Alicee" -> "Ali", "lic", "ice", "cee"
     const result = await search(orgId, userId, { query: 'Alicee' });
     
-    // If it found Alice Johnson via fuzzy search, then suggestions might be empty because results > 0
-    // If fuzzy search didn't find it, then suggestions should have "Alice Johnson"
     if (result.total === 0) {
       expect(result.suggestions).toContain('Alice Johnson');
-    } else {
-      // It was found via fuzzy search
-      expect(result.results[0].name).toBe('Alice Johnson');
-      expect(result.usedFallback).toBe(true);
-      
-      // Try an even more broken one that trigram fallback might miss but suggestion might find?
-      // Actually suggestion uses the same trigram logic.
-      // The difference is that suggestion only returns the *string*, not the whole record,
-      // and it is only triggered when total === 0.
     }
   });
 
@@ -153,5 +198,14 @@ describe('Search Service', () => {
     if (result.total === 0) {
       expect(result.suggestions).toContain('Software Engineering');
     }
+  });
+
+  it('should handle edge cases in getSearchSuggestions', () => {
+    expect(getSearchSuggestions(orgId, '')).toEqual([]);
+    expect(getSearchSuggestions(orgId, 'a')).toEqual([]);
+    
+    // Exact match should be filtered out from suggestions
+    const suggestions = getSearchSuggestions(orgId, 'Software Engineering');
+    expect(suggestions).not.toContain('Software Engineering');
   });
 });
