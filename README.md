@@ -44,7 +44,7 @@ A modern, full-stack organizational directory and visualization platform. Build,
   - CSV format for departments and people
   - GEDS XML file upload
   - **GEDS URL Import**: Paste download URLs for instant import (no manual download required)
-- **Full-Text Search**: FTS5-powered search with autocomplete and fuzzy matching
+- **Full-Text Search**: FTS5-powered search with autocomplete, fuzzy matching, and "Did you mean?" suggestions
 - **Audit Trail**: Track all changes with 1-year retention
 - **Automatic Backups**: Database persistence with scheduled backups
 

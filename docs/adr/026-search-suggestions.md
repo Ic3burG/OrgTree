@@ -1,7 +1,7 @@
 # ADR 026: "Did You Mean?" Search Suggestions
 
 ## Status
-Accepted
+Implemented
 
 ## Date
 2026-02-03
