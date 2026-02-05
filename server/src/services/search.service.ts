@@ -702,11 +702,7 @@ function searchPeopleTrigram(
 /**
  * Get "Did you mean?" suggestions using Trigram FTS
  */
-export function getSearchSuggestions(
-  orgId: string,
-  query: string,
-  limit: number = 3
-): string[] {
+export function getSearchSuggestions(orgId: string, query: string, limit: number = 3): string[] {
   if (!query || query.trim().length < 2) return [];
 
   const trigrams = generateTrigrams(query);

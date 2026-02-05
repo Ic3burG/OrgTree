@@ -54,40 +54,68 @@ describe('Search Service', () => {
     ).run(orgId, 'Test Org', userId, 0);
 
     // Create Department
-    const deptResult = db.prepare(
-      'INSERT INTO departments (id, organization_id, name, description) VALUES (?, ?, ?, ?)'
-    ).run('dept-1', orgId, 'Software Engineering', 'Software development');
+    const deptResult = db
+      .prepare(
+        'INSERT INTO departments (id, organization_id, name, description) VALUES (?, ?, ?, ?)'
+      )
+      .run('dept-1', orgId, 'Software Engineering', 'Software development');
 
     // Manually populate FTS tables as triggers might be missing in test environment
-    db.prepare('INSERT INTO departments_fts (rowid, name, description) VALUES (?, ?, ?)')
-      .run(deptResult.lastInsertRowid, 'Software Engineering', 'Software development');
-    db.prepare('INSERT INTO departments_trigram (rowid, name, description) VALUES (?, ?, ?)')
-      .run(deptResult.lastInsertRowid, 'Software Engineering', 'Software development');
+    db.prepare('INSERT INTO departments_fts (rowid, name, description) VALUES (?, ?, ?)').run(
+      deptResult.lastInsertRowid,
+      'Software Engineering',
+      'Software development'
+    );
+    db.prepare('INSERT INTO departments_trigram (rowid, name, description) VALUES (?, ?, ?)').run(
+      deptResult.lastInsertRowid,
+      'Software Engineering',
+      'Software development'
+    );
 
     // Create Person
-    const person1Result = db.prepare(
-      'INSERT INTO people (id, department_id, name, title, email, is_starred) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run('person-1', 'dept-1', 'Alice Johnson', 'Senior Engineer', 'alice@example.com', 1);
-    
-    db.prepare('INSERT INTO people_fts (rowid, name, title, email) VALUES (?, ?, ?, ?)')
-      .run(person1Result.lastInsertRowid, 'Alice Johnson', 'Senior Engineer', 'alice@example.com');
-    db.prepare('INSERT INTO people_trigram (rowid, name, title, email) VALUES (?, ?, ?, ?)')
-      .run(person1Result.lastInsertRowid, 'Alice Johnson', 'Senior Engineer', 'alice@example.com');
+    const person1Result = db
+      .prepare(
+        'INSERT INTO people (id, department_id, name, title, email, is_starred) VALUES (?, ?, ?, ?, ?, ?)'
+      )
+      .run('person-1', 'dept-1', 'Alice Johnson', 'Senior Engineer', 'alice@example.com', 1);
 
-    const person2Result = db.prepare(
-      'INSERT INTO people (id, department_id, name, title, email, is_starred) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run('person-2', 'dept-1', 'Bob Smith', 'Designer', 'bob@example.com', 0);
+    db.prepare('INSERT INTO people_fts (rowid, name, title, email) VALUES (?, ?, ?, ?)').run(
+      person1Result.lastInsertRowid,
+      'Alice Johnson',
+      'Senior Engineer',
+      'alice@example.com'
+    );
+    db.prepare('INSERT INTO people_trigram (rowid, name, title, email) VALUES (?, ?, ?, ?)').run(
+      person1Result.lastInsertRowid,
+      'Alice Johnson',
+      'Senior Engineer',
+      'alice@example.com'
+    );
 
-    db.prepare('INSERT INTO people_fts (rowid, name, title, email) VALUES (?, ?, ?, ?)')
-      .run(person2Result.lastInsertRowid, 'Bob Smith', 'Designer', 'bob@example.com');
-    db.prepare('INSERT INTO people_trigram (rowid, name, title, email) VALUES (?, ?, ?, ?)')
-      .run(person2Result.lastInsertRowid, 'Bob Smith', 'Designer', 'bob@example.com');
+    const person2Result = db
+      .prepare(
+        'INSERT INTO people (id, department_id, name, title, email, is_starred) VALUES (?, ?, ?, ?, ?, ?)'
+      )
+      .run('person-2', 'dept-1', 'Bob Smith', 'Designer', 'bob@example.com', 0);
+
+    db.prepare('INSERT INTO people_fts (rowid, name, title, email) VALUES (?, ?, ?, ?)').run(
+      person2Result.lastInsertRowid,
+      'Bob Smith',
+      'Designer',
+      'bob@example.com'
+    );
+    db.prepare('INSERT INTO people_trigram (rowid, name, title, email) VALUES (?, ?, ?, ?)').run(
+      person2Result.lastInsertRowid,
+      'Bob Smith',
+      'Designer',
+      'bob@example.com'
+    );
   });
 
   it('should validate FTS queries', () => {
     expect(validateFtsQuery('valid').valid).toBe(true);
     expect(validateFtsQuery('unbalanced " quotes').valid).toBe(false);
-    expect(validateFtsQuery('unbalanced \' quotes').valid).toBe(false);
+    expect(validateFtsQuery("unbalanced ' quotes").valid).toBe(false);
     expect(validateFtsQuery('too many ***********').valid).toBe(false);
     expect(validateFtsQuery('invalid and operator').valid).toBe(false);
     expect(validateFtsQuery('').valid).toBe(true);
@@ -185,7 +213,7 @@ describe('Search Service', () => {
 
     // Now try a query that is close to "Alice Johnson"
     const result = await search(orgId, userId, { query: 'Alicee' });
-    
+
     if (result.total === 0) {
       expect(result.suggestions).toContain('Alice Johnson');
     }
@@ -194,7 +222,7 @@ describe('Search Service', () => {
   it('should return suggestions for departments', async () => {
     // "Softwar" -> close to "Software Engineering"
     const result = await search(orgId, userId, { query: 'Softwarre' });
-    
+
     if (result.total === 0) {
       expect(result.suggestions).toContain('Software Engineering');
     }
@@ -203,7 +231,7 @@ describe('Search Service', () => {
   it('should handle edge cases in getSearchSuggestions', () => {
     expect(getSearchSuggestions(orgId, '')).toEqual([]);
     expect(getSearchSuggestions(orgId, 'a')).toEqual([]);
-    
+
     // Exact match should be filtered out from suggestions
     const suggestions = getSearchSuggestions(orgId, 'Software Engineering');
     expect(suggestions).not.toContain('Software Engineering');
