@@ -23,6 +23,9 @@ ADRs document significant architectural decisions that have been finalized and i
 | 021 | [Frontend Quality & E2E Testing Strategy](./adr/021-frontend-quality-e2e-strategy.md) | ✅ Implemented | 2026-01-29 |
 | 022 | [Advanced Sidebar UI](./adr/022-advanced-sidebar-ui.md)                               | ✅ Implemented | 2026-01-31 |
 | 023 | [Organization Analytics Dashboard](./adr/023-organization-analytics-dashboard.md)     | ✅ Implemented | 2026-02-02 |
+| 024 | [Coverage Maintenance Ratcheting](./adr/024-coverage-maintenance-ratcheting.md)       | ✅ Implemented | 2026-02-03 |
+| 025 | [Invitation Enhancements](./adr/025-invitation-enhancements.md)                       | ✅ Implemented | 2026-02-03 |
+| 026 | [Search Suggestions](./adr/026-search-suggestions.md)                                 | 📝 Accepted    | 2026-02-03 |
 
 ## [Requests for Comments (RFCs)](./rfc/)
 
@@ -30,8 +33,6 @@ RFCs are proposals for new features or significant changes that are currently un
 
 | Title                                                                         | Status                   | Priority |
 | ----------------------------------------------------------------------------- | ------------------------ | -------- |
-| [Coverage Maintenance](./adr/024-coverage-maintenance-ratcheting.md)          | ✅ Accepted              | High     |
-| [Invitation Enhancements](./rfc/invitation-enhancements.md)                   | 💡 Proposed              | High     |
 | [Organization Analytics Dashboard](./rfc/organization-analytics-dashboard.md) | ⛔ Superseded by ADR-023 | Medium   |
 
 ## [Security Documentation](./security/)

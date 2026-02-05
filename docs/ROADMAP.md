@@ -171,7 +171,7 @@ This document outlines the development roadmap for OrgTree, including technical 
    1. ~~**Typo Tolerance** - Trigram-based fuzzy matching~~ ✅ **DONE**
    1. ~~**Search Analytics** - Track zero-result searches to identify gaps~~ ✅ **DONE**
    1. ~~**Saved Searches** - Allow users to save frequently-used queries~~ ✅ **DONE**
-   1. **Search Suggestions** - "Did you mean?" suggestions for misspellings (Partially covered by fuzzy match fallback)
+   1. **Search Suggestions** - "Did you mean?" suggestions for misspellings (see [docs/adr/026-search-suggestions.md](adr/026-search-suggestions.md)) 🏗️ **IN PROGRESS**
 
 ---
 

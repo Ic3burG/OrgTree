@@ -40,7 +40,9 @@ An Architecture Decision Record (ADR) is a document that captures an important a
 | [021](021-frontend-quality-e2e-strategy.md)        | Frontend Quality & E2E Testing Strategy     | Accepted | 2026-01-27 | testing, frontend, e2e, quality                     |
 | [022](022-advanced-sidebar-ui.md)                  | Advanced Sidebar UI Enhancements            | Accepted | 2026-01-31 | frontend, ui, ux, state-management                  |
 | [023](023-organization-analytics-dashboard.md)     | Organization Analytics Dashboard            | Accepted | 2026-02-02 | analytics, dashboard, visualization, admin-features |
-| [024](024-coverage-maintenance-ratcheting.md)      | Automated Coverage Maintenance & Ratcheting | Accepted | 2026-01-28 | testing, devops, code-quality                       |
+| 024 | [Automated Coverage Maintenance & Ratcheting](024-coverage-maintenance-ratcheting.md) | Accepted | 2026-01-28 | testing, devops, code-quality                       |
+| 025 | [Invitation Enhancements](025-invitation-enhancements.md)                           | Accepted | 2026-02-03 | invitations, email, ux                              |
+| 026 | [Search Suggestions](026-search-suggestions.md)                                     | Accepted | 2026-02-03 | search, ux, trigram                                 |
 
 ## Reading Guide
 
