@@ -51,7 +51,8 @@ export default function SearchOverlay({
     starredOnly,
     setStarredOnly,
     results,
-    suggestions,
+    autocompleteSuggestions,
+    didYouMeanSuggestions,
     loading,
     total,
     clearSearch,
@@ -60,14 +61,20 @@ export default function SearchOverlay({
     fromCache,
   } = useSearch(orgId, { debounceMs: 300, minQueryLength: 1 });
 
-  // Open dropdown when we have results
+  // Open dropdown when we have results or suggestions
   useEffect(() => {
-    if (query.trim() && (results.length > 0 || loading)) {
+    if (
+      query.trim() &&
+      (results.length > 0 ||
+        autocompleteSuggestions.length > 0 ||
+        didYouMeanSuggestions.length > 0 ||
+        loading)
+    ) {
       setIsOpen(true);
     } else if (!query.trim()) {
       setIsOpen(false);
     }
-  }, [query, results, loading]);
+  }, [query, results, autocompleteSuggestions, didYouMeanSuggestions, loading]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -271,10 +278,10 @@ export default function SearchOverlay({
       )}
 
       {/* Suggestions (shown while typing, before results) */}
-      {isOpen && suggestions.length > 0 && results.length === 0 && !loading && (
+      {isOpen && autocompleteSuggestions.length > 0 && results.length === 0 && !loading && (
         <div className="mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-2">
           <div className="text-xs text-slate-500 dark:text-slate-400 px-4 pb-1">Suggestions:</div>
-          {suggestions.map((suggestion, index) => (
+          {autocompleteSuggestions.map((suggestion, index) => (
             <button
               key={`suggestion-${index}`}
               onClick={() => handleSuggestionClick(suggestion)}
@@ -403,19 +410,43 @@ export default function SearchOverlay({
       )}
 
       {/* No results state */}
-      {isOpen && !loading && query.trim() && results.length === 0 && suggestions.length === 0 && (
-        <div className="mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-8 text-center">
-          <p className="text-sm text-slate-500">No results found for "{query}"</p>
-          {type !== 'all' && (
-            <button
-              onClick={() => setType('all')}
-              className="mt-2 text-sm text-blue-600 hover:text-blue-700"
-            >
-              Search in all categories
-            </button>
-          )}
-        </div>
-      )}
+      {isOpen &&
+        !loading &&
+        query.trim() &&
+        results.length === 0 &&
+        autocompleteSuggestions.length === 0 && (
+          <div className="mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-8 text-center px-4">
+            <p className="text-sm text-slate-500">No results found for "{query}"</p>
+
+            {didYouMeanSuggestions.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                  Did you mean?
+                </p>
+                <div className="mt-2 flex flex-wrap justify-center gap-2">
+                  {didYouMeanSuggestions.map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setQuery(suggestion)}
+                      className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors border border-blue-100 dark:border-blue-800"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {type !== 'all' && (
+              <button
+                onClick={() => setType('all')}
+                className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Search in all categories
+              </button>
+            )}
+          </div>
+        )}
     </div>
   );
 }

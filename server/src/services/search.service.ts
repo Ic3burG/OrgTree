@@ -700,6 +700,77 @@ function searchPeopleTrigram(
 }
 
 /**
+ * Get "Did you mean?" suggestions using Trigram FTS
+ */
+export function getSearchSuggestions(
+  orgId: string,
+  query: string,
+  limit: number = 3
+): string[] {
+  if (!query || query.trim().length < 2) return [];
+
+  const trigrams = generateTrigrams(query);
+  let matchQuery = '';
+
+  if (trigrams.length > 0) {
+    matchQuery = trigrams.map(t => `"${t.replace(/"/g, '""')}"`).join(' OR ');
+  } else {
+    matchQuery = `"${query.replace(/"/g, '""')}"`;
+  }
+
+  const deptSql = `
+    SELECT DISTINCT d.name, bm25(dt.departments_trigram) as rank
+    FROM departments_trigram dt
+    JOIN departments d ON d.rowid = dt.rowid
+    WHERE dt.departments_trigram MATCH ?
+      AND d.organization_id = ?
+      AND d.deleted_at IS NULL
+    ORDER BY rank
+    LIMIT ?
+  `;
+
+  const peopleSql = `
+    SELECT DISTINCT p.name, bm25(pt.people_trigram) as rank
+    FROM people_trigram pt
+    JOIN people p ON p.rowid = pt.rowid
+    JOIN departments d ON p.department_id = d.id
+    WHERE pt.people_trigram MATCH ?
+      AND d.organization_id = ?
+      AND p.deleted_at IS NULL
+      AND d.deleted_at IS NULL
+    ORDER BY rank
+    LIMIT ?
+  `;
+
+  const suggestions: { text: string; rank: number }[] = [];
+
+  try {
+    const deptRows = db.prepare(deptSql).all(matchQuery, orgId, limit) as {
+      name: string;
+      rank: number;
+    }[];
+    suggestions.push(...deptRows.map(r => ({ text: r.name, rank: r.rank })));
+  } catch (err) {
+    console.error('[suggestions] Department suggestion error:', err);
+  }
+
+  try {
+    const peopleRows = db.prepare(peopleSql).all(matchQuery, orgId, limit) as {
+      name: string;
+      rank: number;
+    }[];
+    suggestions.push(...peopleRows.map(r => ({ text: r.name, rank: r.rank })));
+  } catch (err) {
+    console.error('[suggestions] People suggestion error:', err);
+  }
+
+  // Sort by rank and return distinct names
+  return Array.from(new Set(suggestions.sort((a, b) => a.rank - b.rank).map(s => s.text)))
+    .filter(text => text.toLowerCase() !== query.toLowerCase())
+    .slice(0, limit);
+}
+
+/**
  * Main search function - searches both departments and people
  */
 export async function search(
@@ -837,13 +908,10 @@ export async function search(
     if (total > 0) {
       usedFallback = true;
       warnings.push('Showing approximate matches (fuzzy search)');
-    } else {
-      // If still no results, try the LIKE fallback (last resort)
-      // ... (existing fallback logic if desired, or skip it since Trigram is better than LIKE)
-      // We'll keep the LIKE fallback logic as a final safety net if Trigram fails completely or returns nothing where LIKE might (?)
-      // Actually, Trigram is superior to LIKE. We can skip LIKE fallback if Trigram was attempted.
     }
   }
+
+  const suggestions = total === 0 ? getSearchSuggestions(orgId, query) : undefined;
 
   const queryTimeMs = Date.now() - startTime;
   const slowQueryThreshold = 100;
@@ -871,6 +939,7 @@ export async function search(
       offset,
       hasMore: total > offset + limit,
     },
+    suggestions,
     ...(warnings.length > 0 && { warnings }),
     ...(usedFallback && { usedFallback }),
     performance: {

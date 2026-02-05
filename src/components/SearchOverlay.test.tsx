@@ -35,7 +35,8 @@ describe('SearchOverlay', () => {
     starredOnly: false,
     setStarredOnly: vi.fn(),
     results: [],
-    suggestions: [],
+    autocompleteSuggestions: [],
+    didYouMeanSuggestions: [],
     loading: false,
     total: 0,
     clearSearch: vi.fn(),
@@ -201,7 +202,8 @@ describe('SearchOverlay', () => {
       ...mockUseSearchValue,
       query: 'unknown',
       results: [],
-      suggestions: [],
+      autocompleteSuggestions: [],
+      didYouMeanSuggestions: [],
       loading: false,
     });
 
@@ -216,5 +218,25 @@ describe('SearchOverlay', () => {
     await waitFor(() => {
       expect(screen.getByText(/No results found for "unknown"/i)).toBeDefined();
     });
+  });
+
+  it('shows "Did you mean?" suggestions when available', async () => {
+    (useSearch as Mock).mockReturnValue({
+      ...mockUseSearchValue,
+      query: 'Alix',
+      results: [],
+      autocompleteSuggestions: [],
+      didYouMeanSuggestions: ['Alice Johnson'],
+      loading: false,
+    });
+
+    renderComponent();
+
+    expect(screen.getByText(/Did you mean\?/i)).toBeDefined();
+    expect(screen.getByText('Alice Johnson')).toBeDefined();
+
+    const setQuery = mockUseSearchValue.setQuery;
+    fireEvent.click(screen.getByText('Alice Johnson'));
+    expect(setQuery).toHaveBeenCalledWith('Alice Johnson');
   });
 });

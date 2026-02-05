@@ -1,6 +1,6 @@
 # OrgTree Development Roadmap
 
-> **Last Updated**: January 25, 2026
+> **Last Updated**: February 5, 2026
 > **Status**: Production-ready with ongoing enhancements
 
 This document outlines the development roadmap for OrgTree, including technical debt items, feature enhancements, and infrastructure improvements.
@@ -171,7 +171,7 @@ This document outlines the development roadmap for OrgTree, including technical 
    1. ~~**Typo Tolerance** - Trigram-based fuzzy matching~~ ✅ **DONE**
    1. ~~**Search Analytics** - Track zero-result searches to identify gaps~~ ✅ **DONE**
    1. ~~**Saved Searches** - Allow users to save frequently-used queries~~ ✅ **DONE**
-   1. **Search Suggestions** - "Did you mean?" suggestions for misspellings (see [docs/adr/026-search-suggestions.md](adr/026-search-suggestions.md)) 🏗️ **IN PROGRESS**
+   1. ~~**Search Suggestions** - "Did you mean?" suggestions for misspellings (see [docs/adr/026-search-suggestions.md](adr/026-search-suggestions.md))~~ ✅ **DONE** (February 5, 2026)
 
 ---
 

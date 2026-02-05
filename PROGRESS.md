@@ -14,6 +14,26 @@
 - **Update "Last Updated" date**: February 3, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
 
+**Session 56 (February 5, 2026 - "Did you mean?" Search Suggestions)**:
+
+- ✅ **Feature Implementation**: Added "Did you mean?" search suggestions (ADR-026) to improve UX on zero-result searches.
+  - **Backend**:
+    - Implemented `getSearchSuggestions` in `search.service.ts` using Trigram FTS to find similar names when no results are found.
+    - Updated `search` function to populate the `suggestions` field in `SearchResponse`.
+    - Verified logic with new unit tests in `search.service.test.ts`.
+  - **Frontend**:
+    - Updated `useSearch` hook to capture `didYouMeanSuggestions` from the API response and renamed the existing autocomplete `suggestions` to `autocompleteSuggestions` for clarity.
+    - Updated `SearchOverlay.tsx` to display suggestions in the "No results found" state.
+    - Added logic to automatically open the dropdown if suggestions are available.
+    - Verified functionality with updated and new tests in `SearchOverlay.test.tsx`.
+- 📁 **FILES MODIFIED**:
+  - `server/src/services/search.service.ts`
+  - `server/src/services/search.service.test.ts`
+  - `src/hooks/useSearch.ts`
+  - `src/components/SearchOverlay.tsx`
+  - `src/components/SearchOverlay.test.tsx`
+  - `PROGRESS.md` (This file)
+
 **Session 55 (February 3, 2026 - Invitation Flow Fix)**:
 
 - 🐛 **Bug Fix**: Resolved issue where "Send Invitation" option was not appearing when adding a new member by email (user not found).

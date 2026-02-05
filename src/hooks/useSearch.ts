@@ -23,7 +23,8 @@ interface UseSearchReturn {
   type: SearchType;
   starredOnly: boolean;
   results: SearchResult[];
-  suggestions: SearchSuggestion[];
+  autocompleteSuggestions: SearchSuggestion[];
+  didYouMeanSuggestions: string[];
   loading: boolean;
   error: string | null;
   total: number;
@@ -58,7 +59,8 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
   const [query, setQuery] = useState<string>('');
   const [type, setType] = useState<SearchType>(defaultType);
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<SearchSuggestion[]>([]);
+  const [didYouMeanSuggestions, setDidYouMeanSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
@@ -124,6 +126,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
       setError(null);
       setRetryCount(0);
       setFromCache(false);
+      setDidYouMeanSuggestions([]);
 
       // Check cache first (only for first page)
       if (searchOffset === 0 && isIndexedDBAvailable()) {
@@ -166,6 +169,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
           setHasMore(data.pagination?.hasMore || false);
           setWarnings(data.warnings || []);
           setUsedFallback(data.usedFallback || false);
+          setDidYouMeanSuggestions(data.suggestions || []);
           setRetryCount(attempt);
 
           // Cache successful first-page results
@@ -248,7 +252,7 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
   const fetchSuggestions = useCallback(
     async (q: string): Promise<void> => {
       if (!orgId || q.length < 2) {
-        setSuggestions([]);
+        setAutocompleteSuggestions([]);
         return;
       }
 
@@ -258,9 +262,9 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
           text: suggestion.text,
           type: suggestion.type,
         }));
-        setSuggestions(suggestions);
+        setAutocompleteSuggestions(suggestions);
       } catch {
-        setSuggestions([]);
+        setAutocompleteSuggestions([]);
       }
     },
     [orgId]
@@ -276,7 +280,8 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
 
     if (query.length < minQueryLength) {
       setResults([]);
-      setSuggestions([]);
+      setAutocompleteSuggestions([]);
+      setDidYouMeanSuggestions([]);
       setTotal(0);
       setHasMore(false);
       return;
@@ -300,7 +305,8 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
   const clearSearch = useCallback((): void => {
     setQuery('');
     setResults([]);
-    setSuggestions([]);
+    setAutocompleteSuggestions([]);
+    setDidYouMeanSuggestions([]);
     setTotal(0);
     setHasMore(false);
     setError(null);
@@ -322,7 +328,8 @@ export function useSearch(orgId: string | undefined, options: SearchOptions = {}
     type,
     starredOnly,
     results,
-    suggestions,
+    autocompleteSuggestions,
+    didYouMeanSuggestions,
     loading,
     error,
     total,

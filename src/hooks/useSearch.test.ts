@@ -136,11 +136,37 @@ describe('useSearch', () => {
       await Promise.resolve();
     });
 
-    expect(result.current.suggestions).toHaveLength(2);
-    expect(result.current.suggestions).toBeDefined();
-    if (result.current.suggestions[0]) {
-      expect(result.current.suggestions[0].text).toBe('suggestion 1');
+    expect(result.current.autocompleteSuggestions).toHaveLength(2);
+    expect(result.current.autocompleteSuggestions).toBeDefined();
+    if (result.current.autocompleteSuggestions[0]) {
+      expect(result.current.autocompleteSuggestions[0].text).toBe('suggestion 1');
     }
+  });
+
+  it('populates didYouMeanSuggestions from search response', async () => {
+    vi.mocked(api.search).mockResolvedValue({
+      results: [],
+      total: 0,
+      query: 'Alix',
+      pagination: { hasMore: false, offset: 0, limit: 20 },
+      suggestions: ['Alice Johnson'],
+    });
+
+    const { result } = renderHook(() => useSearch(mockOrgId));
+
+    act(() => {
+      result.current.setQuery('Alix');
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current.didYouMeanSuggestions).toEqual(['Alice Johnson']);
   });
 
   it('clears search', () => {

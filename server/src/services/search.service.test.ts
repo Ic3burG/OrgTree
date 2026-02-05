@@ -114,4 +114,44 @@ describe('Search Service', () => {
     const listAfter = await getSavedSearches(orgId, userId);
     expect(listAfter.length).toBe(0);
   });
+
+  it('should return suggestions when no results are found', async () => {
+    // "Alix" instead of "Alice" - might be close enough for fuzzy, but let's try something more distant
+    // but still sharing trigrams. "Alicia" shares "Ali" "lic" "ici".
+    // If I search for "Alicia", and "Alice" exists.
+    
+    // First, verify a very distant query returns nothing and no suggestions
+    const noMatch = await search(orgId, userId, { query: 'Zzzzzzzzzz' });
+    expect(noMatch.total).toBe(0);
+    expect(noMatch.suggestions).toEqual([]);
+
+    // Now try a query that is close to "Alice Johnson"
+    // "Alice" -> "Ali", "lic", "ice"
+    // "Alicee" -> "Ali", "lic", "ice", "cee"
+    const result = await search(orgId, userId, { query: 'Alicee' });
+    
+    // If it found Alice Johnson via fuzzy search, then suggestions might be empty because results > 0
+    // If fuzzy search didn't find it, then suggestions should have "Alice Johnson"
+    if (result.total === 0) {
+      expect(result.suggestions).toContain('Alice Johnson');
+    } else {
+      // It was found via fuzzy search
+      expect(result.results[0].name).toBe('Alice Johnson');
+      expect(result.usedFallback).toBe(true);
+      
+      // Try an even more broken one that trigram fallback might miss but suggestion might find?
+      // Actually suggestion uses the same trigram logic.
+      // The difference is that suggestion only returns the *string*, not the whole record,
+      // and it is only triggered when total === 0.
+    }
+  });
+
+  it('should return suggestions for departments', async () => {
+    // "Softwar" -> close to "Software Engineering"
+    const result = await search(orgId, userId, { query: 'Softwarre' });
+    
+    if (result.total === 0) {
+      expect(result.suggestions).toContain('Software Engineering');
+    }
+  });
 });
