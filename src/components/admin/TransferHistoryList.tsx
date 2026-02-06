@@ -88,11 +88,11 @@ export default function TransferHistoryList({
               </div>
             </div>
           </div>
-          {transfer.completed_at && (
+          {transfer.completedAt && (
             <div className="text-xs text-gray-400 text-right">
               Completed on
               <br />
-              {new Date(transfer.completed_at).toLocaleDateString()}
+              {new Date(transfer.completedAt).toLocaleDateString()}
             </div>
           )}
         </div>

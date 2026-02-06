@@ -94,25 +94,43 @@ function logAuditEntry(
 
 function mapTransferRow(row: OwnershipTransferRow): OwnershipTransfer | undefined {
   if (!row) return undefined;
+
+  const initiatedAt = row.initiated_at
+    ? new Date(row.initiated_at * 1000).toISOString()
+    : new Date().toISOString();
+  const expiresAt = row.expires_at
+    ? new Date(row.expires_at * 1000).toISOString()
+    : new Date().toISOString();
+  const completedAt = row.completed_at ? new Date(row.completed_at * 1000).toISOString() : null;
+  const createdAt = row.created_at
+    ? new Date(row.created_at * 1000).toISOString()
+    : new Date().toISOString();
+  const updatedAt = row.updated_at
+    ? new Date(row.updated_at * 1000).toISOString()
+    : new Date().toISOString();
+
   return {
-    ...row,
+    id: row.id,
+    status: row.status,
+    reason: row.reason,
     organizationId: row.organization_id,
     fromUserId: row.from_user_id,
     toUserId: row.to_user_id,
-    initiatedAt: row.initiated_at
-      ? new Date(row.initiated_at * 1000).toISOString()
-      : new Date().toISOString(),
-    expiresAt: row.expires_at
-      ? new Date(row.expires_at * 1000).toISOString()
-      : new Date().toISOString(),
-    completedAt: row.completed_at ? new Date(row.completed_at * 1000).toISOString() : null,
-    createdAt: row.created_at
-      ? new Date(row.created_at * 1000).toISOString()
-      : new Date().toISOString(),
-    updatedAt: row.updated_at
-      ? new Date(row.updated_at * 1000).toISOString()
-      : new Date().toISOString(),
+    initiatedAt,
+    expiresAt,
+    completedAt,
+    createdAt,
+    updatedAt,
     cancellationReason: row.cancellation_reason,
+    // snake_case aliases for backwards compatibility
+    organization_id: row.organization_id,
+    from_user_id: row.from_user_id,
+    to_user_id: row.to_user_id,
+    initiated_at: initiatedAt,
+    expires_at: expiresAt,
+    completed_at: completedAt,
+    created_at: createdAt,
+    updated_at: updatedAt,
   };
 }
 
@@ -120,25 +138,49 @@ function mapTransferWithDetailsRow(
   row: OwnershipTransferWithDetailsRow
 ): OwnershipTransferWithDetails | undefined {
   if (!row) return undefined;
+
+  const initiatedAt = row.initiated_at
+    ? new Date(row.initiated_at * 1000).toISOString()
+    : new Date().toISOString();
+  const expiresAt = row.expires_at
+    ? new Date(row.expires_at * 1000).toISOString()
+    : new Date().toISOString();
+  const completedAt = row.completed_at ? new Date(row.completed_at * 1000).toISOString() : null;
+  const createdAt = row.created_at
+    ? new Date(row.created_at * 1000).toISOString()
+    : new Date().toISOString();
+  const updatedAt = row.updated_at
+    ? new Date(row.updated_at * 1000).toISOString()
+    : new Date().toISOString();
+
   return {
-    ...row,
+    id: row.id,
+    status: row.status,
+    reason: row.reason,
     organizationId: row.organization_id,
     fromUserId: row.from_user_id,
     toUserId: row.to_user_id,
-    initiatedAt: row.initiated_at
-      ? new Date(row.initiated_at * 1000).toISOString()
-      : new Date().toISOString(),
-    expiresAt: row.expires_at
-      ? new Date(row.expires_at * 1000).toISOString()
-      : new Date().toISOString(),
-    completedAt: row.completed_at ? new Date(row.completed_at * 1000).toISOString() : null,
-    createdAt: row.created_at
-      ? new Date(row.created_at * 1000).toISOString()
-      : new Date().toISOString(),
-    updatedAt: row.updated_at
-      ? new Date(row.updated_at * 1000).toISOString()
-      : new Date().toISOString(),
+    initiatedAt,
+    expiresAt,
+    completedAt,
+    createdAt,
+    updatedAt,
     cancellationReason: row.cancellation_reason,
+    // Details
+    from_user_name: row.from_user_name,
+    from_user_email: row.from_user_email,
+    to_user_name: row.to_user_name,
+    to_user_email: row.to_user_email,
+    organization_name: row.organization_name,
+    // snake_case aliases for backwards compatibility
+    organization_id: row.organization_id,
+    from_user_id: row.from_user_id,
+    to_user_id: row.to_user_id,
+    initiated_at: initiatedAt,
+    expires_at: expiresAt,
+    completed_at: completedAt,
+    created_at: createdAt,
+    updated_at: updatedAt,
   };
 }
 
