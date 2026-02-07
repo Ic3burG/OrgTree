@@ -86,7 +86,7 @@ export function ToastProvider({ children }: ToastProviderProps): React.JSX.Eleme
   return (
     <ToastContext.Provider value={toast}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 space-y-2">
+      <div className="fixed bottom-20 left-4 right-4 lg:bottom-4 lg:left-auto lg:right-4 z-50 space-y-2">
         {toasts.map(t => (
           <ToastItem key={t.id} toast={t} onClose={() => removeToast(t.id)} />
         ))}
@@ -110,7 +110,7 @@ function ToastItem({ toast, onClose }: ToastItemProps): React.JSX.Element {
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg ${backgrounds[toast.type]} animate-slide-in-right min-w-[300px]`}
+      className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg ${backgrounds[toast.type]} animate-slide-in-right w-full lg:min-w-[300px] lg:w-auto`}
     >
       {icons[toast.type]}
       <span className="text-slate-700 flex-1">{toast.message}</span>

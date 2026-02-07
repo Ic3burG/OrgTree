@@ -63,7 +63,7 @@ export default function DetailPanel({
       {/* Panel */}
       <div
         className="fixed right-0 top-0 bottom-0 w-full lg:max-w-md bg-white dark:bg-slate-800 shadow-2xl z-50
-          overflow-y-auto animate-slide-in-right"
+          overflow-y-auto animate-slide-in-right pb-safe"
         role="dialog"
         aria-modal="true"
         aria-labelledby="detail-panel-title"

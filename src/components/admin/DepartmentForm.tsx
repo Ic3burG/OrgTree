@@ -169,7 +169,7 @@ export default function DepartmentForm({
     >
       <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
 
-      <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[85dvh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
@@ -305,7 +305,7 @@ export default function DepartmentForm({
             )}
 
             {/* Buttons */}
-            <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-slate-700">
+            <div className="sticky bottom-0 flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800">
               <button
                 type="button"
                 onClick={onClose}

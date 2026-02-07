@@ -166,7 +166,7 @@ export default function GedsUrlImporter({
             onClick={status === 'complete' ? handleClose : undefined}
           ></div>
 
-          <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[85dvh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">

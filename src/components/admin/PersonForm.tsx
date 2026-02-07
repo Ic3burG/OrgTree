@@ -215,7 +215,7 @@ export default function PersonForm({
       aria-modal="true"
       aria-labelledby="person-form-title"
     >
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[85dvh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
           <h2
@@ -433,7 +433,7 @@ export default function PersonForm({
             )}
           </div>
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-slate-700">
+          <div className="sticky bottom-0 flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
             <button
               type="button"
               onClick={onClose}

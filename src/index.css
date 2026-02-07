@@ -63,6 +63,15 @@
   .no-print {
     @apply print:hidden;
   }
+
+  /* Safe area insets for notched phones (iPhone X+) */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 /* Print optimizations */

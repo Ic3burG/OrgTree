@@ -79,7 +79,7 @@ export default function TransferOwnershipModal({
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-red-100 dark:border-red-900/30 flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-red-100 dark:border-red-900/30 flex flex-col max-h-[85dvh]">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-700 bg-red-50/50 dark:bg-red-900/10">
           <div className="flex items-center gap-3">

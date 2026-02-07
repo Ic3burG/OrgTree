@@ -1018,7 +1018,7 @@ export default function OrgMap(): React.JSX.Element {
   }
 
   return (
-    <div className="w-full h-screen relative bg-slate-50 dark:bg-slate-900">
+    <div className="w-full h-full relative bg-slate-50 dark:bg-slate-900">
       <OrgChartThemeContext.Provider value={settings.theme}>
         <div ref={reactFlowWrapper} className="w-full h-full">
           <ReactFlow
@@ -1043,7 +1043,7 @@ export default function OrgMap(): React.JSX.Element {
             <MiniMap
               nodeColor={node => getDepthColors(node.data.depth, settings.theme).hex}
               maskColor={isDarkMode ? 'rgba(30, 41, 59, 0.7)' : 'rgba(241, 245, 249, 0.7)'}
-              className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm"
+              className="hidden lg:block bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm"
             />
           </ReactFlow>
         </div>

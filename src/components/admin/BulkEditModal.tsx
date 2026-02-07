@@ -119,7 +119,7 @@ export default function BulkEditModal({
       aria-modal="true"
       aria-labelledby="bulk-edit-title"
     >
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col border border-gray-100 dark:border-slate-700 overflow-hidden transform transition-all duration-300 scale-100">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85dvh] flex flex-col border border-gray-100 dark:border-slate-700 overflow-hidden transform transition-all duration-300 scale-100">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-gray-50/50 dark:bg-slate-900/20">
           <div className="flex items-center gap-3">

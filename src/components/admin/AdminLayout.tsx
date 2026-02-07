@@ -331,7 +331,7 @@ export default function AdminLayout(): React.JSX.Element {
 
       {/* Main content - Dynamic margin based on sidebar state */}
       <main
-        className="pt-14 lg:pt-0 pb-16 lg:pb-0 h-screen overflow-hidden transition-[margin] duration-300 ease-in-out"
+        className="pt-14 lg:pt-0 pb-16 lg:pb-0 h-dvh overflow-hidden transition-[margin] duration-300 ease-in-out"
         style={{ marginLeft: isHidden ? 0 : isMinimized ? 64 : width }}
       >
         <div className="h-full">
