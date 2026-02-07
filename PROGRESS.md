@@ -11,8 +11,27 @@
 
 - **PROGRESS.md updates are MANDATORY**: Update this file after EACH command/task completion (not just at end of session)
 - **Commit AND push ALL changes**: Never leave commits local-only; always push to GitHub
-- **Update "Last Updated" date**: February 5, 2026
+- **Update "Last Updated" date**: February 7, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
+
+**Session 57 (February 7, 2026 - Mobile Experience Overhaul)**:
+
+- ✅ **Mobile Layout Overhaul (ADR-027)**: Comprehensive fix for broken mobile experience across public and authenticated views.
+  - **Phase 1 - Critical Layout Fixes**:
+    - Updated viewport meta tag with `viewport-fit=cover` and `interactive-widget=resizes-content` for proper notch/keyboard handling on iOS/Android
+    - Added `safe-area-inset-bottom` and `pb-safe` utility classes to `src/index.css` (previously dead classes)
+    - Rebuilt `Toolbar.tsx` from a 10-button vertical column (overflowing on phones) into a collapsible FAB on mobile with a 3x3 labeled grid panel; desktop layout unchanged
+    - Fixed viewport height bugs: `h-screen` -> `h-full` in OrgMap (inside AdminLayout), `h-screen` -> `h-dvh` in PublicOrgMap and AdminLayout (standalone containers)
+    - Hidden MiniMap on mobile (`hidden lg:block`) in both OrgMap and PublicOrgMap — saves ~120x80px of screen space
+    - Compacted PublicOrgMap badge on mobile: hidden icon/subtitle, reduced padding
+  - **Phase 2 - Modal & Form Keyboard Fixes**:
+    - Changed `max-h-[90vh]` to `max-h-[85dvh]` across all 7 modal components (PersonForm, DepartmentForm, ImportModal, GedsUrlImporter, ShareModal, BulkEditModal, TransferOwnershipModal)
+    - Added sticky submit button footers to PersonForm and DepartmentForm so action buttons stay visible while scrolling long forms
+    - Repositioned Toast above MobileNav on mobile (`bottom-20`), full-width on narrow screens to prevent overflow on 320px devices
+  - **Phase 3 - Polish**:
+    - Added `pb-safe` to DetailPanel for notched phone bottom padding
+- 📁 **FILES MODIFIED** (15 files):
+  - `index.html`, `src/index.css`, `src/components/Toolbar.tsx`, `src/components/OrgMap.tsx`, `src/components/PublicOrgMap.tsx`, `src/components/admin/AdminLayout.tsx`, `src/components/admin/PersonForm.tsx`, `src/components/admin/DepartmentForm.tsx`, `src/components/admin/ImportModal.tsx`, `src/components/admin/GedsUrlImporter.tsx`, `src/components/admin/ShareModal.tsx`, `src/components/admin/BulkEditModal.tsx`, `src/components/admin/TransferOwnershipModal.tsx`, `src/components/ui/Toast.tsx`, `src/components/DetailPanel.tsx`
 
 **Session 56 (February 5, 2026 - "Did you mean?" Search Suggestions)**:
 
