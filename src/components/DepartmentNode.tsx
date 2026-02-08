@@ -235,7 +235,7 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>): Reac
         {/* Expanded People List */}
         {isExpanded && peopleCount > 0 && (
           <div className="bg-white dark:bg-slate-800 rounded-b-lg border-t border-slate-200 dark:border-slate-700">
-            <div className="max-h-96 overflow-y-auto touch-pan-y">
+            <div className="max-h-96 overflow-y-auto overscroll-y-contain nopan nowheel nodrag">
               {people.map((person, index) => (
                 <PersonRowCard
                   key={person.id}

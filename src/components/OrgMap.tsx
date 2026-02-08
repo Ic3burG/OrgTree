@@ -472,10 +472,14 @@ export default function OrgMap(): React.JSX.Element {
     const personId = searchParams.get('personId');
     const departmentId = searchParams.get('departmentId');
 
-    // Skip if no deep link, still loading, no nodes, or already processed
+    // Skip if no deep link, still loading, map not ready, no nodes, or already processed
+    // isMapReady gate is critical: setCenter only works after React Flow's onInit fires.
+    // Without this, navigating from another tab (e.g. People) would call setCenter before
+    // React Flow is initialized, causing the zoom to silently fail.
     if (
       (!personId && !departmentId) ||
       isLoading ||
+      !isMapReady ||
       nodes.length === 0 ||
       deepLinkProcessedRef.current
     ) {
@@ -502,10 +506,12 @@ export default function OrgMap(): React.JSX.Element {
       if (targetNodeId && targetPerson) {
         const node = nodes.find(n => n.id === targetNodeId);
 
+        // Expand the department node if it's collapsed
         if (node && !node.data.isExpanded) {
           handleToggleExpand(targetNodeId);
         }
 
+        // Short delay to let layout recalculate after expand toggle
         setTimeout(() => {
           const updatedNode = nodesRef.current.find(n => n.id === targetNodeId);
           if (updatedNode && updatedNode.position) {
@@ -518,24 +524,21 @@ export default function OrgMap(): React.JSX.Element {
           }
 
           setSelectedPerson(targetPerson as Person);
-        }, 500); // Increased delay to ensure ReactFlow is ready
+        }, 300);
       }
     } else if (departmentId) {
       const targetNode = nodes.find(n => n.id === departmentId);
 
       if (targetNode?.position) {
-        // Use a longer delay to ensure ReactFlow viewport is ready
-        setTimeout(() => {
-          setCenter(targetNode.position.x + 110, targetNode.position.y + 35, {
-            zoom: 1.5,
-            duration: 800,
-          });
-          setHighlightedNodeId(departmentId);
-          setTimeout(() => setHighlightedNodeId(null), 3000);
-        }, 500); // Increased delay
+        setCenter(targetNode.position.x + 110, targetNode.position.y + 35, {
+          zoom: 1.5,
+          duration: 800,
+        });
+        setHighlightedNodeId(departmentId);
+        setTimeout(() => setHighlightedNodeId(null), 3000);
       }
     }
-  }, [isLoading, nodes, searchParams, handleToggleExpand, setCenter]);
+  }, [isLoading, isMapReady, nodes, searchParams, handleToggleExpand, setCenter]);
 
   // Initial load
   useEffect(() => {

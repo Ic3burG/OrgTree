@@ -14,6 +14,18 @@
 - **Update "Last Updated" date**: February 7, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
 
+**Session 58 (February 7, 2026 - OrgMap Deep-Link Zoom & Touch Scroll Fixes)**:
+
+- 🐛 **Bug Fix: Deep-link zoom not working from People tab**: Clicking a person's name in the People tab navigated to the Org Map and opened the DetailPanel, but failed to zoom to or expand the person's department node.
+  - **Root Cause**: Race condition — the deep-link `useEffect` in `OrgMap.tsx` checked `isLoading` and `nodes.length` but not `isMapReady`. When navigating from the People tab, `setCenter()` was called before React Flow's `onInit` fired, so the zoom was silently discarded while `setSelectedPerson()` (plain React state) still worked.
+  - **Fix**: Added `isMapReady` gate to the deep-link effect's condition and dependency array. Also removed unnecessary 500ms `setTimeout` workaround for the `departmentId` path since the proper gate eliminates the timing issue.
+- 🐛 **Bug Fix: Touch scrolling in department nodes**: On mobile/iPad, swiping on the expanded people list inside a department node panned the React Flow canvas instead of scrolling through names.
+  - **Root Cause**: React Flow v11 captures all pointer/touch events for canvas panning, overriding the native scroll behavior of the `overflow-y-auto` container despite the `touch-pan-y` CSS hint.
+  - **Fix**: Added React Flow's built-in interaction-blocking classes (`nopan nowheel nodrag`) to the scrollable people list in `DepartmentNode.tsx`. Added `overscroll-y-contain` to prevent scroll chaining at list boundaries.
+- 📁 **FILES MODIFIED** (2 files):
+  - `src/components/OrgMap.tsx` — Added `isMapReady` to deep-link effect guard, cleaned up setTimeout workarounds
+  - `src/components/DepartmentNode.tsx` — Added `nopan nowheel nodrag overscroll-y-contain` classes to people list scroll container
+
 **Session 57 (February 7, 2026 - Mobile Experience Overhaul)**:
 
 - ✅ **Mobile Layout Overhaul (ADR-027)**: Comprehensive fix for broken mobile experience across public and authenticated views.
