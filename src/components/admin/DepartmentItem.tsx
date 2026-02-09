@@ -1,4 +1,5 @@
-import React, { memo, useRef, useCallback, useEffect } from 'react';
+import React, { memo, useRef, useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import {
   ChevronRight,
@@ -53,7 +54,9 @@ const DepartmentItem = memo(function DepartmentItem({
   const peopleCount = dept.people?.length || 0;
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const triggerRef = useRef<HTMLSpanElement>(null);
-  const popupBelowRef = useRef(false);
+  const [popupPos, setPopupPos] = useState<{ top: number; left: number; below: boolean } | null>(
+    null
+  );
   const showPeople = activePeoplePopupId === dept.id;
 
   const clearHideTimeout = useCallback(() => {
@@ -67,8 +70,12 @@ const DepartmentItem = memo(function DepartmentItem({
     clearHideTimeout();
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      // Flip popup below if not enough room above (header + popup height)
-      popupBelowRef.current = rect.top < 250;
+      const below = rect.top < 250;
+      setPopupPos({
+        top: below ? rect.bottom + 8 : rect.top - 8,
+        left: rect.left,
+        below,
+      });
     }
     onPeoplePopupChange(dept.id);
   }, [clearHideTimeout, onPeoplePopupChange, dept.id]);
@@ -162,9 +169,19 @@ const DepartmentItem = memo(function DepartmentItem({
               <Users size={14} className="inline mr-1" />
               {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
             </Link>
-            {showPeople && peopleCount > 0 && (
+          </span>
+          {showPeople &&
+            peopleCount > 0 &&
+            popupPos &&
+            createPortal(
               <div
-                className={`absolute left-0 ${popupBelowRef.current ? 'top-full mt-2' : 'bottom-full mb-2'} bg-white dark:bg-slate-800 shadow-xl rounded-lg border border-slate-200 dark:border-slate-700 w-56 z-50 overflow-hidden`}
+                className="fixed z-[9999] w-56 bg-white dark:bg-slate-800 shadow-xl rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden"
+                style={{
+                  left: popupPos.left,
+                  ...(popupPos.below
+                    ? { top: popupPos.top }
+                    : { bottom: window.innerHeight - popupPos.top }),
+                }}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
@@ -188,9 +205,9 @@ const DepartmentItem = memo(function DepartmentItem({
                     </Link>
                   ))}
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
-          </span>
           {/* Helper text for flat view (search results) if needed in future */}
           {dept.parent_id && !selectionMode && dept.depth === 0 && (
             <span className="ml-2 text-xs text-green-600 dark:text-green-400 hidden sm:inline">
