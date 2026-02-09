@@ -52,6 +52,8 @@ const DepartmentItem = memo(function DepartmentItem({
   const hasChildren = dept.children && dept.children.length > 0;
   const peopleCount = dept.people?.length || 0;
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const triggerRef = useRef<HTMLSpanElement>(null);
+  const popupBelowRef = useRef(false);
   const showPeople = activePeoplePopupId === dept.id;
 
   const clearHideTimeout = useCallback(() => {
@@ -63,6 +65,11 @@ const DepartmentItem = memo(function DepartmentItem({
 
   const handleMouseEnter = useCallback(() => {
     clearHideTimeout();
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      // Flip popup below if not enough room above (header + popup height)
+      popupBelowRef.current = rect.top < 250;
+    }
     onPeoplePopupChange(dept.id);
   }, [clearHideTimeout, onPeoplePopupChange, dept.id]);
 
@@ -142,6 +149,7 @@ const DepartmentItem = memo(function DepartmentItem({
         <div className="flex-1 min-w-0">
           <span className="font-medium text-slate-800 dark:text-slate-100">{dept.name}</span>
           <span
+            ref={triggerRef}
             className="ml-2 relative"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -156,7 +164,7 @@ const DepartmentItem = memo(function DepartmentItem({
             </Link>
             {showPeople && peopleCount > 0 && (
               <div
-                className="absolute left-0 bottom-full mb-2 bg-white dark:bg-slate-800 shadow-xl rounded-lg border border-slate-200 dark:border-slate-700 w-56 z-50 overflow-hidden"
+                className={`absolute left-0 ${popupBelowRef.current ? 'top-full mt-2' : 'bottom-full mb-2'} bg-white dark:bg-slate-800 shadow-xl rounded-lg border border-slate-200 dark:border-slate-700 w-56 z-50 overflow-hidden`}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
