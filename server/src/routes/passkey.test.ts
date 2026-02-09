@@ -53,8 +53,11 @@ describe('Passkey Routes', () => {
   });
 
   describe('POST /api/auth/passkey/register/start', () => {
-    it('should generate registration options', async () => {
+    it('should generate registration options with remaining slots', async () => {
       const mockOptions = { challenge: 'test-challenge', someOption: true };
+
+      // Mock getUserPasskeys to return empty array (no existing passkeys)
+      vi.mocked(passkeyService.getUserPasskeys).mockReturnValue([] as any);
 
       // Mock db user lookup
       vi.mocked(db.prepare).mockReturnValue({
@@ -67,7 +70,8 @@ describe('Passkey Routes', () => {
 
       const response = await request(app).post('/api/auth/passkey/register/start').expect(200);
 
-      expect(response.body).toEqual(mockOptions);
+      expect(response.body.challenge).toBe('test-challenge');
+      expect(response.body.remainingSlots).toBe(5);
       expect(response.headers['set-cookie'][0]).toContain('passkey_challenge=test-challenge');
       expect(passkeyService.generatePasskeyRegistrationOptions).toHaveBeenCalledWith(
         mockUser.id,
@@ -75,7 +79,18 @@ describe('Passkey Routes', () => {
       );
     });
 
+    it('should reject when at passkey cap', async () => {
+      // Mock getUserPasskeys to return 5 passkeys (at cap)
+      vi.mocked(passkeyService.getUserPasskeys).mockReturnValue(Array(5).fill({ id: 'pk' }) as any);
+
+      const response = await request(app).post('/api/auth/passkey/register/start').expect(400);
+
+      expect(response.body.message).toContain('Maximum of 5 passkeys');
+    });
+
     it('should handle errors', async () => {
+      vi.mocked(passkeyService.getUserPasskeys).mockReturnValue([] as any);
+
       vi.mocked(db.prepare).mockReturnValue({
         get: vi.fn().mockReturnValue({ email: 'test@example.com' }),
       } as any);
@@ -91,7 +106,31 @@ describe('Passkey Routes', () => {
   });
 
   describe('POST /api/auth/passkey/register/finish', () => {
-    it('should verify registration', async () => {
+    it('should verify registration with name', async () => {
+      const mockVerification = { verified: true, id: 'new-passkey-id' };
+
+      vi.mocked(passkeyService.verifyPasskeyRegistration).mockResolvedValue(
+        mockVerification as any
+      );
+
+      const response = await request(app)
+        .post('/api/auth/passkey/register/finish')
+        .set('Cookie', ['passkey_challenge=test-challenge'])
+        .send({ id: 'cred-id', response: {}, name: 'MacBook Pro' })
+        .expect(200);
+
+      expect(response.body).toEqual(mockVerification);
+      // Should clear cookie
+      expect(response.headers['set-cookie'][0]).toContain('passkey_challenge=;');
+      expect(passkeyService.verifyPasskeyRegistration).toHaveBeenCalledWith(
+        mockUser.id,
+        expect.objectContaining({ id: 'cred-id' }),
+        'test-challenge',
+        'MacBook Pro'
+      );
+    });
+
+    it('should work without name', async () => {
       const mockVerification = { verified: true, id: 'new-passkey-id' };
 
       vi.mocked(passkeyService.verifyPasskeyRegistration).mockResolvedValue(
@@ -105,12 +144,11 @@ describe('Passkey Routes', () => {
         .expect(200);
 
       expect(response.body).toEqual(mockVerification);
-      // Should clear cookie
-      expect(response.headers['set-cookie'][0]).toContain('passkey_challenge=;');
       expect(passkeyService.verifyPasskeyRegistration).toHaveBeenCalledWith(
         mockUser.id,
         expect.objectContaining({ id: 'cred-id' }),
-        'test-challenge'
+        'test-challenge',
+        undefined
       );
     });
 
@@ -235,10 +273,11 @@ describe('Passkey Routes', () => {
   });
 
   describe('GET /api/auth/passkey/list', () => {
-    it('should return safe passkey list', async () => {
+    it('should return safe passkey list with name', async () => {
       const mockPasskeys = [
         {
           id: 'pk1',
+          name: 'MacBook Pro',
           created_at: '2024-01-01',
           last_used_at: '2024-01-02',
           backup_status: 1,
@@ -253,12 +292,76 @@ describe('Passkey Routes', () => {
       expect(response.body).toHaveLength(1);
       expect(response.body[0]).toEqual({
         id: 'pk1',
+        name: 'MacBook Pro',
         created_at: '2024-01-01',
         last_used_at: '2024-01-02',
         backup_status: true,
       });
       // Should filter out internal fields
       expect(response.body[0]).not.toHaveProperty('secret_data');
+    });
+
+    it('should default name to "Passkey" when null', async () => {
+      const mockPasskeys = [
+        {
+          id: 'pk1',
+          name: null,
+          created_at: '2024-01-01',
+          last_used_at: '2024-01-02',
+          backup_status: 0,
+        },
+      ];
+
+      vi.mocked(passkeyService.getUserPasskeys).mockReturnValue(mockPasskeys as any);
+
+      const response = await request(app).get('/api/auth/passkey/list').expect(200);
+
+      expect(response.body[0].name).toBe('Passkey');
+    });
+  });
+
+  describe('PATCH /api/auth/passkey/:id (rename)', () => {
+    it('should rename a passkey', async () => {
+      vi.mocked(passkeyService.renamePasskey).mockReturnValue(true);
+
+      const response = await request(app)
+        .patch('/api/auth/passkey/pk1')
+        .send({ name: 'YubiKey 5' })
+        .expect(200);
+
+      expect(response.body).toEqual({ success: true });
+      expect(passkeyService.renamePasskey).toHaveBeenCalledWith('pk1', mockUser.id, 'YubiKey 5');
+    });
+
+    it('should return 404 if passkey not found', async () => {
+      vi.mocked(passkeyService.renamePasskey).mockReturnValue(false);
+
+      await request(app).patch('/api/auth/passkey/pk1').send({ name: 'New Name' }).expect(404);
+    });
+
+    it('should reject empty name', async () => {
+      await request(app).patch('/api/auth/passkey/pk1').send({ name: '' }).expect(400);
+    });
+
+    it('should reject missing name', async () => {
+      await request(app).patch('/api/auth/passkey/pk1').send({}).expect(400);
+    });
+
+    it('should reject name longer than 50 characters', async () => {
+      const response = await request(app)
+        .patch('/api/auth/passkey/pk1')
+        .send({ name: 'A'.repeat(51) })
+        .expect(400);
+
+      expect(response.body.message).toBe('Name must be 50 characters or less');
+    });
+
+    it('should trim whitespace from name', async () => {
+      vi.mocked(passkeyService.renamePasskey).mockReturnValue(true);
+
+      await request(app).patch('/api/auth/passkey/pk1').send({ name: '  My Key  ' }).expect(200);
+
+      expect(passkeyService.renamePasskey).toHaveBeenCalledWith('pk1', mockUser.id, 'My Key');
     });
   });
 

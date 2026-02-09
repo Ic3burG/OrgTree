@@ -216,6 +216,7 @@ export interface Session {
 // Security types
 export interface Passkey {
   id: string;
+  name: string;
   credentialId?: string;
   createdAt?: string; // Backwards compatible with legacy
   created_at: string;

@@ -162,6 +162,7 @@ export function createTestSchema(db: DatabaseType): void {
       public_key TEXT NOT NULL,
       counter INTEGER NOT NULL DEFAULT 0,
       device_name TEXT,
+      name TEXT DEFAULT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       last_used_at DATETIME,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

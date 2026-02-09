@@ -7,6 +7,8 @@ import {
   verifyPasskeyLogin,
   getUserPasskeys,
   deletePasskey,
+  renamePasskey,
+  MAX_PASSKEYS,
 } from '../services/passkey.service.js';
 import db from '../db.js';
 import {
@@ -40,6 +42,15 @@ router.post('/register/start', authenticateToken, async (req: AuthRequest, res: 
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
+    const existingPasskeys = getUserPasskeys(userId);
+    const remainingSlots = MAX_PASSKEYS - existingPasskeys.length;
+
+    if (remainingSlots <= 0) {
+      return res
+        .status(400)
+        .json({ message: `Maximum of ${MAX_PASSKEYS} passkeys allowed per user` });
+    }
+
     const user = db.prepare('SELECT email FROM users WHERE id = ?').get(userId) as {
       email: string;
     };
@@ -48,7 +59,7 @@ router.post('/register/start', authenticateToken, async (req: AuthRequest, res: 
     // Store challenge in cookie
     res.cookie('passkey_challenge', options.challenge, CHALLENGE_COOKIE_OPTIONS);
 
-    return res.json(options);
+    return res.json({ ...options, remainingSlots });
   } catch (error: unknown) {
     console.error('Passkey register start error:', error);
     return res.status(500).json({ message: getErrorMessage(error) });
@@ -66,7 +77,8 @@ router.post('/register/finish', authenticateToken, async (req: AuthRequest, res:
       return res.status(400).json({ message: 'Challenge expired or missing' });
     }
 
-    const result = await verifyPasskeyRegistration(userId, req.body, challenge);
+    const { name, ...registrationBody } = req.body;
+    const result = await verifyPasskeyRegistration(userId, registrationBody, challenge, name);
 
     // Clear challenge cookie
     res.clearCookie('passkey_challenge', { path: '/api/auth/passkey' });
@@ -203,12 +215,46 @@ router.get('/list', authenticateToken, (req: AuthRequest, res: Response) => {
     // Just return metadata
     const safePasskeys = passkeys.map(pk => ({
       id: pk.id,
+      name: pk.name || 'Passkey',
       created_at: pk.created_at,
       last_used_at: pk.last_used_at,
       backup_status: !!pk.backup_status,
     }));
 
     return res.json(safePasskeys);
+  } catch (error: unknown) {
+    return res.status(500).json({ message: getErrorMessage(error) });
+  }
+});
+
+// Rename Passkey
+router.patch('/:id', authenticateToken, (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const passkeyId = req.params.id;
+    if (!passkeyId) {
+      return res.status(400).json({ message: 'Passkey ID required' });
+    }
+
+    const { name } = req.body;
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      return res.status(400).json({ message: 'Name is required' });
+    }
+
+    if (name.trim().length > 50) {
+      return res.status(400).json({ message: 'Name must be 50 characters or less' });
+    }
+
+    const success = renamePasskey(passkeyId, userId, name.trim());
+    if (success) {
+      return res.json({ success: true });
+    } else {
+      return res.status(404).json({ message: 'Passkey not found' });
+    }
   } catch (error: unknown) {
     return res.status(500).json({ message: getErrorMessage(error) });
   }

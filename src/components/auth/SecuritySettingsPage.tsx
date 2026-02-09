@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Fingerprint,
   Trash2,
@@ -10,6 +10,9 @@ import {
   Lock,
   Eye,
   EyeOff,
+  Pencil,
+  Check,
+  X,
 } from 'lucide-react';
 import { usePasskey } from '../../hooks/usePasskey';
 import { api } from '../../api/client';
@@ -40,7 +43,21 @@ export default function SecuritySettingsPage(): React.JSX.Element {
   const [totpToken, setTotpToken] = useState('');
   const [showBackupCodes, setShowBackupCodes] = useState(false);
 
-  const { registerPasskey, listPasskeys, deletePasskey, loading: passkeyLoading } = usePasskey();
+  // Passkey naming state
+  const [showNameInput, setShowNameInput] = useState(false);
+  const [newPasskeyName, setNewPasskeyName] = useState('');
+  const [editingPasskeyId, setEditingPasskeyId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
+  const MAX_PASSKEYS = 5;
+
+  const {
+    registerPasskey,
+    listPasskeys,
+    deletePasskey,
+    renamePasskey,
+    loading: passkeyLoading,
+  } = usePasskey();
 
   const fetchPasskeys = async () => {
     try {
@@ -104,10 +121,13 @@ export default function SecuritySettingsPage(): React.JSX.Element {
     setMessage(null);
 
     try {
-      const result = await registerPasskey();
+      const name = newPasskeyName.trim() || undefined;
+      const result = await registerPasskey(name);
 
       if (result?.verified) {
         setMessage({ type: 'success', text: 'Passkey added successfully!' });
+        setShowNameInput(false);
+        setNewPasskeyName('');
         await fetchPasskeys();
       } else {
         setMessage({ type: 'error', text: 'Failed to add passkey' });
@@ -116,6 +136,32 @@ export default function SecuritySettingsPage(): React.JSX.Element {
       console.error('Add passkey error:', err);
       setMessage({ type: 'error', text: 'Failed to add passkey' });
     }
+  };
+
+  const handleStartRename = (passkey: Passkey) => {
+    setEditingPasskeyId(passkey.id);
+    setEditingName(passkey.name || 'Passkey');
+    setTimeout(() => editInputRef.current?.focus(), 0);
+  };
+
+  const handleRename = async () => {
+    if (!editingPasskeyId || !editingName.trim()) return;
+    setMessage(null);
+
+    try {
+      await renamePasskey(editingPasskeyId, editingName.trim());
+      setEditingPasskeyId(null);
+      setEditingName('');
+      await fetchPasskeys();
+    } catch (err) {
+      console.error('Rename passkey error:', err);
+      setMessage({ type: 'error', text: 'Failed to rename passkey' });
+    }
+  };
+
+  const handleCancelRename = () => {
+    setEditingPasskeyId(null);
+    setEditingName('');
   };
 
   const handleDeletePasskey = async (passkeyId: string) => {
@@ -322,21 +368,71 @@ export default function SecuritySettingsPage(): React.JSX.Element {
       {/* Passkeys Section */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <Fingerprint size={20} />
-            Passkeys
-          </h2>
-          {passkeys.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <Fingerprint size={20} />
+              Passkeys
+            </h2>
+            {passkeys.length > 0 && (
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                {passkeys.length} of {MAX_PASSKEYS} passkeys used
+              </p>
+            )}
+          </div>
+          {passkeys.length > 0 && passkeys.length < MAX_PASSKEYS && (
             <button
-              onClick={handleAddPasskey}
-              disabled={passkeyLoading || loading}
+              onClick={() => setShowNameInput(true)}
+              disabled={passkeyLoading || loading || showNameInput}
               className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus size={16} />
-              Add Backup Passkey
+              Add Passkey
             </button>
           )}
         </div>
+
+        {/* Name input for new passkey */}
+        {showNameInput && (
+          <div className="mb-4 p-4 border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Name your passkey (e.g., &quot;MacBook Pro&quot;, &quot;YubiKey&quot;)
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newPasskeyName}
+                onChange={e => setNewPasskeyName(e.target.value)}
+                placeholder="Passkey"
+                maxLength={50}
+                className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100 text-sm"
+                onKeyDown={e => {
+                  if (e.key === 'Enter') handleAddPasskey();
+                  if (e.key === 'Escape') {
+                    setShowNameInput(false);
+                    setNewPasskeyName('');
+                  }
+                }}
+                autoFocus
+              />
+              <button
+                onClick={handleAddPasskey}
+                disabled={passkeyLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                {passkeyLoading ? 'Adding...' : 'Add'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowNameInput(false);
+                  setNewPasskeyName('');
+                }}
+                className="px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="text-center py-8">
@@ -350,7 +446,7 @@ export default function SecuritySettingsPage(): React.JSX.Element {
               Add a passkey to enable passwordless sign-in
             </p>
             <button
-              onClick={handleAddPasskey}
+              onClick={() => setShowNameInput(true)}
               disabled={passkeyLoading || loading}
               className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -366,9 +462,51 @@ export default function SecuritySettingsPage(): React.JSX.Element {
                 className="flex items-center justify-between p-4 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <Fingerprint className="text-blue-600" size={24} />
+                  <Fingerprint className="text-blue-600 shrink-0" size={24} />
                   <div>
-                    <p className="font-medium text-slate-800 dark:text-slate-100">Passkey</p>
+                    {editingPasskeyId === passkey.id ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          ref={editInputRef}
+                          type="text"
+                          value={editingName}
+                          onChange={e => setEditingName(e.target.value)}
+                          maxLength={50}
+                          className="px-2 py-1 border border-slate-300 dark:border-slate-600 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-slate-100 text-sm font-medium"
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') handleRename();
+                            if (e.key === 'Escape') handleCancelRename();
+                          }}
+                        />
+                        <button
+                          onClick={handleRename}
+                          className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition-colors"
+                          title="Save"
+                        >
+                          <Check size={16} />
+                        </button>
+                        <button
+                          onClick={handleCancelRename}
+                          className="p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
+                          title="Cancel"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-slate-800 dark:text-slate-100">
+                          {passkey.name || 'Passkey'}
+                        </p>
+                        <button
+                          onClick={() => handleStartRename(passkey)}
+                          className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
+                          title="Rename passkey"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                      </div>
+                    )}
                     <p className="text-sm text-slate-600 dark:text-slate-400">
                       Created: {formatDate(passkey.created_at || passkey.createdAt || '')} • Last
                       used: {formatDate(passkey.last_used_at || passkey.lastUsedAt || '')}
@@ -384,6 +522,11 @@ export default function SecuritySettingsPage(): React.JSX.Element {
                 </button>
               </div>
             ))}
+            {passkeys.length >= MAX_PASSKEYS && (
+              <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+                Maximum number of passkeys reached. Delete an existing passkey to add a new one.
+              </p>
+            )}
           </div>
         )}
       </div>

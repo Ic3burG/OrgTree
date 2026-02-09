@@ -349,4 +349,15 @@ export const legacyMigrations: Migration[] = [
     },
     down: () => {},
   },
+  {
+    id: '20240101000019',
+    name: 'Add name column to passkeys',
+    up: db => {
+      const passkeysInfo = db.prepare('PRAGMA table_info(passkeys)').all() as TableInfoRow[];
+      if (!passkeysInfo.some(col => col.name === 'name')) {
+        db.exec('ALTER TABLE passkeys ADD COLUMN name TEXT DEFAULT NULL');
+      }
+    },
+    down: () => {},
+  },
 ];

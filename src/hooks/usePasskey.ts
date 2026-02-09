@@ -17,7 +17,7 @@ export function usePasskey() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const registerPasskey = async (): Promise<PasskeyRegistrationResult | null> => {
+  const registerPasskey = async (name?: string): Promise<PasskeyRegistrationResult | null> => {
     setLoading(true);
     setError(null);
 
@@ -32,7 +32,8 @@ export function usePasskey() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to start passkey registration');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to start passkey registration');
       }
 
       const options = await response.json();
@@ -40,14 +41,14 @@ export function usePasskey() {
       // 2. Create credential using WebAuthn API
       const registrationResponse = await startRegistration(options);
 
-      // 3. Send credential to server for verification
+      // 3. Send credential to server for verification (include name)
       const verifyResponse = await fetch('/api/auth/passkey/register/finish', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify(registrationResponse),
+        body: JSON.stringify({ ...registrationResponse, name }),
       });
 
       if (!verifyResponse.ok) {
@@ -157,11 +158,34 @@ export function usePasskey() {
     }
   };
 
+  const renamePasskey = async (passkeyId: string, name: string) => {
+    try {
+      const response = await fetch(`/api/auth/passkey/${passkeyId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ name }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to rename passkey');
+      }
+
+      return await response.json();
+    } catch (err) {
+      console.error('Failed to rename passkey:', err);
+      throw err;
+    }
+  };
+
   return {
     registerPasskey,
     loginWithPasskey,
     listPasskeys,
     deletePasskey,
+    renamePasskey,
     loading,
     error,
   };

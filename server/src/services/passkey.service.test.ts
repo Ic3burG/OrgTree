@@ -23,6 +23,7 @@ vi.mock('../db.js', async () => {
       transports TEXT,
       backup_eligible INTEGER DEFAULT 1,
       backup_status INTEGER DEFAULT 1,
+      name TEXT DEFAULT NULL,
       created_at TEXT DEFAULT (datetime('now')),
       last_used_at TEXT DEFAULT (datetime('now'))
     );
@@ -44,6 +45,8 @@ import {
   verifyPasskeyLogin,
   getUserPasskeys,
   deletePasskey,
+  renamePasskey,
+  MAX_PASSKEYS,
 } from './passkey.service.js';
 
 import {
@@ -271,6 +274,102 @@ describe('Passkey Service', () => {
 
       const result = await getUserPasskeys(userId);
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('Passkey naming', () => {
+    it('should store name when provided during registration', async () => {
+      const mockResponse = { id: 'cred-id', response: {} } as any;
+      const expectedChallenge = 'mock-challenge';
+
+      await verifyPasskeyRegistration(userId, mockResponse, expectedChallenge, 'MacBook Pro');
+
+      const passkeys = (db as DatabaseType)
+        .prepare('SELECT * FROM passkeys WHERE user_id = ?')
+        .all(userId) as any[];
+      expect(passkeys).toHaveLength(1);
+      expect(passkeys[0].name).toBe('MacBook Pro');
+    });
+
+    it('should default name to "Passkey" when not provided', async () => {
+      const mockResponse = { id: 'cred-id', response: {} } as any;
+      const expectedChallenge = 'mock-challenge';
+
+      await verifyPasskeyRegistration(userId, mockResponse, expectedChallenge);
+
+      const passkeys = (db as DatabaseType)
+        .prepare('SELECT * FROM passkeys WHERE user_id = ?')
+        .all(userId) as any[];
+      expect(passkeys).toHaveLength(1);
+      expect(passkeys[0].name).toBe('Passkey');
+    });
+
+    it('should rename a passkey', () => {
+      (db as DatabaseType)
+        .prepare(
+          'INSERT INTO passkeys (id, user_id, credential_id, public_key, name) VALUES (?, ?, ?, ?, ?)'
+        )
+        .run('pk-1', userId, 'cred-1', Buffer.from('pk'), 'Old Name');
+
+      const success = renamePasskey('pk-1', userId, 'YubiKey 5');
+      expect(success).toBe(true);
+
+      const passkey = (db as DatabaseType)
+        .prepare('SELECT name FROM passkeys WHERE id = ?')
+        .get('pk-1') as any;
+      expect(passkey.name).toBe('YubiKey 5');
+    });
+
+    it('should not rename a passkey belonging to another user', () => {
+      (db as DatabaseType)
+        .prepare(
+          'INSERT INTO passkeys (id, user_id, credential_id, public_key, name) VALUES (?, ?, ?, ?, ?)'
+        )
+        .run('pk-1', 'other-user', 'cred-1', Buffer.from('pk'), 'Other Key');
+
+      const success = renamePasskey('pk-1', userId, 'Stolen Key');
+      expect(success).toBe(false);
+    });
+  });
+
+  describe('Registration cap', () => {
+    it('should enforce maximum passkey limit', async () => {
+      // Insert MAX_PASSKEYS passkeys
+      for (let i = 0; i < MAX_PASSKEYS; i++) {
+        (db as DatabaseType)
+          .prepare(
+            'INSERT INTO passkeys (id, user_id, credential_id, public_key) VALUES (?, ?, ?, ?)'
+          )
+          .run(`pk-${i}`, userId, `cred-${i}`, Buffer.from('pk'));
+      }
+
+      const mockResponse = { id: 'new-cred', response: {} } as any;
+
+      await expect(
+        verifyPasskeyRegistration(userId, mockResponse, 'mock-challenge')
+      ).rejects.toThrow(`Maximum of ${MAX_PASSKEYS} passkeys allowed per user`);
+
+      // Verify no new passkey was added
+      const passkeys = (db as DatabaseType)
+        .prepare('SELECT * FROM passkeys WHERE user_id = ?')
+        .all(userId);
+      expect(passkeys).toHaveLength(MAX_PASSKEYS);
+    });
+
+    it('should allow registration when under the cap', async () => {
+      // Insert one fewer than the cap
+      for (let i = 0; i < MAX_PASSKEYS - 1; i++) {
+        (db as DatabaseType)
+          .prepare(
+            'INSERT INTO passkeys (id, user_id, credential_id, public_key) VALUES (?, ?, ?, ?)'
+          )
+          .run(`pk-${i}`, userId, `cred-${i}`, Buffer.from('pk'));
+      }
+
+      const mockResponse = { id: 'new-cred', response: {} } as any;
+
+      const result = await verifyPasskeyRegistration(userId, mockResponse, 'mock-challenge');
+      expect(result.verified).toBe(true);
     });
   });
 });

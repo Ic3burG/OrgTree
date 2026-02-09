@@ -53,6 +53,7 @@ describe('usePasskey', () => {
     it('handles start registration failure', async () => {
       vi.mocked(fetch).mockResolvedValueOnce({
         ok: false,
+        json: async () => ({}),
       } as Response);
 
       const { result } = renderHook(() => usePasskey());

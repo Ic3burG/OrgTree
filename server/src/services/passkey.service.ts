@@ -21,6 +21,8 @@ const rpName = process.env.RP_NAME || 'OrgTree';
 const rpID = process.env.RP_ID || 'localhost';
 const origin = process.env.ORIGIN || 'http://localhost:5173';
 
+const MAX_PASSKEYS = 5;
+
 interface Passkey {
   id: string;
   user_id: string;
@@ -30,6 +32,7 @@ interface Passkey {
   transports: string | null;
   backup_eligible: number;
   backup_status: number;
+  name: string | null;
   created_at: string;
   last_used_at: string;
 }
@@ -68,10 +71,17 @@ export async function generatePasskeyRegistrationOptions(userId: string, userEma
 export async function verifyPasskeyRegistration(
   userId: string,
   body: RegistrationResponseJSON,
-  expectedChallenge: string
+  expectedChallenge: string,
+  name?: string
 ) {
   if (!expectedChallenge) {
     throw new Error('Registration flow not started');
+  }
+
+  // Enforce passkey cap
+  const existingCount = getUserPasskeys(userId).length;
+  if (existingCount >= MAX_PASSKEYS) {
+    throw new Error(`Maximum of ${MAX_PASSKEYS} passkeys allowed per user`);
   }
 
   const opts: VerifyRegistrationResponseOpts = {
@@ -92,13 +102,14 @@ export async function verifyPasskeyRegistration(
     // Save passkey to DB
     const id = randomUUID();
     const transports = body.response.transports ? JSON.stringify(body.response.transports) : null;
+    const passkeyName = name?.trim() || 'Passkey';
 
     db.prepare(
       `
       INSERT INTO passkeys (
-        id, user_id, credential_id, public_key, counter, transports, 
-        backup_eligible, backup_status, created_at, last_used_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+        id, user_id, credential_id, public_key, counter, transports,
+        backup_eligible, backup_status, name, created_at, last_used_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `
     ).run(
       id,
@@ -108,7 +119,8 @@ export async function verifyPasskeyRegistration(
       counter,
       transports,
       credentialBackedUp ? 1 : 0,
-      credentialBackedUp ? 1 : 0 // Assuming backup_status maps to backed up state roughly or strictly
+      credentialBackedUp ? 1 : 0,
+      passkeyName
     );
 
     return { verified: true, id };
@@ -223,6 +235,15 @@ export function deletePasskey(passkeyId: string, userId: string) {
     .run(passkeyId, userId);
   return result.changes > 0;
 }
+
+export function renamePasskey(passkeyId: string, userId: string, name: string): boolean {
+  const result = db
+    .prepare('UPDATE passkeys SET name = ? WHERE id = ? AND user_id = ?')
+    .run(name, passkeyId, userId);
+  return result.changes > 0;
+}
+
+export { MAX_PASSKEYS };
 
 function getUserPasskeyByCredentialId(credentialId: string): Passkey | undefined {
   return db.prepare('SELECT * FROM passkeys WHERE credential_id = ?').get(credentialId) as
