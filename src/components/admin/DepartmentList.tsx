@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Loader2, CheckSquare, Square } from 'lucide-react';
 import DepartmentItem, { type DepartmentWithDepth } from './DepartmentItem';
 import type { Department, SearchResult, CustomFieldDefinition } from '../../types/index.js';
@@ -46,6 +46,8 @@ export default function DepartmentList({
   searchResults = [],
   fieldDefinitions = [],
 }: DepartmentListProps): React.JSX.Element {
+  const [activePeoplePopupId, setActivePeoplePopupId] = useState<string | null>(null);
+
   // Recursive renderer for the tree
   const renderTreeItem = useCallback(
     (dept: DepartmentWithDepth): React.JSX.Element => {
@@ -65,6 +67,8 @@ export default function DepartmentList({
             onDelete={onDelete}
             isRecentlyChanged={isRecentlyChanged(dept.id)}
             fieldDefinitions={fieldDefinitions}
+            activePeoplePopupId={activePeoplePopupId}
+            onPeoplePopupChange={setActivePeoplePopupId}
           />
           {hasChildren && isExpanded && !selectionMode && (
             <div>{dept.children!.map(renderTreeItem)}</div>
@@ -82,6 +86,7 @@ export default function DepartmentList({
       onDelete,
       isRecentlyChanged,
       fieldDefinitions,
+      activePeoplePopupId,
     ]
   );
 
@@ -107,11 +112,22 @@ export default function DepartmentList({
             onDelete={onDelete}
             isRecentlyChanged={isRecentlyChanged(dept.id)}
             fieldDefinitions={fieldDefinitions}
+            activePeoplePopupId={activePeoplePopupId}
+            onPeoplePopupChange={setActivePeoplePopupId}
           />
         </div>
       );
     },
-    [selectionMode, isSelected, toggleSelect, onEdit, onDelete, isRecentlyChanged, fieldDefinitions]
+    [
+      selectionMode,
+      isSelected,
+      toggleSelect,
+      onEdit,
+      onDelete,
+      isRecentlyChanged,
+      fieldDefinitions,
+      activePeoplePopupId,
+    ]
   );
 
   if (loading) {

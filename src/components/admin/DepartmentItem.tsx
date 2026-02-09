@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useRef, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronRight,
@@ -29,7 +29,11 @@ interface DepartmentItemProps {
   onDelete: (dept: Department) => void;
   isRecentlyChanged?: boolean;
   fieldDefinitions?: CustomFieldDefinition[];
+  activePeoplePopupId: string | null;
+  onPeoplePopupChange: React.Dispatch<React.SetStateAction<string | null>>;
 }
+
+const HIDE_DELAY_MS = 300;
 
 const DepartmentItem = memo(function DepartmentItem({
   dept,
@@ -42,10 +46,39 @@ const DepartmentItem = memo(function DepartmentItem({
   onDelete,
   isRecentlyChanged = false,
   fieldDefinitions = [],
+  activePeoplePopupId,
+  onPeoplePopupChange,
 }: DepartmentItemProps): React.JSX.Element {
   const hasChildren = dept.children && dept.children.length > 0;
   const peopleCount = dept.people?.length || 0;
-  const [showPeople, setShowPeople] = useState(false);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showPeople = activePeoplePopupId === dept.id;
+
+  const clearHideTimeout = useCallback(() => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    clearHideTimeout();
+    onPeoplePopupChange(dept.id);
+  }, [clearHideTimeout, onPeoplePopupChange, dept.id]);
+
+  const handleMouseLeave = useCallback(() => {
+    clearHideTimeout();
+    const myId = dept.id;
+    hideTimeoutRef.current = setTimeout(() => {
+      // Only close if this department is still the active popup
+      onPeoplePopupChange(prev => (prev === myId ? null : prev));
+    }, HIDE_DELAY_MS);
+  }, [clearHideTimeout, onPeoplePopupChange, dept.id]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => clearHideTimeout();
+  }, [clearHideTimeout]);
 
   // Filter out empty custom fields and map to their definitions
   const activeCustomFields = fieldDefinitions
@@ -110,8 +143,8 @@ const DepartmentItem = memo(function DepartmentItem({
           <span className="font-medium text-slate-800 dark:text-slate-100">{dept.name}</span>
           <span
             className="ml-2 relative"
-            onMouseEnter={() => setShowPeople(true)}
-            onMouseLeave={() => setShowPeople(false)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             <Link
               to={`/org/${dept.organization_id}/map?departmentId=${dept.id}`}
@@ -124,8 +157,8 @@ const DepartmentItem = memo(function DepartmentItem({
             {showPeople && peopleCount > 0 && (
               <div
                 className="absolute left-0 bottom-full mb-2 bg-white dark:bg-slate-800 shadow-xl rounded-lg border border-slate-200 dark:border-slate-700 w-56 z-50 overflow-hidden"
-                onMouseEnter={() => setShowPeople(true)}
-                onMouseLeave={() => setShowPeople(false)}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               >
                 <div className="bg-slate-50 dark:bg-slate-700/50 px-3 py-2 border-b border-slate-100 dark:border-slate-700/50 text-xs font-medium text-slate-500 dark:text-slate-400">
                   People in {dept.name}
