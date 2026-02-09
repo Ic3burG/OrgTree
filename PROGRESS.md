@@ -11,8 +11,46 @@
 
 - **PROGRESS.md updates are MANDATORY**: Update this file after EACH command/task completion (not just at end of session)
 - **Commit AND push ALL changes**: Never leave commits local-only; always push to GitHub
-- **Update "Last Updated" date**: February 7, 2026
+- **Update "Last Updated" date**: February 9, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
+
+**Session 60 (February 9, 2026 - Department People Popup Hover Fix)**:
+
+- 🐛 **Bug Fix: People popup disappears too quickly on hover**: Hovering over a department's people count showed a popup listing the people, but it vanished instantly when the cursor left the trigger text — before the user could click any person link in the popup.
+  - **Root Cause**: `DepartmentItem` used instant `onMouseEnter`/`onMouseLeave` with `useState(false)` — no grace period for the cursor to travel from the trigger to the popup.
+  - **Fix**: Added a 300ms delayed hide via `useRef` timeout. Entering the popup cancels the timeout, keeping it open. Leaving the popup starts a new 300ms countdown.
+- ✅ **Feature: Coordinated popup dismiss across departments**: When hovering a different department's people count, the previous popup closes **immediately** (not after 300ms). This prevents multiple popups from overlapping.
+  - **Implementation**: Lifted `activePeoplePopupId` state from `DepartmentItem` up to `DepartmentList`. Each item derives its visibility from `activePeoplePopupId === dept.id`. The delayed hide uses a functional state updater (`prev => prev === myId ? null : prev`) to avoid a race condition where department A's stale timeout could close department B's newly-opened popup.
+- 📁 **FILES MODIFIED** (3 files):
+  - `src/components/admin/DepartmentItem.tsx` — Replaced `useState` toggle with coordinated timeout-based hover logic, new `activePeoplePopupId`/`onPeoplePopupChange` props
+  - `src/components/admin/DepartmentList.tsx` — Added shared `activePeoplePopupId` state, passed down to all `DepartmentItem` instances
+  - `PROGRESS.md` — Session 60 notes
+
+**Session 59 (February 9, 2026 - Passkey Naming & Registration Cap)**:
+
+- ✅ **Feature: Passkey Naming**: Users can now name their passkeys (e.g., "MacBook Pro", "YubiKey") when registering, making it easy to identify which passkey belongs to which device. Previously all passkeys displayed as generic "Passkey" with only dates to distinguish them.
+- ✅ **Feature: Registration Cap (5 per user)**: Enforced a maximum of 5 passkeys per user to prevent unbounded registration. Cap is checked both at the route level (early rejection before WebAuthn ceremony) and at the service level (defense in depth).
+- ✅ **Feature: Passkey Rename**: Users can rename existing passkeys inline via a pencil icon, with confirm/cancel controls and 1-50 character validation.
+- **Backend Changes**:
+  - Added migration `20240101000019` to add `name TEXT DEFAULT NULL` column to `passkeys` table
+  - `passkey.service.ts`: Added `MAX_PASSKEYS=5` constant, `name` field to Passkey interface, cap enforcement before insert, optional `name` parameter (defaults to "Passkey"), new `renamePasskey()` function
+  - `passkey.ts` routes: `POST /register/start` returns `remainingSlots` and rejects at cap (400), `POST /register/finish` extracts `name` from body, `GET /list` includes `name` field, new `PATCH /:id` rename endpoint with validation
+- **Frontend Changes**:
+  - `types/index.ts`: Added `name: string` to Passkey interface
+  - `usePasskey.ts`: `registerPasskey()` accepts optional name, improved error parsing, added `renamePasskey()` method
+  - `SecuritySettingsPage.tsx`: Shows passkey names in list, inline name input before WebAuthn ceremony, inline rename with pencil/confirm/cancel icons, "X of 5 passkeys used" counter, add button hidden at cap with explanatory message
+- **Tests**: 13+ new/updated tests across service tests (name storage, default name, rename, cross-user rejection, cap enforcement), route tests (remaining slots, cap rejection, name passthrough, list name inclusion, rename validation), and frontend hook tests (mock fix for error path)
+- 📁 **FILES MODIFIED** (10 files):
+  - `server/src/migrations/legacy-migrations.ts` — New migration for `name` column
+  - `server/src/services/passkey.service.ts` — MAX_PASSKEYS, name support, cap enforcement, renamePasskey()
+  - `server/src/routes/passkey.ts` — remainingSlots, name in register/list, PATCH rename endpoint
+  - `server/src/services/passkey.service.test.ts` — New tests for naming, rename, cap
+  - `server/src/routes/passkey.test.ts` — New tests for all route changes
+  - `server/src/test-helpers/test-db-schema.ts` — Added name column to passkeys table
+  - `src/types/index.ts` — Added name to Passkey interface
+  - `src/hooks/usePasskey.ts` — Name param, renamePasskey(), improved error handling
+  - `src/hooks/usePasskey.test.ts` — Fixed mock for error path
+  - `src/components/auth/SecuritySettingsPage.tsx` — Full UI overhaul for naming, renaming, cap display
 
 **Session 58 (February 7, 2026 - OrgMap Deep-Link Zoom & Touch Scroll Fixes)**:
 
