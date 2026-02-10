@@ -29,7 +29,6 @@ export default function ShareModal({
   role,
   onClose,
 }: ShareModalProps): React.JSX.Element {
-  const [activeTab, setActiveTab] = useState<'public' | 'members'>('public');
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [isPublic, setIsPublic] = useState<boolean>(false);
@@ -137,13 +136,13 @@ export default function ShareModal({
     [orgId]
   );
 
-  // Load members when Team Members tab is active
+  // Load members on mount for admins
   useEffect(() => {
-    if (activeTab === 'members') {
+    if (isAdmin) {
       loadMembers();
       loadInvitations();
     }
-  }, [activeTab, loadMembers, loadInvitations]);
+  }, [isAdmin, loadMembers, loadInvitations]);
 
   // Real-time updates for members
   useRealtimeUpdates(orgId, {
@@ -319,175 +318,128 @@ export default function ShareModal({
             </button>
           </div>
 
-          {/* Tabs - only show Team Members tab for admins */}
-          <div className="border-b border-slate-200 dark:border-slate-700">
-            <div className="flex px-6" role="tablist">
-              <button
-                role="tab"
-                aria-selected={activeTab === 'public'}
-                aria-controls="share-public-panel"
-                onClick={() => setActiveTab('public')}
-                className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
-                  activeTab === 'public'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <Globe size={18} />
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Public Link Section */}
+            <div className="space-y-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wide">
+                <Globe size={16} className="text-slate-500 dark:text-slate-400" />
                 Public Link
-              </button>
-              {isAdmin && (
-                <button
-                  role="tab"
-                  aria-selected={activeTab === 'members'}
-                  aria-controls="share-members-panel"
-                  onClick={() => setActiveTab('members')}
-                  className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
-                    activeTab === 'members'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Users size={18} />
-                  Team Members
-                </button>
+              </h3>
+
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              ) : (
+                <>
+                  {/* Public/Private Toggle */}
+                  <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      {isPublic ? (
+                        <Globe className="text-green-600" size={20} />
+                      ) : (
+                        <Lock className="text-slate-500" size={20} />
+                      )}
+                      <div>
+                        <p className="font-medium text-slate-900 dark:text-white">
+                          {isPublic ? 'Public' : 'Private'}
+                        </p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          {isPublic
+                            ? 'Anyone with the link can view'
+                            : 'Only team members can view'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleTogglePublic}
+                      disabled={saving || !isAdmin}
+                      aria-label="Toggle public access"
+                      title={!isAdmin ? 'Only admins can change sharing settings' : ''}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                        isPublic ? 'bg-blue-600' : 'bg-slate-300'
+                      } ${saving || !isAdmin ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          isPublic ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Share Link */}
+                  {isPublic && shareUrl && (
+                    <div className="space-y-3">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Share Link
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={shareUrl}
+                          readOnly
+                          className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm font-mono"
+                        />
+                        <button
+                          onClick={handleCopyUrl}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                        >
+                          {copied ? (
+                            <>
+                              <Check size={18} />
+                              <span className="hidden sm:inline">Copied</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy size={18} />
+                              <span className="hidden sm:inline">Copy</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Regenerate Token */}
+                      {isAdmin && (
+                        <button
+                          onClick={handleRegenerateToken}
+                          disabled={saving}
+                          className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors disabled:opacity-50"
+                        >
+                          <RefreshCw size={16} />
+                          Regenerate link
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
-          </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {activeTab === 'public' && (
-              <div className="space-y-6">
-                {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : (
-                  <>
-                    {/* Public/Private Toggle */}
-                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        {isPublic ? (
-                          <Globe className="text-green-600" size={20} />
-                        ) : (
-                          <Lock className="text-slate-500" size={20} />
-                        )}
-                        <div>
-                          <p className="font-medium text-slate-900 dark:text-white">
-                            {isPublic ? 'Public' : 'Private'}
-                          </p>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
-                            {isPublic
-                              ? 'Anyone with the link can view'
-                              : 'Only team members can view'}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleTogglePublic}
-                        disabled={saving || !isAdmin}
-                        aria-label="Toggle public access"
-                        title={!isAdmin ? 'Only admins can change sharing settings' : ''}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                          isPublic ? 'bg-blue-600' : 'bg-slate-300'
-                        } ${saving || !isAdmin ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            isPublic ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                    </div>
+            {/* Team Members Section - admin only */}
+            {isAdmin && (
+              <div className="space-y-4 border-t border-slate-200 dark:border-slate-700 pt-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wide">
+                    <Users size={16} className="text-slate-500 dark:text-slate-400" />
+                    Team Members
+                  </h3>
+                  <button
+                    onClick={() => setShowAddMember(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm"
+                  >
+                    <Users size={16} />
+                    Add Member
+                  </button>
+                </div>
 
-                    {/* Share Link */}
-                    {isPublic && shareUrl && (
-                      <div className="space-y-3">
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                          Share Link
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={shareUrl}
-                            readOnly
-                            className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm font-mono"
-                          />
-                          <button
-                            onClick={handleCopyUrl}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-                          >
-                            {copied ? (
-                              <>
-                                <Check size={18} />
-                                <span className="hidden sm:inline">Copied</span>
-                              </>
-                            ) : (
-                              <>
-                                <Copy size={18} />
-                                <span className="hidden sm:inline">Copy</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-
-                        {/* Regenerate Token */}
-                        {isAdmin && (
-                          <button
-                            onClick={handleRegenerateToken}
-                            disabled={saving}
-                            className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors disabled:opacity-50"
-                          >
-                            <RefreshCw size={16} />
-                            Regenerate link
-                          </button>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Info */}
-                    <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                      <p className="text-sm text-blue-800 dark:text-blue-300">
-                        {isPublic ? (
-                          <>
-                            <strong>Public sharing is enabled.</strong> Anyone with the link can
-                            view this organization chart in read-only mode.
-                          </>
-                        ) : (
-                          <>
-                            <strong>Private mode.</strong> Enable public sharing to generate a
-                            shareable link that anyone can use to view this organization chart.
-                          </>
-                        )}
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'members' && (
-              <div className="space-y-4">
                 {loadingMembers ? (
                   <div className="flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   </div>
                 ) : (
                   <>
-                    {/* Add Member Button - only for admins */}
-                    {isAdmin && (
-                      <div className="flex justify-end">
-                        <button
-                          onClick={() => setShowAddMember(true)}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-                        >
-                          <Users size={18} />
-                          Add Member
-                        </button>
-                      </div>
-                    )}
-
                     {/* Owner */}
                     {owner && (
                       <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
@@ -517,9 +469,9 @@ export default function ShareModal({
                     {/* Members List */}
                     {members.length > 0 ? (
                       <div className="space-y-2">
-                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                           Members
-                        </h3>
+                        </h4>
                         {members.map((member: OrgMemberWithDetails) => (
                           <div
                             key={member.id}
@@ -540,47 +492,33 @@ export default function ShareModal({
                                 </div>
                               </div>
                               <div className="flex items-center space-x-3">
-                                {isAdmin ? (
-                                  <>
-                                    <select
-                                      value={member.role}
-                                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                                        handleUpdateRole(member.id, e.target.value)
-                                      }
-                                      className="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    >
-                                      <option value="viewer">Viewer</option>
-                                      <option value="editor">Editor</option>
-                                      <option value="admin">Admin</option>
-                                    </select>
-                                    <button
-                                      onClick={() =>
-                                        handleRemoveMember(member.id, member.userName!)
-                                      }
-                                      className="text-red-600 hover:text-red-800 transition-colors"
-                                      title="Remove member"
-                                    >
-                                      <Trash2 size={18} />
-                                    </button>
-                                  </>
-                                ) : (
-                                  <span
-                                    className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleBadgeColor(member.role)}`}
-                                  >
-                                    {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
-                                  </span>
-                                )}
+                                <select
+                                  value={member.role}
+                                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                                    handleUpdateRole(member.id, e.target.value)
+                                  }
+                                  className="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                  <option value="viewer">Viewer</option>
+                                  <option value="editor">Editor</option>
+                                  <option value="admin">Admin</option>
+                                </select>
+                                <button
+                                  onClick={() => handleRemoveMember(member.id, member.userName!)}
+                                  className="text-red-600 hover:text-red-800 transition-colors"
+                                  title="Remove member"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
                               </div>
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                        <Users size={48} className="mx-auto mb-3 text-gray-300" />
-                        <p className="font-medium dark:text-gray-300">No team members yet</p>
-                        <p className="text-sm mt-1">
-                          Add members to collaborate on this organization
+                      <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                        <p className="text-sm">
+                          No team members yet. Add members to collaborate on this organization.
                         </p>
                       </div>
                     )}
@@ -588,9 +526,9 @@ export default function ShareModal({
                     {/* Pending Invitations */}
                     {invitations.length > 0 && (
                       <div className="space-y-2">
-                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                           Pending and Expired Invitations
-                        </h3>
+                        </h4>
                         {invitations.map((invitation: InvitationWithDetails) => (
                           <div
                             key={invitation.id}
@@ -641,28 +579,24 @@ export default function ShareModal({
                                   {invitation.status.charAt(0).toUpperCase() +
                                     invitation.status.slice(1)}
                                 </span>
-                                {isAdmin && (
-                                  <>
-                                    <button
-                                      onClick={() =>
-                                        handleResendInvitation(invitation.id, invitation.email)
-                                      }
-                                      className="text-blue-600 hover:text-blue-800 transition-colors"
-                                      title="Resend invitation"
-                                    >
-                                      <RefreshCw size={18} />
-                                    </button>
-                                    <button
-                                      onClick={() =>
-                                        handleCancelInvitation(invitation.id, invitation.email)
-                                      }
-                                      className="text-red-600 hover:text-red-800 transition-colors"
-                                      title="Cancel invitation"
-                                    >
-                                      <Trash2 size={18} />
-                                    </button>
-                                  </>
-                                )}
+                                <button
+                                  onClick={() =>
+                                    handleResendInvitation(invitation.id, invitation.email)
+                                  }
+                                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                                  title="Resend invitation"
+                                >
+                                  <RefreshCw size={18} />
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleCancelInvitation(invitation.id, invitation.email)
+                                  }
+                                  className="text-red-600 hover:text-red-800 transition-colors"
+                                  title="Cancel invitation"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
                               </div>
                             </div>
                           </div>
