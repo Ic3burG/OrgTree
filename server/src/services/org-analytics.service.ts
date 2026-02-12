@@ -9,6 +9,7 @@ export interface OrgAnalyticsOverview {
   peopleGrowth30d: number;
   avgUpdatesPerDay: number;
   activeUsers7d: number;
+  publicLinkViews30d: number;
   lastActivityAt: string | null;
 }
 
@@ -31,6 +32,7 @@ export interface StructuralHealth {
 export interface ActivityMetrics {
   totalEdits: number;
   editsPerDay: { date: string; count: number }[];
+  publicLinkViewsPerDay: { date: string; count: number }[];
   topEditors: { userId: string; name: string; email: string; editCount: number }[];
   peakActivityHour: number; // 0-23
   recentActions: { action: string; count: number }[]; // created/updated/deleted
@@ -107,6 +109,18 @@ export function getOrgAnalyticsOverview(orgId: string): OrgAnalyticsOverview {
       )
       .get({ orgId }) as { count: number };
 
+    const publicViews = db
+      .prepare(
+        `
+      SELECT COUNT(*) as count
+      FROM analytics_events
+      WHERE event_name = 'public_link_view'
+      AND properties LIKE '%"organization_id":"' || @orgId || '"%'
+      AND created_at >= date('now', '-30 days')
+    `
+      )
+      .get({ orgId }) as { count: number };
+
     return {
       totalDepartments: counts.deptCount,
       totalPeople: counts.peopleCount,
@@ -115,6 +129,7 @@ export function getOrgAnalyticsOverview(orgId: string): OrgAnalyticsOverview {
       peopleGrowth30d: calculateGrowth(counts.peopleCount, oldCounts.peopleCount),
       avgUpdatesPerDay: Math.round((activityStats.totalEdits / 30) * 10) / 10,
       activeUsers7d: activeUsers?.count || 0,
+      publicLinkViews30d: publicViews?.count || 0,
       lastActivityAt: activityStats.lastActivity || null,
     };
   } catch (error) {
@@ -296,6 +311,20 @@ export function getOrgActivityMetrics(
       )
       .all({ orgId, days }) as { date: string; count: number }[];
 
+    const publicViewsPerDay = db
+      .prepare(
+        `
+      SELECT date(created_at) as date, COUNT(*) as count
+      FROM analytics_events
+      WHERE event_name = 'public_link_view'
+      AND properties LIKE '%"organization_id":"' || @orgId || '"%'
+      AND created_at >= date('now', '-' || @days || ' days')
+      GROUP BY date
+      ORDER BY date
+    `
+      )
+      .all({ orgId, days }) as { date: string; count: number }[];
+
     const topEditors = db
       .prepare(
         `
@@ -331,6 +360,7 @@ export function getOrgActivityMetrics(
     return {
       totalEdits,
       editsPerDay,
+      publicViewsPerDay,
       topEditors,
       peakActivityHour,
       recentActions,

@@ -87,6 +87,7 @@ export default function AnalyticsDashboard(): React.JSX.Element {
           { Metric: 'Total People', Value: overviewData.totalPeople },
           { Metric: 'Total Members', Value: overviewData.totalMembers },
           { Metric: 'Avg Updates/Day', Value: overviewData.avgUpdatesPerDay },
+          { Metric: 'Public Views (Last 30 Days)', Value: overviewData.publicLinkViews30d || 0 },
         ];
         csvContent = convertToCSV(flatData);
       } else if (activeTab === 'growth' && growthData) {
@@ -95,8 +96,30 @@ export default function AnalyticsDashboard(): React.JSX.Element {
         // Export department sizes which is the list data
         csvContent = convertToCSV(structureData.departmentSizes);
       } else if (activeTab === 'activity' && activityData) {
-        // Export daily edits
-        csvContent = convertToCSV(activityData.editsPerDay);
+        // Export both internal activity and public views
+        const combinedData = activityData.editsPerDay.map(day => {
+          const publicDay = activityData.publicLinkViewsPerDay.find(p => p.date === day.date);
+          return {
+            Date: day.date,
+            'Internal Updates': day.count,
+            'Public Views': publicDay ? publicDay.count : 0,
+          };
+        });
+
+        // Add any days that have public views but no internal updates
+        activityData.publicLinkViewsPerDay.forEach(pDay => {
+          if (!combinedData.find(d => d.Date === pDay.date)) {
+            combinedData.push({
+              Date: pDay.date,
+              'Internal Updates': 0,
+              'Public Views': pDay.count,
+            });
+          }
+        });
+
+        // Sort by date
+        combinedData.sort((a, b) => a.Date.localeCompare(b.Date));
+        csvContent = convertToCSV(combinedData);
       } else if (activeTab === 'search' && searchData) {
         // Export top queries
         csvContent = convertToCSV(searchData.topQueries);

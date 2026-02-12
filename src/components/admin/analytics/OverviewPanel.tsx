@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Building2, UserPlus, TrendingUp } from 'lucide-react';
+import { Users, Building2, UserPlus, TrendingUp, Eye } from 'lucide-react';
 import { OrgAnalyticsOverview } from '../../../types/index';
 
 interface OverviewPanelProps {
@@ -10,8 +10,8 @@ interface OverviewPanelProps {
 export default function OverviewPanel({ data, loading }: OverviewPanelProps): React.JSX.Element {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 animate-pulse">
+        {[...Array(5)].map((_, i) => (
           <div key={i} className="h-32 bg-gray-200 dark:bg-slate-700 rounded-xl" />
         ))}
       </div>
@@ -49,10 +49,17 @@ export default function OverviewPanel({ data, loading }: OverviewPanelProps): Re
       color: 'text-orange-600',
       bg: 'bg-orange-100 dark:bg-orange-900/30',
     },
+    {
+      label: 'Public Views',
+      value: data.publicLinkViews30d || 0,
+      icon: Eye,
+      color: 'text-indigo-600',
+      bg: 'bg-indigo-100 dark:bg-indigo-900/30',
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       {stats.map(stat => (
         <div
           key={stat.label}

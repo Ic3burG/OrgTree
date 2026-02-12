@@ -1,8 +1,10 @@
 import express, { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
+import crypto from 'crypto';
 import db from '../db.js';
 import { getInvitationByToken } from '../services/invitation.service.js';
 import { createAuditLog } from '../services/audit.service.js';
+import { trackEvent } from '../services/analytics.service.js';
 import type { CustomFieldDefinition } from '../types/index.js';
 
 const router = express.Router();
@@ -62,6 +64,27 @@ router.get(
       if (!org) {
         res.status(404).json({ message: 'Organization not found or not public' });
         return;
+      }
+
+      // Track public view event
+      try {
+        const ip = req.ip || req.socket.remoteAddress || 'unknown';
+        const sessionId = crypto.createHash('sha256').update(`${ip}-${new Date().toDateString()}`).digest('hex');
+        
+        trackEvent({
+          event_name: 'public_link_view',
+          category: 'public_access',
+          properties: { 
+            organization_id: org.id,
+            org_name: org.name
+          },
+          session_id: sessionId,
+          url: req.originalUrl,
+          device_type: req.headers['user-agent']?.includes('Mobile') ? 'mobile' : 'desktop'
+        });
+      } catch (err) {
+        // Don't let analytics failure block the response
+        console.warn('Failed to track public link view:', err);
       }
 
       // Get all departments for this organization

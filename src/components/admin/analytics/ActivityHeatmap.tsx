@@ -1,12 +1,22 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Calendar, Clock, User } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from 'recharts';
+import { Calendar, Clock, User, Eye } from 'lucide-react';
 
-// We need to define the full ActivityMetrics interface locally or import it if we move it to shared types
 // For now, based on backend service:
 interface ActivityMetrics {
   totalEdits: number;
   editsPerDay: { date: string; count: number }[];
+  publicLinkViewsPerDay: { date: string; count: number }[];
   topEditors: { userId: string; name: string; email: string; editCount: number }[];
   peakActivityHour: number;
   recentActions: { action: string; count: number }[];
@@ -40,10 +50,13 @@ export default function ActivityHeatmap({
     return hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
   };
 
+  const totalPublicViews =
+    data.publicLinkViewsPerDay?.reduce((sum, day) => sum + day.count, 0) || 0;
+
   return (
     <div className="space-y-6">
       {/* Key Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-lg">
             <Calendar size={20} />
@@ -51,6 +64,18 @@ export default function ActivityHeatmap({
           <div>
             <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Total Updates</p>
             <p className="text-xl font-bold text-gray-900 dark:text-slate-100">{data.totalEdits}</p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 rounded-lg">
+            <Eye size={20} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Public Views</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-slate-100">
+              {totalPublicViews}
+            </p>
           </div>
         </div>
 
@@ -73,7 +98,7 @@ export default function ActivityHeatmap({
           <div>
             <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Top Contributor</p>
             <p
-              className="text-sm font-bold text-gray-900 dark:text-slate-100 truncate max-w-[150px]"
+              className="text-sm font-bold text-gray-900 dark:text-slate-100 truncate max-w-[120px]"
               title={data.topEditors[0]?.email || ''}
             >
               {data.topEditors[0]?.name || data.topEditors[0]?.email || 'N/A'}
@@ -86,7 +111,7 @@ export default function ActivityHeatmap({
         {/* Daily Activity Chart */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-6">
-            Activity Volume
+            Internal Activity
           </h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -143,11 +168,83 @@ export default function ActivityHeatmap({
           </div>
         </div>
 
-        {/* Action Types Breakdown */}
+        {/* Public Views Chart */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-6">
-            Action Types
+            Public View Engagement
           </h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={data.publicLinkViewsPerDay}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  className="stroke-gray-200 dark:stroke-slate-700"
+                />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={d =>
+                    new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                  }
+                  stroke="#94a3b8"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-3 rounded-lg shadow-lg">
+                          <p className="font-medium text-gray-900 dark:text-slate-100 mb-2">
+                            {new Date(label as string).toLocaleDateString()}
+                          </p>
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                          {payload.map((entry: any, index: number) => (
+                            <div key={index} className="flex items-center gap-2 text-sm">
+                              <div
+                                className="w-2 h-2 rounded-full"
+                                style={{ backgroundColor: entry.stroke || entry.fill }}
+                              />
+                              <span className="text-gray-500 dark:text-slate-400">
+                                {entry.name}:
+                              </span>
+                              <span className="font-medium text-gray-900 dark:text-slate-100">
+                                {entry.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  name="Public Views"
+                  stroke="#6366f1"
+                  strokeWidth={2}
+                  dot={{ r: 4, fill: '#6366f1' }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Types Breakdown */}
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-6">
+          Action Types Breakdown
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-4">
             {data.recentActions.map((action, index) => (
               <div key={index} className="flex items-center justify-between">
@@ -169,6 +266,15 @@ export default function ActivityHeatmap({
                 </div>
               </div>
             ))}
+          </div>
+          <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg">
+            <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">
+              Engagement Tip
+            </h4>
+            <p className="text-sm text-blue-800 dark:text-blue-400/80">
+              Higher public view counts often correlate with organizational transparency. Share your
+              public link in company newsletters or internal portals to improve discoverability.
+            </p>
           </div>
         </div>
       </div>

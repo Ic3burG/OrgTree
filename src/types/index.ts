@@ -436,6 +436,7 @@ export interface OrgAnalyticsOverview {
   totalPeople: number;
   totalMembers: number;
   avgUpdatesPerDay: number;
+  publicLinkViews30d: number;
 }
 
 export interface OrgGrowthTrend {
@@ -453,6 +454,7 @@ export interface OrgStructuralHealth {
 export interface OrgActivityMetrics {
   totalEdits: number;
   editsPerDay: { date: string; count: number }[];
+  publicLinkViewsPerDay: { date: string; count: number }[];
   topEditors: { userId: string; name: string; email: string; editCount: number }[];
   peakActivityHour: number;
   recentActions: { action: string; count: number }[];
