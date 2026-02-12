@@ -7,6 +7,15 @@ if [ "$(arch)" = "i386" ]; then
   exec arch -arm64 "$0" "$@"
 fi
 
+# Prettier check
+echo "Checking code formatting with Prettier..."
+npm run format:check && (cd server && npm run format:check)
+
+if [ $? -ne 0 ]; then
+  echo "Prettier check failed. Push aborted. Please run 'npm run format' and 'cd server && npm run format' to fix."
+  exit 1
+fi
+
 # Run full test suite (frontend + backend)
 # Run frontend tests
 echo "Running frontend tests..."
