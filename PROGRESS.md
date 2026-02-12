@@ -11,8 +11,35 @@
 
 - **PROGRESS.md updates are MANDATORY**: Update this file after EACH command/task completion (not just at end of session)
 - **Commit AND push ALL changes**: Never leave commits local-only; always push to GitHub
-- **Update "Last Updated" date**: February 9, 2026
+- **Update "Last Updated" date**: February 12, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
+
+**Session 61 (February 12, 2026 - Analytics Expansion & Formatting Enforcement)**:
+
+- ✅ **Feature: Public Link View Tracking**: Implemented privacy-aware tracking for public shared links.
+  - **Anonymization**: Public users are anonymized using a SHA-256 hash of their `IP address` + `current date`, ensuring daily unique visitor tracking without storing personal data.
+  - **Backend**: Instrumented public routes to emit `public_link_view` events and updated `OrgAnalyticsService` to aggregate these metrics.
+- ✅ **Feature: Analytics Dashboard Enhancements**:
+  - **Overview**: Added "Public Views" card to the dashboard summary.
+  - **Activity**: Added a new "Public View Engagement" line chart to track shared link popularity over time.
+  - **Export**: Integrated public view data into the Activity CSV export.
+- ✅ **Infrastructure: Monorepo Formatting Enforcement**:
+  - **Git Hook**: Implemented a Husky `pre-push` hook that runs `npm run format:check` across both frontend and backend.
+  - **Hook Architecture**: The hook uses `arch -arm64` on Darwin to ensure compatibility with Apple Silicon Macs when triggered from x86-emulated git shells.
+  - **Expanded Coverage**: Updated Prettier scripts to include `.json`, `.md`, and `.html` files across the entire project.
+  - **Agent Guidelines**: Added formatting mandates to `CLAUDE.md` and created `.cursorrules` to ensure AI assistants (Claude, Gemini, Cursor) maintain style consistency.
+- 📁 **FILES MODIFIED/CREATED** (12 files):
+  - `server/src/routes/public.ts` — Tracking instrumentation
+  - `server/src/services/org-analytics.service.ts` — Aggregation logic
+  - `src/types/index.ts` — Shared analytics interfaces
+  - `src/components/admin/analytics/OverviewPanel.tsx` — Stat card
+  - `src/components/admin/analytics/ActivityHeatmap.tsx` — Engagement chart
+  - `src/components/admin/AnalyticsDashboard.tsx` — Export logic
+  - `.husky/pre-push` — NEW push-time validation
+  - `package.json` / `server/package.json` — Expanded glob patterns
+  - `server/.prettierignore` — NEW ignore file
+  - `CLAUDE.md` / `.cursorrules` — AI agent instructions
+  - `PROGRESS.md` — Session 61 notes
 
 **Session 60 (February 9, 2026 - Department People Popup Hover Fix)**:
 
