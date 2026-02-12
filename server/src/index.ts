@@ -73,6 +73,7 @@ if (
   process.exit(1);
 }
 
+const formattingViolation = 'this should fail prettier';
 const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT || 3001;
