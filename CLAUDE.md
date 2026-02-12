@@ -47,12 +47,17 @@ npm run lint:all               # Lint frontend and backend
 
 ⚠️ **ALWAYS run linting checks BEFORE creating any git commit.** This is MANDATORY.
 
+⚠️ **PRE-PUSH HOOK ENFORCEMENT:** A git `pre-push` hook is active. It will BLOCKED your push if ANY file in the monorepo fails Prettier formatting.
+
 Before staging files for commit, you MUST:
 
 1. Run `npm run lint:all` from the root directory
-2. Run `cd server && npm run format:check` to verify Prettier formatting
+2. Run `npm run format` from the root directory to ensure ALL files (frontend, backend, docs, config) are styled.
 3. Fix ALL linting and formatting errors before proceeding
 4. NEVER commit code with linting or formatting errors
+
+**AI Agent Formatting Mandate:**
+Any AI agent working on this repository (Claude, Gemini, Cursor, etc.) MUST run `npm run format` before finalizing a task. Failure to do so will cause the `pre-push` hook to fail and disrupt the workflow.
 
 **Commit & Push Policy:**
 

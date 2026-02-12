@@ -1,0 +1,23 @@
+# Cursor Rules - OrgTree Project
+
+## Code Style & Formatting
+
+- **Prettier is Mandatory**: This project enforces Prettier formatting across the entire monorepo.
+- **Git Hook**: A `pre-push` hook will block any push that contains unformatted code.
+- **Formatting Command**: Always run `npm run format` from the root directory before finishing your task. This covers frontend, backend (`server/`), documentation, and configuration files.
+
+## Development Workflow
+
+1. Implement changes.
+2. Run tests: `npm run test:all`.
+3. Format code: `npm run format`.
+4. Check linting: `npm run lint:all`.
+5. Commit with a detailed, descriptive message (see `.gemini/COMMIT_GUIDELINES.md`).
+6. Push immediately.
+
+## Tech Stack Reminders
+
+- **Frontend**: React, Tailwind CSS, Vite, React Flow.
+- **Backend**: Node.js, Express, SQLite (better-sqlite3).
+- **Authentication**: JWT (Access + Refresh tokens), Passkeys (WebAuthn), TOTP 2FA.
+- **Database**: SQLite with FTS5 search. Migrations are inline in `server/src/db.ts`.
