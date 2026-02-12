@@ -20,8 +20,8 @@
     "backup:stats": "tsx scripts/backup.ts --stats",
     "lint": "eslint src/ scripts/",
     "lint:fix": "eslint src/ scripts/ --fix",
-    "format": "prettier --write \"src/**/*.ts\" \"scripts/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\" \"scripts/**/*.ts\"",
+    "format": "prettier --write \"**/*.{ts,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,json,md}\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

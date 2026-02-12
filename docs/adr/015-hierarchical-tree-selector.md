@@ -119,7 +119,6 @@ New reusable component with the following features:
 **Component API:**
 
 ```typescript
-
 interface TreeNode {
   id: string;
   name: string;
@@ -151,7 +150,6 @@ interface HierarchicalTreeSelectorProps {
   className?: string;
   id?: string;
 }
-
 ```
 
 **Internal state management:**
@@ -187,7 +185,6 @@ Unit tests for the new component:
 Add new utility function for tree node conversion:
 
 ```typescript
-
 /**
  * Convert flat department list to nested tree structure for HierarchicalTreeSelector
  * @param departments - Flat list of departments
@@ -202,7 +199,6 @@ export function buildDepartmentTree(departments: Department[]): TreeNode[];
  * @returns Array of descendant IDs including the department itself
  */
 export function getDescendantIds(departmentId: string, departments: Department[]): string[];
-
 ```
 
 ---
@@ -248,7 +244,6 @@ Replace parent department select (around line 219) with `HierarchicalTreeSelecto
 Add exclusion of current department and its descendants to prevent circular references:
 
 ```tsx
-
 <HierarchicalTreeSelector
   id="parentId"
   items={buildDepartmentTree(departments)}
@@ -259,7 +254,6 @@ Add exclusion of current department and its descendants to prevent circular refe
   allowClear={true}
   disabled={loading}
 />
-
 ```
 
 ---
@@ -269,7 +263,6 @@ Add exclusion of current department and its descendants to prevent circular refe
 Replace select (lines 108-122) with `HierarchicalTreeSelector`:
 
 ```tsx
-
 <HierarchicalTreeSelector
   items={buildDepartmentTree(departments)}
   value={selectedDeptId}
@@ -277,7 +270,6 @@ Replace select (lines 108-122) with `HierarchicalTreeSelector`:
   placeholder="Select a department..."
   showBreadcrumb={true}
 />
-
 ```
 
 ---
@@ -345,7 +337,7 @@ cd /Users/ojdavis/Claude\ Code/OrgTree && npm run test:e2e
 Consider adding new E2E tests for tree selector interactions in forms.
 
 ### Manual Verification
->
+
 > [!NOTE]
 > **User should test these scenarios manually after implementation:**
 

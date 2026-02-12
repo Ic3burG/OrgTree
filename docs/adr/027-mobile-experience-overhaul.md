@@ -69,28 +69,28 @@ Chosen option: "Option 1 — Targeted CSS and component fixes", because it addre
 
 ### Phase 1: Critical Layout Fixes
 
-| Change | File(s) | Rationale |
-|--------|---------|-----------|
-| Viewport meta: `viewport-fit=cover`, `interactive-widget=resizes-content` | `index.html` | Enables `env(safe-area-inset-*)` for notched phones; resizes viewport when keyboard opens |
-| Safe area utility classes | `src/index.css` | `pb-safe` / `safe-area-inset-bottom` were referenced but never defined |
-| Collapsible FAB toolbar | `src/components/Toolbar.tsx` | 10 buttons in 460px column → single FAB expanding to 3x3 grid |
-| `h-screen` → `h-full` | `OrgMap.tsx` | Lives inside AdminLayout which already handles height; `h-screen` overflowed by 78px |
-| `h-screen` → `h-dvh` | `PublicOrgMap.tsx`, `AdminLayout.tsx` | Standalone containers need dynamic viewport height |
-| Hide MiniMap on mobile | `OrgMap.tsx`, `PublicOrgMap.tsx` | Reclaims ~120x80px; pinch-to-zoom is the primary mobile interaction |
-| Compact public badge | `PublicOrgMap.tsx` | Hides SVG icon and subtitle on mobile, reduces padding |
+| Change                                                                    | File(s)                               | Rationale                                                                                 |
+| ------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Viewport meta: `viewport-fit=cover`, `interactive-widget=resizes-content` | `index.html`                          | Enables `env(safe-area-inset-*)` for notched phones; resizes viewport when keyboard opens |
+| Safe area utility classes                                                 | `src/index.css`                       | `pb-safe` / `safe-area-inset-bottom` were referenced but never defined                    |
+| Collapsible FAB toolbar                                                   | `src/components/Toolbar.tsx`          | 10 buttons in 460px column → single FAB expanding to 3x3 grid                             |
+| `h-screen` → `h-full`                                                     | `OrgMap.tsx`                          | Lives inside AdminLayout which already handles height; `h-screen` overflowed by 78px      |
+| `h-screen` → `h-dvh`                                                      | `PublicOrgMap.tsx`, `AdminLayout.tsx` | Standalone containers need dynamic viewport height                                        |
+| Hide MiniMap on mobile                                                    | `OrgMap.tsx`, `PublicOrgMap.tsx`      | Reclaims ~120x80px; pinch-to-zoom is the primary mobile interaction                       |
+| Compact public badge                                                      | `PublicOrgMap.tsx`                    | Hides SVG icon and subtitle on mobile, reduces padding                                    |
 
 ### Phase 2: Modal & Form Keyboard Fixes
 
-| Change | File(s) | Rationale |
-|--------|---------|-----------|
-| `max-h-[90vh]` → `max-h-[85dvh]` | 7 modal components | `dvh` tracks visible viewport; 85% leaves breathing room for backdrop |
-| Sticky submit footers | `PersonForm.tsx`, `DepartmentForm.tsx` | Buttons stay visible while scrolling long forms on mobile |
-| Toast repositioning | `Toast.tsx` | `bottom-20` on mobile (above MobileNav), full-width on narrow screens |
+| Change                           | File(s)                                | Rationale                                                             |
+| -------------------------------- | -------------------------------------- | --------------------------------------------------------------------- |
+| `max-h-[90vh]` → `max-h-[85dvh]` | 7 modal components                     | `dvh` tracks visible viewport; 85% leaves breathing room for backdrop |
+| Sticky submit footers            | `PersonForm.tsx`, `DepartmentForm.tsx` | Buttons stay visible while scrolling long forms on mobile             |
+| Toast repositioning              | `Toast.tsx`                            | `bottom-20` on mobile (above MobileNav), full-width on narrow screens |
 
 ### Phase 3: Polish
 
-| Change | File(s) | Rationale |
-|--------|---------|-----------|
+| Change                   | File(s)           | Rationale                         |
+| ------------------------ | ----------------- | --------------------------------- |
 | `pb-safe` on DetailPanel | `DetailPanel.tsx` | Bottom padding for notched phones |
 
 ## Links

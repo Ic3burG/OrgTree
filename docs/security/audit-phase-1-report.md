@@ -68,12 +68,10 @@ This security audit reviewed the OrgTree application's authentication and author
 **CVSS:** 7.5
 
 ```javascript
-
 // VULNERABLE: Uses Math.random() - predictable IDs
 const generateId = () => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 };
-
 ```
 
 **Risk:** Attackers can predict/enumerate IDs, leading to IDOR vulnerabilities.
@@ -81,10 +79,8 @@ const generateId = () => {
 **Fix:** Replace with `crypto.randomUUID()`:
 
 ```javascript
-
 import { randomUUID } from 'crypto';
 const id = randomUUID();
-
 ```
 
 ---
@@ -99,14 +95,12 @@ const id = randomUUID();
 **Fix:** Add rate limiting:
 
 ```javascript
-
 const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   message: { message: 'Too many requests' },
 });
 router.use(publicLimiter);
-
 ```
 
 ---
@@ -117,11 +111,9 @@ router.use(publicLimiter);
 **CVSS:** 6.5
 
 ```javascript
-
 // VULNERABLE: No field whitelist validation
 const { personIds, updates } = req.body;
 const result = bulkEditPeople(orgId, personIds, updates, req.user);
-
 ```
 
 **Risk:** Attackers can update unintended fields.
@@ -129,12 +121,10 @@ const result = bulkEditPeople(orgId, personIds, updates, req.user);
 **Fix:** Validate allowed fields:
 
 ```javascript
-
 const allowedFields = ['title', 'departmentId'];
 const sanitizedUpdates = Object.fromEntries(
   Object.entries(updates).filter(([key]) => allowedFields.includes(key))
 );
-
 ```
 
 ---
@@ -226,11 +216,9 @@ Added helmet.js middleware providing:
 Now explicitly specifies HS256 algorithm to prevent algorithm confusion attacks:
 
 ```javascript
-
 const decoded = jwt.verify(token, process.env.JWT_SECRET, {
   algorithms: ['HS256'],
 });
-
 ```
 
 ---
@@ -326,12 +314,10 @@ Removed 15 debug console.log statements from production code.
 **Previous Implementation:**
 
 ```javascript
-
 const tempPassword = randomBytes(9)
   .toString('base64')
   .replace(/[^a-zA-Z0-9]/g, '')
   .slice(0, 12);
-
 ```
 
 **New Implementation:**

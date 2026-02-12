@@ -67,10 +67,8 @@ Enhance the Org Map to visually highlight the entire hierarchical path from a de
 Add new state variables:
 
 ```typescript
-
 const [hoveredDepartmentId, setHoveredDepartmentId] = useState<string | null>(null);
 const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | null>(null);
-
 ```
 
 #### 2. Hierarchy Tracking
@@ -78,7 +76,6 @@ const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | null>(
 Create a utility function to build ancestor chains:
 
 ```typescript
-
 /**
  * Build a map of department ID to array of ancestor IDs
  * @param departments - All departments
@@ -108,7 +105,6 @@ function buildAncestorMap(departments: Department[]): Map<string, string[]> {
 
   return ancestorMap;
 }
-
 ```
 
 #### 3. Edge Highlighting Logic
@@ -116,7 +112,6 @@ function buildAncestorMap(departments: Department[]): Map<string, string[]> {
 Modify edge creation in `transformToFlowData`:
 
 ```typescript
-
 // In transformToFlowData function
 const ancestorMap = buildAncestorMap(departments);
 
@@ -144,7 +139,6 @@ edges.push({
   },
   zIndex: isHighlighted ? 1000 : 1,
 });
-
 ```
 
 #### 4. Node Highlighting
@@ -152,7 +146,6 @@ edges.push({
 Update node data to include highlighting state:
 
 ```typescript
-
 // In transformToFlowData
 const isInHierarchy =
   (hoveredDepartmentId && ancestorMap.get(hoveredDepartmentId)?.includes(dept.id)) ||
@@ -180,7 +173,6 @@ nodes.push({
     },
   },
 });
-
 ```
 
 #### 5. DepartmentNode Component Updates (`DepartmentNode.tsx`)
@@ -263,7 +255,6 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>) {
 1. Test `buildAncestorMap` function:
 
    ```typescript
-
    describe('buildAncestorMap', () => {
      it('should build correct ancestor chains', () => {
        const departments = [
@@ -279,7 +270,6 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>) {
        // Test with circular parent_id relationships
      });
    });
-
    ```
 
 2. Test hover state management
@@ -297,7 +287,6 @@ function DepartmentNode({ data, selected }: NodeProps<DepartmentNodeData>) {
 **File**: `e2e/org-map-hierarchy.spec.ts` (Playwright)
 
 ```typescript
-
 test.describe('Department Hierarchy Highlighting', () => {
   test('should highlight ancestors on hover', async ({ page }) => {
     await page.goto('/org-map');
@@ -336,7 +325,6 @@ test.describe('Department Hierarchy Highlighting', () => {
     await expect(department).toHaveClass(/ring-2/);
   });
 });
-
 ```
 
 ### Manual Testing Checklist

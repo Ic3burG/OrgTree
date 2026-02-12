@@ -115,7 +115,6 @@ No database schema changes required. Existing audit log and import tables are su
 **Response**:
 
 ```typescript
-
 {
   results: Array<{
     url: string;
@@ -132,7 +131,6 @@ No database schema changes required. Existing audit log and import tables are su
     error?: string;
   }>;
 }
-
 ```
 
 **Implementation Logic**:
@@ -190,10 +188,8 @@ No database schema changes required. Existing audit log and import tables are su
 - Import and mount new GEDS import route:
 
   ```typescript
-
   import gedsImportRoutes from './routes/geds-import.js';
   app.use('/api/organizations', gedsImportRoutes);
-
   ```
 
 #### [MODIFY] [scripts/parse-geds-xml.ts](file:///Users/ojdavis/Claude%20Code/OrgTree/scripts/parse-geds-xml.ts)
@@ -204,12 +200,10 @@ No database schema changes required. Existing audit log and import tables are su
 - Script becomes thin wrapper:
 
   ```typescript
-
   import { parseGedsXml } from '../src/services/geds-parser.service.js';
 
   const parsed = await parseGedsXml(inputFile);
   await fs.writeFile(outputFile, JSON.stringify(parsed, null, 2));
-
   ```
 
 ### Frontend
@@ -288,7 +282,6 @@ interface ImportResult {
 **Functions**:
 
 ```typescript
-
 export interface GedsImportResult {
   url: string;
   status: 'success' | 'failed';
@@ -313,7 +306,6 @@ export async function importGedsUrls(
     body: JSON.stringify({ urls }),
   });
 }
-
 ```
 
 ## Verification Plan

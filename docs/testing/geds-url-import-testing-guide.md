@@ -384,7 +384,6 @@ After testing GEDS URL import, verify these existing features:
 If you encounter issues during testing, please report with:
 
 ```markdown
-
 **Scenario**: [e.g., Single Valid URL Import]
 **Steps**:
 
@@ -398,7 +397,6 @@ If you encounter issues during testing, please report with:
 **Console Errors**: [paste any errors from browser console]
 **Server Logs**: [paste relevant server output]
 **Screenshots**: [if applicable]
-
 ```
 
 ---

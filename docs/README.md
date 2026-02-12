@@ -26,7 +26,7 @@ ADRs document significant architectural decisions that have been finalized and i
 | 024 | [Coverage Maintenance Ratcheting](./adr/024-coverage-maintenance-ratcheting.md)       | ✅ Implemented | 2026-02-03 |
 | 025 | [Invitation Enhancements](./adr/025-invitation-enhancements.md)                       | ✅ Implemented | 2026-02-03 |
 | 026 | [Search Suggestions](./adr/026-search-suggestions.md)                                 | ✅ Implemented | 2026-02-05 |
-| 027 | [Share Modal Single-Pane Layout](./adr/027-share-modal-single-pane.md)               | ✅ Implemented | 2026-02-10 |
+| 027 | [Share Modal Single-Pane Layout](./adr/027-share-modal-single-pane.md)                | ✅ Implemented | 2026-02-10 |
 
 ## [Requests for Comments (RFCs)](./rfc/)
 

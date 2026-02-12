@@ -86,14 +86,12 @@ export const useSocket = () => useContext(SocketContext);
 **Usage in Components**:
 
 ```typescript
-
 function AdminDashboard() {
   const { user } = useAuth();
   const { socket } = useSocket();
 
   // Component logic
 }
-
 ```
 
 ### Positive Consequences
@@ -234,22 +232,18 @@ function DepartmentList() {
 **2. Memoization**: Use `useMemo` for expensive computations
 
 ```typescript
-
 const sortedDepartments = useMemo(
   () => departments.sort((a, b) => a.name.localeCompare(b.name)),
   [departments]
 );
-
 ```
 
 **3. Component Memoization**: Prevent re-renders with `React.memo`
 
 ```typescript
-
 const DepartmentNode = React.memo(({ department, theme }) => {
   // Only re-renders if department or theme changes
 });
-
 ```
 
 ## Context Structure

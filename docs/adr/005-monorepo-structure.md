@@ -157,20 +157,16 @@ cd server && npm start
 **Future improvement**: TypeScript project references
 
 ```json
-
 // server/tsconfig.json
 {
   "references": [{ "path": "../" }]
 }
-
 ```
 
 This would allow importing types directly:
 
 ```typescript
-
 import type { Department } from '../../src/types/models';
-
 ```
 
 **Alternative considered**: Extract shared types to `packages/types/`
@@ -198,7 +194,6 @@ import type { Department } from '../../src/types/models';
 **GitHub Actions** (`.github/workflows/ci.yml`):
 
 ```yaml
-
 - name: Install dependencies
   run: |
     npm ci
@@ -216,7 +211,6 @@ import type { Department } from '../../src/types/models';
 
 - name: Build
   run: npm run build
-
 ```
 
 Simple sequential execution (no workspace orchestration needed).
@@ -226,14 +220,12 @@ Simple sequential execution (no workspace orchestration needed).
 **Render.com**:
 
 ```yaml
-
 # render.yaml
 services:
   - type: web
     name: orgtree
     buildCommand: npm install && npm run build && cd server && npm install
     startCommand: cd server && npm start
-
 ```
 
 Single service deploys both frontend and backend.

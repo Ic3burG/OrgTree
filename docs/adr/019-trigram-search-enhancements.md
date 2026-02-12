@@ -31,17 +31,17 @@ Chosen option: **Trigram-based Fuzzy Matching and Dedicated Analytics/Saved Sear
 ### Implementation Details
 
 1. **Typo Tolerance**:
-    - Two new FTS5 tables: `departments_trigram` and `people_trigram` using the `tokenize='trigram'` option.
-    - Search logic generates trigrams from the user input (e.g., "hello" -> "hel", "ell", "llo") and queries these tables when standard FTS returns zero results.
-    - Triggers keep these tables in sync with the main data tables.
+   - Two new FTS5 tables: `departments_trigram` and `people_trigram` using the `tokenize='trigram'` option.
+   - Search logic generates trigrams from the user input (e.g., "hello" -> "hel", "ell", "llo") and queries these tables when standard FTS returns zero results.
+   - Triggers keep these tables in sync with the main data tables.
 
 2. **Search Analytics**:
-    - A `search_analytics` table tracks queries, result counts, and performance execution time.
-    - Focus on identifying "Zero Result" trends to improve data quality or search synonyms.
+   - A `search_analytics` table tracks queries, result counts, and performance execution time.
+   - Focus on identifying "Zero Result" trends to improve data quality or search synonyms.
 
 3. **Saved Searches**:
-    - A `saved_searches` table allows users to persist complex queries.
-    - Supports optional organization-wide sharing of searches.
+   - A `saved_searches` table allows users to persist complex queries.
+   - Supports optional organization-wide sharing of searches.
 
 ### Positive Consequences
 

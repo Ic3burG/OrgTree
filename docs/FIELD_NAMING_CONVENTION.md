@@ -13,7 +13,6 @@ This document establishes the **mandatory** field naming convention for OrgTree.
 The OrgMap component (`src/components/OrgMap.tsx`) depends on specific field names to create edges (connection lines) between departments:
 
 ```typescript
-
 // Line 110 in OrgMap.tsx
 if (dept.parent_id) {
   edges.push({
@@ -23,7 +22,6 @@ if (dept.parent_id) {
     type: 'smoothstep',
   });
 }
-
 ```
 
 **If `parent_id` is returned as `parentId` (camelCase), this check fails silently and no edges are created.**
@@ -56,7 +54,6 @@ if (dept.parent_id) {
 ### ✅ CORRECT Backend Query
 
 ```typescript
-
 // org.service.ts
 const departments = db
   .prepare(
@@ -76,13 +73,11 @@ const departments = db
 `
   )
   .all(id) as Department[];
-
 ```
 
 ### ❌ WRONG Backend Query (WILL BREAK EDGES!)
 
 ```typescript
-
 // DON'T DO THIS!
 const departments = db
   .prepare(
@@ -102,13 +97,11 @@ const departments = db
 `
   )
   .all(id) as Department[];
-
 ```
 
 ### ✅ CORRECT TypeScript Interface
 
 ```typescript
-
 // Backend service interface
 interface Department {
   id: string;
@@ -120,13 +113,11 @@ interface Department {
   created_at: string; // snake_case
   updated_at: string; // snake_case
 }
-
 ```
 
 ### ❌ WRONG TypeScript Interface
 
 ```typescript
-
 // DON'T DO THIS!
 interface Department {
   id: string;
@@ -138,7 +129,6 @@ interface Department {
   createdAt: string; // ❌ WRONG!
   updatedAt: string; // ❌ WRONG!
 }
-
 ```
 
 ---

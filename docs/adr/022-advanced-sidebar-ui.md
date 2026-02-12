@@ -27,7 +27,7 @@ The previous admin sidebar implementation was limited to a simple two-state (exp
 
 Chosen option: **Option 2 and Option 4**.
 
-We implemented a modular `Sidebar` component and a suite of hooks (`useSidebar`, `useResizable`, `useWorkspacePresets`). 
+We implemented a modular `Sidebar` component and a suite of hooks (`useSidebar`, `useResizable`, `useWorkspacePresets`).
 
 During implementation, it was decided to move the **Workspace Layout Presets** management to a dedicated **Interface** tab in **Account Settings** (`/settings/preferences`) rather than keeping it in the sidebar header (as originally proposed in the RFC). This decision was made to keep the primary navigation clean and avoid accidentally triggering layout changes during routine navigation.
 

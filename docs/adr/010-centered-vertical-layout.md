@@ -66,7 +66,6 @@ The fix is straightforward - change the Dagre alignment setting from `'UL'` to `
 **Current Code** (lines 44-52):
 
 ```typescript
-
 g.setGraph({
   rankdir: direction, // 'TB' (vertical) or 'LR' (horizontal)
   nodesep: 80, // horizontal spacing between nodes at same level
@@ -76,13 +75,11 @@ g.setGraph({
   align: 'UL', // alignment: UL (up-left), UR, DL, DR
   ranker: 'tight-tree', // better for tree-like structures
 });
-
 ```
 
 **Proposed Change - Option A (Conditional Alignment)**:
 
 ```typescript
-
 g.setGraph({
   rankdir: direction,
   nodesep: 80,
@@ -93,13 +90,11 @@ g.setGraph({
   align: direction === 'TB' ? undefined : 'UL',
   ranker: 'tight-tree',
 });
-
 ```
 
 **Proposed Change - Option B (Always Centered)**:
 
 ```typescript
-
 g.setGraph({
   rankdir: direction,
   nodesep: 80,
@@ -109,7 +104,6 @@ g.setGraph({
   // Remove align property entirely for default centering
   ranker: 'tight-tree',
 });
-
 ```
 
 **Recommended**: **Option B** - Remove the `align` property entirely. Dagre's default behavior centers nodes, which works well for both vertical and horizontal layouts.
@@ -119,7 +113,6 @@ g.setGraph({
 For better visual balance with centered layout, consider adjusting spacing:
 
 ```typescript
-
 g.setGraph({
   rankdir: direction,
   // Increase horizontal spacing for better symmetry in TB layout
@@ -129,7 +122,6 @@ g.setGraph({
   marginy: 40,
   ranker: 'tight-tree',
 });
-
 ```
 
 ### Visual Comparison
@@ -168,7 +160,6 @@ Front  Back  Regional
 Add test cases to verify centered layout:
 
 ```typescript
-
 describe('calculateLayout', () => {
   // ... existing tests
 
@@ -227,7 +218,6 @@ describe('calculateLayout', () => {
     expect(root!.position!.x).toBeLessThan(child1!.position!.x);
   });
 });
-
 ```
 
 **How to Run**:
@@ -357,7 +347,6 @@ If centering causes issues:
 Instead of relying on Dagre's alignment, manually calculate center offset:
 
 ```typescript
-
 export function calculateLayout(
   nodes: FlowNode[],
   edges: FlowEdge[],
@@ -396,7 +385,6 @@ export function calculateLayout(
 
   return layoutedNodes;
 }
-
 ```
 
 **Not Recommended**: This adds complexity and may conflict with React Flow's fitView.

@@ -166,14 +166,12 @@ curl http://localhost:3001/api/health
 Expected response:
 
 ```json
-
 {
   "status": "ok",
   "timestamp": "2025-01-17T...",
   "database": "connected",
   "environment": "production"
 }
-
 ```
 
 ---
@@ -303,7 +301,6 @@ curl https://orgtree-app.onrender.com/api/health
 **Structured logs** (JSON in production):
 
 ```json
-
 {
   "timestamp": "2025-01-17T10:30:00.000Z",
   "level": "info",
@@ -311,13 +308,11 @@ curl https://orgtree-app.onrender.com/api/health
   "port": 3001,
   "environment": "production"
 }
-
 ```
 
 **Error logs**:
 
 ```json
-
 {
   "timestamp": "2025-01-17T10:30:05.000Z",
   "level": "error",
@@ -326,7 +321,6 @@ curl https://orgtree-app.onrender.com/api/health
   "path": "/api/organizations",
   "method": "GET"
 }
-
 ```
 
 ### Performance Metrics
@@ -367,7 +361,6 @@ Use an external service to hit a backup endpoint:
 1. Create backup endpoint (add to `server/src/index.js`):
 
 ```javascript
-
 app.post('/api/admin/backup', authenticateToken, async (req, res) => {
   // Check if user is admin
   if (req.user.role !== 'admin') {
@@ -382,7 +375,6 @@ app.post('/api/admin/backup', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'Backup failed', error: error.message });
   }
 });
-
 ```
 
 1. Schedule via [cron-job.org](https://cron-job.org) (free):

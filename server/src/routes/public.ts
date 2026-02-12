@@ -69,18 +69,21 @@ router.get(
       // Track public view event
       try {
         const ip = req.ip || req.socket.remoteAddress || 'unknown';
-        const sessionId = crypto.createHash('sha256').update(`${ip}-${new Date().toDateString()}`).digest('hex');
-        
+        const sessionId = crypto
+          .createHash('sha256')
+          .update(`${ip}-${new Date().toDateString()}`)
+          .digest('hex');
+
         trackEvent({
           event_name: 'public_link_view',
           category: 'public_access',
-          properties: { 
+          properties: {
             organization_id: org.id,
-            org_name: org.name
+            org_name: org.name,
           },
           session_id: sessionId,
           url: req.originalUrl,
-          device_type: req.headers['user-agent']?.includes('Mobile') ? 'mobile' : 'desktop'
+          device_type: req.headers['user-agent']?.includes('Mobile') ? 'mobile' : 'desktop',
         });
       } catch (err) {
         // Don't let analytics failure block the response

@@ -42,7 +42,6 @@ Add a vibrant rainbow color theme to the Org Map that cycles through rainbow col
 Add rainbow theme to the `themes` object:
 
 ```typescript
-
 const themes: Record<string, Theme> = {
   // ... existing themes
   rainbow: {
@@ -71,7 +70,6 @@ const themes: Record<string, Theme> = {
     swatch: '#dc2626', // Red swatch for theme picker
   },
 };
-
 ```
 
 **Alternative Rainbow Palette** (More Vibrant):
@@ -99,20 +97,17 @@ rainbow: {
 The existing function already handles cycling through colors:
 
 ```typescript
-
 export function getDepthColors(depth: number, themeName: string = 'slate'): ColorConfig {
   const theme = themes[themeName] || themes['slate'];
   const safeDepth = Math.max(0, depth || 0);
   const index = Math.min(safeDepth, theme.colors.length - 1);
   return theme.colors[index];
 }
-
 ```
 
 For rainbow theme with cycling:
 
 ```typescript
-
 export function getDepthColors(depth: number, themeName: string = 'slate'): ColorConfig {
   const theme = themes[themeName] || themes['slate'];
   const safeDepth = Math.max(0, depth || 0);
@@ -127,7 +122,6 @@ export function getDepthColors(depth: number, themeName: string = 'slate'): Colo
   const index = Math.min(safeDepth, theme.colors.length - 1);
   return theme.colors[index];
 }
-
 ```
 
 ### Visual Design
@@ -160,7 +154,6 @@ Level 0 (CEO)           → Red
 Add test cases for rainbow theme:
 
 ```typescript
-
 describe('Rainbow Theme', () => {
   it('should return rainbow colors for each depth', () => {
     expect(getDepthColors(0, 'rainbow').hex).toBe('#dc2626'); // Red
@@ -185,7 +178,6 @@ describe('Rainbow Theme', () => {
     expect(rainbow?.name).toBe('Rainbow');
   });
 });
-
 ```
 
 **Run Command**:

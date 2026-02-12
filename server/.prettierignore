@@ -1,0 +1,6 @@
+coverage/
+dist/
+node_modules/
+database.db
+database.sqlite
+*.log
