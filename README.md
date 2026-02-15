@@ -227,14 +227,14 @@ Track feature implementation and roadmap in **[PROGRESS.md](./PROGRESS.md)**
 
 ## License
 
-This project is licensed under the GPL 3.0 License - see the [LICENSE](LICENSE) file for details.
+OrgTree is dual-licensed:
+
+- **Open Source**: [GNU Affero General Public License v3](LICENSE) (AGPL-3.0-or-later) — free to use, modify, and distribute under AGPL terms. If you run a modified version as a network service, you must make your source code available to its users.
+- **Commercial**: A proprietary license is available for organizations that need to use OrgTree without AGPL obligations (e.g., embedding in closed-source products or SaaS platforms). Contact **OJD Technical Solutions** for details.
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) before submitting a pull request. All contributors must sign the [Contributor License Agreement](CLA.md) (handled automatically via CLA Assistant on your first PR).
 
 ## Support
 

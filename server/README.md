@@ -156,3 +156,7 @@ Common status codes:
 ## Development
 
 The server uses Node.js `--watch` flag in development mode for automatic restarts when files change.
+
+## License
+
+This server is part of OrgTree, licensed under the [GNU Affero General Public License v3](../LICENSE) (AGPL-3.0-or-later). A commercial license is also available — see the [root README](../README.md#license) for details.
