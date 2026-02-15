@@ -4,6 +4,7 @@ Thank you for your interest in contributing to OrgTree! This document provides g
 
 ## Table of Contents
 
+- [Contributor License Agreement](#contributor-license-agreement-cla)
 - [Code of Conduct](#code-of-conduct)
 - [Getting Started](#getting-started)
 - [Development Setup](#development-setup)
@@ -13,6 +14,16 @@ Thank you for your interest in contributing to OrgTree! This document provides g
 - [Testing](#testing)
 - [Pull Request Process](#pull-request-process)
 - [Commit Guidelines](#commit-guidelines)
+
+---
+
+## Contributor License Agreement (CLA)
+
+Before we can accept your first contribution, you'll need to sign our [Contributor License Agreement](CLA.md). This is a **one-time process** handled automatically by [CLA Assistant](https://cla-assistant.io/) when you open your first pull request.
+
+**Why do we require a CLA?**
+
+OrgTree uses a dual-licensing model: the project is publicly available under the [GNU Affero General Public License v3](LICENSE) (AGPL-3.0), and we also offer a commercial license for organizations that need it. The CLA grants OJD Technical Solutions the right to include your contributions under both licenses. **You keep full ownership of everything you write** — the CLA simply gives us permission to distribute it.
 
 ---
 
@@ -396,8 +407,8 @@ invalidated after use or expiry.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the same license as the project.
+OrgTree is licensed under the [GNU Affero General Public License v3](LICENSE) (AGPL-3.0-or-later). By contributing, you agree to the terms of the [Contributor License Agreement](CLA.md), which grants OJD Technical Solutions the rights needed for dual licensing while you retain full copyright ownership of your contributions.
 
 ---
 
-Thank you for contributing to OrgTree! 🎉
+Thank you for contributing to OrgTree!
