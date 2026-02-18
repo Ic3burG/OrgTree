@@ -17,6 +17,7 @@ on:
       - 'LICENSE'
       - '.gitignore'
       - '.vscode/**'
+  workflow_dispatch:
 
 jobs:
   lint:
