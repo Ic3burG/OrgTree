@@ -1,6 +1,33 @@
 # Commit Message Guidelines
 
-## Critical Requirements
+## ⚠️ MANDATORY: Format Before Every Commit
+
+**Run `npm run format` from the repository root before staging any files.** This is non-negotiable.
+
+A `pre-push` git hook enforces Prettier formatting across the entire monorepo. Unformatted code will fail CI. The correct workflow is:
+
+```bash
+# 1. Make changes
+# 2. Format (MANDATORY — do this before git add)
+npm run format
+
+# 3. Lint
+npm run lint:all
+
+# 4. Test
+npm run test:all
+
+# 5. Commit and push
+git add <files>
+git commit -m "type(scope): detailed description"
+git push
+```
+
+**Never use `--no-verify` to bypass git hooks.** CI enforces the same checks independently.
+
+---
+
+## Critical Commit Message Requirements
 
 **ALL commits MUST follow these guidelines without exception.** These rules apply to both human developers and AI assistants working on this codebase.
 
