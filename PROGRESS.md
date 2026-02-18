@@ -11,8 +11,31 @@
 
 - **PROGRESS.md updates are MANDATORY**: Update this file after EACH command/task completion (not just at end of session)
 - **Commit AND push ALL changes**: Never leave commits local-only; always push to GitHub
-- **Update "Last Updated" date**: February 12, 2026
+- **Update "Last Updated" date**: February 16, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
+
+**Session 62 (February 15, 2026 - AGPL-3.0 Licensing & Copyright Headers)**:
+
+- ✅ **License Switch: GPL-3.0 → AGPL-3.0**: Replaced the existing GPL v3 license with AGPL v3 to close the SaaS loophole — prevents competitors from running OrgTree as a hosted service without contributing back.
+  - **LICENSE**: Replaced full GPL-3.0 text with official GNU AGPL-3.0 text.
+  - **Dual-Licensing Model**: AGPL-3.0 for open-source use; commercial license available separately from OJD Technical Solutions.
+- ✅ **Copyright Headers on All Source Files**: Added a 22-line AGPL-3.0 copyright header to all 329 `.ts`/`.tsx` files across `src/` and `server/src/` (including test files). Header includes SPDX identifier (`AGPL-3.0-or-later`), copyright holder, and commercial licensing note.
+- ✅ **Package Metadata**: Updated `license` field in both `package.json` and `server/package.json` from `GPL-3.0-or-later` to `AGPL-3.0-or-later`.
+- ✅ **Contributor License Agreement (CLA)**: Added Apache-style CLA granting OJD Technical Solutions perpetual, sublicensable rights to contributions while contributors retain full copyright ownership. Includes patent grant, originality certification, and Ontario governing law.
+  - Later migrated CLA to organization-wide agreement at `Ic3burG/.github` for all repos under the org.
+- ✅ **Supporting Docs**:
+  - `COPYRIGHT-HEADER.txt` — JS/TS block comment template for new files.
+  - `CONTRIBUTING.md` — Updated with CLA section explaining dual-licensing rationale.
+  - `README.md` / `server/README.md` — Updated with full dual-licensing section.
+- 📁 **FILES MODIFIED/CREATED** (333+ files):
+  - `LICENSE` — Full AGPL-3.0 text
+  - `CLA.md` — NEW Contributor License Agreement
+  - `COPYRIGHT-HEADER.txt` — NEW header template
+  - `CONTRIBUTING.md` — CLA section added
+  - `README.md` / `server/README.md` — License sections updated
+  - `package.json` / `server/package.json` — License field updated
+  - 329 `.ts`/`.tsx` source files — Copyright headers added
+  - `PROGRESS.md` — Session 62 notes
 
 **Session 61 (February 12, 2026 - Analytics Expansion & Formatting Enforcement)**:
 

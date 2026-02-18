@@ -15,6 +15,7 @@
 ### Task 1: Greeting utility — heading logic + tests
 
 **Files:**
+
 - Create: `src/utils/greetings.ts`
 - Create: `src/utils/greetings.test.ts`
 
@@ -169,6 +170,7 @@ Subtitle is stubbed — implemented in next task."
 ### Task 2: Greeting utility — subtitle logic + tests
 
 **Files:**
+
 - Modify: `src/utils/greetings.ts`
 - Modify: `src/utils/greetings.test.ts`
 
@@ -177,68 +179,68 @@ Subtitle is stubbed — implemented in next task."
 Append to `src/utils/greetings.test.ts` inside the outer `describe('getGreeting')`:
 
 ```typescript
-  describe('subtitle', () => {
-    it('returns a non-empty string', () => {
-      const date = new Date(2026, 2, 4, 10, 0);
-      expect(getGreeting(date).subtitle).toBeTruthy();
-    });
-
-    it('returns the same subtitle for the same 6-hour window', () => {
-      // Same day, 2 hours apart — same 6-hour window
-      const date1 = new Date(2026, 2, 4, 7, 0);
-      const date2 = new Date(2026, 2, 4, 9, 0);
-      expect(getGreeting(date1).subtitle).toBe(getGreeting(date2).subtitle);
-    });
-
-    it('returns a different subtitle for different 6-hour windows', () => {
-      // 7 hours apart — different windows
-      const date1 = new Date(2026, 2, 4, 1, 0);
-      const date2 = new Date(2026, 2, 4, 8, 0);
-      // Different windows should usually give different subtitles
-      // (could theoretically collide, but with 20+ items it's very unlikely)
-      const sub1 = getGreeting(date1).subtitle;
-      const sub2 = getGreeting(date2).subtitle;
-      // At minimum verify both are valid strings
-      expect(sub1).toBeTruthy();
-      expect(sub2).toBeTruthy();
-    });
-
-    it('includes seasonal subtitle in winter pool', () => {
-      // Iterate through many winter windows and collect all subtitles
-      const winterSubs = new Set<string>();
-      for (let day = 0; day < 90; day++) {
-        // Jan 1 2026 through Mar 31 — covers Dec-Feb range
-        const date = new Date(2026, 0, 1 + day, 10, 0);
-        winterSubs.add(getGreeting(date).subtitle);
-      }
-      expect(winterSubs.has('Stay warm, stay organized.')).toBe(true);
-    });
-
-    it('includes seasonal subtitle in summer pool', () => {
-      const summerSubs = new Set<string>();
-      for (let day = 0; day < 92; day++) {
-        const date = new Date(2026, 5, 1 + day, 10, 0);
-        summerSubs.add(getGreeting(date).subtitle);
-      }
-      expect(summerSubs.has('Sunshine and structure.')).toBe(true);
-    });
-
-    it('does not include winter subtitle in summer', () => {
-      const summerSubs = new Set<string>();
-      for (let day = 0; day < 92; day++) {
-        const date = new Date(2026, 5, 1 + day, 10, 0);
-        summerSubs.add(getGreeting(date).subtitle);
-      }
-      expect(summerSubs.has('Stay warm, stay organized.')).toBe(false);
-    });
-
-    it('handles year rollover (Dec 31 to Jan 1)', () => {
-      const dec31 = new Date(2026, 11, 31, 23, 0);
-      const jan1 = new Date(2027, 0, 1, 1, 0);
-      expect(getGreeting(dec31).subtitle).toBeTruthy();
-      expect(getGreeting(jan1).subtitle).toBeTruthy();
-    });
+describe('subtitle', () => {
+  it('returns a non-empty string', () => {
+    const date = new Date(2026, 2, 4, 10, 0);
+    expect(getGreeting(date).subtitle).toBeTruthy();
   });
+
+  it('returns the same subtitle for the same 6-hour window', () => {
+    // Same day, 2 hours apart — same 6-hour window
+    const date1 = new Date(2026, 2, 4, 7, 0);
+    const date2 = new Date(2026, 2, 4, 9, 0);
+    expect(getGreeting(date1).subtitle).toBe(getGreeting(date2).subtitle);
+  });
+
+  it('returns a different subtitle for different 6-hour windows', () => {
+    // 7 hours apart — different windows
+    const date1 = new Date(2026, 2, 4, 1, 0);
+    const date2 = new Date(2026, 2, 4, 8, 0);
+    // Different windows should usually give different subtitles
+    // (could theoretically collide, but with 20+ items it's very unlikely)
+    const sub1 = getGreeting(date1).subtitle;
+    const sub2 = getGreeting(date2).subtitle;
+    // At minimum verify both are valid strings
+    expect(sub1).toBeTruthy();
+    expect(sub2).toBeTruthy();
+  });
+
+  it('includes seasonal subtitle in winter pool', () => {
+    // Iterate through many winter windows and collect all subtitles
+    const winterSubs = new Set<string>();
+    for (let day = 0; day < 90; day++) {
+      // Jan 1 2026 through Mar 31 — covers Dec-Feb range
+      const date = new Date(2026, 0, 1 + day, 10, 0);
+      winterSubs.add(getGreeting(date).subtitle);
+    }
+    expect(winterSubs.has('Stay warm, stay organized.')).toBe(true);
+  });
+
+  it('includes seasonal subtitle in summer pool', () => {
+    const summerSubs = new Set<string>();
+    for (let day = 0; day < 92; day++) {
+      const date = new Date(2026, 5, 1 + day, 10, 0);
+      summerSubs.add(getGreeting(date).subtitle);
+    }
+    expect(summerSubs.has('Sunshine and structure.')).toBe(true);
+  });
+
+  it('does not include winter subtitle in summer', () => {
+    const summerSubs = new Set<string>();
+    for (let day = 0; day < 92; day++) {
+      const date = new Date(2026, 5, 1 + day, 10, 0);
+      summerSubs.add(getGreeting(date).subtitle);
+    }
+    expect(summerSubs.has('Stay warm, stay organized.')).toBe(false);
+  });
+
+  it('handles year rollover (Dec 31 to Jan 1)', () => {
+    const dec31 = new Date(2026, 11, 31, 23, 0);
+    const jan1 = new Date(2027, 0, 1, 1, 0);
+    expect(getGreeting(dec31).subtitle).toBeTruthy();
+    expect(getGreeting(jan1).subtitle).toBeTruthy();
+  });
+});
 ```
 
 **Step 2: Run tests to verify new subtitle tests fail**
@@ -293,9 +295,7 @@ function getSubtitle(date: Date): string {
 
   // Deterministic selection based on 6-hour window
   const startOfYear = new Date(date.getFullYear(), 0, 1);
-  const hoursIntoYear = Math.floor(
-    (date.getTime() - startOfYear.getTime()) / (1000 * 60 * 60),
-  );
+  const hoursIntoYear = Math.floor((date.getTime() - startOfYear.getTime()) / (1000 * 60 * 60));
   const windowIndex = Math.floor(hoursIntoYear / 6);
 
   return pool[windowIndex % pool.length];
@@ -327,6 +327,7 @@ exclusion, and year rollover."
 ### Task 3: Integrate greeting into LoginPage
 
 **Files:**
+
 - Modify: `src/components/auth/LoginPage.tsx:24,146-151`
 
 **Step 1: Import getGreeting and use it**
@@ -346,10 +347,12 @@ const { heading, subtitle } = getGreeting();
 **Step 2: Replace static text**
 
 Replace the heading text on line 147:
+
 - Old: `Welcome Back`
 - New: `{heading}`
 
 Replace the subtitle text on line 149:
+
 - Old: `Sign in to your OrgTree account`
 - New: `{subtitle}`
 
@@ -388,6 +391,7 @@ Expected: All frontend and backend tests PASS
 **Step 2: Manual smoke test**
 
 Run: `npm run dev`
+
 - Open `http://localhost:3000/login`
 - Verify the heading matches current time-of-day
 - Verify the subtitle is a valid message from the pool

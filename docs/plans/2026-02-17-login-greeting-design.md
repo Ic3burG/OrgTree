@@ -15,15 +15,15 @@ A single pure utility function `getGreeting(date?: Date)` in `src/utils/greeting
 
 Priority order (first match wins):
 
-| Condition         | Heading            |
-| ----------------- | ------------------ |
-| Weekend (Sat/Sun) | "Happy Weekend"    |
-| Friday            | "Happy Friday"     |
-| Monday morning    | "Happy Monday"     |
-| 5am–11:59am       | "Good Morning"     |
-| 12pm–4:59pm       | "Good Afternoon"   |
-| 5pm–8:59pm        | "Good Evening"     |
-| 9pm–4:59am        | "Good Evening"     |
+| Condition         | Heading          |
+| ----------------- | ---------------- |
+| Weekend (Sat/Sun) | "Happy Weekend"  |
+| Friday            | "Happy Friday"   |
+| Monday morning    | "Happy Monday"   |
+| 5am–11:59am       | "Good Morning"   |
+| 12pm–4:59pm       | "Good Afternoon" |
+| 5pm–8:59pm        | "Good Evening"   |
+| 9pm–4:59am        | "Good Evening"   |
 
 ## Subtitle Selection
 
@@ -32,6 +32,7 @@ A flat array of ~20+ general subtitles plus 4 seasonal subtitles. Deterministica
 ### Tone Categories
 
 **Witty**
+
 - "Your org chart missed you."
 - "Hierarchy never looked this good."
 - "Back to connect the dots."
@@ -39,6 +40,7 @@ A flat array of ~20+ general subtitles plus 4 seasonal subtitles. Deterministica
 - "Org charts don't build themselves. Well, almost."
 
 **Motivational**
+
 - "Ready to build something great?"
 - "Great teams start with great structure."
 - "Let's shape your organization."
@@ -46,12 +48,14 @@ A flat array of ~20+ general subtitles plus 4 seasonal subtitles. Deterministica
 - "Structure brings clarity."
 
 **Straightforward**
+
 - "Sign in to your OrgTree account."
 - "Let's get to work."
 - "Pick up where you left off."
 - "Your team is waiting."
 
 **Seasonal** (included in pool only during their season)
+
 - Winter (Dec–Feb): "Stay warm, stay organized."
 - Spring (Mar–May): "Fresh season, fresh structure."
 - Summer (Jun–Aug): "Sunshine and structure."
@@ -68,6 +72,7 @@ const { heading, subtitle } = getGreeting();
 ```
 
 Replace:
+
 - `"Welcome Back"` → `{heading}`
 - `"Sign in to your OrgTree account"` → `{subtitle}`
 
@@ -75,11 +80,11 @@ No new state, effects, or hooks. No animation. The greeting is present on render
 
 ## Files
 
-| File | Action |
-| --- | --- |
-| `src/utils/greetings.ts` | Create — greeting utility function |
-| `src/utils/greetings.test.ts` | Create — unit tests |
-| `src/components/auth/LoginPage.tsx` | Modify — use dynamic greeting |
+| File                                | Action                             |
+| ----------------------------------- | ---------------------------------- |
+| `src/utils/greetings.ts`            | Create — greeting utility function |
+| `src/utils/greetings.test.ts`       | Create — unit tests                |
+| `src/components/auth/LoginPage.tsx` | Modify — use dynamic greeting      |
 
 ## Testing
 
