@@ -24,6 +24,7 @@
 import React, { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getGreeting } from '../../utils/greetings';
 
 import { LogIn, Mail, Lock, AlertCircle, Fingerprint } from 'lucide-react';
 import DarkModeToggle from '../ui/DarkModeToggle';
@@ -44,6 +45,7 @@ export default function LoginPage(): React.JSX.Element {
   const { setUser } = useAuth();
 
   const from = location.state?.from?.pathname || '/';
+  const { heading, subtitle } = getGreeting();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -144,10 +146,10 @@ export default function LoginPage(): React.JSX.Element {
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6 lg:p-8">
             <div className="text-center mb-6 lg:mb-8">
               <h1 className="text-xl lg:text-2xl font-bold text-slate-800 dark:text-slate-100">
-                Welcome Back
+                {heading}
               </h1>
               <p className="text-sm lg:text-base text-slate-600 dark:text-slate-400 mt-2">
-                Sign in to your OrgTree account
+                {subtitle}
               </p>
             </div>
 
