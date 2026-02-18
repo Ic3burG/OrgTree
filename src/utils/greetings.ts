@@ -96,5 +96,5 @@ function getSubtitle(date: Date): string {
   const hoursIntoYear = Math.floor((date.getTime() - startOfYear.getTime()) / (1000 * 60 * 60));
   const windowIndex = Math.floor(hoursIntoYear / 6);
 
-  return pool[windowIndex % pool.length];
+  return pool[windowIndex % pool.length]!;
 }
