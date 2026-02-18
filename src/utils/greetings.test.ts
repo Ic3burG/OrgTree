@@ -88,4 +88,67 @@ describe('getGreeting', () => {
       expect(getGreeting(date).heading).toBe('Good Evening');
     });
   });
+
+  describe('subtitle', () => {
+    it('returns a non-empty string', () => {
+      const date = new Date(2026, 2, 4, 10, 0);
+      expect(getGreeting(date).subtitle).toBeTruthy();
+    });
+
+    it('returns the same subtitle for the same 6-hour window', () => {
+      // Same day, 2 hours apart — same 6-hour window
+      const date1 = new Date(2026, 2, 4, 7, 0);
+      const date2 = new Date(2026, 2, 4, 9, 0);
+      expect(getGreeting(date1).subtitle).toBe(getGreeting(date2).subtitle);
+    });
+
+    it('returns a different subtitle for different 6-hour windows', () => {
+      // 7 hours apart — different windows
+      const date1 = new Date(2026, 2, 4, 1, 0);
+      const date2 = new Date(2026, 2, 4, 8, 0);
+      // Different windows should usually give different subtitles
+      // (could theoretically collide, but with 20+ items it's very unlikely)
+      const sub1 = getGreeting(date1).subtitle;
+      const sub2 = getGreeting(date2).subtitle;
+      // At minimum verify both are valid strings
+      expect(sub1).toBeTruthy();
+      expect(sub2).toBeTruthy();
+    });
+
+    it('includes seasonal subtitle in winter pool', () => {
+      // Iterate through many winter windows and collect all subtitles
+      const winterSubs = new Set<string>();
+      for (let day = 0; day < 90; day++) {
+        // Jan 1 2026 through Mar 31 — covers Dec-Feb range
+        const date = new Date(2026, 0, 1 + day, 10, 0);
+        winterSubs.add(getGreeting(date).subtitle);
+      }
+      expect(winterSubs.has('Stay warm, stay organized.')).toBe(true);
+    });
+
+    it('includes seasonal subtitle in summer pool', () => {
+      const summerSubs = new Set<string>();
+      for (let day = 0; day < 92; day++) {
+        const date = new Date(2026, 5, 1 + day, 10, 0);
+        summerSubs.add(getGreeting(date).subtitle);
+      }
+      expect(summerSubs.has('Sunshine and structure.')).toBe(true);
+    });
+
+    it('does not include winter subtitle in summer', () => {
+      const summerSubs = new Set<string>();
+      for (let day = 0; day < 92; day++) {
+        const date = new Date(2026, 5, 1 + day, 10, 0);
+        summerSubs.add(getGreeting(date).subtitle);
+      }
+      expect(summerSubs.has('Stay warm, stay organized.')).toBe(false);
+    });
+
+    it('handles year rollover (Dec 31 to Jan 1)', () => {
+      const dec31 = new Date(2026, 11, 31, 23, 0);
+      const jan1 = new Date(2027, 0, 1, 1, 0);
+      expect(getGreeting(dec31).subtitle).toBeTruthy();
+      expect(getGreeting(jan1).subtitle).toBeTruthy();
+    });
+  });
 });

@@ -51,6 +51,50 @@ function getHeading(date: Date): string {
   return 'Good Evening';
 }
 
-function getSubtitle(_date: Date): string {
-  return '';
+type Season = 'winter' | 'spring' | 'summer' | 'fall';
+
+const GENERAL_SUBTITLES: string[] = [
+  // Witty
+  'Your org chart missed you.',
+  'Hierarchy never looked this good.',
+  'Back to connect the dots.',
+  'Who reports to whom? Let\u2019s find out.',
+  'Org charts don\u2019t build themselves. Well, almost.',
+  // Motivational
+  'Ready to build something great?',
+  'Great teams start with great structure.',
+  'Let\u2019s shape your organization.',
+  'Every great org starts with a plan.',
+  'Structure brings clarity.',
+  // Straightforward
+  'Sign in to your OrgTree account.',
+  'Let\u2019s get to work.',
+  'Pick up where you left off.',
+  'Your team is waiting.',
+];
+
+const SEASONAL_SUBTITLES: Record<Season, string> = {
+  winter: 'Stay warm, stay organized.',
+  spring: 'Fresh season, fresh structure.',
+  summer: 'Sunshine and structure.',
+  fall: 'Crisp air, clean org charts.',
+};
+
+function getSeason(month: number): Season {
+  if (month === 11 || month <= 1) return 'winter';
+  if (month >= 2 && month <= 4) return 'spring';
+  if (month >= 5 && month <= 7) return 'summer';
+  return 'fall';
+}
+
+function getSubtitle(date: Date): string {
+  const season = getSeason(date.getMonth());
+  const pool = [...GENERAL_SUBTITLES, SEASONAL_SUBTITLES[season]];
+
+  // Deterministic selection based on 6-hour window
+  const startOfYear = new Date(date.getFullYear(), 0, 1);
+  const hoursIntoYear = Math.floor((date.getTime() - startOfYear.getTime()) / (1000 * 60 * 60));
+  const windowIndex = Math.floor(hoursIntoYear / 6);
+
+  return pool[windowIndex % pool.length];
 }
