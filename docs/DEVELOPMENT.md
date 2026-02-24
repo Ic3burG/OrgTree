@@ -96,6 +96,24 @@ The `Directory` component manages all application state:
 4. `highlightMatch` adds HTML highlighting to search results
 5. Components render recursively based on tree structure
 
+## API Versioning
+
+OrgTree uses URL path versioning for its REST API.
+
+- **Current Version**: `/api/v1`
+- **Legacy Base**: `/api` (aliased to v1 for backward compatibility)
+
+### Guidelines for Changes
+
+- **Non-breaking changes**: Can be added directly to the current version.
+- **Breaking changes**: Require a new API version (e.g., `v2`).
+- **Deprecation**: Use the `Deprecation` header for endpoints that will be removed.
+
+### Documentation
+
+- **Swagger UI**: Available at `/api/docs`
+- **OpenAPI Spec**: Available at `/api/v1/openapi.yaml` and `/api/v1/openapi.json`
+
 ## Key Features
 
 ### Search Functionality

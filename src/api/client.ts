@@ -59,7 +59,7 @@ import type {
   OrgSearchAnalytics,
 } from '../types/index.js';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 // CSRF token storage
 let csrfToken: string | null = null;

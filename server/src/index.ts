@@ -31,39 +31,10 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yaml';
-import authRoutes from './routes/auth.js';
-import organizationRoutes from './routes/organizations.js';
-import departmentRoutes from './routes/departments.js';
-import peopleRoutes from './routes/people.js';
-import importRoutes from './routes/import.js';
-import publicRoutes from './routes/public.js';
-import usersRoutes from './routes/users.js';
-import memberRoutes from './routes/members.js';
-import invitationRoutes from './routes/invitations.js';
-import auditRoutes from './routes/audit.js';
-import searchRoutes from './routes/search.js';
-import savedSearchesRoutes from './routes/saved-searches.js';
-import bulkRoutes from './routes/bulk.js';
-import csrfRoutes from './routes/csrf.js';
-import backupRoutes from './routes/backup.js';
-import passkeyRoutes from './routes/passkey.js';
-import totpRoutes from './routes/totp.js';
-import customFieldsRoutes from './routes/custom-fields.js';
-import metricsRoutes from './routes/metrics.js';
-import analyticsRoutes from './routes/analytics.js';
-import orgAnalyticsRoutes from './routes/org-analytics.js';
-import gedsRoutes from './routes/geds.js';
-import gedsImportRoutes from './routes/geds-import.js';
-import ownershipTransfersRoutes from './routes/ownership-transfers.js';
+import v1Router from './routes/v1/index.js';
 import { scheduleFtsMaintenance } from './services/fts-scheduler.service.js';
 import { scheduleTransferExpiration } from './services/transfer-expiration-scheduler.service.js';
 import { scheduleInvitationReminders } from './services/invitation-scheduler.service.js';
-import ftsMaintenanceRoutes from './routes/fts-maintenance.js';
-import versionRoutes from './routes/version.js';
-import orgMembershipCheckRoutes from './routes/org-membership-check.js';
-import fixOrgOwnersRoutes from './routes/fix-org-owners.js';
-import fixOrgOwnersSimpleRoutes from './routes/fix-org-owners-simple.js';
-import { validateCsrf } from './middleware/csrf.js';
 import { metricsMiddleware } from './middleware/metrics.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
@@ -198,110 +169,28 @@ app.get('/api/openapi.json', (_req, res) => {
   res.json(openApiSpec);
 });
 
-// Health check with database connectivity test and system metrics
-app.get('/api/health', async (_req, res) => {
-  try {
-    // Test database connectivity
-    const dbCheck = db.prepare('SELECT 1 as ok').get() as { ok: number };
-
-    // Get database mode for verification
-    const journalMode = db.pragma('journal_mode', { simple: true }) as string;
-    const busyTimeout = db.pragma('busy_timeout', { simple: true }) as number;
-
-    // Get process and system metrics
-    const memoryUsage = process.memoryUsage();
-    const uptime = process.uptime();
-
-    // Security: Don't expose sensitive environment details or full paths
-    res.json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || '1.0.0',
-      uptime: {
-        seconds: Math.floor(uptime),
-        human: new Date(uptime * 1000).toISOString().substr(11, 8),
-      },
-      database: {
-        status: dbCheck.ok === 1 ? 'connected' : 'error',
-        journal_mode: journalMode,
-        busy_timeout_ms: busyTimeout,
-      },
-      process: {
-        memory: {
-          rss: Math.round(memoryUsage.rss / 1024 / 1024) + 'MB',
-          heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024) + 'MB',
-          heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024) + 'MB',
-          external: Math.round(memoryUsage.external / 1024 / 1024) + 'MB',
-        },
-      },
-    });
-  } catch (error: unknown) {
-    res.status(503).json({
-      status: 'error',
-      timestamp: new Date().toISOString(),
-      database: 'disconnected',
-      message: (error as Error).message,
-    });
-  }
-});
-
-// DEBUG: Simple test endpoint with no middleware (temporary)
-app.get('/api/admin/backup/test-simple', (_req, res) => {
-  logger.info('Simple backup test endpoint hit (no middleware)');
-  res.json({
-    message: 'Direct test endpoint working',
-    timestamp: new Date().toISOString(),
-    envVarConfigured: !!process.env.BACKUP_API_TOKEN,
-    envVarLength: process.env.BACKUP_API_TOKEN?.length || 0,
-    nodeEnv: process.env.NODE_ENV,
-  });
-});
-
 // API Routes
-// CSRF token endpoint (must be before CSRF validation middleware)
-app.use('/api', csrfRoutes);
+// Mount v1 API
+app.use('/api/v1', v1Router);
 
-// Version endpoint (no authentication required)
-app.use('/api', versionRoutes);
-
-// Debug endpoints (authentication required, no CSRF for GET)
-app.use('/api', orgMembershipCheckRoutes);
-
-// Migration endpoints (GET version without CSRF for easy testing)
-app.use('/api', fixOrgOwnersSimpleRoutes);
-
-// Backup and rollback endpoints (custom authentication, no CSRF required for CI/CD)
-app.use('/api', backupRoutes);
-
-// Public routes (no authentication or CSRF required)
-app.use('/api/auth', authRoutes);
-app.use('/api/auth/passkey', passkeyRoutes);
-app.use('/api/auth/2fa', totpRoutes);
-app.use('/api/public', publicRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/geds', gedsRoutes);
-
-// Protected routes (require CSRF validation for state-changing operations)
-app.use('/api', validateCsrf); // Apply CSRF middleware to all routes below
-
-app.use('/api', organizationRoutes);
-app.use('/api', orgAnalyticsRoutes);
-app.use('/api', ownershipTransfersRoutes);
-app.use('/api', departmentRoutes);
-app.use('/api', peopleRoutes);
-app.use('/api', importRoutes);
-app.use('/api', gedsImportRoutes);
-app.use('/api', customFieldsRoutes);
-app.use('/api', usersRoutes);
-app.use('/api', memberRoutes);
-app.use('/api', invitationRoutes);
-app.use('/api', auditRoutes);
-app.use('/api', searchRoutes);
-app.use('/api', savedSearchesRoutes);
-app.use('/api', bulkRoutes);
-app.use('/api', metricsRoutes);
-app.use('/api/fts-maintenance', ftsMaintenanceRoutes);
-app.use('/api', fixOrgOwnersRoutes);
+// Legacy API Alias (to be removed in future versions)
+app.use(
+  '/api',
+  (req, _res, next) => {
+    if (!req.path.startsWith('/v1')) {
+      logger.warn(
+        `Legacy API access detected: ${req.method} ${req.originalUrl}. Please migrate to /api/v1/`,
+        {
+          path: req.path,
+          method: req.method,
+          ip: req.ip,
+        }
+      );
+    }
+    next();
+  },
+  v1Router
+);
 
 // Serve index.html for all non-API routes (SPA support) in production
 if (process.env.NODE_ENV === 'production') {

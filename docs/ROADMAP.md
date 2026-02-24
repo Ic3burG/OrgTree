@@ -84,7 +84,7 @@ This document outlines the development roadmap for OrgTree, including technical 
 - [x] **Dependency Audit** - Remove unused dependencies, update outdated packages ✅ **DONE** (January 6, 2026)
 - [x] **Dead Code Elimination** - Remove unused components, functions, routes ✅ **DONE** (January 7, 2026)
 - [x] **CSS Optimization** - Purge unused Tailwind classes, optimize bundle size ✅ **DONE** (January 8, 2026)
-- [ ] **API Versioning Strategy** - Plan for backward-compatible API changes
+- [x] **API Versioning Strategy** - Plan for backward-compatible API changes (see [docs/adr/028-api-versioning-strategy.md](adr/028-api-versioning-strategy.md)) ✅ **DONE** (February 23, 2026)
 - [x] **Accessibility Audit** - WCAG 2.1 AA compliance review and fixes ✅ **DONE** (January 11, 2026)
 
 ---

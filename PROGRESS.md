@@ -11,8 +11,36 @@
 
 - **PROGRESS.md updates are MANDATORY**: Update this file after EACH command/task completion (not just at end of session)
 - **Commit AND push ALL changes**: Never leave commits local-only; always push to GitHub
-- **Update "Last Updated" date**: February 16, 2026
+- **Update "Last Updated" date**: February 23, 2026
 - **Document in "Recent Activity"**: Add session details, features, bugs fixed, decisions made
+
+**Session 63 (February 23, 2026 - API Versioning Strategy)**:
+
+- ✅ **Feature: API Versioning (v1)**: Implemented URL path versioning (`/api/v1/...`) to ensure backward compatibility and project scalability.
+- ✅ **Backend: Versioned Routing**:
+  - Created `server/src/routes/v1/index.ts` aggregating all existing routes.
+  - Mounted versioned router at `/api/v1` in `server/src/index.ts`.
+  - Implemented **Legacy Alias Middleware** at `/api` that logs a warning for non-versioned access to encourage migration while maintaining compatibility.
+  - Added `X-API-Version: v1` response header to all v1 endpoints.
+  - Integrated health check and raw OpenAPI spec routes directly into the v1 router.
+- ✅ **Frontend: API Client Migration**:
+  - Updated `src/api/client.ts` to target `/api/v1` by default.
+- ✅ **SDK & Documentation**:
+  - Updated `server/src/openapi.yaml` with versioned server URLs.
+  - Regenerated TypeScript API SDK (`src/sdk/api-types.ts`).
+  - Updated `DEVELOPMENT.md` with versioning guidelines.
+  - Documented decision in **ADR-028** and tracked implementation in a new plan.
+- 📁 **FILES MODIFIED/CREATED** (10 files):
+  - `server/src/routes/v1/index.ts` — NEW versioned router
+  - `server/src/index.ts` — Mount points and legacy logging
+  - `src/api/client.ts` — Base URL update
+  - `server/src/openapi.yaml` — Server URLs
+  - `src/sdk/api-types.ts` — Regenerated SDK
+  - `docs/adr/028-api-versioning-strategy.md` — NEW ADR
+  - `docs/plans/api-versioning-plan.md` — NEW implementation plan
+  - `docs/ROADMAP.md` — Marked as complete
+  - `docs/DEVELOPMENT.md` / `docs/DOCUMENTATION.md` — Guidelines and metadata
+  - `PROGRESS.md` — Session 63 notes
 
 **Session 62 (February 15, 2026 - AGPL-3.0 Licensing & Copyright Headers)**:
 

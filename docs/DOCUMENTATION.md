@@ -2,8 +2,8 @@
 
 > Complete User Guide and Administration Manual
 
-**Version**: 1.3
-**Last Updated**: January 31, 2026
+**Version**: 1.4
+**Last Updated**: February 23, 2026
 **Application URL**: <https://orgtree-app.onrender.com>
 
 ---
