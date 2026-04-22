@@ -22,6 +22,7 @@
  */
 
 import express, { Response, NextFunction } from 'express';
+import { readFileSync } from 'fs';
 import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
 import {
   createBackup,
@@ -47,6 +48,24 @@ router.get('/admin/backup/test', (_req, res) => {
     envVarConfigured: !!process.env.BACKUP_API_TOKEN,
     envVarLength: process.env.BACKUP_API_TOKEN?.length || 0,
   });
+});
+
+/**
+ * TEMPORARY: Read the file.io upload response written by the disk-export job.
+ * Remove this endpoint after the backup has been downloaded.
+ */
+router.get('/admin/backup/disk-export-status', (req, res) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!process.env.BACKUP_API_TOKEN || token !== process.env.BACKUP_API_TOKEN) {
+    res.status(401).json({ message: 'Unauthorized' });
+    return;
+  }
+  try {
+    const data = readFileSync('/opt/render/project/src/data/fileio-response.json', 'utf8');
+    res.json(JSON.parse(data));
+  } catch {
+    res.status(404).json({ message: 'Export file not found on disk' });
+  }
 });
 
 /**
