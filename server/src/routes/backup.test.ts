@@ -393,45 +393,48 @@ describe('Backup Routes', () => {
     });
   });
 
-  describe('GET /api/admin/backup/disk-export-status', () => {
+  describe('GET /api/admin/backup/download-db', () => {
     const API_TOKEN = 'test-backup-api-token';
 
     beforeEach(() => {
       process.env.BACKUP_API_TOKEN = API_TOKEN;
+      process.env.DATABASE_URL = 'file:/tmp/test-production.db';
     });
 
     afterEach(() => {
       delete process.env.BACKUP_API_TOKEN;
+      delete process.env.DATABASE_URL;
     });
 
-    it('should return file.io response when token is valid and file exists', async () => {
-      const mockResponse = { success: true, link: 'https://file.io/abc123', expires: '2026-04-23' };
-      vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify(mockResponse));
+    it('should stream the database file with correct headers when token is valid', async () => {
+      const mockDbBytes = Buffer.from('SQLite format 3\0fake-db-content');
+      vi.mocked(fs.readFileSync).mockReturnValue(mockDbBytes);
 
       const response = await request(app)
-        .get('/api/admin/backup/disk-export-status')
+        .get('/api/admin/backup/download-db')
         .set('Authorization', `Bearer ${API_TOKEN}`)
         .expect(200);
 
-      expect(response.body).toEqual(mockResponse);
+      expect(response.headers['content-type']).toBe('application/octet-stream');
+      expect(response.headers['content-disposition']).toBe('attachment; filename="production.db"');
     });
 
-    it('should return 404 when the export file does not exist', async () => {
+    it('should return 404 when the database file does not exist', async () => {
       vi.mocked(fs.readFileSync).mockImplementation(() => {
         throw new Error('ENOENT: no such file');
       });
 
       const response = await request(app)
-        .get('/api/admin/backup/disk-export-status')
+        .get('/api/admin/backup/download-db')
         .set('Authorization', `Bearer ${API_TOKEN}`)
         .expect(404);
 
-      expect(response.body).toEqual({ message: 'Export file not found on disk' });
+      expect(response.body).toEqual({ message: 'Database file not found' });
     });
 
     it('should return 401 with wrong token', async () => {
       const response = await request(app)
-        .get('/api/admin/backup/disk-export-status')
+        .get('/api/admin/backup/download-db')
         .set('Authorization', 'Bearer wrong-token')
         .expect(401);
 
@@ -439,7 +442,7 @@ describe('Backup Routes', () => {
     });
 
     it('should return 401 with no token', async () => {
-      const response = await request(app).get('/api/admin/backup/disk-export-status').expect(401);
+      const response = await request(app).get('/api/admin/backup/download-db').expect(401);
 
       expect(response.body).toEqual({ message: 'Unauthorized' });
     });
