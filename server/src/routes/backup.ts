@@ -22,7 +22,6 @@
  */
 
 import express, { Response, NextFunction } from 'express';
-import { readFileSync } from 'fs';
 import { authenticateToken, requireSuperuser } from '../middleware/auth.js';
 import {
   createBackup,
@@ -48,32 +47,6 @@ router.get('/admin/backup/test', (_req, res) => {
     envVarConfigured: !!process.env.BACKUP_API_TOKEN,
     envVarLength: process.env.BACKUP_API_TOKEN?.length || 0,
   });
-});
-
-/**
- * TEMPORARY: Stream the live production.db directly to the caller.
- * Remove this endpoint after the backup has been downloaded.
- */
-router.get('/admin/backup/download-db', (req, res) => {
-  const token = req.headers['authorization']?.split(' ')[1];
-  if (!process.env.BACKUP_API_TOKEN || token !== process.env.BACKUP_API_TOKEN) {
-    res.status(401).json({ message: 'Unauthorized' });
-    return;
-  }
-  const dbPath = (process.env.DATABASE_URL ?? '').replace(/^file:/, '');
-  if (!dbPath) {
-    res.status(500).json({ message: 'DATABASE_URL not configured' });
-    return;
-  }
-  try {
-    const data = readFileSync(dbPath);
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Disposition', 'attachment; filename="production.db"');
-    res.setHeader('Content-Length', data.length);
-    res.send(data);
-  } catch {
-    res.status(404).json({ message: 'Database file not found' });
-  }
 });
 
 /**

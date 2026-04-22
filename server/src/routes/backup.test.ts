@@ -27,12 +27,6 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import backupRouter from './backup.js';
 import * as backupService from '../services/backup.service.js';
-import * as fs from 'fs';
-
-vi.mock('fs', async () => {
-  const actual = await vi.importActual<typeof import('fs')>('fs');
-  return { ...actual, readFileSync: vi.fn() };
-});
 
 // Mock dependencies
 vi.mock('../services/backup.service.js');
@@ -390,61 +384,6 @@ describe('Backup Routes', () => {
       expect(response.body).toEqual({
         message: 'Access token required',
       });
-    });
-  });
-
-  describe('GET /api/admin/backup/download-db', () => {
-    const API_TOKEN = 'test-backup-api-token';
-
-    beforeEach(() => {
-      process.env.BACKUP_API_TOKEN = API_TOKEN;
-      process.env.DATABASE_URL = 'file:/tmp/test-production.db';
-    });
-
-    afterEach(() => {
-      delete process.env.BACKUP_API_TOKEN;
-      delete process.env.DATABASE_URL;
-    });
-
-    it('should stream the database file with correct headers when token is valid', async () => {
-      const mockDbBytes = Buffer.from('SQLite format 3\0fake-db-content');
-      vi.mocked(fs.readFileSync).mockReturnValue(mockDbBytes);
-
-      const response = await request(app)
-        .get('/api/admin/backup/download-db')
-        .set('Authorization', `Bearer ${API_TOKEN}`)
-        .expect(200);
-
-      expect(response.headers['content-type']).toBe('application/octet-stream');
-      expect(response.headers['content-disposition']).toBe('attachment; filename="production.db"');
-    });
-
-    it('should return 404 when the database file does not exist', async () => {
-      vi.mocked(fs.readFileSync).mockImplementation(() => {
-        throw new Error('ENOENT: no such file');
-      });
-
-      const response = await request(app)
-        .get('/api/admin/backup/download-db')
-        .set('Authorization', `Bearer ${API_TOKEN}`)
-        .expect(404);
-
-      expect(response.body).toEqual({ message: 'Database file not found' });
-    });
-
-    it('should return 401 with wrong token', async () => {
-      const response = await request(app)
-        .get('/api/admin/backup/download-db')
-        .set('Authorization', 'Bearer wrong-token')
-        .expect(401);
-
-      expect(response.body).toEqual({ message: 'Unauthorized' });
-    });
-
-    it('should return 401 with no token', async () => {
-      const response = await request(app).get('/api/admin/backup/download-db').expect(401);
-
-      expect(response.body).toEqual({ message: 'Unauthorized' });
     });
   });
 });
