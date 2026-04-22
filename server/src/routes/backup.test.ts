@@ -27,6 +27,12 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import backupRouter from './backup.js';
 import * as backupService from '../services/backup.service.js';
+import * as fs from 'fs';
+
+vi.mock('fs', async () => {
+  const actual = await vi.importActual<typeof import('fs')>('fs');
+  return { ...actual, readFileSync: vi.fn() };
+});
 
 // Mock dependencies
 vi.mock('../services/backup.service.js');
@@ -384,6 +390,58 @@ describe('Backup Routes', () => {
       expect(response.body).toEqual({
         message: 'Access token required',
       });
+    });
+  });
+
+  describe('GET /api/admin/backup/disk-export-status', () => {
+    const API_TOKEN = 'test-backup-api-token';
+
+    beforeEach(() => {
+      process.env.BACKUP_API_TOKEN = API_TOKEN;
+    });
+
+    afterEach(() => {
+      delete process.env.BACKUP_API_TOKEN;
+    });
+
+    it('should return file.io response when token is valid and file exists', async () => {
+      const mockResponse = { success: true, link: 'https://file.io/abc123', expires: '2026-04-23' };
+      vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify(mockResponse));
+
+      const response = await request(app)
+        .get('/api/admin/backup/disk-export-status')
+        .set('Authorization', `Bearer ${API_TOKEN}`)
+        .expect(200);
+
+      expect(response.body).toEqual(mockResponse);
+    });
+
+    it('should return 404 when the export file does not exist', async () => {
+      vi.mocked(fs.readFileSync).mockImplementation(() => {
+        throw new Error('ENOENT: no such file');
+      });
+
+      const response = await request(app)
+        .get('/api/admin/backup/disk-export-status')
+        .set('Authorization', `Bearer ${API_TOKEN}`)
+        .expect(404);
+
+      expect(response.body).toEqual({ message: 'Export file not found on disk' });
+    });
+
+    it('should return 401 with wrong token', async () => {
+      const response = await request(app)
+        .get('/api/admin/backup/disk-export-status')
+        .set('Authorization', 'Bearer wrong-token')
+        .expect(401);
+
+      expect(response.body).toEqual({ message: 'Unauthorized' });
+    });
+
+    it('should return 401 with no token', async () => {
+      const response = await request(app).get('/api/admin/backup/disk-export-status').expect(401);
+
+      expect(response.body).toEqual({ message: 'Unauthorized' });
     });
   });
 });
